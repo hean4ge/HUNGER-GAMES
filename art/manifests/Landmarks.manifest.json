@@ -1,0 +1,1527 @@
+{
+ "category": "Landmarks",
+ "glb": "Landmarks.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "Spire",
+   "kind": "Landmark",
+   "tags": [
+    "Spire",
+    "Landmark"
+   ],
+   "notes": "Hero landmark at the arena centre (origin = Arena Center). 'The Cleft': layered stone monolith split along X above z=27, bound by iron bands; a tulip-shaped iron crown of 16 flared fins holds the fire bowl. Spire_Ember = coal bed (Neon, no collision/shadow): parent the beacon PointLight + fire/smoke emitters to attachment Beacon. CrateSlot_1..4 = floor centres of the four alcoves (crate pivot on the floor, LookVector out). First tread top z=0.6 is flush with SpirePlatform; 1-stud risers, 2-stud treads up to the terrace at z=3.6. The slit faces Roblox +/-Z (Blender +/-Y), so the silhouette tells players which side they are on.",
+   "parts": [
+    {
+     "name": "Spire_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 188,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 2036,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      130,
+      124,
+      115
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 820,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      70,
+      69,
+      71
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 364,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      152,
+      145,
+      133
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 424,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_DarkMetal_2",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1660,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Spire_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 80,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Spire_Basalt",
+     "role": "Basalt",
+     "robloxMaterial": "Basalt",
+     "rgb": [
+      66,
+      64,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 280,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "CrateSlot_1": {
+     "position": [
+      6.85,
+      3.6,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_2": {
+     "position": [
+      0.0,
+      3.6,
+      -6.85
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_3": {
+     "position": [
+      -6.85,
+      3.6,
+      -0.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_4": {
+     "position": [
+      -0.0,
+      3.6,
+      6.85
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Beacon": {
+     "position": [
+      0.0,
+      54.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -20.0,
+    0.0,
+    -20.0
+   ],
+   "boundsMax": [
+    20.0,
+    58.4525,
+    20.0
+   ],
+   "size": [
+    40.0,
+    58.452,
+    40.0
+   ],
+   "tris": 6028,
+   "origin": [
+    20.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "SpirePlatform",
+   "kind": "Plaza",
+   "tags": [
+    "Spire"
+   ],
+   "notes": "Place at the same origin as the Spire, on flat ground. The octagonal hole (apothem 20) is exactly the Spire's bottom slab, so the plaza top (z=0.6) is flush with the Spire's first tread. Cobble ring r=37.5-40.5 makes a natural plinth circle (r~39); cobble spokes run on the Spire's 8 face axes.",
+   "parts": [
+    {
+     "name": "SpirePlatform_Paving",
+     "role": "Paving",
+     "robloxMaterial": "Pavement",
+     "rgb": [
+      124,
+      120,
+      112
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 976,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SpirePlatform_Paving_2",
+     "role": "Paving",
+     "robloxMaterial": "Pavement",
+     "rgb": [
+      110,
+      106,
+      99
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 976,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SpirePlatform_Cobble",
+     "role": "Cobble",
+     "robloxMaterial": "Cobblestone",
+     "rgb": [
+      102,
+      96,
+      88
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 2432,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SpirePlatform_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1728,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -59.9538,
+    0.0,
+    -59.9538
+   ],
+   "boundsMax": [
+    59.9538,
+    0.95,
+    59.9538
+   ],
+   "size": [
+    119.908,
+    0.95,
+    119.908
+   ],
+   "tris": 6112,
+   "origin": [
+    105.9538,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Plinth",
+   "kind": "StartPad",
+   "tags": [
+    "Plinth"
+   ],
+   "notes": "5.5 across flats, 1.5 tall. Front (+Y Blender / Roblox LookVector) should face the Spire: the ember strip sits on the front facet. Attachment Stand = where the contender's feet go.",
+   "parts": [
+    {
+     "name": "Plinth_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 28,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Plinth_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 200,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Plinth_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 288,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Plinth_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 60,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Plinth_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 12,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Stand": {
+     "position": [
+      0.0,
+      1.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.93,
+    0.0,
+    -2.9
+   ],
+   "boundsMax": [
+    2.93,
+    1.5,
+    2.93
+   ],
+   "size": [
+    5.86,
+    1.5,
+    5.83
+   ],
+   "tris": 588,
+   "origin": [
+    174.838,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Pavilion",
+   "kind": "Building",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Open timber pavilion, 24 x 16 under the eaves, ridge ~14. Deck top z=0.95 with a front step. Roof collision Hull (sloped roofs are Hull in every category); posts/floor Default; rafters, boards, caps and the lantern are non-colliding. Put a warm PointLight on attachment Lantern.",
+   "parts": [
+    {
+     "name": "Pavilion_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 40,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Pavilion_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 20,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Pavilion_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 480,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Pavilion_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1496,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Pavilion_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      122,
+      70,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 36,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Pavilion_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      64,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 36,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pavilion_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 780,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pavilion_RoofTiles_2",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      98,
+      57,
+      43
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 180,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pavilion_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 212,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pavilion_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Lantern": {
+     "position": [
+      0.0,
+      9.7,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -12.1727,
+    0.0,
+    -8.1727
+   ],
+   "boundsMax": [
+    12.1727,
+    13.91,
+    8.1727
+   ],
+   "size": [
+    24.345,
+    13.91,
+    16.345
+   ],
+   "tris": 3308,
+   "origin": [
+    195.9407,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Brazier",
+   "kind": "Prop",
+   "tags": [
+    "Lobby",
+    "Fire"
+   ],
+   "notes": "Standing iron brazier, ~5 tall: tripod + column + octagonal bowl with a small crown of curved bars (a miniature of the Spire's crown). Brazier_Ember = coal bed (Neon, no collision/shadow): put the fire ParticleEmitter + warm PointLight on attachment Fire. Good AmbientEmitter for a fire-crackle loop.",
+   "parts": [
+    {
+     "name": "Brazier_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1068,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Brazier_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 80,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Brazier_Basalt",
+     "role": "Basalt",
+     "robloxMaterial": "Basalt",
+     "rgb": [
+      66,
+      64,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 160,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Fire": {
+     "position": [
+      0.0,
+      4.92,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.2887,
+    0.0,
+    -2.2887
+   ],
+   "boundsMax": [
+    2.2887,
+    5.3646,
+    2.2887
+   ],
+   "size": [
+    4.577,
+    5.365,
+    4.577
+   ],
+   "tris": 1308,
+   "origin": [
+    216.4017,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BannerPole",
+   "kind": "Prop",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "12-stud pole with a hanging cloth banner (BannerPole_Banner, non-colliding). The cut-out emblem is an original abstract mark of the cleft Spire: two leaning stone halves, the fire above, a base bar.",
+   "parts": [
+    {
+     "name": "BannerPole_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 60,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BannerPole_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 28,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BannerPole_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BannerPole_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 214,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BannerPole_Banner",
+     "role": "Banner",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      198,
+      94,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 816,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.17,
+    0.0,
+    -0.8
+   ],
+   "boundsMax": [
+    2.17,
+    12.4,
+    0.8
+   ],
+   "size": [
+    4.34,
+    12.4,
+    1.6
+   ],
+   "tris": 1146,
+   "origin": [
+    226.86,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Bench",
+   "kind": "Prop",
+   "tags": [
+    "Lobby",
+    "Seat"
+   ],
+   "notes": "Backless stone-and-wood bench, seat top z=1.8. Seat_1/Seat_2 attachments for sit spots.",
+   "parts": [
+    {
+     "name": "Bench_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 88,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bench_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 88,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {
+    "Seat_1": {
+     "position": [
+      -1.5,
+      1.8,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      1.5,
+      1.8,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -3.1855,
+    0.0,
+    -0.8752
+   ],
+   "boundsMax": [
+    3.1184,
+    1.8,
+    0.8752
+   ],
+   "size": [
+    6.304,
+    1.8,
+    1.75
+   ],
+   "tris": 176,
+   "origin": [
+    238.2155,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "NoticeBoard",
+   "kind": "Prop",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "NoticeBoard_Planks is a clean 8 x 6 x 0.3 box (no bevel); its +Y face (Roblox Front, -Z) is the SurfaceGui face. Attachment Board = centre of that face.",
+   "parts": [
+    {
+     "name": "NoticeBoard_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "NoticeBoard_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      64,
+      46
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "NoticeBoard_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 132,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "NoticeBoard_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 120,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "NoticeBoard_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      122,
+      70,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 68,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "NoticeBoard_RoofTiles_2",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      98,
+      57,
+      43
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 20,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Board": {
+     "position": [
+      0.0,
+      5.2,
+      -0.15
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -5.5,
+    0.0,
+    -1.18
+   ],
+   "boundsMax": [
+    5.5,
+    10.61,
+    1.18
+   ],
+   "size": [
+    11.0,
+    10.61,
+    2.36
+   ],
+   "tris": 528,
+   "origin": [
+    252.834,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Railing",
+   "kind": "Railing",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "8-stud segment along X (x = -4..4), 3.6 tall. Tile every 8 studs: the end posts pair up into a double pier. All parts Box collision so the run acts as a solid barrier.",
+   "parts": [
+    {
+     "name": "Railing_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 108,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Railing_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Railing_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 264,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.0,
+    0.0,
+    -0.62
+   ],
+   "boundsMax": [
+    4.0,
+    3.6,
+    0.62
+   ],
+   "size": [
+    8.0,
+    3.6,
+    1.24
+   ],
+   "tris": 428,
+   "origin": [
+    268.334,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "LobbyGate",
+   "kind": "Gate",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Stone archway 16 wide, 14 tall with a tiled cap roof; opening 8.9 wide, 8.9 clear at the piers, 10.9 under the keystone (lantern hangs to ~8.4). Piers + attic use PreciseConvexDecomposition so the opening stays open. Put a warm PointLight on attachment Lantern.",
+   "parts": [
+    {
+     "name": "LobbyGate_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 184,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "LobbyGate_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 124,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "LobbyGate_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      150,
+      144,
+      135
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 396,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "LobbyGate_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      122,
+      70,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 36,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "LobbyGate_RoofTiles_2",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      98,
+      57,
+      43
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 180,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "LobbyGate_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 324,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "LobbyGate_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Lantern": {
+     "position": [
+      0.0,
+      9.3,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -7.9634,
+    0.0,
+    -2.6134
+   ],
+   "boundsMax": [
+    7.9634,
+    13.99,
+    2.6134
+   ],
+   "size": [
+    15.927,
+    13.99,
+    5.227
+   ],
+   "tris": 1272,
+   "origin": [
+    286.2974,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StoneSteps",
+   "kind": "Stairs",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "3 steps, 8 wide overall (6.6 walkable between cheeks), 1-stud risers, 2-stud treads. Bottom step at the front (+Y); top tread z=3 meets a terrace at y=-3.",
+   "parts": [
+    {
+     "name": "StoneSteps_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 132,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StoneSteps_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 104,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.0,
+    0.0,
+    -3.0
+   ],
+   "boundsMax": [
+    4.0,
+    3.35,
+    3.0
+   ],
+   "size": [
+    8.0,
+    3.35,
+    6.0
+   ],
+   "tris": 236,
+   "origin": [
+    304.261,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

@@ -1,0 +1,3644 @@
+{
+ "category": "GroundReal",
+ "glb": null,
+ "glbs": [
+  {
+   "file": "GroundReal_Flora.glb",
+   "bytes": 4818392,
+   "sizeMB": 4.82,
+   "assets": [
+    "FernA",
+    "FernB",
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch"
+   ],
+   "primitives": 16,
+   "maxMeshTris": 1236,
+   "embeddedImages": [
+    "GR_Shrubs_Normal",
+    "GR_Shrubs_Color",
+    "GR_Shrubs_MR",
+    "GR_Plants_Normal",
+    "GR_Plants_Color",
+    "GR_Plants_MR"
+   ],
+   "alphaMask": [
+    "GR_Plants",
+    "GR_Shrubs"
+   ],
+   "alphaBlend": []
+  },
+  {
+   "file": "GroundReal_Rocks.glb",
+   "bytes": 9857800,
+   "sizeMB": 9.86,
+   "assets": [
+    "BoulderA",
+    "BoulderB",
+    "BoulderC",
+    "BoulderD",
+    "RockFlat",
+    "RiverStones"
+   ],
+   "primitives": 10,
+   "maxMeshTris": 1960,
+   "embeddedImages": [
+    "GR_RockPage2_Normal",
+    "GR_RockPage2_Color",
+    "GR_Rock_MR",
+    "GR_RockPage3_Normal",
+    "GR_RockPage3_Color",
+    "GR_RockPage1_Normal",
+    "GR_RockPage1_Color"
+   ],
+   "alphaMask": [],
+   "alphaBlend": []
+  },
+  {
+   "file": "GroundReal_Cliffs.glb",
+   "bytes": 10610808,
+   "sizeMB": 10.61,
+   "assets": [
+    "ScreeA",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "primitives": 11,
+   "maxMeshTris": 6821,
+   "embeddedImages": [
+    "GR_Shrubs_Normal",
+    "GR_Shrubs_Color",
+    "GR_Shrubs_MR",
+    "GR_Granite_Normal",
+    "GR_Granite_Color",
+    "GR_Rock_MR"
+   ],
+   "alphaMask": [
+    "GR_Shrubs"
+   ],
+   "alphaBlend": []
+  }
+ ],
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "textureFolder": "textures/GroundReal",
+ "textureSets": {
+  "Plants": {
+   "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+   "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Transparency",
+   "notes": "1024 card atlas, colour bled into transparent pixels; cut-out alpha"
+  },
+  "Shrubs": {
+   "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+   "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Transparency",
+   "notes": "1024 card atlas, colour bled into transparent pixels; cut-out alpha"
+  },
+  "Granite": {
+   "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+   "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Overlay",
+   "tileStuds": 13.0,
+   "notes": "seamless granite tile, 1024 px over 13 studs (78 px/stud); box-projected UVs run outside 0..1 and must repeat"
+  },
+  "RockPage1": {
+   "colorMap": "textures/GroundReal/GR_RockPage1_Color.png",
+   "normalMap": "textures/GroundReal/GR_RockPage1_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Overlay",
+   "pxPerStud": 53.1,
+   "notes": "unique bake page 1024 px (smart UVs, ~55-65 px/stud): albedo with short-distance AO, OpenGL tangent-space normal of the full-detail high-poly"
+  },
+  "RockPage2": {
+   "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+   "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Overlay",
+   "pxPerStud": 69.4,
+   "notes": "unique bake page 1024 px (smart UVs, ~55-65 px/stud): albedo with short-distance AO, OpenGL tangent-space normal of the full-detail high-poly"
+  },
+  "RockPage3": {
+   "colorMap": "textures/GroundReal/GR_RockPage3_Color.png",
+   "normalMap": "textures/GroundReal/GR_RockPage3_Normal.png",
+   "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+   "metalnessMap": null,
+   "alphaMode": "Overlay",
+   "pxPerStud": 68.7,
+   "notes": "unique bake page 1024 px (smart UVs, ~55-65 px/stud): albedo with short-distance AO, OpenGL tangent-space normal of the full-detail high-poly"
+  }
+ },
+ "textures": {
+  "GR_Granite_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "ScreeA",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1573051
+  },
+  "GR_Granite_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "ScreeA",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2332509
+  },
+  "GR_Plants_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 936780
+  },
+  "GR_Plants_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 961216
+  },
+  "GR_Plants_Rough.png": {
+   "kind": "roughness",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 117381
+  },
+  "GR_RockPage1_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "BoulderD"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1218568
+  },
+  "GR_RockPage1_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "BoulderD"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1708999
+  },
+  "GR_RockPage2_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "BoulderA",
+    "BoulderC",
+    "RiverStones"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1361822
+  },
+  "GR_RockPage2_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "BoulderA",
+    "BoulderC",
+    "RiverStones"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2021398
+  },
+  "GR_RockPage3_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "BoulderB",
+    "RockFlat"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1190720
+  },
+  "GR_RockPage3_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "BoulderB",
+    "RockFlat"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1769890
+  },
+  "GR_Rock_Rough.png": {
+   "kind": "roughness",
+   "usedBy": [
+    "BoulderA",
+    "BoulderB",
+    "BoulderC",
+    "BoulderD",
+    "RockFlat",
+    "ScreeA",
+    "RiverStones",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 180680
+  },
+  "GR_Shrubs_Color.png": {
+   "kind": "color",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 1010661
+  },
+  "GR_Shrubs_Normal.png": {
+   "kind": "normal",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1142261
+  },
+  "GR_Shrubs_Rough.png": {
+   "kind": "roughness",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 147394
+  }
+ },
+ "glbOnlyTextures": [
+  "textures/GroundReal/glb_only/GR_Plants_MR.png",
+  "textures/GroundReal/glb_only/GR_Rock_MR.png",
+  "textures/GroundReal/glb_only/GR_Shrubs_MR.png"
+ ],
+ "import": [
+  "Geometry: import GroundReal_Flora.glb, GroundReal_Rocks.glb and GroundReal_Cliffs.glb (3D Importer / Open Cloud); each asset's 'glb' names its file. Each asset root arrives as a Model of MeshParts named <Asset>_<Role>[_n]; re-centre with the asset 'origin' (WorldPivot = CFrame.new(origin), then PivotTo) like the other categories. The GLBs carry tangents (MikkTSpace) and embedded textures (glb_only/*_MR.png is the packed glTF roughness; never upload it separately).",
+  "Surfaces: give every part ONE SurfaceAppearance from its 'surfaceAppearance' block: ColorMap / NormalMap / RoughnessMap = the uploaded image ids of those PNGs (upload each file in 'textures' once and share the ids so copies instance), MetalnessMap empty, AlphaMode as given, Color = 'color' (white: the maps are final albedo). Roughness PNGs are 8-bit grayscale; normal maps are OpenGL (+Y), tangent space. Clear any importer TextureID.",
+  "Cards (backFacesInMesh = true) already contain flipped back faces: keep MeshPart.DoubleSided = false and MeshPart.Transparency = 0 so AlphaMode Transparency is a depth-correct alpha cut-out.",
+  "Per part: CanCollide = collide, CollisionFidelity = collision (edit time only), CastShadow = castShadow, CanQuery = canQuery, CanTouch = canTouch, Anchored = true, Material = robloxMaterial (physics and footstep sounds only), Color = rgb (fallback when the SurfaceAppearance is not loaded).",
+  "BerryBush_Berries is a separate part: hide it when the bush is picked (Transparency 1 or parent it away).",
+  "Rocks and cliffs continue below y = 0 (buriedDepth) so they sit into terrain on slopes; plant cards sink at most 0.07. Place each asset's pivot on the terrain surface.",
+  "CliffFace* / CaveMouth use the tiling GR_Granite set: their UVs run outside 0..1 on purpose (the texture repeats every tileStuds studs). Check in Studio that the SurfaceAppearance repeats on these MeshParts."
+ ],
+ "glbCheck": {
+  "meshes": 37,
+  "images": 19,
+  "attributesPerMesh": {
+   "BerryBush_Berries": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BerryBush_Leaves": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BushA_Leaves": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BushB_Leaves": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "FernA_Fern": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "FernB_Fern": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "FlowersA_Flower": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "FlowersB_Flower": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "GrassForest_Grass": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "GrassTallA_Grass": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "GrassTallB_Grass": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "MossPatch_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "MushroomsA_Mushroom": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "ReedsA_Reed": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "SaplingBroadleaf_Leaves": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "SaplingBroadleaf_Trunk": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BoulderA_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BoulderB_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BoulderC_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "BoulderD_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RiverStones_Pebbles": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RiverStones_Stone": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RiverStones_Stone_2": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RiverStones_Stone_3": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RiverStones_Stone_4": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RockFlat_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CaveMouth_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CaveMouth_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceA_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceA_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceB_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceB_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceC_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "CliffFaceC_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RockOutcrop_Moss": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "RockOutcrop_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ],
+   "ScreeA_Rock": [
+    "NORMAL",
+    "POSITION",
+    "TANGENT",
+    "TEXCOORD_0"
+   ]
+  },
+  "tangentsOnEveryPrimitive": true
+ },
+ "assets": [
+  {
+   "name": "FernA",
+   "kind": "Plant",
+   "tags": [
+    "Fern",
+    "Bracken",
+    "Cover"
+   ],
+   "notes": "Bracken: upright stipes carrying broad near-horizontal triangular blades (~2.6 tall).",
+   "parts": [
+    {
+     "name": "FernA_Fern",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      100,
+      122,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 864,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.0736,
+    -0.064,
+    -2.3704
+   ],
+   "boundsMax": [
+    2.8525,
+    2.4884,
+    2.4025
+   ],
+   "size": [
+    5.926,
+    2.552,
+    4.773
+   ],
+   "tris": 864,
+   "origin": [
+    3.0736,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "FernB",
+   "kind": "Plant",
+   "tags": [
+    "Fern",
+    "SwordFern",
+    "Cover"
+   ],
+   "notes": "Sword fern: fountain rosette of arching single-pinnate fronds.",
+   "parts": [
+    {
+     "name": "FernB_Fern",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      100,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 728,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.2045,
+    -0.04,
+    -2.0154
+   ],
+   "boundsMax": [
+    2.3631,
+    2.0948,
+    2.1508
+   ],
+   "size": [
+    4.568,
+    2.135,
+    4.166
+   ],
+   "tris": 728,
+   "origin": [
+    14.1305,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "BushA",
+   "kind": "Bush",
+   "tags": [
+    "Bush",
+    "Cover",
+    "Hide"
+   ],
+   "notes": "Dense evergreen shrub (small glossy leaves) that hides a crouching player; walk-through.",
+   "parts": [
+    {
+     "name": "BushA_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      56,
+      73,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "HideSpot"
+     ],
+     "tris": 1236,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.6112,
+    -0.07,
+    -3.3197
+   ],
+   "boundsMax": [
+    3.4733,
+    4.9334,
+    3.2929
+   ],
+   "size": [
+    7.084,
+    5.003,
+    6.613
+   ],
+   "tris": 1236,
+   "origin": [
+    26.1052,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "BushB",
+   "kind": "Bush",
+   "tags": [
+    "Bush",
+    "Cover",
+    "Hide"
+   ],
+   "notes": "Low spreading broadleaf shrub; walk-through.",
+   "parts": [
+    {
+     "name": "BushB_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      88,
+      109,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "HideSpot"
+     ],
+     "tris": 996,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.7837,
+    -0.07,
+    -3.3729
+   ],
+   "boundsMax": [
+    3.5246,
+    3.1627,
+    3.4341
+   ],
+   "size": [
+    7.308,
+    3.233,
+    6.807
+   ],
+   "tris": 996,
+   "origin": [
+    39.3617,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "BerryBush",
+   "kind": "Bush",
+   "tags": [
+    "Bush",
+    "Cover",
+    "Hide",
+    "Forage",
+    "Berries"
+   ],
+   "notes": "Currant-like shrub with red berry clusters (forage cue). BerryBush_Berries is a separate part: hide it (Transparency 1 / parent away) when picked. 46 berries in 9 clusters.",
+   "parts": [
+    {
+     "name": "BerryBush_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      76,
+      101,
+      43
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "HideSpot"
+     ],
+     "tris": 916,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "BerryBush_Berries",
+     "role": "Berries",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      147,
+      25,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Forage",
+      "HideWhenPicked"
+     ],
+     "tris": 920,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.9447,
+    -0.07,
+    -2.5436
+   ],
+   "boundsMax": [
+    3.2566,
+    4.3671,
+    2.5659
+   ],
+   "size": [
+    6.201,
+    4.437,
+    5.109
+   ],
+   "tris": 1836,
+   "origin": [
+    51.8307,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "GrassTallA",
+   "kind": "Plant",
+   "tags": [
+    "Grass",
+    "TallGrass",
+    "Cover"
+   ],
+   "notes": "Golden tall-grass clump for the open field; alpha cards, no collision, no shadow.",
+   "parts": [
+    {
+     "name": "GrassTallA_Grass",
+     "role": "Grass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      116,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 384,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.6471,
+    -0.07,
+    -1.7032
+   ],
+   "boundsMax": [
+    1.8538,
+    3.6006,
+    1.5123
+   ],
+   "size": [
+    3.501,
+    3.671,
+    3.216
+   ],
+   "tris": 384,
+   "origin": [
+    62.7341,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "GrassTallB",
+   "kind": "Plant",
+   "tags": [
+    "Grass",
+    "TallGrass",
+    "Cover"
+   ],
+   "notes": "Golden tall-grass clump for the open field; alpha cards, no collision, no shadow.",
+   "parts": [
+    {
+     "name": "GrassTallB_Grass",
+     "role": "Grass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      127,
+      121,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 360,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.8086,
+    -0.07,
+    -1.7568
+   ],
+   "boundsMax": [
+    2.1564,
+    3.2155,
+    1.6252
+   ],
+   "size": [
+    3.965,
+    3.285,
+    3.382
+   ],
+   "tris": 360,
+   "origin": [
+    72.3966,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "GrassForest",
+   "kind": "Plant",
+   "tags": [
+    "Grass",
+    "GroundCover"
+   ],
+   "notes": "Green grass tuft for forest floor and meadow edges; scatter densely.",
+   "parts": [
+    {
+     "name": "GrassForest_Grass",
+     "role": "Grass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      97,
+      116,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -0.8149,
+    -0.07,
+    -0.8383
+   ],
+   "boundsMax": [
+    0.9626,
+    1.0345,
+    0.7926
+   ],
+   "size": [
+    1.778,
+    1.105,
+    1.631
+   ],
+   "tris": 160,
+   "origin": [
+    81.3679,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "ReedsA",
+   "kind": "Plant",
+   "tags": [
+    "Reeds",
+    "Cattail",
+    "Shore",
+    "Marsh",
+    "Cover"
+   ],
+   "notes": "Common reed and cattails for shores and the marsh (5-6.5 tall). Sink 0.3-1 into shallow water.",
+   "parts": [
+    {
+     "name": "ReedsA_Reed",
+     "role": "Reed",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      119,
+      126,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 534,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.5683,
+    -0.07,
+    -1.6112
+   ],
+   "boundsMax": [
+    1.7341,
+    6.0975,
+    1.7847
+   ],
+   "size": [
+    3.302,
+    6.167,
+    3.396
+   ],
+   "tris": 534,
+   "origin": [
+    89.8993,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "FlowersA",
+   "kind": "Plant",
+   "tags": [
+    "Flowers",
+    "GroundCover"
+   ],
+   "notes": "Ox-eye daisies and buttercups in grass. Side cards plus up-facing head cards.",
+   "parts": [
+    {
+     "name": "FlowersA_Flower",
+     "role": "Flower",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      115,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 196,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.0232,
+    -0.07,
+    -0.8128
+   ],
+   "boundsMax": [
+    0.969,
+    1.5526,
+    0.9951
+   ],
+   "size": [
+    1.992,
+    1.623,
+    1.808
+   ],
+   "tris": 196,
+   "origin": [
+    98.6562,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "FlowersB",
+   "kind": "Plant",
+   "tags": [
+    "Flowers",
+    "GroundCover"
+   ],
+   "notes": "Knapweed, yarrow, red clover and harebells in grass. Side cards plus up-facing head cards.",
+   "parts": [
+    {
+     "name": "FlowersB_Flower",
+     "role": "Flower",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      99,
+      109,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 192,
+     "textureSet": "Plants",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Plants_Color.png",
+      "normalMap": "textures/GroundReal/GR_Plants_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Plants_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -0.8898,
+    -0.07,
+    -0.8027
+   ],
+   "boundsMax": [
+    0.9067,
+    1.4072,
+    0.8782
+   ],
+   "size": [
+    1.796,
+    1.477,
+    1.681
+   ],
+   "tris": 192,
+   "origin": [
+    106.5148,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "MushroomsA",
+   "kind": "Plant",
+   "tags": [
+    "Mushroom",
+    "ForestFloor"
+   ],
+   "notes": "Cluster of tawny brown-capped mushrooms on a leaf-litter patch.",
+   "parts": [
+    {
+     "name": "MushroomsA_Mushroom",
+     "role": "Mushroom",
+     "robloxMaterial": "Ground",
+     "rgb": [
+      142,
+      109,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 830,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -0.85,
+    -0.011,
+    -0.75
+   ],
+   "boundsMax": [
+    0.85,
+    0.5721,
+    0.75
+   ],
+   "size": [
+    1.7,
+    0.583,
+    1.5
+   ],
+   "tris": 830,
+   "origin": [
+    114.271,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "SaplingBroadleaf",
+   "kind": "Tree",
+   "tags": [
+    "Sapling",
+    "Broadleaf"
+   ],
+   "notes": "Young beech-like broadleaf (~8.5 tall). Trunk collides (thin Hull); crown is walk-through.",
+   "parts": [
+    {
+     "name": "SaplingBroadleaf_Trunk",
+     "role": "Trunk",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      105,
+      92
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 140,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "SaplingBroadleaf_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      96,
+      120,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1056,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.9645,
+    -0.0034,
+    -3.1623
+   ],
+   "boundsMax": [
+    3.3893,
+    9.2301,
+    3.3207
+   ],
+   "size": [
+    6.354,
+    9.234,
+    6.483
+   ],
+   "tris": 1196,
+   "origin": [
+    124.0855,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "MossPatch",
+   "kind": "Plant",
+   "tags": [
+    "Moss",
+    "Decal"
+   ],
+   "notes": "Low moss mat (4 x 2.2) plus two cushions for rocks, logs and ground. Single-sided, cut-out edge.",
+   "parts": [
+    {
+     "name": "MossPatch_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      63,
+      75,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 252,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.3327,
+    -0.0027,
+    -1.6749
+   ],
+   "boundsMax": [
+    2.5117,
+    0.2481,
+    1.6117
+   ],
+   "size": [
+    4.844,
+    0.251,
+    3.287
+   ],
+   "tris": 252,
+   "origin": [
+    135.8077,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Flora.glb"
+  },
+  {
+   "name": "BoulderA",
+   "kind": "Rock",
+   "tags": [
+    "Boulder",
+    "Cover"
+   ],
+   "notes": "Small granite boulder; sink 0.1-0.3.",
+   "parts": [
+    {
+     "name": "BoulderA_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 508,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.1027,
+    -0.3521,
+    -1.0369
+   ],
+   "boundsMax": [
+    1.1736,
+    1.7109,
+    1.0369
+   ],
+   "size": [
+    2.276,
+    2.063,
+    2.074
+   ],
+   "tris": 508,
+   "buriedDepth": 0.352,
+   "origin": [
+    1.1027,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "BoulderB",
+   "kind": "Rock",
+   "tags": [
+    "Boulder",
+    "Cover"
+   ],
+   "notes": "Split granite boulder (crack through the body).",
+   "parts": [
+    {
+     "name": "BoulderB_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      93,
+      95,
+      76
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 930,
+     "textureSet": "RockPage3",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage3_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage3_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.0581,
+    -0.5018,
+    -1.9184
+   ],
+   "boundsMax": [
+    2.0581,
+    3.1322,
+    1.9184
+   ],
+   "size": [
+    4.116,
+    3.634,
+    3.837
+   ],
+   "tris": 930,
+   "buriedDepth": 0.502,
+   "origin": [
+    10.3341,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "BoulderC",
+   "kind": "Rock",
+   "tags": [
+    "Boulder",
+    "Cover"
+   ],
+   "notes": "Large weathered granite boulder with exfoliated, mossy top.",
+   "parts": [
+    {
+     "name": "BoulderC_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1420,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.2916,
+    -0.8064,
+    -2.8394
+   ],
+   "boundsMax": [
+    3.386,
+    4.5178,
+    2.8364
+   ],
+   "size": [
+    6.678,
+    5.324,
+    5.676
+   ],
+   "tris": 1420,
+   "buriedDepth": 0.806,
+   "origin": [
+    21.6836,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "BoulderD",
+   "kind": "Rock",
+   "tags": [
+    "Boulder",
+    "Cover",
+    "Climbable?"
+   ],
+   "notes": "Big glacial erratic, mossy top; hip-high ledges.",
+   "parts": [
+    {
+     "name": "BoulderD_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      110,
+      110,
+      97
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1960,
+     "textureSet": "RockPage1",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage1_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage1_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.5453,
+    -1.2032,
+    -4.2066
+   ],
+   "boundsMax": [
+    5.4975,
+    5.8958,
+    4.2066
+   ],
+   "size": [
+    11.043,
+    7.099,
+    8.413
+   ],
+   "tris": 1960,
+   "buriedDepth": 1.203,
+   "origin": [
+    36.6153,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "RockFlat",
+   "kind": "Rock",
+   "tags": [
+    "Slab",
+    "Walkable"
+   ],
+   "notes": "Low tabular slab, walkable top at ~1.3.",
+   "parts": [
+    {
+     "name": "RockFlat_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      93,
+      95,
+      76
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 930,
+     "textureSet": "RockPage3",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage3_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage3_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.9725,
+    -0.5036,
+    -3.791
+   ],
+   "boundsMax": [
+    4.8987,
+    1.351,
+    3.7583
+   ],
+   "size": [
+    9.871,
+    1.855,
+    7.549
+   ],
+   "tris": 930,
+   "buriedDepth": 0.504,
+   "origin": [
+    53.0855,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "ScreeA",
+   "kind": "Rock",
+   "tags": [
+    "Scree",
+    "Pile"
+   ],
+   "notes": "Pile of angular granite fragments for cliff feet and slopes. Tiling GR_Granite set (the same surface as the cliffs above it), crisp per-corner normals.",
+   "parts": [
+    {
+     "name": "ScreeA_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1896,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.1381,
+    -0.327,
+    -3.3354
+   ],
+   "boundsMax": [
+    4.0462,
+    2.8039,
+    3.1569
+   ],
+   "size": [
+    8.184,
+    3.131,
+    6.492
+   ],
+   "tris": 1896,
+   "buriedDepth": 0.327,
+   "origin": [
+    198.6721,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  },
+  {
+   "name": "RiverStones",
+   "kind": "Rock",
+   "tags": [
+    "RiverStones",
+    "Shore",
+    "Ford"
+   ],
+   "notes": "Smooth river-worn stones for banks and fords: the 4 big stones are separate Hull parts (no bridging between them); pebbles are one non-colliding part.",
+   "parts": [
+    {
+     "name": "RiverStones_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 294,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "RiverStones_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 294,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "RiverStones_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 294,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "RiverStones_Stone_4",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 294,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "RiverStones_Pebbles",
+     "role": "Pebbles",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      107,
+      106,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1104,
+     "textureSet": "RockPage2",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_RockPage2_Color.png",
+      "normalMap": "textures/GroundReal/GR_RockPage2_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.5784,
+    -0.2516,
+    -2.8062
+   ],
+   "boundsMax": [
+    3.6372,
+    0.9603,
+    2.8313
+   ],
+   "size": [
+    7.216,
+    1.212,
+    5.637
+   ],
+   "tris": 2280,
+   "buriedDepth": 0.252,
+   "origin": [
+    67.5624,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Rocks.glb"
+  },
+  {
+   "name": "CliffFaceA",
+   "kind": "Cliff",
+   "tags": [
+    "Cliff",
+    "Ledges"
+   ],
+   "notes": "Stratified granite/gneiss cliff chunk 27 x 19; steep layered face (front, Roblox -Z) with walkable ledges, back slopes down to bury 4-8 studs into the hillside.",
+   "parts": [
+    {
+     "name": "CliffFaceA_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 4062,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "CliffFaceA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      76,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Decal"
+     ],
+     "tris": 434,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -13.6654,
+    -2.6683,
+    -12.6347
+   ],
+   "boundsMax": [
+    13.6654,
+    19.6551,
+    12.6347
+   ],
+   "size": [
+    27.331,
+    22.323,
+    25.269
+   ],
+   "tris": 4496,
+   "buriedDepth": 2.668,
+   "origin": [
+    13.6654,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  },
+  {
+   "name": "CliffFaceB",
+   "kind": "Cliff",
+   "tags": [
+    "Cliff",
+    "Ledges"
+   ],
+   "notes": "Stratified cliff chunk 38 x 28 with ledges, overhangs and V-notched joints.",
+   "parts": [
+    {
+     "name": "CliffFaceB_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 6005,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "CliffFaceB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      76,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Decal"
+     ],
+     "tris": 686,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -19.1638,
+    -3.1908,
+    -16.4066
+   ],
+   "boundsMax": [
+    19.1638,
+    28.7109,
+    16.4066
+   ],
+   "size": [
+    38.328,
+    31.902,
+    32.813
+   ],
+   "tris": 6691,
+   "buriedDepth": 3.191,
+   "origin": [
+    52.4948,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  },
+  {
+   "name": "CliffFaceC",
+   "kind": "Cliff",
+   "tags": [
+    "Cliff",
+    "Ledges"
+   ],
+   "notes": "Big stratified crag 48 x 40 for the gorge and highland walls.",
+   "parts": [
+    {
+     "name": "CliffFaceC_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 6628,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "CliffFaceC_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      76,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Decal"
+     ],
+     "tris": 590,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -24.2101,
+    -3.2782,
+    -20.5599
+   ],
+   "boundsMax": [
+    24.2101,
+    40.7759,
+    20.5038
+   ],
+   "size": [
+    48.42,
+    44.054,
+    41.064
+   ],
+   "tris": 7218,
+   "buriedDepth": 3.278,
+   "origin": [
+    101.8691,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  },
+  {
+   "name": "RockOutcrop",
+   "kind": "Rock",
+   "tags": [
+    "Outcrop",
+    "Cover"
+   ],
+   "notes": "Low forest-floor bedrock outcrop (stepped strata, mossy top); climbable steps.",
+   "parts": [
+    {
+     "name": "RockOutcrop_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 2385,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "RockOutcrop_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      76,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Decal"
+     ],
+     "tris": 306,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -6.99,
+    -1.2096,
+    -8.4691
+   ],
+   "boundsMax": [
+    7.1193,
+    5.2195,
+    8.4691
+   ],
+   "size": [
+    14.109,
+    6.429,
+    16.938
+   ],
+   "tris": 2691,
+   "buriedDepth": 1.21,
+   "origin": [
+    139.069,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  },
+  {
+   "name": "CaveMouth",
+   "kind": "CaveMouth",
+   "tags": [
+    "Cave",
+    "Arch"
+   ],
+   "notes": "Rock arch/overhang shell framing a terrain cave: opening ~18 wide x ~10.5 high at the front narrowing inward over 14 studs; floor is terrain; back buries into the hillside.",
+   "parts": [
+    {
+     "name": "CaveMouth_Rock",
+     "role": "Rock",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      128,
+      124,
+      116
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 6821,
+     "textureSet": "Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Granite_Color.png",
+      "normalMap": "textures/GroundReal/GR_Granite_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Rock_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    },
+    {
+     "name": "CaveMouth_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      76,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Decal"
+     ],
+     "tris": 648,
+     "textureSet": "Shrubs",
+     "surfaceAppearance": {
+      "colorMap": "textures/GroundReal/GR_Shrubs_Color.png",
+      "normalMap": "textures/GroundReal/GR_Shrubs_Normal.png",
+      "roughnessMap": "textures/GroundReal/GR_Shrubs_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "renderFidelity": "Automatic",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "CaveEntrance": {
+     "position": [
+      0.0033,
+      0.0,
+      -10.0725
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -18.1731,
+    -2.0527,
+    -15.7828
+   ],
+   "boundsMax": [
+    18.1731,
+    22.5206,
+    15.7828
+   ],
+   "size": [
+    36.346,
+    24.573,
+    31.566
+   ],
+   "tris": 7469,
+   "buriedDepth": 2.053,
+   "origin": [
+    170.3611,
+    0.0,
+    0.0
+   ],
+   "glb": "GroundReal_Cliffs.glb"
+  }
+ ],
+ "warnings": [],
+ "notes": [
+  "Flora: alpha cards with real flipped back faces (DoubleSided off, Transparency 0, AlphaMode Transparency); card bottoms are clamped to at most 0.07 studs below y = 0 so blades emerge from the soil on slopes.",
+  "Plants atlas: one-pixel alpha rim so thin blades survive the lower mips; colour is bled into every transparent pixel (no halos).",
+  "All roughness maps are separate 8-bit grayscale PNGs for the SurfaceAppearances; the GLBs embed a packed glTF metallicRoughness copy (glb_only/*_MR.png, R = G = roughness, B = 0, metallicFactor 0); no metal.",
+  "Rock texel density: RockPage1 53 px/stud, RockPage2 69 px/stud, RockPage3 69 px/stud, Granite tile 79 px/stud (1024 px over 13 studs)"
+ ],
+ "atlasLayout": {
+  "Plants": {
+   "files": {
+    "color": "GR_Plants_Color.png",
+    "normal": "GR_Plants_Normal.png",
+    "rough": "GR_Plants_Rough.png"
+   },
+   "slots": {
+    "grass_tall_a": {
+     "rect": [
+      0,
+      512,
+      256,
+      1005
+     ],
+     "density": 128.0
+    },
+    "grass_tall_b": {
+     "rect": [
+      256,
+      512,
+      512,
+      978
+     ],
+     "density": 128.0
+    },
+    "reed": {
+     "rect": [
+      512,
+      512,
+      640,
+      1014
+     ],
+     "density": 80.0
+    },
+    "cattail": {
+     "rect": [
+      640,
+      512,
+      768,
+      952
+     ],
+     "density": 91.43
+    },
+    "swordfern_a": {
+     "rect": [
+      777,
+      512,
+      886,
+      1001
+     ],
+     "density": 170.67
+    },
+    "swordfern_b": {
+     "rect": [
+      906,
+      512,
+      1015,
+      958
+     ],
+     "density": 170.67
+    },
+    "bracken": {
+     "rect": [
+      15,
+      129,
+      367,
+      506
+     ],
+     "density": 160.0
+    },
+    "grass_forest_a": {
+     "rect": [
+      384,
+      256,
+      640,
+      466
+     ],
+     "density": 160.0
+    },
+    "grass_forest_b": {
+     "rect": [
+      384,
+      0,
+      640,
+      223
+     ],
+     "density": 160.0
+    },
+    "flowers_a": {
+     "rect": [
+      661,
+      256,
+      883,
+      491
+     ],
+     "density": 142.22
+    },
+    "flowers_b": {
+     "rect": [
+      640,
+      0,
+      896,
+      222
+     ],
+     "density": 142.22
+    },
+    "stem_green": {
+     "rect": [
+      896,
+      256,
+      928,
+      512
+     ],
+     "density": 320.0
+    },
+    "stem_brown": {
+     "rect": [
+      928,
+      256,
+      960,
+      512
+     ],
+     "density": 320.0
+    },
+    "cattail_head": {
+     "rect": [
+      960,
+      256,
+      992,
+      512
+     ],
+     "density": 320.0
+    },
+    "reed_culm": {
+     "rect": [
+      992,
+      256,
+      1024,
+      512
+     ],
+     "density": 320.0
+    },
+    "head_0_daisy": {
+     "rect": [
+      3,
+      67,
+      62,
+      126
+     ],
+     "density": 266.67
+    },
+    "head_1_daisy": {
+     "rect": [
+      67,
+      67,
+      125,
+      126
+     ],
+     "density": 266.67
+    },
+    "head_2_buttercup": {
+     "rect": [
+      143,
+      90,
+      170,
+      115
+     ],
+     "density": 266.67
+    },
+    "head_3_buttercup": {
+     "rect": [
+      203,
+      83,
+      229,
+      110
+     ],
+     "density": 266.67
+    },
+    "head_4_knapweed": {
+     "rect": [
+      266,
+      76,
+      311,
+      116
+     ],
+     "density": 266.67
+    },
+    "head_5_yarrow": {
+     "rect": [
+      321,
+      66,
+      381,
+      125
+     ],
+     "density": 266.67
+    },
+    "head_6_clover": {
+     "rect": [
+      12,
+      16,
+      52,
+      50
+     ],
+     "density": 266.67
+    },
+    "head_7_harebell": {
+     "rect": [
+      82,
+      29,
+      109,
+      53
+     ],
+     "density": 266.67
+    },
+    "head_8_daisy": {
+     "rect": [
+      131,
+      4,
+      189,
+      59
+     ],
+     "density": 266.67
+    },
+    "head_9_buttercup": {
+     "rect": [
+      224,
+      18,
+      251,
+      44
+     ],
+     "density": 266.67
+    },
+    "head_10_knapweed": {
+     "rect": [
+      269,
+      11,
+      309,
+      54
+     ],
+     "density": 266.67
+    },
+    "head_11_clover": {
+     "rect": [
+      332,
+      16,
+      372,
+      52
+     ],
+     "density": 266.67
+    }
+   }
+  },
+  "Shrubs": {
+   "files": {
+    "color": "GR_Shrubs_Color.png",
+    "normal": "GR_Shrubs_Normal.png",
+    "rough": "GR_Shrubs_Rough.png"
+   },
+   "slots": {
+    "evergreen_a": {
+     "rect": [
+      32,
+      770,
+      214,
+      1022
+     ],
+     "density": 213.33
+    },
+    "evergreen_b": {
+     "rect": [
+      287,
+      770,
+      475,
+      1016
+     ],
+     "density": 213.33
+    },
+    "broadleaf_a": {
+     "rect": [
+      525,
+      769,
+      721,
+      1024
+     ],
+     "density": 182.86
+    },
+    "broadleaf_b": {
+     "rect": [
+      782,
+      769,
+      994,
+      1000
+     ],
+     "density": 182.86
+    },
+    "currant": {
+     "rect": [
+      15,
+      513,
+      203,
+      768
+     ],
+     "density": 182.86
+    },
+    "beech_a": {
+     "rect": [
+      277,
+      512,
+      496,
+      768
+     ],
+     "density": 160.0
+    },
+    "beech_b": {
+     "rect": [
+      533,
+      512,
+      768,
+      768
+     ],
+     "density": 160.0
+    },
+    "fill_evergreen": {
+     "rect": [
+      768,
+      512,
+      1024,
+      768
+     ],
+     "density": 213.33
+    },
+    "moss_a": {
+     "rect": [
+      15,
+      267,
+      247,
+      504
+     ],
+     "density": 142.22
+    },
+    "moss_b": {
+     "rect": [
+      266,
+      269,
+      487,
+      501
+     ],
+     "density": 142.22
+    },
+    "moss_mat": {
+     "rect": [
+      11,
+      8,
+      502,
+      245
+     ],
+     "density": 128.0
+    },
+    "bark": {
+     "rect": [
+      512,
+      0,
+      640,
+      512
+     ],
+     "density": 128.0
+    },
+    "mush_cap": {
+     "rect": [
+      640,
+      384,
+      768,
+      512
+     ],
+     "density": 256.0
+    },
+    "mush_gills": {
+     "rect": [
+      640,
+      256,
+      768,
+      384
+     ],
+     "density": 256.0
+    },
+    "mush_stem": {
+     "rect": [
+      640,
+      0,
+      704,
+      256
+     ],
+     "density": 256.0
+    },
+    "berry": {
+     "rect": [
+      704,
+      192,
+      768,
+      256
+     ],
+     "density": 320.0
+    },
+    "fill_broadleaf": {
+     "rect": [
+      768,
+      256,
+      1024,
+      512
+     ],
+     "density": 182.86
+    },
+    "litter": {
+     "rect": [
+      768,
+      0,
+      1024,
+      252
+     ],
+     "density": 160.0
+    }
+   }
+  }
+ },
+ "schema": "LS-Real-1",
+ "uploadTextures": [
+  {
+   "file": "textures/GroundReal/GR_Granite_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "ScreeA",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1573051
+  },
+  {
+   "file": "textures/GroundReal/GR_Granite_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "ScreeA",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2332509
+  },
+  {
+   "file": "textures/GroundReal/GR_Plants_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 936780
+  },
+  {
+   "file": "textures/GroundReal/GR_Plants_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 961216
+  },
+  {
+   "file": "textures/GroundReal/GR_Plants_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "FernA",
+    "FernB",
+    "GrassTallA",
+    "GrassTallB",
+    "GrassForest",
+    "ReedsA",
+    "FlowersA",
+    "FlowersB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 117381
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage1_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BoulderD"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1218568
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage1_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BoulderD"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1708999
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage2_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BoulderA",
+    "BoulderC",
+    "RiverStones"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1361822
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage2_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BoulderA",
+    "BoulderC",
+    "RiverStones"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2021398
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage3_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BoulderB",
+    "RockFlat"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1190720
+  },
+  {
+   "file": "textures/GroundReal/GR_RockPage3_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BoulderB",
+    "RockFlat"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1769890
+  },
+  {
+   "file": "textures/GroundReal/GR_Rock_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "BoulderA",
+    "BoulderB",
+    "BoulderC",
+    "BoulderD",
+    "RockFlat",
+    "ScreeA",
+    "RiverStones",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 180680
+  },
+  {
+   "file": "textures/GroundReal/GR_Shrubs_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 1010661
+  },
+  {
+   "file": "textures/GroundReal/GR_Shrubs_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1142261
+  },
+  {
+   "file": "textures/GroundReal/GR_Shrubs_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "BushA",
+    "BushB",
+    "BerryBush",
+    "MushroomsA",
+    "SaplingBroadleaf",
+    "MossPatch",
+    "CliffFaceA",
+    "CliffFaceB",
+    "CliffFaceC",
+    "RockOutcrop",
+    "CaveMouth"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 147394
+  }
+ ],
+ "adCheck": {
+  "problems": [],
+  "glbs": 3,
+  "uploadImages": 15,
+  "totalTris": 48253,
+  "assets": 26
+ }
+}

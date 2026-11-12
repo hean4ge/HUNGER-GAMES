@@ -1,0 +1,1034 @@
+{
+ "category": "Rocks",
+ "glb": "Rocks.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "BoulderA",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Boulder ~3 studs across",
+   "parts": [
+    {
+     "name": "BoulderA_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      122,
+      119,
+      112
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 320,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.4187,
+    -0.0,
+    -1.5
+   ],
+   "boundsMax": [
+    1.4187,
+    1.8176,
+    1.5
+   ],
+   "size": [
+    2.837,
+    1.818,
+    3.0
+   ],
+   "tris": 320,
+   "origin": [
+    1.4187,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BoulderB",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Boulder ~5 studs across",
+   "parts": [
+    {
+     "name": "BoulderB_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      117,
+      115,
+      109
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 304,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BoulderB_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      84,
+      84,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 90,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.3635,
+    0.0,
+    -2.5
+   ],
+   "boundsMax": [
+    2.3635,
+    2.8939,
+    2.5
+   ],
+   "size": [
+    4.727,
+    2.894,
+    5.0
+   ],
+   "tris": 394,
+   "origin": [
+    11.2005,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BoulderC",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Boulder ~8 studs across",
+   "parts": [
+    {
+     "name": "BoulderC_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      112,
+      110,
+      105
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 316,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BoulderC_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      82,
+      111,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 152,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.0,
+    0.0,
+    -3.0402
+   ],
+   "boundsMax": [
+    4.0,
+    4.3881,
+    3.0402
+   ],
+   "size": [
+    8.0,
+    4.388,
+    6.08
+   ],
+   "tris": 468,
+   "origin": [
+    23.564,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BoulderD",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Boulder ~13 studs across",
+   "parts": [
+    {
+     "name": "BoulderD_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      124,
+      121,
+      114
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 412,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BoulderD_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      85,
+      108,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 292,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.7807,
+    0.0,
+    -6.5
+   ],
+   "boundsMax": [
+    5.7807,
+    6.0973,
+    6.5
+   ],
+   "size": [
+    11.561,
+    6.097,
+    13.0
+   ],
+   "tris": 704,
+   "origin": [
+    39.3447,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "CliffChunkA",
+   "kind": "Cliff",
+   "tags": [],
+   "notes": "Highland outcrop: steep layered face toward +Y, stepped back slopes into the hill",
+   "parts": [
+    {
+     "name": "CliffChunkA_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1062,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkA_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      129,
+      125,
+      117
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 568,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkA_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      109,
+      107,
+      103
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 452,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkA_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      82,
+      81,
+      83
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 108,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -14.6615,
+    -0.0001,
+    -9.7588
+   ],
+   "boundsMax": [
+    14.6615,
+    17.3231,
+    9.7588
+   ],
+   "size": [
+    29.323,
+    17.323,
+    19.518
+   ],
+   "tris": 2190,
+   "origin": [
+    65.7865,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "CliffChunkB",
+   "kind": "Cliff",
+   "tags": [],
+   "notes": "Cliff wall: steep layered face toward +Y, stepped back slopes into the hill",
+   "parts": [
+    {
+     "name": "CliffChunkB_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1736,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkB_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      109,
+      107,
+      103
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1180,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkB_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      129,
+      125,
+      117
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 458,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkB_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      82,
+      81,
+      83
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 268,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -21.2999,
+    0.0,
+    -10.5253
+   ],
+   "boundsMax": [
+    21.2999,
+    27.3929,
+    10.5253
+   ],
+   "size": [
+    42.6,
+    27.393,
+    21.051
+   ],
+   "tris": 3642,
+   "origin": [
+    107.7479,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "CliffChunkC",
+   "kind": "Cliff",
+   "tags": [],
+   "notes": "Mountain crag with snow on the upper ledges; front face toward +Y",
+   "parts": [
+    {
+     "name": "CliffChunkC_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1802,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkC_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      129,
+      125,
+      117
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 914,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkC_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      109,
+      107,
+      103
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 390,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkC_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      82,
+      81,
+      83
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 432,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "CliffChunkC_Snow",
+     "role": "Snow",
+     "robloxMaterial": "Snow",
+     "rgb": [
+      236,
+      240,
+      244
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 444,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -23.3111,
+    -0.0,
+    -12.1727
+   ],
+   "boundsMax": [
+    23.3111,
+    39.0375,
+    12.1727
+   ],
+   "size": [
+    46.622,
+    39.037,
+    24.345
+   ],
+   "tris": 3982,
+   "origin": [
+    158.3591,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "RockPile",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Heap of 8 rocks, 6 studs across",
+   "parts": [
+    {
+     "name": "RockPile_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      122,
+      119,
+      112
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 508,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RockPile_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      104,
+      102,
+      98
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 228,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RockPile_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      84,
+      83,
+      85
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 220,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.0,
+    -0.0,
+    -1.9313
+   ],
+   "boundsMax": [
+    3.0,
+    2.3638,
+    1.9313
+   ],
+   "size": [
+    6.0,
+    2.364,
+    3.863
+   ],
+   "tris": 956,
+   "origin": [
+    190.67,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Pebbles",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "Decorative flat scatter, no collision",
+   "parts": [
+    {
+     "name": "Pebbles_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      130,
+      127,
+      120
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 286,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pebbles_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      106,
+      104,
+      99
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 270,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Pebbles_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      86,
+      85,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 138,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.2568,
+    -0.0,
+    -2.3909
+   ],
+   "boundsMax": [
+    3.2568,
+    0.2867,
+    2.3909
+   ],
+   "size": [
+    6.514,
+    0.287,
+    4.782
+   ],
+   "tris": 694,
+   "origin": [
+    202.9268,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StandingStones",
+   "kind": "Landmark",
+   "tags": [],
+   "notes": "Fragment of a stone ring; the ring centre lies ~13 studs in front (+Y)",
+   "parts": [
+    {
+     "name": "StandingStones_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      132,
+      124
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 236,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StandingStones_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      146,
+      140,
+      131
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 236,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StandingStones_Granite_3",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      133,
+      128,
+      121
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 244,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StandingStones_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      84,
+      106,
+      54
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 668,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "RingCenter": {
+     "position": [
+      0.1725,
+      0.0,
+      -12.0811
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -7.9346,
+    -0.0164,
+    -2.174
+   ],
+   "boundsMax": [
+    7.9346,
+    9.1591,
+    2.174
+   ],
+   "size": [
+    15.869,
+    9.176,
+    4.348
+   ],
+   "tris": 1384,
+   "origin": [
+    220.1186,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "FlatStone",
+   "kind": "Rock",
+   "tags": [],
+   "notes": "10 x 8 x 1.5 slab; walkable top",
+   "parts": [
+    {
+     "name": "FlatStone_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      126,
+      122,
+      115
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 120,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FlatStone_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      108,
+      106,
+      101
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 64,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FlatStone_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      88,
+      110,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 104,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.1085,
+    0.0,
+    -3.995
+   ],
+   "boundsMax": [
+    5.1085,
+    1.4925,
+    3.995
+   ],
+   "size": [
+    10.217,
+    1.493,
+    7.99
+   ],
+   "tris": 288,
+   "origin": [
+    239.1615,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "RockArch",
+   "kind": "Landmark",
+   "tags": [],
+   "notes": "Natural arch; walk through along Y",
+   "parts": [
+    {
+     "name": "RockArch_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      120,
+      116,
+      108
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1076,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RockArch_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      133,
+      127,
+      117
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 872,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RockArch_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      114,
+      112,
+      107
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 334,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RockArch_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      82,
+      106,
+      54
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 308,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "PassageCenter": {
+     "position": [
+      0.5294,
+      0.0,
+      -0.2272
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -10.0,
+    -0.0,
+    -5.6014
+   ],
+   "boundsMax": [
+    10.0,
+    14.0462,
+    5.6014
+   ],
+   "size": [
+    20.0,
+    14.046,
+    11.203
+   ],
+   "tris": 2590,
+   "origin": [
+    260.27,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

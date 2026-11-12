@@ -1,0 +1,1677 @@
+{
+ "category": "Foliage",
+ "glb": "Foliage.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "PineA",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Classic spruce silhouette. Trunk collides (Hull); roots, twigs and needles are walk-through.",
+   "parts": [
+    {
+     "name": "PineA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 250,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "PineA_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 390,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineA_PineNeedles",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      36,
+      62,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 440,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineA_PineNeedles_2",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      48,
+      80,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 360,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineA_PineNeedles_3",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      62,
+      98,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 434,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.9233,
+    0.0,
+    -8.0773
+   ],
+   "boundsMax": [
+    7.4073,
+    34.0752,
+    6.8482
+   ],
+   "size": [
+    13.331,
+    34.075,
+    14.925
+   ],
+   "tris": 1874,
+   "origin": [
+    5.9233,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "PineB",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Tall, narrow, slightly blue-green. Bare trunk to ~9 studs.",
+   "parts": [
+    {
+     "name": "PineB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      64,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 250,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "PineB_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      64,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 334,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineB_PineNeedles",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      34,
+      60,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 380,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineB_PineNeedles_2",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      44,
+      76,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 420,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineB_PineNeedles_3",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      56,
+      92,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 434,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.4439,
+    0.0,
+    -6.2002
+   ],
+   "boundsMax": [
+    6.5302,
+    40.0074,
+    5.6279
+   ],
+   "size": [
+    11.974,
+    40.007,
+    11.828
+   ],
+   "tris": 1818,
+   "origin": [
+    24.7749,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "PineC",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Shorter, broad, windswept lean; yellower needles.",
+   "parts": [
+    {
+     "name": "PineC_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      70,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 250,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "PineC_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      70,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 408,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineC_PineNeedles",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      44,
+      68,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 460,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineC_PineNeedles_2",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      56,
+      86,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 220,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "PineC_PineNeedles_3",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      70,
+      102,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 334,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -6.4002,
+    0.0,
+    -6.6306
+   ],
+   "boundsMax": [
+    9.4215,
+    27.9482,
+    8.4134
+   ],
+   "size": [
+    15.822,
+    27.948,
+    15.044
+   ],
+   "tris": 1672,
+   "origin": [
+    43.7052,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "OakA",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "4 standable branches (flat tops >= 1.6 studs wide, 9.6-14.3 studs up; Perch1-4 attachments).",
+   "parts": [
+    {
+     "name": "OakA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 1338,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "OakA_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 220,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "OakA_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      100,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 720,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "OakA_Leaves_2",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      82,
+      116,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 859,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Perch1": {
+     "position": [
+      2.7684,
+      9.8021,
+      -1.1664
+     ],
+     "look": [
+      0.9485,
+      0.0,
+      -0.3168
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch2": {
+     "position": [
+      -0.9463,
+      11.3644,
+      -2.8606
+     ],
+     "look": [
+      -0.3755,
+      0.0,
+      -0.9268
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch3": {
+     "position": [
+      -2.5214,
+      12.5997,
+      0.8644
+     ],
+     "look": [
+      -0.9124,
+      0.0,
+      0.4093
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch4": {
+     "position": [
+      0.8301,
+      13.7355,
+      2.3193
+     ],
+     "look": [
+      0.2739,
+      0.0,
+      0.9618
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -13.0802,
+    0.0,
+    -12.3647
+   ],
+   "boundsMax": [
+    12.6535,
+    23.3278,
+    12.01
+   ],
+   "size": [
+    25.734,
+    23.328,
+    24.375
+   ],
+   "tris": 3137,
+   "origin": [
+    72.2072,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "OakB",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Old wide oak, 5 standable branches (Perch1-5 attachments).",
+   "parts": [
+    {
+     "name": "OakB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      82,
+      64,
+      50
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 1562,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "OakB_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      82,
+      64,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 220,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "OakB_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      72,
+      102,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 820,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "OakB_Leaves_2",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      88,
+      120,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 859,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Perch1": {
+     "position": [
+      3.0868,
+      9.6234,
+      -0.4947
+     ],
+     "look": [
+      0.9989,
+      0.0,
+      -0.0472
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch2": {
+     "position": [
+      0.5388,
+      10.7555,
+      -3.1864
+     ],
+     "look": [
+      0.2244,
+      0.0,
+      -0.9745
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch3": {
+     "position": [
+      -2.7222,
+      12.2143,
+      -2.1488
+     ],
+     "look": [
+      -0.8479,
+      0.0,
+      -0.5301
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch4": {
+     "position": [
+      -2.1231,
+      13.3625,
+      1.797
+     ],
+     "look": [
+      -0.7132,
+      0.0,
+      0.701
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch5": {
+     "position": [
+      1.0577,
+      14.7039,
+      2.1854
+     ],
+     "look": [
+      0.3765,
+      0.0,
+      0.9264
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -14.479,
+    0.0,
+    -13.3266
+   ],
+   "boundsMax": [
+    14.4253,
+    25.4018,
+    11.9017
+   ],
+   "size": [
+    28.904,
+    25.402,
+    25.228
+   ],
+   "tris": 3461,
+   "origin": [
+    105.34,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BirchA",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Single slender stem; dark bands are a separate Bark part.",
+   "parts": [
+    {
+     "name": "BirchA_BirchBark",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      214,
+      207,
+      192
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 174,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BirchA_BirchBark_2",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      214,
+      207,
+      192
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 196,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      58,
+      54,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 288,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchA_BirchLeaves",
+     "role": "BirchLeaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      112,
+      142,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 420,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchA_BirchLeaves_2",
+     "role": "BirchLeaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      128,
+      156,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 640,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.8966,
+    -0.0027,
+    -5.1972
+   ],
+   "boundsMax": [
+    5.3023,
+    25.1705,
+    4.0989
+   ],
+   "size": [
+    10.199,
+    25.173,
+    9.296
+   ],
+   "tris": 1718,
+   "origin": [
+    130.6616,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BirchB",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Twin stems from one root; each stem has its own Hull collider.",
+   "parts": [
+    {
+     "name": "BirchB_BirchBark",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      214,
+      207,
+      192
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 174,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BirchB_BirchBark_2",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      214,
+      207,
+      192
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 174,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "BirchB_BirchBark_3",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      214,
+      207,
+      192
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 252,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      58,
+      54,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 324,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchB_BirchLeaves",
+     "role": "BirchLeaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      146,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 380,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BirchB_BirchLeaves_2",
+     "role": "BirchLeaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      134,
+      160,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 560,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -6.3294,
+    -0.004,
+    -5.21
+   ],
+   "boundsMax": [
+    6.1402,
+    27.3452,
+    6.5098
+   ],
+   "size": [
+    12.47,
+    27.349,
+    11.72
+   ],
+   "tris": 1864,
+   "origin": [
+    148.2934,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "DeadTreeA",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Snapped-top snag with swamp roots. Trunk collides (Hull); limbs/roots walk-through.",
+   "parts": [
+    {
+     "name": "DeadTreeA_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      100,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 206,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "DeadTreeA_DeadWood_2",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      100,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 704,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.6616,
+    0.0,
+    -4.4599
+   ],
+   "boundsMax": [
+    5.5815,
+    19.7246,
+    5.3587
+   ],
+   "size": [
+    11.243,
+    19.725,
+    9.819
+   ],
+   "tris": 910,
+   "origin": [
+    166.0956,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "DeadTreeB",
+   "kind": "Tree",
+   "tags": [],
+   "notes": "Leaning mossy snag with hanging moss beards.",
+   "parts": [
+    {
+     "name": "DeadTreeB_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      92,
+      80
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 206,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "DeadTreeB_DeadWood_2",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      92,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 628,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "DeadTreeB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      80,
+      104,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 634,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.9147,
+    -0.0073,
+    -5.8517
+   ],
+   "boundsMax": [
+    2.9037,
+    16.4477,
+    2.9956
+   ],
+   "size": [
+    8.818,
+    16.455,
+    8.847
+   ],
+   "tris": 1468,
+   "origin": [
+    183.5917,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BushA",
+   "kind": "Bush",
+   "tags": [],
+   "notes": "Rounded dome, hides a crouching player.",
+   "parts": [
+    {
+     "name": "BushA_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      102,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 570,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.5539,
+    0.0,
+    -3.176
+   ],
+   "boundsMax": [
+    3.6291,
+    4.2162,
+    3.5295
+   ],
+   "size": [
+    7.183,
+    4.216,
+    6.705
+   ],
+   "tris": 570,
+   "origin": [
+    196.0489,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BushB",
+   "kind": "Bush",
+   "tags": [],
+   "notes": "Low and spreading.",
+   "parts": [
+    {
+     "name": "BushB_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      62,
+      96,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 570,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.9642,
+    0.0,
+    -3.8183
+   ],
+   "boundsMax": [
+    3.717,
+    3.615,
+    3.6365
+   ],
+   "size": [
+    7.681,
+    3.615,
+    7.455
+   ],
+   "tris": 570,
+   "origin": [
+    209.6422,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BushC",
+   "kind": "Bush",
+   "tags": [],
+   "notes": "Tall upright bush.",
+   "parts": [
+    {
+     "name": "BushC_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      106,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 570,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.7616,
+    0.0,
+    -2.7797
+   ],
+   "boundsMax": [
+    2.9611,
+    4.7685,
+    2.7425
+   ],
+   "size": [
+    5.723,
+    4.768,
+    5.522
+   ],
+   "tris": 570,
+   "origin": [
+    222.1206,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "BerryBush",
+   "kind": "Bush",
+   "tags": [],
+   "notes": "Forage bush; berries are a separate Berry part (could be hidden once picked).",
+   "parts": [
+    {
+     "name": "BerryBush_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      92,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 480,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "BerryBush_Berry",
+     "role": "Berry",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      148,
+      32,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 840,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.3663,
+    0.0,
+    -3.1475
+   ],
+   "boundsMax": [
+    3.575,
+    4.0641,
+    3.4405
+   ],
+   "size": [
+    6.941,
+    4.064,
+    6.588
+   ],
+   "tris": 1320,
+   "origin": [
+    234.4483,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "FernClump",
+   "kind": "Plant",
+   "tags": [],
+   "notes": "Ground fern, walk-through.",
+   "parts": [
+    {
+     "name": "FernClump_Fern",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      84,
+      120,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 940,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.3316,
+    -0.0309,
+    -2.8574
+   ],
+   "boundsMax": [
+    2.6637,
+    2.0652,
+    3.1047
+   ],
+   "size": [
+    4.995,
+    2.096,
+    5.962
+   ],
+   "tris": 940,
+   "origin": [
+    246.3546,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "ReedsClump",
+   "kind": "Plant",
+   "tags": [],
+   "notes": "Waterside reeds 4-6 studs with cattail heads (Reed role, brown rgb).",
+   "parts": [
+    {
+     "name": "ReedsClump_Reed",
+     "role": "Reed",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      130,
+      134,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 972,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "ReedsClump_Reed_2",
+     "role": "Reed",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      100,
+      70,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 184,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.9674,
+    0.0,
+    -2.7944
+   ],
+   "boundsMax": [
+    3.0239,
+    5.7212,
+    3.3735
+   ],
+   "size": [
+    4.991,
+    5.721,
+    6.168
+   ],
+   "tris": 1156,
+   "origin": [
+    256.9854,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "MushroomCluster",
+   "kind": "Plant",
+   "tags": [],
+   "notes": "Toadstool cluster; spots belong to the Mushroom part.",
+   "parts": [
+    {
+     "name": "MushroomCluster_Mushroom",
+     "role": "Mushroom",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      196,
+      168,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 596,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "MushroomCluster_MushroomCap",
+     "role": "MushroomCap",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      160,
+      62,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 588,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.281,
+    0.0,
+    -1.3371
+   ],
+   "boundsMax": [
+    1.7249,
+    2.3136,
+    1.3186
+   ],
+   "size": [
+    3.006,
+    2.314,
+    2.656
+   ],
+   "tris": 1184,
+   "origin": [
+    267.29,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Stump",
+   "kind": "Prop",
+   "tags": [],
+   "notes": "Stand-on stump 2.3 studs high; body collides (Hull), cut face/roots/splinters walk-through.",
+   "parts": [
+    {
+     "name": "Stump_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 284,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Stump_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      150,
+      118,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 338,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Stump_Bark_2",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      66,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 330,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.2118,
+    0.0,
+    -2.8158
+   ],
+   "boundsMax": [
+    3.1448,
+    2.9354,
+    3.0439
+   ],
+   "size": [
+    6.357,
+    2.935,
+    5.86
+   ],
+   "tris": 952,
+   "origin": [
+    278.2268,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "FallenLog",
+   "kind": "Prop",
+   "tags": [],
+   "notes": "14.5-stud log lying along X (front = +Y side), ~2.3 studs high, hop-on (Hull).",
+   "parts": [
+    {
+     "name": "FallenLog_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      78,
+      58
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 390,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FallenLog_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      146,
+      114,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 194,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FallenLog_Logs_2",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      78,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 102,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FallenLog_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      86,
+      108,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 480,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FallenLog_Mushroom",
+     "role": "Mushroom",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      206,
+      184,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 264,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -7.3468,
+    0.0,
+    -2.3924
+   ],
+   "boundsMax": [
+    8.081,
+    2.943,
+    1.5003
+   ],
+   "size": [
+    15.428,
+    2.943,
+    3.893
+   ],
+   "tris": 1430,
+   "origin": [
+    294.7188,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

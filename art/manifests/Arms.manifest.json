@@ -1,0 +1,1147 @@
+{
+ "category": "Arms",
+ "glb": "Arms.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "R_UpperArm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "UpperArm"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the SHOULDER. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = +X (Roblox +X). Sleeve from the shoulder (z=0) to the elbow (z=0.95); the rounded end past z=0.95 is the elbow ball that covers the joint when the forearm bends (bend the forearm toward -Y). Attachments: Shoulder (origin), Elbow (z=0.95). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "R_UpperArm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      52,
+      56,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 736,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Shoulder": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Elbow": {
+     "position": [
+      0.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.159,
+    -0.023,
+    -0.16
+   ],
+   "boundsMax": [
+    0.1641,
+    1.076,
+    0.1662
+   ],
+   "size": [
+    0.323,
+    1.099,
+    0.326
+   ],
+   "tris": 736,
+   "origin": [
+    0.159,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_Forearm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Forearm"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the ELBOW. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = +X (Roblox +X). Sleeve from the elbow (z=0) to a rolled cuff (z~0.5-0.6), bare skin to the wrist (z=0.85); the skin continues ~0.075 past the wrist pivot and hides inside the glove cuff of the hand. Attachments: Elbow (origin), Wrist (z=0.85). Skin can be recoloured at runtime to the avatar skin tone. collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "R_Forearm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      52,
+      56,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 388,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_Forearm_Sleeve_2",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      76,
+      80,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 168,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_Forearm_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 238,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Elbow": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Wrist": {
+     "position": [
+      0.0,
+      0.85,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1333,
+    -0.02,
+    -0.1323
+   ],
+   "boundsMax": [
+    0.1347,
+    0.9265,
+    0.1313
+   ],
+   "size": [
+    0.268,
+    0.947,
+    0.264
+   ],
+   "tris": 794,
+   "origin": [
+    0.9563,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandGrip",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Hand",
+    "Grip"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = +X (Roblox +X). Hand closed around a 0.15-stud cylindrical handle (power grip; the Items handles are 0.12-0.17 across). Attachment Grip = centre of the fist on the handle axis: look = handle axis toward the thumb/index side (where a blade-up weapon exits), up = toward the knuckles/fingers (blade edge direction). Weld weapons so their handle axis runs along Grip.look. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "R_HandGrip_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1008,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandGrip_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandGrip_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Grip": {
+     "position": [
+      0.0131,
+      0.2573,
+      0.1175
+     ],
+     "look": [
+      0.9848,
+      0.1736,
+      -0.0
+     ],
+     "up": [
+      -0.1736,
+      0.9848,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1263,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1477,
+    0.4244,
+    0.2573
+   ],
+   "size": [
+    0.274,
+    0.447,
+    0.356
+   ],
+   "tris": 1926,
+   "origin": [
+    1.7173,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandOpen",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Hand",
+    "Open"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = +X (Roblox +X). Relaxed open hand (slight natural curl). Attachment Palm = centre of the palm surface, look = out of the palm (-Y), up = toward the fingers. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "R_HandOpen_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1018,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandOpen_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandOpen_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      0.0,
+      0.18,
+      0.066
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1263,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1657,
+    0.5606,
+    0.1475
+   ],
+   "size": [
+    0.292,
+    0.583,
+    0.246
+   ],
+   "tris": 1936,
+   "origin": [
+    2.4913,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandFist",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Hand",
+    "Fist"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = +X (Roblox +X). Punching fist, thumb wrapped over the index/middle fingers. Attachment Knuckles = front of the fist on the striking knuckles, look = punch direction (+Z), up = back of the hand. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "R_HandFist_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1072,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandFist_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "R_HandFist_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Knuckles": {
+     "position": [
+      0.0524,
+      0.3388,
+      0.033
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1263,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1321,
+    0.3405,
+    0.2093
+   ],
+   "size": [
+    0.258,
+    0.363,
+    0.308
+   ],
+   "tris": 1990,
+   "origin": [
+    3.2833,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_UpperArm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "UpperArm"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the SHOULDER. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = -X (Roblox -X); exact mirror of the R_ piece. Sleeve from the shoulder (z=0) to the elbow (z=0.95); the rounded end past z=0.95 is the elbow ball that covers the joint when the forearm bends (bend the forearm toward -Y). Attachments: Shoulder (origin), Elbow (z=0.95). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "L_UpperArm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      52,
+      56,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 736,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Shoulder": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Elbow": {
+     "position": [
+      0.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1641,
+    -0.023,
+    -0.16
+   ],
+   "boundsMax": [
+    0.159,
+    1.076,
+    0.1662
+   ],
+   "size": [
+    0.323,
+    1.099,
+    0.326
+   ],
+   "tris": 736,
+   "origin": [
+    4.0791,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_Forearm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Forearm"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the ELBOW. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = -X (Roblox -X); exact mirror of the R_ piece. Sleeve from the elbow (z=0) to a rolled cuff (z~0.5-0.6), bare skin to the wrist (z=0.85); the skin continues ~0.075 past the wrist pivot and hides inside the glove cuff of the hand. Attachments: Elbow (origin), Wrist (z=0.85). Skin can be recoloured at runtime to the avatar skin tone. collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "L_Forearm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      52,
+      56,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 388,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_Forearm_Sleeve_2",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      76,
+      80,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 168,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_Forearm_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 238,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Elbow": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Wrist": {
+     "position": [
+      0.0,
+      0.85,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1347,
+    -0.02,
+    -0.1323
+   ],
+   "boundsMax": [
+    0.1333,
+    0.9265,
+    0.1313
+   ],
+   "size": [
+    0.268,
+    0.947,
+    0.264
+   ],
+   "tris": 794,
+   "origin": [
+    4.8727,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandGrip",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Hand",
+    "Grip"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = -X (Roblox -X); exact mirror of the R_ piece. Hand closed around a 0.15-stud cylindrical handle (power grip; the Items handles are 0.12-0.17 across). Attachment Grip = centre of the fist on the handle axis: look = handle axis toward the thumb/index side (where a blade-up weapon exits), up = toward the knuckles/fingers (blade edge direction). Weld weapons so their handle axis runs along Grip.look. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "L_HandGrip_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1008,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandGrip_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandGrip_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Grip": {
+     "position": [
+      -0.0131,
+      0.2573,
+      0.1175
+     ],
+     "look": [
+      -0.9848,
+      0.1736,
+      -0.0
+     ],
+     "up": [
+      0.1736,
+      0.9848,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1477,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1263,
+    0.4244,
+    0.2573
+   ],
+   "size": [
+    0.274,
+    0.447,
+    0.356
+   ],
+   "tris": 1926,
+   "origin": [
+    5.6537,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandOpen",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Hand",
+    "Open"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = -X (Roblox -X); exact mirror of the R_ piece. Relaxed open hand (slight natural curl). Attachment Palm = centre of the palm surface, look = out of the palm (-Y), up = toward the fingers. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "L_HandOpen_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1018,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandOpen_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandOpen_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      -0.0,
+      0.18,
+      0.066
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1657,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1263,
+    0.5606,
+    0.1475
+   ],
+   "size": [
+    0.292,
+    0.583,
+    0.246
+   ],
+   "tris": 1936,
+   "origin": [
+    6.4457,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandFist",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Hand",
+    "Fist"
+   ],
+   "notes": "Bone axis = Blender +Z (Roblox +Y, the part UpVector), proximal -> distal; pivot (origin) at the WRIST. Blender +Y (Roblox -Z, LookVector) = back of the arm/hand; -Y = palm / inner elbow; thumb side = -X (Roblox -X); exact mirror of the R_ piece. Punching fist, thumb wrapped over the index/middle fingers. Attachment Knuckles = front of the fist on the striking knuckles, look = punch direction (+Z), up = back of the hand. Fingerless leather glove (Glove) with bare fingers (Skin, can be recoloured to the avatar skin tone) and a brass press stud on the wrist strap. The glove cuff starts at the wrist pivot and sleeves the forearm's wrist end. Attachment Wrist (origin). collide=False, castShadow=False.",
+   "parts": [
+    {
+     "name": "L_HandFist_Glove",
+     "role": "Glove",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      52,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1072,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandFist_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      204,
+      160,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 890,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "L_HandFist_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Knuckles": {
+     "position": [
+      -0.0524,
+      0.3388,
+      0.033
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1321,
+    -0.0225,
+    -0.0984
+   ],
+   "boundsMax": [
+    0.1263,
+    0.3405,
+    0.2093
+   ],
+   "size": [
+    0.258,
+    0.363,
+    0.308
+   ],
+   "tris": 1990,
+   "origin": [
+    7.2041,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

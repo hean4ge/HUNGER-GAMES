@@ -1,0 +1,2732 @@
+{
+ "category": "Buildings",
+ "glb": "Buildings.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "RangerCabin",
+   "kind": "Building",
+   "tags": [
+    "Enterable",
+    "Woodland"
+   ],
+   "notes": "Stacked-log cabin. Door centre front (+Y), 2 front windows, loft window in the west gable. Loft over the west third (floor top z=10.9) reached by a TrussPart at LadderBase/LadderTop (visual wooden ladder included, collide off).",
+   "parts": [
+    {
+     "name": "RangerCabin_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      78,
+      54
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1108,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Logs_2",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      78,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 660,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Logs_3",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      101,
+      77,
+      53
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 964,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Logs_4",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      80,
+      56
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 852,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Logs_5",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      72,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 224,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 336,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      124,
+      95,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Planks_3",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      132,
+      100,
+      70
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      126,
+      122,
+      114
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Shingles",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      94,
+      85,
+      76
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 80,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Logs_6",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      74,
+      52
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 112,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      92,
+      62
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 592,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Shingles_2",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      88,
+      80,
+      72
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Shingles_3",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      88,
+      80,
+      72
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Shingles_4",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      98,
+      88,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 374,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      90,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1188,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Wood_4",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      82,
+      56
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      64,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Wood_5",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      126,
+      94,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 112,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Wood_6",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      126,
+      94,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 316,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_Wood_7",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      140,
+      106,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "LadderVisual"
+     ],
+     "tris": 224,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RangerCabin_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      122,
+      118,
+      110
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 752,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RangerCabin_DarkStone",
+     "role": "DarkStone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      80,
+      80,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "LadderBase": {
+     "position": [
+      -2.75,
+      1.0,
+      3.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LadderTop": {
+     "position": [
+      -2.75,
+      10.9,
+      3.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Door": {
+     "position": [
+      0.0,
+      1.0,
+      -8.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -14.62,
+    -0.0089,
+    -13.2
+   ],
+   "boundsMax": [
+    15.618,
+    24.17,
+    10.8136
+   ],
+   "size": [
+    30.238,
+    24.179,
+    24.014
+   ],
+   "tris": 8538,
+   "origin": [
+    14.62,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Watchtower",
+   "kind": "Building",
+   "tags": [
+    "Lookout"
+   ],
+   "notes": "Deck top z=22. Ladder well x 0.5..3.0, y -3.0..-0.5: place a 2x22x2 TrussPart (Transparency 1) between LadderBase and LadderTop; the wooden ladder mesh is visual only. Walk in through the open front (+Y) bottom bay.",
+   "parts": [
+    {
+     "name": "Watchtower_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      76,
+      54
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 304,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      84,
+      58
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1408,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      78,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 396,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      129,
+      100,
+      67
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 264,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      129,
+      94,
+      68
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 88,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Planks_3",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      123,
+      91,
+      61
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 88,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Planks_4",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      123,
+      92,
+      61
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 88,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      120,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 180,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_4",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      120,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 180,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_5",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      120,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 92,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_6",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      120,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 92,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Wood_7",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      80,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 528,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Watchtower_Shingles",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      86,
+      78,
+      70
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 16,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Watchtower_Shingles_2",
+     "role": "Shingles",
+     "robloxMaterial": "RoofShingles",
+     "rgb": [
+      96,
+      86,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 72,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Watchtower_Wood_8",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      72,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 196,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Watchtower_Banner",
+     "role": "Banner",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      198,
+      94,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 36,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Watchtower_Wood_9",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      140,
+      106,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "LadderVisual"
+     ],
+     "tris": 464,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "LadderBase": {
+     "position": [
+      1.75,
+      0.0,
+      1.75
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LadderTop": {
+     "position": [
+      1.75,
+      22.0,
+      1.75
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -7.0593,
+    -0.0061,
+    -7.0655
+   ],
+   "boundsMax": [
+    7.1666,
+    35.4,
+    7.1685
+   ],
+   "size": [
+    14.226,
+    35.406,
+    14.234
+   ],
+   "tris": 4668,
+   "origin": [
+    43.2973,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "RiverMill",
+   "kind": "Building",
+   "tags": [
+    "Enterable",
+    "Woodland",
+    "River"
+   ],
+   "notes": "Enterable stone ground floor (floor top z=0.4, door front-left). Put the WaterWheel asset at the WheelAxle attachment (same orientation) and spin it about X. The plank tailrace + water strip under the wheel is part of the mill.",
+   "parts": [
+    {
+     "name": "RiverMill_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      121,
+      118,
+      111
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 308,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      119,
+      118,
+      112
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Stone_3",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      123,
+      120,
+      113
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Stone_4",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      116,
+      114,
+      106
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      146,
+      140,
+      130
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1980,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      110,
+      82,
+      56
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Plaster",
+     "role": "Plaster",
+     "robloxMaterial": "Plaster",
+     "rgb": [
+      204,
+      194,
+      172
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 20,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      74,
+      56,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 988,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      118,
+      68,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_RoofTiles_2",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      118,
+      68,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_RoofTiles_3",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      128,
+      74,
+      54
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 424,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_RoofTiles_4",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      104,
+      60,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      116,
+      86,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 396,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_DarkPlanks_2",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      70,
+      82,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 88,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      74,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 88,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 84,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      72,
+      50
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 264,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 160,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Planks_3",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      98,
+      76,
+      56
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 100,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_WaterFill",
+     "role": "WaterFill",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      110,
+      160,
+      190
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 12,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "RiverMill_Wood_4",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      82,
+      56
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      140,
+      134,
+      126
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 104,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "RiverMill_Canvas",
+     "role": "Canvas",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      196,
+      182,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 192,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "WheelAxle": {
+     "position": [
+      13.6,
+      7.4,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Door": {
+     "position": [
+      -3.3,
+      0.4,
+      -8.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -13.7,
+    0.0,
+    -10.8381
+   ],
+   "boundsMax": [
+    16.7,
+    22.7509,
+    10.8381
+   ],
+   "size": [
+    30.4,
+    22.751,
+    21.676
+   ],
+   "tris": 5812,
+   "origin": [
+    70.164,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "WaterWheel",
+   "kind": "Mechanism",
+   "tags": [
+    "Spin"
+   ],
+   "notes": "Diameter 14. Pivot = axle centre at the origin, axle along X (Roblox X). Place at RiverMill.WheelAxle and rotate about the part's X axis. Below-zero extent is intentional.",
+   "parts": [
+    {
+     "name": "WaterWheel_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      80,
+      54
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1024,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "WaterWheel_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      122,
+      92,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 704,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "WaterWheel_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 272,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Axle": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -3.05,
+    -6.8823,
+    -6.8823
+   ],
+   "boundsMax": [
+    3.25,
+    6.8823,
+    6.8823
+   ],
+   "size": [
+    6.3,
+    13.765,
+    13.765
+   ],
+   "tris": 2000,
+   "origin": [
+    95.914,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Bridge",
+   "kind": "Building",
+   "tags": [
+    "Bridge",
+    "River"
+   ],
+   "notes": "36 x 8 timber arch bridge spanning Blender/Roblox X. Deck top z=0.95 at the ends, 3.35 at mid-span. Ends rest on stone abutments at z=0.",
+   "parts": [
+    {
+     "name": "Bridge_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      122,
+      90,
+      61
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bridge_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      127,
+      97,
+      67
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bridge_Planks_3",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      130,
+      99,
+      68
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bridge_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      74,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 784,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Bridge_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      118,
+      116,
+      110
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bridge_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      116,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 744,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Bridge_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      116,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 744,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {
+    "EndWest": {
+     "position": [
+      -18.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "EndEast": {
+     "position": [
+      18.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -19.5674,
+    -0.0328,
+    -5.5781
+   ],
+   "boundsMax": [
+    19.5575,
+    6.5433,
+    5.5606
+   ],
+   "size": [
+    39.125,
+    6.576,
+    11.139
+   ],
+   "tris": 4384,
+   "origin": [
+    124.7314,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "FishingShack",
+   "kind": "Building",
+   "tags": [
+    "Enterable",
+    "Lakeside"
+   ],
+   "notes": "12 x 10 plank shack on a low deck with a covered porch (front +Y). Floor top z=1.0. Rusty corrugated shed roof (high side at the front).",
+   "parts": [
+    {
+     "name": "FishingShack_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      118,
+      92,
+      66
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      84,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      72,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 168,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 72,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Planks_3",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      122,
+      92,
+      60
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 48,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Planks_4",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      128,
+      96,
+      69
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 60,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Planks_5",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      62
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 24,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      80,
+      62,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 524,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      126,
+      96,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 880,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Logs_2",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      76,
+      54
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Rust",
+     "role": "Rust",
+     "robloxMaterial": "CorrodedMetal",
+     "rgb": [
+      122,
+      82,
+      58
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 232,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_Rust_2",
+     "role": "Rust",
+     "robloxMaterial": "CorrodedMetal",
+     "rgb": [
+      108,
+      76,
+      60
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 116,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "FishingShack_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 156,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_DarkPlanks_2",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      70,
+      84,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      150,
+      128,
+      96
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 108,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Banner",
+     "role": "Banner",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      196,
+      88,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 108,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "FishingShack_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      150,
+      116,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 128,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Door": {
+     "position": [
+      -1.6,
+      1.0,
+      -5.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -6.78,
+    0.0,
+    -9.3
+   ],
+   "boundsMax": [
+    8.7153,
+    13.698,
+    6.1375
+   ],
+   "size": [
+    15.495,
+    13.698,
+    15.438
+   ],
+   "tris": 2792,
+   "origin": [
+    157.069,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Jetty",
+   "kind": "Building",
+   "tags": [
+    "Lakeside",
+    "Water"
+   ],
+   "notes": "24-stud pier along +Y (shore end at -Y, water end at +Y). Deck top z=3.0; sink the posts into the water/lake bed as needed.",
+   "parts": [
+    {
+     "name": "Jetty_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      120,
+      94,
+      68
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 1188,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Jetty_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      76,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 396,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Jetty_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      70,
+      56
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 616,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Jetty_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      76,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 264,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Jetty_Logs_2",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      72,
+      54
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Jetty_Logs_3",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      72,
+      54
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "Jetty_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 288,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "Jetty_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      126,
+      96,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "LadderVisual"
+     ],
+     "tris": 84,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "ShoreEnd": {
+     "position": [
+      0.0,
+      3.0,
+      12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "WaterEnd": {
+     "position": [
+      0.0,
+      3.0,
+      -12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -3.3228,
+    -0.0271,
+    -12.4
+   ],
+   "boundsMax": [
+    3.4,
+    5.0,
+    12.1
+   ],
+   "size": [
+    6.723,
+    5.027,
+    24.5
+   ],
+   "tris": 2924,
+   "origin": [
+    175.1068,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StiltHut",
+   "kind": "Building",
+   "tags": [
+    "Enterable",
+    "Swamp"
+   ],
+   "notes": "14 x 12 hut, floor top z=7.0 on log stilts. Porch on the front (+Y) under the thatch hood; the ramp leaves the porch's east end and lands at x=20.6 (z=0).",
+   "parts": [
+    {
+     "name": "StiltHut_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      112,
+      90,
+      66
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 12,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      80,
+      66,
+      52
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      78,
+      58
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      64,
+      46
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_DarkPlanks_2",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      81,
+      59,
+      43
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 20,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_DarkPlanks_3",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      86,
+      67,
+      47
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 48,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_DarkPlanks_4",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      83,
+      64,
+      44
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 48,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Thatch",
+     "role": "Thatch",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      158,
+      138,
+      88
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 124,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Thatch_2",
+     "role": "Thatch",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      158,
+      138,
+      88
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 124,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Thatch_3",
+     "role": "Thatch",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      150,
+      130,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 344,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "StiltHut_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      84,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 924,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "StiltHut_Logs_2",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      86,
+      70,
+      54
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 56,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Wood_3",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      92,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 364,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Wood_4",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      92,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 136,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Planks_2",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      118,
+      94,
+      68
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 660,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Logs_3",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      68,
+      52
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "tags": [],
+     "tris": 200,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Wood_5",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      92,
+      64
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 212,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "StiltHut_Reed",
+     "role": "Reed",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      130,
+      134,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 76,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Door": {
+     "position": [
+      0.0,
+      7.0,
+      -6.3
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "RampFoot": {
+     "position": [
+      20.6,
+      0.0,
+      -8.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -9.6655,
+    -0.021,
+    -12.1
+   ],
+   "boundsMax": [
+    20.533,
+    25.5482,
+    7.9
+   ],
+   "size": [
+    30.198,
+    25.569,
+    20.0
+   ],
+   "tris": 4448,
+   "origin": [
+    194.1725,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "WalkwaySegment",
+   "kind": "Building",
+   "tags": [
+    "Swamp",
+    "Walkway"
+   ],
+   "notes": "12-stud plank walkway along Y, deck top z=2.0. Chain segments end to end: EndB of one segment = EndA of the next (12 studs apart).",
+   "parts": [
+    {
+     "name": "WalkwaySegment_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      116,
+      92,
+      66
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 528,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "WalkwaySegment_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      76,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "WalkwaySegment_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      82,
+      68,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 112,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {
+    "EndA": {
+     "position": [
+      0.0,
+      2.0,
+      6.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "EndB": {
+     "position": [
+      0.0,
+      2.0,
+      -6.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.273,
+    0.014,
+    -6.0
+   ],
+   "boundsMax": [
+    2.2468,
+    2.0157,
+    6.0
+   ],
+   "size": [
+    4.52,
+    2.002,
+    12.0
+   ],
+   "tris": 816,
+   "origin": [
+    222.978,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

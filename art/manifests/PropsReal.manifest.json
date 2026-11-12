@@ -1,0 +1,1671 @@
+{
+ "category": "PropsReal",
+ "set": "BuildingsReal",
+ "glb": "PropsReal.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "surfaces": "Every part has a 'surface': textured PBR from the BR_ sheets, embedded in the GLB as baseColorTexture / normalTexture (OpenGL +Y, tangent space) / metallicRoughnessTexture, with TANGENT, NORMAL and TEXCOORD_0 on every primitive. The 3D importer turns them into a SurfaceAppearance. If its packed-map conversion is poor, build the SurfaceAppearance by hand from textures/BuildingsReal/: ColorMap = colorMap, NormalMap = normalMap, RoughnessMap = roughnessMap (8-bit grayscale), MetalnessMap = metalnessMap (only parts that list one; leave it empty elsewhere), AlphaMode = alphaMode (glass only, with MeshPart.Transparency = meshTransparency; every other part ignores alpha). All parts are closed solids: DoubleSided false. 'rgb' is the average texture colour (MeshPart.Color fallback), 'robloxMaterial' the fallback material if no SurfaceAppearance is applied.",
+ "uploads": {
+  "importer": "the GLB embeds 15 images: BR_<Sheet>_Color / _Normal / _MR for Wood, Log, Stone, Shake, Kit (both BuildingsReal.glb and PropsReal.glb embed the same files - upload each PNG once and share the ids)",
+  "manual": "16 images: BR_<Sheet>_Color, BR_<Sheet>_Normal, BR_<Sheet>_Roughness (5 sheets) + BR_Kit_Metal"
+ },
+ "texelDensity": {
+  "Wood": {
+   "board_silver": 160.0,
+   "board_grey": 160.0,
+   "board_brown": 160.0,
+   "board_damp": 160.0,
+   "beam": 160.0,
+   "board_lichen": 160.0,
+   "board_crate": 160.0,
+   "end_sq_0": 160.0,
+   "end_sq_1": 160.0,
+   "end_sq_2": 160.0,
+   "end_sq_3": 160.0,
+   "end_sq_4": 160.0,
+   "end_sq_5": 160.0,
+   "end_sq_6": 160.0,
+   "end_sq_7": 160.0
+  },
+  "Log": {
+   "log_wall": 164.0,
+   "pole": 176.0,
+   "bark": 196.0,
+   "split": 150.0,
+   "rope": 112.0,
+   "end_0": 100.0,
+   "end_1": 100.0,
+   "end_2": 100.0,
+   "end_3": 100.0,
+   "end_4": 100.0,
+   "end_5": 100.0,
+   "end_fresh_0": 100.0,
+   "end_fresh_1": 100.0
+  },
+  "Stone": {
+   "masonry": 200.0,
+   "masonry_foot": 200.0,
+   "rock": 200.0,
+   "rock_burnt": 140.0,
+   "chinking": 200.0,
+   "concrete": 160.0,
+   "ash": 120.0
+  },
+  "Shake": {
+   "course_0": 160.0,
+   "course_1": 160.0,
+   "course_2": 160.0,
+   "course_3": 160.0,
+   "course_4": 160.0,
+   "course_5": 160.0,
+   "course_6": 160.0,
+   "butt": 160.0,
+   "moss": 160.0
+  },
+  "Kit": {
+   "canvas": 128.0,
+   "iron": 200.0,
+   "tin": 200.0,
+   "wire": 160.0,
+   "char": 180.0,
+   "ember": 180.0,
+   "globe": 300.0,
+   "blanket": 110.0,
+   "glass": 160.0,
+   "leather": 300.0,
+   "ticking": 110.0
+  }
+ },
+ "texelDensityUnits": "pixels per stud on the 1024 sheets (logs 164, boards / shakes 160, masonry 200, bark 196, canvas 128; end-grain discs 100)",
+ "textureSheets": {
+  "BR_Kit": {
+   "color": "BR_Kit_Color.png",
+   "normal": "BR_Kit_Normal.png",
+   "mr": "glb_only/BR_Kit_MR.png",
+   "roughness": "BR_Kit_Roughness.png",
+   "metal": "BR_Kit_Metal.png"
+  },
+  "BR_Log": {
+   "color": "BR_Log_Color.png",
+   "normal": "BR_Log_Normal.png",
+   "mr": "glb_only/BR_Log_MR.png",
+   "roughness": "BR_Log_Roughness.png"
+  },
+  "BR_Stone": {
+   "color": "BR_Stone_Color.png",
+   "normal": "BR_Stone_Normal.png",
+   "mr": "glb_only/BR_Stone_MR.png",
+   "roughness": "BR_Stone_Roughness.png"
+  },
+  "BR_Wood": {
+   "color": "BR_Wood_Color.png",
+   "normal": "BR_Wood_Normal.png",
+   "mr": "glb_only/BR_Wood_MR.png",
+   "roughness": "BR_Wood_Roughness.png"
+  }
+ },
+ "assets": [
+  {
+   "name": "Tent",
+   "kind": "Prop",
+   "tags": [
+    "Camp"
+   ],
+   "notes": "Weathered canvas A-frame on a ridge pole and two uprights. Door at the front (+Y): left flap rolled and tied, right flap staked open. Canvas collides (Default fidelity); poles, stakes and guy lines do not.",
+   "parts": [
+    {
+     "name": "Tent_Canvas",
+     "role": "Canvas",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      147,
+      135,
+      103
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1016,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "canvas"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Tent_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      107,
+      93
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 392,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Wood",
+      "colorMap": "BR_Wood_Color.png",
+      "normalMap": "BR_Wood_Normal.png",
+      "roughnessMap": "BR_Wood_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Wood_MR.png",
+      "regions": [
+       "board_grey",
+       "end_sq_2",
+       "end_sq_4",
+       "end_sq_5",
+       "end_sq_6"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Wood_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Wood_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Wood_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Tent_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      123,
+      105,
+      79
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 464,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Log",
+      "colorMap": "BR_Log_Color.png",
+      "normalMap": "BR_Log_Normal.png",
+      "roughnessMap": "BR_Log_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Log_MR.png",
+      "regions": [
+       "rope"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Log_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Log_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Log_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {
+    "Entrance": {
+     "position": [
+      0.0,
+      0.0,
+      -4.2
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -3.5117,
+    -0.0292,
+    -6.4572
+   ],
+   "boundsMax": [
+    3.5297,
+    4.87,
+    6.4142
+   ],
+   "size": [
+    7.041,
+    4.899,
+    12.871
+   ],
+   "tris": 1872,
+   "origin": [
+    3.5117,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Campfire",
+   "kind": "Prop",
+   "tags": [
+    "Camp",
+    "Fire"
+   ],
+   "notes": "Fire ring of soot-blackened stones round an ash bed, charred logs and a coal bed. Fire particles / PointLight / crackle sound at FireCenter. Campfire_Ember is the emissive coal part (drive SurfaceAppearance EmissiveStrength or swap to Neon).",
+   "parts": [
+    {
+     "name": "Campfire_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      93,
+      90,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1128,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Stone",
+      "colorMap": "BR_Stone_Color.png",
+      "normalMap": "BR_Stone_Normal.png",
+      "roughnessMap": "BR_Stone_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Stone_MR.png",
+      "regions": [
+       "ash",
+       "rock",
+       "rock_burnt"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Stone_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Stone_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Stone_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Campfire_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      43,
+      40,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 190,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "char"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Campfire_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 432,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "ember"
+      ],
+      "doubleSided": false,
+      "emissive": {
+       "glTF": "emissiveTexture = colorMap, strength 3",
+       "roblox": "Material Neon with Color (255,128,48) + a warm PointLight at the asset's light attachment (v1 convention), or keep the SurfaceAppearance and add EmissiveStrength 1-3 / EmissiveTint (255,150,80) if the importer kept the emissive map"
+      }
+     },
+     "notes": "Emissive coals: SurfaceAppearance EmissiveStrength 1-3 (night higher); no collision, no shadow.",
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": null,
+     "neon": true,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {
+    "FireCenter": {
+     "position": [
+      0.0,
+      0.6,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -1.8896,
+    -0.0423,
+    -1.8679
+   ],
+   "boundsMax": [
+    1.8416,
+    0.6829,
+    1.8271
+   ],
+   "size": [
+    3.731,
+    0.725,
+    3.695
+   ],
+   "tris": 1750,
+   "origin": [
+    16.9306,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Woodpile",
+   "kind": "Prop",
+   "tags": [
+    "Camp",
+    "Cover"
+   ],
+   "notes": "Split firewood stacked between pole stakes on two ground rails, end grain to the front (+Y); chopping round with a split billet beside it. One Box collider.",
+   "parts": [
+    {
+     "name": "Woodpile_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      110,
+      97,
+      82
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1438,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Log",
+      "colorMap": "BR_Log_Color.png",
+      "normalMap": "BR_Log_Normal.png",
+      "roughnessMap": "BR_Log_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Log_MR.png",
+      "regions": [
+       "bark",
+       "end_0",
+       "end_1",
+       "end_2",
+       "end_3",
+       "end_4",
+       "end_5",
+       "end_fresh_0",
+       "end_fresh_1",
+       "pole",
+       "split"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Log_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Log_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Log_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.2508,
+    -0.047,
+    -2.7502
+   ],
+   "boundsMax": [
+    3.3043,
+    3.0625,
+    1.2956
+   ],
+   "size": [
+    6.555,
+    3.109,
+    4.046
+   ],
+   "tris": 1438,
+   "origin": [
+    30.0228,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Barrel",
+   "kind": "Prop",
+   "tags": [
+    "Container",
+    "Cover"
+   ],
+   "notes": "Coopered oak barrel, 16 staves, 4 forged iron hoops, recessed boarded head.",
+   "parts": [
+    {
+     "name": "Barrel_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      132,
+      115,
+      95
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 286,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Wood",
+      "colorMap": "BR_Wood_Color.png",
+      "normalMap": "BR_Wood_Normal.png",
+      "roughnessMap": "BR_Wood_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Wood_MR.png",
+      "regions": [
+       "board_brown",
+       "board_damp"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Wood_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Wood_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Wood_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Barrel_Rust",
+     "role": "Rust",
+     "robloxMaterial": "CorrodedMetal",
+     "rgb": [
+      92,
+      65,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 768,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "iron"
+      ],
+      "doubleSided": false,
+      "metalnessMap": "BR_Kit_Metal.png"
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": "textures/BuildingsReal/BR_Kit_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.1671,
+    0.0,
+    -1.155
+   ],
+   "boundsMax": [
+    1.155,
+    3.2,
+    1.1668
+   ],
+   "size": [
+    2.322,
+    3.2,
+    2.322
+   ],
+   "tris": 1054,
+   "origin": [
+    42.4941,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Lantern",
+   "kind": "Prop",
+   "tags": [
+    "Light"
+   ],
+   "notes": "Tin hurricane lantern (real size, 1.4 tall with the bail up). Hang it from HangPoint; put a warm PointLight (Range 16-24, Brightness 1-1.5, (255,170,100)) at Glow. Lantern_Glass is the sooty globe (AlphaMode Transparency, MeshPart.Transparency 0.05-0.2); Lantern_Ember is the flame (emissive). No collision.",
+   "parts": [
+    {
+     "name": "Lantern_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      99,
+      84,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 1004,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "iron",
+       "tin"
+      ],
+      "doubleSided": false,
+      "metalnessMap": "BR_Kit_Metal.png"
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": "textures/BuildingsReal/BR_Kit_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Lantern_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      187,
+      192,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 288,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "globe"
+      ],
+      "doubleSided": false,
+      "alphaMode": "Transparency",
+      "meshTransparency": 0.15
+     },
+     "notes": "Sooty globe glass: AlphaMode Transparency with MeshPart.Transparency 0.05-0.2 (blended).",
+     "transparency": 0.15,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Lantern_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 52,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "ember"
+      ],
+      "doubleSided": false,
+      "emissive": {
+       "glTF": "emissiveTexture = colorMap, strength 3",
+       "roblox": "Material Neon with Color (255,128,48) + a warm PointLight at the asset's light attachment (v1 convention), or keep the SurfaceAppearance and add EmissiveStrength 1-3 / EmissiveTint (255,150,80) if the importer kept the emissive map"
+      }
+     },
+     "notes": "Wick flame: emissive; hide it when the lantern is out.",
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": null,
+     "neon": true,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {
+    "HangPoint": {
+     "position": [
+      0.0,
+      1.37,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Glow": {
+     "position": [
+      0.0,
+      0.42,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.3177,
+    0.0,
+    -0.2827
+   ],
+   "boundsMax": [
+    0.3177,
+    1.377,
+    0.2827
+   ],
+   "size": [
+    0.635,
+    1.377,
+    0.565
+   ],
+   "tris": 1344,
+   "origin": [
+    51.9667,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "CratePile",
+   "kind": "Prop",
+   "tags": [
+    "Cover"
+   ],
+   "notes": "Four weathered pine supply crates (board faces, corner posts and rim battens). One Box collider for the whole pile (cover).",
+   "parts": [
+    {
+     "name": "CratePile_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      120,
+      107,
+      93
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1044,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Wood",
+      "colorMap": "BR_Wood_Color.png",
+      "normalMap": "BR_Wood_Normal.png",
+      "roughnessMap": "BR_Wood_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Wood_MR.png",
+      "regions": [
+       "board_crate",
+       "board_grey",
+       "end_sq_0",
+       "end_sq_1",
+       "end_sq_2",
+       "end_sq_3",
+       "end_sq_4",
+       "end_sq_5",
+       "end_sq_6",
+       "end_sq_7"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Wood_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Wood_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Wood_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -3.1354,
+    0.0,
+    -3.6857
+   ],
+   "boundsMax": [
+    2.971,
+    4.697,
+    1.6761
+   ],
+   "size": [
+    6.106,
+    4.697,
+    5.362
+   ],
+   "tris": 1044,
+   "origin": [
+    63.4194,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "FenceSegment",
+   "kind": "Prop",
+   "tags": [
+    "Fence"
+   ],
+   "notes": "8-stud split-rail segment along X: paired-post style, posts at x = +-3.8, three split rails running past the posts so neighbours (placed 8 apart) overlap. One Box collider.",
+   "parts": [
+    {
+     "name": "FenceSegment_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      96,
+      83
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 198,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Log",
+      "colorMap": "BR_Log_Color.png",
+      "normalMap": "BR_Log_Normal.png",
+      "roughnessMap": "BR_Log_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Log_MR.png",
+      "regions": [
+       "bark",
+       "end_2",
+       "end_4",
+       "end_5",
+       "pole",
+       "split"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Log_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Log_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Log_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.2547,
+    -0.0221,
+    -0.2968
+   ],
+   "boundsMax": [
+    4.2549,
+    4.2113,
+    0.3284
+   ],
+   "size": [
+    8.51,
+    4.233,
+    0.625
+   ],
+   "tris": 198,
+   "origin": [
+    78.6447,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Sign",
+   "kind": "Prop",
+   "tags": [
+    "Sign"
+   ],
+   "notes": "Weathered hewn post with a blank two-plank board nailed to its front. SurfaceGui on Sign_Planks, Face Front, at SignFace (board centre, 4.4 x 1.5).",
+   "parts": [
+    {
+     "name": "Sign_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      122,
+      111,
+      99
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 140,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Wood",
+      "colorMap": "BR_Wood_Color.png",
+      "normalMap": "BR_Wood_Normal.png",
+      "roughnessMap": "BR_Wood_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Wood_MR.png",
+      "regions": [
+       "beam",
+       "board_grey",
+       "board_silver",
+       "end_sq_0",
+       "end_sq_3",
+       "end_sq_6",
+       "end_sq_7"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Wood_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Wood_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Wood_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    },
+    {
+     "name": "Sign_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      112,
+      109,
+      101
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 432,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Stone",
+      "colorMap": "BR_Stone_Color.png",
+      "normalMap": "BR_Stone_Normal.png",
+      "roughnessMap": "BR_Stone_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Stone_MR.png",
+      "regions": [
+       "rock"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Stone_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Stone_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Stone_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {
+    "SignFace": {
+     "position": [
+      0.0,
+      5.36,
+      -0.386
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.205,
+    -0.0367,
+    -0.7516
+   ],
+   "boundsMax": [
+    2.205,
+    6.13,
+    0.7263
+   ],
+   "size": [
+    4.41,
+    6.167,
+    1.478
+   ],
+   "tris": 572,
+   "origin": [
+    93.105,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "Bedroll",
+   "kind": "Prop",
+   "tags": [
+    "Camp"
+   ],
+   "notes": "Canvas groundsheet with a wool blanket laid out on it, top corner turned back, the head end rolled into a pillow and strapped. Head toward -Y. Walk-over: no collision.",
+   "parts": [
+    {
+     "name": "Bedroll_Cloth",
+     "role": "Cloth",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      113,
+      80,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 824,
+     "canQuery": false,
+     "canTouch": false,
+     "surface": {
+      "sheet": "BR_Kit",
+      "colorMap": "BR_Kit_Color.png",
+      "normalMap": "BR_Kit_Normal.png",
+      "roughnessMap": "BR_Kit_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Kit_MR.png",
+      "regions": [
+       "blanket",
+       "canvas",
+       "leather"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Kit_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Kit_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Kit_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -1.2513,
+    -0.0128,
+    -3.3002
+   ],
+   "boundsMax": [
+    1.2511,
+    0.731,
+    3.3003
+   ],
+   "size": [
+    2.502,
+    0.744,
+    6.601
+   ],
+   "tris": 824,
+   "origin": [
+    104.5613,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  },
+  {
+   "name": "LogBench",
+   "kind": "Prop",
+   "tags": [
+    "Camp",
+    "Seat"
+   ],
+   "notes": "Half-log bench on two log rounds. Seat top 1.66. Seat_1 / Seat_2 on the seat, facing front (+Y Blender = Roblox -Z).",
+   "parts": [
+    {
+     "name": "LogBench_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      116,
+      98,
+      78
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "tags": [],
+     "tris": 232,
+     "canQuery": true,
+     "canTouch": true,
+     "surface": {
+      "sheet": "BR_Log",
+      "colorMap": "BR_Log_Color.png",
+      "normalMap": "BR_Log_Normal.png",
+      "roughnessMap": "BR_Log_Roughness.png",
+      "metalRoughnessMap": "glb_only/BR_Log_MR.png",
+      "regions": [
+       "bark",
+       "end_4",
+       "end_fresh_0",
+       "end_fresh_1",
+       "pole"
+      ],
+      "doubleSided": false
+     },
+     "transparency": 0,
+     "doubleSided": false,
+     "surfaceAppearance": {
+      "colorMap": "textures/BuildingsReal/BR_Log_Color.png",
+      "normalMap": "textures/BuildingsReal/BR_Log_Normal.png",
+      "roughnessMap": "textures/BuildingsReal/BR_Log_Roughness.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "neon": false,
+     "backFacesInMesh": false
+    }
+   ],
+   "attachments": {
+    "Seat_1": {
+     "position": [
+      -1.7,
+      1.66,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      1.6,
+      1.66,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -3.4,
+    -0.0176,
+    -0.6818
+   ],
+   "boundsMax": [
+    3.4,
+    1.6602,
+    0.6793
+   ],
+   "size": [
+    6.8,
+    1.678,
+    1.361
+   ],
+   "tris": 232,
+   "origin": [
+    117.212,
+    0.0,
+    0.0
+   ],
+   "glb": "PropsReal.glb"
+  }
+ ],
+ "warnings": [],
+ "schema": "LS-Real-1",
+ "glbs": [
+  {
+   "file": "PropsReal.glb",
+   "bytes": 13017060,
+   "sizeMB": 13.02,
+   "assets": [
+    "Tent",
+    "Campfire",
+    "Woodpile",
+    "Barrel",
+    "Lantern",
+    "CratePile",
+    "FenceSegment",
+    "Sign",
+    "Bedroll",
+    "LogBench"
+   ],
+   "primitives": 18,
+   "maxMeshTris": 1438,
+   "embeddedImages": [
+    "BR_Wood_Normal",
+    "BR_Wood_Color",
+    "BR_Wood_MR",
+    "BR_Kit_Normal",
+    "BR_Kit_Color",
+    "BR_Kit_MR",
+    "BR_Stone_Normal",
+    "BR_Stone_Color",
+    "BR_Stone_MR",
+    "BR_Log_Normal",
+    "BR_Log_Color",
+    "BR_Log_MR"
+   ],
+   "alphaMask": [],
+   "alphaBlend": [
+    "BR_Kit_Glass"
+   ]
+  }
+ ],
+ "textureFolder": "textures/BuildingsReal",
+ "uploadTextures": [
+  {
+   "file": "textures/BuildingsReal/BR_Kit_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Tent",
+    "Campfire",
+    "Barrel",
+    "Lantern",
+    "Bedroll"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 1454252
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Kit_Metal.png",
+   "kind": "metalness",
+   "usedBy": [
+    "Barrel",
+    "Lantern"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 30770
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Kit_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Tent",
+    "Campfire",
+    "Barrel",
+    "Lantern",
+    "Bedroll"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1307329
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Kit_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Tent",
+    "Campfire",
+    "Barrel",
+    "Lantern",
+    "Bedroll"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 67881
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Log_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Tent",
+    "Woodpile",
+    "FenceSegment",
+    "LogBench"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1118040
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Log_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Tent",
+    "Woodpile",
+    "FenceSegment",
+    "LogBench"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1538154
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Log_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Tent",
+    "Woodpile",
+    "FenceSegment",
+    "LogBench"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 58958
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Stone_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Campfire",
+    "Sign"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1495043
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Stone_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Campfire",
+    "Sign"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2222173
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Stone_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Campfire",
+    "Sign"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 143183
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Wood_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Tent",
+    "Barrel",
+    "CratePile",
+    "Sign"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1040617
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Wood_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Tent",
+    "Barrel",
+    "CratePile",
+    "Sign"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1427398
+  },
+  {
+   "file": "textures/BuildingsReal/BR_Wood_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Tent",
+    "Barrel",
+    "CratePile",
+    "Sign"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 37752
+  }
+ ],
+ "glbOnlyTextures": [
+  "textures/BuildingsReal/glb_only/BR_Kit_MR.png",
+  "textures/BuildingsReal/glb_only/BR_Log_MR.png",
+  "textures/BuildingsReal/glb_only/BR_Shake_MR.png",
+  "textures/BuildingsReal/glb_only/BR_Stone_MR.png",
+  "textures/BuildingsReal/glb_only/BR_Wood_MR.png"
+ ],
+ "sharesTexturesWith": "BuildingsReal",
+ "adCheck": {
+  "problems": [],
+  "glbs": 1,
+  "uploadImages": 13,
+  "totalTris": 10328,
+  "assets": 10
+ }
+}

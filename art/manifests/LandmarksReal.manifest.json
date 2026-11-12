@@ -1,0 +1,4061 @@
+{
+ "category": "LandmarksReal",
+ "glb": "LandmarksReal.glb",
+ "units": "1 Blender unit = 1 Roblox stud (1 stud ~ 0.33 m)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "textureFolder": "textures/LandmarksReal",
+ "textures": [
+  {
+   "file": "LR_Granite_Color.png",
+   "material": "LR_Granite",
+   "map": "color",
+   "colorSpace": "sRGB",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB base colour (no alpha)",
+   "upload": true,
+   "bytes": 1679314
+  },
+  {
+   "file": "LR_Granite_Normal.png",
+   "material": "LR_Granite",
+   "map": "normal",
+   "colorSpace": "Linear",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB tangent-space normal, OpenGL (+Y up), MikkTSpace",
+   "upload": true,
+   "bytes": 1469675
+  },
+  {
+   "file": "LR_Granite_Rough.png",
+   "material": "LR_Granite",
+   "map": "rough",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale roughness (Roblox-ready: authored + 0.08)",
+   "upload": true,
+   "bytes": 174092
+  },
+  {
+   "file": "glb_only/LR_Granite_MR.png",
+   "material": "LR_Granite",
+   "map": "mr",
+   "colorSpace": "Linear",
+   "size": [
+    256,
+    256
+   ],
+   "channels": "glTF metallicRoughness packing (R = G = roughness, B = metalness); embedded in the GLB - do not upload separately",
+   "upload": false,
+   "bytes": 56382
+  },
+  {
+   "file": "LR_StoneTrim_Color.png",
+   "material": "LR_StoneTrim",
+   "map": "color",
+   "colorSpace": "sRGB",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB base colour (no alpha)",
+   "upload": true,
+   "bytes": 1692875
+  },
+  {
+   "file": "LR_StoneTrim_Normal.png",
+   "material": "LR_StoneTrim",
+   "map": "normal",
+   "colorSpace": "Linear",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB tangent-space normal, OpenGL (+Y up), MikkTSpace",
+   "upload": true,
+   "bytes": 1538238
+  },
+  {
+   "file": "LR_StoneTrim_Rough.png",
+   "material": "LR_StoneTrim",
+   "map": "rough",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale roughness (Roblox-ready: authored + 0.08)",
+   "upload": true,
+   "bytes": 157549
+  },
+  {
+   "file": "glb_only/LR_StoneTrim_MR.png",
+   "material": "LR_StoneTrim",
+   "map": "mr",
+   "colorSpace": "Linear",
+   "size": [
+    256,
+    256
+   ],
+   "channels": "glTF metallicRoughness packing (R = G = roughness, B = metalness); embedded in the GLB - do not upload separately",
+   "upload": false,
+   "bytes": 53482
+  },
+  {
+   "file": "LR_Wood_Color.png",
+   "material": "LR_Wood",
+   "map": "color",
+   "colorSpace": "sRGB",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB base colour (no alpha)",
+   "upload": true,
+   "bytes": 1288550
+  },
+  {
+   "file": "LR_Wood_Normal.png",
+   "material": "LR_Wood",
+   "map": "normal",
+   "colorSpace": "Linear",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB tangent-space normal, OpenGL (+Y up), MikkTSpace",
+   "upload": true,
+   "bytes": 1547535
+  },
+  {
+   "file": "LR_Wood_Rough.png",
+   "material": "LR_Wood",
+   "map": "rough",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale roughness (Roblox-ready: authored + 0.08)",
+   "upload": true,
+   "bytes": 144639
+  },
+  {
+   "file": "glb_only/LR_Wood_MR.png",
+   "material": "LR_Wood",
+   "map": "mr",
+   "colorSpace": "Linear",
+   "size": [
+    256,
+    256
+   ],
+   "channels": "glTF metallicRoughness packing (R = G = roughness, B = metalness); embedded in the GLB - do not upload separately",
+   "upload": false,
+   "bytes": 43482
+  },
+  {
+   "file": "LR_Iron_Color.png",
+   "material": "LR_Iron",
+   "map": "color",
+   "colorSpace": "sRGB",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB base colour (no alpha)",
+   "upload": true,
+   "bytes": 1234116
+  },
+  {
+   "file": "LR_Iron_Normal.png",
+   "material": "LR_Iron",
+   "map": "normal",
+   "colorSpace": "Linear",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB tangent-space normal, OpenGL (+Y up), MikkTSpace",
+   "upload": true,
+   "bytes": 1206752
+  },
+  {
+   "file": "LR_Iron_Rough.png",
+   "material": "LR_Iron",
+   "map": "rough",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale roughness (Roblox-ready: authored + 0.08)",
+   "upload": true,
+   "bytes": 179815
+  },
+  {
+   "file": "LR_Iron_Metal.png",
+   "material": "LR_Iron",
+   "map": "metal",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale metalness",
+   "upload": true,
+   "bytes": 72241
+  },
+  {
+   "file": "glb_only/LR_Iron_MR.png",
+   "material": "LR_Iron",
+   "map": "mr",
+   "colorSpace": "Linear",
+   "size": [
+    256,
+    256
+   ],
+   "channels": "glTF metallicRoughness packing (R = G = roughness, B = metalness); embedded in the GLB - do not upload separately",
+   "upload": false,
+   "bytes": 95429
+  },
+  {
+   "file": "LR_Misc_Color.png",
+   "material": "LR_Misc",
+   "map": "color",
+   "colorSpace": "sRGB",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB base colour (no alpha)",
+   "upload": true,
+   "bytes": 1099808
+  },
+  {
+   "file": "LR_Misc_Normal.png",
+   "material": "LR_Misc",
+   "map": "normal",
+   "colorSpace": "Linear",
+   "size": [
+    1024,
+    1024
+   ],
+   "channels": "RGB tangent-space normal, OpenGL (+Y up), MikkTSpace",
+   "upload": true,
+   "bytes": 982209
+  },
+  {
+   "file": "LR_Misc_Rough.png",
+   "material": "LR_Misc",
+   "map": "rough",
+   "colorSpace": "Linear",
+   "size": [
+    512,
+    512
+   ],
+   "channels": "8-bit grayscale roughness (Roblox-ready: authored + 0.08)",
+   "upload": true,
+   "bytes": 146069
+  },
+  {
+   "file": "glb_only/LR_Misc_MR.png",
+   "material": "LR_Misc",
+   "map": "mr",
+   "colorSpace": "Linear",
+   "size": [
+    256,
+    256
+   ],
+   "channels": "glTF metallicRoughness packing (R = G = roughness, B = metalness); embedded in the GLB - do not upload separately",
+   "upload": false,
+   "bytes": 48596
+  }
+ ],
+ "glbCheck": {
+  "primitives": 75,
+  "primitivesWithTangent": 75,
+  "primitivesMissingTangent": [],
+  "attributeSets": [
+   "NORMAL,POSITION,TANGENT,TEXCOORD_0"
+  ],
+  "materials": [
+   {
+    "name": "LR_Misc",
+    "baseColorTexture": true,
+    "metallicRoughnessTexture": true,
+    "normalTexture": true
+   },
+   {
+    "name": "LR_Collider",
+    "baseColorTexture": false,
+    "metallicRoughnessTexture": false,
+    "normalTexture": false
+   },
+   {
+    "name": "LR_Iron",
+    "baseColorTexture": true,
+    "metallicRoughnessTexture": true,
+    "normalTexture": true
+   },
+   {
+    "name": "LR_Granite",
+    "baseColorTexture": true,
+    "metallicRoughnessTexture": true,
+    "normalTexture": true
+   },
+   {
+    "name": "LR_StoneTrim",
+    "baseColorTexture": true,
+    "metallicRoughnessTexture": true,
+    "normalTexture": true
+   },
+   {
+    "name": "LR_Wood",
+    "baseColorTexture": true,
+    "metallicRoughnessTexture": true,
+    "normalTexture": true
+   },
+   {
+    "name": "LR_Ember",
+    "baseColorTexture": false,
+    "metallicRoughnessTexture": false,
+    "normalTexture": false
+   }
+  ],
+  "images": [
+   "LR_Misc_Normal",
+   "LR_Misc_Color",
+   "LR_Misc_MR",
+   "LR_Iron_Normal",
+   "LR_Iron_Color",
+   "LR_Iron_MR",
+   "LR_Granite_Normal",
+   "LR_Granite_Color",
+   "LR_Granite_MR",
+   "LR_StoneTrim_Normal",
+   "LR_StoneTrim_Color",
+   "LR_StoneTrim_MR",
+   "LR_Wood_Normal",
+   "LR_Wood_Color",
+   "LR_Wood_MR"
+  ],
+  "bytes": 19624564
+ },
+ "notes": [
+  "Geometry: import LandmarksReal.glb (3D Importer or Open Cloud Model). Each asset root arrives as a Model of MeshParts named <Asset>_<Role>[_n]. Re-centre with the asset 'origin' (Model.WorldPivot = CFrame.new(origin), then PivotTo(CFrame.new())) as for every other category; boundsMin/boundsMax are relative to that pivot.",
+  "Surfaces: every textured part has ONE SurfaceAppearance built from its 'surfaceAppearance' block: ColorMap, NormalMap (OpenGL +Y, MikkTSpace tangents are in the GLB), RoughnessMap (8-bit grayscale) and, for LR_Iron parts only, MetalnessMap (8-bit grayscale). Upload each PNG of textures/LandmarksReal ONCE and share the ids: 5 colour + 5 normal + 5 roughness + 1 metalness = 16 images. The *_MR.png files are the glTF metallicRoughness packing embedded in the GLB (256 px); never upload them. Clear any importer-created TextureID. alphaMode null = leave the default: no LandmarksReal image has an alpha channel. 'rgb' is the texture average (fallback Color).",
+  "Roughness maps are Roblox-ready: authored roughness + 0.08 (LookDevPlaybook s.11, Roblox renders glossier than Blender). Roughness/metalness are 512 px (half the colour size, as the playbook recommends).",
+  "Tiling: the stone, wood and iron sheets are trim/tile sheets; UVs run outside 0..1 along U (and both ways on the granite tile), so the samplers must repeat (glTF default REPEAT). Check one wall in Studio before mass placement.",
+  "Collision: visual parts never collide (CanCollide/CanQuery/CanTouch false). Parts with role 'Collider' carry all collision and raycasts: Transparency 1, CastShadow false, CanCollide/CanQuery/CanTouch true, CollisionFidelity as listed (CollisionFidelity can only be set at edit time). They are simple convex pieces, so walkable steps and decks stay walkable and every doorway, alcove and launch-plate opening stays open. If Studio's decomposition ever fills an opening, split that Collider by its islands into separate parts.",
+  "Ember parts (role Ember: Spire_Ember, Plinth_Ember, Brazier_Ember, Pavilion_Ember, LobbyGate_Ember): Material Neon, Color (255,128,48), no SurfaceAppearance, CastShadow false. Pair each with a real light: Beacon (Spire), Fire (Brazier) and Lantern (Pavilion, LobbyGate) attachments.",
+  "Launch plates: SpirePlatform attachments Plate_1..Plate_24 (plaza surface at the 24 openings, LookVector toward the Spire): pivot one Plinth on each. Plinth origin = plaza surface (tread y = 1.5 above it, Stand attachment); its ram reaches 12.3 below the plaza top so it fills the granite tube while the plate rises by LaunchDepth. Carve the terrain under the 24 tubes (radius 3.5, from plaza y = 0.6 down to y = -11.6), or the plate sinks into terrain when lowered.",
+  "Spire + SpirePlatform: same origin, unrotated, at the arena centre; the plaza top (0.6) is flush with the Spire's first tread. Spire slit runs along Roblox Z (sky shows through it from north and south)."
+ ],
+ "assets": [
+  {
+   "name": "Spire",
+   "kind": "Landmark",
+   "tags": [
+    "Spire",
+    "Landmark"
+   ],
+   "notes": "Hero landmark at the arena centre (origin = arena centre, base on the plaza at y = 0). 'The Cleft': dressed granite tower on a walkable stepped octagon (40 across; 1-stud risers, 2-stud treads, terrace at 3.6), a socle with four gabled alcoves (CrateSlot_1..4 on the alcove floors, LookVector out of the alcove), four buttresses on the diagonals, then a tapering monolith split down its upper half (slit along Roblox Z, so the sky shows through from the front/back), clamped by three riveted iron straps, an iron collar and a forged fire basket. Visual parts are non-colliding; the Collider parts (Transparency 1) carry collision and queries. Spire_Ember = glowing coal bed (Neon, no collision, no shadow): parent the beacon PointLight and fire/smoke emitters to attachment Beacon.",
+   "origin": [
+    20.0108,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -20.0108,
+    0.0,
+    -20.0114
+   ],
+   "boundsMax": [
+    20.0119,
+    58.162,
+    20.0099
+   ],
+   "size": [
+    40.023,
+    58.162,
+    40.021
+   ],
+   "tris": 22985,
+   "colliderTris": 644,
+   "parts": [
+    {
+     "name": "Spire_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 11174,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "dressed granite (tile + trim)",
+     "neon": false
+    },
+    {
+     "name": "Spire_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 4355,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "dressed granite (tile + trim)",
+     "neon": false
+    },
+    {
+     "name": "Spire_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      132,
+      128,
+      120
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 324,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "joint backing, only visible through the joints",
+     "neon": false
+    },
+    {
+     "name": "Spire_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 4952,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "straps, collar, fire basket",
+     "neon": false
+    },
+    {
+     "name": "Spire_Basalt",
+     "role": "Basalt",
+     "robloxMaterial": "Basalt",
+     "rgb": [
+      40,
+      38,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 2100,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "charcoal lumps on the coal bed",
+     "neon": false
+    },
+    {
+     "name": "Spire_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 80,
+     "material": "LR_Ember",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "glowing coal bed: Neon (255,128,48), no collision, no shadow",
+     "neon": true
+    },
+    {
+     "name": "Spire_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 192,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "steps, terrace and buttresses: 4 octagonal tiers + 4 wedges (walkable)",
+     "neon": false
+    },
+    {
+     "name": "Spire_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 312,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "socle with the four open alcoves (convex pieces), cornice",
+     "neon": false
+    },
+    {
+     "name": "Spire_Collider_3",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 96,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "monolith: lower block + the two split halves (the slit stays open) + collar",
+     "neon": false
+    },
+    {
+     "name": "Spire_Collider_4",
+     "role": "Collider",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 44,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "fire basket",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "CrateSlot_1": {
+     "position": [
+      6.85,
+      3.6,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_2": {
+     "position": [
+      0.0,
+      3.6,
+      -6.85
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_3": {
+     "position": [
+      -6.85,
+      3.6,
+      -0.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrateSlot_4": {
+     "position": [
+      -0.0,
+      3.6,
+      6.85
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Beacon": {
+     "position": [
+      0.0,
+      54.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "SpirePlatform",
+   "kind": "Plaza",
+   "tags": [
+    "Spire"
+   ],
+   "notes": "Place unrotated at the arena centre with the same origin as the Spire, on flat ground. Walking surface y = 0.6, flush with the Spire's first tread; the octagonal hole (apothem 20) is exactly the Spire's bottom slab. Worn granite flagstones (moss and soil in the joints), eight cobbled spokes on the Spire's face axes, a band of setts (r 47.6-56.6) with the 24 launch-plate openings (radius 3.4, centres at r = 52, every 15 degrees clockwise from north = Roblox -Z) and their forged-iron rims, and a granite kerb (r 56.6-60, top 0.95). Under every opening a granite-lined launch tube 12 deep (to y = -11.4): carve the terrain there (e.g. Terrain:FillCylinder with Air, radius 3.5, from y = -11.6 to 0.6). Attachments Plate_1..Plate_24 = opening centres on the plaza surface, LookVector toward the Spire: put each Plinth's pivot there. Visual parts never collide; the Collider parts (Transparency 1) keep the 24 openings open.",
+   "origin": [
+    108.014,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -59.9913,
+    -11.4,
+    -59.9847
+   ],
+   "boundsMax": [
+    59.9926,
+    0.9675,
+    59.9922
+   ],
+   "size": [
+    119.984,
+    12.368,
+    119.977
+   ],
+   "tris": 16030,
+   "colliderTris": 2672,
+   "parts": [
+    {
+     "name": "SpirePlatform_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 1465,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "flagstones and kerb (granite tile + damp trim)",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 3557,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "flagstones and kerb (granite tile + damp trim)",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Cobble",
+     "role": "Cobble",
+     "robloxMaterial": "Cobblestone",
+     "rgb": [
+      124,
+      120,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 4016,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "cobbled spokes and the setts band",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      82,
+      94,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 2864,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "moss and soil in the joints",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 2592,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "forged iron rims of the 24 openings",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      132,
+      128,
+      120
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 768,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "granite-lined launch tubes",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Stone_2",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      132,
+      128,
+      120
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 768,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "granite-lined launch tubes",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 160,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "plaza inside the plate band: 16 convex slabs (walkable)",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Cobblestone",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 2272,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "plate band: 24 cells x 8 convex pieces, the 24 openings stay open",
+     "neon": false
+    },
+    {
+     "name": "SpirePlatform_Collider_3",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 240,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "kerb ring, top 0.95 (a 0.35 step)",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Plate_1": {
+     "position": [
+      0.0,
+      0.6,
+      -52.0
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_2": {
+     "position": [
+      13.4586,
+      0.6,
+      -50.2281
+     ],
+     "look": [
+      -0.2588,
+      0.0,
+      0.9659
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_3": {
+     "position": [
+      26.0,
+      0.6,
+      -45.0333
+     ],
+     "look": [
+      -0.5,
+      0.0,
+      0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_4": {
+     "position": [
+      36.7696,
+      0.6,
+      -36.7696
+     ],
+     "look": [
+      -0.7071,
+      0.0,
+      0.7071
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_5": {
+     "position": [
+      45.0333,
+      0.6,
+      -26.0
+     ],
+     "look": [
+      -0.866,
+      0.0,
+      0.5
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_6": {
+     "position": [
+      50.2281,
+      0.6,
+      -13.4586
+     ],
+     "look": [
+      -0.9659,
+      0.0,
+      0.2588
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_7": {
+     "position": [
+      52.0,
+      0.6,
+      -0.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_8": {
+     "position": [
+      50.2281,
+      0.6,
+      13.4586
+     ],
+     "look": [
+      -0.9659,
+      0.0,
+      -0.2588
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_9": {
+     "position": [
+      45.0333,
+      0.6,
+      26.0
+     ],
+     "look": [
+      -0.866,
+      0.0,
+      -0.5
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_10": {
+     "position": [
+      36.7696,
+      0.6,
+      36.7696
+     ],
+     "look": [
+      -0.7071,
+      0.0,
+      -0.7071
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_11": {
+     "position": [
+      26.0,
+      0.6,
+      45.0333
+     ],
+     "look": [
+      -0.5,
+      0.0,
+      -0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_12": {
+     "position": [
+      13.4586,
+      0.6,
+      50.2281
+     ],
+     "look": [
+      -0.2588,
+      0.0,
+      -0.9659
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_13": {
+     "position": [
+      0.0,
+      0.6,
+      52.0
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_14": {
+     "position": [
+      -13.4586,
+      0.6,
+      50.2281
+     ],
+     "look": [
+      0.2588,
+      0.0,
+      -0.9659
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_15": {
+     "position": [
+      -26.0,
+      0.6,
+      45.0333
+     ],
+     "look": [
+      0.5,
+      0.0,
+      -0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_16": {
+     "position": [
+      -36.7696,
+      0.6,
+      36.7696
+     ],
+     "look": [
+      0.7071,
+      0.0,
+      -0.7071
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_17": {
+     "position": [
+      -45.0333,
+      0.6,
+      26.0
+     ],
+     "look": [
+      0.866,
+      0.0,
+      -0.5
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_18": {
+     "position": [
+      -50.2281,
+      0.6,
+      13.4586
+     ],
+     "look": [
+      0.9659,
+      0.0,
+      -0.2588
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_19": {
+     "position": [
+      -52.0,
+      0.6,
+      0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_20": {
+     "position": [
+      -50.2281,
+      0.6,
+      -13.4586
+     ],
+     "look": [
+      0.9659,
+      0.0,
+      0.2588
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_21": {
+     "position": [
+      -45.0333,
+      0.6,
+      -26.0
+     ],
+     "look": [
+      0.866,
+      0.0,
+      0.5
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_22": {
+     "position": [
+      -36.7696,
+      0.6,
+      -36.7696
+     ],
+     "look": [
+      0.7071,
+      0.0,
+      0.7071
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_23": {
+     "position": [
+      -26.0,
+      0.6,
+      -45.0333
+     ],
+     "look": [
+      0.5,
+      0.0,
+      0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Plate_24": {
+     "position": [
+      -13.4586,
+      0.6,
+      -50.2281
+     ],
+     "look": [
+      0.2588,
+      0.0,
+      0.9659
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "Plinth",
+   "kind": "StartPad",
+   "tags": [
+    "Plinth"
+   ],
+   "notes": "Launch plate. Origin = the plaza surface at the opening centre (SpirePlatform attachment Plate_<n>, plaza y = 0.6): pivot the Plinth there with its LookVector toward the Spire. Worn steel plate 5.6 across (16 facets) with a raised rim and concentric diamond-tread grip rings; tread surface y = 1.5 (attachment Stand, where the contender's feet go); the facet facing the Spire carries Plinth_Ember, a thin light strip (Neon). Below it a steel ram 12 studs long (down to y = -10.8) fills the launch tube while the plate rises, so nothing floats. Lower/raise the whole model by LaunchDepth. Collider = one Hull cylinder (radius 2.8, y -10.8..1.5); the visual parts never collide.",
+   "origin": [
+    178.7528,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -2.7462,
+    -10.82,
+    -2.7812
+   ],
+   "boundsMax": [
+    2.7462,
+    1.6,
+    2.7462
+   ],
+   "size": [
+    5.492,
+    12.42,
+    5.527
+   ],
+   "tris": 1264,
+   "colliderTris": 60,
+   "parts": [
+    {
+     "name": "Plinth_Steel",
+     "role": "Steel",
+     "robloxMaterial": "DiamondPlate",
+     "rgb": [
+      122,
+      124,
+      126
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 1252,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "plate, rim, ram (worn steel)",
+     "neon": false
+    },
+    {
+     "name": "Plinth_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Ember",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "light strip on the front facet: Neon",
+     "neon": true
+    },
+    {
+     "name": "Plinth_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 60,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "plate + ram cylinder, top 1.5",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Stand": {
+     "position": [
+      0.0,
+      1.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "Pavilion",
+   "kind": "Building",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Open timber pavilion on a granite base: 24 x 16 under the eaves, ridge ~13.6. Oak deck top y = 0.95 with a granite front step (top 0.42). Eight hewn oak posts on granite pads, wall plates, tie beams and knee braces, a hipped roof of clay pantiles (bellcast eaves) on boarded rafters, half-round ridge and hip tiles. Forged iron lantern under the ridge: put a warm PointLight on attachment Lantern (Pavilion_Ember = its glowing core, Neon). Collision: Collider parts (deck/base and step boxes, eight post boxes, a Hull roof); the timber and tiles never collide.",
+   "origin": [
+    201.6404,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -12.1414,
+    -0.0079,
+    -8.1414
+   ],
+   "boundsMax": [
+    12.1414,
+    13.8183,
+    8.1414
+   ],
+   "size": [
+    24.283,
+    13.826,
+    16.283
+   ],
+   "tris": 8558,
+   "colliderTris": 136,
+   "parts": [
+    {
+     "name": "Pavilion_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 589,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "base course, pads, front step",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 825,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "base course, pads, front step",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 1980,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "oak deck boards",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 4466,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "posts, plates, ties, braces, rafters, sarking, fascia",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      146,
+      84,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 176,
+     "material": "LR_Misc",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Misc_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Misc_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Misc_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "clay pantiles, ridge and hip tiles",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 510,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "lantern",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Ember",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "lantern core: Neon",
+     "neon": true
+    },
+    {
+     "name": "Pavilion_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "base + deck, top 0.95",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "front step, top 0.42",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Collider_3",
+     "role": "Collider",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 96,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "eight posts (boxes)",
+     "neon": false
+    },
+    {
+     "name": "Pavilion_Collider_4",
+     "role": "Collider",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 16,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "roof volume",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Lantern": {
+     "position": [
+      0.0,
+      10.074,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "LobbyGate",
+   "kind": "Gate",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Granite archway 16 wide, 14 tall: two ashlar piers on a projecting plinth course, moulded imposts, a segmental arch of nine voussoirs with a keystone, coursed spandrels, a cornice and a small hipped roof of clay pantiles. Opening 8.9 wide, 8.9 clear at the imposts, 10.9 under the keystone (the lantern hangs to ~8.4). Old iron gate pintles on the piers. Put a warm PointLight on attachment Lantern (LobbyGate_Ember = the lantern core, Neon). Collision: Collider parts (two pier boxes, convex pieces over the arch, Hull roof); the opening stays open.",
+   "origin": [
+    229.7521,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -7.9702,
+    -0.0064,
+    -2.6202
+   ],
+   "boundsMax": [
+    7.9702,
+    13.9702,
+    2.6202
+   ],
+   "size": [
+    15.94,
+    13.977,
+    5.24
+   ],
+   "tris": 3474,
+   "colliderTris": 118,
+   "parts": [
+    {
+     "name": "LobbyGate_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 2425,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "piers, arch, spandrels, cornice",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 77,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "piers, arch, spandrels, cornice",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      146,
+      84,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 152,
+     "material": "LR_Misc",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Misc_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Misc_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Misc_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "pantiles, ridge and hip tiles",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 46,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "roof boards and fascia",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 762,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "lantern, bracket, pintles",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Ember",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "lantern core: Neon",
+     "neon": true
+    },
+    {
+     "name": "LobbyGate_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 24,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "two piers",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 86,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "masonry over the arch (convex pieces)",
+     "neon": false
+    },
+    {
+     "name": "LobbyGate_Collider_3",
+     "role": "Collider",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 8,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "roof",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Lantern": {
+     "position": [
+      0.0,
+      9.68,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "Brazier",
+   "kind": "Prop",
+   "tags": [
+    "Lobby",
+    "Fire"
+   ],
+   "notes": "Standing forged-iron brazier ~5.3 tall: three splayed legs with scroll feet, a twisted centre column, a riveted bowl and a crown of curved bars (a miniature of the Spire's fire basket). Brazier_Ember = the coal bed (Neon, no collision/shadow) under charcoal lumps: put the fire ParticleEmitter + warm PointLight on attachment Fire. Good AmbientEmitter for a fire-crackle loop. Collision: one Hull Collider.",
+   "origin": [
+    247.9301,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -2.2078,
+    0.0548,
+    -2.1015
+   ],
+   "boundsMax": [
+    2.2078,
+    5.3413,
+    2.1015
+   ],
+   "size": [
+    4.416,
+    5.286,
+    4.203
+   ],
+   "tris": 2456,
+   "colliderTris": 38,
+   "parts": [
+    {
+     "name": "Brazier_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 1752,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "forged iron",
+     "neon": false
+    },
+    {
+     "name": "Brazier_Basalt",
+     "role": "Basalt",
+     "robloxMaterial": "Basalt",
+     "rgb": [
+      40,
+      38,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 624,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "charcoal lumps",
+     "neon": false
+    },
+    {
+     "name": "Brazier_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 80,
+     "material": "LR_Ember",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "coal bed: Neon",
+     "neon": true
+    },
+    {
+     "name": "Brazier_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 38,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "brazier hull",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Fire": {
+     "position": [
+      0.0,
+      4.92,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "BannerPole",
+   "kind": "Prop",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "12-stud oak pole in a granite socket block, iron collar, spike finial, a crossbar on a forged bracket and a hanging wool banner with the arena's own sigil, the Cleft (a stepped base, a stone monolith split down its upper half, three iron bands, a fire basket and flame) and a swallowtail hem. BannerPole_Banner is cloth: non-colliding, real back faces (DoubleSided off). Collision: two Box Colliders (block, pole).",
+   "origin": [
+    260.3579,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -2.22,
+    -0.0077,
+    -0.8006
+   ],
+   "boundsMax": [
+    2.22,
+    12.42,
+    0.8125
+   ],
+   "size": [
+    4.44,
+    12.428,
+    1.613
+   ],
+   "tris": 1230,
+   "colliderTris": 24,
+   "parts": [
+    {
+     "name": "BannerPole_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 13,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "socket block",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 31,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "socket block",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 64,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "pole and crossbar",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 274,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "collar, bracket, finial, knobs",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      150,
+      128,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 128,
+     "material": "LR_Misc",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Misc_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Misc_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Misc_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "lashings",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Banner",
+     "role": "Banner",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      140,
+      60,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 720,
+     "material": "LR_Misc",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Misc_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Misc_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Misc_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "notes": "banner cloth: real back faces, DoubleSided off",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "socket block",
+     "neon": false
+    },
+    {
+     "name": "BannerPole_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "pole",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "Bench",
+   "kind": "Prop",
+   "tags": [
+    "Lobby",
+    "Seat"
+   ],
+   "notes": "Backless bench: two rough granite blocks carrying two thick weathered oak planks held by forged iron straps; seat top y = 1.8. Seat_1/Seat_2 attachments for sit spots. Collision: one Box Collider.",
+   "origin": [
+    273.7333,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -3.1554,
+    -0.0085,
+    -0.945
+   ],
+   "boundsMax": [
+    3.1558,
+    1.875,
+    0.945
+   ],
+   "size": [
+    6.311,
+    1.883,
+    1.89
+   ],
+   "tris": 438,
+   "colliderTris": 12,
+   "parts": [
+    {
+     "name": "Bench_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 92,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "granite legs",
+     "neon": false
+    },
+    {
+     "name": "Bench_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 50,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "granite legs",
+     "neon": false
+    },
+    {
+     "name": "Bench_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 88,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "oak seat planks",
+     "neon": false
+    },
+    {
+     "name": "Bench_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      64,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 208,
+     "material": "LR_Iron",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Iron_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Iron_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Iron_Rough.png",
+      "metalnessMap": "textures/LandmarksReal/LR_Iron_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "straps and bolts",
+     "neon": false
+    },
+    {
+     "name": "Bench_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "bench volume, top 1.8",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Seat_1": {
+     "position": [
+      -1.5,
+      1.8,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      1.5,
+      1.8,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "NoticeBoard",
+   "kind": "Prop",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Notice board: NoticeBoard_Planks is the board, 8 x 6 x 0.3 (x -4..4, y 2.2..8.2 up, 0.3 thick) of eight flush weathered boards; its +Y face (Roblox Front, -Z) is the SurfaceGui face (the GUI sits on the part's bounding-box face, which the board fronts exactly). Attachment Board = centre of that face. Oak frame, two hewn posts on granite pads, braces, and a small pantiled gable roof. Collision: Box Collider for the board and posts, Hull Collider for the roof.",
+   "origin": [
+    290.4433,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -5.5541,
+    -0.0076,
+    -1.4475
+   ],
+   "boundsMax": [
+    5.5541,
+    10.6007,
+    1.4495
+   ],
+   "size": [
+    11.108,
+    10.608,
+    2.897
+   ],
+   "tris": 1106,
+   "colliderTris": 20,
+   "parts": [
+    {
+     "name": "NoticeBoard_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 96,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "the SurfaceGui board (clean flat front)",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      128,
+      128,
+      128
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 176,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "board frame",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 712,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "posts, header, braces, roof boards",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 38,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "post pads",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 62,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "post pads",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_RoofTiles",
+     "role": "RoofTiles",
+     "robloxMaterial": "ClayRoofTiles",
+     "rgb": [
+      146,
+      84,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 22,
+     "material": "LR_Misc",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Misc_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Misc_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Misc_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "pantiles and ridge",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "posts and board",
+     "neon": false
+    },
+    {
+     "name": "NoticeBoard_Collider_2",
+     "role": "Collider",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 8,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "roof",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Board": {
+     "position": [
+      0.0,
+      5.2,
+      -0.15
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "Railing",
+   "kind": "Railing",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "8-stud segment along X (x = -4..4), 3.6 tall: granite plinth kerb, two dressed granite posts with weathered caps, oak top and bottom rails with square balusters. Tile every 8 studs: the end posts pair up into a double pier. Collision: one Box Collider, so the run acts as a solid barrier.",
+   "origin": [
+    308.037,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -4.0396,
+    -0.0078,
+    -0.6009
+   ],
+   "boundsMax": [
+    4.0333,
+    3.6079,
+    0.6002
+   ],
+   "size": [
+    8.073,
+    3.616,
+    1.201
+   ],
+   "tris": 758,
+   "colliderTris": 12,
+   "parts": [
+    {
+     "name": "Railing_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 356,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "kerb, posts, caps",
+     "neon": false
+    },
+    {
+     "name": "Railing_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 94,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "kerb, posts, caps",
+     "neon": false
+    },
+    {
+     "name": "Railing_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      116,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 308,
+     "material": "LR_Wood",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Wood_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Wood_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Wood_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "rails and balusters",
+     "neon": false
+    },
+    {
+     "name": "Railing_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "solid barrier",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "glb": "LandmarksReal.glb"
+  },
+  {
+   "name": "StoneSteps",
+   "kind": "Stairs",
+   "tags": [
+    "Lobby"
+   ],
+   "notes": "Three granite steps, 8 wide overall (6.6 walkable between the cheek walls), 1-stud risers, 2-stud treads. Bottom step at the front (+Y); the top tread (y = 3) meets a terrace at z = -3 (Roblox) behind. Each step is two long stones with worn nosings; sloped cheek walls with coping. Collision: Collider pieces (three stacked step blocks + two cheek walls, PreciseConvexDecomposition).",
+   "origin": [
+    324.1294,
+    0.0,
+    0.0
+   ],
+   "boundsMin": [
+    -4.0591,
+    -0.0076,
+    -3.0119
+   ],
+   "boundsMax": [
+    4.0536,
+    3.36,
+    3.0118
+   ],
+   "size": [
+    8.113,
+    3.368,
+    6.024
+   ],
+   "tris": 452,
+   "colliderTris": 68,
+   "parts": [
+    {
+     "name": "StoneSteps_Granite",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 313,
+     "material": "LR_Granite",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_Granite_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_Granite_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_Granite_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "steps and cheeks",
+     "neon": false
+    },
+    {
+     "name": "StoneSteps_Granite_2",
+     "role": "Granite",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      138,
+      134,
+      127
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 139,
+     "material": "LR_StoneTrim",
+     "surfaceAppearance": {
+      "colorMap": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+      "normalMap": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+      "roughnessMap": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "steps and cheeks",
+     "neon": false
+    },
+    {
+     "name": "StoneSteps_Collider",
+     "role": "Collider",
+     "robloxMaterial": "Granite",
+     "rgb": [
+      90,
+      88,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 68,
+     "material": "LR_Collider",
+     "surfaceAppearance": null,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "notes": "steps + cheeks",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "glb": "LandmarksReal.glb"
+  }
+ ],
+ "warnings": [],
+ "schema": "LS-Real-1",
+ "glbs": [
+  {
+   "file": "LandmarksReal.glb",
+   "bytes": 19624564,
+   "sizeMB": 19.62,
+   "assets": [
+    "Spire",
+    "SpirePlatform",
+    "Plinth",
+    "Pavilion",
+    "LobbyGate",
+    "Brazier",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "primitives": 75,
+   "maxMeshTris": 11174,
+   "embeddedImages": [
+    "LR_Misc_Normal",
+    "LR_Misc_Color",
+    "LR_Misc_MR",
+    "LR_Iron_Normal",
+    "LR_Iron_Color",
+    "LR_Iron_MR",
+    "LR_Granite_Normal",
+    "LR_Granite_Color",
+    "LR_Granite_MR",
+    "LR_StoneTrim_Normal",
+    "LR_StoneTrim_Color",
+    "LR_StoneTrim_MR",
+    "LR_Wood_Normal",
+    "LR_Wood_Color",
+    "LR_Wood_MR"
+   ],
+   "alphaMask": [],
+   "alphaBlend": []
+  }
+ ],
+ "uploadTextures": [
+  {
+   "file": "textures/LandmarksReal/LR_Granite_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1679314
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Granite_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1469675
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Granite_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 174092
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Iron_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Plinth",
+    "Pavilion",
+    "LobbyGate",
+    "Brazier",
+    "BannerPole",
+    "Bench"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1234116
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Iron_Metal.png",
+   "kind": "metalness",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Plinth",
+    "Pavilion",
+    "LobbyGate",
+    "Brazier",
+    "BannerPole",
+    "Bench"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 72241
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Iron_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Plinth",
+    "Pavilion",
+    "LobbyGate",
+    "Brazier",
+    "BannerPole",
+    "Bench"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1206752
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Iron_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Plinth",
+    "Pavilion",
+    "LobbyGate",
+    "Brazier",
+    "BannerPole",
+    "Bench"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 179815
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Misc_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "NoticeBoard"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1099808
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Misc_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "NoticeBoard"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 982209
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Misc_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "NoticeBoard"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 146069
+  },
+  {
+   "file": "textures/LandmarksReal/LR_StoneTrim_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1692875
+  },
+  {
+   "file": "textures/LandmarksReal/LR_StoneTrim_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1538238
+  },
+  {
+   "file": "textures/LandmarksReal/LR_StoneTrim_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Spire",
+    "SpirePlatform",
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing",
+    "StoneSteps"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 157549
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Wood_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1288550
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Wood_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1547535
+  },
+  {
+   "file": "textures/LandmarksReal/LR_Wood_Rough.png",
+   "kind": "roughness",
+   "usedBy": [
+    "Pavilion",
+    "LobbyGate",
+    "BannerPole",
+    "Bench",
+    "NoticeBoard",
+    "Railing"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 144639
+  }
+ ],
+ "glbOnlyTextures": [
+  "textures/LandmarksReal/glb_only/LR_Granite_MR.png",
+  "textures/LandmarksReal/glb_only/LR_Iron_MR.png",
+  "textures/LandmarksReal/glb_only/LR_Misc_MR.png",
+  "textures/LandmarksReal/glb_only/LR_StoneTrim_MR.png",
+  "textures/LandmarksReal/glb_only/LR_Wood_MR.png"
+ ],
+ "adCheck": {
+  "problems": [],
+  "glbs": 1,
+  "uploadImages": 16,
+  "totalTris": 58751,
+  "assets": 11
+ }
+}

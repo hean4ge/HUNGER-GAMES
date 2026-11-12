@@ -1,0 +1,3194 @@
+{
+ "category": "Items",
+ "glb": "Items.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "assets": [
+  {
+   "name": "knife",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Survival knife. Grip (handle centre) at origin, blade +Z, edge +Y.",
+   "parts": [
+    {
+     "name": "knife_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      178,
+      181,
+      186
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 166,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "knife_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 110,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "knife_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 204,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "knife_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 162,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      1.02,
+      -0.03
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.074,
+    -0.318,
+    -0.19
+   ],
+   "boundsMax": [
+    0.074,
+    1.02,
+    0.12
+   ],
+   "size": [
+    0.148,
+    1.338,
+    0.31
+   ],
+   "tris": 642,
+   "origin": [
+    0.074,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "machete",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Wide machete with upswept tip, full tang, wood scales, brass rivets. Grip at origin.",
+   "parts": [
+    {
+     "name": "machete_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      152,
+      154,
+      154
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 322,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "machete_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      106,
+      110,
+      116
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 142,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "machete_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      96,
+      64,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 108,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "machete_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 176,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "machete_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 120,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      2.08,
+      -0.19
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.069,
+    -0.441,
+    -0.269
+   ],
+   "boundsMax": [
+    0.069,
+    2.08,
+    0.0855
+   ],
+   "size": [
+    0.138,
+    2.521,
+    0.355
+   ],
+   "tris": 868,
+   "origin": [
+    6.217,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "hatchet",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Axe"
+   ],
+   "notes": "Bearded hatchet, ash haft with leather grip. Grip at origin, bit faces +Y.",
+   "parts": [
+    {
+     "name": "hatchet_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      132,
+      98,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 172,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "hatchet_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 236,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "hatchet_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      158,
+      160,
+      160
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 300,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "hatchet_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 120,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      1.46,
+      -0.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.098,
+    -0.4086,
+    -0.5
+   ],
+   "boundsMax": [
+    0.098,
+    1.72,
+    0.15
+   ],
+   "size": [
+    0.196,
+    2.129,
+    0.65
+   ],
+   "tris": 828,
+   "origin": [
+    12.384,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "spear",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Thrown",
+    "Polearm"
+   ],
+   "notes": "7-stud ash spear, leaf head, rope binding and a red rag. Grip (balance point) at origin.",
+   "parts": [
+    {
+     "name": "spear_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      146,
+      112,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 214,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 268,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 140,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      170,
+      172,
+      174
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 142,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 188,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "spear_Cloth",
+     "role": "Cloth",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      150,
+      58,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 256,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      4.4,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.096,
+    -2.62,
+    -0.1779
+   ],
+   "boundsMax": [
+    0.1654,
+    4.4,
+    0.1779
+   ],
+   "size": [
+    0.261,
+    7.02,
+    0.356
+   ],
+   "tris": 1252,
+   "origin": [
+    18.578,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "mace",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blunt"
+   ],
+   "notes": "Flanged iron mace on a wooden haft. Grip at origin, head +Z, a flange faces +Y.",
+   "parts": [
+    {
+     "name": "mace_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      98,
+      70,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "mace_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 236,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "mace_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 98,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "mace_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 322,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "mace_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      166,
+      168,
+      170
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 478,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      2.38,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.2196,
+    -0.42,
+    -0.24
+   ],
+   "boundsMax": [
+    0.2196,
+    2.38,
+    0.24
+   ],
+   "size": [
+    0.439,
+    2.8,
+    0.48
+   ],
+   "tris": 1178,
+   "origin": [
+    24.9626,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "sword",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Arming sword with fuller, blackened crossguard, brass wheel pommel. Grip at origin.",
+   "parts": [
+    {
+     "name": "sword_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      184,
+      188,
+      192
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 358,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "sword_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 284,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "sword_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      56,
+      58,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 140,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "sword_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 268,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "sword_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 166,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      3.05,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.0828,
+    -0.585,
+    -0.4087
+   ],
+   "boundsMax": [
+    0.0828,
+    3.05,
+    0.4087
+   ],
+   "size": [
+    0.166,
+    3.635,
+    0.817
+   ],
+   "tris": 1216,
+   "origin": [
+    31.2648,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "bow",
+   "kind": "Weapon",
+   "tags": [
+    "Ranged",
+    "Bow"
+   ],
+   "notes": "Recurve bow. Grip at origin (hand), string centre/nock at z=0.2 so the arrow passes over the hand. Arrow rest on the -X side of the riser window.",
+   "parts": [
+    {
+     "name": "bow_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      88,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 568,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bow_Wood_2",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      56,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 140,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bow_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 172,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bow_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 68,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bow_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 48,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0.0,
+      0.2,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0.0,
+      2.32,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0.0,
+      -1.92,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.04,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.0872,
+    -2.0665,
+    -0.13
+   ],
+   "boundsMax": [
+    0.1085,
+    2.4665,
+    0.4468
+   ],
+   "size": [
+    0.196,
+    4.533,
+    0.577
+   ],
+   "tris": 996,
+   "origin": [
+    37.4352,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "arrow",
+   "kind": "Ammo",
+   "tags": [
+    "Ranged",
+    "Ammo"
+   ],
+   "notes": "Arrow. Origin = nock throat (Grip and Nock), tip +Z. Nock slot runs along Y (align arrow +Y with the bow string); red cock feather points +X.",
+   "parts": [
+    {
+     "name": "arrow_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      164,
+      134,
+      96
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 20,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 164,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_Feather",
+     "role": "Feather",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      212,
+      204,
+      186
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 48,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_Feather_2",
+     "role": "Feather",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      178,
+      64,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 24,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 152,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 60,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "arrow_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      178,
+      182
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 94,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      3.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.0705,
+    -0.054,
+    -0.1112
+   ],
+   "boundsMax": [
+    0.122,
+    3.0,
+    0.1112
+   ],
+   "size": [
+    0.193,
+    3.054,
+    0.222
+   ],
+   "tris": 562,
+   "origin": [
+    43.6145,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "throwing_knife",
+   "kind": "Weapon",
+   "tags": [
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "Balanced double-edged throwing knife, cord wrap, ring pommel. Grip at origin.",
+   "parts": [
+    {
+     "name": "throwing_knife_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      190,
+      196
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 188,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "throwing_knife_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 188,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "throwing_knife_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 268,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "throwing_knife_Metal_2",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      108,
+      112,
+      118
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 244,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      0.66,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.0402,
+    -0.359,
+    -0.08
+   ],
+   "boundsMax": [
+    0.0402,
+    0.66,
+    0.08
+   ],
+   "size": [
+    0.08,
+    1.019,
+    0.16
+   ],
+   "tris": 888,
+   "origin": [
+    49.7772,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "water_bottle",
+   "kind": "Drink",
+   "tags": [
+    "Drink"
+   ],
+   "notes": "Glass bottle with water, knurled tin cap, leather sleeve. Grip = body centre at origin. Glass needs Transparency (~0.45) in Roblox so the WaterFill reads.",
+   "parts": [
+    {
+     "name": "water_bottle_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      172,
+      204,
+      208
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 240,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "water_bottle_WaterFill",
+     "role": "WaterFill",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      110,
+      160,
+      190
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 60,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "water_bottle_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      152,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 94,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "water_bottle_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 96,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Mouth": {
+     "position": [
+      0.0,
+      0.6,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.224,
+    -0.4,
+    -0.224
+   ],
+   "boundsMax": [
+    0.224,
+    0.6,
+    0.224
+   ],
+   "size": [
+    0.448,
+    1.0,
+    0.448
+   ],
+   "tris": 490,
+   "origin": [
+    56.041,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "empty_bottle",
+   "kind": "Drink",
+   "tags": [
+    "Drink",
+    "Refillable"
+   ],
+   "notes": "Same bottle, empty and open; the cap hangs from a cord. Grip = body centre at origin.",
+   "parts": [
+    {
+     "name": "empty_bottle_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      178,
+      210,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 288,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "empty_bottle_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      152,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 94,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "empty_bottle_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 116,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Mouth": {
+     "position": [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.21,
+    -0.4,
+    -0.21
+   ],
+   "boundsMax": [
+    0.4366,
+    0.502,
+    0.21
+   ],
+   "size": [
+    0.647,
+    0.902,
+    0.42
+   ],
+   "tris": 498,
+   "origin": [
+    62.475,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "berries",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Wild berry cluster on a twig. Grip = cluster centre.",
+   "parts": [
+    {
+     "name": "berries_Berry",
+     "role": "Berry",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      148,
+      32,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 280,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "berries_Berry_2",
+     "role": "Berry",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      116,
+      24,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 112,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "berries_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 36,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "berries_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      76,
+      110,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 56,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.1964,
+    -0.1595,
+    -0.1981
+   ],
+   "boundsMax": [
+    0.2219,
+    0.47,
+    0.2007
+   ],
+   "size": [
+    0.418,
+    0.629,
+    0.399
+   ],
+   "tris": 484,
+   "origin": [
+    69.1084,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "apple",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Red apple. Grip = apple centre at origin.",
+   "parts": [
+    {
+     "name": "apple_Food",
+     "role": "Food",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      168,
+      44,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 216,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "apple_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      60,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 26,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "apple_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      88,
+      122,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 28,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.207,
+    -0.1939,
+    -0.2186
+   ],
+   "boundsMax": [
+    0.2221,
+    0.304,
+    0.2135
+   ],
+   "size": [
+    0.429,
+    0.498,
+    0.432
+   ],
+   "tris": 270,
+   "origin": [
+    75.537,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "dried_meat",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Cured, twine-tied haunch of dried meat on the bone. Grip = the bone shank at origin; bone uses the Plaster role (matte bone white).",
+   "parts": [
+    {
+     "name": "dried_meat_Food",
+     "role": "Food",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      134,
+      58,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 190,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "dried_meat_Plaster",
+     "role": "Plaster",
+     "robloxMaterial": "Plaster",
+     "rgb": [
+      224,
+      214,
+      190
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 140,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "dried_meat_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 160,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.202,
+    -0.1732,
+    -0.1633
+   ],
+   "boundsMax": [
+    0.202,
+    0.667,
+    0.1633
+   ],
+   "size": [
+    0.404,
+    0.84,
+    0.327
+   ],
+   "tris": 490,
+   "origin": [
+    81.961,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "ration",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Ration tin with olive label and pull ring. Grip = tin centre.",
+   "parts": [
+    {
+     "name": "ration_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      152,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 376,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "ration_Paper",
+     "role": "Paper",
+     "robloxMaterial": "Cardboard",
+     "rgb": [
+      116,
+      122,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 112,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.244,
+    -0.33,
+    -0.2379
+   ],
+   "boundsMax": [
+    0.244,
+    0.333,
+    0.2379
+   ],
+   "size": [
+    0.488,
+    0.663,
+    0.476
+   ],
+   "tris": 488,
+   "origin": [
+    88.407,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "bandage",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Bandage roll (axis X) with a loose tail. Grip = roll centre at origin.",
+   "parts": [
+    {
+     "name": "bandage_Bandage",
+     "role": "Bandage",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      234,
+      226,
+      206
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 288,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bandage_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 56,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.181,
+    -0.3362,
+    -0.2755
+   ],
+   "boundsMax": [
+    0.181,
+    0.122,
+    0.1189
+   ],
+   "size": [
+    0.362,
+    0.458,
+    0.394
+   ],
+   "tris": 344,
+   "origin": [
+    94.832,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "herbs",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Bundle of healing herbs tied with twine. Grip = the tie at origin.",
+   "parts": [
+    {
+     "name": "herbs_Fern",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      84,
+      120,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 240,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "herbs_Fern_2",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      112,
+      138,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 160,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "herbs_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 76,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.2224,
+    -0.2216,
+    -0.1909
+   ],
+   "boundsMax": [
+    0.2309,
+    0.559,
+    0.193
+   ],
+   "size": [
+    0.453,
+    0.781,
+    0.384
+   ],
+   "tris": 476,
+   "origin": [
+    101.2354,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "medkit",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Canvas medic bag with a white cross, leather straps and carry handle. Grip = the carry handle at origin; the bag hangs below.",
+   "parts": [
+    {
+     "name": "medkit_Canvas",
+     "role": "Canvas",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      156,
+      58,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 168,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "medkit_Bandage",
+     "role": "Bandage",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      230,
+      226,
+      212
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 44,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "medkit_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 196,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "medkit_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 56,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -0.52,
+    -0.755,
+    -0.275
+   ],
+   "boundsMax": [
+    0.52,
+    0.031,
+    0.21
+   ],
+   "size": [
+    1.04,
+    0.786,
+    0.485
+   ],
+   "tris": 464,
+   "origin": [
+    107.986,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "leather_vest",
+   "kind": "Armor",
+   "tags": [
+    "Armor",
+    "Wearable"
+   ],
+   "notes": "Leather vest: V-neck, open arms, toggled placket, laced sides. Grip = back of the collar at origin (vest hangs below); 'Torso' attachment = cavity centre for wearing.",
+   "parts": [
+    {
+     "name": "leather_vest_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      114,
+      76,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 1000,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "leather_vest_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      58,
+      42,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 220,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "leather_vest_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 60,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "leather_vest_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 152,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Torso": {
+     "position": [
+      0.0,
+      -1.13,
+      -0.4091
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -1.1497,
+    -2.292,
+    -1.1409
+   ],
+   "boundsMax": [
+    1.1514,
+    0.0899,
+    0.2699
+   ],
+   "size": [
+    2.301,
+    2.382,
+    1.411
+   ],
+   "tris": 1432,
+   "origin": [
+    115.6557,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "padded_armor",
+   "kind": "Armor",
+   "tags": [
+    "Armor",
+    "Wearable"
+   ],
+   "notes": "Quilted padded jacket (gambeson) with leather collar, front straps and brass buckles. Grip = back of the collar at origin; 'Torso' attachment = cavity centre for wearing.",
+   "parts": [
+    {
+     "name": "padded_armor_Cloth",
+     "role": "Cloth",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      156,
+      140,
+      108
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 984,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "padded_armor_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      66,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 400,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "padded_armor_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      176,
+      140,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 84,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Torso": {
+     "position": [
+      0.0,
+      -1.33,
+      -0.395
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -1.22,
+    -2.492,
+    -1.2271
+   ],
+   "boundsMax": [
+    1.22,
+    0.0,
+    0.375
+   ],
+   "size": [
+    2.44,
+    2.492,
+    1.602
+   ],
+   "tris": 1468,
+   "origin": [
+    124.027,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "SupplyCrate1",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier1"
+   ],
+   "notes": "Plain wooden crate 4 x 2.6 x 2.2 with diagonal braces. Lid = SupplyCrate1_Lid.",
+   "parts": [
+    {
+     "name": "SupplyCrate1_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      126,
+      94,
+      64
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 364,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate1_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      78,
+      52
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 456,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate1_Lid",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      116,
+      86,
+      58
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 140,
+     "canQuery": true,
+     "canTouch": true
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.96,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.0,
+    0.0,
+    -1.304
+   ],
+   "boundsMax": [
+    2.0,
+    2.2,
+    1.304
+   ],
+   "size": [
+    4.0,
+    2.2,
+    2.608
+   ],
+   "tris": 960,
+   "origin": [
+    133.247,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "SupplyCrate2",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier2"
+   ],
+   "notes": "Wooden crate with rope handles and metal corners. Lid = SupplyCrate2_Lid (+ SupplyCrate2_LidMetal corners riding on it).",
+   "parts": [
+    {
+     "name": "SupplyCrate2_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      142,
+      108,
+      72
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 252,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate2_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      82,
+      54
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 336,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate2_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 188,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "SupplyCrate2_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      160,
+      132,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 160,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "SupplyCrate2_Lid",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      64,
+      46
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 140,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate2_LidMetal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      122,
+      126,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 112,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.96,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.1819,
+    0.0,
+    -1.32
+   ],
+   "boundsMax": [
+    2.1819,
+    2.255,
+    1.32
+   ],
+   "size": [
+    4.364,
+    2.255,
+    2.64
+   ],
+   "tris": 1188,
+   "origin": [
+    143.4289,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "SupplyCrate3",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier3"
+   ],
+   "notes": "Dark reinforced crate, iron bands, faint ember glow leaking from the lid seam. Lid = SupplyCrate3_Lid (+ SupplyCrate3_LidDarkMetal bands and hasp).",
+   "parts": [
+    {
+     "name": "SupplyCrate3_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      82,
+      60,
+      44
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 252,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate3_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      58,
+      60,
+      66
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [],
+     "tris": 532,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate3_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      236,
+      112,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [],
+     "tris": 32,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "SupplyCrate3_Lid",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      70,
+      54,
+      40
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 140,
+     "canQuery": true,
+     "canTouch": true
+    },
+    {
+     "name": "SupplyCrate3_LidDarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      58,
+      60,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 196,
+     "canQuery": false,
+     "canTouch": false
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.99,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -2.0,
+    0.0,
+    -1.41
+   ],
+   "boundsMax": [
+    2.0,
+    2.23,
+    1.37
+   ],
+   "size": [
+    4.0,
+    2.23,
+    2.78
+   ],
+   "tris": 1152,
+   "origin": [
+    153.611,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

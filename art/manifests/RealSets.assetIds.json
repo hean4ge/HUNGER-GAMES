@@ -1,0 +1,1028 @@
+{
+ "schema": "LS-Real-AssetIds-1",
+ "creator": {
+  "userId": 5458010221
+ },
+ "universeId": 10775788705,
+ "notes": [
+  "One upload per file through Open Cloud POST /assets/v1/assets. Never re-upload a file listed here; reuse its id.",
+  "Paths are relative to BlenderExports (C:/Users/USER/OneDrive/Documents/LastStanding/BlenderExports)."
+ ],
+ "models": {
+  "GroundReal_Flora.glb": {
+   "displayName": "LS_GroundReal_Flora_v1",
+   "operationId": "2111d339-8fd9-41e4-a179-f03480eb120b",
+   "uploadedUtc": "2026-11-12T01:23:04.797Z",
+   "assetId": 95045390089356,
+   "moderationState": "Approved",
+   "bytes": 4818392,
+   "revisionId": "1"
+  },
+  "TreesReal.glb": {
+   "displayName": "LS_TreesReal_v1",
+   "operationId": "9e8477be-fc81-4d45-9236-41483a17fd7c",
+   "bytes": 18374528,
+   "moderationState": "Approved",
+   "assetId": 105791192366429,
+   "uploadedUtc": "2026-11-12T01:36:42.144Z",
+   "revisionId": 1
+  },
+  "GroundReal_Rocks.glb": {
+   "displayName": "LS_GroundReal_Rocks_v1",
+   "operationId": "2164bb20-27bc-47e0-bf9f-4e1801e58749",
+   "bytes": 9857800,
+   "moderationState": "Approved",
+   "assetId": 135015962042408,
+   "uploadedUtc": "2026-11-12T01:36:49.756Z",
+   "revisionId": 1
+  },
+  "GroundReal_Cliffs.glb": {
+   "displayName": "LS_GroundReal_Cliffs_v1",
+   "operationId": "f18af11e-ee89-42e5-9a6f-b2d92b1f4952",
+   "bytes": 10610808,
+   "moderationState": "Approved",
+   "assetId": 88367418166779,
+   "uploadedUtc": "2026-11-12T01:36:59.040Z",
+   "revisionId": 1
+  },
+  "LandmarksReal.glb": {
+   "displayName": "LS_LandmarksReal_v1",
+   "operationId": "7300c27f-a423-4a9c-b72e-4acff94bee32",
+   "bytes": 19624564,
+   "moderationState": "Approved",
+   "assetId": 122335015926239,
+   "uploadedUtc": "2026-11-12T01:37:26.248Z",
+   "revisionId": 1
+  },
+  "BuildingsReal.glb": {
+   "displayName": "LS_BuildingsReal_v1",
+   "operationId": "1fa1d558-14a7-438d-abf0-f07c4b82a5d0",
+   "bytes": 18379140,
+   "moderationState": "Approved",
+   "assetId": 72785823510334,
+   "uploadedUtc": "2026-11-12T01:37:42.461Z",
+   "revisionId": 1
+  },
+  "PropsReal.glb": {
+   "displayName": "LS_PropsReal_v1",
+   "operationId": "2a323a35-d9e0-43e3-8321-ad259e2306da",
+   "bytes": 13017060,
+   "moderationState": "Approved",
+   "assetId": 79449784281623,
+   "uploadedUtc": "2026-11-12T01:37:52.645Z",
+   "revisionId": 1
+  },
+  "ItemsReal.glb": {
+   "displayName": "LS_ItemsReal_v1",
+   "operationId": "4f57b389-e106-4c0a-bf3a-9f6d47f1fea3",
+   "bytes": 13524068,
+   "moderationState": "Approved",
+   "assetId": 97973095265937,
+   "uploadedUtc": "2026-11-12T01:38:14.470Z",
+   "revisionId": 1
+  }
+ },
+ "images": {
+  "textures/TreesReal/TR_Rough_Bark.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "e4f047d8-fc33-4674-9396-fc3d9eeec041",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 100287855917248,
+   "uploadedUtc": "2026-11-12T01:38:29.137Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/TreesReal/TR_Rough_Foliage.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "212fb22e-d9fd-48c2-b55b-3ef69f0b1c58",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 86102580144794,
+   "uploadedUtc": "2026-11-12T01:38:37.653Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/GroundReal/GR_Plants_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "d763135c-ea19-4c64-b804-4a1d86dbb740",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 111726694635767,
+   "uploadedUtc": "2026-11-12T01:38:45.577Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/GroundReal/GR_Shrubs_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "409f84bf-37e8-4749-b978-a7fc473fc422",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 92617838164566,
+   "uploadedUtc": "2026-11-12T01:38:52.712Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/GroundReal/GR_Rock_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "382616e7-8202-428b-a9f7-c7d3bfc00297",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 107482824984480,
+   "uploadedUtc": "2026-11-12T01:39:00.134Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_Granite_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "95f82942-e6cb-4d0a-bcaf-c7bde1c5e5eb",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 113027411940711,
+   "uploadedUtc": "2026-11-12T01:39:07.182Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_Iron_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "510c8d2c-30a2-4094-b7ab-f377b00ed0b6",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 75408110074260,
+   "uploadedUtc": "2026-11-12T01:39:14.241Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_Iron_Metal.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "6383c3dd-d386-4004-989a-8efeeb99e911",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 125301590484546,
+   "uploadedUtc": "2026-11-12T01:39:22.032Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_Misc_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "4832b225-1df4-4064-8b3d-db3695740e09",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 80061923057644,
+   "uploadedUtc": "2026-11-12T01:39:29.593Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_StoneTrim_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "8c1f93f9-c893-442a-a993-ffc5e885f76f",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 88736335099023,
+   "uploadedUtc": "2026-11-12T01:39:36.730Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/LandmarksReal/LR_Wood_Rough.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "792e2bdc-9d83-4052-8d91-659186678a32",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 91125870665851,
+   "uploadedUtc": "2026-11-12T01:39:44.200Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Kit_Metal.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "1fd83ff5-0691-4c69-8cb6-ad3e79bc0e41",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 77756495899290,
+   "uploadedUtc": "2026-11-12T01:39:51.237Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Kit_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "86a41c58-4245-4fed-93e2-c932cd30b037",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 96265093004080,
+   "uploadedUtc": "2026-11-12T01:39:59.459Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Log_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "277d66aa-033a-4782-8a7f-6371ac962534",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 128702375973004,
+   "uploadedUtc": "2026-11-12T01:40:06.961Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Shake_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "164ebd03-edda-4661-a6d6-c2a241fd5b5d",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 85653423661374,
+   "uploadedUtc": "2026-11-12T01:40:13.683Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Stone_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "0dd076b3-a1aa-4c76-b345-1646969f8e32",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 85652708444414,
+   "uploadedUtc": "2026-11-12T01:40:20.689Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/BuildingsReal/BR_Wood_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "25c880f4-1e94-4626-beb5-c6705c41b898",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 94225611967263,
+   "uploadedUtc": "2026-11-12T01:40:28.779Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_CratesA_Metalness.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "12bff08c-7056-4633-ba69-ec35af56444f",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 119997448950104,
+   "uploadedUtc": "2026-11-12T01:40:36.149Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_CratesA_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "3f2988b4-7e9a-48db-b2ca-cc033d6c4ca1",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 119244044357414,
+   "uploadedUtc": "2026-11-12T01:40:44.895Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_CratesB_Metalness.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "474dcff8-8756-45fc-9ba2-b29decbb4435",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 76545059140292,
+   "uploadedUtc": "2026-11-12T01:40:51.099Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_CratesB_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "9783c5dc-c0e9-442d-9d08-4b691ad8035c",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 126957601838809,
+   "uploadedUtc": "2026-11-12T01:40:59.316Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_Supplies_Metalness.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "7eada37e-d662-4504-b52e-96633e6e52c6",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 128319105579394,
+   "uploadedUtc": "2026-11-12T01:41:05.901Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_Supplies_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "a0512d2e-955e-462f-a649-63ab3b6d742e",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 86699433914894,
+   "uploadedUtc": "2026-11-12T01:41:15.636Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_Weapons_Metalness.png": {
+   "kind": "metalness",
+   "assetType": "Image",
+   "operationId": "7da12c7b-d97d-4620-a102-8592b172e579",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 126616807138424,
+   "uploadedUtc": "2026-11-12T01:41:23.025Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/ItemsReal/IR_Weapons_Roughness.png": {
+   "kind": "roughness",
+   "assetType": "Image",
+   "operationId": "f3b8da22-6e40-47a5-b445-06f6578e4d36",
+   "source": "upload",
+   "moderationState": "Approved",
+   "assetId": 132989985409106,
+   "uploadedUtc": "2026-11-12T01:41:30.769Z",
+   "verified": "EditableImage readback: same size, grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "textures/TreesReal/TR_BarkConifer_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 81332070376471,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BarkConifer_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 132866956562031,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_ConiferAtlas_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 85896924655092,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_ConiferAtlas_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 103730983906375,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BarkOak_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 104424902253992,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BarkOak_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 139368915789380,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BarkBirch_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 105450671024101,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BarkBirch_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 128171756263310,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BroadleafAtlas_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 94134417889453,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_BroadleafAtlas_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 131614719198657,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_Deadwood_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 79296974743849,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/TreesReal/TR_Deadwood_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 89705003207269,
+   "source": "importer",
+   "createdBy": "TreesReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with TreesReal.glb (model revision 2026-11-12T01:36:42.144Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Plants_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 140424583898788,
+   "source": "importer",
+   "createdBy": "GroundReal_Flora.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Flora.glb (model revision 2026-11-12T01:22:59Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Plants_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 81507085904195,
+   "source": "importer",
+   "createdBy": "GroundReal_Flora.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Flora.glb (model revision 2026-11-12T01:22:59Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Shrubs_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 90259594919684,
+   "source": "importer",
+   "createdBy": "GroundReal_Flora.glb",
+   "alsoEmbeddedIn": [
+    "GroundReal_Cliffs.glb"
+   ],
+   "uploadedUtc": "with GroundReal_Flora.glb (model revision 2026-11-12T01:22:59Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Shrubs_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 88236644004111,
+   "source": "importer",
+   "createdBy": "GroundReal_Flora.glb",
+   "alsoEmbeddedIn": [
+    "GroundReal_Cliffs.glb"
+   ],
+   "uploadedUtc": "with GroundReal_Flora.glb (model revision 2026-11-12T01:22:59Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage2_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 106179377112753,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage2_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 98435083063372,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage3_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 93491376557414,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage3_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 82411519398816,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage1_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 93711019554757,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_RockPage1_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 115235963331940,
+   "source": "importer",
+   "createdBy": "GroundReal_Rocks.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Rocks.glb (model revision 2026-11-12T01:36:49.756Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Granite_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 99851720726901,
+   "source": "importer",
+   "createdBy": "GroundReal_Cliffs.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Cliffs.glb (model revision 2026-11-12T01:36:59.040Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/GroundReal/GR_Granite_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 78047208984257,
+   "source": "importer",
+   "createdBy": "GroundReal_Cliffs.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with GroundReal_Cliffs.glb (model revision 2026-11-12T01:36:59.040Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Granite_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 137484684046124,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Granite_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 122030374472764,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_StoneTrim_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 130148934258165,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_StoneTrim_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 91433396146274,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Iron_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 110819260453510,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Iron_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 127648030396571,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Wood_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 89944243303572,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Wood_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 80622037222988,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Misc_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 99842538106498,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/LandmarksReal/LR_Misc_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 94779078872752,
+   "source": "importer",
+   "createdBy": "LandmarksReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with LandmarksReal.glb (model revision 2026-11-12T01:37:26.248Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Log_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 119182305898723,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Log_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 115374863723304,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Wood_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 123822790176387,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Wood_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 74663389927961,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Shake_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 138095161030277,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Shake_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 80615043551447,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Kit_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 84268034947289,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Kit_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 72320529159899,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Stone_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 73831443930932,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/BuildingsReal/BR_Stone_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 98694815077924,
+   "source": "importer",
+   "createdBy": "BuildingsReal.glb",
+   "alsoEmbeddedIn": [
+    "PropsReal.glb"
+   ],
+   "uploadedUtc": "with BuildingsReal.glb (model revision 2026-11-12T01:37:42.461Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_Weapons_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 90912889661017,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_Weapons_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 71536434401451,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_Supplies_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 120724266524592,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_Supplies_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 88355305021411,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_CratesA_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 124892034765047,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_CratesA_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 130891652468745,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_CratesB_Color.png": {
+   "kind": "color",
+   "assetType": "Image",
+   "assetId": 113453802268091,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  },
+  "textures/ItemsReal/IR_CratesB_Normal.png": {
+   "kind": "normal",
+   "assetType": "Image",
+   "assetId": 75166794330743,
+   "source": "importer",
+   "createdBy": "ItemsReal.glb",
+   "alsoEmbeddedIn": [],
+   "uploadedUtc": "with ItemsReal.glb (model revision 2026-11-12T01:38:14.470Z)",
+   "moderationState": "Approved",
+   "verified": "EditableImage readback: same size, mean of a 1/64 grid equal to 0.01, 9 sample pixels x 4 channels equal"
+  }
+ },
+ "imageDecision": {
+  "decidedUtc": "2026-11-12T01:40:00Z",
+  "decision": "ColorMap and NormalMap reuse the images the Open Cloud importer uploaded implicitly from each GLB (52 files), each checked by pixel readback against its PNG. RoughnessMap and MetalnessMap use the 25 grayscale PNGs from uploadTextures (19 roughness + 6 metalness), uploaded once each as Image assets. Importer roughness/metalness images are never referenced. Files embedded in two GLBs (GR_Shrubs_*, BR_Wood/Kit/Stone/Log_*) keep the id from their first import (GroundReal_Flora, BuildingsReal). If an importer image fails the readback check, that PNG is uploaded instead (once).",
+  "evidence": [
+   "Every embedded Color and Normal image in the 8 GLBs is byte-identical (sha256) to its upload PNG; no roughness or metalness PNG is embedded (the GLBs carry packed MR/ORM copies instead).",
+   "GroundReal_Flora import: 16/16 MeshParts, each with an importer SurfaceAppearance; GR_Plants images Color 140424583898788, Normal 81507085904195, Roughness 86627699425187, Metalness 123004125232832 (shared with GR_Shrubs); GR_Shrubs Color 90259594919684, Normal 88236644004111, Roughness 71789053819131. All are Image assets owned by user 5458010221, displayName image, Approved, created 01:22:59Z just before the model revision.",
+   "EditableImage readback, GR_Plants: Color 1024x1024, the same 5 sample pixels as the PNG (including colour in transparent texels), alpha<128 on 63.2% vs 63.3%; Normal 1024x1024, the same 5 sample pixels (G not flipped); Roughness 512x512 (the PNG is 1024x1024); Metalness 512x512 flat 0.",
+   "Packed MR vs authored maps (means equal): half resolution for GR_Plants/GR_Shrubs (512 vs 1024) and all LandmarksReal sheets (256 vs 512); BuildingsReal non-metal sheets have B mean 1/255 (would give non-empty metalness where the manifest says null); non-metal sets get an extra flat-black metalness image.",
+   "The importer leaves AlphaMode Overlay on the MASK card materials: cards render as grey boxes until AlphaMode = Transparency (screen capture)."
+  ],
+  "uploadsPlanned": {
+   "models": 8,
+   "images": 25
+  },
+  "result": "52 importer Color/Normal images verified pixel-exact (one id per file; the importer de-duplicated GR_Shrubs_* and BR_Log/Wood/Kit/Stone_* across GLBs); 25 grayscale PNGs uploaded once each and verified. 77 of 77 upload images covered."
+ },
+ "importerUnused": {
+  "note": "Images the Open Cloud importer created implicitly from the GLBs that no template references: roughness and metalness derived from the packed glTF metallicRoughness/ORM maps, and one ColorMap baked from the PropsReal ember material (base colour + emissive). Approved assets on the account. RealAssets uses the uploaded grayscale PNGs for roughness/metalness and builds embers as Neon parts without a SurfaceAppearance.",
+  "roughness": [
+   86627699425187,
+   71789053819131,
+   90029405353475,
+   102140469170459,
+   113200252864103,
+   136804922893279,
+   78810386329049,
+   94310023265335,
+   118546333825142,
+   136111871466801,
+   109385296450205,
+   134945999007360,
+   80645670719871,
+   73918653107202,
+   111367416714236,
+   94936723665532,
+   77081559534283,
+   90647819925250,
+   88777565329287
+  ],
+  "metalness": [
+   123004125232832,
+   133135854343425,
+   119793346030789,
+   80792014050504,
+   136650552163278,
+   113653877094705,
+   118325863763077,
+   74590543544571,
+   95503468839773
+  ],
+  "color": [
+   130802519081423
+  ],
+  "details": {
+   "130802519081423": {
+    "kind": "color (emissive baked in)",
+    "createdBy": "PropsReal.glb",
+    "glbMaterial": "BR_Kit_Ember: baseColorTexture BR_Kit_Color, emissiveTexture BR_Kit_Color, emissiveFactor [1,1,1]",
+    "usedIn": "ServerStorage.MeshImports.LS_PropsReal_v1 only: ColorMap of Lantern_Ember and Campfire_Ember (2 SurfaceAppearances). No template references it.",
+    "assetType": "Image",
+    "displayName": "image",
+    "creator": "user 5458010221",
+    "revisionCreateTime": "2026-11-12T01:37:49.239Z",
+    "moderationState": "Approved",
+    "readback": "EditableImage 1024x1024. 32x32-grid mean RGBA 190.9/168.7/137.1/236.9 vs BR_Kit_Color (84268034947289) 127.5/113.6/92.8/236.9, alpha identical: BR_Kit_Color brightened by the emissive term, not a copy of any upload PNG.",
+    "addedUtc": "2026-11-12 (fix round, verifier finding 3)"
+   }
+  }
+ },
+ "duplicateUploadAudit": {
+  "checkedUtc": "2026-11-12T06:53Z",
+  "result": "No duplicate upload found. Every file in this ledger was uploaded once (8 GLBs + 25 PNGs = 33 Open Cloud creates), the importer ran once per GLB, and every account-side listing that can be read shows each upload once.",
+  "ledgerUniqueIds": 114,
+  "ledgerBreakdown": "8 models + 77 image files (52 importer Color/Normal + 25 uploaded grayscale PNGs) + 29 importerUnused (19 roughness, 9 metalness, 1 ember colour)",
+  "imagesFromTheseUploads": "106 Image assets: 81 importer-made (all referenced by the 8 raw imports in ServerStorage.MeshImports) + 25 uploaded PNGs",
+  "methods": [
+   {
+    "method": "Open Cloud GET /cloud/v2/users/5458010221/inventory-items?filter=inventoryItemAssetTypes=MODEL (the verifier's method for models)",
+    "result": "10 MODEL items, nextPageToken empty: LS_Items_v1 89569069083663 and LS_Arms_v1 130319005401961 (2026-11-11) plus the 8 realistic models once each (2026-11-12T01:23:04Z-01:38:14Z). So each GLB was imported once."
+   },
+   {
+    "method": "Open Cloud inventory with inventoryItemAssetTypes=IMAGE, or assetIds=<image ids>",
+    "result": "Not usable for images: IMAGE is not an InventoryItemAssetType, and an assetIds filter with three image ids returns 500 INTERNAL. Assets v1 only reads by id."
+   },
+   {
+    "method": "Studio MCP search_asset scope=user assetType=Image (the Toolbox inventory search; max 20 results per query, no paging)",
+    "result": "Empty query lists the account's Image assets newest first: the top 20 are exactly the last 20 PNG uploads in reverse upload order (IR_Weapons_Roughness 01:41:30Z ... LR_Granite_Rough 01:39:07Z), so no Image was created on the account after the last ledger upload. Name searches 'Rough', 'Roughness' and 'Metal' return each of the 25 uploaded PNG names exactly once, with the ledger id, ahead of other assets (0 same-name duplicates). Query 'image' (the importer's displayName) returns the 20 highest-id importer images, all in this ledger. assetType=Decal returns 0 assets."
+   },
+   {
+    "method": "Transcript audit: every tool call in the 102 Claude Code transcripts of this project (main sessions + all workflow subagents)",
+    "result": "35 Open Cloud asset creates in total: LS_Items_v1 and LS_Arms_v1 on 2026-11-11, and the 33 realistic uploads on 2026-11-12 (01:22:40Z-01:41:20Z), one per file, each 200 OK with the operationId recorded here. 0 PATCH (new versions), 0 retries, 0 upload_image/store_image calls, 0 Luau CreateAssetAsync. Other image-making calls: 10 generate_material calls for terrain materials (LS_MeadowGrass and others) by another agent on 2026-11-11T06:04Z, the likely source of the 'Generated ColorMap/NormalMap/RoughnessMap/MetalnessMap' images on the account (not ours)."
+   },
+   {
+    "method": "Place sweep (Edit mode): every SurfaceAppearance map, TextureID and Decal in the 8 raw imports, then every SurfaceAppearance in Workspace, ServerStorage, ReplicatedStorage, StarterPlayer, StarterGui, StarterPack, Lighting and ServerScriptService",
+    "result": "Raw imports: 81 distinct image ids (27 ColorMap, 26 NormalMap, 19 RoughnessMap, 9 MetalnessMap), all in this ledger after adding 130802519081423; 0 TextureIDs, 0 Decals. Whole place: 1127 SurfaceAppearances reference 106 distinct ids, all in this ledger (77 image files + 29 importerUnused); every image file appears, none under two ids."
+   }
+  ],
+  "limit": "The search tool returns at most 20 results per query and has no paging, and Open Cloud cannot list Image assets, so the 61 lower-id importer images cannot be listed account-wide. An unreferenced importer-made copy there is ruled out indirectly: one import per GLB (model inventory + transcript audit), and the importer reuses an existing id for identical content (GroundReal_Cliffs reused GroundReal_Flora's GR_Shrubs ids; PropsReal reused BuildingsReal's BR_* ids)."
+ }
+}

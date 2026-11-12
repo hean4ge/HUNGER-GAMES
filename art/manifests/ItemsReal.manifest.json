@@ -1,0 +1,4586 @@
+{
+ "category": "ItemsReal",
+ "glb": "ItemsReal.glb",
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "textureSets": {
+  "IR_Weapons": {
+   "images": {
+    "color": "textures/ItemsReal/IR_Weapons_Color.png",
+    "normal": "textures/ItemsReal/IR_Weapons_Normal.png",
+    "roughness": "textures/ItemsReal/IR_Weapons_Roughness.png",
+    "metalness": "textures/ItemsReal/IR_Weapons_Metalness.png"
+   },
+   "resolution": 1024,
+   "assets": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife"
+   ],
+   "colorAlpha": null,
+   "pxPerStud": {
+    "knife": 275.3,
+    "machete": 258.5,
+    "hatchet": 230.4,
+    "spear": 199.3,
+    "mace": 224.8,
+    "sword": 230.4,
+    "bow": 168.6,
+    "arrow": 213.5,
+    "throwing_knife": 269.7
+   }
+  },
+  "IR_Supplies": {
+   "images": {
+    "color": "textures/ItemsReal/IR_Supplies_Color.png",
+    "normal": "textures/ItemsReal/IR_Supplies_Normal.png",
+    "roughness": "textures/ItemsReal/IR_Supplies_Roughness.png",
+    "metalness": "textures/ItemsReal/IR_Supplies_Metalness.png"
+   },
+   "resolution": 1024,
+   "assets": [
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit"
+   ],
+   "colorAlpha": "opacity (AlphaMode Transparency parts only; 1 elsewhere)",
+   "pxPerStud": {
+    "water_bottle": 245.0,
+    "empty_bottle": 294.0,
+    "berries": 269.5,
+    "apple": 245.0,
+    "dried_meat": 294.0,
+    "ration": 263.4,
+    "bandage": 263.4,
+    "herbs": 245.0,
+    "medkit": 245.0
+   }
+  },
+  "IR_CratesA": {
+   "images": {
+    "color": "textures/ItemsReal/IR_CratesA_Color.png",
+    "normal": "textures/ItemsReal/IR_CratesA_Normal.png",
+    "roughness": "textures/ItemsReal/IR_CratesA_Roughness.png",
+    "metalness": "textures/ItemsReal/IR_CratesA_Metalness.png"
+   },
+   "resolution": 1024,
+   "assets": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ],
+   "colorAlpha": null,
+   "pxPerStud": {
+    "SupplyCrate1": 52.7,
+    "SupplyCrate2": 62.8
+   }
+  },
+  "IR_CratesB": {
+   "images": {
+    "color": "textures/ItemsReal/IR_CratesB_Color.png",
+    "normal": "textures/ItemsReal/IR_CratesB_Normal.png",
+    "roughness": "textures/ItemsReal/IR_CratesB_Roughness.png",
+    "metalness": "textures/ItemsReal/IR_CratesB_Metalness.png"
+   },
+   "resolution": 1024,
+   "assets": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "colorAlpha": null,
+   "pxPerStud": {
+    "SupplyCrate3": 59.0,
+    "leather_vest": 54.9,
+    "padded_armor": 54.9
+   }
+  }
+ },
+ "assets": [
+  {
+   "name": "knife",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Clip-point survival knife: carbon-steel blade with a saber grind and honed edge, oval steel guard, stacked-leather-washer handle with fibre spacers, steel pommel with peened tang nut. Grip (handle centre) at origin, blade +Z, edge +Y.",
+   "origin": [
+    0.0543,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.109,
+    1.35,
+    0.27
+   ],
+   "boundsMin": [
+    -0.0543,
+    -0.33,
+    -0.165
+   ],
+   "boundsMax": [
+    0.0543,
+    1.02,
+    0.105
+   ],
+   "tris": 1788,
+   "parts": [
+    {
+     "name": "knife_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      143,
+      142,
+      143
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 752,
+     "pxPerStud": 258.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "knife_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      75,
+      48,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1036,
+     "pxPerStud": 292.2,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      1.02,
+      -0.03
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "machete",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Latin machete with an upswept tip: blackened carbon steel worn to bare metal at the edge (file-sharpened band), full tang between hardwood scales with three brass-lined rivets, cord lanyard. Grip at origin.",
+   "origin": [
+    4.1669,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.116,
+    2.533,
+    0.341
+   ],
+   "boundsMin": [
+    -0.0579,
+    -0.4535,
+    -0.262
+   ],
+   "boundsMax": [
+    0.0579,
+    2.08,
+    0.079
+   ],
+   "tris": 1008,
+   "parts": [
+    {
+     "name": "machete_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      154,
+      152,
+      151
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 708,
+     "pxPerStud": 224.8,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "machete_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      82,
+      50,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 300,
+     "pxPerStud": 292.2,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      2.08,
+      -0.19
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "hatchet",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Axe"
+   ],
+   "notes": "Bearded hatchet: hand-forged head left black with forge scale, the bit ground bright; hickory haft (oval, swelled knob) with hand grime, wedged through the eye. Grip at origin, bit faces +Y.",
+   "origin": [
+    8.2794,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.109,
+    2.14,
+    0.65
+   ],
+   "boundsMin": [
+    -0.0544,
+    -0.4,
+    -0.5
+   ],
+   "boundsMax": [
+    0.0544,
+    1.74,
+    0.15
+   ],
+   "tris": 1008,
+   "parts": [
+    {
+     "name": "hatchet_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      68,
+      68,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 468,
+     "pxPerStud": 247.2,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "hatchet_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      153,
+      117,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 540,
+     "pxPerStud": 213.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      1.46,
+      -0.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "spear",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Thrown",
+    "Polearm"
+   ],
+   "notes": "7-stud ash spear: hand-forged leaf head with a diamond midrib and bright honed edges on a riveted conical socket, cord binding, leather grip at the balance point (origin), torn red rag, iron butt spike.",
+   "origin": [
+    12.4089,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.212,
+    7.02,
+    0.3
+   ],
+   "boundsMin": [
+    -0.0749,
+    -2.62,
+    -0.15
+   ],
+   "boundsMax": [
+    0.1366,
+    4.4,
+    0.15
+   ],
+   "tris": 2432,
+   "parts": [
+    {
+     "name": "spear_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      71,
+      71,
+      73
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 724,
+     "pxPerStud": 247.2,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "spear_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      139,
+      104,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1708,
+     "pxPerStud": 151.4,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      4.4,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "mace",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blunt"
+   ],
+   "notes": "Forged flanged mace: six pointed flanges on an iron core with a top spike, collar and riveted langets down an oak haft, leather-wrapped grip, iron pommel. Grip at origin, a flange faces +Y.",
+   "origin": [
+    16.7534,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.415,
+    2.81,
+    0.464
+   ],
+   "boundsMin": [
+    -0.2074,
+    -0.43,
+    -0.232
+   ],
+   "boundsMax": [
+    0.2074,
+    2.38,
+    0.232
+   ],
+   "tris": 1844,
+   "parts": [
+    {
+     "name": "mace_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      46,
+      37,
+      37
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1180,
+     "pxPerStud": 224.8,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "mace_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      54,
+      35
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 664,
+     "pxPerStud": 224.8,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      2.38,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "sword",
+   "kind": "Weapon",
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Arming sword: lenticular blade with a fuller, honed edges, forged crossguard, leather grip over cord risers with cord-bound ends, aged brass wheel pommel with a peened tang. Grip at origin.",
+   "origin": [
+    21.0125,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.103,
+    3.682,
+    0.75
+   ],
+   "boundsMin": [
+    -0.0515,
+    -0.632,
+    -0.375
+   ],
+   "boundsMax": [
+    0.0515,
+    3.05,
+    0.375
+   ],
+   "tris": 2440,
+   "parts": [
+    {
+     "name": "sword_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      177,
+      175,
+      172
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1372,
+     "pxPerStud": 191.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "sword_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      54,
+      36,
+      24
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1068,
+     "pxPerStud": 269.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      3.05,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "bow",
+   "kind": "Weapon",
+   "tags": [
+    "Ranged",
+    "Bow"
+   ],
+   "notes": "Traditional recurve: ash limbs with horn tip overlays, walnut riser with an arrow shelf, stitched leather grip, waxed linen string with dark centre serving and a brass nock point. Grip at origin; string centre / Nock at z = 0.2 so the arrow clears the hand; ArrowRest on the -X side of the riser window. bow_Rope = string + serving + nock bead (hide it while drawing and draw Beams StringTop -> Nock -> StringBottom).",
+   "origin": [
+    25.132,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.172,
+    4.522,
+    0.561
+   ],
+   "boundsMin": [
+    -0.068,
+    -2.0611,
+    -0.1229
+   ],
+   "boundsMax": [
+    0.1045,
+    2.4611,
+    0.4379
+   ],
+   "tris": 1996,
+   "parts": [
+    {
+     "name": "bow_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      133,
+      101,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1528,
+     "pxPerStud": 179.8,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "bow_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      173,
+      161,
+      136
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 468,
+     "pxPerStud": 157.3,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0.0,
+      0.2,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0.0,
+      2.32,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0.0,
+      -1.92,
+      0.4168
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.04,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "arrow",
+   "kind": "Ammo",
+   "tags": [
+    "Ranged",
+    "Ammo"
+   ],
+   "notes": "Cedar arrow: horn nock insert (origin = nock throat = Grip = Nock; slot along Y), three shield-cut turkey fletchings (barred red cock feather points +X), sinew bindings, socketed steel broadhead. Align arrow +Y with the bow string.",
+   "origin": [
+    29.2897,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.158,
+    3.055,
+    0.182
+   ],
+   "boundsMin": [
+    -0.0537,
+    -0.055,
+    -0.0911
+   ],
+   "boundsMax": [
+    0.104,
+    3.0,
+    0.0911
+   ],
+   "tris": 1128,
+   "parts": [
+    {
+     "name": "arrow_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      155,
+      122,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 836,
+     "pxPerStud": 202.3,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "arrow_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      132,
+      131,
+      132
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 292,
+     "pxPerStud": 224.8,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      3.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "throwing_knife",
+   "kind": "Weapon",
+   "tags": [
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "One-piece stonewashed throwing knife: double-edged spear-point blade, flat tang under an olive paracord wrap, steel ring pommel. Grip at origin, blade +Z.",
+   "origin": [
+    33.4215,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.055,
+    1.022,
+    0.152
+   ],
+   "boundsMin": [
+    -0.0275,
+    -0.3622,
+    -0.0759
+   ],
+   "boundsMax": [
+    0.0275,
+    0.66,
+    0.0759
+   ],
+   "tris": 1488,
+   "parts": [
+    {
+     "name": "throwing_knife_Steel",
+     "role": "Steel",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      174,
+      174,
+      174
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 832,
+     "pxPerStud": 269.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "throwing_knife_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      66,
+      67,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 656,
+     "pxPerStud": 269.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Weapons_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Weapons_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Weapons_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Weapons_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0.0,
+      0.66,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "water_bottle",
+   "kind": "Drink",
+   "tags": [
+    "Drink"
+   ],
+   "notes": "Heavy old green-tinted bottle glass (seed bubbles, mould seams, smudges) holding water, knurled tin screw cap, stitched leather sleeve. Grip = body centre at origin. Glass and WaterFill use AlphaMode Transparency with MeshPart.Transparency 0.02 (alpha = opacity).",
+   "origin": [
+    37.6735,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.449,
+    1.0,
+    0.449
+   ],
+   "boundsMin": [
+    -0.2245,
+    -0.4,
+    -0.2245
+   ],
+   "boundsMax": [
+    0.2245,
+    0.6,
+    0.2245
+   ],
+   "tris": 1440,
+   "parts": [
+    {
+     "name": "water_bottle_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      115,
+      148,
+      118
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 760,
+     "pxPerStud": 196.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.02,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "water_bottle_WaterFill",
+     "role": "WaterFill",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      64,
+      98,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "pxPerStud": 51.4,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.02,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "water_bottle_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      171,
+      170,
+      166
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 280,
+     "pxPerStud": 318.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "water_bottle_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      62,
+      40,
+      24
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "pxPerStud": 294.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Mouth": {
+     "position": [
+      0.0,
+      0.6,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "empty_bottle",
+   "kind": "Drink",
+   "tags": [
+    "Drink",
+    "Refillable"
+   ],
+   "notes": "The same bottle, empty and open; the tin cap hangs on a twine cord from a wire collar round the neck. Grip = body centre at origin. Glass: AlphaMode Transparency, Transparency 0.02.",
+   "origin": [
+    42.108,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.641,
+    0.902,
+    0.42
+   ],
+   "boundsMin": [
+    -0.21,
+    -0.4,
+    -0.21
+   ],
+   "boundsMax": [
+    0.4311,
+    0.502,
+    0.21
+   ],
+   "tris": 1528,
+   "parts": [
+    {
+     "name": "empty_bottle_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      117,
+      152,
+      122
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 880,
+     "pxPerStud": 196.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.02,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "empty_bottle_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      169,
+      168,
+      165
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 280,
+     "pxPerStud": 318.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "empty_bottle_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      110,
+      93,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 368,
+     "pxPerStud": 294.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Mouth": {
+     "position": [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "berries",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Sprig of glossy wild berries (ripe dark red to a few lighter, 2.3-3.3 cm) on fine stalks from a woody twig with three leaves. Grip = cluster centre at origin.",
+   "origin": [
+    46.6925,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.341,
+    0.7,
+    0.234
+   ],
+   "boundsMin": [
+    -0.1535,
+    -0.1544,
+    -0.1279
+   ],
+   "boundsMax": [
+    0.1871,
+    0.5453,
+    0.1066
+   ],
+   "tris": 2332,
+   "parts": [
+    {
+     "name": "berries_Berry",
+     "role": "Berry",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      101,
+      15,
+      27
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1440,
+     "pxPerStud": 318.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "berries_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      71,
+      49,
+      33
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 736,
+     "pxPerStud": 207.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "berries_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      96,
+      113,
+      65
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 156,
+     "pxPerStud": 269.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "apple",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "10 cm red apple: streaky blush over yellow-green ground colour, lenticel specks, waxy bloom, russet stem cavity, calyx basin, woody stem and one leaf. Grip = apple centre at origin.",
+   "origin": [
+    51.0367,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.317,
+    0.314,
+    0.317
+   ],
+   "boundsMin": [
+    -0.1567,
+    -0.1282,
+    -0.1591
+   ],
+   "boundsMax": [
+    0.1601,
+    0.1857,
+    0.1579
+   ],
+   "tris": 756,
+   "parts": [
+    {
+     "name": "apple_Food",
+     "role": "Food",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      144,
+      66,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 624,
+     "pxPerStud": 306.2,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "apple_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      67,
+      48,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 80,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "apple_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      93,
+      105,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "dried_meat",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Smoke-cured shank of meat on the bone: dark crusted outside with pale fat seams and cracked pepper, a cut top face showing lean and marbling, two turns of twine; the hock bone sticks out below and is the grip (origin).",
+   "origin": [
+    55.3524,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.368,
+    0.845,
+    0.322
+   ],
+   "boundsMin": [
+    -0.1554,
+    -0.1904,
+    -0.1612
+   ],
+   "boundsMax": [
+    0.2128,
+    0.655,
+    0.1612
+   ],
+   "tris": 1016,
+   "parts": [
+    {
+     "name": "dried_meat_Food",
+     "role": "Food",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      71,
+      29,
+      19
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 320,
+     "pxPerStud": 294.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "dried_meat_Plaster",
+     "role": "Plaster",
+     "robloxMaterial": "Plaster",
+     "rgb": [
+      173,
+      153,
+      119
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 168,
+     "pxPerStud": 269.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "dried_meat_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      100,
+      83,
+      59
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 528,
+     "pxPerStud": 294.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "ration",
+   "kind": "Food",
+   "tags": [
+    "Food"
+   ],
+   "notes": "Tinplate ration tin with rolled double-seam rims, beading, a pull ring on the lid, rust at the seams; aged olive paper label (cream band, unreadable small print, rust-red rules). Grip = tin centre at origin.",
+   "origin": [
+    59.81,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.49,
+    0.666,
+    0.485
+   ],
+   "boundsMin": [
+    -0.245,
+    -0.333,
+    -0.2425
+   ],
+   "boundsMax": [
+    0.245,
+    0.333,
+    0.2425
+   ],
+   "tris": 1556,
+   "parts": [
+    {
+     "name": "ration_Tin",
+     "role": "Tin",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      118,
+      111,
+      105
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1380,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "ration_Paper",
+     "role": "Paper",
+     "robloxMaterial": "Cardboard",
+     "rgb": [
+      87,
+      89,
+      59
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "pxPerStud": 281.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "bandage",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Roll of open-weave cotton gauze (axis X, wound layers on the dished ends) with the loose end hanging and two toothed steel clips. Grip = roll centre at origin.",
+   "origin": [
+    64.2159,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.321,
+    0.423,
+    0.266
+   ],
+   "boundsMin": [
+    -0.1609,
+    -0.337,
+    -0.1799
+   ],
+   "boundsMax": [
+    0.1604,
+    0.0862,
+    0.086
+   ],
+   "tris": 796,
+   "parts": [
+    {
+     "name": "bandage_Bandage",
+     "role": "Bandage",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      207,
+      201,
+      186
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 644,
+     "pxPerStud": 281.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "bandage_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      158,
+      156,
+      153
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 152,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "herbs",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Bundle of fresh sage: seven square stems with soft grey-green, velvety, pebbled leaves in opposite pairs, tied with two turns of twine. Grip = the tie at origin.",
+   "origin": [
+    68.5285,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.297,
+    0.654,
+    0.276
+   ],
+   "boundsMin": [
+    -0.1525,
+    -0.2179,
+    -0.1389
+   ],
+   "boundsMax": [
+    0.1447,
+    0.4359,
+    0.1376
+   ],
+   "tris": 2180,
+   "parts": [
+    {
+     "name": "herbs_Fern",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      107,
+      117,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1560,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "herbs_Fern_2",
+     "role": "Fern",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      80,
+      53
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 312,
+     "pxPerStud": 196.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "herbs_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      113,
+      95,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 308,
+     "pxPerStud": 269.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "medkit",
+   "kind": "Medical",
+   "tags": [
+    "Medical",
+    "Heal"
+   ],
+   "notes": "Rust-red waxed-canvas medic bag (white cross patch sewn on the front - not the protected red-on-white emblem), flap with two leather straps and brass buckles, riveted leather carry handle. Grip = the carry handle at origin; the bag hangs below.",
+   "origin": [
+    73.1844,
+    0.0,
+    0.0
+   ],
+   "size": [
+    1.022,
+    0.778,
+    0.474
+   ],
+   "boundsMin": [
+    -0.5114,
+    -0.756,
+    -0.2595
+   ],
+   "boundsMax": [
+    0.5105,
+    0.022,
+    0.2147
+   ],
+   "tris": 1088,
+   "parts": [
+    {
+     "name": "medkit_Canvas",
+     "role": "Canvas",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      94,
+      40,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 372,
+     "pxPerStud": 220.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "medkit_DarkLeather",
+     "role": "DarkLeather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      53,
+      33,
+      22
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 540,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "medkit_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      133,
+      117,
+      83
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "pxPerStud": 245.0,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_Supplies_Color.png",
+      "normalMap": "textures/ItemsReal/IR_Supplies_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_Supplies_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_Supplies_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "SupplyCrate1",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier1"
+   ],
+   "notes": "Tier 1: plain crate of weathered, sun-silvered pine boards (raised grain, checks, rusty nail stains, grime and a little moss low down), diagonal braces, leather strap hinges. Lid = SupplyCrate1_Lid (opens ~100 degrees about LidHinge).",
+   "origin": [
+    79.6987,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.008,
+    2.205,
+    2.65
+   ],
+   "boundsMin": [
+    -2.0037,
+    -0.0053,
+    -1.3253
+   ],
+   "boundsMax": [
+    2.0047,
+    2.1996,
+    1.3245
+   ],
+   "tris": 1104,
+   "parts": [
+    {
+     "name": "SupplyCrate1_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      107,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 364,
+     "pxPerStud": 39.4,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate1_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      90,
+      79,
+      66
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 480,
+     "pxPerStud": 52.7,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate1_Lid",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      116,
+      107,
+      95
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 260,
+     "pxPerStud": 57.1,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.96,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "SupplyCrate2",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier2"
+   ],
+   "notes": "Tier 2: sturdier crate of warmer, less weathered pine with riveted bent-steel corner caps, a riveted tag plate, laid-rope handles through iron eyes on both ends. Lid = SupplyCrate2_Lid (+ SupplyCrate2_LidMetal corner caps riding on it).",
+   "origin": [
+    87.8725,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.339,
+    2.207,
+    2.62
+   ],
+   "boundsMin": [
+    -2.1695,
+    -0.0042,
+    -1.31
+   ],
+   "boundsMax": [
+    2.1695,
+    2.2032,
+    1.31
+   ],
+   "tris": 2044,
+   "parts": [
+    {
+     "name": "SupplyCrate2_Planks",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      118,
+      94,
+      68
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 252,
+     "pxPerStud": 37.3,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate2_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      94,
+      74,
+      52
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 336,
+     "pxPerStud": 51.3,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate2_Metal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      52,
+      34,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 636,
+     "pxPerStud": 68.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate2_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      114,
+      93,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 536,
+     "pxPerStud": 68.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate2_Lid",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      119,
+      96,
+      70
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 140,
+     "pxPerStud": 57.1,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate2_LidMetal",
+     "role": "Metal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      48,
+      35,
+      33
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 144,
+     "pxPerStud": 68.5,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesA_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesA_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesA_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesA_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.96,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "SupplyCrate3",
+   "kind": "Crate",
+   "tags": [
+    "LootCrate",
+    "Tier3"
+   ],
+   "notes": "Tier 3: dark-stained, iron-banded chest: blackened forged-iron corner angles, straps, lock plate, hasp and strap hinges (pitted, rust in the pits, worn bright on the edges), the arena's Spire 'Cleft' sigil burnt into the lid, a faint ember glow leaking from the lid seam (SupplyCrate3_Ember, separate Neon part). Lid = SupplyCrate3_Lid (+ SupplyCrate3_LidDarkMetal).",
+   "origin": [
+    96.056,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.028,
+    2.234,
+    2.727
+   ],
+   "boundsMin": [
+    -2.014,
+    -0.0034,
+    -1.3685
+   ],
+   "boundsMax": [
+    2.014,
+    2.231,
+    1.3585
+   ],
+   "tris": 2140,
+   "parts": [
+    {
+     "name": "SupplyCrate3_DarkPlanks",
+     "role": "DarkPlanks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      55,
+      43,
+      33
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 588,
+     "pxPerStud": 40.4,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate3_DarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      51,
+      38,
+      35
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1072,
+     "pxPerStud": 63.1,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate3_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      236,
+      112,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 32,
+     "surfaceAppearance": null,
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": true
+    },
+    {
+     "name": "SupplyCrate3_Lid",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      58,
+      45,
+      35
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 140,
+     "pxPerStud": 54.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "SupplyCrate3_LidDarkMetal",
+     "role": "DarkMetal",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      55,
+      43,
+      41
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ],
+     "tris": 308,
+     "pxPerStud": 63.1,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0.0,
+      1.99,
+      1.3
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0.0,
+      1.2,
+      -1.45
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0.0,
+      0.2,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "leather_vest",
+   "kind": "Armor",
+   "tags": [
+    "Armor",
+    "Wearable"
+   ],
+   "notes": "Oil-tanned leather vest: pebbled grain, creases at the arm holes and waist, scuffed lighter edges, darker hand-worn trim at the hem and placket, three brass toggles, laced sides. Grip = back of the collar at origin (vest hangs below); 'Torso' = cavity centre for wearing.",
+   "origin": [
+    103.2166,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.293,
+    2.367,
+    1.401
+   ],
+   "boundsMin": [
+    -1.1466,
+    -2.292,
+    -1.1309
+   ],
+   "boundsMax": [
+    1.1466,
+    0.0749,
+    0.2699
+   ],
+   "tris": 2124,
+   "parts": [
+    {
+     "name": "leather_vest_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      87,
+      56,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1588,
+     "pxPerStud": 54.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "leather_vest_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      129,
+      112,
+      79
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 84,
+     "pxPerStud": 65.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "leather_vest_Rope",
+     "role": "Rope",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      66,
+      48,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 452,
+     "pxPerStud": 54.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Torso": {
+     "position": [
+      0.0,
+      -1.13,
+      -0.4091
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  },
+  {
+   "name": "padded_armor",
+   "kind": "Armor",
+   "tags": [
+    "Armor",
+    "Wearable"
+   ],
+   "notes": "Quilted linen gambeson (vertical stitched channels, stuffed and puffy, faded and grubby), leather standing collar, placket and hem, three leather straps with brass buckles. Grip = back of the collar at origin; 'Torso' = cavity centre for wearing.",
+   "origin": [
+    109.553,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.38,
+    2.492,
+    1.533
+   ],
+   "boundsMin": [
+    -1.19,
+    -2.492,
+    -1.1988
+   ],
+   "boundsMax": [
+    1.19,
+    0.0,
+    0.3341
+   ],
+   "tris": 1984,
+   "parts": [
+    {
+     "name": "padded_armor_Cloth",
+     "role": "Cloth",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      153,
+      126,
+      85
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1288,
+     "pxPerStud": 54.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "padded_armor_Leather",
+     "role": "Leather",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      68,
+      43,
+      28
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 528,
+     "pxPerStud": 54.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    },
+    {
+     "name": "padded_armor_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      139,
+      121,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 168,
+     "pxPerStud": 65.9,
+     "surfaceAppearance": {
+      "colorMap": "textures/ItemsReal/IR_CratesB_Color.png",
+      "normalMap": "textures/ItemsReal/IR_CratesB_Normal.png",
+      "roughnessMap": "textures/ItemsReal/IR_CratesB_Roughness.png",
+      "metalnessMap": "textures/ItemsReal/IR_CratesB_Metalness.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Torso": {
+     "position": [
+      0.0,
+      -1.33,
+      -0.395
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "glb": "ItemsReal.glb"
+  }
+ ],
+ "warnings": [],
+ "notes": [
+  "knife dips 0.33 studs below z = 0 [held item: grip at origin by convention]",
+  "machete dips 0.45 studs below z = 0 [held item: grip at origin by convention]",
+  "hatchet dips 0.40 studs below z = 0 [held item: grip at origin by convention]",
+  "spear dips 2.62 studs below z = 0 [held item: grip at origin by convention]",
+  "mace dips 0.43 studs below z = 0 [held item: grip at origin by convention]",
+  "sword dips 0.63 studs below z = 0 [held item: grip at origin by convention]",
+  "bow dips 2.06 studs below z = 0 [held item: grip at origin by convention]",
+  "arrow dips 0.05 studs below z = 0 [held item: grip at origin by convention]",
+  "throwing_knife dips 0.36 studs below z = 0 [held item: grip at origin by convention]",
+  "water_bottle dips 0.40 studs below z = 0 [held item: grip at origin by convention]",
+  "empty_bottle dips 0.40 studs below z = 0 [held item: grip at origin by convention]",
+  "berries dips 0.15 studs below z = 0 [held item: grip at origin by convention]",
+  "apple dips 0.13 studs below z = 0 [held item: grip at origin by convention]",
+  "dried_meat dips 0.19 studs below z = 0 [held item: grip at origin by convention]",
+  "ration dips 0.33 studs below z = 0 [held item: grip at origin by convention]",
+  "bandage dips 0.34 studs below z = 0 [held item: grip at origin by convention]",
+  "herbs dips 0.22 studs below z = 0 [held item: grip at origin by convention]",
+  "medkit dips 0.76 studs below z = 0 [held item: grip at origin by convention]",
+  "leather_vest dips 2.29 studs below z = 0 [held item: grip at origin by convention]",
+  "padded_armor dips 2.49 studs below z = 0 [held item: grip at origin by convention]"
+ ],
+ "glbCheck": {
+  "tangents": true,
+  "primitives": 64,
+  "embeddedImages": [
+   "IR_Supplies_Normal",
+   "IR_Supplies_Color",
+   "IR_Supplies_ORM",
+   "IR_Weapons_Normal",
+   "IR_Weapons_Color",
+   "IR_Weapons_ORM",
+   "IR_CratesB_Normal",
+   "IR_CratesB_Color",
+   "IR_CratesB_ORM",
+   "IR_CratesA_Normal",
+   "IR_CratesA_Color",
+   "IR_CratesA_ORM"
+  ]
+ },
+ "textureFolder": "textures/ItemsReal",
+ "textures": {
+  "IR_Weapons_Color.png": {
+   "kind": "color",
+   "set": "IR_Weapons",
+   "bytes": 1065746,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "arrow",
+    "bow",
+    "hatchet",
+    "knife",
+    "mace",
+    "machete",
+    "spear",
+    "sword",
+    "throwing_knife"
+   ]
+  },
+  "IR_Weapons_Normal.png": {
+   "kind": "normal",
+   "set": "IR_Weapons",
+   "bytes": 874834,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "arrow",
+    "bow",
+    "hatchet",
+    "knife",
+    "mace",
+    "machete",
+    "spear",
+    "sword",
+    "throwing_knife"
+   ]
+  },
+  "IR_Weapons_Roughness.png": {
+   "kind": "roughness",
+   "set": "IR_Weapons",
+   "bytes": 354076,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "arrow",
+    "bow",
+    "hatchet",
+    "knife",
+    "mace",
+    "machete",
+    "spear",
+    "sword",
+    "throwing_knife"
+   ]
+  },
+  "IR_Weapons_Metalness.png": {
+   "kind": "metalness",
+   "set": "IR_Weapons",
+   "bytes": 188641,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "arrow",
+    "bow",
+    "hatchet",
+    "knife",
+    "mace",
+    "machete",
+    "spear",
+    "sword",
+    "throwing_knife"
+   ]
+  },
+  "IR_Supplies_Color.png": {
+   "kind": "color",
+   "set": "IR_Supplies",
+   "bytes": 1090183,
+   "alpha": true,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "apple",
+    "bandage",
+    "berries",
+    "dried_meat",
+    "empty_bottle",
+    "herbs",
+    "medkit",
+    "ration",
+    "water_bottle"
+   ]
+  },
+  "IR_Supplies_Normal.png": {
+   "kind": "normal",
+   "set": "IR_Supplies",
+   "bytes": 1056684,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "apple",
+    "bandage",
+    "berries",
+    "dried_meat",
+    "empty_bottle",
+    "herbs",
+    "medkit",
+    "ration",
+    "water_bottle"
+   ]
+  },
+  "IR_Supplies_Roughness.png": {
+   "kind": "roughness",
+   "set": "IR_Supplies",
+   "bytes": 402255,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "apple",
+    "bandage",
+    "berries",
+    "dried_meat",
+    "empty_bottle",
+    "herbs",
+    "medkit",
+    "ration",
+    "water_bottle"
+   ]
+  },
+  "IR_Supplies_Metalness.png": {
+   "kind": "metalness",
+   "set": "IR_Supplies",
+   "bytes": 71766,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "apple",
+    "bandage",
+    "berries",
+    "dried_meat",
+    "empty_bottle",
+    "herbs",
+    "medkit",
+    "ration",
+    "water_bottle"
+   ]
+  },
+  "IR_CratesA_Color.png": {
+   "kind": "color",
+   "set": "IR_CratesA",
+   "bytes": 914640,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ]
+  },
+  "IR_CratesA_Normal.png": {
+   "kind": "normal",
+   "set": "IR_CratesA",
+   "bytes": 740611,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ]
+  },
+  "IR_CratesA_Roughness.png": {
+   "kind": "roughness",
+   "set": "IR_CratesA",
+   "bytes": 241794,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ]
+  },
+  "IR_CratesA_Metalness.png": {
+   "kind": "metalness",
+   "set": "IR_CratesA",
+   "bytes": 64383,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ]
+  },
+  "IR_CratesB_Color.png": {
+   "kind": "color",
+   "set": "IR_CratesB",
+   "bytes": 908155,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ]
+  },
+  "IR_CratesB_Normal.png": {
+   "kind": "normal",
+   "set": "IR_CratesB",
+   "bytes": 857400,
+   "alpha": false,
+   "grayscale": false,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ]
+  },
+  "IR_CratesB_Roughness.png": {
+   "kind": "roughness",
+   "set": "IR_CratesB",
+   "bytes": 298455,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ]
+  },
+  "IR_CratesB_Metalness.png": {
+   "kind": "metalness",
+   "set": "IR_CratesB",
+   "bytes": 119685,
+   "alpha": false,
+   "grayscale": true,
+   "resolution": [
+    1024,
+    1024
+   ],
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ]
+  }
+ },
+ "imageCount": 16,
+ "glbOnlyTextures": [],
+ "import": [
+  "Swap-in for the v1 Items set: every asset keeps its v1 name, origin (Grip at the hand grip, crates on the floor centre), gameplay size and attachments (Grip, Tip, Nock, StringTop, StringBottom, ArrowRest, Mouth, Torso, LidHinge, Prompt, LootPoint) at the v1 positions, so ItemAssets.build() can switch manifests without code changes. Part lists are leaner (one MeshPart per surface group); the names the game relies on are kept: <Crate>_Lid (+ Lid-tagged fittings), SupplyCrate3_Ember, bow_Rope (the string), water_bottle_Glass / water_bottle_WaterFill / empty_bottle_Glass.",
+  "Geometry: import ItemsReal.glb (3D Importer / Open Cloud Model). Each asset root arrives as a Model of MeshParts named as in the manifest; re-centre with the asset 'origin' exactly like the v1 Items (WorldPivot = CFrame.new(origin), then PivotTo).",
+  "Surfaces: give every textured part ONE SurfaceAppearance from its 'surfaceAppearance' block: ColorMap / NormalMap / RoughnessMap / MetalnessMap = the uploaded ids of those PNGs in textures/ItemsReal (16 images for the whole set, each uploaded once and shared), AlphaMode as given, Color = 'color'. Do not rely on the importer's auto SurfaceAppearance for roughness/metalness: the GLB packs them into one glTF metallicRoughness image (glbOnlyTextures) which Roblox does not split. Clear any importer-created TextureID.",
+  "Glass and water (water_bottle_Glass, water_bottle_WaterFill, empty_bottle_Glass): AlphaMode = Transparency and MeshPart.Transparency = 0.02 (>= 0.02 makes the colour-map alpha blend smoothly; the alpha channel already carries the glass opacity: ~0.2 in thin walls, more at the base, shoulder and smudges). Every other part is opaque (AlphaMode Overlay with a fully opaque colour map; Transparency 0). No part relies on DoubleSided; keep MeshPart.DoubleSided = false.",
+  "SupplyCrate3_Ember is untextured: Material Neon, Color = rgb (236,112,44), or a plain part with EmissiveStrength; optionally a small orange PointLight (Range ~6, Brightness ~0.5) at LootPoint.",
+  "Per part: CanCollide = collide, CollisionFidelity = collision, CastShadow = castShadow, CanQuery = canQuery, CanTouch = canTouch; Material = robloxMaterial (physics/sounds only, the look comes from the SurfaceAppearance); 'rgb' = mean texture colour (fallback MeshPart.Color). Viewmodel / held copies: set CastShadow = false on every part (LookDevPlaybook 7.3); world loot copies use castShadow as listed.",
+  "Texel density (median px per stud, per asset) is in textureSets.<set>.pxPerStud; held items 170-260, crates and armour lower (large surfaces seen at arm's length)."
+ ],
+ "schema": "LS-Real-1",
+ "glbs": [
+  {
+   "file": "ItemsReal.glb",
+   "bytes": 13524068,
+   "sizeMB": 13.52,
+   "assets": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife",
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit",
+    "SupplyCrate1",
+    "SupplyCrate2",
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "primitives": 64,
+   "maxMeshTris": 1708,
+   "embeddedImages": [
+    "IR_Supplies_Normal",
+    "IR_Supplies_Color",
+    "IR_Supplies_ORM",
+    "IR_Weapons_Normal",
+    "IR_Weapons_Color",
+    "IR_Weapons_ORM",
+    "IR_CratesB_Normal",
+    "IR_CratesB_Color",
+    "IR_CratesB_ORM",
+    "IR_CratesA_Normal",
+    "IR_CratesA_Color",
+    "IR_CratesA_ORM"
+   ],
+   "alphaMask": [],
+   "alphaBlend": [
+    "IR_Supplies_Transparent"
+   ]
+  }
+ ],
+ "uploadTextures": [
+  {
+   "file": "textures/ItemsReal/IR_CratesA_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 914640
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesA_Metalness.png",
+   "kind": "metalness",
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 64383
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesA_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 740611
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesA_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "SupplyCrate1",
+    "SupplyCrate2"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 241794
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesB_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 908155
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesB_Metalness.png",
+   "kind": "metalness",
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 119685
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesB_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 857400
+  },
+  {
+   "file": "textures/ItemsReal/IR_CratesB_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "SupplyCrate3",
+    "leather_vest",
+    "padded_armor"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 298455
+  },
+  {
+   "file": "textures/ItemsReal/IR_Supplies_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 1090183
+  },
+  {
+   "file": "textures/ItemsReal/IR_Supplies_Metalness.png",
+   "kind": "metalness",
+   "usedBy": [
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 71766
+  },
+  {
+   "file": "textures/ItemsReal/IR_Supplies_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1056684
+  },
+  {
+   "file": "textures/ItemsReal/IR_Supplies_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "water_bottle",
+    "empty_bottle",
+    "berries",
+    "apple",
+    "dried_meat",
+    "ration",
+    "bandage",
+    "herbs",
+    "medkit"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 402255
+  },
+  {
+   "file": "textures/ItemsReal/IR_Weapons_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1065746
+  },
+  {
+   "file": "textures/ItemsReal/IR_Weapons_Metalness.png",
+   "kind": "metalness",
+   "usedBy": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 188641
+  },
+  {
+   "file": "textures/ItemsReal/IR_Weapons_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 874834
+  },
+  {
+   "file": "textures/ItemsReal/IR_Weapons_Roughness.png",
+   "kind": "roughness",
+   "usedBy": [
+    "knife",
+    "machete",
+    "hatchet",
+    "spear",
+    "mace",
+    "sword",
+    "bow",
+    "arrow",
+    "throwing_knife"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 354076
+  }
+ ],
+ "adCheck": {
+  "problems": [],
+  "glbs": 1,
+  "uploadImages": 16,
+  "totalTris": 37220,
+  "assets": 23
+ }
+}

@@ -1,0 +1,4001 @@
+{
+ "category": "TreesReal",
+ "glbs": [
+  {
+   "file": "TreesReal.glb",
+   "bytes": 18374528,
+   "sizeMB": 18.37,
+   "assets": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "BirchA",
+    "BirchB",
+    "OakA",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "primitives": 70,
+   "maxMeshTris": 6060,
+   "embeddedImages": [
+    "TR_BarkOak_Normal",
+    "TR_BarkOak_Color",
+    "TR_Rough_Bark_MR",
+    "TR_BarkBirch_Normal",
+    "TR_BarkBirch_Color",
+    "TR_BroadleafAtlas_Normal",
+    "TR_BroadleafAtlas_Color",
+    "TR_Rough_Foliage_MR",
+    "TR_BarkConifer_Normal",
+    "TR_BarkConifer_Color",
+    "TR_ConiferAtlas_Normal",
+    "TR_ConiferAtlas_Color",
+    "TR_Deadwood_Normal",
+    "TR_Deadwood_Color"
+   ],
+   "alphaMask": [
+    "TR_Broadleaf_Birch",
+    "TR_Broadleaf_Oak",
+    "TR_Conifer_Dead",
+    "TR_Conifer_Fir",
+    "TR_Conifer_Pine",
+    "TR_Conifer_Spruce",
+    "TR_Conifer_SpruceB",
+    "TR_Conifer_Young",
+    "TR_Moss",
+    "TR_Moss_Broadleaf"
+   ],
+   "alphaBlend": []
+  }
+ ],
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "tangentSpace": "MikkTSpace tangents exported (glTF TANGENT on every primitive, checked after export); normal maps are OpenGL (+Y), tangent space",
+ "textureFolder": "textures/TreesReal",
+ "textures": {
+  "TR_BarkConifer_Color.png": {
+   "kind": "color",
+   "set": "BarkConifer",
+   "bytes": 1293432,
+   "alpha": false,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_BarkConifer_Normal.png": {
+   "kind": "normal",
+   "set": "BarkConifer",
+   "bytes": 2458202,
+   "alpha": false,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_Rough_Bark.png": {
+   "kind": "roughness",
+   "set": null,
+   "bytes": 67756,
+   "alpha": false,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "BirchA",
+    "BirchB",
+    "OakA",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_BarkOak_Color.png": {
+   "kind": "color",
+   "set": "BarkOak",
+   "bytes": 1214715,
+   "alpha": false,
+   "usedBy": [
+    "PineA",
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ]
+  },
+  "TR_BarkOak_Normal.png": {
+   "kind": "normal",
+   "set": "BarkOak",
+   "bytes": 2328409,
+   "alpha": false,
+   "usedBy": [
+    "PineA",
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ]
+  },
+  "TR_BarkBirch_Color.png": {
+   "kind": "color",
+   "set": "BarkBirch",
+   "bytes": 1032011,
+   "alpha": false,
+   "usedBy": [
+    "BirchA",
+    "BirchB"
+   ]
+  },
+  "TR_BarkBirch_Normal.png": {
+   "kind": "normal",
+   "set": "BarkBirch",
+   "bytes": 932636,
+   "alpha": false,
+   "usedBy": [
+    "BirchA",
+    "BirchB"
+   ]
+  },
+  "TR_Deadwood_Color.png": {
+   "kind": "color",
+   "set": "Deadwood",
+   "bytes": 476347,
+   "alpha": false,
+   "usedBy": [
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_Deadwood_Normal.png": {
+   "kind": "normal",
+   "set": "Deadwood",
+   "bytes": 874012,
+   "alpha": false,
+   "usedBy": [
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_ConiferAtlas_Color.png": {
+   "kind": "color",
+   "set": "ConiferAtlas",
+   "bytes": 746525,
+   "alpha": true,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_ConiferAtlas_Normal.png": {
+   "kind": "normal",
+   "set": "ConiferAtlas",
+   "bytes": 940774,
+   "alpha": false,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_Rough_Foliage.png": {
+   "kind": "roughness",
+   "set": null,
+   "bytes": 75094,
+   "alpha": false,
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "BirchA",
+    "BirchB",
+    "OakA",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ]
+  },
+  "TR_BroadleafAtlas_Color.png": {
+   "kind": "color",
+   "set": "BroadleafAtlas",
+   "bytes": 747510,
+   "alpha": true,
+   "usedBy": [
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ]
+  },
+  "TR_BroadleafAtlas_Normal.png": {
+   "kind": "normal",
+   "set": "BroadleafAtlas",
+   "bytes": 682113,
+   "alpha": false,
+   "usedBy": [
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ]
+  }
+ },
+ "glbOnlyTextures": [
+  "textures/TreesReal/glb_only/TR_Rough_Bark_MR.png",
+  "textures/TreesReal/glb_only/TR_Rough_Foliage_MR.png"
+ ],
+ "materials": {
+  "TR_Bark_Spruce": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    176,
+    150,
+    132
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    92,
+    68,
+    52
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Fir": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    196,
+    192,
+    186
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    103,
+    90,
+    77
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_PineUpper": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    240,
+    174,
+    134
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    128,
+    81,
+    53
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Young": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    190,
+    164,
+    142
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    100,
+    75,
+    57
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Snag": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    150,
+    138,
+    128
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    77,
+    62,
+    51
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Log": {
+   "textureSet": "BarkConifer",
+   "tint": [
+    150,
+    134,
+    122
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    77,
+    60,
+    48
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Oak": {
+   "textureSet": "BarkOak",
+   "tint": [
+    216,
+    208,
+    198
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    100,
+    92,
+    81
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_PineLower": {
+   "textureSet": "BarkOak",
+   "tint": [
+    226,
+    196,
+    176
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    105,
+    86,
+    71
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_BirchBase": {
+   "textureSet": "BarkOak",
+   "tint": [
+    120,
+    118,
+    118
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    53,
+    49,
+    45
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Bark_Birch": {
+   "textureSet": "BarkBirch",
+   "tint": [
+    252,
+    252,
+    250
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    198,
+    195,
+    185
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Deadwood": {
+   "textureSet": "Deadwood",
+   "tint": [
+    214,
+    206,
+    194
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    122,
+    112,
+    98
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Deadwood_Rot": {
+   "textureSet": "Deadwood",
+   "tint": [
+    150,
+    138,
+    124
+   ],
+   "alphaMode": "Overlay",
+   "regions": null,
+   "albedoMeanSrgb": [
+    84,
+    73,
+    61
+   ],
+   "roughnessMean": 0.9,
+   "metalness": 0
+  },
+  "TR_Conifer_Spruce": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    255,
+    255,
+    255
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "spruce"
+   ],
+   "albedoMeanSrgb": [
+    45,
+    63,
+    29
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Conifer_SpruceB": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    246,
+    255,
+    236
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "spruce"
+   ],
+   "albedoMeanSrgb": [
+    43,
+    63,
+    26
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Conifer_Fir": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    238,
+    250,
+    244
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "fir"
+   ],
+   "albedoMeanSrgb": [
+    63,
+    81,
+    51
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Conifer_Pine": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    236,
+    246,
+    250
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "pine"
+   ],
+   "albedoMeanSrgb": [
+    76,
+    81,
+    58
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Conifer_Young": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    232,
+    236,
+    222
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "young"
+   ],
+   "albedoMeanSrgb": [
+    76,
+    89,
+    39
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Conifer_Dead": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    255,
+    255,
+    255
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "deadtwig"
+   ],
+   "albedoMeanSrgb": [
+    112,
+    101,
+    88
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Moss": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    244,
+    244,
+    236
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "moss"
+   ],
+   "albedoMeanSrgb": [
+    64,
+    73,
+    31
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_EndGrain": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    226,
+    218,
+    206
+   ],
+   "alphaMode": "Overlay",
+   "regions": [
+    "endgrain"
+   ],
+   "albedoMeanSrgb": [
+    144,
+    112,
+    78
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_EndGrain_Old": {
+   "textureSet": "ConiferAtlas",
+   "tint": [
+    176,
+    168,
+    158
+   ],
+   "alphaMode": "Overlay",
+   "regions": [
+    "endgrain"
+   ],
+   "albedoMeanSrgb": [
+    111,
+    85,
+    58
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Broadleaf_Birch": {
+   "textureSet": "BroadleafAtlas",
+   "tint": [
+    236,
+    236,
+    226
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "birchA",
+    "birchStrand",
+    "birchB"
+   ],
+   "albedoMeanSrgb": [
+    93,
+    117,
+    46
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Broadleaf_Oak": {
+   "textureSet": "BroadleafAtlas",
+   "tint": [
+    250,
+    250,
+    244
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "oakA",
+    "oakB"
+   ],
+   "albedoMeanSrgb": [
+    73,
+    94,
+    45
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  },
+  "TR_Moss_Broadleaf": {
+   "textureSet": "BroadleafAtlas",
+   "tint": [
+    244,
+    244,
+    236
+   ],
+   "alphaMode": "Transparency",
+   "regions": [
+    "moss"
+   ],
+   "albedoMeanSrgb": [
+    64,
+    73,
+    31
+   ],
+   "roughnessMean": 0.72,
+   "metalness": 0
+  }
+ },
+ "import": [
+  "Geometry: import each GLB (3D Importer / Open Cloud Model). Every asset root arrives as a Model of MeshParts named <Asset>_<Role>[_n]; re-centre with the asset 'origin' (WorldPivot = CFrame.new(origin), then PivotTo) exactly like the other categories. The meshes carry tangents, so normal maps work.",
+  "Surfaces: give every part ONE SurfaceAppearance built from its 'surfaceAppearance' block: ColorMap / NormalMap / RoughnessMap = the uploaded image ids of those PNG files (each file once - 14 images in total, shared by every asset; RoughnessMap uses the separate 8-bit grayscale TR_Rough_*.png), MetalnessMap empty (nothing is metal), AlphaMode as given, Color = 'color' (sRGB tint; it multiplies the ColorMap - the species differ only by these tints, so never skip it). Do not rely on the importer's auto SurfaceAppearance for roughness: the GLB packs roughness into a glTF metallicRoughness image (glb_only/*_MR.png, metallicFactor 0). Clear any importer-created TextureID.",
+  "Cards (backFacesInMesh = true) already contain flipped back faces: keep MeshPart.DoubleSided = false (otherwise the back sides z-fight) and MeshPart.Transparency = 0 so AlphaMode Transparency is an alpha cut-out (no sorting). Each alpha part says so in its 'alphaSetup'.",
+  "Per part: CanCollide = collide, CollisionFidelity = collision, CastShadow = castShadow, CanQuery = canQuery, CanTouch = canTouch, Anchored = true; Material = robloxMaterial (physics/sounds only, the look comes from the SurfaceAppearance); 'rgb' is a fallback MeshPart.Color matching the texture.",
+  "OakA: OakA_Bark gets the CollectionService tag Climbable; attachments Perch1..N as in the v1 oaks.",
+  "Check in Studio: card shadows should be cut out (dappled); if a crown casts solid card-shaped shadows, set CastShadow = false on that Foliage part. RenderFidelity Automatic is fine; if far crowns break up, use Precise on Foliage parts."
+ ],
+ "assets": [
+  {
+   "name": "SpruceA",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Realistic"
+   ],
+   "notes": "Tall mature Norway spruce, ~54 studs: conical crown from ~9 studs, sagging tiers with hanging branchlet curtains, dead self-pruned stubs below. Trunk Hull; branches, roots, cards walk-through.",
+   "parts": [
+    {
+     "name": "SpruceA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 612,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2427,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      45,
+      63,
+      29
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 5152,
+     "material": "TR_Conifer_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "SpruceA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -9.0936,
+    -0.6642,
+    -8.4256
+   ],
+   "boundsMax": [
+    9.0934,
+    54.6,
+    8.6752
+   ],
+   "size": [
+    18.187,
+    55.264,
+    17.101
+   ],
+   "tris": 8503,
+   "barkPxPerStud": 133,
+   "origin": [
+    9.0936,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "SpruceB",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Realistic"
+   ],
+   "notes": "Medium spruce, ~35 studs, fuller and lower crowned (live branches from ~3.5 studs).",
+   "parts": [
+    {
+     "name": "SpruceB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 468,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceB_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1552,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceB_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      68,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       176,
+       150,
+       132
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SpruceB_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      43,
+      63,
+      26
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3728,
+     "material": "TR_Conifer_SpruceB",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       246,
+       255,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "SpruceB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -7.8656,
+    -0.6159,
+    -7.2002
+   ],
+   "boundsMax": [
+    7.2833,
+    35.5998,
+    7.775
+   ],
+   "size": [
+    15.149,
+    36.216,
+    14.975
+   ],
+   "tris": 6060,
+   "barkPxPerStud": 179,
+   "origin": [
+    34.0526,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "FirA",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Realistic"
+   ],
+   "notes": "Silver fir, ~41 studs: dense, narrow, regular tiers of flat sprays with upturned tips, smooth grey bark.",
+   "parts": [
+    {
+     "name": "FirA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      103,
+      90,
+      77
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 516,
+     "material": "TR_Bark_Fir",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       196,
+       192,
+       186
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FirA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      103,
+      90,
+      77
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1644,
+     "material": "TR_Bark_Fir",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       196,
+       192,
+       186
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FirA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      103,
+      90,
+      77
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Fir",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       196,
+       192,
+       186
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FirA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      63,
+      81,
+      51
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 6060,
+     "material": "TR_Conifer_Fir",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       238,
+       250,
+       244
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "FirA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -6.0238,
+    -0.6306,
+    -6.6824
+   ],
+   "boundsMax": [
+    6.5635,
+    41.5999,
+    6.0819
+   ],
+   "size": [
+    12.587,
+    42.23,
+    12.764
+   ],
+   "tris": 8532,
+   "barkPxPerStud": 165,
+   "origin": [
+    55.3598,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "PineA",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Realistic",
+    "Pine"
+   ],
+   "notes": "Scots pine, ~52 studs: bare straight bole (grey furrowed lower bark, orange plated upper bark), high irregular crown of sinuous limbs ending in needle brushes.",
+   "parts": [
+    {
+     "name": "PineA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      105,
+      86,
+      71
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 364,
+     "material": "TR_Bark_PineLower",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       226,
+       196,
+       176
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "PineA_BarkUpper",
+     "role": "BarkUpper",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      128,
+      81,
+      53
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 252,
+     "material": "TR_Bark_PineUpper",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       240,
+       174,
+       134
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "PineA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      128,
+      81,
+      53
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2116,
+     "material": "TR_Bark_PineUpper",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       240,
+       174,
+       134
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "PineA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      105,
+      86,
+      71
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_PineLower",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       226,
+       196,
+       176
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "PineA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      76,
+      81,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 5508,
+     "material": "TR_Conifer_Pine",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       236,
+       246,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "PineA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 54,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -10.6621,
+    -0.666,
+    -12.94
+   ],
+   "boundsMax": [
+    10.6253,
+    53.8809,
+    12.5081
+   ],
+   "size": [
+    21.287,
+    54.547,
+    25.448
+   ],
+   "tris": 8534,
+   "barkPxPerStud": 134,
+   "origin": [
+    80.5851,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "ConiferYoung",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Realistic",
+    "Young"
+   ],
+   "notes": "Young spruce, ~11 studs, branches to the ground. Trunk Hull.",
+   "parts": [
+    {
+     "name": "ConiferYoung_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      75,
+      57
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 147,
+     "material": "TR_Bark_Young",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       190,
+       164,
+       142
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "ConiferYoung_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      76,
+      89,
+      39
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1892,
+     "material": "TR_Conifer_Young",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       232,
+       236,
+       222
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.6831,
+    -0.4017,
+    -2.9167
+   ],
+   "boundsMax": [
+    2.89,
+    11.3999,
+    3.0205
+   ],
+   "size": [
+    5.573,
+    11.802,
+    5.937
+   ],
+   "tris": 2039,
+   "barkPxPerStud": 602,
+   "origin": [
+    101.8931,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "BirchA",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Realistic",
+    "Birch"
+   ],
+   "notes": "Single-stem silver birch, ~29 studs: white bark with black lenticels and a black fissured base, airy crown of hanging leafy strands.",
+   "parts": [
+    {
+     "name": "BirchA_BarkBase",
+     "role": "BarkBase",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      53,
+      49,
+      45
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 306,
+     "material": "TR_Bark_BirchBase",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       120,
+       118,
+       118
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchA_BirchBark",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 500,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1441,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      53,
+      49,
+      45
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 192,
+     "material": "TR_Bark_BirchBase",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       120,
+       118,
+       118
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      93,
+      117,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2952,
+     "material": "TR_Broadleaf_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       236,
+       236,
+       226
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "BirchA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 36,
+     "material": "TR_Moss_Broadleaf",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -7.8823,
+    -0.6062,
+    -9.358
+   ],
+   "boundsMax": [
+    10.6525,
+    29.7353,
+    10.3911
+   ],
+   "size": [
+    18.535,
+    30.341,
+    19.749
+   ],
+   "tris": 5427,
+   "barkPxPerStud": 214,
+   "origin": [
+    120.6653,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "BirchB",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Realistic",
+    "Birch"
+   ],
+   "notes": "Three-stem birch clump, ~27 studs. Each stem collides on its own (Hull); the shared black base is one Hull.",
+   "parts": [
+    {
+     "name": "BirchB_BarkBase",
+     "role": "BarkBase",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      53,
+      49,
+      45
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 666,
+     "material": "TR_Bark_BirchBase",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       120,
+       118,
+       118
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_BirchBark",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 345,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_BirchBark_2",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 365,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_BirchBark_3",
+     "role": "BirchBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 365,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      198,
+      195,
+      185
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2371,
+     "material": "TR_Bark_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkBirch_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkBirch_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       252,
+       252,
+       250
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      53,
+      49,
+      45
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 576,
+     "material": "TR_Bark_BirchBase",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       120,
+       118,
+       118
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "BirchB_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      93,
+      117,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 4096,
+     "material": "TR_Broadleaf_Birch",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       236,
+       236,
+       226
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "BirchB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 108,
+     "material": "TR_Moss_Broadleaf",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -10.5869,
+    -0.5965,
+    -9.747
+   ],
+   "boundsMax": [
+    11.1643,
+    27.9574,
+    10.0929
+   ],
+   "size": [
+    21.751,
+    28.554,
+    19.84
+   ],
+   "tris": 8892,
+   "barkPxPerStud": 297,
+   "origin": [
+    149.9049,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "OakA",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Realistic",
+    "Oak"
+   ],
+   "notes": "Broad old oak, ~27 tall x ~28 wide. 4 thick limbs run out level with flat standable tops (Perch1-4 at their centres); trunk + limbs are one PreciseConvexDecomposition part tagged Climbable.",
+   "parts": [
+    {
+     "name": "OakA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      92,
+      81
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 1246,
+     "material": "TR_Bark_Oak",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       216,
+       208,
+       198
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "OakA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      92,
+      81
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2880,
+     "material": "TR_Bark_Oak",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       216,
+       208,
+       198
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "OakA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      100,
+      92,
+      81
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 288,
+     "material": "TR_Bark_Oak",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkOak_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkOak_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       216,
+       208,
+       198
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "OakA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      94,
+      45
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 4124,
+     "material": "TR_Broadleaf_Oak",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       250,
+       250,
+       244
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "OakA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 90,
+     "material": "TR_Moss_Broadleaf",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {
+    "Perch1": {
+     "position": [
+      2.9526,
+      10.4294,
+      -1.3186
+     ],
+     "look": [
+      0.907,
+      0.0,
+      -0.4212
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch2": {
+     "position": [
+      -1.3253,
+      12.2065,
+      -2.7643
+     ],
+     "look": [
+      -0.4137,
+      0.0,
+      -0.9104
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch3": {
+     "position": [
+      -3.135,
+      13.3982,
+      1.5301
+     ],
+     "look": [
+      -0.9232,
+      0.0,
+      0.3843
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch4": {
+     "position": [
+      1.4314,
+      14.2868,
+      2.9514
+     ],
+     "look": [
+      0.4003,
+      0.0,
+      0.9164
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boundsMin": [
+    -14.3006,
+    -0.8198,
+    -14.4279
+   ],
+   "boundsMax": [
+    14.9394,
+    28.0864,
+    14.7312
+   ],
+   "size": [
+    29.24,
+    28.906,
+    29.159
+   ],
+   "tris": 8628,
+   "barkPxPerStud": 141,
+   "origin": [
+    183.3696,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "SnagA",
+   "kind": "Tree",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Snag"
+   ],
+   "notes": "Dead standing conifer with a splintered broken top, bark sloughing off to silver wood.",
+   "parts": [
+    {
+     "name": "SnagA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 944,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagA_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      98
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 890,
+     "material": "TR_Deadwood",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       214,
+       206,
+       194
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagA_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      98
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1415,
+     "material": "TR_Deadwood",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       214,
+       206,
+       194
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagA_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      112,
+      101,
+      88
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 144,
+     "material": "TR_Conifer_Dead",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "SnagA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 54,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -4.5122,
+    -0.6436,
+    -4.502
+   ],
+   "boundsMax": [
+    4.4639,
+    27.4553,
+    4.7106
+   ],
+   "size": [
+    8.976,
+    28.099,
+    9.213
+   ],
+   "tris": 3687,
+   "barkPxPerStud": 146,
+   "origin": [
+    210.8212,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "SnagB",
+   "kind": "Tree",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Snag"
+   ],
+   "notes": "Leaning, mossy dead conifer (leans away from the pivot), broken top.",
+   "parts": [
+    {
+     "name": "SnagB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 766,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagB_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      98
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 762,
+     "material": "TR_Deadwood",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       214,
+       206,
+       194
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagB_Branches",
+     "role": "Branches",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      98
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 741,
+     "material": "TR_Deadwood",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       214,
+       206,
+       194
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagB_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "SnagB_Foliage",
+     "role": "Foliage",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      112,
+      101,
+      88
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "material": "TR_Conifer_Dead",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": true,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - the back faces are real, flipped duplicate faces in the mesh",
+     "neon": false
+    },
+    {
+     "name": "SnagB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 306,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -5.9154,
+    -0.729,
+    -2.6735
+   ],
+   "boundsMax": [
+    2.9911,
+    19.6292,
+    7.2733
+   ],
+   "size": [
+    8.907,
+    20.358,
+    9.947
+   ],
+   "tris": 2867,
+   "barkPxPerStud": 164,
+   "origin": [
+    229.2004,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "FallenLogA",
+   "kind": "Prop",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Log"
+   ],
+   "notes": "Fallen conifer log along X (~14.5 long): sawn end grain at -X, splintered break at +X.",
+   "parts": [
+    {
+     "name": "FallenLogA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      60,
+      48
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 776,
+     "material": "TR_Bark_Log",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       134,
+       122
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FallenLogA_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      73,
+      61
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 286,
+     "material": "TR_Deadwood_Rot",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       124
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FallenLogA_CutFace",
+     "role": "CutFace",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      144,
+      112,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 14,
+     "material": "TR_EndGrain",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       226,
+       218,
+       206
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FallenLogA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 90,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -7.3001,
+    -0.2023,
+    -1.1237
+   ],
+   "boundsMax": [
+    8.4738,
+    1.7878,
+    1.2245
+   ],
+   "size": [
+    15.774,
+    1.99,
+    2.348
+   ],
+   "tris": 1166,
+   "barkPxPerStud": 190,
+   "origin": [
+    247.4921,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "FallenLogB",
+   "kind": "Prop",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Log"
+   ],
+   "notes": "Mossy, rotting log along X (~21 long), top ~2.3 (hop-on); both ends broken.",
+   "parts": [
+    {
+     "name": "FallenLogB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      60,
+      48
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 788,
+     "material": "TR_Bark_Log",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       134,
+       122
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FallenLogB_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      73,
+      61
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1006,
+     "material": "TR_Deadwood_Rot",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       124
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "FallenLogB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 468,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -11.3199,
+    -0.1738,
+    -1.3177
+   ],
+   "boundsMax": [
+    11.0376,
+    3.0455,
+    1.9501
+   ],
+   "size": [
+    22.357,
+    3.219,
+    3.268
+   ],
+   "tris": 2262,
+   "barkPxPerStud": 295,
+   "origin": [
+    275.2859,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "StumpA",
+   "kind": "Prop",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Stump"
+   ],
+   "notes": "Sawn stump, top ~2.1 (hop-on) with growth rings, flaring roots.",
+   "parts": [
+    {
+     "name": "StumpA_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      60,
+      48
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 184,
+     "material": "TR_Bark_Log",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       134,
+       122
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpA_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      73,
+      61
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 16,
+     "material": "TR_Deadwood_Rot",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       124
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpA_CutFace",
+     "role": "CutFace",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      144,
+      112,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 14,
+     "material": "TR_EndGrain",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       226,
+       218,
+       206
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpA_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      60,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Log",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       134,
+       122
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpA_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 54,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.6716,
+    -0.7181,
+    -3.0127
+   ],
+   "boundsMax": [
+    3.0121,
+    2.1,
+    2.5602
+   ],
+   "size": [
+    5.684,
+    2.818,
+    5.573
+   ],
+   "tris": 508,
+   "barkPxPerStud": 223,
+   "origin": [
+    296.9946,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  },
+  {
+   "name": "StumpB",
+   "kind": "Prop",
+   "tags": [
+    "Dead",
+    "Realistic",
+    "Stump"
+   ],
+   "notes": "Broken, rotten stump, splintered hollow top, moss.",
+   "parts": [
+    {
+     "name": "StumpB_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 174,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpB_DeadWood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      84,
+      73,
+      61
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 174,
+     "material": "TR_Deadwood_Rot",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_Deadwood_Color.png",
+      "normalMap": "textures/TreesReal/TR_Deadwood_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       124
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpB_Roots",
+     "role": "Roots",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      77,
+      62,
+      51
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 240,
+     "material": "TR_Bark_Snag",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_BarkConifer_Color.png",
+      "normalMap": "textures/TreesReal/TR_BarkConifer_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Bark.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       150,
+       138,
+       128
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "neon": false
+    },
+    {
+     "name": "StumpB_Moss",
+     "role": "Moss",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      64,
+      73,
+      31
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "material": "TR_Moss",
+     "surfaceAppearance": {
+      "colorMap": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+      "normalMap": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+      "roughnessMap": "textures/TreesReal/TR_Rough_Foliage.png",
+      "metalnessMap": null,
+      "alphaMode": "Transparency",
+      "color": [
+       244,
+       244,
+       236
+      ]
+     },
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "transparency": 0,
+     "alphaSetup": "SurfaceAppearance.AlphaMode = Transparency with MeshPart.Transparency = 0 (alpha-tested cut-out: depth-correct, no sorting) and MeshPart.DoubleSided = false - single-sided decal lying on the bark, seen from outside only",
+     "neon": false
+    }
+   ],
+   "attachments": {},
+   "boundsMin": [
+    -2.4525,
+    -0.6894,
+    -2.5489
+   ],
+   "boundsMax": [
+    2.0564,
+    3.9274,
+    2.4287
+   ],
+   "size": [
+    4.509,
+    4.617,
+    4.978
+   ],
+   "tris": 660,
+   "barkPxPerStud": 126,
+   "origin": [
+    310.4595,
+    0.0,
+    0.0
+   ],
+   "glb": "TreesReal.glb"
+  }
+ ],
+ "notes": [
+  "Trunks, roots and logs continue below y = 0 on purpose (they dive into the soil so a tree on a slope never shows a floating edge); the pivot is the ground point at the trunk centre: SpruceA dips 0.66 studs below z = 0; SpruceB dips 0.62 studs below z = 0; FirA dips 0.63 studs below z = 0; PineA dips 0.67 studs below z = 0; ConiferYoung dips 0.40 studs below z = 0; BirchA dips 0.61 studs below z = 0; BirchB dips 0.60 studs below z = 0; OakA dips 0.82 studs below z = 0; SnagA dips 0.64 studs below z = 0; SnagB dips 0.73 studs below z = 0; FallenLogA dips 0.20 studs below z = 0; FallenLogB dips 0.17 studs below z = 0; StumpA dips 0.72 studs below z = 0; StumpB dips 0.69 studs below z = 0"
+ ],
+ "warnings": [],
+ "schema": "LS-Real-1",
+ "uploadTextures": [
+  {
+   "file": "textures/TreesReal/TR_BarkBirch_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BirchA",
+    "BirchB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1032011
+  },
+  {
+   "file": "textures/TreesReal/TR_BarkBirch_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BirchA",
+    "BirchB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 932636
+  },
+  {
+   "file": "textures/TreesReal/TR_BarkConifer_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1293432
+  },
+  {
+   "file": "textures/TreesReal/TR_BarkConifer_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2458202
+  },
+  {
+   "file": "textures/TreesReal/TR_BarkOak_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "PineA",
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1214715
+  },
+  {
+   "file": "textures/TreesReal/TR_BarkOak_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "PineA",
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 2328409
+  },
+  {
+   "file": "textures/TreesReal/TR_BroadleafAtlas_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 747510
+  },
+  {
+   "file": "textures/TreesReal/TR_BroadleafAtlas_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "BirchA",
+    "BirchB",
+    "OakA"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 682113
+  },
+  {
+   "file": "textures/TreesReal/TR_ConiferAtlas_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGBA",
+   "bytes": 746525
+  },
+  {
+   "file": "textures/TreesReal/TR_ConiferAtlas_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 940774
+  },
+  {
+   "file": "textures/TreesReal/TR_Deadwood_Color.png",
+   "kind": "color",
+   "usedBy": [
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 476347
+  },
+  {
+   "file": "textures/TreesReal/TR_Deadwood_Normal.png",
+   "kind": "normal",
+   "usedBy": [
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 874012
+  },
+  {
+   "file": "textures/TreesReal/TR_Rough_Bark.png",
+   "kind": "roughness",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "BirchA",
+    "BirchB",
+    "OakA",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 67756
+  },
+  {
+   "file": "textures/TreesReal/TR_Rough_Foliage.png",
+   "kind": "roughness",
+   "usedBy": [
+    "SpruceA",
+    "SpruceB",
+    "FirA",
+    "PineA",
+    "ConiferYoung",
+    "BirchA",
+    "BirchB",
+    "OakA",
+    "SnagA",
+    "SnagB",
+    "FallenLogA",
+    "FallenLogB",
+    "StumpA",
+    "StumpB"
+   ],
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 75094
+  }
+ ],
+ "adCheck": {
+  "problems": [],
+  "glbs": 1,
+  "uploadImages": 14,
+  "totalTris": 67765,
+  "assets": 14
+ }
+}

@@ -1,0 +1,23 @@
+# Python and Blender leftovers
+__pycache__/
+*.pyc
+*.blend1
+*.blend@
+
+# Art previews: keep the art director's renders, the Studio look-check shots and each set's lineup image.
+# Everything else is a render output; regenerate it with the review scripts in art/blender (see art/README.md).
+art/previews/**/tiles/
+art/previews/_ArtDirection/_sheet_*
+art/previews/Arms/*
+art/previews/Buildings/*
+art/previews/Foliage/*
+art/previews/Items/*
+art/previews/Landmarks/*
+art/previews/Props/*
+art/previews/Rocks/*
+art/previews/BuildingsReal/*
+art/previews/GroundReal/*
+art/previews/ItemsReal/*
+art/previews/LandmarksReal/*
+art/previews/TreesReal/*
+!art/previews/*/_lineup*.png

@@ -1,0 +1,798 @@
+{
+  "generatedAt": "2026-11-12T11:52:30Z",
+  "placeId": 120572716460286,
+  "placeVersion": 166,
+  "studioReportedPlaceVersion": 147,
+  "totals": {
+    "scripts": 85,
+    "bytes": 2283538,
+    "byService": {
+      "StarterPlayer": {
+        "scripts": 26,
+        "bytes": 805584
+      },
+      "ReplicatedStorage": {
+        "scripts": 19,
+        "bytes": 254937
+      },
+      "ServerScriptService": {
+        "scripts": 12,
+        "bytes": 268011
+      },
+      "ServerStorage": {
+        "scripts": 28,
+        "bytes": 955006
+      }
+    },
+    "byClass": {
+      "ModuleScript": 82,
+      "LocalScript": 2,
+      "Script": 1
+    }
+  },
+  "scripts": [
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.ClientState",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/ClientState.lua",
+      "bytes": 7300,
+      "fnv1a": "09d5b124"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.ClientMain",
+      "class": "LocalScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/ClientMain.client.lua",
+      "bytes": 2131,
+      "fnv1a": "e0c1d999"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ArenaController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ArenaController/init.lua",
+      "bytes": 10835,
+      "fnv1a": "c3938427"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ArenaController.Sky",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ArenaController/Sky.lua",
+      "bytes": 14859,
+      "fnv1a": "fca6d623"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ProjectileController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ProjectileController.lua",
+      "bytes": 33666,
+      "fnv1a": "ad59e2ee"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.CombatController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/CombatController.lua",
+      "bytes": 36126,
+      "fnv1a": "b49bb43e"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.AudioController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/AudioController.lua",
+      "bytes": 55239,
+      "fnv1a": "bf540ef2"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/init.lua",
+      "bytes": 25972,
+      "fnv1a": "f75129c5"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController.Rig",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/Rig.lua",
+      "bytes": 23774,
+      "fnv1a": "c090b7b2"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController.Poses",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/Poses.lua",
+      "bytes": 27513,
+      "fnv1a": "5deb8cf1"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.SettingsController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SettingsController.lua",
+      "bytes": 29136,
+      "fnv1a": "9013cb6c"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.CharacterVisuals",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/CharacterVisuals.lua",
+      "bytes": 44256,
+      "fnv1a": "f460dd0c"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.CameraController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/CameraController.lua",
+      "bytes": 27814,
+      "fnv1a": "beb2f707"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.InventoryController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/InventoryController.lua",
+      "bytes": 38731,
+      "fnv1a": "54b1db7e"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.HUDController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/HUDController.lua",
+      "bytes": 76987,
+      "fnv1a": "2ae23e47"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.LobbyController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua",
+      "bytes": 15622,
+      "fnv1a": "f4a92fc3"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.MovementController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/MovementController.lua",
+      "bytes": 106427,
+      "fnv1a": "be849130"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.NotificationController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/NotificationController.lua",
+      "bytes": 64166,
+      "fnv1a": "fa38db4c"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.SpectateController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SpectateController.lua",
+      "bytes": 15724,
+      "fnv1a": "dcdb4f31"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/FallenRecapController/init.lua",
+      "bytes": 47477,
+      "fnv1a": "722a7da8"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController.Shapes",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/FallenRecapController/Shapes.lua",
+      "bytes": 21825,
+      "fnv1a": "88741c8c"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController.PointFont",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/FallenRecapController/PointFont.lua",
+      "bytes": 12978,
+      "fnv1a": "53cbc891"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.LaunchController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LaunchController.lua",
+      "bytes": 21934,
+      "fnv1a": "88228b36"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.LootCueController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LootCueController.lua",
+      "bytes": 8388,
+      "fnv1a": "cb25582d"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.DetailController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/DetailController.lua",
+      "bytes": 13000,
+      "fnv1a": "5211ef88"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterCharacterScripts.Animate",
+      "class": "LocalScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterCharacterScripts/Animate.client.lua",
+      "bytes": 23704,
+      "fnv1a": "1353ee24"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Signal",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Signal.lua",
+      "bytes": 1522,
+      "fnv1a": "f9862450"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Spring",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Spring.lua",
+      "bytes": 1393,
+      "fnv1a": "b1c0ed6f"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Net",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Net.lua",
+      "bytes": 2575,
+      "fnv1a": "f0ffa5cc"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Util",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Util.lua",
+      "bytes": 2642,
+      "fnv1a": "3350858b"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Config",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Config.lua",
+      "bytes": 22088,
+      "fnv1a": "2a1646c1"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.ItemDefs",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/ItemDefs.lua",
+      "bytes": 9120,
+      "fnv1a": "5bfd3fbd"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Sounds",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Sounds.lua",
+      "bytes": 13815,
+      "fnv1a": "f6fe4c23"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Sfx",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Sfx.lua",
+      "bytes": 3530,
+      "fnv1a": "14ecca3b"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.ItemModels",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/ItemModels.lua",
+      "bytes": 22795,
+      "fnv1a": "89459fc0"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Theme",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Theme.lua",
+      "bytes": 10943,
+      "fnv1a": "bad95532"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Input",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Input.lua",
+      "bytes": 17356,
+      "fnv1a": "f6422c9e"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.ArenaLayout",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/ArenaLayout.lua",
+      "bytes": 76780,
+      "fnv1a": "0c61660e"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.DayCycle",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/DayCycle.lua",
+      "bytes": 31511,
+      "fnv1a": "cc2ae699"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Lore",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Lore.lua",
+      "bytes": 2651,
+      "fnv1a": "560a1946"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.ThreatLine",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/ThreatLine.lua",
+      "bytes": 6016,
+      "fnv1a": "9f2b7cd1"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.WaterPoints",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/WaterPoints.lua",
+      "bytes": 3149,
+      "fnv1a": "1ec5a3dd"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Glyphs",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Glyphs.lua",
+      "bytes": 8358,
+      "fnv1a": "eab488ea"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.Feedback",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/Feedback.lua",
+      "bytes": 10453,
+      "fnv1a": "9aa5e201"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.ActionHints",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/ActionHints.lua",
+      "bytes": 8240,
+      "fnv1a": "21180b9c"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Main",
+      "class": "Script",
+      "runContext": "Legacy",
+      "file": "src/ServerScriptService/Server/Main.server.lua",
+      "bytes": 1757,
+      "fnv1a": "717a54ea"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.CombatService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/CombatService.lua",
+      "bytes": 34036,
+      "fnv1a": "42666ab0"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.ProjectileService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/ProjectileService.lua",
+      "bytes": 11178,
+      "fnv1a": "354af53e"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.PlayerService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/PlayerService.lua",
+      "bytes": 36939,
+      "fnv1a": "57175056"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.RoundService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/RoundService.lua",
+      "bytes": 27430,
+      "fnv1a": "5d7ddf27"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.ArenaService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/ArenaService/init.lua",
+      "bytes": 30679,
+      "fnv1a": "0dfe885c"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.ArenaService.FallenSnapshots",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/ArenaService/FallenSnapshots.lua",
+      "bytes": 5559,
+      "fnv1a": "0badbf26"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.DataService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/DataService.lua",
+      "bytes": 13355,
+      "fnv1a": "c540e873"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.LootService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/LootService.lua",
+      "bytes": 50326,
+      "fnv1a": "3a3600b3"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.MovementService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/MovementService.lua",
+      "bytes": 8279,
+      "fnv1a": "c5552333"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.InventoryService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/InventoryService.lua",
+      "bytes": 36510,
+      "fnv1a": "0dd44897"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.OnboardingService",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/OnboardingService.lua",
+      "bytes": 11963,
+      "fnv1a": "d16269ee"
+    },
+    {
+      "studioPath": "ServerStorage.Dev.SyntaxCheck",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/Dev/SyntaxCheck.lua",
+      "bytes": 3162,
+      "fnv1a": "b3200b2b"
+    },
+    {
+      "studioPath": "ServerStorage.Dev.InputCheck",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/Dev/InputCheck.lua",
+      "bytes": 9087,
+      "fnv1a": "2c5d3aba"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/init.lua",
+      "bytes": 2927,
+      "fnv1a": "4f0dc85c"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder.Kit",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/Kit.lua",
+      "bytes": 17769,
+      "fnv1a": "70799297"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder.Trees",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/Trees.lua",
+      "bytes": 10770,
+      "fnv1a": "21381fa8"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder.Nature",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/Nature.lua",
+      "bytes": 11931,
+      "fnv1a": "02a74dc7"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder.Props",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/Props.lua",
+      "bytes": 28937,
+      "fnv1a": "81837fd1"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.AssetBuilder.Structures",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/AssetBuilder/Structures.lua",
+      "bytes": 43763,
+      "fnv1a": "abd1429e"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.DummyBuilder",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/DummyBuilder.lua",
+      "bytes": 12421,
+      "fnv1a": "3b9fab2f"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainGen",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainGen.lua",
+      "bytes": 142216,
+      "fnv1a": "38acae9f"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.UIBuilder",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/UIBuilder.lua",
+      "bytes": 84783,
+      "fnv1a": "99b9da1d"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.ItemAssets",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/ItemAssets/init.lua",
+      "bytes": 26350,
+      "fnv1a": "51e9b9d8"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.ItemAssets.Manifest",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/ItemAssets/Manifest.lua",
+      "bytes": 12761,
+      "fnv1a": "f9eac410"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.LightingRig",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/LightingRig.lua",
+      "bytes": 5857,
+      "fnv1a": "3c13556d"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/init.lua",
+      "bytes": 807,
+      "fnv1a": "ac678824"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData.H",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/H.lua",
+      "bytes": 82698,
+      "fnv1a": "8c4fdd0d"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData.S",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/S.lua",
+      "bytes": 41398,
+      "fnv1a": "339b8c01"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData.M",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/M.lua",
+      "bytes": 41398,
+      "fnv1a": "afb255ac"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData.W",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/W.lua",
+      "bytes": 41398,
+      "fnv1a": "e6d96107"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.TerrainData.C",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/TerrainData/C.lua",
+      "bytes": 41398,
+      "fnv1a": "f7c70dba"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.RealAssets",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/RealAssets/init.lua",
+      "bytes": 33309,
+      "fnv1a": "695d9daf"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.RealAssets.Manifest",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/RealAssets/Manifest.lua",
+      "bytes": 61053,
+      "fnv1a": "d446bbbe"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.WaterPointsBuilder",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/WaterPointsBuilder.lua",
+      "bytes": 7402,
+      "fnv1a": "552dfc57"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.Populate",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/Populate/init.lua",
+      "bytes": 37851,
+      "fnv1a": "07c7cd29"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.Populate.Sites",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/Populate/Sites.lua",
+      "bytes": 58062,
+      "fnv1a": "02442951"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.Populate.Scatter",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/Populate/Scatter.lua",
+      "bytes": 34240,
+      "fnv1a": "b9275a17"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.Populate.Lobby",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/Populate/Lobby.lua",
+      "bytes": 16510,
+      "fnv1a": "1991a62d"
+    },
+    {
+      "studioPath": "ServerStorage.WorldGen.Populate.Audit",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/WorldGen/Populate/Audit.lua",
+      "bytes": 44748,
+      "fnv1a": "a033dcbc"
+    }
+  ],
+  "skipped": [
+    {
+      "path": "ServerStorage.Archive_v1",
+      "reason": "excluded by the export rules (archived old script versions)",
+      "scripts": 20,
+      "bytes": 437690,
+      "scriptPaths": [
+        "ServerStorage.Archive_v1.ArenaLayout_v1",
+        "ServerStorage.Archive_v1.TerrainGen_v1",
+        "ServerStorage.Archive_v1.ItemAssets_v1",
+        "ServerStorage.Archive_v1.ItemAssets_v1.Manifest",
+        "ServerStorage.Archive_v1.ViewmodelController_preItemsReal",
+        "ServerStorage.Archive_v1.ViewmodelController_preItemsReal.Rig",
+        "ServerStorage.Archive_v1.ViewmodelController_preItemsReal.Poses",
+        "ServerStorage.Archive_v1.ItemModels_preItemsReal",
+        "ServerStorage.Archive_v1.TerrainGen_v2_0",
+        "ServerStorage.Archive_v1.ViewmodelController_preFixRound",
+        "ServerStorage.Archive_v1.ViewmodelController_preFixRound.Rig",
+        "ServerStorage.Archive_v1.ViewmodelController_preFixRound.Poses",
+        "ServerStorage.Archive_v1.Populate_v1",
+        "ServerStorage.Archive_v1.Populate_v1.Ground",
+        "ServerStorage.Archive_v1.Populate_v1.Core",
+        "ServerStorage.Archive_v1.Populate_v1.Lobby",
+        "ServerStorage.Archive_v1.Populate_v1.Sites",
+        "ServerStorage.Archive_v1.Populate_v1.Scatter",
+        "ServerStorage.Archive_v1.Populate_v1.Ambience",
+        "ServerStorage.Archive_v1.ActionHints_strayCopy"
+      ]
+    },
+    {
+      "path": "ServerStorage.MeshImports",
+      "reason": "excluded by the export rules (mesh import data)",
+      "present": true,
+      "scripts": 0,
+      "bytes": 0,
+      "note": "folder contains 1320 instances and no scripts"
+    },
+    {
+      "path": "ServerStorage.MeshAssets",
+      "reason": "excluded by the export rules (mesh assets)",
+      "present": true,
+      "scripts": 0,
+      "bytes": 0,
+      "note": "folder contains 622 instances and no scripts"
+    },
+    {
+      "path": "ServerStorage.MeshAssets_Preview",
+      "reason": "excluded by the export rules (mesh asset previews)",
+      "present": true,
+      "scripts": 0,
+      "bytes": 0,
+      "note": "folder contains 15359 instances and no scripts"
+    },
+    {
+      "path": "StarterPlayer.PlayerModule",
+      "reason": "excluded by the export rules (Roblox's stock PlayerModule, not game code)",
+      "present": false,
+      "scripts": 0,
+      "bytes": 0,
+      "note": "No PlayerModule exists anywhere under StarterPlayer (StarterPlayerScripts holds only the Client folder), so nothing was skipped here; the game uses Roblox's default PlayerModule at runtime."
+    },
+    {
+      "path": "CoreGui",
+      "reason": "excluded by the export rules (Roblox-internal UI, not part of the place); not traversed"
+    },
+    {
+      "path": "Players",
+      "reason": "excluded by the export rules (runtime copies); not traversed. The Edit session had one Player instance under Players."
+    }
+  ],
+  "renamed": [],
+  "notes": [
+    "game.PlaceVersion in the open Studio Edit session reported 147, both before and after the export; placeVersion 166 is the version this export was taken as (as instructed).",
+    "fnv1a is FNV-1a 32-bit (offset basis 0x811c9dc5, prime 0x01000193) over the UTF-8 bytes of Source, lowercase hex; bytes is the byte length of Source. Both were computed in Studio (Luau) and recomputed from the written files (Python): all 85 match.",
+    "file paths are relative to the repository root.",
+    "All exported Sources are valid UTF-8 with LF line endings only (no CR), no BOM, and end with a newline; each file holds the Source string exactly.",
+    "Scripts that have exported children are written as a folder with an init file: StarterPlayer.StarterPlayerScripts.Client.Controllers.ArenaController, StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController, StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController, ServerScriptService.Server.Services.ArenaService, ServerStorage.WorldGen.AssetBuilder, ServerStorage.WorldGen.ItemAssets, ServerStorage.WorldGen.TerrainData, ServerStorage.WorldGen.RealAssets, ServerStorage.WorldGen.Populate.",
+    "No Script has RunContext Client (the only Script, ServerScriptService.Server.Main, uses RunContext Legacy), so no Script was written as .client.lua.",
+    "No two exported siblings share a name (compared case-insensitively) and no names needed changing for the file system, so no '~N' suffixes were added.",
+    "No script has Archivable = false, and none sits under a non-Archivable ancestor.",
+    "Services with no scripts: Workspace, Lighting, SoundService, StarterGui, StarterPack, ReplicatedFirst, Teams, Chat, TextChatService and the rest. ServerStorage.Docs, ServerStorage.WorldAssets and ServerStorage.ArenaData contain no scripts.",
+    "A second listing taken after the export matched the first for every script in the place (no edits during the export)."
+  ]
+}
