@@ -5,7 +5,7 @@
   "studioReportedPlaceVersion": 147,
   "totals": {
     "scripts": 85,
-    "bytes": 2283538,
+    "bytes": 2284858,
     "byService": {
       "StarterPlayer": {
         "scripts": 26,
@@ -21,7 +21,7 @@
       },
       "ServerStorage": {
         "scripts": 28,
-        "bytes": 955006
+        "bytes": 956326
       }
     },
     "byClass": {
@@ -564,8 +564,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerStorage/WorldGen/TerrainGen.lua",
-      "bytes": 142216,
-      "fnv1a": "38acae9f"
+      "bytes": 142667,
+      "fnv1a": "3958007d"
     },
     {
       "studioPath": "ServerStorage.WorldGen.UIBuilder",
@@ -684,8 +684,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerStorage/WorldGen/Populate/Sites.lua",
-      "bytes": 58062,
-      "fnv1a": "02442951"
+      "bytes": 58931,
+      "fnv1a": "289fc4a0"
     },
     {
       "studioPath": "ServerStorage.WorldGen.Populate.Scatter",
@@ -794,5 +794,7 @@
     "No script has Archivable = false, and none sits under a non-Archivable ancestor.",
     "Services with no scripts: Workspace, Lighting, SoundService, StarterGui, StarterPack, ReplicatedFirst, Teams, Chat, TextChatService and the rest. ServerStorage.Docs, ServerStorage.WorldAssets and ServerStorage.ArenaData contain no scripts.",
     "A second listing taken after the export matched the first for every script in the place (no edits during the export)."
-  ]
+  ],
+  "updatedAt": "2026-11-12",
+  "updateNote": "TerrainGen (launch-trench cap at r 59) and Populate.Sites (PlateCollar) edited after the export; both re-verified against Studio."
 }

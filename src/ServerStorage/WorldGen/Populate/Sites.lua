@@ -266,6 +266,23 @@ function Sites.core(Ctx): string
 			if not m:HasTag("Plinth") then
 				m:AddTag("Plinth")
 			end
+			-- PlateCollar: a thin rusted-iron disc just under the deck surface. The deck openings (2.6-3.7 studs from
+			-- the plate axis) are wider than the plinth (half-width 2.76), so without it you look down a dark gap beside
+			-- every raised plate. Its top sits 0.1 below the pivot (the plate's raised height); it moves with the plinth.
+			local collar = Instance.new("Part")
+			collar.Name = "PlateCollar"
+			collar.Shape = Enum.PartType.Cylinder
+			collar.Size = V3(0.3, 7.5, 7.5)
+			collar.CFrame = CFrame.new(m:GetPivot().Position + V3(0, -0.25, 0)) * CFrame.Angles(0, 0, math.rad(90))
+			collar.Material = Enum.Material.CorrodedMetal
+			collar.Color = Color3.fromRGB(64, 44, 36)
+			collar.Anchored = true
+			collar.CanCollide = false
+			collar.CanQuery = false
+			collar.CanTouch = false
+			collar.CastShadow = false
+			collar.Massless = true
+			collar.Parent = m
 			m.Parent = plinths
 			placed += 1
 		end

@@ -2224,7 +2224,7 @@ local TUBE_FLOOR = Layout.PlateTube.floorY
 -- (r 3.4) with granite, so from above each plate sits in its own tube; it must be in place whenever the trench
 -- is (TerrainGen.placeSpirePlatform). Measured: a 4.8 x 4.8 block and a r 2.8 sphere drop to the floor at every
 -- plate, terrain at least 3.6 studs from every axis.
-TerrainGen.Tube = { intrude = 1.8 }
+TerrainGen.Tube = { intrude = 1.8, maxCentreR = 59 }
 local BORE = {}
 local function computeBores()
 	table.clear(BORE)
@@ -2241,7 +2241,11 @@ local function computeBores()
 			local near = sqrt(nx * nx + nz * nz)
 			local fx, fz = abs(x - CX) + 2, abs(z - CZ) + 2
 			local far = sqrt(fx * fx + fz * fz)
-			if far > rIn and near < rOut then
+			-- never open a cell whose centre lies beyond Tube.maxCentreR: the deck rim is at r 60.5, and cells straddling
+			-- it left a visible dip (up to 3 studs deep) round the platform. Measured with this cap: ground at or above
+			-- the deck top from r 61 out, and terrain still >= 4.3 studs from every plate axis (plinth 2.76, collar 3.75).
+			local cr = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
+			if far > rIn and near < rOut and cr <= (TerrainGen.Tube.maxCentreR or 59) then
 				BORE[j * FN + i + 1] = true
 			end
 		end
