@@ -1,0 +1,7 @@
+# Keep LF everywhere: Studio sources are LF, and src/manifest.json hashes the LF bytes.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.glb binary
+*.blend binary
