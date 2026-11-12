@@ -1,31 +1,31 @@
 {
   "generatedAt": "2026-11-12T11:52:30Z",
   "placeId": 120572716460286,
-  "placeVersion": 166,
+  "placeVersion": 199,
   "studioReportedPlaceVersion": 147,
   "totals": {
-    "scripts": 85,
-    "bytes": 2284858,
+    "scripts": 91,
+    "bytes": 2467603,
     "byService": {
       "StarterPlayer": {
-        "scripts": 26,
-        "bytes": 805584
+        "scripts": 28,
+        "bytes": 878725
       },
       "ReplicatedStorage": {
-        "scripts": 19,
-        "bytes": 254937
+        "scripts": 20,
+        "bytes": 270168
       },
       "ServerScriptService": {
-        "scripts": 12,
-        "bytes": 268011
+        "scripts": 13,
+        "bytes": 305601
       },
       "ServerStorage": {
-        "scripts": 28,
-        "bytes": 956326
+        "scripts": 30,
+        "bytes": 1013109
       }
     },
     "byClass": {
-      "ModuleScript": 82,
+      "ModuleScript": 88,
       "LocalScript": 2,
       "Script": 1
     }
@@ -68,8 +68,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ProjectileController.lua",
-      "bytes": 33666,
-      "fnv1a": "ad59e2ee"
+      "bytes": 42805,
+      "fnv1a": "46e8a135"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.CombatController",
@@ -92,24 +92,24 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/init.lua",
-      "bytes": 25972,
-      "fnv1a": "f75129c5"
+      "bytes": 30697,
+      "fnv1a": "d2ce4cc1"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController.Rig",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/Rig.lua",
-      "bytes": 23774,
-      "fnv1a": "c090b7b2"
+      "bytes": 52467,
+      "fnv1a": "2701c9f0"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController.Poses",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/Poses.lua",
-      "bytes": 27513,
-      "fnv1a": "5deb8cf1"
+      "bytes": 41609,
+      "fnv1a": "5d84e1b7"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.SettingsController",
@@ -260,8 +260,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ReplicatedStorage/Shared/Net.lua",
-      "bytes": 2575,
-      "fnv1a": "f0ffa5cc"
+      "bytes": 2592,
+      "fnv1a": "900c2056"
     },
     {
       "studioPath": "ReplicatedStorage.Shared.Util",
@@ -276,8 +276,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ReplicatedStorage/Shared/Config.lua",
-      "bytes": 22088,
-      "fnv1a": "2a1646c1"
+      "bytes": 24972,
+      "fnv1a": "218560ee"
     },
     {
       "studioPath": "ReplicatedStorage.Shared.ItemDefs",
@@ -404,16 +404,16 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerScriptService/Server/Services/CombatService.lua",
-      "bytes": 34036,
-      "fnv1a": "42666ab0"
+      "bytes": 35342,
+      "fnv1a": "58706444"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.ProjectileService",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerScriptService/Server/Services/ProjectileService.lua",
-      "bytes": 11178,
-      "fnv1a": "354af53e"
+      "file": "src/ServerScriptService/Server/Services/ProjectileService/init.lua",
+      "bytes": 13065,
+      "fnv1a": "b2b0747f"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.PlayerService",
@@ -460,8 +460,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerScriptService/Server/Services/LootService.lua",
-      "bytes": 50326,
-      "fnv1a": "3a3600b3"
+      "bytes": 50872,
+      "fnv1a": "85f9fbc5"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.MovementService",
@@ -710,6 +710,54 @@
       "file": "src/ServerStorage/WorldGen/Populate/Audit.lua",
       "bytes": 44748,
       "fnv1a": "a033dcbc"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController.Shade",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/ViewmodelController/Shade.lua",
+      "bytes": 7870,
+      "fnv1a": "c67f459f"
+    },
+    {
+      "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.WorldItemController",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/WorldItemController.lua",
+      "bytes": 8618,
+      "fnv1a": "6dc64b45"
+    },
+    {
+      "studioPath": "ReplicatedStorage.Shared.WorldItems",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ReplicatedStorage/Shared/WorldItems.lua",
+      "bytes": 12330,
+      "fnv1a": "6c50d1cc"
+    },
+    {
+      "studioPath": "ServerScriptService.Server.Services.ProjectileService.WorldProjectiles",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerScriptService/Server/Services/ProjectileService/WorldProjectiles.lua",
+      "bytes": 33851,
+      "fnv1a": "d2ba26bd"
+    },
+    {
+      "studioPath": "ServerStorage.StyleTest.StyleTestBuilder",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/StyleTest/StyleTestBuilder/init.lua",
+      "bytes": 36698,
+      "fnv1a": "4d633b34"
+    },
+    {
+      "studioPath": "ServerStorage.StyleTest.StyleTestBuilder.Manifest",
+      "class": "ModuleScript",
+      "runContext": null,
+      "file": "src/ServerStorage/StyleTest/StyleTestBuilder/Manifest.lua",
+      "bytes": 20085,
+      "fnv1a": "fbe76998"
     }
   ],
   "skipped": [
@@ -788,7 +836,7 @@
     "fnv1a is FNV-1a 32-bit (offset basis 0x811c9dc5, prime 0x01000193) over the UTF-8 bytes of Source, lowercase hex; bytes is the byte length of Source. Both were computed in Studio (Luau) and recomputed from the written files (Python): all 85 match.",
     "file paths are relative to the repository root.",
     "All exported Sources are valid UTF-8 with LF line endings only (no CR), no BOM, and end with a newline; each file holds the Source string exactly.",
-    "Scripts that have exported children are written as a folder with an init file: StarterPlayer.StarterPlayerScripts.Client.Controllers.ArenaController, StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController, StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController, ServerScriptService.Server.Services.ArenaService, ServerStorage.WorldGen.AssetBuilder, ServerStorage.WorldGen.ItemAssets, ServerStorage.WorldGen.TerrainData, ServerStorage.WorldGen.RealAssets, ServerStorage.WorldGen.Populate.",
+    "Scripts that have exported children are written as a folder with an init file: StarterPlayer.StarterPlayerScripts.Client.Controllers.ArenaController, StarterPlayer.StarterPlayerScripts.Client.Controllers.ViewmodelController, StarterPlayer.StarterPlayerScripts.Client.Controllers.FallenRecapController, ServerScriptService.Server.Services.ArenaService, ServerStorage.WorldGen.AssetBuilder, ServerStorage.WorldGen.ItemAssets, ServerStorage.WorldGen.TerrainData, ServerStorage.WorldGen.RealAssets, ServerStorage.WorldGen.Populate, ServerScriptService.Server.Services.ProjectileService, ServerStorage.StyleTest.StyleTestBuilder.",
     "No Script has RunContext Client (the only Script, ServerScriptService.Server.Main, uses RunContext Legacy), so no Script was written as .client.lua.",
     "No two exported siblings share a name (compared case-insensitively) and no names needed changing for the file system, so no '~N' suffixes were added.",
     "No script has Archivable = false, and none sits under a non-Archivable ancestor.",
@@ -796,5 +844,5 @@
     "A second listing taken after the export matched the first for every script in the place (no edits during the export)."
   ],
   "updatedAt": "2026-11-12",
-  "updateNote": "TerrainGen (launch-trench cap at r 59) and Populate.Sites (PlateCollar) edited after the export; both re-verified against Studio."
+  "updateNote": "Place version 199: avatar arms (ViewmodelController, Rig, Poses, new Shade), persistent pickable arrows (ProjectileController, new WorldItemController, Net, Config, new WorldItems, CombatService, ProjectileService now a folder with the new WorldProjectiles, LootService) and the art-style test builder (new ServerStorage.StyleTest.StyleTestBuilder with Manifest). Every script in the manifest was re-checked against a fresh Studio listing (bytes and FNV-1a) and against the written file."
 }

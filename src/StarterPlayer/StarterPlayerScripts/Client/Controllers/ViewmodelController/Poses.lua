@@ -22,6 +22,7 @@
 	  Poses.bowRaise(draw) / Poses.bowPull(draw) / Poses.bowDip(draw) -> number   how far the bow is raised, the
 	                                         string pulled, and the bow pushed out and down (x Poses.BOW_DIP), 0..1
 	  Poses.bowTuck(right, left, tuck) -> (right, left)      the bow pulled in against a wall (tuck 0..1)
+	  Poses.useStyle(style)   "Avatar" | "Classic": the arm style's values for the holds and uses (Poses.AVATAR)
 ]]
 local Poses = {}
 
@@ -218,7 +219,9 @@ Poses.PUNCH = {
 	},
 }
 
-local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, W: CFrame, M: CFrame?, F: CFrame): CFrame
+-- (R, optional: a waypoint on the way back from F to the rest pose, so the recovery can pass below the view instead of
+-- across the bottom of it)
+local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, W: CFrame, M: CFrame?, F: CFrame, R: CFrame?): CFrame
 	if t <= windup then
 		return rest:Lerp(W, easeOut(math.clamp(t / math.max(windup, 1e-3), 0, 1)))
 	end
@@ -233,6 +236,12 @@ local function phases(t: number, windup: number, strike: number, total: number, 
 		return W:Lerp(F, easeInOut(u))
 	end
 	local u = math.clamp((t - windup - strike) / math.max(total - windup - strike, 1e-3), 0, 1)
+	if R then
+		if u < 0.4 then
+			return F:Lerp(R, smooth(u / 0.4))
+		end
+		return R:Lerp(rest, easeInOut((u - 0.4) / 0.6))
+	end
 	return F:Lerp(rest, easeInOut(u))
 end
 
@@ -256,7 +265,7 @@ function Poses.swing(style: string, variant: number, t: number, windup: number, 
 	end
 	local sets = Poses.SWING[style] or Poses.SWING.Slash
 	local set = sets[((variant - 1) % #sets) + 1]
-	return phases(t, windup, strike, total, restRight, set.W, set.M, set.F), restLeft
+	return phases(t, windup, strike, total, restRight, set.W, set.M, set.F, set.R), restLeft
 end
 
 -- Spear thrust (right hand): W the point brought round to the front at the hip, M half way, F full reach - the point
@@ -280,6 +289,29 @@ function Poses.spearRaise(s: number): CFrame
 end
 Poses.SPEAR_LEFT = V(-0.4, -0.8, -1.4) -- where the left hand holds the shaft in the guard (camera space)
 Poses.SPEAR_REACH = 1.241 -- from the right hand's grip to the left hand's, along the shaft, in the guard
+Poses.MEDKIT = {} -- (Avatar: Poses.AVATAR.MEDKIT; the Classic arms bandage in place, Poses.use)
+-- How far the supporting hand has let go of the shaft as the spear is raised to throw (raised 0..1 -> 0..1): it is off
+-- by SPEAR_RAISE_LET_GO of the raise (Avatar: early, before the shaft swings across the bottom of the view).
+Poses.SPEAR_RAISE_LET_GO = 1
+function Poses.spearRaiseLetGo(raised: number): number
+	return smooth(math.clamp(raised / math.max(Poses.SPEAR_RAISE_LET_GO or 1, 0.05), 0, 1))
+end
+-- (Avatar) the left hand lets go of the shaft for a stab (Poses.spearLetGo: how far, 0..1, the controller blends it
+-- from the shaft to its free hold): it lets go at once as the thrust starts (so it never rides the shaft across the
+-- bottom of the view) and takes the shaft again only as the spear settles back into the guard.
+Poses.STAB_LET_GO = 0
+function Poses.spearLetGo(t: number, windup: number, strike: number, total: number): number
+	local most = Poses.STAB_LET_GO or 0
+	if most <= 0 then
+		return 0
+	elseif t <= windup then
+		return most * smooth(math.clamp(t / math.max(windup * 0.2, 1e-3), 0, 1))
+	elseif t <= windup + strike then
+		return most
+	end
+	local u = math.clamp((t - windup - strike) / math.max(total - windup - strike, 1e-3), 0, 1)
+	return most * (1 - smooth(math.clamp((u - 0.75) / 0.25, 0, 1)))
+end
 
 -- The supporting hand on the spear shaft: `reach` up the shaft from the right hand's grip, or, given `near`, at the
 -- point of the shaft closest to it (so in a thrust the shaft slides through the left hand). Knuckles up, so the
@@ -452,10 +484,22 @@ local function wrapHands(rig: any, t: number, duration: number): (CFrame, CFrame
 	local near = along:Cross(up) -- ... and toward the eye
 	local k = math.clamp(t / math.max(duration, 0.1), 0, 1)
 	local s = math.clamp((k - W.start) / (W.stop - W.start), 0, 1)
-	local turn = s * W.turns
-	local p = if s >= 1 then 0 else turn - math.floor(turn)
-	local angle = W.slowAt + 2 * math.pi * p - W.ease * math.sin(2 * math.pi * p)
+	local angle
+	if W.twist then
+		-- (Avatar) the roll is held against the near side of the forearm (a small circle there) while the forearm turns
+		-- to and fro about its length, so the bandage winds on without the roll swinging up over the arm
+		local swing = math.sin(s * W.turns * 2 * math.pi) * W.twist
+		left = CFrame.new(W.wrist) * CFrame.fromAxisAngle(along, swing) * CFrame.new(-W.wrist) * left
+		angle = W.slowAt + 2 * math.pi * s * W.turns * 2
+	else
+		local turn = s * W.turns
+		local p = if s >= 1 then 0 else turn - math.floor(turn)
+		angle = W.slowAt + 2 * math.pi * p - W.ease * math.sin(2 * math.pi * p)
+	end
 	local centre = W.wrist - along * W.at + (up * math.cos(angle) + near * math.sin(angle)) * W.radius
+	if W.twist then
+		centre += (up * math.cos(W.slowAt) + near * math.sin(W.slowAt)) * W.hold
+	end
 	-- the roll's axis (the right thumb, Rig.ITEM_HOLD.bandage) along the forearm, the fist on the W.fist side of it
 	local side = (W.fist - along * along:Dot(W.fist)).Unit
 	local hand = CFrame.fromMatrix(Vector3.zero, side, along)
@@ -468,9 +512,63 @@ local function wrapHands(rig: any, t: number, duration: number): (CFrame, CFrame
 	return right, left
 end
 
--- The left elbow's pole during a use (nil: Rig.POLE.Left); the controller blends it in with the use.
-function Poses.usePole(style: string): Vector3?
-	return if style == "Wrap" then Poses.WRAP.pole else nil
+-- (Avatar) how much bandage is wound on the left forearm t seconds into the wrap (Rig:setWrap, studs): none until the
+-- winding starts, then it grows to Poses.WRAP.band (nil: no band).
+function Poses.wrapBand(t: number, duration: number): number
+	local W = Poses.WRAP
+	if not W.band then
+		return 0
+	end
+	local k = math.clamp(t / math.max(duration, 0.1), 0, 1)
+	if k <= W.start then
+		return 0
+	end
+	return 0.04 + (W.band - 0.04) * math.clamp((k - W.start) / (W.stop - W.start), 0, 1)
+end
+
+-- The elbows' poles during a use (nil: Rig.POLE); the controller blends them in with the use. Poses.USE_POLE[style] =
+-- { right = Vector3?, left = Vector3? } (bandaging: the left elbow out to the left, Poses.WRAP.pole).
+Poses.USE_POLE = {} :: { [string]: { [string]: Vector3 } }
+function Poses.usePole(style: string, side: string?): Vector3?
+	if (side or "Left") == "Left" and style == "Wrap" then
+		return Poses.WRAP.pole
+	end
+	local poles = Poses.USE_POLE[style]
+	return poles and poles[if side == "Right" then "right" else "left"]
+end
+
+-- The right elbow's pole during melee swings and throws (nil: Rig.POLE.Right; a left jab mirrors it on the left arm),
+-- blended in and out over the action by Poses.actionPoleWeight (the avatar arms swing with the elbow out to the side,
+-- so the forearm stays off the hotbar).
+Poses.SWING_POLE = nil :: Vector3?
+function Poses.actionPoleWeight(t: number, total: number): number
+	return math.sin(math.clamp(t / math.max(total, 1e-3), 0, 1) * math.pi) ^ 0.5
+end
+
+-- The med kit (Poses.MEDKIT, when it has values): the right hand holds it open in front, the left hand reaches into
+-- it and presses what it takes to the body (out of view), MEDKIT.cycles times over the use.
+local function medkitHands(t: number, duration: number, restLeft: CFrame): (CFrame, CFrame)
+	local K = Poses.MEDKIT
+	local k = math.clamp(t / math.max(duration, 0.1), 0, 1)
+	local p = (k * K.cycles) % 1
+	if K.oneHand then
+		-- (Avatar) the kit up at the lower right, shaken as the other hand rummages in it out of view, then pressed to the
+		-- chest (out of view below) and back
+		local b = if p < 0.55 then 0 elseif p < 0.7 then smooth((p - 0.55) / 0.15) elseif p < 0.85 then 1 else 1 - smooth((p - 0.85) / 0.15)
+		local shake = V(math.sin(t * 9) * 0.012, math.abs(math.sin(t * 6.5)) * 0.02, 0) * (1 - b)
+		return K.kit:Lerp(K.press, b) + shake, restLeft
+	end
+	local left
+	if p < 0.35 then
+		left = K.press:Lerp(K.reach, smooth(p / 0.35))
+	elseif p < 0.5 then
+		left = K.reach
+	elseif p < 0.8 then
+		left = K.reach:Lerp(K.press, smooth((p - 0.5) / 0.3))
+	else
+		left = K.press
+	end
+	return K.kit + V(math.sin(t * 2.1) * 0.01, math.sin(t * 1.7) * 0.012, 0), left
 end
 
 -- Eating, bandaging with the med kit and putting on armor (t = seconds since the use began).
@@ -478,14 +576,23 @@ function Poses.use(style: string, t: number, restRight: CFrame, restLeft: CFrame
 	if style == "Armor" then
 		return armorHands(t, duration or 1.5, restRight, restLeft)
 	elseif style == "Bandage" then
+		if Poses.MEDKIT.kit then
+			return medkitHands(t, duration or 5, restLeft)
+		end
 		local left = H(V(0.12, -0.88, -1.32), V(0.05, 1, 0.1), V(1, 0, -0.25))
 		local angle = t * 8.5
 		local around = V(0.02 + math.cos(angle) * 0.2, 0.02 + math.sin(angle) * 0.17, 0.06)
 		local right = H(left.Position + around + V(0.32, 0.05, 0.1), V(-0.45, 0.7, -0.5), V(-1, -0.1, -0.3))
 		return right, left
 	end
-	-- Eat
-	return Poses.EAT.hand + V(0, math.abs(math.sin(t * 7)) * Poses.EAT.chew, 0), restLeft
+	-- Eat: bites (EAT.bite: down to the mouth and back every EAT.biteEvery seconds), or a small chewing bob
+	local E = Poses.EAT
+	if E.bite then
+		local p = (t / E.biteEvery) % 1
+		local b = if p < 0.45 then smooth(p / 0.45) elseif p < 0.6 then 1 else 1 - smooth((p - 0.6) / 0.4)
+		return E.hand:Lerp(E.bite, b), restLeft
+	end
+	return E.hand + V(0, math.abs(math.sin(t * 7)) * E.chew, 0), restLeft
 end
 
 function Poses.applyUse(style: string, t: number, u: number, right: CFrame, left: CFrame, rig: any, duration: number): (CFrame, CFrame)
@@ -525,6 +632,208 @@ end
 function Poses.bowFollow(u: number): (Vector3, number)
 	local pulse = if u < 0.25 then easeOut(u / 0.25) else 1 - easeInOut((u - 0.25) / 0.75)
 	return V(-0.06, -0.1, -0.03) * pulse, -0.2 * pulse
+end
+
+-- Arm styles. ViewmodelController keeps Poses.useStyle(Rig.STYLE) current. The avatar arms are Roblox R15 arms: a
+-- square hand block on a long forearm, not a fist on a thin sleeve, so most holds and actions have their own values
+-- (Poses.AVATAR), placed by where the hand block is seen (A: its centre, Poses.AVATAR_HAND_AT along the knuckles from
+-- the hand frame's origin) and kept within the arm's reach from Rig.AVATAR_SHOULDER, so the elbows bend instead of the
+-- arms sliding about straight. They keep the hands and forearms off the hotbar (bottom centre) and the health meters
+-- (bottom left): hands that work in front come in from the sides with the elbows out and low. useStyle("Avatar")
+-- copies them over the values above, field by field (AVATAR.TOP: top-level values), and useStyle("Classic") puts the
+-- originals back. Camera space at FOV 72: a point at screen (x, y) (-1..1) and depth d is (1.515 x d, 0.727 y d, -d).
+Poses.STYLE = "Classic"
+Poses.AVATAR_HAND_AT = 0.265
+local function A(centre: Vector3, thumb: Vector3, knuckles: Vector3): CFrame
+	local h = H(centre, thumb, knuckles)
+	return h - h.LookVector * Poses.AVATAR_HAND_AT
+end
+Poses.avatarHand = A
+local LOW_LEFT = Poses.HOLD.Blade.left -- (the free left hand, down out of view)
+Poses.AVATAR = {
+	HOLD = {
+		Fists = { -- a loose guard: the fists up at the lower corners, the forearms rising into view from below
+			right = A(V(0.88, -0.42, -1.35), V(-0.1, 0.85, 0.5), V(-0.15, 0.55, -0.8)),
+			left = A(V(-0.74, -0.38, -1.35), V(0.1, 0.85, 0.5), V(0.15, 0.55, -0.8)),
+		},
+		Blade = { -- the blade upright at the lower right, leaning a little forward and in
+			right = A(V(0.89, -0.5, -1.28), V(-0.25, 0.92, -0.3), V(-0.15, 0.35, -0.92)),
+			left = LOW_LEFT,
+		},
+		Throwable = {
+			right = A(V(0.85, -0.5, -1.25), V(0.02, 0.8, -0.6), V(-0.05, 0.6, -0.8)),
+			left = LOW_LEFT,
+		},
+		Item = { -- held up at the lower right, the thing on the palm side, toward the middle of the view
+			right = A(V(0.8, -0.44, -1.22), V(-0.15, 0.85, 0.5), V(-0.15, 0.5, -0.85)),
+			left = LOW_LEFT,
+		},
+		Armor = { -- the vest held up by its collar at the right, hanging in view toward the middle
+			right = A(V(1.0, -0.26, -1.3), V(0.05, -1, 0.05), V(-0.7, 0, -0.7)),
+			left = LOW_LEFT,
+		},
+		-- the spear guard: the right hand at the hip (out of view), the shaft up through the left hand above the left
+		-- end of the hotbar (Poses.SPEAR_LEFT) to the point at the left
+		Spear = {
+			right = H(V(0.63, -0.975, -0.667), V(-0.787, 0.198, -0.583), V(-0.2, -0.9, -0.35)),
+			left = Poses.HOLD.Spear.left,
+		},
+		SpearRaised = { -- over the shoulder: the hand at the right edge (the arm out of view at the aim zoom), the shaft
+			-- coming in level from it
+			right = A(V(1.04, 0.14, -0.56), V(-0.1, 0, -1), V(0, 1, 0.1)),
+			left = H(V(-0.75, -1.4, -0.8), V(0.12, 1, -0.2), V(0.15, -0.1, -1)),
+		},
+	},
+	HOLD_ITEM = {
+		bandage = { right = A(V(0.84, -0.4, -1.22), V(-0.15, 0.95, -0.25), V(-0.35, -0.25, -0.9)) },
+		berries = { right = A(V(0.84, -0.42, -1.2), V(-0.12, 0.92, -0.38), V(-0.2, -0.3, -0.9)) },
+		-- the bottle stands up beside the palm, left of the hand
+		water_bottle = { right = A(V(1.08, -0.5, -1.25), V(-0.3, 0.95, 0.1), V(-0.15, 0.3, -0.95)) },
+		empty_bottle = { right = A(V(1.08, -0.5, -1.25), V(-0.3, 0.95, 0.1), V(-0.15, 0.3, -0.95)) },
+	},
+	PUNCH = {
+		left = {
+			W = A(V(-0.84, -0.4, -1.2), V(0.2, 0.9, 0.4), V(0.2, 0.45, -0.85)),
+			F = A(V(-0.36, -0.3, -1.5), V(0.95, 0.25, 0), V(0.1, 0.25, -1)),
+		},
+		right = {
+			W = A(V(0.92, -0.42, -1.2), V(-0.2, 0.9, 0.4), V(-0.2, 0.45, -0.85)),
+			F = A(V(0.36, -0.3, -1.5), V(-0.95, 0.25, 0), V(-0.1, 0.25, -1)),
+		},
+	},
+	SWING = {
+		Slash = {
+			{ -- right to left, falling: from over the right shoulder, across above the hotbar, out low at the left, and
+				-- back under the view (R) to the guard
+				W = A(V(1.14, 0.04, -1.0), V(0.55, 0.75, 0.35), V(-0.8, -0.2, -0.55)),
+				M = A(V(0.25, -0.29, -1.4), V(-0.6, 0.25, -0.75), V(-0.55, -0.5, 0.2)),
+				F = A(V(-0.62, -1.15, -1.05), V(-0.85, -0.35, -0.4), V(-0.2, -0.9, 0.3)),
+				R = A(V(0.45, -1.45, -0.75), V(-0.3, 0.4, 0.85), V(-0.2, -0.9, 0.3)),
+			},
+			{ -- right to left, flat: from out at the right, across at chest height, out low at the left (the arm never
+				-- crosses the hotbar to wind up on the left)
+				W = A(V(1.25, -0.22, -0.85), V(0.6, 0.45, 0.65), V(-0.6, -0.3, -0.7)),
+				M = A(V(0.3, -0.33, -1.4), V(-0.85, 0.15, -0.5), V(-0.45, -0.6, 0.3)),
+				F = A(V(-0.55, -1.12, -1.0), V(-0.8, -0.3, 0.2), V(-0.3, -0.9, 0.3)),
+				R = A(V(0.45, -1.45, -0.75), V(-0.3, 0.4, 0.85), V(-0.2, -0.9, 0.3)),
+			},
+		},
+	},
+	-- one-handed thrust at the lower right (the left hand lets go of the shaft: Poses.STAB_LET_GO), the point driven in
+	-- just under the crosshair
+	STAB = {
+		W = A(V(0.75, -0.5, -0.95), V(-0.068, -0.035, -1), V(-0.55, 0.55, -0.1)),
+		M = A(V(0.78, -0.54, -1.15), V(-0.07, -0.03, -1), V(-0.55, 0.55, -0.1)),
+		F = A(V(0.77, -0.57, -1.42), V(-0.073, -0.03, -1), V(-0.55, 0.55, -0.1)),
+	},
+	THROW = {
+		knife = {
+			W = A(V(0.82, 0.02, -0.55), V(0.1, 0.6, 0.8), V(0, 0.8, -0.6)),
+			R = A(V(0.66, -0.26, -1.45), V(-0.05, 0.2, -1), V(0, -1, -0.2)),
+			F = A(V(0.87, -1.05, -1.15), V(0, -0.6, -0.8), V(0, -0.8, 0.6)),
+		},
+		spear = {
+			W = A(V(1.0, 0.05, -0.2), V(-0.06, 0.16, -1), V(0, 1, 0.15)),
+			R = A(V(0.55, -0.21, -1.45), V(-0.05, 0.05, -1), V(0, 1, 0)),
+			F = A(V(0.87, -1.05, -1.2), V(0, -0.55, -0.85), V(0, 0.8, -0.5)),
+		},
+	},
+	-- eating: the hand comes up at the lower right, right of the hotbar, its palm (and the food on it) turned toward you;
+	-- each bite takes the food down to the mouth (out of view below) and back
+	EAT = {
+		hand = A(V(0.79, -0.44, -1.0), V(0.89, 0.1, 0.44), V(0, 0.97, -0.22)),
+		bite = A(V(0.42, -0.62, -0.62), V(0.89, 0.1, 0.44), V(0, 0.97, -0.22)),
+		biteEvery = 0.55,
+		lift = {},
+	},
+	-- drinking: the bottle tipped up toward the mouth, its neck going out of view at the bottom right of the hotbar and
+	-- its base up at the right of the crosshair, the hand on its right side
+	DRINK = {
+		lips = V(0.4, -0.72, -0.9),
+		yaw = 30,
+		tilt0 = 50,
+		tilt1 = 62,
+		roll = 160,
+		low = V(0.2, -0.55, 0.1),
+	},
+	-- bandaging (the roll): the left forearm held up at the lower left (between the meters and the hotbar), the right
+	-- hand holding the roll against its near side while the forearm turns to and fro; the bandage builds up behind the
+	-- wrist (Poses.wrapBand)
+	WRAP = {
+		wrist = V(-0.6, -0.44, -1.15),
+		pole = V(-1, -0.6, 0.1),
+		bend = V(0.1, -1.4, -0.1),
+		palm = V(0.2, 0.6, 1),
+		at = 0.22,
+		radius = 0.05,
+		hold = 0.38,
+		slowAt = math.rad(140),
+		twist = math.rad(55),
+		turns = 2.5,
+		band = 0.26,
+		fist = V(0.3, -0.9, 0.2),
+	},
+	-- the med kit: held up open at the lower right with a rummaging shake, pressed to the chest (out of view below) twice
+	MEDKIT = {
+		kit = A(V(0.92, -0.42, -1.2), V(-0.45, 0.88, 0.15), V(-0.2, 0.3, -0.95)),
+		press = A(V(0.78, -1.1, -0.6), V(-0.6, 0.6, 0.5), V(-0.3, 0.55, -0.8)),
+		cycles = 2,
+		oneHand = true,
+	},
+	-- putting on armor: the vest raised at the upper right, swung over the right shoulder (it leaves the view at the top
+	-- right and is worn from then on), both hands come down at the sides and tug the hem twice at the bottom corners
+	ARMOR = {
+		lift = A(V(0.78, 0.15, -1.2), V(0.05, -1, 0.1), V(-0.8, 0.1, -0.5)),
+		over = A(V(1.15, 1.3, 0.1), V(0.1, 0.2, 1), V(-0.3, 1, -0.2)),
+		downRight = A(V(1.0, -1.2, -0.7), V(-0.2, 1, -0.2), V(-0.3, -0.2, -1)),
+		downLeft = A(V(-1.0, -1.2, -0.7), V(0.2, 1, -0.2), V(0.3, -0.2, -1)),
+		tugRight = A(V(1.0, -0.62, -1.2), V(-0.25, 0.85, -0.45), V(-0.15, 0.5, -0.88)),
+		tugLeft = A(V(-1.0, -0.62, -1.2), V(0.25, 0.85, -0.45), V(0.15, 0.5, -0.88)),
+		liftedAt = 0.25,
+		overAt = 0.45,
+		downAt = 0.58,
+		tug0At = 0.66,
+	},
+	USE_POLE = {
+		Bandage = { right = V(0.8, -1, 0) },
+		Eat = { right = V(1, -0.6, 0) },
+		Drink = { right = V(1, -0.6, 0) },
+		Wrap = { right = V(1, -0.7, 0) },
+	},
+	TOP = {
+		SPEAR_LEFT = V(-0.8, -0.6, -1.55),
+		SPEAR_REACH = 1.6,
+		STAB_LET_GO = 1,
+		SPEAR_RAISE_LET_GO = 0.2,
+		SWING_POLE = V(1, -0.6, 0.1),
+	},
+}
+local classicValues: { [string]: { [string]: any } } = {}
+local NONE = {} -- (a field the Classic table didn't have)
+function Poses.useStyle(style: string)
+	style = if style == "Avatar" then "Avatar" else "Classic"
+	if style == Poses.STYLE then
+		return
+	end
+	Poses.STYLE = style
+	for group, values in pairs(Poses.AVATAR) do
+		local target = if group == "TOP" then (Poses :: any) else (Poses :: any)[group]
+		if type(target) == "table" then
+			local saved = classicValues[group] or {}
+			classicValues[group] = saved
+			for key, value in pairs(values) do
+				if saved[key] == nil then
+					saved[key] = if target[key] == nil then NONE else target[key]
+				end
+				if style == "Avatar" then
+					target[key] = value
+				else
+					local original = saved[key]
+					target[key] = if original == NONE then nil else original
+				end
+			end
+		end
+	end
 end
 
 return Poses

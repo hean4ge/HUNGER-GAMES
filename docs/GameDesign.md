@@ -55,6 +55,8 @@ Realistic lighting, atmosphere and Roblox PBR materials with slightly simplified
 
 Fists (nothing equipped), knife, machete, hatchet, spear (melee and throw), mace, sword; recurve bow (hold to draw, release to fire, arrows are ammo, projectiles with gravity, headshots); throwing knives. Server-authoritative hits and damage. Stats in `Shared.ItemDefs` and `Config.Combat`.
 
+Spent arrows, throwing knives and thrown spears never vanish (`ProjectileService.WorldProjectiles`, rules in `Shared.WorldItems`): they stay embedded where they hit (angled along the flight, sunk by material and speed, fletching out), rest on the bed under water, land where a miss's arc meets the ground, and stick in the body part of a contender or dummy until that body dies or `Config.Combat.BodyFallOutTime` (~30 s) passes, then lie on the ground there. A training dummy lets its items out as it breaks, before its parts are flung (`CombatService` calls `world.releaseFrom`), and a hit on a body that is already dead (the killing shot included) falls straight out. "The ground" is terrain or a part held in place: the drop ray looks past bodies, broken dummy parts and loose parts, and an item lying on a part that is removed drops again. Anyone alive can take them: walking over arrows and throwing knives (`Config.Loot.AutoPickup`, even holding none) or E on the one you look at within reach (`WorldItemController`). They stay until the round's arena cleanup; `Config.Combat.WorldItemCap` (400) per server, oldest first.
+
 ## 7. Controls (action names are a contract; bind through `Shared.Input`)
 
 | Action | Keyboard / mouse | Gamepad | Touch |
@@ -78,12 +80,17 @@ In the lobby: third-person camera, movement only, no attacks. In the arena: lock
 ```
 ReplicatedStorage
   Shared/           ModuleScripts (require anywhere at top level):
-                    Config, ItemDefs, ItemModels, Theme, Net, Signal, Spring, Sfx, Sounds, Util, Input (client only), ArenaLayout
+                    Config, ItemDefs, ItemModels, Theme, Net, Signal, Spring, Sfx, Sounds, Util, Input (client only), ArenaLayout,
+                    WorldItems (spent-projectile poses and reach)
   Remotes/          RemoteEvents (section 9)
   GameState         Configuration with attributes (section 10)
   Assets/           client-visible mesh templates built by ServerStorage.WorldGen.ItemAssets:
                     Items.<itemId> (ItemModels.build), Crates.SupplyCrate1..3 (ItemModels.buildCrate),
-                    Viewmodel.<R_|L_ piece> (first-person arms)
+                    Viewmodel.<R_|L_ piece> (the Classic first-person arms, kept as a fallback),
+                    Viewmodel.StandardArms (default blocky R15 arms: the fallback for R6 and unusual avatars)
+                    First person shows the player's own avatar arms by default (`Config.Viewmodel.ArmStyle = "Avatar"`):
+                    `ViewmodelController.Rig` clones the character's R15 arm parts, shirt and body colours, and
+                    `ViewmodelController.Shade` lights them like the world (exposure, a soft sky key, a shade layer)
 ServerScriptService.Server
   Main              Script: loader
   Services/         ModuleScripts: DataService, PlayerService, MovementService, InventoryService, LootService,
@@ -93,7 +100,8 @@ StarterPlayer.StarterPlayerScripts.Client
   ClientState       ModuleScript: shared client state + signals (read it before writing client code)
   Controllers/      ModuleScripts: SettingsController, CameraController, MovementController, CharacterVisuals,
                     InventoryController, CombatController, ViewmodelController, ProjectileController, AudioController,
-                    ArenaController, HUDController, LobbyController, NotificationController, SpectateController
+                    ArenaController, HUDController, LobbyController, NotificationController, SpectateController,
+                    WorldItemController (the Take prompt for spent arrows, knives and spears)
 StarterGui          ScreenGuis HUD, Lobby, Overlay, Menu, Spectate (built by ServerStorage.WorldGen.UIBuilder;
                     Enabled = false at edit time; controllers enable them at runtime)
 ServerStorage
@@ -128,9 +136,9 @@ The code is exported from Studio to this GitHub repo. Anything that is **not** a
 - **PlayerService**: `isAlive(player) -> boolean`; `damage(player, amount, info) -> killed` with `info = { attacker: Player?, cause: "Combat"|"Fall"|"Border"|"Starvation"|"Dehydration"|"Other", weaponId: string?, position: Vector3?, headshot: boolean? }` (fires `DamageTaken` to the victim and handles death exactly once); `heal(player, amount)`; `addHunger(player, delta)`; `addThirst(player, delta)` (both clamp 0..100); `getAlivePlayers() -> {Player}`; `died: Signal(victim: Player, killer: Player?, cause: string)`
 - **RoundService**: `getPhase() -> string`; `isPractice() -> boolean`; `roundStarted: Signal(roundId)`; `roundEnded: Signal(winner: Player?)`
 - **InventoryService**: `give(player, itemId, count) -> number added`; `take(player, itemId, count) -> boolean`; `consume(...)` (same as take); `has(player, itemId, count) -> boolean`; `count(player, itemId) -> number`; `getEquipped(player) -> (itemId?, slot)` (nil, 0 = fists); `removeEquipped(player) -> itemId?`; `getArmorMultiplier(player) -> number` (1 = no armor); `clear(player)`; `dropAll(player, position)`
-- **LootService**: `populate()`; `clearAll()`; `refillSpire()`; `spawnGroundItem(itemId, count, position, velocity?) -> Model?`
+- **LootService**: `populate()`; `clearAll()`; `refillSpire()`; `spawnGroundItem(itemId, count, position, velocity?) -> Model?`; `cleared: Signal()` (after every `clearAll`); `inventoryFull(player)` (the INVENTORY FULL toast)
 - **CombatService**: `applyHit(attacker: Player?, humanoid: Humanoid, baseDamage: number, info) -> (damageDealt, killed)`
-- **ProjectileService**: `fire(shooter, itemId, origin, velocity, gravity, damage, opts) -> id`
+- **ProjectileService**: `fire(shooter, itemId, origin, velocity, gravity, damage, opts) -> id?` (nil = refused by the in-flight caps; `opts.recoverItem` is the item left in the world); `world` = `WorldProjectiles` (`count()`, `get(worldId)`, `stats()`, `releaseFrom(model) -> number` (everything stuck in a body comes out now), `clear()`)
 - **ArenaService**: `isInsideBorder(position) -> boolean`; `getFallen() -> {string}`
 - **DataService**: `increment(player, key, n)`; `get(player, key) -> any`; `setSettings(player, settings)`
 - **MovementService**: no public API
@@ -160,7 +168,7 @@ Never send arrays with nil holes — use `false` for empty entries.
 | Sfx | `(key: string, opts { position?, volume?, pitch? }?)` — used by `Shared.Sfx` |
 | InventoryUpdate | `{ slots = { [1..6] = { id, count } \| false }, equipped (0 = fists), armor ("" = none) }` |
 | ProjectileFired | `{ id, shooter (UserId), itemId, origin, velocity, gravity }` |
-| ProjectileImpact | `{ id, position, normal, hitCharacter: boolean, part: BasePart? }` |
+| ProjectileImpact | `{ id, position, normal, hitCharacter: boolean, part: BasePart?, material, itemId, headshot, recovered, worldId?, pivot?, rel?, fallTo?, fallTime?, sink? }` (the item left in the world, its pose, relative to `part` when stuck to it, and the fall or sink that follows) |
 | HitConfirm | `{ damage, headshot, killed }` |
 | DamageTaken | `{ amount, fromPosition: Vector3?, cause }` |
 | CombatAction | `{ userId, action = "Swing"\|"Draw"\|"Release"\|"Throw", itemId }` |
@@ -177,6 +185,7 @@ Never send arrays with nil holes — use `false` for empty entries.
 | SetStance | `("Stand"\|"Crouch"\|"Slide"\|"Climb")` |
 | SaveSettings | `({ [string]: number })` |
 | SpectateTarget | `(target: Player?)` — server sets the requester's ReplicationFocus so streaming follows the spectated contender |
+| TakeWorldItem | `(worldId: number)` — take a spent arrow, knife or spear (the server checks reach: PickupRange + 2, no higher than PickupReachAbove + 1.5 above the root) |
 
 ## 10. Attributes and tags
 
@@ -185,7 +194,7 @@ Never send arrays with nil holes — use `false` for empty entries.
 - **Player**: Alive (alive contender this round), InArena, Frozen (movement locked), Hunger, Thirst, Armor (item id or ""), Kills (this round), Placement, Wins, TotalKills, RoundsPlayed, SettingsJson
 - **Character**: Stance ("Stand"|"Crouch"|"Slide"|"Climb"), set by the server from SetStance
 - **workspace.Arena**: Center (Vector3), PlayRadius; children Plinths, Boundary, SpirePlatform (covers the launch trench), Waterfall (particle curtain), and the set dressing from `Populate` (§11): Landmarks (the Spire), POIs, Camps, Cliffs, Forest, Flora, Rocks, Ambience. **workspace.Terrain**: ArenaTerrainReady (true once terrain generation is done), TerrainVersion (2), TerrainGenStatus / TerrainGenProgress (the last generation)
-- **CollectionService tags**: LootSpawn (marker Part with attributes Tier 1|2|3 and Kind "Crate"|"Ground"), Climbable, NoMantle, AmbientEmitter (Part with attribute SoundKey), Plinth, TrainingDummy
+- **CollectionService tags**: LootSpawn (marker Part with attributes Tier 1|2|3 and Kind "Crate"|"Ground"), Climbable, NoMantle, AmbientEmitter (Part with attribute SoundKey), Plinth, TrainingDummy, WorldProjectile (a spent arrow, knife or spear in `workspace.Arena.Loot.Projectiles`; attributes ItemId, WorldId, Shot, and Host / HostPart while it is in a body), LooseProjectile (one that can be taken now)
 
 ## 11. World layout
 

@@ -1,8 +1,10 @@
 --[[
 	ViewmodelController - first-person arms and the held item. Client only.
 
-	Visible only in first person, in the arena, alive and not spectating. Arms are built from parts (dark fabric
-	sleeves, cuffs, fists in the skin colour of the local character's hands) and the held item comes from
+	Visible only in first person, in the arena, alive and not spectating. The arms are the player's own avatar arms
+	(R15 UpperArm / LowerArm / Hand with their skin colour and shirt, Rig:setAvatar, rebuilt when the character's
+	arms, shirt or colours change), or with Config.Viewmodel.ArmStyle = "Classic" the part-built arms (dark fabric
+	sleeves, cuffs, fists in the skin colour of the local character's hands). The held item comes from
 	ItemModels.build(id, "view"), placed at the hand by its Grip attachment (a bow sits in the left hand and the
 	right hand draws the string). Child modules: Rig (parts, two-bone IK, item placement, BulkMoveTo) and Poses
 	(hand poses and keyframes).
@@ -44,6 +46,7 @@ local Util = require(Shared:WaitForChild("Util"))
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Rig = require(script:WaitForChild("Rig"))
 local Poses = require(script:WaitForChild("Poses"))
+local Shade = require(script:WaitForChild("Shade"))
 
 local player = Players.LocalPlayer
 
@@ -56,6 +59,8 @@ local SPEAR_REACH = Poses.SPEAR_REACH or 1.16 -- the supporting hand's distance 
 -- Bow: how far the string is pulled at full draw in first person (studs). Longer than the mesh bow's own MaxDraw, so the
 -- nock reaches an under-chin anchor with the bow arm extended (Poses.HOLD.BowDrawn is built for this length).
 local BOW_DRAW = Config.Combat.ViewBowDraw or 1.35
+-- Config.Viewmodel.ArmStyle: "Avatar" (the player's own R15 arms) or "Classic" (the part-built arms)
+local ARM_STYLE = if Config.Viewmodel and Config.Viewmodel.ArmStyle == "Classic" then "Classic" else "Avatar"
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
 local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
 local USE_STYLE: { [string]: string } = {
@@ -66,6 +71,7 @@ local USE_BY_KIND: { [string]: string } = { Food = "Eat", Drink = "Drink", Heal 
 local Controllers: { [string]: any } = {}
 local camera: Camera? = workspace.CurrentCamera
 local rig: any = nil
+local shade: any = nil -- (Avatar arms) Shade: the light on the arms (exposure, sky key, shade layer)
 local visible = false
 local initialized = false
 
@@ -96,6 +102,10 @@ local wasUsing = false
 local useHidItem = false -- the used item is out of view (armor once it is over the shoulder: Poses.useHidesItem)
 local fullDrawSince: number? = nil
 local skinCheckAt = 0
+local avatarSignature: string? = nil -- what the avatar arms were last built from (Rig.avatarSignature)
+local avatarCheckAt = 0
+local avatarBuilding = false
+local pendingArms: any = nil -- built arms waiting to be shown (false: the Classic arms)
 local lastRightCam = CFrame.identity
 local muzzle: Vector3? = nil
 
@@ -147,6 +157,48 @@ local function skinColor(): Color3?
 	end
 	local colors = character:FindFirstChildOfClass("BodyColors")
 	return if colors then colors.RightArmColor3 else nil
+end
+
+-- (Avatar arms) rebuilds them when the character's arms, shirt or arm colours have changed. Runs on Heartbeat, outside
+-- the render step: the arms are built over two frames (Rig:buildAvatar with task.wait between its halves) and shown on
+-- the frame after (pendingArms, Rig:useArms), so no frame pays for the whole build inside the viewmodel's step.
+local function refreshAvatar()
+	if not rig or rig.style ~= "Avatar" or avatarBuilding then
+		return
+	end
+	local character = player.Character
+	local signature = Rig.avatarSignature(character)
+	if signature == avatarSignature then
+		return
+	end
+	avatarSignature = signature
+	avatarBuilding = true
+	task.spawn(function()
+		local ok, arms = pcall(rig.buildAvatar, rig, character, task.wait)
+		avatarBuilding = false
+		if ok then
+			pendingArms = arms or false
+		else
+			avatarSignature = nil -- (try again on the next check)
+			warn("[ViewmodelController] avatar arms: " .. tostring(arms))
+		end
+	end)
+end
+
+local function onHeartbeat()
+	if not rig then
+		return
+	end
+	if pendingArms ~= nil then
+		local arms = pendingArms
+		pendingArms = nil
+		rig:useArms(arms or nil)
+	end
+	local now = os.clock()
+	if visible and now >= avatarCheckAt then
+		avatarCheckAt = now + 1
+		refreshAvatar()
+	end
 end
 
 local function countItem(itemId: string): number
@@ -212,12 +264,20 @@ local function setVisible(on: boolean)
 		if color then
 			rig:setSkin(color)
 		end
+		avatarCheckAt = 0 -- (checked on the next Heartbeat)
+		if shade then
+			shade:reset()
+		end
 		resetMotion()
 		equipStart = os.clock()
 		equipDuration = 0.4 -- the arms rise into view
 		rig.model.Parent = camera
+		if shade then
+			rig:setKeyParent(workspace) -- (the arms' key light: in the workspace, a light in the camera gives none)
+		end
 	else
 		rig.model.Parent = nil
+		rig:setKeyParent(nil)
 		anim = nil
 		muzzle = nil
 	end
@@ -332,11 +392,14 @@ local function update(dt: number)
 	local now = os.clock()
 	syncItem(now)
 	if now >= skinCheckAt then
-		skinCheckAt = now + 2
+		skinCheckAt = now + 1
 		local color = skinColor()
 		if color and color ~= rig.skin then
 			rig:setSkin(color)
 		end
+	end
+	if Poses.STYLE ~= Rig.STYLE then
+		Poses.useStyle(Rig.STYLE) -- (the avatar arms' own holds and use poses)
 	end
 
 	-- One-shot animation clock (slowed for a moment on impact: hit-stop)
@@ -431,10 +494,15 @@ local function update(dt: number)
 		end
 	end
 
-	-- The spear is held in both hands until it's raised to throw
+	-- The spear is held in both hands until it's raised to throw (the avatar arms let go with the left for a stab:
+	-- Poses.spearLetGo)
 	if heldKind == "Spear" and raised < 1 and not rig.itemHidden then
-		local shaft = Poses.spearLeft(right * Rig.GRIP.Right, SPEAR_REACH, Rig.GRIP_POINT.Left, Poses.SPEAR_LEFT)
-		left = shaft:Lerp(left, Poses.smooth(raised))
+		local shaft = Poses.spearLeft(right * Rig.GRIP.Right, Poses.SPEAR_REACH or SPEAR_REACH, Rig.GRIP_POINT.Left, Poses.SPEAR_LEFT)
+		local free = Poses.spearRaiseLetGo(raised)
+		if anim and anim.kind == "Swing" and anim.style == "Stab" then
+			free = math.max(free, Poses.spearLetGo(anim.t, anim.windup, anim.strike, anim.total))
+		end
+		left = shaft:Lerp(left, free)
 	end
 
 	-- Eating, drinking, bandaging, putting on armor (Poses.applyUse: the use poses, their blend from the hold, the wrists)
@@ -447,12 +515,32 @@ local function update(dt: number)
 		rig:setItemHidden(hideForUse or itemHiddenUntil > 0)
 	end
 	local leftPole = Rig.POLE.Left
+	local rightPole: Vector3? = nil -- (a use's or an action's own right elbow pole, blended in)
+	local style = useStyle()
+	local wrap = 0
 	if alpha.use > 0.001 then
 		local u = Poses.smooth(alpha.use)
-		right, left = Poses.applyUse(useStyle(), useT, u, right, left, rig, useTime)
-		local usePole = Poses.usePole(useStyle())
+		right, left = Poses.applyUse(style, useT, u, right, left, rig, useTime)
+		local usePole = Poses.usePole(style, "Left")
 		if usePole then
 			leftPole = leftPole:Lerp(usePole, u) -- (bandaging: the left elbow out to the left)
+		end
+		local useRight = Poses.usePole(style, "Right")
+		if useRight then
+			rightPole = Rig.POLE.Right:Lerp(useRight, u)
+		end
+		if style == "Wrap" then
+			wrap = Poses.wrapBand(useT, useTime) * u -- (the bandage building up on the forearm)
+		end
+	end
+	rig:setWrap(if using or alpha.use > 0.05 then wrap else 0)
+	if Poses.SWING_POLE and heldKind ~= "Bow" and anim and (anim.kind == "Swing" or anim.kind == "Throw") then
+		local w = Poses.actionPoleWeight(anim.t, anim.total)
+		if anim.style == "Punch" and (anim.variant or 1) % 2 == 1 then
+			local p = Poses.SWING_POLE -- (a left jab: the left elbow out to the left)
+			leftPole = leftPole:Lerp(Vector3.new(-p.X, p.Y, p.Z), w)
+		else
+			rightPole = (rightPole or Rig.POLE.Right):Lerp(Poses.SWING_POLE, w)
 		end
 	end
 
@@ -589,7 +677,24 @@ local function update(dt: number)
 		* about(PIVOT, CFrame.Angles(recoil.X + land * 0.05 + math.sin(now * 1.8 - 0.6) * 0.004 * calm, recoil.Y, recoil.Z - lean.X * 0.05))
 	local M = motion * state
 	-- (with a bow the right elbow goes out to the right, so the drawing forearm comes in from the lower right)
-	local poleRight = if heldKind == "Bow" then bowPole else Rig.POLE.Right
+	local poleRight = if heldKind == "Bow" then bowPole else rightPole or Rig.POLE.Right
+	-- (Avatar arms) hands that must stay exactly where they are put: the bow and the hand on its string, a bottle at the
+	-- lips, the bandaging hands (Rig:pose frame.lock; "hand": the elbow may still turn toward the hand)
+	local lock: { [string]: any }? = nil
+	if heldKind == "Bow" then
+		lock = { Left = "hand", Right = if alpha.tuck < 0.5 then true else nil }
+	elseif heldKind == "Spear" and Rig.STYLE == "Avatar" then
+		lock = { Right = "hand" } -- (the spear's line comes from the right hand: it is never turned by the wrist limit)
+	elseif alpha.use > 0.05 and (style == "Drink" or style == "Wrap") then
+		lock = { Right = "hand", Left = if style == "Wrap" then true else nil }
+	end
+	-- the light on the avatar arms (exposure, sky key, shade layer)
+	local key: CFrame? = nil
+	if shade and rig.avatar then
+		key = shade:update(dt, camCF, alpha.tuck)
+	else
+		rig:setExposure(1)
+	end
 
 	local frame = {
 		right = camCF * (M * right),
@@ -600,6 +705,8 @@ local function update(dt: number)
 		poleLeft = camCF:VectorToWorldSpace(M:VectorToWorldSpace(leftPole)),
 		up = camCF.UpVector,
 		arrow = if arrowCam then camCF * (M * arrowCam) else nil,
+		lock = lock,
+		key = key,
 	}
 	rig:pose(frame)
 	rig:updateView(camCF, cam.FieldOfView, cam.ViewportSize.Y)
@@ -623,8 +730,11 @@ function ViewmodelController.Init(registry)
 end
 
 function ViewmodelController.Start()
-	rig = Rig.new(skinColor())
+	rig = Rig.new(skinColor(), ARM_STYLE)
+	Poses.useStyle(Rig.STYLE)
+	shade = if ARM_STYLE == "Avatar" then Shade.new(rig) else nil
 	player:SetAttribute("ViewmodelVisible", false)
+	RunService.Heartbeat:Connect(onHeartbeat)
 
 	local combat = Controllers.CombatController
 	if combat and type(combat.action) == "table" and type(combat.action.Connect) == "function" then
@@ -646,6 +756,8 @@ function ViewmodelController.Start()
 	end)
 	player.CharacterAdded:Connect(function()
 		skinCheckAt = 0
+		avatarSignature = nil
+		avatarCheckAt = 0
 	end)
 	RunService:BindToRenderStep("ViewmodelController", Enum.RenderPriority.Camera.Value + 2, update)
 end

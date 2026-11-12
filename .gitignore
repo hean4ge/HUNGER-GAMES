@@ -21,3 +21,13 @@ art/previews/ItemsReal/*
 art/previews/LandmarksReal/*
 art/previews/TreesReal/*
 !art/previews/*/_lineup*.png
+
+# Style test: keep the comparison sheet and one lineup per style; the rest regenerates from
+# art/blender/style_*.py (Blender renders) or the Workspace.StyleTest diorama (Studio captures).
+art/previews/StyleTest/A/*
+art/previews/StyleTest/B/*
+art/previews/StyleTest/C/*
+art/previews/StyleTest/Studio/*
+!art/previews/StyleTest/A/A_lineup_midday.png
+!art/previews/StyleTest/B/_B_overview.png
+!art/previews/StyleTest/C/lineup_midday.png

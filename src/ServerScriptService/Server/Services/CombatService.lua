@@ -170,6 +170,14 @@ local function consumeItem(player: Player, itemId: string, count: number): boole
 	return type(consume) == "function" and consume(player, itemId, count) == true
 end
 
+-- A shot the projectile caps refused gives its item back: nothing thrown or shot is ever lost.
+local function refund(player: Player, itemId: string)
+	local inventory = Services.InventoryService
+	if inventory and type(inventory.give) == "function" then
+		pcall(inventory.give, player, itemId, 1)
+	end
+end
+
 local function facingOk(root: BasePart, direction: Vector3, minDot: number): boolean
 	local flat = Vector3.new(direction.X, 0, direction.Z)
 	if flat.Magnitude < 0.3 then
@@ -243,6 +251,15 @@ local function wornOn(handle: BasePart, accessory: Instance): BasePart?
 			local other = if a == handle then b else a
 			if other and other ~= handle and other:IsA("BasePart") then
 				return other
+			end
+		elseif child:IsA("RigidConstraint") then
+			-- current avatars (layered clothing, most accessories) hang on a RigidConstraint between two attachments
+			local a = child.Attachment0
+			local b = child.Attachment1
+			local other = if a and a.Parent == handle then b else a
+			local part = other and other.Parent
+			if part and part ~= handle and part:IsA("BasePart") then
+				return part
 			end
 		end
 	end
@@ -413,6 +430,15 @@ local function breakDummy(model: Model, slot: DummySlot)
 		return -- already broken (Died and HealthChanged can both report it)
 	end
 	dummyData[model] = nil
+	-- arrows and blades in it come out now, where they are, and drop to the ground before its parts tumble away
+	local projectiles = Services.ProjectileService
+	local world = projectiles and projectiles.world
+	if world and type(world.releaseFrom) == "function" then
+		local ok, err = pcall(world.releaseFrom, model)
+		if not ok then
+			warn("[CombatService] couldn't free the items stuck in a training dummy: " .. tostring(err))
+		end
+	end
 	CollectionService:RemoveTag(model, DUMMY_TAG)
 	local push = if data then data.push else Vector3.zero
 	local head = model:FindFirstChild("Head")
@@ -898,13 +924,16 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		st.lastShot = now
 		local speed = Util.lerp(def.speedMin or 90, def.speedMax or 240, amount)
 		local damage = Util.lerp(def.damageMin or 10, def.damageMax or 40, amount)
-		projectiles.fire(player, ammo, start, aim * speed, def.gravity or 50, damage, {
+		local fired = projectiles.fire(player, ammo, start, aim * speed, def.gravity or 50, damage, {
 			shotId = shotId,
 			weaponId = itemId,
 			headshotMultiplier = def.headshotMultiplier,
-			recoverItem = ammo,
-			recoverChance = CombatConfig.ArrowRecoverChance,
+			recoverItem = ammo, -- it stays where it ends up (ProjectileService.WorldProjectiles)
 		})
+		if not fired then
+			refund(player, ammo)
+			return
+		end
 		Sfx.play("BowRelease", { position = start, exclude = player })
 		broadcastAction(player, "Release", itemId)
 		return
@@ -935,14 +964,16 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 	else
 		return
 	end
-	projectiles.fire(player, itemId :: string, start, aim * (speed or 120), gravity or 40, damage or 0, {
+	local fired = projectiles.fire(player, itemId :: string, start, aim * (speed or 120), gravity or 40, damage or 0, {
 		shotId = shotId,
 		weaponId = itemId,
 		headshotMultiplier = CombatConfig.DefaultHeadshotMultiplier,
-		recoverItem = itemId,
-		recoverChance = 1,
-		recoverAnywhere = true,
+		recoverItem = itemId, -- it stays where it ends up, like an arrow
 	})
+	if not fired then
+		refund(player, itemId :: string)
+		return
+	end
 	Sfx.play("Throw", { position = start, exclude = player })
 	broadcastAction(player, "Throw", itemId)
 end

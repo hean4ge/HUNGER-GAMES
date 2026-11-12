@@ -1,0 +1,1284 @@
+{
+ "schema": "LS-Real-1 (style test)",
+ "category": "StyleTest_A",
+ "variant": "A",
+ "styleName": "Low-poly realism",
+ "glb": "StyleTest/A/StyleTest_A.glb",
+ "glbs": [
+  {
+   "file": "StyleTest/A/StyleTest_A.glb",
+   "assets": [
+    "StyleA_Spruce",
+    "StyleA_Oak",
+    "StyleA_HunterCabin",
+    "StyleA_Boulder"
+   ],
+   "bytes": 8332044,
+   "sizeMB": 8.33,
+   "embeddedImages": [
+    "StyleA_Boulder_Normal",
+    "StyleA_Boulder_Color",
+    "StyleA_Boulder_MR",
+    "StyleA_Cabin_Normal",
+    "StyleA_Cabin_Color",
+    "StyleA_Cabin_MR",
+    "StyleA_CabinRoof_Normal",
+    "StyleA_CabinRoof_Color",
+    "StyleA_CabinRoof_MR",
+    "StyleA_Oak_Normal",
+    "StyleA_Oak_Color",
+    "StyleA_Oak_MR",
+    "StyleA_Spruce_Normal",
+    "StyleA_Spruce_Color",
+    "StyleA_Spruce_MR"
+   ]
+  }
+ ],
+ "units": "1 Blender unit = 1 Roblox stud",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); asset front = Roblox LookVector (-Z); base on y = 0",
+ "textureFolder": "StyleTest/A/textures",
+ "uploadTextures": [
+  {
+   "file": "StyleTest/A/textures/StyleA_Spruce_Color.png",
+   "kind": "color",
+   "set": "StyleA_Spruce",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 621045
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Spruce_Normal.png",
+   "kind": "normal",
+   "set": "StyleA_Spruce",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 103897
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Spruce_Rough.png",
+   "kind": "roughness",
+   "set": "StyleA_Spruce",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 169756
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Oak_Color.png",
+   "kind": "color",
+   "set": "StyleA_Oak",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 633748
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Oak_Normal.png",
+   "kind": "normal",
+   "set": "StyleA_Oak",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 168766
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Oak_Rough.png",
+   "kind": "roughness",
+   "set": "StyleA_Oak",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 172245
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+   "kind": "color",
+   "set": "StyleA_Cabin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 765727
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+   "kind": "normal",
+   "set": "StyleA_Cabin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 996939
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+   "kind": "roughness",
+   "set": "StyleA_Cabin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 188528
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_CabinRoof_Color.png",
+   "kind": "color",
+   "set": "StyleA_CabinRoof",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 590360
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_CabinRoof_Normal.png",
+   "kind": "normal",
+   "set": "StyleA_CabinRoof",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 758815
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_CabinRoof_Rough.png",
+   "kind": "roughness",
+   "set": "StyleA_CabinRoof",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 144479
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Boulder_Color.png",
+   "kind": "color",
+   "set": "StyleA_Boulder",
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 94572
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Boulder_Normal.png",
+   "kind": "normal",
+   "set": "StyleA_Boulder",
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 116343
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_Boulder_Rough.png",
+   "kind": "roughness",
+   "set": "StyleA_Boulder",
+   "size": [
+    512,
+    512
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 20781
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_PebblePath_Color.png",
+   "kind": "color",
+   "set": "terrain:PebblePath",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 681291
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_PebblePath_Normal.png",
+   "kind": "normal",
+   "set": "terrain:PebblePath",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 863952
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_PebblePath_Rough.png",
+   "kind": "roughness",
+   "set": "terrain:PebblePath",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 197527
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_ForestFloor_Color.png",
+   "kind": "color",
+   "set": "terrain:ForestFloor",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1055220
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_ForestFloor_Normal.png",
+   "kind": "normal",
+   "set": "terrain:ForestFloor",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB",
+   "bytes": 1369316
+  },
+  {
+   "file": "StyleTest/A/textures/StyleA_ForestFloor_Rough.png",
+   "kind": "roughness",
+   "set": "terrain:ForestFloor",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray",
+   "bytes": 400007
+  }
+ ],
+ "glbOnlyTextures": [
+  "StyleTest/A/textures/glb_only/StyleA_Spruce_MR.png",
+  "StyleTest/A/textures/glb_only/StyleA_Oak_MR.png",
+  "StyleTest/A/textures/glb_only/StyleA_Cabin_MR.png",
+  "StyleTest/A/textures/glb_only/StyleA_CabinRoof_MR.png",
+  "StyleTest/A/textures/glb_only/StyleA_Boulder_MR.png"
+ ],
+ "textureSets": {
+  "StyleA_Spruce": {
+   "colorMap": "StyleTest/A/textures/StyleA_Spruce_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_Spruce_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_Spruce_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "uvCoverage": 0.415
+  },
+  "StyleA_Oak": {
+   "colorMap": "StyleTest/A/textures/StyleA_Oak_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_Oak_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_Oak_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "uvCoverage": 0.555
+  },
+  "StyleA_Cabin": {
+   "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "uvCoverage": 0.606
+  },
+  "StyleA_CabinRoof": {
+   "colorMap": "StyleTest/A/textures/StyleA_CabinRoof_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_CabinRoof_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_CabinRoof_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "uvCoverage": 0.693
+  },
+  "StyleA_Boulder": {
+   "colorMap": "StyleTest/A/textures/StyleA_Boulder_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_Boulder_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_Boulder_Rough.png",
+   "metalnessMap": null,
+   "size": 512,
+   "uvCoverage": 0.725
+  }
+ },
+ "terrainMaterials": [
+  {
+   "name": "LS_StyleA_PebblePath",
+   "suggestedBaseMaterial": "Pebble",
+   "colorMap": "StyleTest/A/textures/StyleA_PebblePath_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_PebblePath_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_PebblePath_Rough.png",
+   "metalnessMap": null,
+   "studsPerTile": 8.0,
+   "materialPattern": "Organic",
+   "notes": "Seamless tile, modelled at true scale for StudsPerTile = 8. Organic pattern hides the repeat of the larger features (moss patches, big pebbles)."
+  },
+  {
+   "name": "LS_StyleA_ForestFloor",
+   "suggestedBaseMaterial": "Ground",
+   "colorMap": "StyleTest/A/textures/StyleA_ForestFloor_Color.png",
+   "normalMap": "StyleTest/A/textures/StyleA_ForestFloor_Normal.png",
+   "roughnessMap": "StyleTest/A/textures/StyleA_ForestFloor_Rough.png",
+   "metalnessMap": null,
+   "studsPerTile": 10.0,
+   "materialPattern": "Organic",
+   "notes": "Seamless tile, modelled at true scale for StudsPerTile = 10. Organic pattern hides the repeat of the larger features (moss patches, big pebbles)."
+  }
+ ],
+ "import": [
+  "Import the GLB; each asset root is a Model of MeshParts <Asset>_<Part>. Re-centre with 'origin' (WorldPivot = CFrame.new(origin), then PivotTo); the importer turns every asset 180 degrees about Y (measure and undo it as RealAssets does).",
+  "Give every part ONE SurfaceAppearance from its 'surfaceAppearance' block (ColorMap, NormalMap, RoughnessMap; MetalnessMap empty; AlphaMode Overlay; Color white). Parts of one asset share one texture set, so upload each PNG once and reuse the ids.",
+  "Per part: CanCollide = collide, CollisionFidelity = collision (edit time, via CreateMeshPartAsync), CastShadow, CanQuery, CanTouch, Anchored, Material = robloxMaterial, Color = rgb, Transparency = transparency (0.15 on the cabin glass), DoubleSided false.",
+  "Tags: StyleA_Oak_Bark gets the CollectionService tag Climbable (Perch1-2 attachments on the limbs); StyleA_HunterCabin_Floor / _Porch get Floor. Door attachment = threshold centre, facing out.",
+  "Terrain: create one MaterialVariant per 'terrainMaterials' entry (BaseMaterial as suggested, StudsPerTile as given) from the three PNGs."
+ ],
+ "glbCheck": {
+  "primitives": 19,
+  "meshes": 19,
+  "images": [
+   "StyleA_Boulder_Normal",
+   "StyleA_Boulder_Color",
+   "StyleA_Boulder_MR",
+   "StyleA_Cabin_Normal",
+   "StyleA_Cabin_Color",
+   "StyleA_Cabin_MR",
+   "StyleA_CabinRoof_Normal",
+   "StyleA_CabinRoof_Color",
+   "StyleA_CabinRoof_MR",
+   "StyleA_Oak_Normal",
+   "StyleA_Oak_Color",
+   "StyleA_Oak_MR",
+   "StyleA_Spruce_Normal",
+   "StyleA_Spruce_Color",
+   "StyleA_Spruce_MR"
+  ],
+  "materials": [
+   "StyleA_Boulder",
+   "StyleA_Cabin",
+   "StyleA_CabinRoof",
+   "StyleA_Oak",
+   "StyleA_Spruce"
+  ],
+  "bytes": 8332044,
+  "tangentsOnEveryPrimitive": true,
+  "problems": []
+ },
+ "styleRules": [
+  "True-scale realistic silhouettes (1 stud = 0.28 m) built from a few chunky volumes; never alpha cards, photo textures or texture noise.",
+  "Flat-shaded facets sized to the object: 1-2.5 studs on trees and buildings, 0.5-1.5 on rocks and props, nothing under ~0.1 stud except trim.",
+  "Foliage is closed faceted volumes: conifers as drooping star-lobed tiers, broadleaf as flat-bottomed convex-hull clumps on visible branches; trunks are tapered 7-9-sided prisms with root flare.",
+  "Colour is painted, not detailed: dark inside/underneath to light tips/tops, +-6% per volume and +-3% per facet, slight warm/cool hue drift.",
+  "One baked set per asset (Color/Normal/Roughness, 512-1024 px, ~10-25 px/stud): two-radius AO multiplied into Color at 60-78%; the normal map only rounds edges (bevel 0.03-0.12) plus broad bark plates or adze dimples.",
+  "Built things are assembled from real members: octagonal hewn logs with chamfers, proud corner ends and recessed chinking; plank-by-plank decks; single fieldstones with mortar gaps; shingles as staggered tilted strips.",
+  "Muted mid-value palette: needles 26-98 green, leaves 30-108, bark 66-114, weathered wood 96-132, stone 93-146, chinking ~165; no pure black/white, no saturated accents on world assets.",
+  "Matte surfaces (roughness 0.8-0.95, metal 0) so Roblox Realistic lighting and cast shadows do the shading; glass is the only glossy surface.",
+  "Terrain tiles are modelled at true scale from discrete shapes (rounded pebbles, folded leaves, duff flakes, twigs, moss) with soft contact AO and low value contrast, so they stay calm at distance; seamless, 8-10 StudsPerTile.",
+  "Budgets: trees 3.5-5k tris, cabin ~16k split by collision part (each <5k), boulders <300; pipeline collision rules (Hull trunks/roofs/rocks, PreciseConvexDecomposition walls and climbable limbs, canopies non-colliding)."
+ ],
+ "assets": [
+  {
+   "name": "StyleA_Spruce",
+   "kind": "Tree",
+   "tags": [
+    "StyleTest",
+    "VariantA"
+   ],
+   "notes": "Low-poly realism spruce ~42 studs. Needle tiers are closed faceted volumes (no cards).",
+   "glb": "StyleTest_A.glb",
+   "boundsMin": [
+    -5.8127,
+    -0.9228,
+    -5.8913
+   ],
+   "boundsMax": [
+    5.9673,
+    42.6,
+    6.4311
+   ],
+   "size": [
+    11.78,
+    43.523,
+    12.322
+   ],
+   "tris": 4305,
+   "parts": [
+    {
+     "name": "StyleA_Spruce_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      73,
+      60,
+      51
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 296,
+     "textureSet": "StyleA_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Spruce_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Spruce_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Spruce_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_Spruce_Needles",
+     "role": "PineNeedles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      40,
+      62,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3928,
+     "textureSet": "StyleA_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Spruce_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Spruce_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Spruce_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_Spruce_Deadwood",
+     "role": "DeadWood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      81,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 81,
+     "textureSet": "StyleA_Spruce",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Spruce_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Spruce_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Spruce_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {},
+   "buriedDepth": 0.923,
+   "origin": [
+    5.8127,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StyleA_Oak",
+   "kind": "Tree",
+   "tags": [
+    "StyleTest",
+    "VariantA"
+   ],
+   "notes": "Low-poly realism oak ~27 studs; climbable trunk and limbs (Climbable, Perch1-2).",
+   "glb": "StyleTest_A.glb",
+   "boundsMin": [
+    -9.7259,
+    -0.9094,
+    -11.2806
+   ],
+   "boundsMax": [
+    15.1899,
+    27.2529,
+    14.0259
+   ],
+   "size": [
+    24.916,
+    28.162,
+    25.306
+   ],
+   "tris": 3850,
+   "parts": [
+    {
+     "name": "StyleA_Oak_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      103,
+      96,
+      84
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 1249,
+     "textureSet": "StyleA_Oak",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Oak_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Oak_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Oak_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_Oak_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      77,
+      35
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2601,
+     "textureSet": "StyleA_Oak",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Oak_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Oak_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Oak_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Perch1": {
+     "position": [
+      4.2132,
+      9.2595,
+      -1.1826
+     ],
+     "look": [
+      0.9354,
+      0.0,
+      -0.3535
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Perch2": {
+     "position": [
+      -0.9752,
+      8.9607,
+      4.0554
+     ],
+     "look": [
+      -0.3483,
+      0.0,
+      0.9374
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "buriedDepth": 0.909,
+   "origin": [
+    29.506,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StyleA_HunterCabin",
+   "kind": "Building",
+   "tags": [
+    "StyleTest",
+    "VariantA"
+   ],
+   "notes": "Hewn-log hunter's cabin: log walls 16 x 12, porch 5 deep, door opening 4 x 7.5 (door open inward).",
+   "glb": "StyleTest_A.glb",
+   "boundsMin": [
+    -9.1,
+    -0.3,
+    -12.6917
+   ],
+   "boundsMax": [
+    10.7889,
+    18.58,
+    7.7581
+   ],
+   "size": [
+    19.889,
+    18.88,
+    20.45
+   ],
+   "tris": 15788,
+   "parts": [
+    {
+     "name": "StyleA_HunterCabin_Logs",
+     "role": "Logs",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      101,
+      79
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 2848,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Chinking",
+     "role": "Plaster",
+     "robloxMaterial": "Plaster",
+     "rgb": [
+      168,
+      160,
+      144
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 672,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Floor",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      132,
+      107,
+      82
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 132,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Porch",
+     "role": "Planks",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      125,
+      103,
+      81
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [
+      "Floor"
+     ],
+     "tris": 398,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Steps",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      121,
+      97,
+      73
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 64,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Posts",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      98,
+      73
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 384,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Roof",
+     "role": "Shingles",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      101,
+      92,
+      79
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 3810,
+     "textureSet": "StyleA_CabinRoof",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_CabinRoof_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_CabinRoof_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_CabinRoof_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_PorchRoof",
+     "role": "Shingles",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      102,
+      92,
+      79
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 1320,
+     "textureSet": "StyleA_CabinRoof",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_CabinRoof_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_CabinRoof_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_CabinRoof_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Chimney",
+     "role": "Stone",
+     "robloxMaterial": "Cobblestone",
+     "rgb": [
+      125,
+      120,
+      111
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 4360,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Foundation",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      110,
+      106,
+      98
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1188,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Trim",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      101,
+      80,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 432,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      40,
+      50,
+      54
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 36,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.15,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "StyleA_HunterCabin_Interior",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      119,
+      94,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 144,
+     "textureSet": "StyleA_Cabin",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Cabin_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Cabin_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Cabin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Door": {
+     "position": [
+      0.0,
+      1.35,
+      -6.0
+     ],
+     "look": [
+      0,
+      0,
+      -1
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "buriedDepth": 0.3,
+   "origin": [
+    61.7959,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "StyleA_Boulder",
+   "kind": "Rock",
+   "tags": [
+    "StyleTest",
+    "VariantA"
+   ],
+   "notes": "Low-poly realism boulder ~6 studs, base sunk 0.45 below the pivot so it seats into terrain.",
+   "glb": "StyleTest_A.glb",
+   "boundsMin": [
+    -3.2177,
+    -0.45,
+    -2.5538
+   ],
+   "boundsMax": [
+    3.6102,
+    3.0118,
+    2.4447
+   ],
+   "size": [
+    6.828,
+    3.462,
+    4.998
+   ],
+   "tris": 172,
+   "parts": [
+    {
+     "name": "StyleA_Boulder_Rock",
+     "role": "Stone",
+     "robloxMaterial": "Rock",
+     "rgb": [
+      103,
+      101,
+      91
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 172,
+     "textureSet": "StyleA_Boulder",
+     "surfaceAppearance": {
+      "colorMap": "StyleTest/A/textures/StyleA_Boulder_Color.png",
+      "normalMap": "StyleTest/A/textures/StyleA_Boulder_Normal.png",
+      "roughnessMap": "StyleTest/A/textures/StyleA_Boulder_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "transparency": 0.0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {},
+   "buriedDepth": 0.45,
+   "origin": [
+    83.8025,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}

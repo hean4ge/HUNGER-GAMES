@@ -2,23 +2,27 @@
 	ProjectileService - server-side ballistic projectiles: arrows, thrown knives and thrown spears.
 
 	ProjectileService.fire(shooter: Player?, itemId: string, origin: Vector3, velocity: Vector3, gravity: number,
-		damage: number, opts?) -> id?   (nil when rejected by the safety caps)
+		damage: number, opts?) -> id?   (nil when rejected by the safety caps; CombatService then refunds the item)
 	  opts = {
 	    shotId: string?              the client's id for its predicted visual (echoed in ProjectileFired)
 	    weaponId: string?            what the hit is credited to (default itemId), e.g. "bow" for an arrow
 	    headshotMultiplier: number?  default Config.Combat.DefaultHeadshotMultiplier
-	    recoverItem: string?         ground item left behind (via LootService.spawnGroundItem)
-	    recoverChance: number?       0..1 for world impacts (default 1)
-	    recoverAnywhere: boolean?    always drop it: on characters, in water and when it times out (thrown weapons)
+	    recoverItem: string?         the item that stays in the world where the shot ends up (./WorldProjectiles)
 	    lifetime: number?            default Config.Combat.ProjectileMaxLifetime
 	  }
 	Simulated on Heartbeat with raycasts from the previous to the next position (gravity per item), excluding the
 	shooter. Characters get a precise per-part ray; the world ray ignores non-collidable foliage, so arrows fly
 	through leaves and bushes. Hits go through CombatService.applyHit (headshot when the part is the Head).
+	Where it ends up (./WorldProjectiles, the one registry of spent projectiles): embedded at the impact, on the bed
+	under water, in the body part it hit (out again when that body dies, or after Config.Combat.BodyFallOutTime), or,
+	for a miss that outlives its lifetime, where the rest of its arc meets the ground. Nothing is ever lost: if that
+	fails it becomes a plain ground item (LootService.spawnGroundItem).
 
 	Server -> all clients
 	  ProjectileFired  { id, shooter (UserId, 0 = none), itemId, origin, velocity, gravity, shotId, t (server time) }
-	  ProjectileImpact { id, position, normal, hitCharacter, part, material, recovered, itemId, headshot }
+	  ProjectileImpact { id, position, normal, hitCharacter, part, material, recovered, itemId, headshot,
+	                     worldId?, pivot?, rel?, fallTo?, fallTime?, sink? }   (the item it left in the world, its pose,
+	                     relative to `part` when it is stuck to it, and the fall or sink that follows)
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -28,13 +32,13 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
+local World = require(script:WaitForChild("WorldProjectiles"))
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 local CombatConfig = Config.Combat
 
 local MAX_ACTIVE = 300
 local MAX_PER_SHOOTER = 24
-local MAX_DROP_SPEED = 60
 local MAX_STEP = 1 / 30 -- sub-step long frames so the arc stays accurate
 local KILL_HEIGHT = -400
 
@@ -57,8 +61,6 @@ type Projectile = {
 	weaponId: string,
 	headshotMultiplier: number,
 	recoverItem: string?,
-	recoverChance: number,
-	recoverAnywhere: boolean,
 	lifetime: number,
 	age: number,
 }
@@ -118,12 +120,51 @@ local function drop(p: Projectile, position: Vector3, velocity: Vector3?): boole
 	return result ~= nil
 end
 
-local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: Humanoid, bodyPart: BasePart?)
+-- The item stays in the world where the shot ended up (WorldProjectiles). If that fails it becomes a plain ground item
+-- instead, so a shot never eats it. (World.land finding no ground means it fell off the world: nothing to leave.)
+local function leave(p: Projectile, position: Vector3, place: (...any) -> any, ...: any): any
+	if not p.recoverItem then
+		return nil
+	end
+	local ok, entry = pcall(place, p, ...)
+	if ok then
+		if entry or place == World.land then
+			return entry
+		end
+	else
+		warn("[ProjectileService] couldn't leave " .. tostring(p.recoverItem) .. " in the world: " .. tostring(entry))
+	end
+	drop(p, position + Vector3.new(0, 0.5, 0), nil)
+	return nil
+end
+
+local function impactPayload(p: Projectile, result: RaycastResult, hitCharacter: boolean, headshot: boolean, entry: any)
+	return {
+		id = p.id,
+		position = result.Position,
+		normal = result.Normal,
+		hitCharacter = hitCharacter,
+		part = if entry and entry.host then entry.host else result.Instance,
+		material = result.Material,
+		recovered = entry ~= nil,
+		itemId = p.itemId,
+		headshot = headshot,
+		worldId = if entry then entry.id else nil,
+		pivot = if entry then entry.pivot else nil,
+		rel = if entry then entry.rel else nil,
+		fallTo = if entry then entry.fallTo else nil,
+		fallTime = if entry then entry.fallTime else nil,
+		sink = if entry and entry.sink then true else nil,
+	}
+end
+
+local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: Humanoid, bodyPart: BasePart?, velocity: Vector3)
 	remove(p)
-	local headshot = bodyPart ~= nil and bodyPart.Name == "Head"
-	local damage = p.damage * (if headshot then p.headshotMultiplier else 1)
+	local alive = humanoid.Health > 0
+	local headshot = alive and bodyPart ~= nil and bodyPart.Name == "Head"
 	local combat = Services.CombatService
-	if combat and type(combat.applyHit) == "function" then
+	if alive and combat and type(combat.applyHit) == "function" then
+		local damage = p.damage * (if headshot then p.headshotMultiplier else 1)
 		local ok, err = pcall(combat.applyHit, p.shooter, humanoid, damage, {
 			cause = "Combat",
 			weaponId = p.weaponId,
@@ -135,55 +176,22 @@ local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: H
 			warn("[ProjectileService] applyHit failed: " .. tostring(err))
 		end
 	end
-	local recovered = false
-	if p.recoverAnywhere then
-		local back = if p.velocity.Magnitude > 0.01 then p.velocity.Unit * -4 else Vector3.zero
-		recovered = drop(p, result.Position + Vector3.new(0, 0.4, 0), Vector3.new(0, 3, 0) + back)
-	end
-	ProjectileImpact:FireAllClients({
-		id = p.id,
-		position = result.Position,
-		normal = result.Normal,
-		hitCharacter = true,
-		part = result.Instance,
-		material = result.Material,
-		recovered = recovered,
-		itemId = p.itemId,
-		headshot = headshot,
-	})
+	-- it stays in the body part (a body that is already dead lets it fall straight out)
+	local entry = leave(p, result.Position, World.stick, result, bodyPart, humanoid, velocity)
+	ProjectileImpact:FireAllClients(impactPayload(p, result, true, headshot, entry))
 end
 
-local function impactWorld(p: Projectile, result: RaycastResult)
+local function impactWorld(p: Projectile, result: RaycastResult, velocity: Vector3)
 	remove(p)
-	local recovered = false
-	if p.recoverItem then
-		local water = result.Material == Enum.Material.Water
-		if p.recoverAnywhere or (not water and math.random() < p.recoverChance) then
-			recovered = drop(p, result.Position + result.Normal * 0.5, nil)
-		end
-	end
-	ProjectileImpact:FireAllClients({
-		id = p.id,
-		position = result.Position,
-		normal = result.Normal,
-		hitCharacter = false,
-		part = result.Instance,
-		material = result.Material,
-		recovered = recovered,
-		itemId = p.itemId,
-		headshot = false,
-	})
+	local water = result.Material == Enum.Material.Water
+	local entry = leave(p, result.Position + result.Normal * 0.5, if water then World.sink else World.embed, result, velocity)
+	ProjectileImpact:FireAllClients(impactPayload(p, result, false, false, entry))
 end
 
+-- A miss that outlived its lifetime: the rest of its arc is traced to where it meets the ground (no impact effects).
 local function expire(p: Projectile)
 	remove(p)
-	if p.recoverAnywhere and p.position.Y > KILL_HEIGHT * 0.5 then
-		local velocity = p.velocity
-		if velocity.Magnitude > MAX_DROP_SPEED then
-			velocity = velocity.Unit * MAX_DROP_SPEED
-		end
-		drop(p, p.position, velocity)
-	end
+	leave(p, p.position, World.land, worldParams)
 end
 
 local function withoutShooter(targets: { Instance }, shooterCharacter: Model?): { Instance }
@@ -197,6 +205,11 @@ local function withoutShooter(targets: { Instance }, shooterCharacter: Model?): 
 	local list = table.clone(targets)
 	table.remove(list, index)
 	return list
+end
+
+-- The velocity where a sub-step's ray hit, `distance` along its `length`.
+local function velocityAt(p: Projectile, gravity: Vector3, dt: number, distance: number, length: number): Vector3
+	return p.velocity + gravity * (dt * math.clamp(distance / math.max(length, 1e-6), 0, 1))
 end
 
 -- One sub-step. Returns true when the projectile is finished.
@@ -214,19 +227,20 @@ local function step(p: Projectile, dt: number, targets: { Instance }): boolean
 	local worldHit = workspace:Raycast(p.position, displacement, worldParams)
 
 	if characterHit and (worldHit == nil or characterHit.Distance <= worldHit.Distance) then
+		local velocity = velocityAt(p, gravity, dt, characterHit.Distance, displacement.Magnitude)
 		local combat = Services.CombatService
 		local humanoid, _, bodyPart = nil, nil, nil
 		if combat and type(combat.characterFromPart) == "function" then
 			humanoid, _, bodyPart = combat.characterFromPart(characterHit.Instance)
 		end
-		if humanoid and humanoid.Health > 0 then
-			impactCharacter(p, characterHit, humanoid, bodyPart)
+		if humanoid then
+			impactCharacter(p, characterHit, humanoid, bodyPart, velocity) -- a dead body isn't hurt; it just holds it
 		else
-			impactWorld(p, characterHit) -- a body or something else that can't be hurt: it just sticks
+			impactWorld(p, characterHit, velocity) -- something else in a target model: it just sticks
 		end
 		return true
 	elseif worldHit then
-		impactWorld(p, worldHit)
+		impactWorld(p, worldHit, velocityAt(p, gravity, dt, worldHit.Distance, displacement.Magnitude))
 		return true
 	end
 
@@ -305,8 +319,6 @@ function ProjectileService.fire(
 			then o.headshotMultiplier
 			else CombatConfig.DefaultHeadshotMultiplier,
 		recoverItem = if type(o.recoverItem) == "string" then o.recoverItem else nil,
-		recoverChance = if Util.isFiniteNumber(o.recoverChance) then o.recoverChance else 1,
-		recoverAnywhere = o.recoverAnywhere == true,
 		lifetime = if Util.isFiniteNumber(o.lifetime) then o.lifetime else CombatConfig.ProjectileMaxLifetime,
 		age = 0,
 	}
@@ -330,14 +342,18 @@ end
 
 -- Test hook (Edit-mode checks): advance every projectile by dt.
 ProjectileService._simulate = onHeartbeat
+-- The registry of spent projectiles left in the world (counts, tests).
+ProjectileService.world = World
 
 function ProjectileService.Init(registry)
 	Services = registry
 	ProjectileFired = Net.event("ProjectileFired")
 	ProjectileImpact = Net.event("ProjectileImpact")
+	World.Init(registry)
 end
 
 function ProjectileService.Start()
+	World.Start()
 	RunService.Heartbeat:Connect(onHeartbeat)
 	GameState:GetAttributeChangedSignal("Phase"):Connect(function()
 		if GameState:GetAttribute("Phase") ~= "Active" then

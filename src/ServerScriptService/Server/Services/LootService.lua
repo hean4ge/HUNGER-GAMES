@@ -37,6 +37,9 @@ Playability (docs/design/PlayabilityPlan.md)
 	  QW11  Common and Uncommon ground items glint faintly too (Config.Loot.CommonGlint); an opened crate's straps go
 	        slack and its clasp stops glinting (ItemModels.slackenCrate).
 	  QW15  LootService.crateOpened: Signal(player, tier, runner) for the onboarding funnel.
+	Spent arrows, throwing knives and spears are ProjectileService.WorldProjectiles' (they stay where they land):
+	  LootService.cleared: Signal()       fires at the end of every clearAll, so they go with the arena's loot
+	  LootService.inventoryFull(player)   the same INVENTORY FULL toast as here (throttled per player)
 ]]
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -71,6 +74,7 @@ local TOSS_MAX_STEPS = 75
 
 local LootService = {}
 LootService.crateOpened = Signal.new() -- (player, tier, runner)
+LootService.cleared = Signal.new() -- () after every clearAll: the arena's loot is gone (WorldProjectiles goes with it)
 
 local Services: { [string]: any } = {}
 local rng = Random.new()
@@ -1192,6 +1196,10 @@ end
 -- Public API
 --------------------------------------------------------------------------------------------------------------------
 
+function LootService.inventoryFull(player: Player)
+	inventoryFull(player)
+end
+
 function LootService.clearAll()
 	generation += 1
 	for model in pairs(crates) do
@@ -1216,6 +1224,7 @@ function LootService.clearAll()
 			end
 		end
 	end
+	LootService.cleared:Fire()
 end
 
 function LootService.populate()

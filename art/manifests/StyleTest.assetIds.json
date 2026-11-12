@@ -1,0 +1,682 @@
+{
+ "schema": "LS-Real-AssetIds-1",
+ "set": "StyleTest (A_LowPolyRealism, B_BlockyVoxelRealism, C_SmoothStylizedRealism)",
+ "creator": {
+  "userId": 5458010221
+ },
+ "universeId": 10775788705,
+ "notes": [
+  "One upload per file through Open Cloud POST /assets/v1/assets. Never re-upload a file listed here; reuse its id.",
+  "Paths are relative to BlenderExports (C:/Users/USER/OneDrive/Documents/LastStanding/BlenderExports).",
+  "importerImages: images the Open Cloud importer uploaded implicitly from the GLBs' embedded textures. Their ColorMap/NormalMap are pixel-identical to the PNGs and are used as is (no separate upload). The importer's RoughnessMap is the packed glTF metallicRoughness G channel at its embedded size: half the PNG size for A (Spruce, Oak, Cabin, CabinRoof) and B (all four), so those eight grayscale PNGs were uploaded; for A Boulder and all of C the embedded map is full size and pixel-identical, so the importer's image is used.",
+  "Ground tiles: all 18 PNGs uploaded once; used only by the MaterialVariants MaterialService.StyleTest.StyleTest_<V>_<Pebble|ForestFloor> on test slabs."
+ ],
+ "models": {
+  "StyleTest/A/StyleTest_A.glb": {
+   "displayName": "LS_StyleTest_A_v1",
+   "operationId": "9f75c3e8-7b49-4834-93a7-586fea4c2922",
+   "uploadedUtc": "2026-11-12T16:29:20.460Z",
+   "bytes": 8332044,
+   "assetId": 111483960602924,
+   "moderationState": "Approved",
+   "revisionId": 1
+  },
+  "StyleTest/B/StyleTest_B.glb": {
+   "displayName": "LS_StyleTest_B_v1",
+   "operationId": "d03908b8-59cb-4b34-9294-593bc75de670",
+   "uploadedUtc": "2026-11-12T16:29:19.890Z",
+   "bytes": 4844232,
+   "assetId": 89644752791799,
+   "moderationState": "Approved",
+   "revisionId": 1
+  },
+  "StyleTest/C/StyleTest_C.glb": {
+   "displayName": "LS_StyleTest_C_v1",
+   "operationId": "cf3116c9-7043-4c8e-b285-fdbbef2ddbe7",
+   "uploadedUtc": "2026-11-12T16:29:30.919Z",
+   "bytes": 8542244,
+   "assetId": 89928326513570,
+   "moderationState": "Approved",
+   "revisionId": 1
+  }
+ },
+ "images": {
+  "StyleTest/A/textures/StyleA_PebblePath_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_A_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "336f7ba3-e478-4bc6-8e64-62d269d5fe69",
+   "assetId": 123983792095319,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:07.516Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/A/textures/StyleA_PebblePath_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_A_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "0d221a1a-b973-4262-9aae-e85e61976909",
+   "assetId": 117872790316331,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:07.099Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/A/textures/StyleA_PebblePath_Rough.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_A_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "5bb5cad1-7187-463b-bea4-7f21a4a1d56f",
+   "assetId": 136475011802727,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:05.979Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/A/textures/StyleA_ForestFloor_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_A_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "201b6e33-b17a-4ae8-bf5f-2535373a54be",
+   "assetId": 112099030458992,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:09.941Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/A/textures/StyleA_ForestFloor_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_A_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "f6b73339-87a9-4297-94cc-040e7f35e608",
+   "assetId": 116714274376520,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:09.113Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/A/textures/StyleA_ForestFloor_Rough.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_A_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "5eecb903-1655-433c-a41c-657df7ff59f9",
+   "assetId": 98732304647477,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:09.977Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/terrain/VoxPebblePath_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_B_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "f4bb4a5f-d31f-4a32-8fac-ec4c71d360e6",
+   "assetId": 117415805013697,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:38.025Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/B/terrain/VoxPebblePath_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_B_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "9e194083-cd6c-4c7e-945f-c4d302de16f6",
+   "assetId": 110546303035923,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:37.389Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/B/terrain/VoxPebblePath_Roughness.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_B_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "2ef9e399-001a-43d1-80eb-8c326ba6ce2d",
+   "assetId": 116045307750355,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:37.767Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/terrain/VoxForestFloor_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_B_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "b04c077c-3cc5-485f-a2bc-e6e9ed7955f6",
+   "assetId": 126459671711158,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:40.025Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/B/terrain/VoxForestFloor_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_B_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "bd2caff6-6034-4eb1-a183-5f1db1d532ad",
+   "assetId": 138429884191060,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:39.752Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/B/terrain/VoxForestFloor_Roughness.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_B_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "d4bf29d2-b09c-4838-818a-7ca959d90f92",
+   "assetId": 96864806992811,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:30:39.855Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/C/textures/StyleC_PebblePath_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_C_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "326e9cb4-bc24-4bdf-815b-cc90c96f48e2",
+   "assetId": 72425635194062,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:11.126Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/C/textures/StyleC_PebblePath_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_C_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "0ad9c959-b090-4230-9eba-dc80171aa87b",
+   "assetId": 107350040400992,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:10.511Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/C/textures/StyleC_PebblePath_Rough.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_C_Pebble",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "26e92f6f-a843-4308-9683-a167dc575a3c",
+   "assetId": 90410490248889,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:10.194Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/C/textures/StyleC_ForestFloor_Color.png": {
+   "kind": "color",
+   "use": "terrain:StyleTest_C_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "4cafc2f4-221d-4836-b7b1-31e2659b12c5",
+   "assetId": 125418807440377,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:12.736Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/C/textures/StyleC_ForestFloor_Normal.png": {
+   "kind": "normal",
+   "use": "terrain:StyleTest_C_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "8dffe472-9512-4be5-8fb6-80a335c2d581",
+   "assetId": 73881833209050,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:14.910Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleTest/C/textures/StyleC_ForestFloor_Rough.png": {
+   "kind": "roughness",
+   "use": "terrain:StyleTest_C_ForestFloor",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "719fc44c-4c1c-4303-8bba-6d61df245886",
+   "assetId": 119873657669166,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:31:13.814Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/A/textures/StyleA_Spruce_Rough.png": {
+   "kind": "roughness",
+   "use": "asset:StyleA_Spruce",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "ba844d8b-f9a1-48a0-b8e1-323efce41d36",
+   "assetId": 131792856592026,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:07.370Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/A/textures/StyleA_Oak_Rough.png": {
+   "kind": "roughness",
+   "use": "asset:StyleA_Oak",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "6ede587c-382d-4c3f-b0d4-af483930e2c7",
+   "assetId": 121068313748069,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:08.365Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/A/textures/StyleA_Cabin_Rough.png": {
+   "kind": "roughness",
+   "use": "asset:StyleA_Cabin",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "eab8ce3e-f091-4131-8543-61758f356ce4",
+   "assetId": 82049809317459,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:08.700Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/A/textures/StyleA_CabinRoof_Rough.png": {
+   "kind": "roughness",
+   "use": "asset:StyleA_CabinRoof",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "99e7e17d-d2ff-4ee9-a5b3-fbea48677993",
+   "assetId": 117826084340643,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:09.352Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/textures/VoxSpruce_Roughness.png": {
+   "kind": "roughness",
+   "use": "asset:VoxSpruce",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "53b53a92-576f-429a-a720-112058131bb1",
+   "assetId": 90646690514989,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:07.877Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/textures/VoxOak_Roughness.png": {
+   "kind": "roughness",
+   "use": "asset:VoxOak",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "3663b7bb-c9b5-491b-9834-746d4fc9c073",
+   "assetId": 139174293245281,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:08.671Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/textures/VoxCabin_Roughness.png": {
+   "kind": "roughness",
+   "use": "asset:VoxCabin",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "71d29762-e8bb-4a15-ad90-60d3c2154de9",
+   "assetId": 84690086270322,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:09.202Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  },
+  "StyleTest/B/textures/VoxBoulder_Roughness.png": {
+   "kind": "roughness",
+   "use": "asset:VoxBoulder",
+   "assetType": "Image",
+   "source": "upload",
+   "operationId": "6c9d15ed-1c25-479e-918a-cd1d833f67ae",
+   "assetId": 79104532145338,
+   "moderationState": "Approved",
+   "uploadedUtc": "2026-11-12T16:57:09.706Z",
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B"
+  }
+ },
+ "importerImages": {
+  "StyleA_Boulder_Color": {
+   "assetId": 101296075175057,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "color",
+   "size": 512,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Boulder_Rough": {
+   "assetId": 101523946478250,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B (the packed MR is the same size as the grayscale PNG)"
+  },
+  "StyleA_Boulder_Normal": {
+   "assetId": 81574930640317,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "normal",
+   "size": 512,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_CabinRoof_Color": {
+   "assetId": 127930809033809,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_CabinRoof_Rough": {
+   "assetId": 130761526437249,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "StyleA_CabinRoof_Normal": {
+   "assetId": 125861648470102,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Cabin_Color": {
+   "assetId": 124453208891215,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Cabin_Rough": {
+   "assetId": 120884447318382,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "StyleA_Cabin_Normal": {
+   "assetId": 80105982368388,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Oak_Color": {
+   "assetId": 96026802046533,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Oak_Rough": {
+   "assetId": 83044721357687,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "StyleA_Oak_Normal": {
+   "assetId": 125944346723952,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Spruce_Color": {
+   "assetId": 109553404506098,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleA_Spruce_Rough": {
+   "assetId": 96714360961221,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "StyleA_Spruce_Normal": {
+   "assetId": 84287419078032,
+   "source": "LS_StyleTest_A_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Boulder_Color": {
+   "assetId": 79628096438969,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Boulder_Rough": {
+   "assetId": 115498551288824,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B (the packed MR is the same size as the grayscale PNG)"
+  },
+  "StyleC_Boulder_Normal": {
+   "assetId": 94022422031152,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_CabinKit_Color": {
+   "assetId": 97507436618477,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_CabinKit_Rough": {
+   "assetId": 130816784388588,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B (the packed MR is the same size as the grayscale PNG)"
+  },
+  "StyleC_CabinKit_Normal": {
+   "assetId": 114243088534504,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Oak_Color": {
+   "assetId": 80193607080125,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Oak_Rough": {
+   "assetId": 79476461612926,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B (the packed MR is the same size as the grayscale PNG)"
+  },
+  "StyleC_Oak_Normal": {
+   "assetId": 97628809059856,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Spruce_Color": {
+   "assetId": 77670552445741,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "StyleC_Spruce_Rough": {
+   "assetId": 98032388433952,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal, R=G=B (the packed MR is the same size as the grayscale PNG)"
+  },
+  "StyleC_Spruce_Normal": {
+   "assetId": 131621256482384,
+   "source": "LS_StyleTest_C_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxBoulder_Color": {
+   "assetId": 123681536974175,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "color",
+   "size": 512,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxBoulder_Rough": {
+   "assetId": 107443502879140,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "roughness",
+   "size": 256,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 256 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "VoxBoulder_Normal": {
+   "assetId": 96146905626838,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "normal",
+   "size": 512,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxCabin_Color": {
+   "assetId": 74088615674247,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxCabin_Rough": {
+   "assetId": 74660902253670,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "VoxCabin_Normal": {
+   "assetId": 128083712303991,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxOak_Color": {
+   "assetId": 123011124449439,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxOak_Rough": {
+   "assetId": 133808422139200,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "VoxOak_Normal": {
+   "assetId": 72106710945481,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxSpruce_Color": {
+   "assetId": 134551855351788,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "color",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "VoxSpruce_Rough": {
+   "assetId": 76836510324795,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "roughness",
+   "size": 512,
+   "derivedFrom": "packed glTF metallicRoughness (G channel), embedded at 512 px",
+   "used": false,
+   "note": "half the size of the grayscale PNG; the templates use the uploaded PNG instead"
+  },
+  "VoxSpruce_Normal": {
+   "assetId": 131700742719256,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "normal",
+   "size": 1024,
+   "used": true,
+   "verified": "EditableImage readback 2026-11-12: same size as the PNG, 32x32 grid mean equal, 9 sample pixels equal"
+  },
+  "Importer_Metalness_Flat": {
+   "assetId": 77512687314824,
+   "source": "LS_StyleTest_A_v1/B/C (shared)",
+   "kind": "metalness",
+   "size": 512,
+   "used": false,
+   "note": "flat black; the manifests want no MetalnessMap, so the templates leave it empty"
+  },
+  "Importer_Metalness_VoxBoulder": {
+   "assetId": 139524953536970,
+   "source": "LS_StyleTest_B_v1",
+   "kind": "metalness",
+   "size": 256,
+   "used": false,
+   "note": "flat black (256 px); not used"
+  }
+ },
+ "studio": {
+  "rawInserts": "ServerStorage.StyleTest.Raw.LS_StyleTest_<A|B|C>_v1 (packages from insert_asset; never edit)",
+  "templates": "ServerStorage.StyleTest.Templates.<A|B|C>.<Asset> (12 templates, 51 MeshParts; StyleTestBuilder.verify() clean)",
+  "builder": "ServerStorage.StyleTest.StyleTestBuilder (+ Manifest child); repo copies art/manifests/StyleTest.luau and StyleTest.Manifest.luau",
+  "materialVariants": "MaterialService.StyleTest.StyleTest_<V>_Pebble / StyleTest_<V>_ForestFloor, BaseMaterial Ground; used only by Workspace.StyleTest slabs",
+  "diorama": "Workspace.StyleTest (Scene_A z +260, Scene_B z 0, Scene_C z -260 at x 7000, ground y 302) on a 1200 x 12 x 1200 grass pad centred (7000, 296, 0)",
+  "importFindings": "All three imports were turned 180 degrees about Y (undone on the copies). AlphaMode came in as Overlay on every part, which is what the manifests ask (no cut-out cards in these sets). The importer roughness was half size for A Spruce/Oak/Cabin/CabinRoof and all of B, and full size for A Boulder and all of C. Parts arrived grey Plastic, unanchored, Default collision."
+ }
+}

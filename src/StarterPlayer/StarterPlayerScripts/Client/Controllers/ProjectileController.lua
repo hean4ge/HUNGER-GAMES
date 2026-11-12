@@ -10,8 +10,14 @@
 	weapon and merges onto the true path within its first CONVERGE_DISTANCE studs (so you see your shot fly from the
 	bow to where you aimed), and the server echo with the same shotId is matched to it instead of
 	spawning a second arrow. Unconfirmed predictions fade after a couple of seconds.
-	Arrows stick into surfaces for Config.Combat.ArrowStickTime (and into other players for a few seconds);
-	recovered arrows and thrown weapons disappear because the server leaves a ground item there instead.
+	Landing (ProjectileService.WorldProjectiles; rules in Shared.WorldItems): every arrow, throwing knife and thrown spear
+	stays in the world as the server's model (tag WorldProjectile). Our copy stops on the pose the server gives the same
+	hit (WorldItems.depth / embedPivot), then takes the server's exact pivot from ProjectileImpact (relative to the body
+	part or crate it is stuck in) and falls or sinks the way the server's does (fallTo / fallTime / sink). The server's
+	model stays hidden here while our copy is still on its way; once both have landed our copy goes and the model shows,
+	in the same frame and on the same pose: one item on screen, no pop. Items stuck in your own head, arms or chest are
+	hidden from your first-person view (attributes Host / HostPart) until they come out. A shot the server left nothing
+	for sticks for Config.Combat.ArrowStickTime (into other players for a few seconds), as before.
 	ArrowWhiz plays when someone else's projectile passes close to the camera.
 
 	API (for the other combat controllers)
@@ -20,6 +26,7 @@
 	  ProjectileController.surfaceSound(material: Enum.Material?) -> string   Hit_Wood / Hit_Stone / Hit_Metal
 	  ProjectileController.buildArrow(length: number?) -> Model   light arrow (tip at the pivot, pointing along -Z)
 ]]
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -31,6 +38,7 @@ local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local WorldItems = require(Shared:WaitForChild("WorldItems"))
 
 local player = Players.LocalPlayer
 local CombatConfig = Config.Combat
@@ -46,6 +54,12 @@ local LEAD_EASE_TIME = 0.25 -- remote shots catch up with the server over this l
 local CHARACTER_STICK_TIME = 6
 local SPIN_RATE = 19 -- radians per second for tumbling thrown knives
 local FAR_CULL = 1500 -- shots fired further than this from the camera aren't drawn
+local WORLD_WAIT = 30 -- a landed copy waits this long for the server's model before it goes
+-- items stuck in these parts of your own body are out of your first-person view (the camera sits in the head)
+local OWN_BODY_HIDDEN: { [string]: boolean } = {
+	Head = true, UpperTorso = true, Torso = true, LeftUpperArm = true, LeftLowerArm = true, LeftHand = true,
+	RightUpperArm = true, RightLowerArm = true, RightHand = true, ["Left Arm"] = true, ["Right Arm"] = true,
+}
 
 local SHAFT_COLOR = Color3.fromRGB(150, 116, 78)
 local HEAD_COLOR = Color3.fromRGB(88, 90, 94)
@@ -89,7 +103,7 @@ type Shot = {
 	offset: CFrame,
 	spin: number,
 	visualOffset: Vector3?,
-	state: string, -- "Flying" | "Stuck" | "Gone"
+	state: string, -- "Flying" | "Falling" | "Stuck" | "Gone"
 	whizzed: boolean,
 	impactPlayed: boolean,
 	linked: boolean,
@@ -98,6 +112,11 @@ type Shot = {
 	pendingDeadline: number,
 	stuckEntry: any?,
 	trailOn: boolean,
+	world: Model?, -- the server's model of this shot, once it is here
+	hidingWorld: boolean, -- ...hidden here until our copy has landed
+	worldId: number?,
+	mayFall: boolean, -- landed in water or a blade on stone: wait for the server's fall before handing over
+	fall: { from: CFrame, to: CFrame, t0: number, duration: number, sink: boolean }?,
 }
 
 type StuckEntry = { model: Model, expires: number, part: BasePart?, rel: CFrame?, shot: Shot? }
@@ -110,6 +129,9 @@ local byShotId: { [string]: Shot } = {}
 local stuck: { StuckEntry } = {}
 local arrowTemplate: Model? = nil
 local arrowOffset = CFrame.identity
+local byProjectile: { [number]: Shot } = {} -- server projectile id -> our copy, until it hands over to the server's model
+local worldByShot: { [number]: Model } = {} -- server projectile id -> its model in the world (while streamed in)
+local hiddenWhy: { [Instance]: { [string]: boolean } } = {} -- world models hidden here, and why ("landing" / "body")
 
 local characterParams = RaycastParams.new()
 characterParams.FilterType = Enum.RaycastFilterType.Include
@@ -460,8 +482,33 @@ local function removeStuckEntry(entry: StuckEntry?)
 	end
 end
 
+-- Show or hide a world model on this client only, for a reason ("landing": our copy is still on its way; "body": it is
+-- in your own head, arms or chest). It shows again once no reason is left.
+local function setHidden(model: Model, reason: string, hidden: boolean)
+	local why = hiddenWhy[model]
+	if not why then
+		if not hidden then
+			return
+		end
+		why = {}
+		hiddenWhy[model] = why
+	end
+	why[reason] = if hidden then true else nil
+	local hide = next(why) ~= nil
+	if not hide then
+		hiddenWhy[model] = nil
+	end
+	local value = if hide then 1 else 0
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.LocalTransparencyModifier = value
+		end
+	end
+end
+
 local function destroyVisual(shot: Shot)
 	shot.state = "Gone"
+	shot.fall = nil
 	if shot.model then
 		shot.model:Destroy()
 		shot.model = nil
@@ -470,6 +517,15 @@ local function destroyVisual(shot: Shot)
 	shot.stuckEntry = nil
 	if shot.shotId and byShotId[shot.shotId] == shot then
 		byShotId[shot.shotId] = nil
+	end
+	local model = shot.world
+	shot.world = nil
+	if model and shot.hidingWorld and model.Parent then
+		setHidden(model, "landing", false) -- our copy went first: the server's shows
+	end
+	shot.hidingWorld = false
+	if shot.id and byProjectile[shot.id] == shot then
+		byProjectile[shot.id] = nil
 	end
 end
 
@@ -480,6 +536,25 @@ local function forget(shot: Shot)
 	if shot.shotId and byShotId[shot.shotId] == shot then
 		byShotId[shot.shotId] = nil
 	end
+	if shot.id and byProjectile[shot.id] == shot then
+		byProjectile[shot.id] = nil
+	end
+end
+
+-- Our copy has landed (and finished any fall) and the server's model is here: swap them in the same frame. Both sit on
+-- the same pose, so nothing moves on screen.
+local function handover(shot: Shot)
+	local model = shot.world
+	if not model or shot.state ~= "Stuck" or shot.fall ~= nil then
+		return
+	end
+	shot.world = nil
+	if model.Parent and shot.hidingWorld then
+		setHidden(model, "landing", false)
+	end
+	shot.hidingWorld = false
+	destroyVisual(shot)
+	forget(shot)
 end
 
 local function render(shot: Shot, tau: number, position: Vector3)
@@ -511,24 +586,27 @@ local function render(shot: Shot, tau: number, position: Vector3)
 	model:PivotTo(look * shot.offset)
 end
 
--- Leave the visual stuck where it hit (following moving parts and characters).
-local function stickAt(shot: Shot, position: Vector3, part: BasePart?, duration: number)
+-- Leave our copy at `pivot`, following `part` when it moves (a body, a crate lid).
+local function stickAt(shot: Shot, pivot: CFrame, part: BasePart?, duration: number, rel: CFrame?)
 	local model = shot.model
 	if not model then
 		return
 	end
-	local direction = shot.direction
-	local embed = if shot.itemId == "arrow" then 0.5 else 0.3
-	local tip = position + direction * embed
 	setTrails(model, false)
 	shot.trailOn = false
-	model:PivotTo(CFrame.lookAt(tip, tip + direction, upFor(direction)) * shot.offset)
+	shot.fall = nil
+	model:PivotTo(pivot)
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("BasePart") and d.Transparency < 1 then
+			d.CastShadow = true -- like the server's model it hands over to
+		end
+	end
 	shot.state = "Stuck"
 	removeStuckEntry(shot.stuckEntry)
 	local entry: StuckEntry = { model = model, expires = os.clock() + duration, part = nil, rel = nil, shot = shot }
-	if part and part.Parent and (not part.Anchored or humanoidOf(part) ~= nil) then
+	if part and part.Parent and (rel ~= nil or not part.Anchored or humanoidOf(part) ~= nil) then
 		entry.part = part
-		entry.rel = part.CFrame:ToObjectSpace(model:GetPivot())
+		entry.rel = rel or part.CFrame:ToObjectSpace(pivot)
 	end
 	table.insert(stuck, entry)
 	shot.stuckEntry = entry
@@ -549,31 +627,78 @@ local function stickTime(): number
 	return CombatConfig.ArrowStickTime or 20
 end
 
--- Put the shot where the server says it landed.
+-- Our copy falls (or sinks) the way the server's item does, then hands over.
+local function startFall(shot: Shot, from: CFrame, to: any, duration: any, sink: any)
+	if typeof(to) ~= "CFrame" or type(duration) ~= "number" or duration <= 0 then
+		return
+	end
+	shot.fall = { from = from, to = to, t0 = os.clock(), duration = math.min(duration, 3), sink = sink == true }
+	shot.state = "Falling"
+	local entry = shot.stuckEntry
+	if entry then
+		entry.part = nil -- it falls in world space
+		entry.rel = nil
+	end
+	local model = shot.world
+	if model and not shot.hidingWorld then
+		shot.hidingWorld = true
+		setHidden(model, "landing", true)
+	end
+end
+
+-- Where our copy stops at a hit: the pose the server gives the same hit (Shared.WorldItems).
+local function hitPivot(shot: Shot, result: RaycastResult, hitCharacter: boolean): CFrame
+	local velocity = velocityAt(shot, shotTime(shot, os.clock()))
+	local dir = if velocity.Magnitude > 0.01 then velocity.Unit else shot.direction
+	shot.direction = dir
+	local depth = if result.Material == Enum.Material.Water
+		then 0.25
+		else WorldItems.depth(shot.itemId, result.Material, velocity.Magnitude, math.abs(dir:Dot(result.Normal)), hitCharacter)
+	return WorldItems.embedPivot(shot.itemId, result.Position + dir * depth, dir)
+end
+
+-- Put our copy where the server says the item ended up.
 local function settle(shot: Shot, info: any)
 	if not shot.impactPlayed then
 		shot.impactPlayed = true
 		feedback(shot.itemId, info.position, info.normal, info.material, info.hitCharacter)
 	end
-	if info.recovered or not shot.model then
-		destroyVisual(shot) -- the ground item the server spawned replaces it
+	local part = info.part
+	if not shot.model or (info.hitCharacter and isLocalCharacterPart(part)) then
+		destroyVisual(shot) -- in your own body: the server's item is out of your view
 		return
 	end
+	if info.worldId then
+		-- the server's exact pose (relative to what it is stuck in), so the hand-over to its model is seamless
+		shot.worldId = info.worldId
+		local pivot = if part and info.rel then part.CFrame * info.rel else info.pivot
+		if typeof(pivot) ~= "CFrame" then
+			pivot = shot.model:GetPivot()
+		end
+		stickAt(shot, pivot, part, WORLD_WAIT, if info.fallTo then nil else info.rel)
+		if not shot.world and shot.id then
+			local model = worldByShot[shot.id]
+			if model and model.Parent then
+				shot.world = model
+			end
+		end
+		if info.fallTo then
+			startFall(shot, pivot, info.fallTo, info.fallTime, info.sink)
+		end
+		handover(shot)
+		return
+	end
+	-- nothing was left in the world for this shot: stick for a while, then go (as before)
+	local pivot = WorldItems.embedPivot(shot.itemId, info.position + shot.direction * 0.5, shot.direction)
 	if info.hitCharacter then
-		if shot.itemId == "arrow" and info.part and not isLocalCharacterPart(info.part) then
-			stickAt(shot, info.position, info.part, CHARACTER_STICK_TIME)
+		if shot.itemId == "arrow" and part then
+			stickAt(shot, pivot, part, CHARACTER_STICK_TIME)
 		else
 			destroyVisual(shot)
 		end
 		return
 	end
-	if shot.state == "Stuck" and shot.stuckEntry and shot.model then
-		local tipNow = shot.model:GetPivot() * shot.offset:Inverse()
-		if (tipNow.Position - info.position).Magnitude < 1.5 then
-			return -- the prediction was right
-		end
-	end
-	stickAt(shot, info.position, info.part, stickTime())
+	stickAt(shot, pivot, part, stickTime())
 end
 
 local function localImpact(shot: Shot, result: RaycastResult, hitCharacter: boolean)
@@ -583,19 +708,70 @@ local function localImpact(shot: Shot, result: RaycastResult, hitCharacter: bool
 		feedback(shot.itemId, result.Position, result.Normal, result.Material, hitCharacter)
 	end
 	local part = result.Instance :: BasePart
-	if hitCharacter then
-		if shot.itemId == "arrow" and not isLocalCharacterPart(part) then
-			stickAt(shot, result.Position, part, CHARACTER_STICK_TIME)
-		else
-			destroyVisual(shot)
-		end
-	elseif result.Material == Enum.Material.Water then
-		destroyVisual(shot)
+	if hitCharacter and isLocalCharacterPart(part) then
+		destroyVisual(shot) -- in your own body: the server's item is out of your view
 	else
-		stickAt(shot, result.Position, part, stickTime())
+		-- the pose the server gives the same hit; it waits there for the server's model
+		shot.mayFall = result.Material == Enum.Material.Water or WorldItems.glances(shot.itemId, result.Material)
+		stickAt(shot, hitPivot(shot, result, hitCharacter), part, WORLD_WAIT)
 	end
 	if shot.state == "Flying" then
 		shot.state = "Stuck"
+	end
+	if not shot.mayFall then
+		handover(shot)
+	end
+end
+
+-- The server's model of a spent projectile arrived (or streamed in).
+local function onWorldAdded(model: Instance)
+	if not model:IsA("Model") then
+		return
+	end
+	if model:GetAttribute("Host") == player.UserId and OWN_BODY_HIDDEN[tostring(model:GetAttribute("HostPart"))] then
+		setHidden(model, "body", true) -- in your own head, arms or chest: out of your first-person view
+	end
+	local key = model:GetAttribute("Shot")
+	if type(key) ~= "number" or key <= 0 then
+		return
+	end
+	worldByShot[key] = model
+	local shot = byProjectile[key]
+	if not shot or shot.state == "Gone" then
+		return
+	end
+	shot.world = model
+	if shot.state == "Stuck" and not shot.fall and not (shot.mayFall and not shot.worldId) then
+		handover(shot)
+	elseif not shot.hidingWorld then
+		shot.hidingWorld = true
+		setHidden(model, "landing", true) -- our copy is still on its way: one on screen at a time
+	end
+end
+
+local function onWorldRemoved(model: Instance)
+	hiddenWhy[model] = nil
+	local key = model:GetAttribute("Shot")
+	if type(key) ~= "number" or worldByShot[key] ~= model then
+		return
+	end
+	worldByShot[key] = nil
+	local shot = byProjectile[key]
+	if shot and shot.world == model then
+		shot.world = nil
+		shot.hidingWorld = false
+		if shot.state ~= "Flying" then
+			destroyVisual(shot) -- taken (or streamed away) before our copy went: it goes too
+			forget(shot)
+		end
+	end
+end
+
+-- Out of a body (or settled after a fall): it shows for everyone, you included.
+local function onLooseAdded(model: Instance)
+	local why = hiddenWhy[model]
+	if model:IsA("Model") and why and why.body then
+		setHidden(model, "body", false)
 	end
 end
 
@@ -656,6 +832,11 @@ local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravi
 		pendingDeadline = 0,
 		stuckEntry = nil,
 		trailOn = false,
+		world = nil,
+		hidingWorld = false,
+		worldId = nil,
+		mayFall = false,
+		fall = nil,
 	}
 	if model then
 		model:PivotTo(CFrame.new(0, -1000, 0)) -- out of sight until the first render
@@ -694,6 +875,9 @@ local function onFired(data: any)
 			predicted.id = data.id
 			predicted.linked = true
 			byId[data.id] = predicted -- even if it already landed here, so its impact isn't heard twice
+			if predicted.state ~= "Gone" then
+				byProjectile[data.id] = predicted
+			end
 			return
 		end
 	end
@@ -704,6 +888,7 @@ local function onFired(data: any)
 	local shot = newShot(data.itemId, data.origin, data.velocity, gravity, false)
 	shot.id = data.id
 	byId[data.id] = shot
+	byProjectile[data.id] = shot
 	if type(data.t) == "number" then
 		shot.lead = math.clamp(workspace:GetServerTimeNow() - data.t, 0, 0.5)
 	end
@@ -725,6 +910,12 @@ local function onImpact(data: any)
 		hitCharacter = data.hitCharacter == true,
 		recovered = data.recovered == true,
 		itemId = if type(data.itemId) == "string" then data.itemId else "arrow",
+		worldId = if type(data.worldId) == "number" then data.worldId else nil,
+		pivot = if typeof(data.pivot) == "CFrame" then data.pivot else nil,
+		rel = if typeof(data.rel) == "CFrame" then data.rel else nil,
+		fallTo = if typeof(data.fallTo) == "CFrame" then data.fallTo else nil,
+		fallTime = if type(data.fallTime) == "number" then data.fallTime else nil,
+		sink = data.sink == true,
 	}
 	local shot = if type(data.id) == "number" then byId[data.id] else nil
 	if shot then
@@ -753,6 +944,9 @@ local function onImpact(data: any)
 		return
 	end
 	feedback(info.itemId, info.position, info.normal, info.material, info.hitCharacter)
+	if info.worldId then
+		return -- the server's model shows by itself
+	end
 	if info.itemId == "arrow" and not info.recovered and not info.hitCharacter and info.material ~= Enum.Material.Water then
 		local ghost = newShot("arrow", info.position, -info.normal, 0, false)
 		ghost.impactPlayed = true
@@ -761,7 +955,7 @@ local function onImpact(data: any)
 		if index then
 			table.remove(flying, index)
 		end
-		stickAt(ghost, info.position, info.part, stickTime())
+		stickAt(ghost, WorldItems.embedPivot("arrow", info.position - info.normal * 0.5, -info.normal), info.part, stickTime())
 	end
 end
 
@@ -811,6 +1005,16 @@ local function update(_dt: number)
 		for shotId, shot in pairs(byShotId) do
 			if now - shot.createdAt > 10 then
 				byShotId[shotId] = nil
+			end
+		end
+		for id, shot in pairs(byProjectile) do
+			if shot.state == "Gone" then
+				byProjectile[id] = nil
+			end
+		end
+		for id, model in pairs(worldByShot) do
+			if model.Parent == nil then
+				worldByShot[id] = nil
 			end
 		end
 	end
@@ -893,6 +1097,22 @@ local function update(_dt: number)
 			else
 				entry.model:Destroy()
 			end
+		elseif shot and shot.fall then
+			local fall = shot.fall
+			local alpha = (now - fall.t0) / fall.duration
+			if alpha < 1 then
+				entry.model:PivotTo(WorldItems.fallPose(fall.from, fall.to, alpha, fall.sink))
+			else
+				entry.model:PivotTo(fall.to)
+				-- landed: hand over once the server's model has landed too (it started a moment earlier)
+				local model = shot.world
+				local settled = model == nil or (model:GetPivot().Position - fall.to.Position).Magnitude < 0.05
+				if settled or now - fall.t0 > fall.duration + 0.35 then
+					shot.fall = nil
+					shot.state = "Stuck"
+					handover(shot)
+				end
+			end
 		elseif part and entry.rel then
 			entry.model:PivotTo(part.CFrame * entry.rel)
 		end
@@ -908,6 +1128,12 @@ function ProjectileController.Start()
 	end)
 	Net.event("ProjectileFired").OnClientEvent:Connect(onFired)
 	Net.event("ProjectileImpact").OnClientEvent:Connect(onImpact)
+	CollectionService:GetInstanceAddedSignal(WorldItems.TAG):Connect(onWorldAdded)
+	CollectionService:GetInstanceRemovedSignal(WorldItems.TAG):Connect(onWorldRemoved)
+	CollectionService:GetInstanceAddedSignal(WorldItems.LOOSE_TAG):Connect(onLooseAdded)
+	for _, model in ipairs(CollectionService:GetTagged(WorldItems.TAG)) do
+		onWorldAdded(model)
+	end
 	RunService:BindToRenderStep("ProjectileController", Enum.RenderPriority.Camera.Value + 5, update)
 end
 

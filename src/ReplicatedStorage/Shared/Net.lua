@@ -17,7 +17,7 @@ Net.Names = {
 	"HitConfirm", "DamageTaken", "CombatAction", "RoundSummary",
 	-- client -> server
 	"EquipSlot", "DropSlot", "UseStart", "UseFinish", "UseCancel", "Drink", "MeleeSwing", "RangedRelease",
-	"SetStance", "SaveSettings", "SpectateTarget",
+	"SetStance", "SaveSettings", "SpectateTarget", "TakeWorldItem",
 }
 
 local folder = ReplicatedStorage:WaitForChild("Remotes")

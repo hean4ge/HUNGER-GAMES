@@ -300,9 +300,15 @@ Config.Combat = {
 	MeleeHitRadius = 2.4,
 	MeleeLagTolerance = 3, -- extra studs the server allows for latency
 	DefaultHeadshotMultiplier = 1.6,
-	ProjectileMaxLifetime = 4,
-	ArrowRecoverChance = 0.5,
-	ArrowStickTime = 20,
+	ProjectileMaxLifetime = 12, -- seconds a shot is simulated (a full-draw arrow lofted high is up ~9 s); a miss that
+	-- outlives it is traced on to where its arc meets the ground
+	-- Spent arrows, throwing knives and thrown spears stay where they end up until the round's arena cleanup
+	-- (ProjectileService.WorldProjectiles, Shared.WorldItems): embedded where they hit, on the bed under water, or in a
+	-- body until it dies or BodyFallOutTime passes. Taken by walking over them (Config.Loot.AutoPickup) or with E.
+	WorldItemCap = 400, -- safety cap per server: above it the oldest go first (logged)
+	BodyFallOutTime = 30, -- seconds an arrow stays in a living contender or dummy before it falls out by itself
+	PickupReachAbove = 4.3, -- studs above the root a hand reaches (~7 studs above the feet); higher needs a climb or jump
+	ArrowStickTime = 20, -- a client's own stuck copy, only when the server left nothing in the world for that shot
 	DummyRespawnTime = 3,
 	PracticeDummies = 3,
 	DummyHealth = 200,
@@ -320,6 +326,41 @@ Config.Combat = {
 	EquipTime = 0.32, -- seconds after equipping before you can attack (bows take a little longer)
 	-- PlayabilityPlan Q2 (open): 2 = a full-draw headshot does 100, a full health bar; the plan proposes 1.8 (90).
 	BowHeadshotMultiplier = 2,
+}
+
+-- First-person arms (ViewmodelController). "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when
+-- your appearance changes), lit like the world; "Classic": the original part-built arms (dark sleeves, block fists).
+Config.Viewmodel = {
+	ArmStyle = "Avatar",
+	ArmScale = 0.46, -- avatar arms are drawn this wide, a fraction of the avatar's (a full-width Roblox arm fills the view)
+	ArmReach = 1.34, -- ... and this long, shoulder to wrist in studs, whatever the avatar's proportions (the poses' reach)
+	ArmMaterial = Enum.Material.SmoothPlastic,
+	ArmShadows = false, -- the arms cast shadows (onto each other, the held item and the ground)
+	-- The light on the avatar arms (ViewmodelController.Shade): the whole viewmodel brought down toward the scene's
+	-- level at dusk (DuskDarken), at night (NightDarken) and under cover (ShadeDarken by day, NightShadeDarken at night,
+	-- times how much sky is covered; never below MinExposure); a soft spot light above the arms where the world gives no
+	-- direct light (KeyBrightness, KeyRange studs, KeyAngle degrees, KeyHeight studs above them, KeyLean toward the sun or
+	-- moon, KeyTint toward the sky's colour); and the shade layer that gives black clothing the shape of the light
+	-- (ShadeColor at ShadeTransparency). Adapt: how fast it follows the light (1/s).
+	Shade = {
+		DuskDarken = 0.38,
+		NightDarken = 0.45,
+		ShadeDarken = 0.15,
+		NightShadeDarken = 0.5,
+		SunShadeDarken = 0.3, -- (by day, when the sun is up but hidden from the eye: canopy, roofs)
+		MinExposure = 0.18,
+		KeyBrightness = 1.5,
+		KeyDuskBoost = 1.2, -- (the key x (1 + this) in the twilight, whose flat fill is bright)
+		KeyRange = 4.5,
+		KeyAngle = 120,
+		KeyHeight = 2, -- (high above the arms, so their tops catch it and their inner sides fall off)
+		KeyLean = 0.35,
+		KeyTint = 0.55,
+		ShadeColor = Color3.fromRGB(235, 235, 240),
+		ShadeTransparency = 0.72, -- (sleeves)
+		HandShadeTransparency = 0.86, -- (hands: fainter, so skin keeps its colour)
+		Adapt = 3,
+	},
 }
 
 Config.Inventory = {
