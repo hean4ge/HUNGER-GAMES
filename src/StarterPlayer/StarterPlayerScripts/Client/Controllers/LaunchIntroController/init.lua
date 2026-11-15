@@ -1,0 +1,1349 @@
+--[[
+	LaunchIntroController - the launch intro of the beta (TwoArenas.md section 2, Tier 1): one shot at the call, played
+	on this client from the round's shared clock, before today's plate rise.
+	  1. The red room: down through the teal hex frame at your own stand-in on the dusty-rose lift disc, under the fine
+	     diamond net (a slow push in; you look up; the lift starts and carries you up toward the lens).
+	  2. "It loads up": a quick dip to black into your glass case among the other contenders in theirs (Full only):
+	     the camera at face height outside your glass looks past you along the row, then pulls back round the hall.
+	  3. The rise: your disc carries you up your pole through the round hall while the camera circles you (once in
+	     the full shot; half a turn from your disc leaving the case in the short cut), ending low and looking up at
+	     your whole body. The others rise on their own poles a little ahead or behind.
+	  4. A short white-out, and the hand-off: first person on your own plate, turned to face the Spire
+	     (LaunchController's wave-1 turn, which waits for the shot), as the plate rises out of its tube on today's
+	     timeline (GameState LaunchAt), then the last seconds of the countdown and the horn.
+	The server picks the cut and the clock (RoundService, Config.Launch): GameState LaunchCut "Full" | "Short",
+	LaunchCallAt, and LaunchAt = the end of the white-out = the start of the plate rise. Everyone in a round sees the
+	same cut on the same clock; a client that starts late joins the shot where everyone else is, or skips it when it is
+	nearly over.
+	While the shot plays (ClientState.launchShot = true) this controller owns the camera (Scriptable), the lighting
+	(a profile per room; ArenaController's day cycle holds and writes its whole look again afterwards) and the screen:
+	the HUD, HUDFX, Overlay, FeedbackLines, TouchControls and Menu ScreenGuis and Roblox's touch controls are switched
+	off and put back as they were (the Menu comes back at once if you open it); CameraController, the zoom and
+	ViewmodelController stand down; NotificationController holds its countdown numbers and ticks; music ducks and
+	the arena's ambience is muted. Skip: hold Space / A, or hold the SKIP button on touch (Input action "LaunchSkip",
+	bound only during the shot, Config.Launch.SkipHold): it cuts your own camera to your plate (in the tube until the
+	rise); the round's timing stays the server's.
+	Robust: every frame and every step of the clean-up is protected. An error, your death, a cancelled round, leaving
+	the arena, a stalled render step or a shot still running at the horn ends it at once and gives back the camera, the
+	lighting and the HUD (today's rise then plays as usual). The server's cut is the only switch: with
+	Config.Launch.Intro = false it sends none and nothing here runs (the set isn't even built).
+	Studio only (tests and stills): LocalPlayer attribute LS_LaunchPreview = "Full" | "Short" plays a preview shot
+	without a round (no hand-off; the camera goes back where it was), LS_LaunchFreeze = seconds holds the preview at
+	that moment of the shot, LS_LaunchSkipTest = true acts as a completed skip hold; LS_LaunchStats (JSON) reports
+	frame times per stage after every shot.
+	API: LaunchIntroController.isPlaying() -> boolean, LaunchIntroController.stats() -> { [string]: any }?
+]]
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Theme = require(Shared:WaitForChild("Theme"))
+local Input = require(Shared:WaitForChild("Input"))
+local Glyphs = require(Shared:WaitForChild("Glyphs"))
+local Sounds = require(Shared:WaitForChild("Sounds"))
+local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
+
+local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+local Set = require(script:WaitForChild("Set"))
+local Figures = require(script:WaitForChild("Figures"))
+
+local GameState = ReplicatedStorage:WaitForChild("GameState")
+local localPlayer = Players.LocalPlayer
+local LaunchCfg = Config.Launch or {}
+local IS_STUDIO = RunService:IsStudio()
+
+local IDLE_ID = "rbxassetid://17172918855" -- the game's own idle clip (StarterCharacterScripts.Animate)
+local SKIP_ACTION = "LaunchSkip"
+local RENDER_NAME = "LS_LaunchShot"
+local SKIP_HOLD = tonumber(LaunchCfg.SkipHold) or 0.6
+local HIDE_GUIS = { "HUD", "HUDFX", "Overlay", "FeedbackLines", "TouchControls", "Menu" }
+local WHITE = Color3.fromRGB(246, 248, 252)
+local BLACK = Color3.new(0, 0, 0)
+local LIT = Set.Colors.light
+local UNLIT = Color3.fromRGB(40, 44, 50)
+
+-- Stage times in seconds from the call for the nominal cinematic length (the plan ends at LaunchAt), scaled to the
+-- server's LaunchAt - LaunchCallAt.
+--   look      the stand-in looks up the shaft     lift    the lift starts      dip   the dip to black out of the red room
+--   cases     { from, to } at your case (Full)    rise    { from, to } up the pole, the disc climbing riseHeight studs
+--   white     the white-out starts                handoff first person on your plate (the white fades as it rises)
+--   phi       the camera's bearing round you { start, end } in degrees (0 = in front, + = your right)
+local PLANS = {
+	Full = {
+		length = 15.4, look = 1.0, lift = 3.3, dip = 4.45, cases = { 4.5, 8.6 }, rise = { 8.6, 14.95 },
+		white = 14.15, handoff = 14.95, riseHeight = 70, phi = { 34.4, 34.4 - 375 }, start = nil,
+	},
+	Short = {
+		length = 6.2, look = 0.3, lift = 0.8, dip = 1.6, cases = nil, rise = { 1.66, 5.75 },
+		white = 5.05, handoff = 5.75, riseHeight = 44, phi = { 95, -15 },
+		start = { r = 9.6, h = 4.3, fov = 54 },
+	},
+}
+-- the case stage's last pose (slot space) = the full rise's first: continuous position, target and field of view
+local CASE_END_EYE = Vector3.new(6.5, 6.4, -9.5)
+local CASE_END_FOV = 52
+
+-- Lighting per room (TwoArenas 2.8: navy halls, the red room's warm dark; the light carries the hue)
+local PROFILES = {
+	Red = {
+		Ambient = Color3.fromRGB(96, 64, 66), Exposure = 0.2, EnvSpecular = 0.3, AtmDensity = 0.12,
+		AtmColor = Color3.fromRGB(70, 42, 44), AtmDecay = Color3.fromRGB(44, 24, 26), BloomIntensity = 0.6,
+		BloomSize = 24, BloomThreshold = 1.15, GradeContrast = 0.12, GradeSaturation = -0.06,
+		GradeTint = Color3.fromRGB(255, 243, 238),
+	},
+	Cases = {
+		Ambient = Color3.fromRGB(66, 82, 110), Exposure = 0.35, EnvSpecular = 0.35, AtmDensity = 0.18,
+		AtmColor = Color3.fromRGB(40, 52, 72), AtmDecay = Color3.fromRGB(30, 40, 58), BloomIntensity = 0.75,
+		BloomSize = 26, BloomThreshold = 1.1, GradeContrast = 0.1, GradeSaturation = -0.06,
+		GradeTint = Color3.fromRGB(236, 244, 255),
+	},
+	Rise = {
+		Ambient = Color3.fromRGB(50, 62, 86), Exposure = 0.35, EnvSpecular = 0.35, AtmDensity = 0.22,
+		AtmColor = Color3.fromRGB(30, 40, 58), AtmDecay = Color3.fromRGB(22, 30, 44), BloomIntensity = 1.0,
+		BloomSize = 32, BloomThreshold = 1.0, GradeContrast = 0.14, GradeSaturation = -0.04,
+		GradeTint = Color3.fromRGB(232, 240, 255),
+	},
+}
+local LIGHT_PROPS = { "Ambient", "OutdoorAmbient", "Brightness", "ExposureCompensation", "EnvironmentDiffuseScale",
+	"EnvironmentSpecularScale", "ColorShift_Top", "ColorShift_Bottom", "GlobalShadows" }
+local EFFECT_PROPS = {
+	Atmosphere = { "Density", "Offset", "Color", "Decay", "Glare", "Haze" },
+	BloomEffect = { "Enabled", "Intensity", "Size", "Threshold" },
+	ColorCorrectionEffect = { "Enabled", "Brightness", "Contrast", "Saturation", "TintColor" },
+	SunRaysEffect = { "Enabled", "Intensity" },
+	DepthOfFieldEffect = { "Enabled" },
+}
+
+local LaunchIntroController = {}
+
+local Controllers: any = nil
+local set: any = nil
+local building = false
+local buildFailedAt = -math.huge
+local shot: any = nil
+local playedRound: any = nil
+local seenRound: any = nil
+local seenAt = 0
+local ui: any = nil
+local skipHeldSince: number? = nil
+local fadeToken = 0
+local lastStats: any = nil
+local lastTierCheck = 0
+
+-- Helpers ----------------------------------------------------------------------------------------------------------
+
+local function now(): number
+	return workspace:GetServerTimeNow()
+end
+
+local function clamp01(x: number): number
+	return math.clamp(x, 0, 1)
+end
+
+local function smooth(x: number): number
+	x = clamp01(x)
+	return x * x * (3 - 2 * x)
+end
+
+local function lerp(a: number, b: number, k: number): number
+	return a + (b - a) * k
+end
+
+-- the disc's climb: the lift takes the weight, then a steady climb still moving at the white-out (carried on past 1)
+local function riseEase(u: number): number
+	if u <= 0 then
+		return 0
+	elseif u >= 1 then
+		return u
+	end
+	return 2 * u * u - u * u * u
+end
+
+local function tier(): string
+	local t = localPlayer:GetAttribute("DetailTier")
+	if t == "Low" or t == "Medium" or t == "High" then
+		return t
+	end
+	return if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then "Medium" else "High"
+end
+
+local function standInLimit(): number
+	local n = tonumber(LaunchCfg.StandIns) or 8
+	local t = tier()
+	if t == "Low" then
+		n = math.floor(n * 0.4)
+	elseif t == "Medium" then
+		n = math.floor(n * 0.75)
+	end
+	return math.max(0, n)
+end
+
+local function reducedMotion(): boolean
+	local ok, on = pcall(function()
+		return (GuiService :: any).ReducedMotionEnabled
+	end)
+	return ok and on == true
+end
+
+local function arenaCentre(): Vector3
+	local arena = workspace:FindFirstChild("Arena")
+	local centre = arena and arena:GetAttribute("Center")
+	if typeof(centre) == "Vector3" then
+		return centre
+	end
+	return ArenaLayout.Center or Vector3.zero
+end
+
+-- the case of the plate a contender stands on (or nil when they're not on the plate ring yet)
+local function slotOf(position: Vector3): number?
+	local centre = arenaCentre()
+	local flat = Vector2.new(position.X - centre.X, position.Z - centre.Z)
+	if math.abs(flat.Magnitude - (ArenaLayout.PlinthRingRadius or 52)) > 8 then
+		return nil
+	end
+	local n = #set.hall.slots
+	local deg = math.deg(math.atan2(position.X - centre.X, -(position.Z - centre.Z))) % 360
+	return (math.floor(deg / (360 / n) + 0.5) % n) + 1
+end
+
+local function ringDistance(a: number, b: number, n: number): number
+	local d = math.abs(a - b) % n
+	return math.min(d, n - d)
+end
+
+-- The set ---------------------------------------------------------------------------------------------------------------
+
+local function ensureSet()
+	if building or os.clock() - buildFailedAt < 30 then
+		return
+	end
+	if set and (set.detail == tier() or shot) then
+		return
+	end
+	building = true
+	task.spawn(function()
+		local ok, result = pcall(Set.build, { detail = tier(), slots = ArenaLayout.PlinthCount or 24 })
+		if ok and result then
+			if set and not shot then
+				set.model:Destroy()
+			end
+			if not shot then
+				set = result
+			else
+				result.model:Destroy()
+			end
+		else
+			buildFailedAt = os.clock()
+			warn("[LaunchIntroController] the set failed to build: " .. tostring(result))
+		end
+		building = false
+	end)
+end
+
+-- The screen ------------------------------------------------------------------------------------------------------------
+
+local function frame(name: string, parent: Instance, props: { [string]: any }): Frame
+	local f = Instance.new("Frame")
+	f.Name = name
+	f.BorderSizePixel = 0
+	f.BackgroundColor3 = BLACK
+	for k, v in pairs(props) do
+		(f :: any)[k] = v
+	end
+	f.Parent = parent
+	return f
+end
+
+local function buildUi()
+	local playerGui = localPlayer:WaitForChild("PlayerGui")
+	local old = playerGui:FindFirstChild("LaunchShot")
+	if old then
+		old:Destroy()
+	end
+	local screen = Instance.new("ScreenGui")
+	screen.Name = "LaunchShot"
+	screen.ResetOnSpawn = false
+	screen.IgnoreGuiInset = true
+	screen.DisplayOrder = 30
+	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screen.Enabled = false
+	pcall(function()
+		screen.ScreenInsets = Enum.ScreenInsets.None
+	end)
+	local root = frame("Root", screen, { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 })
+	local top = frame("BarTop", root, { Size = UDim2.fromScale(1, 0), ZIndex = 2 })
+	local bottom = frame("BarBottom", root, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1),
+		Size = UDim2.fromScale(1, 0), ZIndex = 2 })
+	local fade = frame("Fade", root, { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 5 })
+	-- keyboard / gamepad: "HOLD SPACE TO SKIP" over the bottom bar, with a thin fill line
+	local prompt = frame("Prompt", root, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -28, 1, -16),
+		Size = UDim2.fromOffset(260, 26), BackgroundTransparency = 1, ZIndex = 4, Visible = false })
+	local text = Instance.new("TextLabel")
+	text.Name = "Text"
+	text.BackgroundTransparency = 1
+	text.Size = UDim2.new(1, 0, 1, -4)
+	text.FontFace = Theme.Fonts.Heading
+	text.TextSize = 15
+	text.TextColor3 = Theme.Colors.Text
+	text.TextTransparency = 0.3
+	text.TextXAlignment = Enum.TextXAlignment.Right
+	text.Text = "HOLD SPACE TO SKIP"
+	text.ZIndex = 4
+	text.Parent = prompt
+	local line = frame("Line", prompt, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.fromScale(1, 1),
+		Size = UDim2.new(0, 120, 0, 2), BackgroundColor3 = Theme.Colors.Text, BackgroundTransparency = 0.8, ZIndex = 4 })
+	local fill = frame("Fill", line, { Size = UDim2.fromScale(0, 1), BackgroundColor3 = Theme.Colors.Accent, ZIndex = 4 })
+	-- touch: a HOLD TO SKIP button (InputCheck: gui LaunchShot.Root.Skip)
+	local skip = Instance.new("TextButton")
+	skip.Name = "Skip"
+	skip.AnchorPoint = Vector2.new(1, 1)
+	skip.Position = UDim2.new(1, -18, 1, -14)
+	skip.Size = UDim2.fromOffset(136, 40)
+	skip.AutoButtonColor = false
+	skip.BackgroundColor3 = Theme.Colors.Panel
+	skip.BackgroundTransparency = 0.45
+	skip.BorderSizePixel = 0
+	skip.FontFace = Theme.Fonts.Heading
+	skip.TextSize = 15
+	skip.TextColor3 = Theme.Colors.Text
+	skip.Text = "HOLD TO SKIP"
+	skip.Selectable = false
+	skip.Visible = false
+	skip.ZIndex = 4
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = Theme.CornerPill
+	corner.Parent = skip
+	local stroke = Instance.new("UIStroke")
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Color = Theme.Colors.Text
+	stroke.Transparency = 0.7
+	stroke.Parent = skip
+	local skipFill = frame("Fill", skip, { Size = UDim2.fromScale(0, 1), BackgroundColor3 = Theme.Colors.Accent,
+		BackgroundTransparency = 0.35, ZIndex = 3 })
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = Theme.CornerPill
+	fillCorner.Parent = skipFill
+	skip.Parent = root
+	skip.InputBegan:Connect(function(io: InputObject)
+		if shot and (io.UserInputType == Enum.UserInputType.Touch or io.UserInputType == Enum.UserInputType.MouseButton1) then
+			skipHeldSince = os.clock()
+		end
+	end)
+	skip.InputEnded:Connect(function(io: InputObject)
+		if io.UserInputType == Enum.UserInputType.Touch or io.UserInputType == Enum.UserInputType.MouseButton1 then
+			skipHeldSince = nil
+		end
+	end)
+	screen.Parent = playerGui
+	ui = { screen = screen, root = root, top = top, bottom = bottom, fade = fade, prompt = prompt, promptText = text,
+		promptFill = fill, skip = skip, skipFill = skipFill }
+end
+
+-- letterbox k: 1 = 2.39:1, 0 = full frame
+local function setLetterbox(k: number)
+	local cam = workspace.CurrentCamera
+	local v = if cam then cam.ViewportSize else Vector2.new(1280, 720)
+	local bar = 0
+	if v.X > 1 and v.Y > 1 then
+		bar = math.max(0, (1 - (v.X / v.Y) / 2.39) / 2) * clamp01(k)
+	end
+	ui.top.Size = UDim2.fromScale(1, bar)
+	ui.bottom.Size = UDim2.fromScale(1, bar)
+end
+
+local function setFade(color: Color3, alpha: number)
+	ui.fade.BackgroundColor3 = color
+	ui.fade.BackgroundTransparency = 1 - clamp01(alpha)
+end
+
+-- After a shot: the white (or black) gives way to the game.
+local function fadeAway(color: Color3, from: number, duration: number)
+	fadeToken += 1
+	local token = fadeToken
+	ui.prompt.Visible = false
+	ui.skip.Visible = false
+	setLetterbox(0)
+	setFade(color, from)
+	ui.screen.Enabled = true
+	task.spawn(function()
+		local t0 = os.clock()
+		while token == fadeToken do
+			local k = (os.clock() - t0) / duration
+			if k >= 1 then
+				break
+			end
+			setFade(color, from * (1 - smooth(k)))
+			RunService.RenderStepped:Wait()
+		end
+		if token == fadeToken then
+			setFade(color, 0)
+			if not shot then
+				ui.screen.Enabled = false
+			end
+		end
+	end)
+end
+
+local function skipText(): string
+	local ok, key = pcall(function()
+		if Input.isGamepad() then
+			return Glyphs.forKey(Enum.KeyCode.ButtonA)
+		end
+		return Glyphs.forKey(Enum.KeyCode.Space)
+	end)
+	return "HOLD " .. (if ok and type(key) == "string" then key else "SPACE") .. " TO SKIP"
+end
+
+-- Everything that shows the game's own UI goes dark for the shot (and comes back exactly as it was).
+local function holdGuis(s)
+	local playerGui = localPlayer:FindFirstChildOfClass("PlayerGui")
+	if not playerGui then
+		return
+	end
+	for _, name in ipairs(HIDE_GUIS) do
+		local g = playerGui:FindFirstChild(name)
+		if g and g:IsA("ScreenGui") then
+			local wantOn = name == "Menu" and ClientState.menuOpen == true
+			if wantOn then
+				if not g.Enabled and s.guis[g] then
+					g.Enabled = true
+				end
+			elseif g.Enabled then
+				g.Enabled = false
+				s.guis[g] = true
+			end
+		end
+	end
+	if s.touchControls == nil then
+		local ok, was = pcall(function()
+			return GuiService.TouchControlsEnabled
+		end)
+		if ok then
+			s.touchControls = was
+			pcall(function()
+				GuiService.TouchControlsEnabled = false
+			end)
+		else
+			s.touchControls = false
+		end
+	end
+end
+
+local function releaseGuis(s)
+	for g in pairs(s.guis) do
+		if g.Parent then
+			g.Enabled = true
+		end
+	end
+	table.clear(s.guis)
+	if s.touchControls == true then
+		pcall(function()
+			GuiService.TouchControlsEnabled = true
+		end)
+	end
+end
+
+-- Lighting --------------------------------------------------------------------------------------------------------------
+
+local function findEffect(className: string, name: string?): Instance?
+	if name then
+		local named = Lighting:FindFirstChild(name)
+		if named and named:IsA(className) then
+			return named
+		end
+		if className == "ColorCorrectionEffect" then
+			return nil -- only the arena's own grade, never another controller's tint
+		end
+	end
+	return Lighting:FindFirstChildOfClass(className)
+end
+
+local function takeLighting(s)
+	local snap = { props = {}, effects = {}, created = {} }
+	for _, p in ipairs(LIGHT_PROPS) do
+		snap.props[p] = (Lighting :: any)[p]
+	end
+	local function grab(className: string, name: string?, create: boolean): any
+		local inst = findEffect(className, name)
+		if not inst then
+			if not create then
+				return nil
+			end
+			inst = Instance.new(className)
+			inst.Name = "LaunchShot" .. className
+			inst.Parent = Lighting
+			table.insert(snap.created, inst)
+			return inst
+		end
+		local values = {}
+		for _, p in ipairs(EFFECT_PROPS[className]) do
+			values[p] = (inst :: any)[p]
+		end
+		table.insert(snap.effects, { inst = inst, values = values })
+		return inst
+	end
+	s.fx = {
+		atmosphere = grab("Atmosphere", nil, true),
+		bloom = grab("BloomEffect", "Bloom", true),
+		grade = grab("ColorCorrectionEffect", "ArenaGrade", true),
+		rays = grab("SunRaysEffect", "SunRays", false),
+		dof = grab("DepthOfFieldEffect", "DepthOfField", false),
+	}
+	s.lighting = snap
+end
+
+local function giveLightingBack(s)
+	local snap = s.lighting
+	if not snap then
+		return
+	end
+	for p, v in pairs(snap.props) do
+		pcall(function()
+			(Lighting :: any)[p] = v
+		end)
+	end
+	for _, e in ipairs(snap.effects) do
+		for p, v in pairs(e.values) do
+			pcall(function()
+				e.inst[p] = v
+			end)
+		end
+	end
+	for _, inst in ipairs(snap.created) do
+		inst:Destroy()
+	end
+	s.lighting = nil
+end
+
+local function writeLighting(s, p, white: number)
+	Lighting.Ambient = p.Ambient
+	Lighting.OutdoorAmbient = p.Ambient
+	Lighting.Brightness = 0
+	Lighting.ExposureCompensation = p.Exposure + 2.4 * white
+	Lighting.EnvironmentDiffuseScale = 0
+	Lighting.EnvironmentSpecularScale = p.EnvSpecular
+	Lighting.ColorShift_Top = BLACK
+	Lighting.ColorShift_Bottom = BLACK
+	-- no sky occlusion in a closed set: the ambient applies at once everywhere, instead of waiting for the engine's
+	-- lighting voxels round a camera that has just jumped thousands of studs (seen as seconds of black rooms)
+	if Lighting.GlobalShadows then
+		Lighting.GlobalShadows = false
+	end
+	local fx = s.fx
+	if fx.atmosphere then
+		fx.atmosphere.Density = p.AtmDensity
+		fx.atmosphere.Offset = 0
+		fx.atmosphere.Color = p.AtmColor
+		fx.atmosphere.Decay = p.AtmDecay
+		fx.atmosphere.Glare = 0
+		fx.atmosphere.Haze = 0
+	end
+	if fx.bloom then
+		fx.bloom.Enabled = true
+		fx.bloom.Intensity = p.BloomIntensity + 1.4 * white
+		fx.bloom.Size = math.floor(p.BloomSize + 16 * white + 0.5)
+		fx.bloom.Threshold = math.max(0.2, p.BloomThreshold - 0.8 * white)
+	end
+	if fx.grade then
+		fx.grade.Enabled = true
+		fx.grade.Brightness = 0.25 * white
+		fx.grade.Contrast = p.GradeContrast
+		fx.grade.Saturation = p.GradeSaturation - 0.3 * white
+		fx.grade.TintColor = p.GradeTint
+	end
+	if fx.rays then
+		fx.rays.Intensity = 0
+	end
+	if fx.dof then
+		fx.dof.Enabled = false
+	end
+end
+
+local function blendLighting(s, name: string, dt: number, snapTo: boolean, white: number)
+	local target = PROFILES[name]
+	local cur = s.profile
+	if snapTo or not cur then
+		cur = table.clone(target)
+	else
+		local k = 1 - math.exp(-5 * dt)
+		for key, v in pairs(target) do
+			local c = cur[key]
+			if typeof(v) == "Color3" then
+				cur[key] = (c :: Color3):Lerp(v, k)
+			else
+				cur[key] = c + (v - c) * k
+			end
+		end
+	end
+	s.profile = cur
+	writeLighting(s, cur, white)
+end
+
+-- Sound -------------------------------------------------------------------------------------------------------------------
+
+local function playSound(s, key: string, opts: { [string]: any }?): Sound?
+	local entry = Sounds[key]
+	if type(entry) ~= "table" or type(entry.ids) ~= "table" or #entry.ids == 0 then
+		return nil
+	end
+	local o = opts or {}
+	local sound = Instance.new("Sound")
+	sound.Name = "LaunchShot_" .. key
+	sound.SoundId = entry.ids[1]
+	sound.Volume = (entry.volume or 0.5) * (o.volume or 1)
+	sound.PlaybackSpeed = o.pitch or 1
+	sound.Looped = o.looped == true
+	local group = SoundService:FindFirstChild(entry.group or "SFX")
+	if group and group:IsA("SoundGroup") then
+		sound.SoundGroup = group
+	end
+	if o.region then
+		sound.PlaybackRegionsEnabled = true
+		sound.PlaybackRegion = NumberRange.new(o.region[1], o.region[2])
+	end
+	if o.reverb then
+		local r = Instance.new("ReverbSoundEffect")
+		r.DecayTime = o.reverb
+		r.Density = 0.9
+		r.Diffusion = 0.9
+		r.WetLevel = -4
+		r.DryLevel = -1
+		r.Parent = sound
+	end
+	sound.Parent = SoundService
+	sound:Play()
+	table.insert(s.sounds, { sound = sound, base = sound.Volume, key = o.tag or key })
+	return sound
+end
+
+-- volume envelope of a running shot sound by its tag (0..1 of its base volume)
+local function soundLevel(s, tag: string, level: number)
+	for _, e in ipairs(s.sounds) do
+		if e.key == tag and e.sound.Parent then
+			e.sound.Volume = e.base * clamp01(level)
+		end
+	end
+end
+
+local function cue(s, name: string, t: number, at: number, fn: () -> ())
+	if not s.fired[name] and t >= at then
+		s.fired[name] = true
+		-- a late join doesn't replay what everyone else heard long ago
+		if t - at < 1.5 then
+			fn()
+		end
+	end
+end
+
+-- The contenders ----------------------------------------------------------------------------------------------------------
+
+-- the other contenders' cases (their plates' bearings where known) and their stand-ins: copies of the nearest
+-- avatars, plain figures for the rest
+local function assignSlots(s)
+	if s.assigned then
+		return
+	end
+	s.assigned = true
+	local slots = set.hall.slots
+	local n = #slots
+	local character = localPlayer.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local mine = if s.preview then 1 else ((root and root:IsA("BasePart") and slotOf(root.Position)) or 1)
+	s.mySlot = mine
+	local taken = { [mine] = true }
+	local pending = {}
+	for _, entry in ipairs(s.contenders) do
+		local k = entry.fixedSlot
+		if not k and entry.player then
+			local c = entry.player.Character
+			local r = c and c:FindFirstChild("HumanoidRootPart")
+			k = if r and r:IsA("BasePart") then slotOf(r.Position) else nil
+		end
+		if k and not taken[k] then
+			taken[k] = true
+			entry.slot = k
+		else
+			table.insert(pending, entry)
+		end
+	end
+	-- the rest fill the free cases nearest yours, alternating sides
+	for _, entry in ipairs(pending) do
+		for step = 1, n do
+			local a, b = (mine - 1 + step) % n + 1, (mine - 1 - step) % n + 1
+			if not taken[a] then
+				taken[a] = true
+				entry.slot = a
+				break
+			elseif not taken[b] then
+				taken[b] = true
+				entry.slot = b
+				break
+			end
+		end
+	end
+	table.sort(s.contenders, function(x, y)
+		return ringDistance(x.slot or mine, mine, n) < ringDistance(y.slot or mine, mine, n)
+	end)
+	local limit = standInLimit()
+	local lit = 0
+	for i, entry in ipairs(s.contenders) do
+		if entry.slot then
+			local figure = entry.copy
+			if not figure and i <= limit and entry.player then
+				local ok, made = pcall(Figures.copy, entry.player.Character)
+				figure = if ok then made else nil
+			end
+			if not figure then
+				figure = Figures.plain(entry.seed)
+			end
+			entry.figure = figure
+			local home = slots[entry.slot]
+			figure.place(home.cf * CFrame.new(0, home.riserTop, 0))
+			figure.model.Parent = set.model
+			pcall(figure.secure)
+			pcall(figure.play, IDLE_ID)
+			-- each rides a few tenths of a second ahead of or behind the clock, set by its case
+			entry.delay = 0.5 * math.sin(entry.slot * 2.3999)
+			entry.pitch = 0.08 + 0.18 * (0.5 + 0.5 * math.sin(entry.slot * 1.7))
+			entry.yaw = 0.35 * math.sin(entry.slot * 3.1)
+		end
+	end
+	for k, slot in ipairs(slots) do
+		local occupied = k == mine or taken[k] == true
+		slot.strip.Material = if occupied then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		slot.strip.Color = if occupied then LIT else UNLIT
+		local near = occupied and ringDistance(k, mine, n) <= 2
+		if near and k ~= mine then
+			lit += 1
+		end
+		slot.light.Enabled = near and (k == mine or lit <= 2)
+		slot.light.Shadows = k == mine and set.detail == "High"
+	end
+	-- the camera passes beside your case: the wall units there step aside
+	for _, p in ipairs(slots[mine].units) do
+		p.LocalTransparencyModifier = 1
+	end
+	set.hall.gantryAnchor.CFrame = slots[mine].cf * CFrame.new(0, 12.9, -10.4)
+end
+
+local function updateOthers(s, t: number)
+	local plan, k = s.plan, s.scale
+	local riseA, riseB = plan.rise[1] * k, plan.rise[2] * k
+	for _, entry in ipairs(s.contenders) do
+		local figure = entry.figure
+		if figure and entry.slot then
+			local slot = set.hall.slots[entry.slot]
+			local u = (t - riseA - entry.delay) / math.max(0.1, riseB - riseA)
+			local y = plan.riseHeight * riseEase(math.max(0, u))
+			slot.riser.CFrame = slot.riserCF + Vector3.yAxis * y
+			figure.place(slot.cf * CFrame.new(0, slot.riserTop + y, 0))
+			figure.look(entry.pitch, entry.yaw)
+		end
+	end
+end
+
+-- The shot ---------------------------------------------------------------------------------------------------------------
+
+local function stageAt(s, t: number): string
+	local plan, k = s.plan, s.scale
+	if t < plan.dip * k then
+		return "Red"
+	elseif plan.cases and t < plan.rise[1] * k then
+		return "Cases"
+	end
+	return "Rise"
+end
+
+local function setStageLights(s, stage: string)
+	if s.lightStage == stage then
+		return
+	end
+	s.lightStage = stage
+	local red = set.red.lights
+	local onRed = stage == "Red"
+	red.key.Enabled = onRed
+	red.roof.Enabled = onRed
+	red.fill.Enabled = onRed
+	red.lamp.Enabled = onRed
+	for _, l in ipairs(red.pits) do
+		l.Enabled = onRed
+	end
+	local hall = set.hall.lights
+	hall.hub.Enabled = not onRed
+	hall.gantry.Enabled = stage == "Cases"
+	hall.rider.Enabled = stage == "Rise"
+	hall.riderFill.Enabled = stage == "Rise"
+end
+
+-- The picture at time t (seconds from the call): camera, stand-ins, discs and lights. Pure in t, so a late join or a
+-- frozen preview shows exactly what everyone else sees at that moment.
+local function evaluate(s, t: number): (CFrame, number, string)
+	local plan, k = s.plan, s.scale
+	local red, hall = set.red, set.hall
+	local up = Vector3.yAxis
+	local dip = plan.dip * k
+	local stage = stageAt(s, t)
+	if t >= dip - 0.3 or stage ~= "Red" then
+		assignSlots(s)
+	end
+	setStageLights(s, stage)
+	if stage == "Red" then
+		local O = red.origin
+		local e = smooth(t / dip)
+		-- the lift: still, then it takes you up the shaft toward the lens
+		local liftA = plan.lift * k
+		local lu = clamp01((t - liftA) / math.max(0.1, dip - liftA))
+		local liftY = 7.2 * lu ^ 2.2
+		red.lift.CFrame = red.liftHome + up * liftY
+		s.me.place(O * CFrame.new(0, red.liftTop + liftY, 0) * CFrame.Angles(0, math.pi, 0))
+		s.me.look(0.85 * smooth((t - plan.look * k) / 1.0), 0)
+		-- the camera: over the shaft's mouth, down through the far half of the hex (its top vertex at the top of the
+		-- frame, its sides at the edges) at you on the disc; a slow push in and a slight drift round the shaft
+		local drift = if s.reduced then 0 else math.rad(lerp(-4, 3, e))
+		local eye = CFrame.Angles(0, drift, 0) * Vector3.new(0, lerp(19.4, 18.2, e), lerp(4.3, 3.7, e))
+		local target = Vector3.new(0, lerp(2.4, 2.8, e) + liftY * 0.6, lerp(-4.2, -3.4, e) + liftY * 0.35)
+		return CFrame.lookAt(O * eye, O * target), lerp(56, 50, e), stage
+	end
+	local slot = hall.slots[s.mySlot]
+	local S = slot.cf
+	if stage == "Cases" then
+		local ca, cb = plan.cases[1] * k, plan.cases[2] * k
+		local e = smooth((t - ca) / (cb - ca))
+		slot.riser.CFrame = slot.riserCF
+		s.me.place(S * CFrame.new(0, slot.riserTop, 0))
+		s.me.look(0.04, 0.65 * smooth((t - ca - 0.5) / 1.0))
+		updateOthers(s, t)
+		-- at face height just outside your glass, looking past you along the row; then it pulls back round the hall
+		local eye = Vector3.new(3.6, 5.4, -4.6):Lerp(CASE_END_EYE, e)
+		local target = Vector3.new(-12, 4.8, -0.5):Lerp(Vector3.new(0, slot.riserTop + 3.4, 0), e)
+		return CFrame.lookAt(S * eye, S * target), lerp(46, CASE_END_FOV, e), stage
+	end
+	-- the rise: your disc climbs the pole while the camera circles you, ending low and looking up at your whole body
+	local riseA, riseB = plan.rise[1] * k, plan.rise[2] * k
+	local u = clamp01((t - riseA) / math.max(0.1, riseB - riseA))
+	local y = plan.riseHeight * riseEase((t - riseA) / math.max(0.1, riseB - riseA))
+	slot.riser.CFrame = slot.riserCF + up * y
+	local feetY = slot.riserTop + y
+	s.me.place(S * CFrame.new(0, feetY, 0))
+	s.me.look(lerp(0.04, 0.3, smooth(u * 2)), lerp(if plan.cases then 0.65 else 0, 0, smooth(u * 3)))
+	updateOthers(s, t)
+	local r0, h0, fov0
+	if plan.start then
+		r0, h0, fov0 = plan.start.r, plan.start.h, plan.start.fov
+	else
+		local flat = Vector2.new(CASE_END_EYE.X, CASE_END_EYE.Z)
+		r0, h0, fov0 = flat.Magnitude, CASE_END_EYE.Y - slot.riserTop, CASE_END_FOV
+	end
+	local phi = math.rad(lerp(plan.phi[1], plan.phi[2], smooth(u)))
+	if s.reduced then
+		phi = math.rad(plan.phi[2]) -- Reduce Motion: a straight push up the pole, no circling
+	end
+	local r = lerp(r0, 8.0, smooth(u / 0.3))
+	r = lerp(r, 7.4, smooth((u - 0.7) / 0.3))
+	local h = lerp(h0, 3.0, smooth(u / 0.35))
+	h = lerp(h, -1.9, smooth((u - 0.6) / 0.4))
+	local eye = Vector3.new(math.sin(phi) * r, feetY + h, -math.cos(phi) * r)
+	local target = Vector3.new(0, feetY + lerp(3.4, 2.9, smooth((u - 0.6) / 0.4)), 0)
+	local keyAt = S * Vector3.new(0, feetY + 9, -2.2)
+	hall.riderAnchor.CFrame = CFrame.lookAt(keyAt, S * Vector3.new(0, feetY + 3, 0))
+	-- your case light goes out behind you once you've left it
+	slot.light.Enabled = u < 0.25
+	return CFrame.lookAt(S * eye, S * target), lerp(fov0, 61, smooth(u)), stage
+end
+
+local function shotTime(s): (number, boolean)
+	if s.preview and IS_STUDIO then
+		local f = localPlayer:GetAttribute("LS_LaunchFreeze")
+		if type(f) == "number" then
+			return f, true
+		end
+	end
+	return now() - s.callAt, false
+end
+
+-- the shot's own sounds (the arena's ambience is muted and the music ducked meanwhile)
+local function updateSound(s, t: number)
+	local plan, k = s.plan, s.scale
+	local dip, riseA, riseB = plan.dip * k, plan.rise[1] * k, plan.rise[2] * k
+	cue(s, "room", t, 0, function()
+		playSound(s, "BorderHum", { volume = 0.45, pitch = 0.62, looped = true, tag = "room" })
+	end)
+	soundLevel(s, "room", 1 - smooth((t - dip + 0.25) / 0.3))
+	cue(s, "lift", t, plan.lift * k, function()
+		playSound(s, "PlateLock", { volume = 1.1, pitch = 0.8 })
+	end)
+	if plan.cases then
+		cue(s, "heart", t, plan.cases[1] * k, function()
+			playSound(s, "Heartbeat", { volume = 1.6, looped = true, tag = "heart" })
+		end)
+		soundLevel(s, "heart", 1 - smooth((t - riseA - 1) / 2))
+	end
+	cue(s, "whir", t, riseA, function()
+		local len = (riseB - riseA) * 0.92
+		playSound(s, "PlateRise", { volume = 0.7, pitch = 0.92, region = { math.max(0, 9.4 - len - 0.6), 9.35 },
+			tag = "whir" })
+	end)
+	cue(s, "tone", t, riseA, function()
+		playSound(s, "RollCallToneSoft", { volume = 0.7, pitch = 0.82, reverb = 4, tag = "tone" })
+	end)
+	cue(s, "swell", t, plan.white * k - 0.5, function()
+		playSound(s, "RollCallTone", { volume = 0.45, pitch = 0.9, reverb = 3, tag = "swell" })
+	end)
+	soundLevel(s, "swell", smooth((t - plan.white * k + 0.5) / 0.9))
+	local audio = Controllers and Controllers.AudioController
+	if audio and type(audio.duck) == "function" and os.clock() >= (s.duckAt or 0) then
+		s.duckAt = os.clock() + 0.4
+		pcall(audio.duck, 0.55, 0.0, 0.7)
+	end
+end
+
+local finish: (reason: string) -> ()
+
+-- your plate is under you (the server has placed you) - the white holds a moment for a late placement
+local function placedOnPlate(): boolean
+	local character = localPlayer.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	return root ~= nil and root:IsA("BasePart") and root.Anchored and set ~= nil and slotOf(root.Position) ~= nil
+end
+
+local function stepShot(dt: number)
+	local s = shot
+	s.lastRender = os.clock()
+	local t, frozen = shotTime(s)
+	local plan, k = s.plan, s.scale
+	local cam = workspace.CurrentCamera
+	-- skip (after the first moment; it only moves your own camera)
+	local sinceStart = os.clock() - s.startedAt
+	if IS_STUDIO and localPlayer:GetAttribute("LS_LaunchSkipTest") == true then
+		-- (Studio tests: a completed hold, for a window that can't take key presses)
+		localPlayer:SetAttribute("LS_LaunchSkipTest", nil)
+		skipHeldSince = os.clock() - SKIP_HOLD - 0.01
+	end
+	if skipHeldSince and sinceStart > 0.8 and not s.preview then
+		local held = os.clock() - (skipHeldSince :: number)
+		if held >= SKIP_HOLD then
+			finish("skip")
+			return
+		end
+	end
+	local holdK = if skipHeldSince then clamp01((os.clock() - (skipHeldSince :: number)) / SKIP_HOLD) else 0
+	-- the hand-off: first person on your plate (the white holds up to 1.5 s for a late placement)
+	local handoffT = plan.handoff * k
+	if not frozen and t >= handoffT then
+		if s.preview then
+			if t >= handoffT + 0.4 then
+				finish("preview")
+				return
+			end
+		elseif placedOnPlate() or t >= handoffT + 1.5 then
+			finish("handoff")
+			return
+		end
+	end
+	if not frozen and s.copyQueue and #s.copyQueue > 0 and not s.assigned then
+		-- copies of the other avatars, two a frame, while the red room plays
+		for _ = 1, 2 do
+			local entry = table.remove(s.copyQueue, 1)
+			if not entry then
+				break
+			end
+			local ok, made = pcall(Figures.copy, entry.player and entry.player.Character)
+			if ok and made then
+				entry.copy = made
+			end
+		end
+	end
+	local camCF, fov, stage = evaluate(s, t)
+	cam.CameraType = Enum.CameraType.Scriptable
+	cam.CFrame = camCF
+	cam.FieldOfView = fov
+	-- light: snap at the cuts (behind black), blend otherwise; the white-out floods the exposure
+	local whiteA = plan.white * k
+	-- the white-out: the light floods first (exposure and bloom), then the white covers the frame
+	local span = math.max(0.1, handoffT - 0.1 - whiteA)
+	local white = smooth((t - whiteA) / span)
+	local cover = smooth((t - whiteA - 0.35 * span) / (0.65 * span))
+	local cut = s.profileStage == nil or (s.profileStage == "Red" and stage ~= "Red") -- behind the black
+	blendLighting(s, stage, if frozen then 0 else dt, frozen or cut, white)
+	s.profileStage = stage
+	-- the screen: fades, the letterbox, the skip prompt
+	local dip = plan.dip * k
+	local black = 0
+	if t - s.joinT < 0.6 then
+		black = 1 - smooth((t - s.joinT - 0.3) / 0.3) -- black a moment while the set settles in, then fade in
+	end
+	if t > dip - 0.1 and t < dip + 0.35 then
+		black = math.max(black, if t < dip then smooth((t - dip + 0.1) / 0.1) else 1 - smooth((t - dip - 0.06) / 0.28))
+	end
+	if cover > 0 then
+		setFade(WHITE, cover)
+	else
+		setFade(BLACK, black)
+	end
+	local riseA = plan.rise[1] * k
+	setLetterbox(if stage == "Rise" then 1 - smooth((t - riseA) / (2.5 * k)) else 1)
+	local touch = Input.isTouch()
+	local showSkip = not s.preview and sinceStart > 1.0 and t < whiteA - 0.2
+	ui.prompt.Visible = showSkip and not touch
+	ui.skip.Visible = showSkip and touch
+	if showSkip then
+		if not touch and ui.promptText.Text ~= s.skipText then
+			ui.promptText.Text = s.skipText
+		end
+		ui.promptFill.Size = UDim2.fromScale(holdK, 1)
+		ui.skipFill.Size = UDim2.fromScale(holdK, 1)
+	end
+	holdGuis(s)
+	if not frozen then
+		updateSound(s, t)
+		local st = s.stats[stage]
+		if not st then
+			st = { n = 0, sum = 0, max = 0 }
+			s.stats[stage] = st
+		end
+		st.n += 1
+		st.sum += dt
+		st.max = math.max(st.max, dt)
+	end
+end
+
+local function render(dt: number)
+	if not shot then
+		return
+	end
+	local ok, err = pcall(stepShot, dt)
+	if not ok then
+		warn("[LaunchIntroController] " .. tostring(err))
+		finish("error")
+	end
+end
+
+local function cameraToPlate()
+	local cam = workspace.CurrentCamera
+	local character = localPlayer.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local head = character and character:FindFirstChild("Head")
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	cam.CameraType = Enum.CameraType.Custom
+	if humanoid then
+		cam.CameraSubject = humanoid
+	end
+	if head and head:IsA("BasePart") and root and root:IsA("BasePart") then
+		local centre = arenaCentre()
+		local flat = Vector3.new(centre.X - root.Position.X, 0, centre.Z - root.Position.Z)
+		local dir = if flat.Magnitude > 0.1 then flat.Unit else root.CFrame.LookVector
+		local pitch = math.rad(-6)
+		local look = dir * math.cos(pitch) + Vector3.new(0, math.sin(pitch), 0)
+		local eye = head.Position + Vector3.new(0, 0.1, 0)
+		cam.CFrame = CFrame.lookAt(eye, eye + look)
+		cam.Focus = CFrame.new(eye + look)
+	end
+	local settings = ClientState.settings
+	cam.FieldOfView = math.clamp(tonumber(settings and settings.fov) or Config.Camera.BaseFov, 40, 110)
+end
+
+finish = function(reason: string)
+	local s = shot
+	if not s then
+		return
+	end
+	shot = nil
+	skipHeldSince = nil
+	if s.preview and IS_STUDIO then
+		localPlayer:SetAttribute("LS_LaunchPreview", nil)
+	end
+	local function try(label: string, fn: () -> ())
+		local ok, err = pcall(fn)
+		if not ok then
+			warn(string.format("[LaunchIntroController] clean-up (%s) failed: %s", label, tostring(err)))
+		end
+	end
+	try("render", function()
+		RunService:UnbindFromRenderStep(RENDER_NAME)
+	end)
+	try("skip", function()
+		Input.unbind(SKIP_ACTION)
+	end)
+	try("sounds", function()
+		for _, e in ipairs(s.sounds) do
+			e.sound:Destroy()
+		end
+	end)
+	try("camera", function()
+		local cam = workspace.CurrentCamera
+		if s.preview then
+			cam.CameraType = s.saved.cameraType
+			if s.saved.subject and s.saved.subject.Parent then
+				cam.CameraSubject = s.saved.subject
+			end
+			cam.CFrame = s.saved.cframe
+			cam.FieldOfView = s.saved.fov
+		else
+			cameraToPlate()
+		end
+	end)
+	try("lighting", function()
+		giveLightingBack(s)
+	end)
+	ClientState.launchShot = false
+	try("gui", function()
+		releaseGuis(s)
+	end)
+	try("set", function()
+		if s.me then
+			s.me.destroy()
+		end
+		for _, entry in ipairs(s.contenders) do
+			if entry.figure then
+				entry.figure.destroy()
+			elseif entry.copy then
+				entry.copy.destroy()
+			end
+		end
+		if set then
+			set.red.lift.CFrame = set.red.liftHome
+			for _, slot in ipairs(set.hall.slots) do
+				slot.riser.CFrame = slot.riserCF
+				slot.light.Enabled = false
+				for _, p in ipairs(slot.units) do
+					p.LocalTransparencyModifier = 0
+				end
+			end
+			s.lightStage = nil
+			setStageLights(s, "None")
+			set.hall.lights.hub.Enabled = false
+			set.model.Parent = nil
+		end
+	end)
+	try("overlay", function()
+		if reason == "handoff" then
+			fadeAway(WHITE, 1, 0.6)
+		elseif reason == "skip" then
+			fadeAway(BLACK, 1, 0.5)
+		else
+			fadeAway(BLACK, 0.85, 0.3)
+		end
+	end)
+	try("stats", function()
+		local out = { cut = s.cut, reason = reason, preview = s.preview, parts = set and set.parts, detail = set and set.detail }
+		for stage, st in pairs(s.stats) do
+			if st.n > 0 then
+				out[stage] = {
+					frames = st.n,
+					fps = math.floor(st.n / math.max(st.sum, 1e-3) * 10 + 0.5) / 10,
+					worstMs = math.floor(st.max * 10000 + 0.5) / 10,
+				}
+			end
+		end
+		lastStats = out
+		if IS_STUDIO then
+			local json = HttpService:JSONEncode(out)
+			localPlayer:SetAttribute("LS_LaunchStats", json)
+			print("[LaunchIntroController] shot ended (" .. reason .. "): " .. json)
+		end
+	end)
+end
+
+local function begin(cut: string, callAt: number, launchAt: number, preview: boolean): boolean
+	local plan = PLANS[cut]
+	if not plan or not set then
+		return false
+	end
+	local length = launchAt - callAt
+	local scale = if length > 1 then length / plan.length else 1
+	local t0 = now() - callAt
+	if not preview and t0 >= plan.handoff * scale - 0.6 then
+		return false -- nearly over: today's rise as usual
+	end
+	local cam = workspace.CurrentCamera
+	local s = {
+		cut = cut, plan = plan, scale = scale, callAt = callAt, launchAt = launchAt, preview = preview,
+		roundId = GameState:GetAttribute("RoundId"), sounds = {}, fired = {}, contenders = {}, guis = {}, stats = {},
+		joinT = math.max(0, t0), startedAt = os.clock(), lastRender = os.clock(), reduced = reducedMotion(),
+		skipText = skipText(),
+		saved = { cameraType = cam.CameraType, subject = cam.CameraSubject, cframe = cam.CFrame, fov = cam.FieldOfView },
+	}
+	shot = s
+	ClientState.launchShot = true
+	local ok, err = pcall(function()
+		-- who else is in the round (their stand-ins are made while the red room plays)
+		if preview then
+			for i, slotOffset in ipairs({ 1, -1, 2, -2, 3, -3, 5, -5, 8 }) do
+				local n = #set.hall.slots
+				table.insert(s.contenders, { seed = i * 7919, fixedSlot = (slotOffset % n) + 1 })
+			end
+		else
+			for _, p in ipairs(Players:GetPlayers()) do
+				if p ~= localPlayer and p:GetAttribute("InArena") == true and p:GetAttribute("Alive") == true then
+					table.insert(s.contenders, { player = p, seed = p.UserId })
+				end
+			end
+		end
+		s.copyQueue = {}
+		for i, entry in ipairs(s.contenders) do
+			if entry.player and i <= standInLimit() then
+				table.insert(s.copyQueue, entry)
+			end
+		end
+		takeLighting(s)
+		holdGuis(s)
+		ui.screen.Enabled = true
+		fadeToken += 1 -- (a fade still running from the last shot stops here)
+		setFade(BLACK, 1)
+		setLetterbox(1)
+		set.model.Parent = workspace
+		s.me = Figures.copy(localPlayer.Character) or Figures.plain(localPlayer.UserId)
+		s.me.place(set.red.origin * CFrame.new(0, set.red.liftTop, 0) * CFrame.Angles(0, math.pi, 0))
+		s.me.model.Parent = set.model
+		pcall(s.me.secure)
+		pcall(s.me.play, IDLE_ID)
+		Input.bind(SKIP_ACTION, function(state: Enum.UserInputState)
+			if state == Enum.UserInputState.Begin then
+				skipHeldSince = os.clock()
+			else
+				skipHeldSince = nil
+			end
+			return Enum.ContextActionResult.Sink
+		end, { keys = { Enum.KeyCode.Space, Enum.KeyCode.ButtonA }, priority = 3000 })
+		cam.CameraType = Enum.CameraType.Scriptable
+		pcall(function()
+			RunService:UnbindFromRenderStep(RENDER_NAME)
+		end)
+		RunService:BindToRenderStep(RENDER_NAME, Enum.RenderPriority.Camera.Value + 20, render)
+	end)
+	if not ok then
+		warn("[LaunchIntroController] the shot couldn't start: " .. tostring(err))
+		finish("error")
+		return false
+	end
+	return true
+end
+
+-- Watching the round ---------------------------------------------------------------------------------------------------
+
+local function watch()
+	local s = shot
+	if s then
+		if s.preview then
+			if IS_STUDIO and localPlayer:GetAttribute("LS_LaunchPreview") == nil then
+				finish("preview")
+			end
+			return
+		end
+		local character = localPlayer.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if GameState:GetAttribute("Phase") ~= "Countdown" or GameState:GetAttribute("RoundId") ~= s.roundId then
+			finish("phase")
+		elseif not (ClientState.inArena and ClientState.alive) or ClientState.spectating ~= nil then
+			finish("left")
+		elseif not humanoid or humanoid.Health <= 0 then
+			finish("died")
+		elseif os.clock() - s.lastRender > 1.5 then
+			finish("stalled")
+		elseif now() > (tonumber(GameState:GetAttribute("PhaseEndsAt")) or math.huge) + 0.5 then
+			finish("timeout")
+		end
+		return
+	end
+	-- Studio previews (stills and timing checks without a round)
+	if IS_STUDIO then
+		local want = localPlayer:GetAttribute("LS_LaunchPreview")
+		if (want == "Full" or want == "Short") and GameState:GetAttribute("Phase") ~= "Countdown" then
+			if not set then
+				ensureSet()
+				return
+			end
+			local plan = PLANS[want]
+			local t = now()
+			if not begin(want, t, t + plan.length, true) then
+				localPlayer:SetAttribute("LS_LaunchPreview", nil)
+			end
+			return
+		end
+	end
+	if GameState:GetAttribute("Phase") ~= "Countdown" then
+		-- with the intro on, the set is built ahead (and rebuilt for a new detail tier between rounds); without it,
+		-- only when a cut arrives anyway (a Studio test)
+		if LaunchCfg.Intro == true and os.clock() - lastTierCheck > 5 then
+			lastTierCheck = os.clock()
+			if not set or set.detail ~= tier() then
+				ensureSet()
+			end
+		end
+		return
+	end
+	local roundId = GameState:GetAttribute("RoundId")
+	if roundId == playedRound then
+		return
+	end
+	if roundId ~= seenRound then
+		seenRound = roundId
+		seenAt = os.clock()
+	end
+	local cut = GameState:GetAttribute("LaunchCut")
+	if cut ~= "Full" and cut ~= "Short" then
+		playedRound = roundId -- no intro this round: today's rise
+		return
+	end
+	if not (ClientState.inArena and ClientState.alive) or ClientState.spectating ~= nil then
+		-- not a contender (a spectator, a late joiner), or the server's attributes are still on their way
+		if os.clock() - seenAt > 1.5 then
+			playedRound = roundId
+		end
+		return
+	end
+	if not set then
+		ensureSet()
+		return
+	end
+	local callAt = tonumber(GameState:GetAttribute("LaunchCallAt"))
+	local launchAt = tonumber(GameState:GetAttribute("LaunchAt"))
+	if not callAt or not launchAt or launchAt <= callAt then
+		playedRound = roundId
+		return
+	end
+	playedRound = roundId
+	begin(cut, callAt, launchAt, false)
+end
+
+-- Public API -------------------------------------------------------------------------------------------------------------
+
+function LaunchIntroController.isPlaying(): boolean
+	return shot ~= nil
+end
+
+function LaunchIntroController.stats(): { [string]: any }?
+	return lastStats
+end
+
+-- Lifecycle --------------------------------------------------------------------------------------------------------------
+
+function LaunchIntroController.Init(registry)
+	Controllers = registry
+end
+
+function LaunchIntroController.Start()
+	buildUi()
+	RunService.Heartbeat:Connect(function()
+		local ok, err = pcall(watch)
+		if not ok then
+			warn("[LaunchIntroController] " .. tostring(err))
+			if shot then
+				pcall(finish, "error")
+			end
+		end
+	end)
+	-- the set is built once, in the background, a few seconds after joining
+	if LaunchCfg.Intro == true then
+		task.delay(3, ensureSet)
+	end
+end
+
+return LaunchIntroController

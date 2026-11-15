@@ -12,7 +12,10 @@
 	        ambienceVolume, guidance, hintsSeen, the sprint / crouch modes, padLook, touchLook; values clamped; rate-limited (bursts are coalesced, so the last change always lands).
 
 	Saving: autosave every 120 s, on leave and in game:BindToClose. Stats are written as deltas through UpdateAsync, so
-	a failed load or a quick server hop never wipes or double-counts them. Every call is pcall-wrapped with retries.
+	a failed load or a quick server hop never wipes or double-counts them. Settings are written only once the profile
+	has loaded, and only the keys this session changed, merged into the stored table: a change made while the profile
+	was still loading keeps every other stored key, and a session whose load failed never writes Settings at all
+	(SettingsController sends only the keys the player changed). Every call is pcall-wrapped with retries.
 	In Studio without API access (or an unpublished place) it logs once and keeps session-only defaults.
 ]]
 local DataStoreService = game:GetService("DataStoreService")
@@ -101,6 +104,7 @@ local function newSession(userId: number)
 		base = { Wins = 0, TotalKills = 0, RoundsPlayed = 0 }, -- last values known to be stored
 		pending = { Wins = 0, TotalKills = 0, RoundsPlayed = 0 }, -- not yet saved
 		settings = {},
+		changed = {}, -- [key] = true: settings this session changed (only these are written, merged into the stored ones)
 		settingsVersion = 0,
 		savedSettingsVersion = 0,
 		loaded = false,
@@ -150,7 +154,7 @@ local function hasChanges(session): boolean
 			return true
 		end
 	end
-	return session.settingsVersion ~= session.savedSettingsVersion
+	return session.loaded and session.settingsVersion ~= session.savedSettingsVersion
 end
 
 local function applySettings(player: Player, session, values: { [string]: number })
@@ -158,6 +162,7 @@ local function applySettings(player: Player, session, values: { [string]: number
 	for key, value in pairs(values) do
 		if session.settings[key] ~= value then
 			session.settings[key] = value
+			session.changed[key] = true
 			changed = true
 		end
 	end
@@ -190,10 +195,10 @@ local function loadPlayer(player: Player)
 					for _, stat in ipairs(STATS) do
 						session.base[stat] = math.max(0, math.floor(tonumber(result[stat]) or 0))
 					end
-					-- stored settings, overridden by anything the player changed while we were loading
+					-- stored settings, overridden only by the keys the player changed while we were loading
 					local merged = sanitizeSettings(result.Settings)
-					for k, v in pairs(session.settings) do
-						merged[k] = v
+					for k in pairs(session.changed) do
+						merged[k] = session.settings[k]
 					end
 					session.settings = merged
 				end
@@ -240,8 +245,12 @@ local function savePlayer(player: Player, session): boolean
 		deltas[stat] = session.pending[stat]
 	end
 	local settingsVersion = session.settingsVersion
-	local settingsDirty = settingsVersion ~= session.savedSettingsVersion
-	local settingsCopy = table.clone(session.settings)
+	-- Settings only once the profile has loaded (a failed load must not overwrite them), and only the changed keys
+	local settingsDirty = session.loaded and settingsVersion ~= session.savedSettingsVersion
+	local changedSettings = {}
+	for k in pairs(session.changed) do
+		changedSettings[k] = session.settings[k]
+	end
 	local key = keyFor(session.userId)
 	local success = false
 	for attempt = 1, SAVE_ATTEMPTS do
@@ -253,7 +262,12 @@ local function savePlayer(player: Player, session): boolean
 					data[stat] = math.max(0, math.floor((tonumber(data[stat]) or 0) + deltas[stat]))
 				end
 				if settingsDirty then
-					data.Settings = settingsCopy
+					-- merged into what is stored: keys this session never changed keep their stored values
+					local stored = if type(data.Settings) == "table" then data.Settings else {}
+					for k, v in pairs(changedSettings) do
+						stored[k] = v
+					end
+					data.Settings = stored
 				elseif type(data.Settings) ~= "table" then
 					data.Settings = {}
 				end

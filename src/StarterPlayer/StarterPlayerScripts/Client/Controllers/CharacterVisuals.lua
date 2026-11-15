@@ -35,17 +35,32 @@
 	  6. Air: the legs tuck toward the apex and reach for the ground before touch-down, the arms come out a little
 	     for balance (wider in a long fall), over Animate's take-off/air clip pose (local: moveState "Air";
 	     remote: the ground probe and vertical speed, swimmers excluded).
+	  7. Melee swings (#90): other players' swings, from the CombatAction remote ("Swing", which the server sends at the
+	     strike with the attacker's swing set as `variant`), as a short procedural swing on the waist, neck, shoulders
+	     and elbows over whatever the Animator plays (the "toolnone" hold with a weapon, the idle with fists): a flat or
+	     falling cut to the left, a backhand to the right, an overhead chop, a spear thrust (straight, high or low), a
+	     left jab or a right cross. The shape follows the first-person set the attacker played (ViewmodelController.Poses:
+	     a set's own `tp` name, else its hand path), so both views agree; with no variant (an older server) the shapes
+	     alternate per attacker. A quick wind-up, a fast cut, a held follow-through that settles, then a slower recovery;
+	     the torso leads the arm, the neck keeps the head on the target and the other arm counters. 0.36 / 0.42 / 0.5 s by
+	     the weapon's weight (fists 0.4), and every swing a little different (size, path, length). A swing that cuts into
+	     another blends from where the body was. Config.Combat.ThirdPersonSwings = false turns it off.
 	IK reach, pelvis drop and the landing dip scale with each rig's leg length (any avatar size).
 	First person (local body only): the eye is placed from the root, not from the animated head, so in the air under a
 	downward view the own body keeps the jump clip's root lift and forward trunk pitch at most at the bind pose (the clip
 	lifts the pelvis ~0.2 studs and pitches the trunk ~8 degrees forward, which brought the chest up into the view and
 	hid the hands), and the air tuck and lean flatten out. A shown body part within NEAR_CULL studs of the camera is
 	hidden until it moves away (never cut open by the near plane). Test hook: the local player's attribute LS_PoseAsRemote = true poses
-	the own body through the remote path (what other players' clients compute).
+	the own body through the remote path (what other players' clients compute) and lets CombatAction swings sent about
+	yourself show on it; LS_SwingSlowMo = n (Studio only) plays the swings that start while it is set n times slower.
 
 	Public API (through the Controllers registry):
 	  CharacterVisuals.headLean(rig, crouchWeight, slideWeight) -> (forward: number, down: number)
 	      how far the head centre moves (root space, studs) under the crouch/slide poses; CameraController uses it.
+	  CharacterVisuals.playSwing(character, itemId?, variant?) -> boolean
+	      a third-person swing (item 7) on that character; any R15 model (a test rig, an NPC) is tracked on first use.
+	  CharacterVisuals._swingOf(character) -> { shape, style, variant, u, duration }?   test hook: the swing it plays.
+	  CharacterVisuals._swingShapes   test hook: the shape table (radians), to try new angles live in a playtest.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -54,6 +69,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Net = require(Shared:WaitForChild("Net"))
 
 local CharacterVisuals = {}
 
@@ -120,6 +136,92 @@ local ROLL_PER_ACCEL = 0.0028
 local ROLL_MAX = math.rad(7)
 local TWIST_MAX = math.rad(50)
 local SPRINT_SPEED = tonumber(MOVE.SprintSpeed) or 21
+-- Melee swings (#90, item 7 above). Each shape has three keyframes, W (wound up), M (the cut) and F (the
+-- follow-through), as joint angles in degrees over the Animator's pose: waist { lean back, turn left, bend left },
+-- right shoulder { raise, swing toward the left, out to the right }, right elbow bend, left shoulder { raise, swing
+-- toward the left, in toward the right }, left elbow bend. `arm`: the striking arm (the path jitter goes there).
+local SWING_N = 11
+local function swingKey(waist: { number }, rs: { number }, re: number, ls: { number }, le: number): { number }
+	local r = math.rad
+	return {
+		r(waist[1]), r(waist[2]), r(waist[3]), r(rs[1]), r(rs[2]), r(rs[3]), r(re), r(ls[1]), r(ls[2]), r(ls[3]), r(le),
+	}
+end
+local SWING_SHAPES: { [string]: { arm: string, W: { number }, M: { number }, F: { number } } } = {
+	Left = { -- a flat cut from the right across to the left at chest height
+		arm = "Right",
+		W = swingKey({ 0, -24, 0 }, { 20, -60, 10 }, 40, { 10, 0, -12 }, 30),
+		M = swingKey({ -2, 2, 0 }, { 2, 0, 0 }, 10, { 0, 0, -6 }, 20),
+		F = swingKey({ -4, 28, 0 }, { -18, 70, -6 }, 18, { -14, 0, -14 }, 35),
+	},
+	DownLeft = { -- falling: from high at the right down across to the low left
+		arm = "Right",
+		W = swingKey({ 6, -22, -4 }, { 55, -50, 15 }, 55, { 12, 0, -12 }, 30),
+		M = swingKey({ -4, 2, 0 }, { 10, 0, 0 }, 12, { 0, 0, -6 }, 20),
+		F = swingKey({ -12, 26, 4 }, { -40, 60, -8 }, 15, { -12, 0, -16 }, 35),
+	},
+	Right = { -- a backhand from the left across to the right, rising a little
+		arm = "Right",
+		W = swingKey({ 0, 26, 0 }, { 0, 75, -10 }, 80, { -8, 0, -8 }, 30),
+		M = swingKey({ -2, 0, 0 }, { 8, 0, 0 }, 25, { 0, 0, -6 }, 20),
+		F = swingKey({ -2, -26, 0 }, { 22, -62, 18 }, 10, { 10, 0, -10 }, 30),
+	},
+	Overhead = { -- straight down from over the head, the body bending into it
+		arm = "Right",
+		W = swingKey({ 12, -8, 0 }, { 80, -8, 8 }, 75, { 20, 0, -14 }, 40),
+		M = swingKey({ -8, 0, 0 }, { 12, 0, 0 }, 15, { 4, 0, -8 }, 25),
+		F = swingKey({ -18, 6, 0 }, { -50, 8, 0 }, 8, { -10, 0, -10 }, 25),
+	},
+	Thrust = { -- the spear drawn back to the hip, level, then driven straight out with the shoulder behind it
+		arm = "Right",
+		W = swingKey({ 4, -22, 0 }, { -60, -8, 10 }, 50, { 20, 0, -10 }, 45),
+		M = swingKey({ -4, 8, 0 }, { 2, 4, 0 }, 0, { 6, 0, -6 }, 30),
+		F = swingKey({ -10, 20, 0 }, { 11, 6, 0 }, -8, { -6, 0, -8 }, 25),
+	},
+	ThrustHigh = {
+		arm = "Right",
+		W = swingKey({ 4, -22, 0 }, { -50, -8, 10 }, 50, { 20, 0, -10 }, 45),
+		M = swingKey({ -2, 8, 0 }, { 14, 4, 0 }, 0, { 6, 0, -6 }, 30),
+		F = swingKey({ -6, 20, 0 }, { 26, 6, 0 }, -8, { -6, 0, -8 }, 25),
+	},
+	ThrustLow = {
+		arm = "Right",
+		W = swingKey({ 2, -22, 0 }, { -64, -8, 10 }, 50, { 20, 0, -10 }, 45),
+		M = swingKey({ -8, 8, 0 }, { -10, 4, 0 }, 0, { 6, 0, -6 }, 30),
+		F = swingKey({ -16, 20, 0 }, { -6, 6, 0 }, -8, { -6, 0, -8 }, 25),
+	},
+	Jab = { -- fists: up into a guard, the left fist driven straight out, the body turning behind it
+		arm = "Left",
+		W = swingKey({ 0, -8, 0 }, { 45, 0, 4 }, 110, { 60, -6, -4 }, 115),
+		M = swingKey({ -3, -16, 0 }, { 45, 0, 4 }, 112, { 88, -10, 0 }, 15),
+		F = swingKey({ -4, -18, 0 }, { 42, 0, 4 }, 108, { 92, -12, 0 }, 4),
+	},
+	Cross = { -- the right fist across from the guard, the body turning behind it
+		arm = "Right",
+		W = swingKey({ 0, 10, 0 }, { 60, 6, 4 }, 115, { 45, 0, -4 }, 110),
+		M = swingKey({ -4, 20, 0 }, { 88, 12, 0 }, 15, { 45, 0, -4 }, 112),
+		F = swingKey({ -5, 24, 0 }, { 92, 14, 0 }, 4, { 42, 0, -4 }, 108),
+	},
+}
+-- Chops and smashes bend the body further into the blow (the waist's lean x torso); a smash also winds up higher (the
+-- right shoulder `raise` degrees more at W).
+local SWING_STYLE: { [string]: { torso: number, raise: number? } } = {
+	Chop = { torso = 1.3 },
+	Smash = { torso = 1.4, raise = 10 },
+}
+local SWING_TIME = { Light = 0.36, Medium = 0.42, Heavy = 0.5 } -- seconds, by the weapon's weight
+local SWING_TIME_STYLE = { Punch = 0.4 } -- (fists come up into a guard first)
+local SWING_WINDUP = { Light = 0.22, Medium = 0.24, Heavy = 0.28 } -- share of the swing spent winding up, then
+local SWING_CUT = 0.1 -- to the cut (M), accelerating,
+local SWING_FOLLOW = 0.12 -- on into the follow-through (F), slowing,
+local SWING_HOLD = 0.1 -- held there while it settles SWING_SETTLE of the way back; the rest is the recovery
+local SWING_SETTLE = 0.12
+local SWING_SIZE = { Light = 0.85, Medium = 1, Heavy = 1.1 } -- how big the motion is, by weight
+local SWING_SIZE_JITTER = 0.08 -- every swing a little different: its size (+-8 %),
+local SWING_ANGLE_JITTER = 4 -- the striking arm's path (+-4 degrees up or down and sideways)
+local SWING_TIME_JITTER = 0.05 -- and its length (+-5 %)
+local SWING_LEAD = 0.04 -- the torso leads the arm by this share of the swing
+local SWING_FADE = 0.07 -- seconds: a swing that cuts into another blends from where the body was
 
 local BODY_PARTS = {
 	UpperTorso = true, LowerTorso = true, LeftUpperLeg = true, LeftLowerLeg = true, LeftFoot = true,
@@ -445,6 +547,291 @@ local function ensureRig(entry): boolean
 	return rig.r15 and rig.joints.Root ~= nil
 end
 
+-- Melee swings (#90) ---------------------------------------------------------------------------------------------------
+
+-- The viewmodel's pose module (ViewmodelController.Poses: pure data, the first-person swing sets), loaded on first use.
+local posesModule: any = nil
+local function swingPoses(): any
+	if posesModule == nil then
+		posesModule = false
+		local folder = script.Parent:FindFirstChild("ViewmodelController")
+		local module = folder and folder:FindFirstChild("Poses")
+		if module and module:IsA("ModuleScript") then
+			local ok, result = pcall(require, module)
+			if ok and type(result) == "table" then
+				posesModule = result
+			end
+		end
+	end
+	return if posesModule then posesModule else nil
+end
+
+-- The shape that matches one first-person swing set: the set's own `tp` name when it has one, else its hand path in
+-- camera space (+X right, +Y up), taken at the fist (a wrist frame's origin sits behind the hand: Poses.avatarHand).
+-- W to F mostly downward: Overhead. Otherwise the cut (W to M) from right to left: Left, or DownLeft when it falls more
+-- than ~10 degrees; from left to right: Right. A Stab set: a thrust, high or low by where F ends.
+local function fist(frame: CFrame): Vector3
+	return frame.Position + frame.LookVector * 0.2
+end
+local function shapeForSet(style: string, set: any): string?
+	if type(set) ~= "table" then
+		return nil
+	end
+	if type(set.tp) == "string" and SWING_SHAPES[set.tp] then
+		return set.tp
+	end
+	local W, M, F = set.W, set.M, set.F
+	if typeof(W) ~= "CFrame" or typeof(F) ~= "CFrame" then
+		return nil
+	end
+	local whole = fist(F) - fist(W)
+	if style == "Stab" then
+		return if whole.Y > 0.12 then "ThrustHigh" elseif whole.Y < -0.12 then "ThrustLow" else "Thrust"
+	end
+	if math.abs(whole.X) < 0.6 * math.abs(whole.Y) then
+		return if whole.Y < 0 then "Overhead" else "Right"
+	end
+	local cut = (if typeof(M) == "CFrame" then fist(M) else fist(F)) - fist(W)
+	if cut.X < 0 then
+		return if cut.Y < -0.18 * math.abs(cut.X) then "DownLeft" else "Left"
+	end
+	return "Right"
+end
+
+-- Shapes by swing set when the first-person sets can't say (also used per attacker when the server sends no set).
+local DEFAULT_SHAPES: { [string]: { string } } = {
+	Slash = { "DownLeft", "Right", "Left" },
+	Chop = { "Overhead", "DownLeft", "Left" },
+	Smash = { "Overhead", "DownLeft" },
+	Stab = { "Thrust", "ThrustHigh", "ThrustLow" },
+	Punch = { "Jab", "Cross" },
+}
+
+local function shapeFor(style: string, variant: number): string
+	local poses = swingPoses()
+	if style == "Punch" then
+		-- (as in first person: odd swings jab with the left, even swings cross with the right, unless a set names its shape)
+		local punch = poses and poses.PUNCH
+		local set = if type(punch) == "table" and #punch > 0 then punch[(variant - 1) % #punch + 1] else nil
+		if type(set) == "table" and type(set.tp) == "string" and SWING_SHAPES[set.tp] then
+			return set.tp
+		end
+		return if variant % 2 == 1 then "Jab" else "Cross"
+	end
+	if poses then
+		local swing = if type(poses.SWING) == "table" then poses.SWING else {}
+		local sets = swing[style]
+		if not (type(sets) == "table" and #sets > 0) then
+			if style == "Stab" then
+				local stab = poses.STAB
+				sets = if type(stab) == "table" and #stab > 0 then stab else { stab }
+			else
+				sets = swing.Slash -- (Poses.swing falls back on the Slash sets)
+			end
+		end
+		if type(sets) == "table" and #sets > 0 then
+			local found = shapeForSet(style, sets[(variant - 1) % #sets + 1])
+			if found then
+				return found
+			end
+		end
+	end
+	local list = DEFAULT_SHAPES[style] or DEFAULT_SHAPES.Slash
+	return list[(variant - 1) % #list + 1]
+end
+
+-- (style, weight) of a melee weapon, from CombatController (the table the first-person swings use).
+local function meleeStyle(itemId: string?): (string, string)
+	local combat = Controllers and Controllers.CombatController
+	if combat and type(combat.meleeStyle) == "function" then
+		local ok, style, weight = pcall(combat.meleeStyle, itemId)
+		if ok and type(style) == "string" then
+			return style, if type(weight) == "string" then weight else "Medium"
+		end
+	end
+	return "Slash", "Medium"
+end
+
+-- A swing set from the wire: an integer 1-8, else nil.
+local function validVariant(value: any): number?
+	if type(value) == "number" and value == value and value % 1 == 0 and value >= 1 and value <= 8 then
+		return value
+	end
+	return nil
+end
+
+local swingRng = Random.new()
+
+-- Starts a third-person swing on a character (item 7 in the header): itemId gives the style and weight, variant (1-8)
+-- the attacker's swing set.
+function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: number?): boolean
+	if typeof(character) ~= "Instance" or not character:IsA("Model") or not character:IsDescendantOf(workspace) then
+		return false
+	end
+	local entry = entries[character]
+	if not entry then
+		if Players:GetPlayerFromCharacter(character) then
+			return false -- (a player's character is tracked from CharacterAdded)
+		end
+		track(character, false) -- not a player's: a test rig, an NPC
+		entry = entries[character]
+		if not entry then
+			return false
+		end
+	end
+	local style, weight = meleeStyle(itemId)
+	local v = validVariant(variant)
+	if not v then
+		entry.swingCount = (entry.swingCount or 0) % 8 + 1 -- (no set from the server: alternate per attacker)
+		v = entry.swingCount
+	end
+	local name = shapeFor(style, v)
+	local shape = SWING_SHAPES[name] or SWING_SHAPES.Left
+	local tweak = SWING_STYLE[style]
+	local size = (SWING_SIZE[weight] or 1) * (1 + (swingRng:NextNumber() * 2 - 1) * SWING_SIZE_JITTER)
+	local pitch = math.rad(SWING_ANGLE_JITTER) * (swingRng:NextNumber() * 2 - 1)
+	local yaw = math.rad(SWING_ANGLE_JITTER) * (swingRng:NextNumber() * 2 - 1)
+	local leftArm = shape.arm == "Left"
+	local pitchAt, yawAt = if leftArm then 8 else 4, if leftArm then 9 else 5
+	local function key(source: { number }, jitter: number): { number }
+		local out = table.create(SWING_N, 0)
+		for i = 1, SWING_N do
+			out[i] = source[i] * size
+		end
+		out[1] *= if tweak then tweak.torso else 1
+		out[pitchAt] += pitch * jitter
+		out[yawAt] += yaw * jitter
+		return out
+	end
+	local W, M, F = key(shape.W, 1), key(shape.M, 0.5), key(shape.F, 1)
+	if tweak and tweak.raise then
+		W[4] += math.rad(tweak.raise)
+	end
+	local settle = table.create(SWING_N, 0)
+	for i = 1, SWING_N do
+		settle[i] = F[i] * (1 - SWING_SETTLE)
+	end
+	local duration = math.clamp((SWING_TIME_STYLE[style] or SWING_TIME[weight] or 0.42)
+		* (1 + (swingRng:NextNumber() * 2 - 1) * SWING_TIME_JITTER), 0.35, 0.5)
+	if Config.IsStudio then
+		local slow = tonumber(player:GetAttribute("LS_SwingSlowMo"))
+		if slow and slow > 1 then
+			duration *= math.min(slow, 60) -- (test hook, for captures)
+		end
+	end
+	local now = os.clock()
+	local from = nil
+	if entry.swing and entry.swingOut and now - (entry.swingOutAt or -math.huge) < 0.1 then
+		from = table.clone(entry.swingOut) -- (cutting into a swing: blend from where the body is)
+	end
+	local uW = SWING_WINDUP[weight] or 0.24
+	entry.swing = {
+		name = name,
+		style = style,
+		variant = v,
+		W = W,
+		M = M,
+		F = F,
+		settle = settle,
+		from = from,
+		t0 = now,
+		duration = duration,
+		uW = uW,
+		uM = uW + SWING_CUT,
+		uF = uW + SWING_CUT + SWING_FOLLOW,
+		uH = uW + SWING_CUT + SWING_FOLLOW + SWING_HOLD,
+	}
+	return true
+end
+
+-- Test hook: the swing a character is playing, or nil.
+function CharacterVisuals._swingOf(character: Model): { [string]: any }?
+	local entry = entries[character]
+	local swing = entry and entry.swing
+	if not swing then
+		return nil
+	end
+	return { shape = swing.name, style = swing.style, variant = swing.variant, duration = swing.duration,
+		u = (os.clock() - swing.t0) / swing.duration }
+end
+CharacterVisuals._swingShapes = SWING_SHAPES -- (test hook: the shapes, radians, for tuning in a playtest)
+
+local function onCombatAction(payload: any)
+	if type(payload) ~= "table" or payload.action ~= "Swing" or Config.Combat.ThirdPersonSwings == false then
+		return
+	end
+	local userId = tonumber(payload.userId)
+	local attacker = if userId then Players:GetPlayerByUserId(userId) else nil
+	-- (your own swings are first person; with the test hook LS_PoseAsRemote your body shows them too)
+	if not attacker or (attacker == player and not poseAsRemote) then
+		return
+	end
+	local character = attacker.Character
+	if character then
+		CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant)
+	end
+end
+
+-- The swing's timeline (shares of its length): wind up to W, accelerate to the cut (M), slow into the follow-through
+-- (F), hold it while it settles back a little, recover.
+local swingArm = table.create(SWING_N, 0)
+local swingBody = table.create(SWING_N, 0)
+local function sampleSwing(swing: any, u: number, out: { number })
+	local a: { number }?, b: { number }?, k: number
+	if u < swing.uW then
+		a, b, k = nil, swing.W, smooth01(u / swing.uW)
+	elseif u < swing.uM then
+		local x = (u - swing.uW) / (swing.uM - swing.uW)
+		a, b, k = swing.W, swing.M, x * x
+	elseif u < swing.uF then
+		local x = (u - swing.uM) / (swing.uF - swing.uM)
+		a, b, k = swing.M, swing.F, 1 - (1 - x) * (1 - x)
+	elseif u < swing.uH then
+		a, b, k = swing.F, swing.settle, smooth01((u - swing.uF) / (swing.uH - swing.uF))
+	else
+		a, b, k = swing.settle, nil, smooth01((u - swing.uH) / (1 - swing.uH))
+	end
+	for i = 1, SWING_N do
+		local from = if a then a[i] else 0
+		local to = if b then b[i] else 0
+		out[i] = from + (to - from) * k
+	end
+end
+
+-- This frame's swing angles for an entry (nil without one; a finished swing is dropped here). The torso runs
+-- SWING_LEAD ahead of the arms; a swing that cut into another starts from the angles it took over.
+local function swingPose(entry, now: number): { number }?
+	local swing = entry.swing
+	if not swing then
+		return nil
+	end
+	local u = (now - swing.t0) / swing.duration
+	if u >= 1 then
+		entry.swing = nil
+		return nil
+	end
+	u = math.max(u, 0)
+	sampleSwing(swing, u, swingArm)
+	sampleSwing(swing, math.min(u + SWING_LEAD, 0.999), swingBody)
+	swingArm[1], swingArm[2], swingArm[3] = swingBody[1], swingBody[2], swingBody[3]
+	local from = swing.from
+	local since = now - swing.t0
+	if from and since < SWING_FADE then
+		local k = smooth01(since / SWING_FADE)
+		for i = 1, SWING_N do
+			swingArm[i] = from[i] + (swingArm[i] - from[i]) * k
+		end
+	end
+	local out = entry.swingOut
+	if not out then
+		out = table.create(SWING_N, 0)
+		entry.swingOut = out
+	end
+	table.move(swingArm, 1, SWING_N, 1, out)
+	entry.swingOutAt = now
+	return out
+end
+
 -- Pose application ------------------------------------------------------------------------------------------------------
 
 -- This frame's animated Transform. If the Animator didn't write this joint this frame (throttled or not
@@ -696,8 +1083,11 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	entry.leanZ += (leanZTarget - entry.leanZ) * expAlpha(7, dt)
 	local leanX, leanZ = entry.leanX, entry.leanZ
 
+	-- Melee swing (#90): this frame's joint angles, or nil (a finished swing is dropped here)
+	local swingAngles = swingPose(entry, os.clock())
+
 	local trivial = c < 0.002 and s < 0.002 and k < 0.002 and math.abs(twist) < 0.004 and math.abs(leanX) < 0.002
-		and math.abs(leanZ) < 0.002 and land < 0.002 and w < 0.002 and entry.air < 0.002
+		and math.abs(leanZ) < 0.002 and land < 0.002 and w < 0.002 and entry.air < 0.002 and swingAngles == nil
 	if trivial then
 		if entry.posed then
 			clearPose(entry)
@@ -783,6 +1173,16 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	P.RightShoulder = CFrame.Angles(shoulderRX, 0, shoulderRZ)
 	P.LeftElbow = CFrame.Angles(elbowL + airElbow, 0, 0)
 	P.RightElbow = CFrame.Angles(elbowR + airElbow, 0, 0)
+	if swingAngles then
+		-- the swing over the stance pose: the torso turns into it, the neck keeps the head on the target
+		local a = swingAngles
+		P.Waist = CFrame.Angles(0, a[2], 0) * CFrame.Angles(a[1], 0, a[3]) * P.Waist
+		P.Neck = CFrame.Angles(0, -0.75 * a[2], 0) * CFrame.Angles(-0.6 * a[1], 0, -0.5 * a[3]) * P.Neck
+		P.RightShoulder = CFrame.Angles(0, a[5], 0) * CFrame.Angles(a[4], 0, a[6]) * P.RightShoulder
+		P.RightElbow = CFrame.Angles(a[7], 0, 0) * P.RightElbow
+		P.LeftShoulder = CFrame.Angles(0, a[9], 0) * CFrame.Angles(a[8], 0, a[10]) * P.LeftShoulder
+		P.LeftElbow = CFrame.Angles(a[11], 0, 0) * P.LeftElbow
+	end
 
 	-- First person, looking down in the air: the jump clip doesn't lift the pelvis or pitch the trunk toward the eye
 	-- (see the header; on the ground the clips are left as they are)
@@ -1037,6 +1437,19 @@ function CharacterVisuals.Start()
 	end)
 	for _, p in ipairs(Players:GetPlayers()) do
 		watchPlayer(p)
+	end
+	-- other players' melee swings (#90)
+	local okRemote, remote = pcall(Net.event, "CombatAction")
+	if okRemote and remote then
+		remote.OnClientEvent:Connect(function(payload)
+			local ok, err = pcall(onCombatAction, payload)
+			if not ok and os.clock() - errorAt > 5 then
+				errorAt = os.clock()
+				warn("[CharacterVisuals] swing error: " .. tostring(err))
+			end
+		end)
+	else
+		warn("[CharacterVisuals] no CombatAction remote: other players' swings won't show")
 	end
 end
 

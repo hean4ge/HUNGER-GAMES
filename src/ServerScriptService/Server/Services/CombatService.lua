@@ -2,8 +2,10 @@
 	CombatService - server-authoritative melee and ranged combat, plus the training dummies of practice rounds.
 
 	Client -> server
-	  MeleeSwing(lookDirection: Vector3, predictedHit: boolean) sent at the strike moment of a swing; predictedHit = the
-	    attacker's own trace touched someone (CombatController): a swing their screen showed as a miss never lands
+	  MeleeSwing(lookDirection: Vector3, predictedHit: boolean, variant: number?) sent at the strike moment of a swing;
+	    predictedHit = the attacker's own trace touched someone (CombatController): a swing their screen showed as a miss
+	    never lands. variant (optional) = the swing's set, an integer 1-8: passed on to the other clients so they show the
+	    same swing (CharacterVisuals); any other value is ignored and the swing goes ahead without it
 	  RangedRelease(shotId, origin, direction, charge, mode)
 	    "Fire"   bow shot: consumes 1 arrow; speed and damage scale with charge (capped by the measured draw time)
 	    "Throw"  throwing knife (consumes 1) or spear (removes the equipped spear)
@@ -12,7 +14,8 @@
 	Server -> client
 	  HitConfirm { damage, headshot, killed, position? (hit point), target = "Player" | "Dummy", weaponId?, melee }
 	    to the attacker
-	  CombatAction { userId, action = "Swing" | "Draw" | "Release" | "Throw", itemId, cancelled? }   to everyone else
+	  CombatAction { userId, action = "Swing" | "Draw" | "Release" | "Throw", itemId, cancelled?, variant? }   to everyone
+	    else (variant: a Swing's set, 1-8, when the attacker sent a valid one)
 	  Sfx: swing, release and impact sounds for everyone except the attacker (who plays them locally, instantly)
 
 	API
@@ -26,9 +29,14 @@
 
 	Training dummies: practice rounds only (GameState.Practice), during Active; in Studio, and on live servers while
 	Config.Round.SoloPractice is on (PlayabilityPlan QW1).
-	Config.Combat.PracticeDummies dummies appear in front of the contender, between the plinths and the Spire, tagged
-	TrainingDummy. They wobble when hit, heal after DummyRegenDelay, and respawn DummyRespawnTime after breaking.
+	Config.Combat.PracticeDummies dummies appear in front of the contender, between the plinths and the Spire, to either
+	side of the straight line from the plate to the Spire (that path stays clear), tagged TrainingDummy. They wobble when
+	hit, heal after DummyRegenDelay, and respawn DummyRespawnTime after breaking. Their name and health bar keep one size
+	on screen (DUMMY_BAR_SIZE) and hide while the contender stands within DUMMY_BAR_HIDE studs, where they would sit on
+	the HUD's compass.
 	Template: ServerStorage.Dev.TrainingDummy (built by ServerStorage.WorldGen.DummyBuilder).
+	Melee cooldown: the next swing may come once the cooldown of the weapon now in hand has passed since the last swing
+	(trySwing), so a knife after a mace isn't refused while the attacker's screen shows it hit.
 ]]
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -49,6 +57,9 @@ local GameState = ReplicatedStorage:WaitForChild("GameState")
 local CombatConfig = Config.Combat
 
 local DUMMY_TAG = "TrainingDummy"
+local DUMMY_BAR_SIZE = Vector2.new(132, 26) -- pixels: a dummy's name and health bar, the same size at any distance
+local DUMMY_BAR_HIDE = 8 -- studs (flat): closer than this the contender doesn't see it (shown again half a stud out):
+-- above the head of a dummy that near, it sat in the compass band at the top of the view
 local FISTS = ItemDefs.get("fists")
 local MELEE_FACING_DOT = -0.2 -- flat swing direction vs. character facing; lenient because the server's view lags
 -- Melee reach. The attacker's screen shows a hit when CombatController's sphere (MeleeHitRadius * MELEE_PREDICT_RADIUS)
@@ -74,7 +85,7 @@ local HitConfirm: RemoteEvent
 local CombatAction: RemoteEvent
 
 type PlayerState = {
-	nextSwing: number,
+	lastSwing: number, -- when the last melee swing counted (trySwing)
 	nextShot: number,
 	nextThrow: number,
 	lastShot: number,
@@ -108,7 +119,7 @@ end
 local function stateFor(player: Player): PlayerState
 	local st = playerState[player]
 	if not st then
-		st = { nextSwing = 0, nextShot = 0, nextThrow = 0, lastShot = 0, drawStart = nil, drawItem = nil }
+		st = { lastSwing = -math.huge, nextShot = 0, nextThrow = 0, lastShot = 0, drawStart = nil, drawItem = nil }
 		playerState[player] = st
 	end
 	return st
@@ -122,6 +133,19 @@ local function tryCooldown(st: any, key: string, cooldown: number, now: number):
 		return false
 	end
 	st[key] = math.max(now, ready) + cooldown
+	return true
+end
+
+-- Melee: the next swing may come once the cooldown of the weapon now in hand has passed since the last swing, whatever
+-- swung it. One window shared across weapons let a mace's 1.1 s refuse the first knife or fist swing after a switch
+-- while the attacker's screen showed it hit (the "ghost hit"). Like tryCooldown, an early swing doesn't pull the next
+-- one earlier, and a slow weapon after a quick one still waits its own full cooldown.
+local function trySwing(st: PlayerState, cooldown: number, now: number): boolean
+	local ready = st.lastSwing + cooldown
+	if now < ready - (CombatConfig.CooldownJitter or 0.12) then
+		return false
+	end
+	st.lastSwing = math.max(now, ready)
 	return true
 end
 
@@ -203,13 +227,22 @@ local function facingOk(root: BasePart, direction: Vector3, minDot: number): boo
 	return flat.Unit:Dot(flatLook.Unit) >= minDot
 end
 
-local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?)
+local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?, variant: number?)
 	local payload = { userId = player.UserId, action = action, itemId = itemId or "fists", cancelled = cancelled == true }
+	payload.variant = variant -- (a Swing's set, when the attacker sent a valid one)
 	for _, other in ipairs(Players:GetPlayers()) do
 		if other ~= player then
 			CombatAction:FireClient(other, payload)
 		end
 	end
+end
+
+-- A swing's set from MeleeSwing: an integer 1-8, else nil (ignored; the swing itself goes ahead).
+local function swingVariant(value: any): number?
+	if type(value) == "number" and value == value and value % 1 == 0 and value >= 1 and value <= 8 then
+		return value
+	end
+	return nil
 end
 
 local SOUND_BY_MATERIAL: { [string]: string } = {
@@ -337,6 +370,7 @@ type DummyData = {
 	push: Vector3,
 	motor: Motor6D?,
 	baseC0: CFrame?,
+	bar: BillboardGui?,
 }
 
 local dummyFolder: Folder? = nil
@@ -394,7 +428,8 @@ local function practiceContenderRoot(): BasePart?
 	return nil
 end
 
--- Dummies stand in a shallow arc a dozen studs in front of the practice contender, toward the Spire.
+-- Dummies stand in a shallow arc a dozen studs in front of the practice contender, toward the Spire, to either side of
+-- the straight line from the plate to the Spire (the middle one used to stand on it, in the way of the first sprint).
 local function dummyLayout(): { CFrame }
 	local center = Vector3.new(ArenaLayout.Center.X, ArenaLayout.BaseHeight, ArenaLayout.Center.Z)
 	local root = practiceContenderRoot()
@@ -420,7 +455,10 @@ local function dummyLayout(): { CFrame }
 	local spots = {}
 	local count = math.max(0, math.floor(CombatConfig.PracticeDummies or 3))
 	for i = 1, count do
-		local lateral = (i - (count + 1) / 2) * 7
+		-- alternate sides: the first pair 6 studs either side of the line (a clear lane about 7 studs wide between their
+		-- stands), then 7 studs further out each
+		local side = if i % 2 == 1 then 1 else -1
+		local lateral = side * (6 + 7 * math.floor((i - 1) / 2))
 		local ahead = 13 + math.abs(lateral) * 0.3
 		local spot = anchor + toCenter * ahead + right * lateral
 		local ground = workspace:Raycast(Vector3.new(spot.X, anchor.Y + 40, spot.Z), Vector3.new(0, -120, 0), params)
@@ -550,6 +588,15 @@ spawnDummy = function(slot: DummySlot)
 	local bar = head and head:FindFirstChild("HealthBar")
 	local track = bar and bar:FindFirstChild("Track")
 	local fill = track and track:FindFirstChild("Fill")
+	-- one size on screen at any distance (sized in studs, it filled the top of the view up close, over the compass);
+	-- updateDummies hides it while the contender is right in front of the dummy
+	if bar and bar:IsA("BillboardGui") then
+		bar.Size = UDim2.fromOffset(DUMMY_BAR_SIZE.X, DUMMY_BAR_SIZE.Y)
+		local data = dummyData[model]
+		if data then
+			data.bar = bar
+		end
+	end
 	humanoid.HealthChanged:Connect(function(health: number)
 		if fill and fill:IsA("GuiObject") then
 			local alpha = math.clamp(health / math.max(humanoid.MaxHealth, 1), 0, 1)
@@ -593,7 +640,17 @@ local function updateDummies(dt: number)
 		return
 	end
 	local now = os.clock()
+	local viewer = practiceContenderRoot()
 	for model, data in pairs(dummyData) do
+		local bar = data.bar
+		local body = model.PrimaryPart or model:FindFirstChild("HumanoidRootPart")
+		if bar and body and body:IsA("BasePart") then
+			local d = if viewer then Util.flat(body.Position - viewer.Position).Magnitude else math.huge
+			local hide = d < (if bar.Enabled then DUMMY_BAR_HIDE else DUMMY_BAR_HIDE + 0.5)
+			if bar.Enabled == hide then
+				bar.Enabled = not hide
+			end
+		end
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
 		if humanoid and humanoid.Health > 0 then
 			if now - data.lastHit > (CombatConfig.DummyRegenDelay or 4) and humanoid.Health < humanoid.MaxHealth then
@@ -815,7 +872,7 @@ end
 -- Remotes
 --------------------------------------------------------------------------------------------------------------------
 
-local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any)
+local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any, variant: any)
 	if not Net.rateLimit(player, "MeleeSwing", 5, 3) then
 		return
 	end
@@ -835,14 +892,14 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	if not def or not facingOk(ctx.root, direction, MELEE_FACING_DOT) then
 		return
 	end
-	if not tryCooldown(stateFor(player), "nextSwing", def.cooldown or 0.5, os.clock()) then
+	if not trySwing(stateFor(player), def.cooldown or 0.5, os.clock()) then
 		return
 	end
 
 	local origin = ctx.head.Position
 	local heavy = (def.cooldown or 0) >= HEAVY_SWING_COOLDOWN
 	Sfx.play(if heavy then "Swing_Heavy" else "Swing_Light", { position = origin, exclude = player })
-	broadcastAction(player, "Swing", def.id)
+	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant))
 
 	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
 	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE, plus lag, past the front of the attacker's own
@@ -1018,8 +1075,9 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 	broadcastAction(player, "Throw", itemId)
 end
 
--- Test hook (Edit-mode checks): the server's melee trace.
+-- Test hooks (Edit-mode checks): the server's melee trace, and the check on MeleeSwing's variant.
 CombatService._trace = meleeTrace
+CombatService._swingVariant = swingVariant
 
 --------------------------------------------------------------------------------------------------------------------
 -- Lifecycle

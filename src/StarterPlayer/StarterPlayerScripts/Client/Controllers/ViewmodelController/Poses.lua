@@ -7,7 +7,11 @@
 	  Poses.hold(kind, aim, itemId?) -> (right, left)   kind: Fists | Blade | Spear | SpearRaised | Bow | Throwable | Item |
 	                                                Armor (for the Bow, aim is how far the bow is raised: 0 low ready, 1
 	                                                drawn); Poses.HOLD_ITEM[itemId] replaces a hand for that item
-	  Poses.swing(style, variant, t, windup, strike, total, restRight, restLeft) -> (right, left)
+	  Poses.swing(style, variant, t, windup, strike, total, restRight, restLeft, jitter?) -> (right, left)   jitter:
+	                                         CombatController.swingJitter(seed) (a little different every swing)
+	  Poses.swingCount(style) -> number   Poses.swingSide(style, variant) -> "Left" | "Right"
+	  Poses.swingKick(style, variant) -> Vector3?   the set's camera-kick direction (CombatController)
+	  Poses.swingPole(style, variant) -> Vector3?   the striking elbow's pole during the swing
 	  Poses.spearLeft(rightGrip, reach, gripPointLeft, near?) -> CFrame   the supporting hand on a spear shaft
 	  Poses.throw(spear, t, windup, total, restRight) -> CFrame
 	  Poses.applyUse(style, t, u, right, left, rig, duration) -> (right, left)   style: Eat | Drink | Bandage | Wrap |
@@ -22,7 +26,19 @@
 	  Poses.bowRaise(draw) / Poses.bowPull(draw) / Poses.bowDip(draw) -> number   how far the bow is raised, the
 	                                         string pulled, and the bow pushed out and down (x Poses.BOW_DIP), 0..1
 	  Poses.bowTuck(right, left, tuck) -> (right, left)      the bow pulled in against a wall (tuck 0..1)
-	  Poses.useStyle(style)   "Avatar" | "Classic": the arm style's values for the holds and uses (Poses.AVATAR)
+	  Poses.useStyle(style)   "Faceted" | "Avatar" | "Classic": the arm style's values for the holds and uses
+	                                         (Poses.FACETED, Poses.AVATAR; Poses.STYLES)
+	  Poses.facetedHand(wrist, fingers, palm, left?) -> CFrame   (Faceted) a hand frame from its wrist, the way the fingers
+	                                         point and the way the palm faces
+	  Poses.guardBlend(relaxed, guard, g, dip?) -> CFrame   (Faceted) the empty hand between the relaxed idle (g = 0)
+	                                         and the raised guard (g = 1), dipped below the view by dip x Poses.GUARD_DIP
+	                                         (on the way down, so the fist can turn back into the relaxed hand out of sight)
+	  Melee swings (#90): Poses.SWING[style] is a list of swing sets (see "Swing sets" below: W, M, F and optional U, A,
+	  B, R waypoints, side, pole, kick, tp); Poses.swing picks ((variant - 1) % #list) + 1, so a style takes any number of
+	  sets (append to the list; CombatController reads the count, Poses.swingCount). Punches: Poses.PUNCH and thrusts:
+	  Poses.STAB are lists of sets too for the Faceted arms (jab, cross, hook; straight, high, low); the Classic and
+	  Avatar arms keep PUNCH.left / right (odd variants jab with the left) and a single STAB { W, M, F }. Each arm style
+	  has its own tables (Poses.FACETED.SWING ...).
 ]]
 local Poses = {}
 
@@ -119,6 +135,24 @@ Poses.HOLD = {
 		left = H(V(-0.82, -1.55, -1.3), V(0.15, 1, -0.3), V(0.1, -0.2, -1)),
 	},
 }
+Poses.HOLD.Relaxed = Poses.HOLD.Fists -- (empty hands at rest; only the Faceted arms have their own, Poses.FACETED)
+
+-- (Faceted) a hand frame from its wrist, the direction its fingers point (the hand's length, -Z) and the direction its
+-- palm faces; the right hand unless `left`.
+function Poses.facetedHand(wrist: Vector3, fingers: Vector3, palm: Vector3, left: boolean?): CFrame
+	local f = fingers.Unit
+	local p = palm - f * palm:Dot(f)
+	p = if p.Magnitude > 1e-3 then p.Unit else V(0, -1, 0)
+	return H(wrist, if left then p:Cross(f) else f:Cross(p), f)
+end
+
+-- (Faceted) empty hands between the relaxed idle (g = 0) and the raised guard (g = 1), dipped by `dip` x
+-- Poses.GUARD_DIP: on the way down the controller dips the hands out of view around g = 0.5, where the fist turns
+-- back into the relaxed hand.
+Poses.GUARD_DIP = V(0, -0.45, 0.12)
+function Poses.guardBlend(relaxed: CFrame, guard: CFrame, g: number, dip: number?): CFrame
+	return relaxed:Lerp(guard, smooth(math.clamp(g, 0, 1))) + Poses.GUARD_DIP * (dip or 0)
+end
 
 -- Items held up to be seen, over their kind's hold (a hand left out keeps the kind's): the bandage roll beside the fist
 -- (Rig.ITEM_HOLD.bandage) and the berry sprig upright in it, the berries over the fist, both above the hotbar at the
@@ -219,38 +253,194 @@ Poses.PUNCH = {
 	},
 }
 
--- (R, optional: a waypoint on the way back from F to the rest pose, so the recovery can pass below the view instead of
--- across the bottom of it)
-local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, W: CFrame, M: CFrame?, F: CFrame, R: CFrame?): CFrame
+-- Swing sets. A set is { W = windup end, M = mid-strike, F = follow-through (frames for the striking hand), and
+-- optionally U = waypoints from the hold to W, A = waypoints from W to M, B = from M to F, R = waypoints on the way
+-- back from F to the hold (each one frame or a list of frames, passed through in order), side = "Left" (a punch with
+-- the left fist; else the right hand), pole = the striking elbow's pole (Poses.swingPole), kick = the camera kick's
+-- direction (pitch, yaw, roll: Poses.swingKick), tp = the third-person shape (CharacterVisuals) }.
+local function path(frames: { CFrame }, s: number): CFrame
+	local n = #frames - 1
+	if n <= 0 then
+		return frames[1]
+	end
+	local x = math.clamp(s, 0, 1) * n
+	local i = math.min(math.floor(x), n - 1)
+	return frames[i + 1]:Lerp(frames[i + 2], x - i)
+end
+
+-- first, the waypoints in `keys` (one frame or a list), then last
+local function via(first: CFrame, keys: any, last: CFrame?): { CFrame }
+	local list = { first }
+	if typeof(keys) == "CFrame" then
+		table.insert(list, keys)
+	elseif type(keys) == "table" then
+		for _, key in ipairs(keys) do
+			table.insert(list, key)
+		end
+	end
+	if last then
+		table.insert(list, last)
+	end
+	return list
+end
+
+-- The hand for a set at t s into an action of windup / strike / total s: the hold to W over the windup (easing out),
+-- W to M accelerating and M to F slowing over the strike, then back to the hold (by way of R, under the view, when the
+-- set has one). `follow` (about 1) stretches the first part of the way back a little (the swing's jitter).
+local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, set: any, follow: number?): CFrame
+	local W, M, F = set.W, set.M, set.F
 	if t <= windup then
-		return rest:Lerp(W, easeOut(math.clamp(t / math.max(windup, 1e-3), 0, 1)))
+		return path(via(rest, set.U, W), easeOut(math.clamp(t / math.max(windup, 1e-3), 0, 1)))
 	end
 	if t <= windup + strike then
 		local u = math.clamp((t - windup) / math.max(strike, 1e-3), 0, 1)
 		if M then
 			if u < 0.5 then
-				return W:Lerp(M, easeIn(u * 2))
+				return path(via(W, set.A, M), easeIn(u * 2))
 			end
-			return M:Lerp(F, easeOut((u - 0.5) * 2))
+			return path(via(M, set.B, F), easeOut((u - 0.5) * 2))
 		end
-		return W:Lerp(F, easeInOut(u))
+		return path(via(W, set.A, F), easeInOut(u))
 	end
 	local u = math.clamp((t - windup - strike) / math.max(total - windup - strike, 1e-3), 0, 1)
+	local R = set.R
 	if R then
-		if u < 0.4 then
-			return F:Lerp(R, smooth(u / 0.4))
+		local first = if typeof(R) == "CFrame" then R else R[1]
+		local a = 0.4 * math.clamp(follow or 1, 0.8, 1.2)
+		if u < a then
+			return F:Lerp(first, smooth(u / a))
 		end
-		return R:Lerp(rest, easeInOut((u - 0.4) / 0.6))
+		local list = { first }
+		if typeof(R) ~= "CFrame" then
+			for i = 2, #R do
+				table.insert(list, R[i])
+			end
+		end
+		table.insert(list, rest)
+		return path(list, easeInOut((u - a) / (1 - a)))
 	end
 	return F:Lerp(rest, easeInOut(u))
 end
 
-function Poses.swing(style: string, variant: number, t: number, windup: number, strike: number, total: number, restRight: CFrame, restLeft: CFrame): (CFrame, CFrame)
+-- The set a swing plays: Poses.SWING[style] (a list; an unknown style swings like Slash), the punches Poses.PUNCH and
+-- the thrusts Poses.STAB. PUNCH and STAB are lists for the Faceted arms; the older arms keep PUNCH = { left, right }
+-- (odd swings jab with the left) and a single STAB.
+local function setFor(style: string, variant: number): (any, string)
+	variant = math.max(1, math.floor(tonumber(variant) or 1))
 	if style == "Punch" then
-		local left = variant % 2 == 1
-		local set = if left then Poses.PUNCH.left else Poses.PUNCH.right
-		local rest = if left then restLeft else restRight
-		local moving = phases(t, windup, strike, total, rest, set.W, nil, set.F)
+		local punch = Poses.PUNCH
+		if #punch > 0 then
+			local set = punch[((variant - 1) % #punch) + 1]
+			return set, set.side or (if variant % 2 == 1 then "Left" else "Right")
+		end
+		if variant % 2 == 1 then
+			return punch.left, "Left"
+		end
+		return punch.right, "Right"
+	elseif style == "Stab" then
+		local stab = Poses.STAB
+		if #stab > 0 then
+			return stab[((variant - 1) % #stab) + 1], "Right"
+		end
+		return stab, "Right"
+	end
+	local sets = Poses.SWING[style] or Poses.SWING.Slash
+	return sets[((variant - 1) % #sets) + 1], "Right"
+end
+
+-- How many sets a style has (CombatController picks one per swing).
+function Poses.swingCount(style: string): number
+	if style == "Punch" then
+		return if #Poses.PUNCH > 0 then #Poses.PUNCH else 2
+	elseif style == "Stab" then
+		return if #Poses.STAB > 0 then #Poses.STAB else 1
+	end
+	local sets = Poses.SWING[style] or Poses.SWING.Slash
+	return #sets
+end
+
+-- Which hand a set strikes with ("Left" | "Right").
+function Poses.swingSide(style: string, variant: number): string
+	local _, side = setFor(style, variant)
+	return side
+end
+
+-- The direction of the camera kick for a set (pitch, yaw, roll; + pitch looks up, + yaw turns left, + roll tilts left;
+-- CombatController scales it to the style's kick), or nil for a set without its own `kick` (then odd sets kick to the
+-- left, even sets to the right).
+function Poses.swingKick(style: string, variant: number): Vector3?
+	local set = setFor(style, variant)
+	if set and typeof(set.kick) == "Vector3" then
+		return set.kick
+	end
+	return nil
+end
+
+-- The striking elbow's pole during a swing (nil: the hold's): the set's own, else Poses.SWING_POLE (mirrored for the
+-- left fist).
+function Poses.swingPole(style: string, variant: number): Vector3?
+	local set, side = setFor(style, variant)
+	if set and typeof(set.pole) == "Vector3" then
+		return set.pole
+	end
+	local p = Poses.SWING_POLE
+	if p and side == "Left" then
+		return V(-p.X, p.Y, p.Z)
+	end
+	return p
+end
+
+-- Per-swing variation (CombatController.swingJitter(seed): pitch, yaw, roll in radians and follow ~1): the set's
+-- keyframes turned a little about the striking shoulder (Poses.JITTER_PIVOT, x mirrored for the left), by
+-- Poses.JITTER_SCALE of the angles, and the follow-through shortened a little. The hold and R are not turned, so the
+-- swing still starts and ends exactly at the hold.
+Poses.JITTER_PIVOT = V(0.5, -0.9, 0)
+Poses.JITTER_SCALE = 0.6
+local function jittered(set: any, side: string, jitter: any): any
+	if type(jitter) ~= "table" then
+		return set
+	end
+	local k = Poses.JITTER_SCALE or 0
+	local pitch, yaw, roll = (tonumber(jitter.pitch) or 0) * k, (tonumber(jitter.yaw) or 0) * k, (tonumber(jitter.roll) or 0) * k
+	local p = Poses.JITTER_PIVOT or V(0.5, -0.9, 0)
+	if side == "Left" then
+		yaw, roll = -yaw, -roll
+		p = V(-p.X, p.Y, p.Z)
+	end
+	local turn = CFrame.new(p) * CFrame.Angles(pitch, yaw, roll) * CFrame.new(-p)
+	local function apply(key: any): any
+		if typeof(key) == "CFrame" then
+			return turn * key
+		elseif type(key) == "table" then
+			local out = table.create(#key)
+			for i, frame in ipairs(key) do
+				out[i] = turn * frame
+			end
+			return out
+		end
+		return key
+	end
+	local follow = math.clamp(tonumber(jitter.follow) or 1, 0.8, 1.2)
+	local F = set.F
+	if set.M and follow < 1 then
+		F = set.M:Lerp(F, follow) -- (a shorter follow-through)
+	end
+	return {
+		U = apply(set.U), W = apply(set.W), A = apply(set.A), M = apply(set.M), B = apply(set.B), F = apply(F),
+		R = set.R, side = set.side,
+	}
+end
+
+function Poses.swing(style: string, variant: number, t: number, windup: number, strike: number, total: number, restRight: CFrame, restLeft: CFrame, jitter: any?): (CFrame, CFrame)
+	local set, side = setFor(style, variant)
+	if not set then
+		return restRight, restLeft
+	end
+	set = jittered(set, side, jitter)
+	local follow = if type(jitter) == "table" then tonumber(jitter.follow) else nil
+	if style == "Punch" then
+		local left = side == "Left"
+		local moving = phases(t, windup, strike, total, if left then restLeft else restRight, set, follow)
 		-- the other fist tucks back a little while this one punches
 		local tuck = math.sin(math.clamp(t / math.max(total, 1e-3), 0, 1) * math.pi) * 0.12
 		if left then
@@ -258,14 +448,8 @@ function Poses.swing(style: string, variant: number, t: number, windup: number, 
 		end
 		return moving, restLeft + V(-0.02, -0.03, tuck)
 	end
-	if style == "Stab" then
-		-- from the guard the point comes round onto the crosshair, then the thrust drives it forward
-		local stab = Poses.STAB
-		return phases(t, windup, strike, total, restRight, stab.W, stab.M, stab.F), restLeft
-	end
-	local sets = Poses.SWING[style] or Poses.SWING.Slash
-	local set = sets[((variant - 1) % #sets) + 1]
-	return phases(t, windup, strike, total, restRight, set.W, set.M, set.F, set.R), restLeft
+	-- (a thrust: from the guard the point comes round under the crosshair, then the thrust drives it forward)
+	return phases(t, windup, strike, total, restRight, set, follow), restLeft
 end
 
 -- Spear thrust (right hand): W the point brought round to the front at the hip, M half way, F full reach - the point
@@ -806,26 +990,310 @@ Poses.AVATAR = {
 		STAB_LET_GO = 1,
 		SPEAR_RAISE_LET_GO = 0.2,
 		SWING_POLE = V(1, -0.6, 0.1),
+		JITTER_PIVOT = V(0.6, -1.2, -0.4), -- (the shoulder the per-swing jitter turns a swing about)
 	},
 }
+-- Faceted arms (Rig "Faceted"): world-scale arms from Rig.FACETED_SHOULDER (reach 1.8 studs to the wrist), a hand frame
+-- whose origin is the wrist and whose -Z runs along the hand to the knuckles (Poses.facetedHand builds one from the way
+-- the fingers point and the way the palm faces). A gripped item's axis leaves the thumb side, tilted 10 degrees toward
+-- the knuckles (the faceted grip). Everything is kept off the hotbar (bottom centre) and the vitals (bottom left), and
+-- the wrists within Rig.FACETED_MAX_WRIST of the forearms. Camera space at FOV 72 (16:9): a point at screen (x, y)
+-- (-1..1) and depth d is (1.29 x d, 0.727 y d, -d).
+local FH = Poses.facetedHand
+local function FL(wrist: Vector3, fingers: Vector3, palm: Vector3): CFrame
+	return FH(wrist, fingers, palm, true)
+end
+local F_LOW_LEFT = FL(V(-0.62, -1.25, -0.75), V(0.25, 0.3, -0.92), V(0.6, -0.8, 0)) -- (the free left hand, down out of view)
+Poses.FACETED = {
+	HOLD = {
+		-- empty hands at rest: low in the bottom corners, the backs of the hands up, the fingers easy and pointing
+		-- forward and a little in, the forearms below the view (the guard, Fists, only while punching)
+		Relaxed = {
+			right = FH(V(0.95, -0.78, -0.98), V(-0.1, -0.22, -0.97), V(-0.5, -0.85, 0.15)),
+			left = FL(V(-0.95, -0.78, -0.98), V(0.1, -0.22, -0.97), V(0.5, -0.85, 0.15)),
+		},
+		-- the guard: fists up at the lower corners, knuckles forward, thumbs on top
+		Fists = {
+			right = H(V(0.78, -0.7, -1.08), V(-0.3, 0.95, 0.12), V(-0.22, 0.28, -0.94)),
+			left = H(V(-0.78, -0.72, -1.1), V(0.3, 0.95, 0.12), V(0.22, 0.28, -0.94)),
+		},
+		-- the blade upright at the lower right, leaning a little forward
+		Blade = {
+			right = H(V(0.9, -0.66, -1.05), V(0.22, 1, -0.3), V(-0.12, 0.15, -1)),
+			left = F_LOW_LEFT,
+		},
+		Throwable = {
+			right = H(V(0.9, -0.66, -1.05), V(0.15, 0.85, -0.5), V(-0.12, 0.45, -0.88)),
+			left = F_LOW_LEFT,
+		},
+		-- food on the open palm at the lower right, turned up toward you
+		Item = {
+			right = FH(V(0.92, -0.72, -1.1), V(-0.4, 0.3, -0.87), V(-0.35, 0.9, 0.25)),
+			left = F_LOW_LEFT,
+		},
+		Armor = {
+			right = H(V(0.86, -0.36, -1.15), V(0.05, -1, 0.05), V(-0.7, 0, -0.7)),
+			left = F_LOW_LEFT,
+		},
+		Spear = {
+			right = H(V(0.63, -0.95, -0.7), V(-0.74, 0.4, -0.54), V(-0.25, -0.88, -0.3)),
+			left = Poses.HOLD.Spear.left,
+		},
+		SpearRaised = {
+			right = H(V(0.86, 0.02, -0.5), V(-0.1, 0, -1), V(0, 1, 0.1)),
+			left = F_LOW_LEFT,
+		},
+		-- the bow hand: the classic (avatar-arms) bow frames turned for the faceted grip, so the bow sits exactly where
+		-- the clear-view check passed (classic frame x classic BOW_GRIP x faceted BOW_GRIP^-1)
+		BowReady = {
+			right = Poses.HOLD.BowReady.right,
+			left = H(V(-0.671, -1.215, -1.379), V(-0.567, 0.822, -0.05), V(-0.135, -0.153, -0.979)),
+		},
+		BowDrawn = {
+			right = Poses.HOLD.BowDrawn.right,
+			left = H(V(-0.487, -0.917, -1.652), V(-0.442, 0.861, 0.25), V(-0.344, 0.095, -0.934)),
+		},
+		BowTucked = {
+			right = Poses.HOLD.BowTucked.right,
+			left = H(V(-0.673, -0.954, -0.763), V(-0.407, 0.83, 0.382), V(0.134, 0.468, -0.874)),
+		},
+	},
+	HOLD_ITEM = {
+		bandage = { right = FH(V(0.92, -0.7, -1.1), V(-0.35, 0.35, -0.87), V(-0.4, 0.88, 0.2)) },
+		berries = { right = FH(V(0.92, -0.72, -1.1), V(-0.4, 0.3, -0.87), V(-0.35, 0.9, 0.25)) },
+		-- the bottle stands in the open hand at the lower right, the palm against its side
+		water_bottle = { right = FH(V(1.08, -0.74, -1.2), V(-0.12, 0.2, -0.97), V(-1, 0.05, 0.1)) },
+		empty_bottle = { right = FH(V(1.08, -0.74, -1.2), V(-0.12, 0.2, -0.97), V(-1, 0.05, 0.1)) },
+		-- the mace leans forward and out, so its head is in view at the upper right
+		mace = { right = H(V(0.9, -0.7, -1.05), V(0.18, 0.8, -0.58), V(-0.15, 0.55, -0.82)) },
+		hatchet = { right = H(V(0.9, -0.66, -1.05), V(0.2, 0.95, -0.3), V(-0.12, 0.3, -0.95)) },
+		knife = { right = H(V(0.9, -0.66, -1.05), V(0.15, 0.85, -0.5), V(-0.12, 0.45, -0.88)) },
+	},
+	PUNCH = { -- jab (left), cross (right), hook (left): odd sets punch with the left
+		{ -- 1 jab: the left fist straight out, left of the crosshair
+			tp = "Jab", kick = V(-0.5, 0.8, 0.6), side = "Left",
+			W = H(V(-0.520, -0.660, -0.850), V(0.300, 0.949, 0.100), V(0.110, 0.070, -0.992)),
+			F = H(V(-0.420, -0.450, -1.450), V(0.966, 0.254, -0.051), V(-0.030, -0.084, -0.996)),
+		},
+		{ -- 2 cross: the right fist across, right of the crosshair
+			tp = "Cross", kick = V(-0.5, -0.8, -0.6),
+			W = H(V(0.520, -0.640, -0.830), V(-0.300, 0.949, 0.100), V(-0.110, 0.070, -0.992)),
+			F = H(V(0.400, -0.440, -1.480), V(-0.966, 0.254, -0.051), V(0.029, -0.089, -0.996)),
+		},
+		{ -- 3 hook: the left fist swings in from the side, knuckles turning, under the crosshair
+			tp = "Jab", kick = V(-0.3, -1, -0.7), side = "Left",
+			W = H(V(-0.550, -0.600, -0.900), V(0.050, 0.998, 0.050), V(0.502, 0.018, -0.865)),
+			M = H(V(-0.380, -0.380, -1.150), V(0.050, 0.998, 0.050), V(0.894, -0.022, -0.448)),
+			F = H(V(-0.240, -0.420, -1.300), V(0.050, 0.998, 0.050), V(0.942, -0.064, 0.330)),
+		},
+	},
+	-- Swing sets (#90, see "Swing sets" above), authored offline against the Faceted IK (the wrist within
+	-- Rig.FACETED_MAX_WRIST) and checked against the mesh triangles: the blade and the arms stay out of the
+	-- crosshair's 6 % circle at FOV 72 (with the per-swing jitter), nothing rests on the hotbar or the vitals
+	-- (only the fast strike crosses them), and the way back passes under the view (R).
+	SWING = {
+		Slash = {
+			{ -- 1 falling cut, right to left: from over the right shoulder, under the crosshair, out at the low left
+				tp = "DownLeft", kick = V(-0.3, 1, 0.85),
+				W = H(V(0.780, 0.074, -0.776), V(0.401, 0.595, 0.696), V(-0.493, 0.781, -0.384)),
+				A = H(V(0.788, -0.108, -0.964), V(0.310, -0.359, -0.880), V(-0.305, 0.839, -0.450)),
+				M = H(V(0.760, -0.468, -1.248), V(-0.958, -0.264, -0.107), V(-0.120, 0.716, -0.687)),
+				B = H(V(0.410, -1.275, -1.322), V(-0.980, -0.199, 0.004), V(-0.037, 0.159, -0.987)),
+				F = H(V(-0.390, -1.480, -1.138), V(-0.926, 0.092, 0.367), V(-0.379, -0.224, -0.898)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+			{ -- 2 rising backhand, left to right: dropped under the view, up left of the hotbar, past the right of the crosshair
+				tp = "Right", kick = V(0.5, -1, -0.85), pole = V(1, -0.4, 0.1),
+				U = {
+					H(V(0.700, -1.220, -1.072), V(0.842, -0.496, -0.212), V(-0.427, -0.372, -0.824)),
+					H(V(-0.095, -1.389, -1.064), V(0.686, -0.674, -0.274), V(-0.705, -0.526, -0.475)),
+				},
+				W = H(V(-0.785, -1.914, -1.399), V(0.848, -0.369, -0.380), V(-0.524, -0.479, -0.704)),
+				A = H(V(-0.955, -1.100, -1.465), V(0.953, 0.010, -0.302), V(-0.298, -0.129, -0.946)),
+				M = H(V(0.461, -0.534, -1.355), V(0.902, 0.059, -0.427), V(-0.410, 0.427, -0.806)),
+				B = H(V(0.915, -0.388, -1.254), V(0.898, 0.305, -0.316), V(-0.404, 0.294, -0.866)),
+				F = H(V(0.928, 0.137, -0.967), V(0.545, 0.464, 0.698), V(-0.169, 0.877, -0.450)),
+			},
+			{ -- 3 high cut, right to left over the crosshair, the elbow out to the right
+				tp = "Left", kick = V(0.1, 1, 0.4), pole = V(1, 0.1, 0),
+				W = H(V(0.846, 0.277, -0.778), V(0.475, 0.473, 0.742), V(-0.320, 0.879, -0.355)),
+				M = H(V(0.480, 0.436, -1.012), V(-0.957, -0.056, -0.284), V(0.048, 0.936, -0.349)),
+				F = H(V(0.000, 0.501, -1.150), V(-0.797, 0.116, 0.593), V(-0.463, 0.512, -0.723)),
+				R = H(V(0.988, 0.062, -0.850), V(0.451, 0.562, 0.694), V(-0.264, 0.826, -0.497)),
+			},
+			{ -- 4 overhead: straight down right of the crosshair
+				tp = "Overhead", kick = V(-1, 0.05, 0.15),
+				W = H(V(0.557, 0.832, -0.817), V(0.178, 0.344, 0.922), V(-0.143, 0.936, -0.322)),
+				A = H(V(0.477, 0.535, -0.989), V(0.503, 0.757, -0.417), V(-0.839, 0.311, -0.447)),
+				M = H(V(0.696, -0.070, -1.160), V(0.225, -0.347, -0.911), V(-0.237, 0.887, -0.396)),
+				F = H(V(0.972, -0.952, -1.159), V(0.158, -0.872, 0.464), V(-0.294, -0.490, -0.821)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+		},
+		Chop = {
+			{ -- 1 overhead: straight down right of the crosshair
+				tp = "Overhead", kick = V(-1, 0, 0.25),
+				W = H(V(0.394, 0.730, -0.450), V(0.138, 0.152, 0.979), V(-0.492, 0.868, -0.066)),
+				A = H(V(0.561, 0.458, -0.803), V(0.176, 0.661, -0.730), V(-0.708, 0.600, 0.373)),
+				M = H(V(0.649, -0.142, -1.132), V(0.138, -0.497, -0.857), V(-0.322, 0.796, -0.513)),
+				F = H(V(0.778, -0.916, -1.104), V(0.255, -0.904, -0.343), V(-0.303, 0.262, -0.916)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+			{ -- 2 right diagonal: from high at the right down across to the low left
+				tp = "DownLeft", kick = V(-0.8, 0.7, 0.6),
+				W = H(V(0.831, 0.347, -0.792), V(0.519, 0.458, 0.722), V(-0.331, 0.886, -0.324)),
+				A = H(V(0.797, -0.023, -0.953), V(0.342, -0.293, -0.893), V(-0.288, 0.872, -0.396)),
+				M = H(V(0.975, -0.934, -1.421), V(-0.831, -0.129, -0.541), V(0.503, 0.241, -0.830)),
+				F = H(V(-0.110, -1.770, -1.314), V(-0.573, -0.731, 0.371), V(-0.270, -0.258, -0.928)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+			{ -- 3 flat side chop from the right, under the crosshair
+				tp = "Left", kick = V(-0.2, 1, 0.45),
+				W = H(V(0.927, -0.087, -0.787), V(0.740, -0.023, 0.673), V(0.108, 0.991, -0.085)),
+				A = H(V(0.918, -0.265, -1.024), V(0.374, -0.311, -0.874), V(-0.187, 0.897, -0.400)),
+				M = H(V(1.072, -0.973, -1.420), V(-0.936, 0.288, 0.205), V(-0.177, 0.120, -0.977)),
+				F = H(V(-0.078, -1.926, -1.470), V(-0.781, -0.426, 0.456), V(-0.222, -0.494, -0.841)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+		},
+		Smash = {
+			{ -- 1 overhead
+				tp = "Overhead", kick = V(-1, 0, 0.3),
+				W = H(V(0.391, 0.732, -0.450), V(0.138, 0.153, 0.979), V(-0.494, 0.867, -0.065)),
+				A = H(V(0.587, 0.473, -0.811), V(0.170, 0.657, -0.735), V(-0.673, 0.622, 0.401)),
+				M = H(V(0.653, -0.133, -1.108), V(0.137, -0.497, -0.857), V(-0.317, 0.797, -0.513)),
+				F = H(V(0.754, -0.855, -1.037), V(0.272, -0.897, -0.348), V(-0.399, 0.224, -0.889)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+			{ -- 2 diagonal: from high at the right down across to the low left
+				tp = "DownLeft", kick = V(-0.85, 0.5, 0.55),
+				W = H(V(0.912, 0.380, -0.858), V(0.498, 0.457, 0.737), V(-0.211, 0.888, -0.409)),
+				A = H(V(0.863, -0.001, -1.057), V(0.314, -0.328, -0.891), V(-0.190, 0.897, -0.398)),
+				M = H(V(0.654, -0.446, -1.205), V(-0.650, -0.481, -0.588), V(-0.078, 0.812, -0.578)),
+				F = H(V(-0.190, -1.502, -1.218), V(-0.548, -0.752, 0.366), V(-0.412, -0.138, -0.901)),
+				R = H(V(0.400, -1.050, -0.500), V(0.769, -0.224, -0.599), V(-0.307, 0.692, -0.653)),
+			},
+		},
+	},
+	STAB = { -- straight, high, low (the left hand lets go for the thrust: STAB_LET_GO)
+		{ -- 1 straight: the point drives in under the crosshair
+			tp = "Thrust", kick = V(0.8, 0, 0.55),
+			W = H(V(0.640, -0.820, -0.550), V(-0.006, -0.507, -0.862), V(-0.724, 0.596, -0.346)),
+			M = H(V(0.620, -0.780, -0.950), V(0.156, -0.392, -0.907), V(-0.685, 0.619, -0.386)),
+			F = H(V(0.600, -0.760, -1.350), V(0.190, -0.354, -0.916), V(-0.675, 0.630, -0.384)),
+			R = H(V(0.620, -0.850, -0.800), V(-0.137, -0.478, -0.868), V(-0.725, 0.645, -0.241)),
+		},
+		{ -- 2 high: the point comes round under the crosshair, then rises past its right
+			tp = "ThrustHigh", kick = V(0.9, -0.35, 0.3),
+			U = H(V(0.660, -0.850, -0.550), V(-0.067, -0.531, -0.845), V(-0.734, 0.600, -0.319)),
+			W = H(V(0.700, -0.750, -0.500), V(0.443, -0.284, -0.851), V(-0.572, 0.641, -0.512)),
+			M = H(V(0.680, -0.620, -0.900), V(0.345, 0.004, -0.938), V(-0.665, 0.707, -0.242)),
+			F = H(V(0.620, -0.540, -1.300), V(0.319, 0.101, -0.942), V(-0.691, 0.705, -0.158)),
+			R = {
+				H(V(0.660, -0.800, -0.800), V(0.341, -0.464, -0.818), V(-0.613, 0.550, -0.568)),
+				H(V(0.640, -0.850, -0.750), V(-0.133, -0.504, -0.854), V(-0.730, 0.632, -0.260)),
+			},
+		},
+		{ -- 3 low: the point drives in low
+			tp = "ThrustLow", kick = V(0.3, 0.2, 0.6),
+			W = H(V(0.620, -0.920, -0.550), V(-0.030, -0.579, -0.815), V(-0.739, 0.561, -0.372)),
+			M = H(V(0.600, -0.920, -0.950), V(0.091, -0.507, -0.857), V(-0.708, 0.573, -0.413)),
+			F = H(V(0.580, -0.920, -1.350), V(0.123, -0.479, -0.869), V(-0.698, 0.581, -0.419)),
+			R = H(V(0.620, -0.900, -0.800), V(-0.158, -0.527, -0.835), V(-0.734, 0.629, -0.257)),
+		},
+	},
+	THROW = {
+		knife = {
+			W = H(V(0.75, -0.05, -0.45), V(0.1, 0.6, 0.8), V(0, 0.8, -0.6)),
+			R = H(V(0.5, -0.35, -1.35), V(-0.05, 0.2, -1), V(0, -1, -0.2)),
+			F = H(V(0.7, -1.0, -1.0), V(0, -0.6, -0.8), V(0, -0.8, 0.6)),
+		},
+		spear = {
+			W = H(V(0.85, 0.0, -0.15), V(-0.06, 0.16, -1), V(0, 1, 0.15)),
+			R = H(V(0.5, -0.25, -1.35), V(-0.05, 0.05, -1), V(0, 1, 0)),
+			F = H(V(0.7, -1.0, -1.05), V(0, -0.55, -0.85), V(0, 0.8, -0.5)),
+		},
+	},
+	-- eating: the food comes up on the open palm at the lower right, each bite takes it down to the mouth (out of view)
+	EAT = {
+		hand = FH(V(0.85, -0.68, -1.0), V(-0.45, 0.35, -0.82), V(-0.3, 0.9, 0.3)),
+		bite = FH(V(0.35, -0.85, -0.55), V(-0.5, 0.45, -0.75), V(-0.2, 0.7, 0.7)),
+		biteEvery = 0.55,
+		lift = {},
+	},
+	-- drinking: the bottle tipped up in front of the right of the crosshair, the hand round its far side and the forearm
+	-- going down out of the lower right (roll 0: the hand behind the bottle, so the bottle is not hidden by the arm)
+	DRINK = {
+		lips = V(0.26, -0.86, -0.78),
+		yaw = 25,
+		tilt0 = 40,
+		tilt1 = 52,
+		roll = 0,
+		low = V(0.2, -0.5, 0.1),
+	},
+	WRAP = {
+		wrist = V(-0.5, -0.5, -1.0),
+		pole = V(-1, -0.6, 0.1),
+		bend = V(0.1, -1.2, -0.1),
+		palm = V(0.2, 0.6, 1),
+		at = 0.2,
+		radius = 0.05,
+		hold = 0.24,
+		slowAt = math.rad(140),
+		twist = math.rad(50),
+		turns = 2.5,
+		band = 0.22,
+		fist = V(0.3, -0.9, 0.2),
+	},
+	MEDKIT = {
+		kit = H(V(0.7, -0.62, -1.0), V(-0.45, 0.88, 0.15), V(-0.2, 0.3, -0.95)),
+		press = H(V(0.55, -1.15, -0.55), V(-0.6, 0.6, 0.5), V(-0.3, 0.55, -0.8)),
+		cycles = 2,
+		oneHand = true,
+	},
+	ARMOR = {
+		lift = H(V(1.0, 0.05, -1.3), V(0.05, -1, 0.1), V(-0.8, 0.1, -0.5)), -- the vest hangs at the right, clear of the hotbar
+		over = H(V(0.95, 1.0, 0.15), V(0.1, 0.2, 1), V(-0.3, 1, -0.2)),
+		downRight = H(V(0.8, -1.25, -0.6), V(-0.2, 1, -0.2), V(-0.3, -0.2, -1)),
+		downLeft = H(V(-0.8, -1.25, -0.6), V(0.2, 1, -0.2), V(0.3, -0.2, -1)),
+		tugRight = H(V(0.62, -0.8, -0.95), V(-0.25, 0.85, -0.45), V(-0.15, 0.5, -0.88)),
+		tugLeft = H(V(-0.62, -0.8, -0.95), V(0.25, 0.85, -0.45), V(0.15, 0.5, -0.88)),
+		liftedAt = 0.25,
+		overAt = 0.45,
+		downAt = 0.58,
+		tug0At = 0.66,
+	},
+	USE_POLE = {
+		Bandage = { right = V(0.8, -1, 0) },
+		Eat = { right = V(1, -0.6, 0) },
+		Drink = { right = V(1, -0.6, 0) },
+		Wrap = { right = V(1, -0.7, 0) },
+	},
+	TOP = {
+		SPEAR_LEFT = V(-0.72, -0.58, -1.4),
+		SPEAR_REACH = 1.3,
+		STAB_LET_GO = 1,
+		SPEAR_RAISE_LET_GO = 0.2,
+		SWING_POLE = V(0.5, -1, 0.25),
+		JITTER_PIVOT = V(0.5, -0.72, 0.15), -- (the shoulder the per-swing jitter turns a swing about)
+	},
+}
+
+Poses.STYLES = { Avatar = Poses.AVATAR, Faceted = Poses.FACETED }
 local classicValues: { [string]: { [string]: any } } = {}
 local NONE = {} -- (a field the Classic table didn't have)
-function Poses.useStyle(style: string)
-	style = if style == "Avatar" then "Avatar" else "Classic"
-	if style == Poses.STYLE then
-		return
-	end
-	Poses.STYLE = style
-	for group, values in pairs(Poses.AVATAR) do
+-- Copies a style's values over the Classic ones, field by field (on), or puts the Classic values back (off).
+local function applyStyle(values: { [string]: any }, on: boolean)
+	for group, fields in pairs(values) do
 		local target = if group == "TOP" then (Poses :: any) else (Poses :: any)[group]
 		if type(target) == "table" then
 			local saved = classicValues[group] or {}
 			classicValues[group] = saved
-			for key, value in pairs(values) do
+			for key, value in pairs(fields) do
 				if saved[key] == nil then
 					saved[key] = if target[key] == nil then NONE else target[key]
 				end
-				if style == "Avatar" then
+				if on then
 					target[key] = value
 				else
 					local original = saved[key]
@@ -833,6 +1301,21 @@ function Poses.useStyle(style: string)
 				end
 			end
 		end
+	end
+end
+function Poses.useStyle(style: string)
+	style = if Poses.STYLES[style] then style else "Classic"
+	if style == Poses.STYLE then
+		return
+	end
+	local current = Poses.STYLES[Poses.STYLE]
+	if current then
+		applyStyle(current, false)
+	end
+	Poses.STYLE = style
+	local values = Poses.STYLES[style]
+	if values then
+		applyStyle(values, true)
 	end
 end
 

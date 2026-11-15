@@ -3,7 +3,9 @@
 
 	Modes: locked first person while you are an alive contender in the arena (ClientState.inArena and alive),
 	Classic third person in the lobby and after death (zoom Config.Camera.LobbyZoom, limits LobbyMinZoom..LobbyMaxZoom).
-	While ClientState.spectating ~= nil this controller does nothing (SpectateController owns the camera).
+	While ClientState.spectating ~= nil this controller does nothing (SpectateController owns the camera), nor while
+	ClientState.launchShot is set (the launch intro, LaunchIntroController, owns it; a faceToward asked for meanwhile
+	waits until the camera is handed back).
 
 	The default PlayerModule camera rebuilds its CFrame every frame from CurrentCamera.CFrame.LookVector
 	(BaseCamera:GetCameraLookVector), so offsets written on top of it would accumulate. We therefore:
@@ -27,13 +29,22 @@
 	  - breathing: a slow rest rhythm when idle, and heavier, faster breathing that follows exertion and
 	    exhaustion (MovementController.getMotion().exertion).
 	  - unsteady footing (sprinting down steep ground) wobbles slightly before a stumble.
-	FOV = settings.fov + a subtle sprint/slide add, times the aim multiplier from ClientState.aimAlpha.
+	FOV = settings.fov + a subtle sprint/slide add, times the stronger of two multipliers: the aim's (ClientState.aimAlpha)
+	and the zoom's. Zoom, the action "Zoom" (V held; R3 or the touch ZOOM button toggled), eases the view in to
+	Config.Camera.ZoomFovMultiplier (ZoomInTime / ZoomOutTime), a slight look closer, and turns the sprint widening off.
+	It is bound only while you are alive in the arena or on your plate: not while spectating, not during the launch shot
+	(and while a cutscene holds the camera, step leaves the FOV alone). While a menu is open its input passes through and
+	the zoom lets go. ZOOM shares AIM's touch slot and shows only while AIM is hidden (a bow or a spear aims instead,
+	which zooms further).
 	settings.headBob scales bob, sway, roll, tilt, turn lean and breathing (0 = off); settings.cameraShake scales
-	shakes, kicks and landing impacts. settings.sensitivity (scaled down with the aim zoom) scales the default camera's
-	IAS mouse binding (Shared.Input.setLookSpeed) with MouseDeltaSensitivity at 1, or MouseDeltaSensitivity itself when
-	those bindings don't exist. The look direction is never delayed or smoothed: aiming stays 1:1 with the mouse.
+	shakes, kicks and landing impacts. settings.sensitivity scales the default camera's IAS mouse binding
+	(Shared.Input.setLookSpeed) with MouseDeltaSensitivity at 1, or MouseDeltaSensitivity itself when those bindings
+	don't exist; settings.padLook and touchLook scale its controller and touch bindings. All three slow down with the
+	aim or the zoom by the ratio of the view's tangents, so a turn sweeps the same share of the screen.
+	The look direction is never delayed or smoothed: aiming stays 1:1 with the mouse.
 	Writes ClientState.lookDelta (base camera rotation this frame, X = yaw, Y = pitch, radians),
-	ClientState.cameraBob (procedural offset in camera space, without the static eye offset) and ClientState.fov.
+	ClientState.cameraBob (procedural offset in camera space, without the static eye offset), ClientState.fov and
+	ClientState.zoomAlpha.
 
 	Public API (through the Controllers registry):
 	  CameraController.getBaseCFrame() -> CFrame   the default camera's CFrame this frame, before our offsets
@@ -77,6 +88,9 @@ local K = {
 	SprintFov = num(CAM, "SprintFovAdd", 3.5),
 	SlideFov = num(CAM, "SlideFovAdd", 6),
 	AimFovMult = num(CAM, "AimFovMultiplier", 0.82),
+	ZoomFovMult = num(CAM, "ZoomFovMultiplier", 0.88),
+	ZoomIn = math.max(num(CAM, "ZoomInTime", 0.15), 0.02), -- seconds
+	ZoomOut = math.max(num(CAM, "ZoomOutTime", 0.18), 0.02),
 	BobWalk = num(CAM, "BobWalkAmplitude", 0.085), -- studs of vertical head travel at jogging pace
 	BobSprint = num(CAM, "BobSprintAmplitude", 0.14),
 	BobCrouch = num(CAM, "BobCrouchScale", 0.55),
@@ -158,6 +172,15 @@ local jumpAt = -math.huge -- os.clock() of the last take-off (ClientState.jumped
 local prepCur = 0 -- 0..1 the eye's share of the knee dip before a take-off
 local faceLook: Vector3? = nil -- the look direction of a requested turn (faceToward)
 local faceFrames = 0 -- frames left to write it
+-- the zoom (action "Zoom")
+local zoomBound = false
+local zoomKey = false -- V held
+local zoomPad = false -- R3 toggled on
+local zoomTouch = false -- the touch ZOOM button toggled on
+local zoomButtonShown: boolean? = nil
+local zoomSpring = Spring.new(0, 4.5 / K.ZoomIn, 1) -- critically damped: about 94 % of the way after ZoomInTime
+local lastPadLook: number? = nil
+local lastTouchLook: number? = nil
 
 local eyeParams = RaycastParams.new()
 eyeParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -268,6 +291,105 @@ local function resetFeel()
 	prepCur = 0
 end
 
+-- Zoom ----------------------------------------------------------------------------------------------------------------
+-- A slight look closer. V holds it (like Sprint and Crouch on a keyboard); R3 and the touch ZOOM button toggle it (like
+-- Sprint on a pad and AIM on touch). step's FOV block takes the stronger of it and the aim, so the two never add up.
+
+-- The launch shot (the round's intro) has the camera: no zoom while it plays.
+local function inLaunchShot(): boolean
+	return ClientState.launchShot == true
+end
+
+-- (While anything else holds the camera, a cutscene's CameraType, step leaves the FOV alone, so V changes nothing then.)
+local function zoomAllowed(): boolean
+	return ClientState.inArena == true and ClientState.alive == true and ClientState.spectating == nil
+		and not inLaunchShot()
+end
+
+local function onZoom(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
+	local touch = io ~= nil and io.UserInputType == Enum.UserInputType.Touch
+	local pad = io ~= nil and io.KeyCode == Enum.KeyCode.ButtonR3
+	if ClientState.menuOpen then
+		-- a menu has the input (refreshZoom lets go of the zoom meanwhile); a touch toggle that switched itself on goes
+		-- back off
+		if touch then
+			Input.setToggle("Zoom", false)
+		end
+		return Enum.ContextActionResult.Pass
+	end
+	if state == Enum.UserInputState.Begin then
+		if touch then
+			zoomTouch = true
+		elseif pad then
+			zoomPad = not zoomPad
+		else
+			zoomKey = true
+		end
+	elseif touch then
+		zoomTouch = false
+	elseif not pad then
+		zoomKey = false -- V let go (End or Cancel)
+	end
+	return nil
+end
+
+-- Every frame: bind or unbind with the state, keep the touch button out of AIM's way, let go while a menu is open.
+local function refreshZoom()
+	local allowed = zoomAllowed()
+	if allowed ~= zoomBound then
+		zoomBound = allowed
+		zoomKey, zoomPad, zoomTouch = false, false, false
+		zoomButtonShown = nil
+		if allowed then
+			Input.bind("Zoom", onZoom, {
+				keys = { Enum.KeyCode.V, Enum.KeyCode.ButtonR3 },
+				touch = { toggle = true, visible = false }, -- shown below; Theme.TouchLayout.Zoom is AIM's slot
+			})
+		else
+			Input.unbind("Zoom")
+			zoomSpring:reset(0)
+			ClientState.zoomAlpha = 0
+		end
+	end
+	if not zoomBound then
+		return
+	end
+	-- ZOOM shows only while AIM is hidden: with a bow or a spear in hand AIM has the slot (and zooms further)
+	local combat = Controllers and Controllers.CombatController
+	local aimShown = false
+	if combat and type(combat.getEquipped) == "function" and type(combat.canAimWith) == "function" then
+		local _, def = combat.getEquipped()
+		aimShown = combat.canAimWith(def) == true
+	end
+	if zoomButtonShown ~= (not aimShown) then
+		zoomButtonShown = not aimShown
+		Input.setTouchVisible("Zoom", not aimShown)
+		if aimShown and zoomTouch then
+			zoomTouch = false
+			Input.setToggle("Zoom", false)
+		end
+	end
+	-- a menu lets go of the zoom; a toggle doesn't come back on by itself when the menu closes
+	if ClientState.menuOpen and (zoomKey or zoomPad or zoomTouch) then
+		zoomKey, zoomPad, zoomTouch = false, false, false
+		Input.setToggle("Zoom", false)
+	end
+end
+
+-- The zoom's share this frame, 0..1, eased (step's FOV block).
+local function easeZoom(dt: number): number
+	local on = zoomBound and (zoomKey or zoomPad or zoomTouch)
+	zoomSpring.target = if on then 1 else 0
+	zoomSpring.speed = 4.5 / (if on then K.ZoomIn else K.ZoomOut)
+	local z = math.clamp(zoomSpring:update(dt), 0, 1)
+	if not on and z < 1e-3 then
+		zoomSpring:reset(0)
+		z = 0
+	end
+	ClientState.zoomAlpha = z
+	return z
+end
+
 -- Render steps --------------------------------------------------------------------------------------------------------
 
 -- RenderPriority.First: hand the default camera back its own CFrame so our offsets never feed into it.
@@ -285,7 +407,7 @@ local function restoreBase()
 		cam.Focus = savedFocus
 	end
 	-- a requested turn (faceToward): the default camera, next to run, rebuilds its CFrame from this look direction
-	if faceFrames > 0 then
+	if faceFrames > 0 and not ClientState.launchShot then -- (a turn asked for during the launch intro waits for it)
 		faceFrames -= 1
 		if cam and faceLook and ClientState.spectating == nil and cam.CameraType == Enum.CameraType.Custom then
 			local position = cam.CFrame.Position
@@ -301,7 +423,7 @@ local function updateSensitivity(aimMul: number, baseFov: number)
 	local sens = settingNumber("sensitivity", 1, 0.05, 10)
 	local scale = 1
 	if aimMul < 0.999 then
-		-- keep aim feel consistent when the FOV zooms in
+		-- keep the look feel consistent when the FOV zooms in (aiming or the zoom)
 		scale = math.tan(math.rad(baseFov * aimMul) / 2) / math.tan(math.rad(baseFov) / 2)
 	end
 	local desired = sens * scale
@@ -316,6 +438,16 @@ local function updateSensitivity(aimMul: number, baseFov: number)
 		else
 			UserInputService.MouseDeltaSensitivity = desired
 		end
+	end
+	-- the controller and touch look speeds (settings.padLook, touchLook) slow by the same ratio. SettingsController applies
+	-- them unscaled when a setting changes; settingsChanged clears lastPadLook, so they're applied again here, scaled.
+	local pad = settingNumber("padLook", 1, 0.05, 10) * scale
+	local touch = settingNumber("touchLook", 1, 0.05, 10) * scale
+	if lastPadLook == nil or lastTouchLook == nil or math.abs(pad - (lastPadLook :: number)) > 1e-3
+		or math.abs(touch - (lastTouchLook :: number)) > 1e-3 then
+		lastPadLook, lastTouchLook = pad, touch
+		Input.setLookSpeed("Gamepad", pad)
+		Input.setLookSpeed("Touch", touch)
 	end
 end
 
@@ -359,6 +491,7 @@ local function step(dt: number)
 	if not cam then
 		return
 	end
+	refreshZoom()
 	local spectating = ClientState.spectating ~= nil
 	if not spectating then
 		applyMode()
@@ -386,14 +519,17 @@ local function step(dt: number)
 	end
 	prevYaw, prevPitch = yaw, pitch
 
-	if spectating or cam.CameraType ~= Enum.CameraType.Custom then
-		-- SpectateController (or a cutscene) owns the camera: hands off
+	if spectating or ClientState.launchShot or cam.CameraType ~= Enum.CameraType.Custom then
+		-- SpectateController, the launch intro or a cutscene owns the camera: hands off
 		if not wasSpectating then
 			resetFeel()
 		end
 		wasSpectating = true
 		ClientState.cameraBob = CFrame.identity
 		return
+	end
+	if wasSpectating then
+		ClientState.lookDelta = Vector2.zero -- handed back: the camera's jump isn't a look movement (no sway from it)
 	end
 	wasSpectating = false
 
@@ -571,18 +707,19 @@ local function step(dt: number)
 	end
 	ClientState.cameraBob = procedural
 
-	-- FOV: a subtle widening at a full sprint, a little more in a slide
+	-- FOV: a subtle widening at a full sprint, a little more in a slide; the aim and the zoom narrow it
 	local sprintAmt = 0
 	if state == "Sprint" then
 		sprintAmt = math.clamp((speed - K.Walk) / math.max(K.Sprint - K.Walk, 1), 0, 1)
 	end
 	local aim = math.clamp(tonumber(ClientState.aimAlpha) or 0, 0, 1)
-	local adds = K.SprintFov * sprintAmt * (1 - aim) + K.SlideFov * slideAmt
+	local zoom = easeZoom(dt) -- no sprint widening under the zoom, and the stronger of it and the aim wins (never both)
+	local adds = K.SprintFov * sprintAmt * (1 - math.max(aim, zoom)) + K.SlideFov * slideAmt
 	if not firstPerson then
 		adds *= 0.5
 	end
 	fovSpring.target = baseFov + adds
-	local aimMul = 1 + (K.AimFovMult - 1) * aim
+	local aimMul = math.min(1 + (K.AimFovMult - 1) * aim, 1 + (K.ZoomFovMult - 1) * zoom)
 	local fov = math.clamp(fovSpring:update(dt) * aimMul, 1, 120)
 	cam.FieldOfView = fov
 	ClientState.fov = fov
@@ -669,7 +806,8 @@ function CameraController.Start()
 		end
 	end)
 	ClientState.settingsChanged:Connect(function()
-		lastSensitivity = nil -- re-apply on the next frame
+		lastSensitivity = nil -- re-apply on the next frame (mouse, controller and touch)
+		lastPadLook = nil
 	end)
 	ClientState.lifeChanged:Connect(function()
 		if ClientState.spectating == nil then
@@ -692,6 +830,13 @@ function CameraController.Start()
 	player.CharacterAdded:Connect(function()
 		resetFeel()
 		prevYaw = nil
+	end)
+	-- a held V the game never hears released: the window lost focus, or a text box took the keyboard
+	UserInputService.WindowFocusReleased:Connect(function()
+		zoomKey = false
+	end)
+	UserInputService.TextBoxFocused:Connect(function()
+		zoomKey = false
 	end)
 	applyMode()
 end

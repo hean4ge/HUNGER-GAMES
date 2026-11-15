@@ -4,8 +4,12 @@
 
 	* Loads ClientState.settings from the SettingsJson player attribute (DataService) and applies them with
 	  ClientState.setSettings; other controllers (camera, audio, movement) react to ClientState.settingsChanged.
-	* Saves with the SaveSettings remote, debounced (~1 s after the last change).
-	* Menu opens with M / DPadUp / the on-screen button (touch, in the arena) / the lobby SETTINGS button.
+	* Saves with the SaveSettings remote, debounced (~1 s after the last change), sending only the keys that changed
+	  (DataService merges them into the stored settings), so a save made before the saved copy arrived can't overwrite
+	  the other keys with this client's defaults. A key changed this session wins over later server copies; every other
+	  key still takes the saved value when SettingsJson arrives.
+	* Menu opens with M / DPadUp / the on-screen button (touch, in the arena) / the lobby SETTINGS button. The Countdown
+	  closes it as it puts you on your plate (it can be opened again there).
 	  While it's open ClientState.menuOpen = true and a Modal button frees the mouse in first person.
 	  Gamepad: D-pad up/down to move, D-pad left/right to adjust, LB/RB to switch tabs, B to close.
 	* Every row is a slider; a choice (Sprint: Hold / Toggle / Auto, Crouch, Guidance) is a stepped slider whose value
@@ -140,6 +144,7 @@ local function controlsFor(device: string): { { string } }
 			{ "Let go of a climb", g(K.ButtonB) },
 			{ "Previous / next item", g(K.ButtonL1) .. " / " .. g(K.ButtonR1) },
 			{ "Drop: tap for one, hold for the stack", g(K.DPadDown) },
+			{ "Zoom in a little (toggle)", g(K.ButtonR3) },
 			{ "Spectate: previous / next · leave", g(K.ButtonL1) .. " / " .. g(K.ButtonR1) .. " · " .. g(K.ButtonB) },
 			{ "Menu", g(K.DPadUp) },
 		}
@@ -158,6 +163,7 @@ local function controlsFor(device: string): { { string } }
 			{ "Let go of a climb", "CROUCH" },
 			{ "Select item", "Tap a slot" },
 			{ "Drop: tap for one, hold for the stack", "DROP" },
+			{ "Zoom in a little (toggle) · AIM with a bow or spear", "ZOOM" },
 			{ "Spectate: previous / next", "‹  ›" },
 			{ "Menu", "Menu button" },
 		}
@@ -177,6 +183,7 @@ local function controlsFor(device: string): { { string } }
 		{ "Let go of a climb", "C" },
 		{ "Select item", "1 – 6 · Wheel" },
 		{ "Drop: tap for one, hold for the stack", "G" },
+		{ "Zoom in a little (hold)", "V" },
 		{ "Spectate: previous / next", "Q / E" },
 		{ "Menu", "M" },
 	}
@@ -232,7 +239,8 @@ end
 --------------------------------------------------------------------------------------------------------------------
 -- Settings values
 --------------------------------------------------------------------------------------------------------------------
-local localDirty = false -- the player changed something this session; later server copies don't override it
+local changedKeys: { [string]: boolean } = {} -- keys the player changed this session: later server copies don't override them
+local unsentKeys: { [string]: boolean } = {} -- keys changed since the last save
 local saveToken = 0
 
 local function quantize(def, value: number): number
@@ -254,29 +262,43 @@ local function currentValue(def): number
 	return math.clamp(v, def.min, def.max)
 end
 
-local function snapshot(): { [string]: number }
+-- Only the keys that changed since the last save (DataService merges them; every key sent with its default filled in
+-- overwrote the stored settings when it arrived before they had loaded).
+local function changedValues(): { [string]: number }
 	local out = {}
-	for _, def in ipairs(DEFS) do
-		if def.key then
-			out[def.key] = currentValue(def)
+	for key in pairs(unsentKeys) do
+		local def = DEF_BY_KEY[key]
+		if def then
+			out[key] = currentValue(def)
 		end
 	end
 	return out
 end
 
-local function scheduleSave()
-	localDirty = true
+local function scheduleSave(key: string?)
+	if key then
+		changedKeys[key] = true
+		unsentKeys[key] = true
+	end
 	saveToken += 1
 	local token = saveToken
 	task.delay(1, function()
 		if token ~= saveToken then
 			return
 		end
+		local values = changedValues()
+		table.clear(unsentKeys)
+		if next(values) == nil then
+			return
+		end
 		local ok, err = pcall(function()
-			Net.event("SaveSettings"):FireServer(snapshot())
+			Net.event("SaveSettings"):FireServer(values)
 		end)
 		if not ok then
 			warn("[SettingsController] Couldn't save settings: " .. tostring(err))
+			for k in pairs(values) do
+				unsentKeys[k] = true -- sent with the next change
+			end
 		end
 	end)
 end
@@ -306,7 +328,7 @@ function SettingsController.set(key: string, value: number)
 	local q = quantize(def, value)
 	if ClientState.settings[key] ~= q then
 		ClientState.setSettings({ [key] = q })
-		scheduleSave()
+		scheduleSave(key)
 	end
 end
 
@@ -373,7 +395,7 @@ local function setValue(entry, value: number, tick: boolean?)
 	local q = quantize(entry.def, value)
 	if ClientState.settings[entry.def.key] ~= q then
 		ClientState.setSettings({ [entry.def.key] = q })
-		scheduleSave()
+		scheduleSave(entry.def.key)
 		if tick then
 			Sfx.play("UIHover")
 		end
@@ -382,9 +404,6 @@ local function setValue(entry, value: number, tick: boolean?)
 end
 
 local function applyAttribute()
-	if localDirty then
-		return
-	end
 	local json = player:GetAttribute("SettingsJson")
 	if type(json) ~= "string" or json == "" then
 		return
@@ -396,6 +415,9 @@ local function applyAttribute()
 		return
 	end
 	local values = sanitize(decoded)
+	for key in pairs(changedKeys) do
+		values[key] = nil -- changed this session: the local value is newer than any server copy
+	end
 	if next(values) ~= nil then
 		ClientState.setSettings(values)
 		refreshRows()
@@ -761,7 +783,9 @@ local function wire()
 			end
 		end
 		ClientState.setSettings(values)
-		scheduleSave()
+		for key in pairs(values) do
+			scheduleSave(key)
+		end
 		refreshRows()
 	end)
 	styleButton(refs.reset, function(on)
@@ -838,6 +862,16 @@ function SettingsController.Start()
 	updateHint()
 	updateLauncher()
 	applyAttribute()
+	-- the Countdown puts you on your plate: a menu left open in the lobby closes, so it doesn't follow you into the
+	-- arena (round-flow QA pt3)
+	local GameState = ReplicatedStorage:WaitForChild("GameState")
+	local function closeForCountdown()
+		if isOpen and ClientState.inArena and GameState:GetAttribute("Phase") == "Countdown" then
+			setOpen(false)
+		end
+	end
+	GameState:GetAttributeChangedSignal("Phase"):Connect(closeForCountdown)
+	ClientState.lifeChanged:Connect(closeForCountdown)
 	menu.Enabled = true
 end
 

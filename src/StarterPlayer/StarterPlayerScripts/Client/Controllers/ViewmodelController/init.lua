@@ -1,10 +1,14 @@
 --[[
 	ViewmodelController - first-person arms and the held item. Client only.
 
-	Visible only in first person, in the arena, alive and not spectating. The arms are the player's own avatar arms
-	(R15 UpperArm / LowerArm / Hand with their skin colour and shirt, Rig:setAvatar, rebuilt when the character's
-	arms, shirt or colours change), or with Config.Viewmodel.ArmStyle = "Classic" the part-built arms (dark fabric
-	sleeves, cuffs, fists in the skin colour of the local character's hands). The held item comes from
+	Visible only in first person, in the arena, alive and not spectating. The arms (Config.Viewmodel.ArmStyle) are the
+	faceted Blender arms ("Faceted", the default: bare skin in the avatar's arm colours, a charcoal sleeve; one hand mesh
+	per side at a time, Rig:setHands: relaxed when the hands are empty, a fist only while punching (raised on Attack,
+	held as a guard Config.Viewmodel.GuardHold seconds after the last punch, then lowered out of view and relaxed),
+	closed round handles and the bow string, open for food and bottles), the player's own avatar arms ("Avatar": R15
+	UpperArm / LowerArm / Hand with their skin colour and shirt, Rig:setAvatar, rebuilt when the character's arms,
+	shirt or colours change), or the part-built arms ("Classic": dark fabric sleeves, cuffs, fists in the skin colour
+	of the local character's hands). The held item comes from
 	ItemModels.build(id, "view"), placed at the hand by its Grip attachment (a bow sits in the left hand and the
 	right hand draws the string). Child modules: Rig (parts, two-bone IK, item placement, BulkMoveTo) and Poses
 	(hand poses and keyframes).
@@ -14,7 +18,8 @@
 	ClientState.lookDelta, walk/sprint bob synced to ClientState.strideAlpha (scaled by settings.headBob), sprint pose
 	(weapon lowered and angled), slide tilt, crouch offset, landing dip (ClientState.landed), jump lift, equip raise
 	(from the lower right, never across the crosshair), melee swings by weight (windup, strike with hit-stop,
-	follow-through), bow hold and draw (the bow waits at a low ready with the drawing hand on the nock, its wrist in
+	follow-through; the swing set CombatController picked, Poses.swing, with the set's own elbow pole and recoil side and a
+	little variation from the swing's seed, CombatController.swingJitter), bow hold and draw (the bow waits at a low ready with the drawing hand on the nock, its wrist in
 	line with a forearm that comes in from the lower right; drawing pulls the string back while the bow is pushed out
 	and down a little and then raised, so the drawing hand drops back and down out of view early, well away from the
 	eye, and arrives at an under-chin anchor; the string bends at the nock and stays a thin line, Rig:updateView; the
@@ -25,7 +30,7 @@
 	chest at the bottom of the view), recoil, a tuck when the camera
 	is against a wall (the bow is pulled in upright and the string let down, Poses.bowTuck), and lowered hands while
 	climbing, mantling or swimming. The spear rests in a low guard across the body with the left hand on the shaft.
-	Fists when nothing is equipped.
+	Empty hands: relaxed and low (Faceted; the other styles keep the fists).
 
 	API
 	  ViewmodelController.isVisible() -> boolean
@@ -59,8 +64,12 @@ local SPEAR_REACH = Poses.SPEAR_REACH or 1.16 -- the supporting hand's distance 
 -- Bow: how far the string is pulled at full draw in first person (studs). Longer than the mesh bow's own MaxDraw, so the
 -- nock reaches an under-chin anchor with the bow arm extended (Poses.HOLD.BowDrawn is built for this length).
 local BOW_DRAW = Config.Combat.ViewBowDraw or 1.35
--- Config.Viewmodel.ArmStyle: "Avatar" (the player's own R15 arms) or "Classic" (the part-built arms)
-local ARM_STYLE = if Config.Viewmodel and Config.Viewmodel.ArmStyle == "Classic" then "Classic" else "Avatar"
+-- Config.Viewmodel.ArmStyle: "Faceted" (the Blender arms, default), "Avatar" (the player's own R15 arms) or "Classic"
+-- (the part-built arms)
+local VIEWMODEL = Config.Viewmodel or {}
+local ARM_STYLE = if VIEWMODEL.ArmStyle == "Classic" or VIEWMODEL.ArmStyle == "Avatar" then VIEWMODEL.ArmStyle else "Faceted"
+-- (Faceted) empty hands: the guard is held this long after the last punch, then the hands are lowered and relax
+local GUARD_HOLD = tonumber(VIEWMODEL.GuardHold) or 1.5
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
 local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
 local USE_STYLE: { [string]: string } = {
@@ -88,7 +97,8 @@ local springs = {
 	kick = Spring.new(0, 18, 0.55), -- push back along the view
 	string = Spring.new(0, 42, 0.3), -- bow string snap with a little overshoot
 }
-local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0 }
+local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0 }
+local lastPunchAt = -10 -- (Faceted) when the last punch started (the guard is held GUARD_HOLD after it)
 
 local equipStart = -10
 local equipDuration = 0.32
@@ -146,17 +156,23 @@ local function holdKindFor(def: any): string
 	return "Item"
 end
 
-local function skinColor(): Color3?
+-- The skin colour of the local character's right arm (and, second, its left arm).
+local function skinColor(): (Color3?, Color3?)
 	local character = player.Character
 	if not character then
-		return nil
-	end
-	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
-	if hand and hand:IsA("BasePart") then
-		return hand.Color
+		return nil, nil
 	end
 	local colors = character:FindFirstChildOfClass("BodyColors")
-	return if colors then colors.RightArmColor3 else nil
+	local function side(name: string, r6: string, fallback: Color3?): Color3?
+		local hand = character:FindFirstChild(name .. "Hand") or character:FindFirstChild(r6)
+		if hand and hand:IsA("BasePart") then
+			return hand.Color
+		end
+		return fallback
+	end
+	local right = side("Right", "Right Arm", if colors then colors.RightArmColor3 else nil)
+	local left = side("Left", "Left Arm", if colors then colors.LeftArmColor3 else nil)
+	return right, left or right
 end
 
 -- (Avatar arms) rebuilds them when the character's arms, shirt or arm colours have changed. Runs on Heartbeat, outside
@@ -230,8 +246,8 @@ end
 --------------------------------------------------------------------------------------------------------------------
 
 local function wantVisible(): boolean
-	if not (ClientState.inArena and ClientState.alive) or ClientState.spectating ~= nil then
-		return false
+	if not (ClientState.inArena and ClientState.alive) or ClientState.spectating ~= nil or ClientState.launchShot then
+		return false -- (and never during the launch intro: LaunchIntroController has the camera)
 	end
 	local cam = camera
 	local character = player.Character
@@ -260,9 +276,9 @@ end
 local function setVisible(on: boolean)
 	visible = on
 	if on then
-		local color = skinColor()
+		local color, left = skinColor()
 		if color then
-			rig:setSkin(color)
+			rig:setSkin(color, left)
 		end
 		avatarCheckAt = 0 -- (checked on the next Heartbeat)
 		if shade then
@@ -316,12 +332,27 @@ end
 -- Combat events
 --------------------------------------------------------------------------------------------------------------------
 
+-- A swing's small variation from its seed (CombatController.swingJitter: the same every time for one seed), or nil.
+local function swingJitter(seed: any): any
+	local combat = Controllers.CombatController
+	if seed ~= nil and combat and type(combat.swingJitter) == "function" then
+		local ok, jitter = pcall(combat.swingJitter, seed)
+		if ok and type(jitter) == "table" then
+			return jitter
+		end
+	end
+	return nil
+end
+
 local function onCombatAction(name: string, data: any)
 	if type(data) ~= "table" then
 		return
 	end
 	local now = os.clock()
 	if name == "Swing" then
+		if data.style == "Punch" then
+			lastPunchAt = now -- (Faceted) the fists come up and stay up as a guard for GUARD_HOLD
+		end
 		anim = {
 			kind = "Swing",
 			t = 0,
@@ -331,9 +362,13 @@ local function onCombatAction(name: string, data: any)
 			windup = data.windup or 0.1,
 			strike = data.strike or 0.1,
 			total = data.total or 0.5,
+			jitter = swingJitter(data.seed), -- (each swing a little different: Poses.swing)
 		}
 	elseif name == "Strike" then
-		local side = if (data.variant or 1) % 2 == 0 then -1 else 1
+		-- the recoil goes the way the set's camera kick goes (Poses.swingKick; without one, odd sets to the left)
+		local dir = if type(Poses.swingKick) == "function" then Poses.swingKick(data.style, data.variant or 1) else nil
+		local side = if dir then math.clamp(dir.Y / math.max(dir.Magnitude, 1e-3) * 1.5, -1, 1)
+			else (if (data.variant or 1) % 2 == 0 then -1 else 1)
 		if data.hit then
 			local strength = if data.hit == "Character" then 1 else 0.7
 			hitStop = (HIT_STOP[data.weight] or 0.06) * strength
@@ -393,9 +428,9 @@ local function update(dt: number)
 	syncItem(now)
 	if now >= skinCheckAt then
 		skinCheckAt = now + 1
-		local color = skinColor()
-		if color and color ~= rig.skin then
-			rig:setSkin(color)
+		local color, left = skinColor()
+		if color and (color ~= rig.skin or (left and left ~= rig.skinLeft)) then
+			rig:setSkin(color, left)
 		end
 	end
 	if Poses.STYLE ~= Rig.STYLE then
@@ -482,13 +517,24 @@ local function update(dt: number)
 		if heldKind == "Bow" then
 			left += Poses.BOW_DIP * alpha.dip
 			right, left = Poses.bowTuck(right, left, alpha.tuck) -- against a wall: pulled in upright
+		elseif heldKind == "Fists" and rig.faceted then
+			-- (Faceted) empty hands rest low and relaxed; a punch raises them to the guard (Poses.HOLD.Fists), held for
+			-- GUARD_HOLD after the last one; then they are lowered, dipping out of view on the way down (where the fists
+			-- relax), back to the rest
+			local punching = anim ~= nil and anim.kind == "Swing" and anim.style == "Punch"
+			local guardUp = punching or now - lastPunchAt < GUARD_HOLD
+			approach("guard", if guardUp then 1 else 0, if guardUp then 22 else 3.2, dt)
+			approach("gdip", if guardUp then 0 else math.sin(math.pi * alpha.guard), 30, dt)
+			local restRight, restLeft = Poses.hold("Relaxed")
+			right = Poses.guardBlend(restRight, right, alpha.guard, alpha.gdip)
+			left = Poses.guardBlend(restLeft, left, alpha.guard, alpha.gdip)
 		end
 	end
 
 	-- One-shot actions
 	if anim then
 		if anim.kind == "Swing" then
-			right, left = Poses.swing(anim.style, anim.variant, anim.t, anim.windup, anim.strike, anim.total, right, left)
+			right, left = Poses.swing(anim.style, anim.variant, anim.t, anim.windup, anim.strike, anim.total, right, left, anim.jitter)
 		elseif anim.kind == "Throw" then
 			right = Poses.throw(anim.spear, anim.t, anim.windup, anim.total, right)
 		end
@@ -536,17 +582,20 @@ local function update(dt: number)
 	rig:setWrap(if using or alpha.use > 0.05 then wrap else 0)
 	if Poses.SWING_POLE and heldKind ~= "Bow" and anim and (anim.kind == "Swing" or anim.kind == "Throw") then
 		local w = Poses.actionPoleWeight(anim.t, anim.total)
-		if anim.style == "Punch" and (anim.variant or 1) % 2 == 1 then
-			local p = Poses.SWING_POLE -- (a left jab: the left elbow out to the left)
-			leftPole = leftPole:Lerp(Vector3.new(-p.X, p.Y, p.Z), w)
+		-- (the set's own elbow pole, Poses.swingPole; a left punch moves the left elbow)
+		local swinging = anim.kind == "Swing"
+		local pole = if swinging then Poses.swingPole(anim.style, anim.variant or 1) else Poses.SWING_POLE
+		if swinging and Poses.swingSide(anim.style, anim.variant or 1) == "Left" then
+			leftPole = leftPole:Lerp(pole or leftPole, w)
 		else
-			rightPole = (rightPole or Rig.POLE.Right):Lerp(Poses.SWING_POLE, w)
+			rightPole = (rightPole or Rig.POLE.Right):Lerp(pole or Rig.POLE.Right, w)
 		end
 	end
 
 	-- Bow: the string, the nocked arrow and the drawing hand
 	local arrowCam: CFrame? = nil
 	local bowPole = Rig.POLE.BowRight -- the right elbow's pole while a bow is held (follows the draw, below)
+	local bowHooked = false -- (the right hand is on the string)
 	local item = rig.item
 	if heldKind == "Bow" and item and item.bow then
 		local tucked = Poses.smooth(alpha.tuck)
@@ -569,6 +618,7 @@ local function update(dt: number)
 		end
 		local handle = rig:handleFrame(left)
 		local hasArrow = countItem("arrow") > 0
+		bowHooked = hasArrow and alpha.tuck < 0.5
 		-- (against a wall there is no room for a nocked arrow: it is kept out of view)
 		local showArrow = hasArrow and now >= arrowHiddenUntil and alpha.tuck < 0.35
 		rig:setArrowHidden(not showArrow)
@@ -683,17 +733,42 @@ local function update(dt: number)
 	local lock: { [string]: any }? = nil
 	if heldKind == "Bow" then
 		lock = { Left = "hand", Right = if alpha.tuck < 0.5 then true else nil }
-	elseif heldKind == "Spear" and Rig.STYLE == "Avatar" then
+	elseif heldKind == "Spear" and (Rig.STYLE == "Avatar" or Rig.STYLE == "Faceted") then
 		lock = { Right = "hand" } -- (the spear's line comes from the right hand: it is never turned by the wrist limit)
 	elseif alpha.use > 0.05 and (style == "Drink" or style == "Wrap") then
 		lock = { Right = "hand", Left = if style == "Wrap" then true else nil }
 	end
-	-- the light on the avatar arms (exposure, sky key, shade layer)
+	-- the light on the avatar and faceted arms (exposure, sky key, shade layer)
 	local key: CFrame? = nil
-	if shade and rig.avatar then
+	if shade and (rig.avatar or rig.faceted) then
 		key = shade:update(dt, camCF, alpha.tuck)
 	else
 		rig:setExposure(1)
+	end
+	-- (Faceted) one hand mesh per side: a fist only while punching (and through the guard), closed round a handle or
+	-- the bow string, open under food and bottles, relaxed otherwise (a thrown weapon has left the hand)
+	if rig.faceted then
+		local rightShape, leftShape = "Relaxed", "Relaxed"
+		if heldKind == "Fists" then
+			local fist = (anim ~= nil and anim.kind == "Swing" and anim.style == "Punch") or alpha.guard > 0.5
+			rightShape = if fist then "Fist" else "Relaxed"
+			leftShape = rightShape
+		elseif heldKind == "Bow" then
+			rightShape = if bowHooked then "Grip" else "Relaxed"
+			leftShape = "Grip"
+		else
+			rightShape = if rig.itemHidden and heldKind ~= "Armor" then "Relaxed" else rig:itemHand() or "Grip"
+			if heldKind == "Spear" then
+				local free = Poses.spearRaiseLetGo(if anim and anim.kind == "Throw" then 1 else aim)
+				if anim and anim.kind == "Swing" and anim.style == "Stab" then
+					free = math.max(free, Poses.spearLetGo(anim.t, anim.windup, anim.strike, anim.total))
+				end
+				leftShape = if free < 0.5 and not rig.itemHidden then "Grip" else "Relaxed"
+			elseif heldKind == "Armor" and alpha.use > 0.05 and useT / math.max(useTime, 0.1) >= Poses.ARMOR.downAt then
+				leftShape = "Grip" -- (both hands take the hem)
+			end
+		end
+		rig:setHands(rightShape, leftShape)
 	end
 
 	local frame = {
@@ -730,9 +805,13 @@ function ViewmodelController.Init(registry)
 end
 
 function ViewmodelController.Start()
-	rig = Rig.new(skinColor(), ARM_STYLE)
+	local skin, skinLeft = skinColor()
+	rig = Rig.new(skin, ARM_STYLE)
+	if skin then
+		rig:setSkin(skin, skinLeft)
+	end
 	Poses.useStyle(Rig.STYLE)
-	shade = if ARM_STYLE == "Avatar" then Shade.new(rig) else nil
+	shade = if rig.style == "Avatar" or rig.style == "Faceted" then Shade.new(rig) else nil
 	player:SetAttribute("ViewmodelVisible", false)
 	RunService.Heartbeat:Connect(onHeartbeat)
 

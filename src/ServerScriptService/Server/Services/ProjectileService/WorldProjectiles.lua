@@ -24,7 +24,8 @@
 	  E: TakeWorldItem(worldId) from WorldItemController's prompt; reach is checked again here (PickupRange + 2 studs,
 	     no higher than PickupReachAbove + 1.5 above the root).
 	  Walking over: Config.Loot.AutoPickup items (arrows, throwing knives) at your feet (WorldItems.walkOver), even if
-	     you carry none; spears are E only. A short WALK_DELAY after it settles, so a shot at your feet isn't caught
+	     you carry none, but ammo only with a weapon that shoots it (arrows with no bow filled the bag: E still takes
+	     them); spears are E only. A short WALK_DELAY after it settles, so a shot at your feet isn't caught
 	     straight back.
 	  Either adds 1 to your stack (InventoryService.give; the InventoryUpdate shows "+1 ARROW") with Sfx PickUp, or says
 	  INVENTORY FULL (LootService.inventoryFull; walking over items you can't carry says it at most every 4 s).
@@ -42,6 +43,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
@@ -840,6 +842,34 @@ local function onTakeRequest(player: Player, worldId: any)
 	end
 end
 
+-- Ammo is walked up only by someone who carries a weapon that shoots it (see the header). AMMO_USERS[ammo] = its bows.
+local AMMO_USERS: { [string]: { string } } = {}
+for id, def in pairs(ItemDefs.Items) do
+	if def.kind == "Bow" then
+		local ammo = def.ammo or "arrow"
+		AMMO_USERS[ammo] = AMMO_USERS[ammo] or {}
+		table.insert(AMMO_USERS[ammo], id)
+	end
+end
+
+local function shootsIt(player: Player, itemId: string): boolean
+	local def = ItemDefs.get(itemId)
+	if not def or def.kind ~= "Ammo" then
+		return true
+	end
+	local inventory = Services.InventoryService
+	if not inventory or type(inventory.has) ~= "function" then
+		return true
+	end
+	for _, weaponId in ipairs(AMMO_USERS[itemId] or {}) do
+		local ok, has = pcall(inventory.has, player, weaponId, 1)
+		if ok and has == true then
+			return true
+		end
+	end
+	return false
+end
+
 local function walkOverTick(now: number)
 	local ids = LootCfg.AutoPickup
 	if type(ids) ~= "table" or next(ids) == nil or next(grid) == nil then
@@ -858,7 +888,9 @@ local function walkOverTick(now: number)
 				if not entry.dead and entry.free and ids[entry.itemId] and not full[entry.itemId]
 					and now - entry.freeAt >= WALK_DELAY
 					and not (entry.noAutoPlayer == player and now < entry.noAutoUntil) then
-					if take(player, entry, true) == "full" then
+					if not shootsIt(player, entry.itemId) then
+						full[entry.itemId] = true -- no bow: the arrows stay where they are this tick (E still takes them)
+					elseif take(player, entry, true) == "full" then
 						full[entry.itemId] = true
 					end
 				end

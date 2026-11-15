@@ -2370,9 +2370,13 @@ local function update(dt: number)
 		and inputMag >= AUTO_SPRINT_PUSH
 	local wantsSprint = (sprintHeld or sprintToggled or autoSprint) and not spectating
 	local aiming = ClientState.aiming == true
+	-- a drawn bow keeps you off a sprint for the whole draw (CombatController.isDrawing), not only as the draw starts
+	local combatCtrl = Controllers and Controllers.CombatController
+	local drawing = combatCtrl ~= nil and type(combatCtrl.isDrawing) == "function" and combatCtrl.isDrawing() == true
 	local deepWade = W.depth > SWM.WadeFull * 0.55
 	local sprintAllowed = wantsSprint and not exhausted and stamina > 0 and inputMag > 0.35 and forwardness >= SPD.SprintCos
-		and not crouchInput and not crouchForced and not slide and not useBusy and not aiming and not stumbling and not deepWade
+		and not crouchInput and not crouchForced and not slide and not useBusy and not aiming and not drawing and not stumbling
+		and not deepWade
 	local crouchActive = (crouchInput or crouchForced) and not slide and not swimming
 
 	-- Target speed for this frame

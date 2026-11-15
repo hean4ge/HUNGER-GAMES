@@ -8,6 +8,8 @@
 	  * Wind: the look's base Workspace.GlobalWind (grass, clouds, particles) plus slow gusts and a gentle swing in
 	    direction (DayCycle.Knobs.GustStrength), written at 10 Hz.
 	  * Players in the lobby (not in the arena and not spectating) keep the lobby hour (Config.Round.LobbyClockTime).
+	  * Held while the launch intro lights its own set (ClientState.launchShot, LaunchIntroController); the whole look is
+	    written again the frame after.
 	  * Low mist sheets over the marsh and the lake at night and dawn (client-local particles, DayCycle look "Mist").
 	    Zones come from ArenaLayout.Lake (shore polygon, or centre + radiusX/radiusZ) and ArenaLayout.Marsh (outline
 	    polygon, pools, or centre + radius), else the Swamp/Marsh sector. Each sheet settles on the real water or
@@ -38,6 +40,7 @@ local targets = { lighting = Lighting }
 local nextTargetScan = 0
 local mist = { parts = {}, emitters = {}, built = false, nextUpdate = 0 }
 local wind = { nextWrite = 0, x = 0, z = 0 }
+local held = false -- the launch intro holds the day cycle (ClientState.launchShot)
 
 local MIST_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
 local MIST_SPACING = 56 -- studs between mist sheets over water
@@ -377,6 +380,15 @@ end
 -- Per frame --------------------------------------------------------------------------------------------------------------
 
 local function step()
+	-- the launch intro lights its own set: hold, then write the whole look again (its writes bypassed the cache)
+	if ClientState and ClientState.launchShot then
+		held = true
+		return
+	end
+	if held then
+		held = false
+		table.clear(cache)
+	end
 	arenaView = inArenaView()
 	if arenaView and base then
 		clock = DayCycle.evalClock(base, workspace:GetServerTimeNow())

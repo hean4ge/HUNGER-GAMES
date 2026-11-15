@@ -13,7 +13,11 @@
 	The server faces every contender toward the Spire, but in first person your body follows your camera. So once a
 	round, when you first stand frozen on the plate ring, your view is turned to the Spire (CameraController.faceToward)
 	and you look around freely from then on; while you ride, your own root is only moved and keeps the facing your
-	camera gives it.
+	camera gives it. With the launch intro (LaunchIntroController, ClientState.launchShot) that turn waits until the
+	intro hands the camera back on your plate.
+	Frozen on the plate and trying to step off - a move or jump key, a jump request, or the move input of any device
+	(a touch thumbstick, a stick) - the countdown caption answers (NotificationController.pulseCountdown). Looking round
+	never does (the arrow keys turn the camera, a touch drag looks), and nothing does during the intro.
 	API:
 	  LaunchController.isLaunching() -> boolean
 	  LaunchController.getRise() -> number   0..1 progress of the rise (1 when done or idle)
@@ -23,6 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -592,8 +597,8 @@ end
 -- Your placement: once a round, when you first stand frozen on the plate ring (the server can keep you in the lobby
 -- for a moment while it waits for streaming), turn your view to the Spire, as the server turned your body.
 local function faceSpire()
-	if not (ClientState.inArena and ClientState.frozen) then
-		return
+	if not (ClientState.inArena and ClientState.frozen) or ClientState.launchShot then
+		return -- (during the launch intro the turn waits: the intro hands the camera back on the plate)
 	end
 	local character = localPlayer.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
@@ -616,6 +621,67 @@ local function faceSpire()
 	if camera and type(camera.faceToward) == "function" then
 		camera.faceToward(toSpire, FACE_PITCH)
 	end
+end
+
+-- Trying to step off the plate -------------------------------------------------------------------------------------------
+
+local moveSource: { [string]: any } = { action = nil, controls = nil, nextScan = 0 }
+local wasMoving = false
+
+-- frozen on your plate, with your own camera (not during the launch intro)
+local function plateHeld(): boolean
+	return ClientState.frozen == true and ClientState.inArena == true and not ClientState.launchShot
+end
+
+local function pulseCaption()
+	local notifications = Controllers and Controllers.NotificationController
+	if notifications and notifications.pulseCountdown then
+		pcall(notifications.pulseCountdown)
+	end
+end
+
+-- How hard the default controls are pushed, 0..1: Roblox's MoveAction (input contexts), else the legacy control module
+-- (the sources MovementController reads). Camera turns and touch drags never move it.
+local function moveIntent(): number
+	local action = moveSource.action
+	if action and not action.Parent then
+		action = nil
+		moveSource.action = nil
+	end
+	if not action and not moveSource.controls and os.clock() >= moveSource.nextScan then
+		moveSource.nextScan = os.clock() + 2
+		local function find(container: Instance?): Instance?
+			local contexts = container and container:FindFirstChild("InputContexts")
+			local character = contexts and contexts:FindFirstChild("CharacterContext")
+			local found = character and character:FindFirstChild("MoveAction")
+			return if found and found:IsA("InputAction") then found else nil
+		end
+		action = find(localPlayer) or find(StarterPlayer:FindFirstChild("PlayerModule"))
+		moveSource.action = action
+		local scripts = if action then nil else localPlayer:FindFirstChildOfClass("PlayerScripts")
+		local module = scripts and scripts:FindFirstChild("PlayerModule")
+		if module and module:IsA("ModuleScript") then
+			local ok, playerModule = pcall(require, module)
+			if ok and type(playerModule) == "table" and type(playerModule.GetControls) == "function" then
+				local okControls, controls = pcall(playerModule.GetControls, playerModule)
+				if okControls and type(controls) == "table" and type(controls.GetMoveVector) == "function" then
+					moveSource.controls = controls
+				end
+			end
+		end
+	end
+	if action then
+		local ok, v = pcall((action :: any).GetState, action)
+		if ok and typeof(v) == "Vector2" then
+			return v.Magnitude
+		end
+	elseif moveSource.controls then
+		local ok, v = pcall(moveSource.controls.GetMoveVector, moveSource.controls)
+		if ok and typeof(v) == "Vector3" then
+			return v.Magnitude
+		end
+	end
+	return 0
 end
 
 -- Public API ----------------------------------------------------------------------------------------------------------------
@@ -661,21 +727,23 @@ function LaunchController.Start()
 			end
 		end
 	end)
-	-- frozen on a plate and pressing to move: make the countdown caption answer
+	-- frozen on a plate and trying to step off: make the countdown caption answer. A move or jump key here; the touch
+	-- thumbstick and the sticks through moveIntent (Heartbeat), the touch jump button through JumpRequest. Never a look
+	-- round: the arrow keys turn the camera and a touch drag looks, so neither counts (the old Left / Right / any-touch
+	-- check put STAY ON YOUR PLATE over the goal whenever a phone player looked round)
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if processed or not (ClientState.frozen and ClientState.inArena) then
+		if processed or not plateHeld() then
 			return
 		end
 		local key = input.KeyCode
-		local moving = key == Enum.KeyCode.W or key == Enum.KeyCode.A or key == Enum.KeyCode.S or key == Enum.KeyCode.D
-			or key == Enum.KeyCode.Up or key == Enum.KeyCode.Down or key == Enum.KeyCode.Left or key == Enum.KeyCode.Right
-			or key == Enum.KeyCode.Space or key == Enum.KeyCode.ButtonA or key == Enum.KeyCode.Thumbstick1
-			or input.UserInputType == Enum.UserInputType.Touch
-		if moving then
-			local notifications = Controllers and Controllers.NotificationController
-			if notifications and notifications.pulseCountdown then
-				pcall(notifications.pulseCountdown)
-			end
+		if key == Enum.KeyCode.W or key == Enum.KeyCode.A or key == Enum.KeyCode.S or key == Enum.KeyCode.D
+			or key == Enum.KeyCode.Up or key == Enum.KeyCode.Down or key == Enum.KeyCode.Space or key == Enum.KeyCode.ButtonA then
+			pulseCaption()
+		end
+	end)
+	UserInputService.JumpRequest:Connect(function()
+		if plateHeld() then
+			pulseCaption()
 		end
 	end)
 	RunService.Heartbeat:Connect(function()
@@ -693,6 +761,16 @@ function LaunchController.Start()
 				facedRound = GameState:GetAttribute("RoundId") -- not again this round
 				warn("[LaunchController] " .. tostring(err))
 			end
+		end
+		-- the move input of any device on the plate (a touch thumbstick, a stick): the caption answers once per push
+		if plateHeld() then
+			local moving = moveIntent() > 0.5
+			if moving and not wasMoving then
+				pulseCaption()
+			end
+			wasMoving = moving
+		else
+			wasMoving = false
 		end
 	end)
 	onPhase()

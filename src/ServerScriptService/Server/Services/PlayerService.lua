@@ -23,7 +23,10 @@
 	  PlayerService.prepareContender(player, ground: CFrame) -> boolean   frozen on a plinth (feet CFrame facing the Spire)
 	  PlayerService.setFrozen(player, frozen)
 	  PlayerService.clearSpectate(player)
-	Remote: SpectateTarget(target: Player?) points the requester's ReplicationFocus at an alive contender.
+	Remote: SpectateTarget(target: Player?) points the requester's ReplicationFocus at an alive contender. A fallen
+	contender who is watching keeps the target and the focus when they respawn on the Tor while the round is Active and
+	the target alive (keepsSpectate): their SpectateController keeps watching and sends SpectateTarget only when the
+	target changes, so clearing it there pulled streaming back to the Tor for the rest of the watch.
 YouDied { placement, total, killer, killerUserId?, cause, weapon, weaponName, headshot, phase ("Active" | "Countdown"),
 	practice } goes to the victim, who also
 	gets the attribute KilledBy (the killer's UserId, or 0). Practice rounds add no TotalKills.
@@ -427,6 +430,17 @@ local function releaseSpectatorsOf(target: Player)
 	end
 end
 
+-- A fallen contender watching the round keeps their spectate target and ReplicationFocus across their respawn on the Tor
+-- (see the header): the round is Active, they are out, and the one they watch is still alive.
+local function keepsSpectate(player: Player): boolean
+	local target = spectateTargets[player]
+	return target ~= nil
+		and phaseNow() == "Active"
+		and player:GetAttribute("Alive") ~= true
+		and target.Parent == Players
+		and target:GetAttribute("Alive") == true
+end
+
 -- Lobby loading ----------------------------------------------------------------------------------------------------
 
 function PlayerService.loadIntoLobby(player: Player)
@@ -439,7 +453,9 @@ function PlayerService.loadIntoLobby(player: Player)
 	st.pendingPlacement = nil
 	st.missingSince = nil
 	resetLifeAttributes(player)
-	PlayerService.clearSpectate(player)
+	if not keepsSpectate(player) then
+		PlayerService.clearSpectate(player)
+	end
 	task.spawn(doLoad, player, st, st.loadToken)
 end
 
@@ -916,7 +932,9 @@ local function onCharacterAdded(player: Player, character: Model)
 		connection:Disconnect()
 	end
 	table.clear(st.charConnections)
-	PlayerService.clearSpectate(player)
+	if not keepsSpectate(player) then
+		PlayerService.clearSpectate(player)
+	end
 
 	for _, child in ipairs(character:GetChildren()) do
 		removeDefaultHealth(child)

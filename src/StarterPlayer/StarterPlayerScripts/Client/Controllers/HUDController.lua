@@ -8,16 +8,18 @@
 	    text fallback), stack counts, rarity line, selected lift, item-name toast, tap to select on touch.
 	    On touch screens it slides left so it never overlaps the action buttons (Theme.TouchLayout / Shared.Input).
 	  * Compass ribbon from the camera yaw with a Spire marker (+ distance when facing it) and, when you're outside
-	    the border, a border marker and an alert. Round clock, "17 REMAIN", practice tag, next-event line.
+	    the border, a border marker and an alert. Round clock, "17 REMAIN", practice tag, next-event line. One countdown at
+	    a time: the round clock shows only while the event line has no sooner countdown of its own (round-flow QA).
 	  * Kill feed (KillFeed remote), crosshair (spread from ClientState.crosshairSpread), hit/kill marker
 	    (ClientState.hitConfirmed), directional damage arcs (ClientState.damageTaken), low-health / outside-border /
-	    hurt vignettes, use ring (ClientState.useProgress), bow draw meter (ClientState.drawAlpha), interaction hint
-	    (ClientState.interactHint).
+	    hurt vignettes, use ring (ClientState.useProgress), bow draw gauge upright beside the crosshair
+	    (ClientState.drawAlpha; under it, it covered a far target's legs), interaction hint (ClientState.interactHint).
 	  * Core GUI: Backpack and Health off, reset disabled while InArena, mouse icon hidden in arena first person.
 	  PlayabilityPlan quick wins drawn here:
 	  * QW2  the action hint (ClientState.actionHint = { text, keys? }) under the crosshair in the key-cap style: "[LMB]"
 	         or "{1}" in the text become caps, other keys lead. The interaction hint (water) wins. Both hold 0.25 s
 	         after their source goes so they never flicker. The item toast adds the item's desc for its first 3 shows.
+	         With a bow in hand the action hint sits lower, below the feet of a target 60 studs out.
 	  * QW5  a tick at Config.Survival.RegenMinStat on Hunger and Thirst (the healing line); under Health a dim
 	         "NOT HEALING · THIRSTY" only when a meter is the reason (player attribute Regen, else the meters), red
 	         "DEHYDRATED · LOSING HEALTH" (or STARVING) at an empty meter; a slow shimmer while health comes back.
@@ -25,8 +27,10 @@
 	  * QW9  the event line always shows the next beat (dim while more than a minute away), built by Shared.ThreatLine
 	         with Shared.Lore's names: ROLL CALL AT DUSK, THE OFFERING, THE BORDER MOVES, THE LAST STAND.
 	  * QW10 Guidance: below 50 thirst with nothing to drink, a water drop and its distance on the compass (nearest
-	         Shared.WaterPoints point inside the border) until your first drink of the round; off the ribbon it waits at
-	         the edge with its distance and an arrow ("‹ 64 m"). Once the border moves
+	         Shared.WaterPoints point inside the border). A drink retires it until thirst drops under 50 again (or 5
+	         below a drink that left you under 50). Off the ribbon it waits at the edge with its distance and an arrow
+	         ("‹ 64 m"). The water's and the Spire's distances keep to a side of their marker that stays on the ribbon
+	         and clear of the other (the Spire's gives way when there is no room). Once the border moves
 	         and you're within 80 m of its edge: "BORDER 42 m" under the compass and a tick toward the edge.
 	Public API (Controllers.HUDController):
 	  flashItemName(itemId: string?)               show the item-name toast above the hotbar
@@ -84,6 +88,11 @@ local LOW = { Health = LOW_HEALTH, Hunger = 0.25, Thirst = 0.25 }
 local REGEN_MIN = tonumber(Config.Survival.RegenMinStat) or 55 -- health only comes back above this on both meters
 local HINT_HOLD = 0.25 -- hints stay up this long after their source goes, so they never flicker (P8)
 local WATER_THIRST = 50 -- Guidance: the water marker shows below this thirst
+local WATER_REARM_DROP = 5 -- after a drink that leaves you under WATER_THIRST, the marker returns this much thirstier
+local DRAW_GAUGE_X = 32 -- the bow's draw gauge stands this far right of the crosshair (design px), clear of a far target
+local DRAW_GAUGE_HEIGHT = 34
+local ACTION_Y = 64 -- the action hint's place under the crosshair (UIBuilder)...
+local ACTION_Y_BOW = 100 -- ...and with a bow in hand: below the feet of a target 60 studs out
 local BORDER_NEAR_METERS = 80 -- the border's distance shows this close to its edge while it moves
 local DESC_SHOWS = 3 -- the item toast carries the description the first few times each item shows
 local KIND_LABEL = {
@@ -145,7 +154,9 @@ local lastHealthRise = 0 -- os.clock() when health last went up (healing)
 local shimmerPhase = 0
 local reasonState = { text = nil :: string?, danger = false }
 local descShown: { [string]: number } = {}
-local drankThisRound = false
+local drankThisRound = false -- a drink retired the water marker until thirst drops under waterRearmBelow
+local waterRearmBelow = 0
+local waterLabelSide = -1 -- the side of its drop the water's distance sat on last frame (-1 left, 1 right)
 local thirstyCardRound = false -- the THIRSTY card showed this round: the water marker comes with it
 local waterPulseUntil = 0
 local waterCache = { at = 0, point = nil :: Vector3?, distance = 0 }
@@ -959,10 +970,45 @@ local function carriesDrink(): boolean
 	return false
 end
 
-local function updateWater(camPos: Vector3, heading: number, half: number, pxPerDeg: number, phase: string, combat: boolean, center: any, radius: number?)
+-- QW10 compass labels (round-flow QA pt2, pt4): a distance beside a marker never runs off the ribbon (the compass clips
+-- it: "55 m" read "5 m") or into the other marker's ("667 1m m"). Widths come from the text (RobotoMono, 0.6 em a
+-- character: a little generous), so a label is placed before the engine has laid it out.
+local compassSpire = { shown = false, x = 0, label = false, from = 0, to = 0 }
+local labelSides: { [Instance]: number } = {}
+
+local function monoWidth(text: string, size: number): number
+	return (utf8.len(text) or #text) * size * 0.6
+end
+
+-- the span of a label `width` wide on the left (-1) or the right (1) of a marker at x; gap = half the marker + 3 px
+local function labelSpan(x: number, side: number, width: number, gap: number): (number, number)
+	if side < 0 then
+		return x - gap - width, x - gap
+	end
+	return x + gap, x + gap + width
+end
+
+local function setLabelSide(label: TextLabel, side: number)
+	if labelSides[label] == side then
+		return
+	end
+	labelSides[label] = side
+	if side > 0 then
+		label.AnchorPoint = Vector2.new(0, 0.5)
+		label.Position = UDim2.new(1, 3, 0.5, 0)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+	else
+		label.AnchorPoint = Vector2.new(1, 0.5)
+		label.Position = UDim2.new(0, -3, 0.5, 0)
+		label.TextXAlignment = Enum.TextXAlignment.Right
+	end
+end
+
+-- Returns true when the Spire's distance has to give way to the water's.
+local function updateWater(camPos: Vector3, heading: number, half: number, pxPerDeg: number, phase: string, combat: boolean, center: any, radius: number?): boolean
 	local marker = R.waterMarker
 	if not marker then
-		return
+		return false
 	end
 	local show = false
 	if combat and phase == "Active" and WaterPoints and not drankThisRound and guidanceOn() then
@@ -988,11 +1034,12 @@ local function updateWater(camPos: Vector3, heading: number, half: number, pxPer
 	show = show and point ~= nil
 	setVisible(marker, show)
 	if not show or not point then
-		return
+		return false
 	end
 	local wd = wrapDelta(bearing(camPos, point), heading)
 	local atEdge = math.abs(wd) > half - 4
-	marker.Position = UDim2.new(0.5, math.clamp(wd, -(half - 4), half - 4) * pxPerDeg, 0, 24)
+	local x = math.clamp(wd, -(half - 4), half - 4) * pxPerDeg
+	marker.Position = UDim2.new(0.5, x, 0, 24)
 	-- it pulses while the THIRSTY card is up. Off the ribbon it waits at the edge with the distance on the inside and
 	-- an arrow toward the water, so the number never disappears.
 	local alpha = 0
@@ -1010,16 +1057,61 @@ local function updateWater(camPos: Vector3, heading: number, half: number, pxPer
 	if R.waterDist.Text ~= text then
 		R.waterDist.Text = text
 	end
-	if side < 0 then
-		-- at the left edge the label goes to the drop's right (the ribbon clips anything further left)
-		R.waterDist.AnchorPoint = Vector2.new(0, 0.5)
-		R.waterDist.Position = UDim2.new(1, 3, 0.5, 0)
-		R.waterDist.TextXAlignment = Enum.TextXAlignment.Left
-	else
-		R.waterDist.AnchorPoint = Vector2.new(1, 0.5)
-		R.waterDist.Position = UDim2.new(0, -3, 0.5, 0)
-		R.waterDist.TextXAlignment = Enum.TextXAlignment.Right
+	-- the distance sits beside the drop on a side that stays on the ribbon (the compass clips past its ends) and clear
+	-- of the Spire marker and its distance. At the edge it stays on the inside, by its arrow. If the Spire's distance is
+	-- in the way on every side, that one gives way (returns true).
+	local width = monoWidth(text, R.waterDist.TextSize)
+	local limit = half * pxPerDeg - 2
+	local sides = if side < 0 then { 1 } elseif side > 0 then { -1 } elseif waterLabelSide > 0 then { 1, -1 } else { -1, 1 }
+	local function clear(s: number, withSpireLabel: boolean): boolean
+		local from, to = labelSpan(x, s, width, 11)
+		if from < -limit or to > limit then
+			return false
+		end
+		if compassSpire.shown then
+			if from < compassSpire.x + 10 and compassSpire.x - 10 < to then
+				return false -- over the Spire's diamond
+			end
+			if withSpireLabel and compassSpire.label and from < compassSpire.to + 3 and compassSpire.from < to + 3 then
+				return false -- over its distance
+			end
+		end
+		return true
 	end
+	local chosen: number? = nil
+	local yields = false
+	for _, s in ipairs(sides) do
+		if clear(s, true) then
+			chosen = s
+			break
+		end
+	end
+	if not chosen and compassSpire.label then
+		for _, s in ipairs(sides) do
+			if clear(s, false) then
+				chosen, yields = s, true
+				break
+			end
+		end
+	end
+	if not chosen then
+		-- the water lies right behind the Spire: keep the number on the ribbon, and the Spire's out of its way
+		yields = compassSpire.label
+		for _, s in ipairs(sides) do
+			local from, to = labelSpan(x, s, width, 11)
+			if from >= -limit and to <= limit then
+				chosen = s
+				break
+			end
+		end
+	end
+	waterLabelSide = chosen or sides[1]
+	setLabelSide(R.waterDist, waterLabelSide)
+	-- nor does the Spire's distance lie over the drop itself
+	if compassSpire.label and compassSpire.from < x + 8 and x - 8 < compassSpire.to then
+		yields = true
+	end
+	return yields
 end
 
 local function updateCompass(camCF: CFrame, phase: string)
@@ -1084,21 +1176,32 @@ local function updateCompass(camCF: CFrame, phase: string)
 	local d = wrapDelta(spireBearing, heading)
 	local showSpire = spireDistance > 30
 	setVisible(R.spire, showSpire)
+	compassSpire.shown, compassSpire.label = showSpire, false
 	if showSpire then
 		local edge = math.abs(d) > half - 4
 		local x = math.clamp(d, -(half - 4), half - 4) * pxPerDeg
 		R.spire.Position = UDim2.new(0.5, x, 0, 24)
+		compassSpire.x = x
 		local feast = GameState:GetAttribute("ArenaEvent") == "Feast"
 		local size = if feast then 7 + 2.5 * (0.5 + 0.5 * math.sin(os.clock() * 5)) else 7
 		R.spireDiamond.Size = UDim2.fromOffset(size, size)
 		R.spireDiamond.BackgroundTransparency = if edge then 0.45 else 0
-		-- distance rides next to the marker while it's on the ribbon
-		setVisible(R.spireDist, not edge)
+		-- distance rides next to the marker while it's on the ribbon: on its right, or on its left near the ribbon's right
+		-- end (it was clipped there). Shown below, once the water's distance has had its say.
 		if not edge then
 			local text = string.format("%d m", math.floor(spireDistance * STUD_TO_METERS + 0.5))
 			if R.spireDist.Text ~= text then
 				R.spireDist.Text = text
 			end
+			local width = monoWidth(text, R.spireDist.TextSize)
+			local side = 1
+			local from, to = labelSpan(x, 1, width, 9)
+			if to > half * pxPerDeg - 2 then
+				side = -1
+				from, to = labelSpan(x, -1, width, 9)
+			end
+			setLabelSide(R.spireDist, side)
+			compassSpire.label, compassSpire.from, compassSpire.to = true, from, to
 		end
 	end
 
@@ -1119,8 +1222,11 @@ local function updateCompass(camCF: CFrame, phase: string)
 		end
 	end
 
-	-- QW10: water for the thirsty
-	updateWater(camPos, heading, half, pxPerDeg, phase, combat, center, radius)
+	-- QW10: water for the thirsty (its distance keeps clear of the Spire's, which gives way when there's no room)
+	local spireYields = updateWater(camPos, heading, half, pxPerDeg, phase, combat, center, radius)
+	if showSpire then
+		setVisible(R.spireDist, compassSpire.label and not spireYields)
+	end
 
 	-- the border marker, only while you're outside it
 	local showBorder = outside and phase == "Active" and typeof(center) == "Vector3"
@@ -1213,12 +1319,26 @@ local function eventLine(now: number): (string?, boolean)
 end
 
 local function updateInfo(now: number, phase: string)
+	local eventText: string? = nil
+	local eventDim = false
+	if phase == "Active" then
+		eventText, eventDim = eventLine(now)
+	end
+	-- one countdown at a time (round-flow QA): the round clock (the hard time limit) gives way while the event line
+	-- counts down to something sooner, and comes back when the time limit is the next thing left
 	local endsAt = tonumber(GameState:GetAttribute("PhaseEndsAt")) or 0
-	local showTimer = phase == "Active" and endsAt > 0
+	local remaining = math.max(0, endsAt - now)
+	local eventLeft: number? = nil
+	if eventText then
+		local m, s = string.match(eventText, "(%d+):(%d%d)$")
+		if m and s then
+			eventLeft = (tonumber(m) or 0) * 60 + (tonumber(s) or 0)
+		end
+	end
+	local showTimer = phase == "Active" and endsAt > 0 and (eventLeft == nil or remaining <= eventLeft + 0.5)
 	setVisible(R.timer, showTimer)
 	setVisible(R.dot, showTimer)
 	if showTimer then
-		local remaining = math.max(0, endsAt - now)
 		local text = Util.formatTime(remaining)
 		if R.timer.Text ~= text then
 			R.timer.Text = text
@@ -1234,11 +1354,6 @@ local function updateInfo(now: number, phase: string)
 	end
 	setVisible(R.practice, GameState:GetAttribute("Practice") == true)
 
-	local eventText: string? = nil
-	local eventDim = false
-	if phase == "Active" then
-		eventText, eventDim = eventLine(now)
-	end
 	-- the event line and the border alert share one slot; being outside the border wins
 	setVisible(R.event, eventText ~= nil and not outside)
 	if eventText and R.event.Text ~= eventText then
@@ -1425,7 +1540,7 @@ local function updateDraw(show: boolean)
 	local on = show and a > 0.02
 	setVisible(R.draw, on)
 	if on then
-		R.drawFill.Size = UDim2.fromScale(a, 1)
+		R.drawFill.Size = UDim2.fromScale(1, a) -- upright: it fills from the bottom
 		R.drawFill.BackgroundColor3 = if a >= 0.999 then C.Accent else C.Text
 		-- below the minimum charge a release lets the string down instead of shooting: the fill stays faint until then
 		R.drawFill.BackgroundTransparency = if a < (Config.Combat.MinBowCharge or 0.2) then 0.6 else 0
@@ -1578,6 +1693,12 @@ local function updateAction(show: boolean)
 	local group = R.action
 	if not group or not R.actionKey or not R.actionText then
 		return
+	end
+	-- with a bow in hand the line sits lower, below the feet of a target 60 studs out (combat QA pt3)
+	local held = ItemDefs.get(ClientState.getEquippedItemId())
+	local y = if held and held.kind == "Bow" then ACTION_Y_BOW else ACTION_Y
+	if group.Position.Y.Offset ~= y then
+		group.Position = UDim2.fromOffset(0, y)
 	end
 	local segments = if show then parseHint((ClientState :: any).actionHint) else nil
 	local now = os.clock()
@@ -1873,6 +1994,14 @@ function HUDController.Start()
 	end
 	R.draw = center:WaitForChild("Draw")
 	R.drawFill = R.draw:WaitForChild("Fill")
+	-- the draw gauge stands upright beside the crosshair and fills from the bottom: under the crosshair it covered a far
+	-- target's legs (combat QA pt3, 60 studs)
+	R.draw.AnchorPoint = Vector2.new(0, 0.5)
+	R.draw.Position = UDim2.fromOffset(DRAW_GAUGE_X, 0)
+	R.draw.Size = UDim2.fromOffset(3, DRAW_GAUGE_HEIGHT)
+	R.drawFill.AnchorPoint = Vector2.new(0, 1)
+	R.drawFill.Position = UDim2.fromScale(0, 1)
+	R.drawFill.Size = UDim2.fromScale(1, 0)
 	R.interact = center:WaitForChild("Interact")
 	R.interactKey = R.interact:WaitForChild("Key")
 	R.interactKeyLabel = R.interactKey:WaitForChild("Label")
@@ -2005,7 +2134,13 @@ function HUDController.Start()
 	player:GetAttributeChangedSignal("Thirst"):Connect(function()
 		local thirst = tonumber(player:GetAttribute("Thirst")) or 100
 		if lastThirst and thirst > lastThirst + 6 and GameState:GetAttribute("Phase") == "Active" and ClientState.inArena then
-			drankThisRound = true -- the first drink of the round retires the water marker
+			-- a drink retires the water marker (and the THIRSTY card's early showing) until thirst drops under the
+			-- threshold again; after a drink that left you under it, until you are WATER_REARM_DROP thirstier
+			drankThisRound = true
+			thirstyCardRound = false
+			waterRearmBelow = math.min(WATER_THIRST, thirst - WATER_REARM_DROP)
+		elseif drankThisRound and thirst < waterRearmBelow then
+			drankThisRound = false -- thirsty again: the marker comes back (while you carry nothing to drink)
 		end
 		lastThirst = thirst
 	end)

@@ -16,7 +16,8 @@
 	It reads the bindings that Shared.Input mirrors onto LocalPlayer.InputBindings (one attribute per action), so it works
 	from the command bar too, which runs its own copy of every module. The state is detected from the LocalPlayer's
 	attributes: Lobby, Plate (Countdown, frozen on a launch plate), Arena (alive in a round); from the command bar,
-	Spectating isn't visible, so pass run({ state = "Spectating" }) while you spectate.
+	Spectating isn't visible, so pass run({ state = "Spectating" }) while you spectate, and run({ state = "Launch" })
+	while the launch intro plays (LaunchIntroController).
 	An action may name a stand-in for one device: "gui:<path under PlayerGui>" (a button the UI draws, e.g. the touch
 	menu button or the hotbar slots), "via:<Action>" (another action covers it, e.g. LB / RB pick items on a gamepad),
 	"wheel" (the mouse wheel, InventoryController), "auto" (touch sprint on Auto needs no button), and "optional" (only
@@ -43,17 +44,26 @@ InputCheck.EXPECTED = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
 		Attack = {},
 		Aim = { optional = true }, -- bound with the weapon; its touch button shows for the bow and spear only
+		Zoom = {}, -- the slight zoom (CameraController): V held, R3, touch ZOOM (in AIM's slot while AIM is hidden)
 		Slot1 = SLOT, Slot2 = SLOT, Slot3 = SLOT, Slot4 = SLOT, Slot5 = SLOT, Slot6 = SLOT,
 		NextSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
 		PrevSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
 		Drop = {},
 		Sprint = { touch = "auto" },
 		Crouch = {},
+		LaunchSkip = { optional = true, touch = "gui:LaunchShot.Root.Skip" }, -- only while the launch intro plays
+	},
+	-- While the launch intro plays (LaunchIntroController): run({ state = "Launch" }). Only the menu and the skip are live
+	-- then; the plate's other actions come back at the hand-off.
+	Launch = {
+		Menu = { touch = "gui:Menu.Root.Launcher" },
+		LaunchSkip = { touch = "gui:LaunchShot.Root.Skip" }, -- hold Space / A; touch: the HOLD TO SKIP button
 	},
 	Arena = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
 		Attack = {},
 		Aim = {},
+		Zoom = {},
 		Slot1 = SLOT, Slot2 = SLOT, Slot3 = SLOT, Slot4 = SLOT, Slot5 = SLOT, Slot6 = SLOT,
 		NextSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
 		PrevSlot = { keyboard = "wheel", touch = SLOT_TOUCH },

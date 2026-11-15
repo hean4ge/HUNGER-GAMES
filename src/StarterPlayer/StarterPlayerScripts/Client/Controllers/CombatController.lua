@@ -5,7 +5,15 @@
 	for the bow and the spear) through Shared.Input, and only while alive in the arena and not spectating, so lobby
 	clicks and the third-person camera are untouched. Input is ignored while ClientState.menuOpen.
 	  Melee: windup -> strike -> recover, timed from ItemDefs (windup, cooldown). At the strike moment MeleeSwing is
-	    sent with the camera look vector and whether the local trace touched someone (only such a swing can land).
+	    sent with the camera look vector, whether the local trace touched someone (only such a swing can land) and the
+	    swing's set (variant 1-8: other players see the same swing, CharacterVisuals).
+	    Swing sets (#90): each weapon remembers its last set. A swing that starts within Config.Combat.SwingChainWindow of
+	    the same weapon's last swing ending (held Attack, a buffered or quick press) takes the next set in order; a fresh
+	    click takes any other set at random, so a set never plays twice running. How many sets a style has is read from
+	    the viewmodel's Poses at run time (Poses.swingCount(style) when it exists, else the style's list in Poses.SWING;
+	    Punch: Poses.PUNCH, left and right; Stab: Poses.STAB). Each swing also carries a seed for small pose variation
+	    (CombatController.swingJitter); windup, strike and total never vary. Each set kicks the camera its own way
+	    (Poses.swingKick(style, set): a direction scaled to the style's KICK; a set without one flips left / right).
 	    Holding Attack keeps swinging; a press just before a swing ends is buffered, and a press during an item switch is kept
     for the whole switch. Attacking while climbing or swimming answers with Feedback.deny.
 	  Bow: hold Attack to draw (ClientState.drawAlpha over drawTime), release to shoot (RangedRelease "Fire") when
@@ -13,7 +21,8 @@
 	    tightens the spread. The server is told when a draw starts and stops (RangedRelease "Draw" / "Cancel").
 	    The arrow lands where the crosshair points: the release is lifted just enough that the arc (speed, gravity)
 	    passes through the point under the crosshair (Config.Combat.BowAimOnTarget, BowZeroDistance).
-	  Throwing knife: Attack throws. Spear: Attack stabs, Aim + Attack throws (RangedRelease "Throw").
+	  Throwing knife: Attack throws. Spear: Attack stabs, Aim + Attack throws (RangedRelease "Throw"). A throw is lifted
+	    onto the crosshair point the same way, with its own speed and gravity (Config.Combat.ThrowAimOnTarget).
 	  Food, drink, healing and armor: Attack is forwarded to ClientState.useRequested(state) instead.
 	Feedback: the strike is traced locally so impact sounds, sparks and camera kicks are instant; the server confirms
 	with HitConfirm -> ClientState.hitConfirmed + HitMarker / HitMarkerKill. DamageTaken -> ClientState.damageTaken,
@@ -21,7 +30,8 @@
 
 	For ViewmodelController / ProjectileController:
 	  CombatController.current -> the action in progress, or nil:
-	    { kind = "Melee", itemId, style, weight, variant, t0, windup, strike, total, struck, hit }
+	    { kind = "Melee", itemId, style, weight, variant, seed, t0, windup, strike, total, struck, hit }
+	      variant: the swing set (1 .. the style's set count); seed: an integer, the same for the whole swing
 	    { kind = "Draw", itemId, t0, drawTime }   { kind = "BowRecover", itemId, t0, total, charge }
 	    { kind = "Throw", itemId, spear, t0, windup, total, released }
 	    style: "Punch" | "Slash" | "Chop" | "Smash" | "Stab"; weight: "Light" | "Medium" | "Heavy"; times use os.clock()
@@ -31,6 +41,11 @@
 	  CombatController.equipBlockedUntil -> os.clock() time when the equip raise is done
 	  CombatController.getEquipped() -> (itemId?, def)    CombatController.canAimWith(def) -> boolean
 	  CombatController.countItem(itemId) -> number   items left, minus what we've spent since the last InventoryUpdate
+	  CombatController.isDrawing() -> boolean   the bow is drawn (MovementController keeps sprint off for the whole draw)
+	  CombatController.meleeStyle(itemId) -> (style, weight)   how that melee weapon swings
+	  CombatController.swingJitter(seed) -> { pitch, yaw, roll, follow }   a swing's small variation, the same for one
+	    seed: angles in radians (each within +-3 degrees) and a timing scale (1 +- 4 %) for use inside the follow-through
+	    only (the recovery still ends at total, so the hit timing never changes)
 	Optional hooks used when present: MovementController.spendStamina(amount) (melee staminaCost),
 	MovementController.stopSprint() (drawing and throwing), ViewmodelController.getMuzzle() -> Vector3?,
 	NotificationController.toast(text) ("No arrows").
@@ -80,7 +95,8 @@ local MELEE_STYLE: { [string]: { style: string, weight: string, strike: number }
 }
 local DEFAULT_STYLE = { style = "Slash", weight = "Medium", strike = 0.1 }
 
--- Camera kicks per swing style (pitch, yaw, roll in radians; yaw/roll flip with the swing direction).
+-- Camera kicks per swing style (pitch, yaw, roll in radians). Each swing set gives the direction (swingKick, from
+-- Poses.swingKick) and the style the size; for a set without one, yaw and roll flip with the set (odd sets to the left).
 local KICK: { [string]: Vector3 } = {
 	Punch = Vector3.new(-0.005, 0.008, 0.006),
 	Slash = Vector3.new(-0.004, 0.014, 0.012),
@@ -109,7 +125,8 @@ local nextActionAt = 0
 local awaitingInventoryUntil = 0
 local queuedAttack = false
 local queuedAt = 0
-local comboIndex = 0
+local swingSets: { [string]: number } = {} -- per weapon: the swing set it played last (#90)
+local lastSwingItem: string? = nil -- the weapon of the last swing
 local lastSwingEnd = -1
 local lastStrikeAt = -1
 local lastPredictedHitAt = -1
@@ -478,10 +495,80 @@ local function endUse()
 	end
 end
 
+-- Swing sets (#90, see the header). The viewmodel's Poses module is pure data; it is loaded on the first swing.
+local posesModule: any = nil
+local function swingSetCount(style: string): number
+	if posesModule == nil then
+		posesModule = false
+		local folder = script.Parent:FindFirstChild("ViewmodelController")
+		local module = folder and folder:FindFirstChild("Poses")
+		if module and module:IsA("ModuleScript") then
+			local ok, result = pcall(require, module)
+			if ok and type(result) == "table" then
+				posesModule = result
+			end
+		end
+	end
+	local poses = posesModule
+	if not poses then
+		return if style == "Stab" then 1 else 2
+	end
+	if type(poses.swingCount) == "function" then
+		local ok, count = pcall(poses.swingCount, style)
+		if ok and type(count) == "number" and count >= 1 then
+			return math.floor(count)
+		end
+	end
+	local swing = if type(poses.SWING) == "table" then poses.SWING else {}
+	local sets = swing[style]
+	if type(sets) == "table" and #sets > 0 then
+		return #sets
+	elseif style == "Punch" then
+		local punch = poses.PUNCH
+		return if type(punch) == "table" and #punch > 0 then #punch else 2 -- (left and right)
+	elseif style == "Stab" then
+		local stab = poses.STAB
+		return if type(stab) == "table" and #stab > 0 then #stab else 1
+	end
+	local slash = swing.Slash -- (Poses.swing falls back on the Slash sets)
+	return if type(slash) == "table" and #slash > 0 then #slash else 1
+end
+
+local function pickVariant(itemId: string, style: string, now: number): number
+	local count = math.max(1, swingSetCount(style))
+	local last = swingSets[itemId]
+	if count == 1 then
+		return 1
+	elseif not last or last > count then
+		return rng:NextInteger(1, count) -- the first swing with this weapon (or its sets changed)
+	elseif lastSwingItem == itemId and now - lastSwingEnd < (CombatConfig.SwingChainWindow or 0.45) then
+		return last % count + 1 -- a chain steps through the sets in order
+	end
+	local pick = rng:NextInteger(1, count - 1) -- a fresh click: any set but the last one
+	return if pick >= last then pick + 1 else pick
+end
+
+-- The camera kick for a swing set: its own direction from the viewmodel's Poses (Poses.swingKick: pitch, yaw, roll),
+-- at the size of the style's kick `base`; without one, yaw and roll flip with the set (odd sets cut to the left).
+local function swingKick(style: string, variant: number, base: Vector3): Vector3
+	swingSetCount(style) -- (loads the Poses module once)
+	local poses = posesModule
+	if poses and type(poses.swingKick) == "function" then
+		local ok, dir = pcall(poses.swingKick, style, variant)
+		if ok and typeof(dir) == "Vector3" and dir == dir and dir.Magnitude > 1e-4 then
+			return dir.Unit * base.Magnitude
+		end
+	end
+	local side = if variant % 2 == 0 then -1 else 1
+	return Vector3.new(base.X, base.Y * side, base.Z * side)
+end
+
 local function startMelee(now: number)
 	local def = meleeDef()
 	local look = MELEE_STYLE[def.id] or DEFAULT_STYLE
-	comboIndex = if now - lastSwingEnd < 0.45 then comboIndex + 1 else 1
+	local variant = pickVariant(def.id, look.style, now)
+	swingSets[def.id] = variant
+	lastSwingItem = def.id
 	local windup = def.windup or 0.1
 	local total = math.max(def.cooldown or 0.5, windup + look.strike + 0.08)
 	local rec = {
@@ -490,7 +577,8 @@ local function startMelee(now: number)
 		def = def,
 		style = look.style,
 		weight = look.weight,
-		variant = comboIndex,
+		variant = variant,
+		seed = rng:NextInteger(1, 2147483646),
 		t0 = now,
 		windup = windup,
 		strike = look.strike,
@@ -510,8 +598,9 @@ local function strike(rec: any, now: number)
 	local cf = camera.CFrame
 	local hit = predictMelee(rec.def, cf)
 	if MeleeSwing then
-		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts
-		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character)
+		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts; the set
+		-- (1-8) lets the other players see this same swing
+		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character, if rec.variant <= 8 then rec.variant else nil)
 	end
 	Sfx.play(if rec.weight == "Light" then "Swing_Light" else "Swing_Heavy")
 
@@ -528,10 +617,9 @@ local function strike(rec: any, now: number)
 	end
 
 	local base = KICK[rec.style] or KICK.Slash
-	local side = if rec.variant % 2 == 0 then -1 else 1
 	local strength = if hit and hit.character then 2.6 elseif hit then 2 else 1
 	local shake = if hit and hit.character then HIT_SHAKE[rec.weight] or 0.2 elseif hit then (HIT_SHAKE[rec.weight] or 0.2) * 0.6 else 0
-	kick(Vector3.new(base.X, base.Y * side, base.Z * side) * strength, shake)
+	kick(swingKick(rec.style, rec.variant, base) * strength, shake)
 	actionPulse = 1
 	CombatController.action:Fire("Strike", {
 		itemId = rec.itemId,
@@ -635,9 +723,16 @@ local function releaseThrow(rec: any, now: number)
 	rec.released = true
 	local def = rec.def
 	local cf = camera.CFrame
-	local direction = applySpread(cf, spreadDegrees("Throw"))
 	local speed = if rec.spear then def.throwSpeed or 150 else def.speed or 150
 	local gravity = if rec.spear then def.throwGravity or 45 else def.gravity or 40
+	local aimCF = cf
+	if CombatConfig.ThrowAimOnTarget ~= false then
+		-- like the bow: lift the release so this throw's arc (its speed and gravity) comes down on the crosshair point;
+		-- thrown along the look, a knife landed about 1.1 studs low at 40 studs (combat QA)
+		local lifted = ballisticDirection(cf.Position, crosshairPoint(cf), speed, gravity, cf.LookVector)
+		aimCF = CFrame.lookAt(cf.Position, cf.Position + lifted)
+	end
+	local direction = applySpread(aimCF, spreadDegrees("Throw"))
 	if RangedRelease then
 		RangedRelease:FireServer(rec.shotId, cf.Position, direction, 1, "Throw")
 	end
@@ -1027,6 +1122,35 @@ end
 
 CombatController.canAimWith = canAimWith
 CombatController.countItem = countItem
+
+-- The bow is drawn: MovementController keeps sprint blocked for the whole draw (stopSprint alone only ends a sprint
+-- as the draw starts; combat QA ran at 21 studs/s at full draw).
+function CombatController.isDrawing(): boolean
+	local rec = CombatController.current
+	return rec ~= nil and rec.kind == "Draw"
+end
+
+-- How a melee weapon swings, for an item id: (style, weight); an id without its own style swings like DEFAULT_STYLE.
+function CombatController.meleeStyle(itemId: string?): (string, string)
+	local look = (if type(itemId) == "string" then MELEE_STYLE[itemId] else nil) or DEFAULT_STYLE
+	return look.style, look.weight
+end
+
+-- A swing's small variation from its seed (the Melee record's seed), the same every time for one seed: angles in radians
+-- (pitch, yaw, roll, each within +-JITTER_DEGREES) and `follow`, a timing scale (1 +- JITTER_FOLLOW) for use inside the
+-- follow-through only, so the swing still ends at its total and the hit timing never changes.
+local JITTER_DEGREES = 3
+local JITTER_FOLLOW = 0.04
+function CombatController.swingJitter(seed: number?): { pitch: number, yaw: number, roll: number, follow: number }
+	local r = Random.new(math.floor(tonumber(seed) or 0))
+	local angle = math.rad(JITTER_DEGREES)
+	return {
+		pitch = (r:NextNumber() * 2 - 1) * angle,
+		yaw = (r:NextNumber() * 2 - 1) * angle,
+		roll = (r:NextNumber() * 2 - 1) * angle,
+		follow = 1 + (r:NextNumber() * 2 - 1) * JITTER_FOLLOW,
+	}
+end
 
 function CombatController.Init(registry)
 	Controllers = registry

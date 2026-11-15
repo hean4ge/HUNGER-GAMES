@@ -10,7 +10,8 @@
 	    (keyboard, gamepad or touch). Open by default only until you've played a round (RoundsPlayed 0, larger screens;
 	    QW6), a toggle on phones and afterwards.
 	  * SETTINGS opens the menu (SettingsController).
-	Shown while you're not in the arena and not spectating.
+	Shown while you're not in the arena and not spectating, and once the death card or the round's result card
+	(NotificationController.isCardUp) has gone: the two never draw text over text (round-flow QA pt2/pt3).
 	Public API (Controllers.LobbyController): setHowToVisible(visible: boolean)
 ]]
 local Players = game:GetService("Players")
@@ -285,8 +286,18 @@ local function refreshSpectateLabel()
 	end
 end
 
+-- the death card or the round's result card (NotificationController) has the screen first: the lobby waits for it
+local function cardUp(): boolean
+	local notifications = Controllers and Controllers.NotificationController
+	if notifications and notifications.isCardUp then
+		local ok, up = pcall(notifications.isCardUp)
+		return ok and up == true
+	end
+	return false
+end
+
 local function updateVisibility()
-	local want = not ClientState.inArena and ClientState.spectating == nil
+	local want = not ClientState.inArena and ClientState.spectating == nil and not cardUp()
 	if want == visible then
 		return
 	end
@@ -442,6 +453,7 @@ function LobbyController.Start()
 	end
 
 	while true do
+		updateVisibility() -- it also waits for the death and result cards
 		if visible then
 			updateStatus()
 		end

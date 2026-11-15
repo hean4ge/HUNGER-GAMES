@@ -6,15 +6,15 @@
 	    Victory (see below). Unknown styles fall back to a toast.
 	  * YouDied: the death screen ("#7 OF 24", killer or cause, weapon) with SPECTATE / CONTINUE, a muted grade.
 	    QW4: "OUTLASTED 15 OF 24 · 6:12", and one tip for the cause and weapon class (a more specific one the second
-	    time the same thing kills you). SPECTATE opens on your killer (payload killerUserId, else the killer's name).
+	    time the same thing kills you; the border's first tip follows the border as it was: still on day 1, closer in for few). SPECTATE opens on your killer (payload killerUserId, else the killer's name).
 	    When your death ends the round (a lone practice contender, the runner-up), the death card stays up for
 	    DEATH_DWELL s (or until CONTINUE) with the result in its note, and the result card follows. Practice deaths read
 	    "FALLEN" (not "#1 OF 1"); a death before the horn (payload phase "Countdown") reads "OUT" with no tip.
 	  * QW5: one-time cards for new players (Guidance, through HUDController.guidanceOn): THIRSTY below 60 thirst (it
 	    also shows the water marker), HUNGRY below 60 hunger. Cards never show during a Roll Call; they wait for it.
 	    They sit at the left (Overlay Cards), clear of the item toast and the held item; toasts sit above the item toast.
-	  * QW6: the countdown caption says the goal while the plate rises ("LAST ONE STANDING WINS", with "PRACTICE ROUND"
-	    in front in practice) and the choice once it locks ("RUSH THE SPIRE FOR WEAPONS · OR RUN FOR THE TREES"), with a
+	  * QW6: the countdown caption says the goal while the plate rises ("LAST ONE STANDING WINS"; alone in a practice
+	    round, "PRACTICE ROUND · NO RIVALS, JUST TRAINING DUMMIES") and the choice once it locks ("RUSH THE SPIRE FOR WEAPONS · OR RUN FOR THE TREES"), with a
 	    line about the runner's caches for new players; trying to step off the plate brings back "STAY ON YOUR PLATE".
 	  * Victory: Phase Ending + WinnerName (or the Victory announce); a special version when you won; then the
 	    RoundSummary table. Players who didn't take part in the round get a headline instead.
@@ -26,6 +26,7 @@
 	  card(title: string, text: string | () -> string, opts?)   a card with the toasts; opts: { color: Color3?,
 	                                        duration: number?, when: (() -> boolean)?, onShow: (() -> ())? }
 	  hideDeathScreen()
+	  isCardUp() -> boolean                the death card or the round's result card is up (the lobby waits for it)
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -571,7 +572,13 @@ local function goalCaption(): string
 	end
 	if not launchLocked() then
 		if GameState:GetAttribute("Practice") == true then
-			return if isPhone() then "PRACTICE  ·  LAST ONE STANDING WINS" else "PRACTICE ROUND  ·  LAST ONE STANDING WINS"
+			-- alone in the arena there is nobody to outlast: say what the round is (round-flow QA pt1)
+			local dummies = (tonumber(Config.Combat.PracticeDummies) or 0) > 0
+				and (Config.IsStudio or Config.Round.SoloPractice ~= false)
+			if dummies then
+				return if isPhone() then "PRACTICE  ·  JUST TRAINING DUMMIES" else "PRACTICE ROUND  ·  NO RIVALS, JUST TRAINING DUMMIES"
+			end
+			return if isPhone() then "PRACTICE  ·  NO RIVALS" else "PRACTICE ROUND  ·  NO RIVALS THIS TIME"
 		end
 		return "LAST ONE STANDING WINS"
 	end
@@ -677,7 +684,8 @@ local function updateCountdown()
 		end
 		local endsAt = tonumber(GameState:GetAttribute("PhaseEndsAt")) or 0
 		local n = math.ceil(endsAt - workspace:GetServerTimeNow())
-		if n >= 1 and n ~= countdown.last and not countdown.flashing then
+		-- (held while the launch intro plays: no numbers and no ticks over the shot; the current one shows after it)
+		if n >= 1 and n ~= countdown.last and not countdown.flashing and not ClientState.launchShot then
 			countdown.last = n
 			showCountdownNumber(math.min(n, 99))
 		end
@@ -808,6 +816,17 @@ local TIPS: { [string]: { () -> string } } = {
 	},
 	Border = {
 		function()
+			-- the border as it was when you died: on day 1 it hasn't moved (a small round's starts closer in), so "from
+			-- the second morning" read wrong after a day-1 death outside it (round-flow QA pt3)
+			local full = tonumber(Config.Border.StartRadius) or 640
+			local start = tonumber(GameState:GetAttribute("BorderStartRadius")) or full
+			local radius = tonumber(GameState:GetAttribute("BorderRadius"))
+			local moving = GameState:GetAttribute("BorderShrinking") == true or (radius ~= nil and radius < start - 0.5)
+			if not moving and start < full - 0.5 then
+				return "With fewer contenders " .. Lore.Border .. " starts closer in, and it hurts from the start. If you stray out, follow the marker on your compass back in."
+			elseif not moving then
+				return Lore.cap("Border") .. " hurts from the start, even before it moves. If you stray out, follow the marker on your compass back in."
+			end
 			return "From the second morning " .. Lore.Border .. " closes on " .. Lore.Spire .. ". Head in when the timer shows."
 		end,
 		function()
@@ -983,6 +1002,12 @@ local function hideDeath()
 	end
 end
 NotificationController.hideDeathScreen = hideDeath
+
+-- The death card or the round's result card is up: LobbyController keeps the lobby screen back until it goes, so the
+-- two never draw text over text (round-flow QA pt2/pt3, survival P2).
+function NotificationController.isCardUp(): boolean
+	return deathVisible or victoryVisible
+end
 
 local function showDeath(data: any)
 	if type(data) ~= "table" or victoryVisible then

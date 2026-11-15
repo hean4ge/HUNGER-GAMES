@@ -1,9 +1,11 @@
 --[[
 	LootCueController - client cues for loot (docs/design/PlayabilityPlan.md QW8 and QW11). Client only.
-	  * Take all (QW8): for a few seconds after a crate is opened, LootService puts a "Take all" prompt on it (tag
-	    "TakeAllPrompt", attribute OwnerUserId). Only the contender who opened the crate sees it (it is disabled
-	    locally for everyone else). While it is up, the items that crate spilled for them (attribute SpillOwner)
-	    hide their own Take prompts, so one press of E takes everything; whatever doesn't fit stays on the ground.
+	  * Take all (QW8): once a crate is opened, LootService puts a "Take all" prompt on it (tag "TakeAllPrompt",
+	    attribute OwnerUserId) until its opener presses it or walks away. Only the contender who opened the crate sees
+	    it (it is disabled locally for everyone else). While it is up, the items that crate spilled for them (attribute
+	    SpillOwner, landed beside the crate in view) hide their own Take prompts, so one press of E takes everything;
+	    whatever doesn't fit stays on the ground and gets its own prompt back as soon as Take all has gone. A prompt
+	    with an Until attribute (server time) is dropped once that has passed, even before its removal replicates.
 	  * Crate outlines (QW11): with Guidance on (ClientState.guidanceOn: new players on Auto, Q1), during the first
 	    Config.Loot.CrateOutlineTime seconds after the horn, an outline-only Highlight on the nearest CrateOutlineMax
 	    unopened crates (tag SupplyCrate) within CrateOutlineRange studs, in your line of sight (Occluded). It fades

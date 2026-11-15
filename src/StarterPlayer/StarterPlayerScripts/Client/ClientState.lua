@@ -29,6 +29,12 @@ local ClientState = {
 	lookDelta = Vector2.zero, -- camera rotation this frame in radians (X = yaw, Y = pitch)
 	cameraBob = CFrame.identity, -- the bob/tilt offset applied to the camera this frame
 	fov = Config.Camera.BaseFov,
+	zoomAlpha = 0, -- 0..1 the slight zoom (action Zoom: V held, R3 or touch ZOOM toggled), eased
+
+	-- The round's launch intro writes (LaunchIntroController):
+	launchShot = false, -- true while the launch shot has the camera, the lighting and the HUD (CameraController and its
+	-- zoom and ViewmodelController stand down, ArenaController's day cycle and NotificationController's countdown hold,
+	-- LaunchController's turn to the Spire waits)
 
 	-- CombatController writes:
 	aiming = false,

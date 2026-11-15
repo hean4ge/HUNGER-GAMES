@@ -17,6 +17,8 @@
 	    A new player holding food or a drink for StallTime with that meter under StallBelow gets the full line back
 	    once a round. The climb line shows with a Climbable trunk within reach (and "LET GO" while climbing).
 	    "[G] DROP THE HELD ITEM" shows for 3 s after an "Inventory full" toast, whatever the Guidance.
+	    Armor that's no better than the armor you wear says so ("WORSE THAN YOUR PADDED ARMOR") whatever the fade,
+	    unless Guidance is Off (survival QA P3).
 	  Both hints stay up 0.25 s after their target leaves the look ray, so they don't flicker as you look around.
 	Input (bound only while an alive contender and not spectating, so it never fights the spectator controls):
 	  Slot1..Slot6 (One..Six), NextSlot / PrevSlot (mouse wheel, ButtonR1 / ButtonL1), Drop (G, DPadDown, touch "DROP"
@@ -33,7 +35,8 @@
 	  says "Drink" or "Fill bottle" (holding an empty bottle) and the Drink action (E / ButtonX / touch "DRINK", which
 	  reads "FILL" with an empty bottle) is bound; holding it keeps sipping every DrinkSipTime. Never while a
 	  ProximityPrompt is showing, so E reaches prompts.
-	Loot prompts (tag "LootPrompt") are hidden locally unless you are an alive contender. (A crate's "Take all" prompt,
+	Loot prompts (tag "LootPrompt") are hidden locally unless you are an alive contender. Armor on the ground says when
+	  it's worse than yours ("Leather Vest  ·  worse than yours"; armor never stacks, so the server never rewrites it). (A crate's "Take all" prompt,
 	  only for its opener, and holding back that crate's item prompts meanwhile are LootCueController's; QW8.)
 	Pickups: when a stack grows or a new item arrives (not by using, filling or swapping an item), Feedback.pickup shows
 	  "+4 ARROWS" over the hotbar in the item's rarity colour.
@@ -1008,6 +1011,10 @@ local function computeActionHint(): any
 	local action = ActionHints.forItem(def)
 	if action then
 		local stage = hintStage(action)
+		-- armor that's no better than what you wear warns everyone with Guidance on at all (survival QA P3)
+		if action == "Wear" and guidanceMode() ~= 0 and ActionHints.isDowngrade(def) then
+			stage = "full"
+		end
 		if stage then
 			return ActionHints.build(action, def, device, { keyOnly = stage == "key", arrows = countOf("arrow") })
 		end
@@ -1088,6 +1095,19 @@ local function applyPrompt(prompt: Instance)
 	local range = prompt:GetAttribute("Range")
 	if type(range) == "number" then
 		prompt.MaxActivationDistance = if ClientState.alive then range else 0
+	end
+	-- armor on the ground says when it's worse than what you wear (survival QA P3)
+	local model = prompt:FindFirstAncestorOfClass("Model")
+	local id = if model then model:GetAttribute("ItemId") else nil
+	local def = if type(id) == "string" then ItemDefs.get(id) else nil
+	if def and def.kind == "Armor" then
+		local text = def.name
+		if ActionHints.isDowngrade(def) then
+			text ..= if player:GetAttribute("Armor") == def.id then "  ·  you wear one" else "  ·  worse than yours"
+		end
+		if prompt.ObjectText ~= text then
+			prompt.ObjectText = text
+		end
 	end
 end
 
@@ -1191,6 +1211,7 @@ function InventoryController.Start()
 		end)
 	end
 	CollectionService:GetInstanceAddedSignal(PROMPT_TAG):Connect(applyPrompt)
+	player:GetAttributeChangedSignal("Armor"):Connect(refreshPrompts) -- "worse than yours" follows what you wear
 	ProximityPromptService.PromptShown:Connect(function(prompt)
 		shownPrompts[prompt] = true
 		setHint(nil) -- E belongs to the prompt now

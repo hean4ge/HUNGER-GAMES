@@ -16,24 +16,30 @@
 	  marker's LookVector, with a small random yaw.
 	Interaction: ProximityPrompts (tag "LootPrompt", attribute Range) - only alive contenders during Countdown/Active,
 	  within Config.Loot.PickupRange (server-checked).
-	  Crates: hold to open -> the lid swings open, CrateItemsMin..Max items (plus a bow's arrows) pop out toward the
-	  opener, Sfx CrateOpen, the prompt is disabled.
+	  Crates: hold to open -> the lid swings open, CrateItemsMin..Max items (plus a bow's arrows) pop out and land beside
+	  the crate as the opener sees it, in view and within reach (spillSpots), Sfx CrateOpen, the prompt is disabled.
 	  Ground items: Take -> InventoryService.give (stacks); leftovers stay on the ground; nothing fits -> Toast
 	  "Inventory full"; Sfx PickUp.
 	Models: crates are tagged "SupplyCrate" (attributes Tier, Opened); ground items are tagged "GroundItem" (attributes
 	  ItemId, Count) with a dim PointLight in the rarity colour (a faint glint for Rare and better).
 
 Playability (docs/design/PlayabilityPlan.md)
-	  QW3   populate() skips markers more than Config.Loot.BorderMargin outside GameState.BorderStartRadius.
+	  QW3   populate() skips markers more than Config.Loot.BorderMargin outside GameState.BorderStartRadius (negative:
+	        that far inside it, so every crate and item starts inside the ring).
+	        Crates stand at least Config.Loot.CrateSpacing apart: a crate whose marker is too close to one already
+	        standing moves aside to clear, level ground nearby, or that marker gets none this round. The rays that place
+	        crates look past the other crates, so none lands on top of another.
 	  QW7   runner's caches: markers with Runner = true get a tier-2 crate rolled from ItemDefs.LootTables.Runner (a
 	        knife or 2 throwing knives, a water bottle, one tier-1 roll) and a pale canvas on a pole beside it
 	        (Model "RunnerMarker", streamed to everyone). Config.Loot.RunnerCaches switches them off.
 	  QW8   after the open, the opener gets a "Take all" prompt on the crate (tag "TakeAllPrompt", attribute
 	        OwnerUserId; LootCueController shows it to the owner only and hides the spilled items' own prompts meanwhile)
-	        for Config.Loot.TakeAllTime s: everything that fits goes in the bag, the rest stays. Items in
+	        until they press it or walk Config.Loot.TakeAllWalkAway studs from the crate (or fall, or nothing is left):
+	        everything that fits goes in the bag, the rest stays and is taken item by item. Items in
 	        Config.Loot.AutoPickup you already carry are picked up when you walk over them (not the stack you just
-	        dropped, for a few seconds). Nothing fits: toast "INVENTORY FULL" (InventoryController adds "[G] DROP
-	        THE HELD ITEM" under the crosshair with this device's button).
+	        dropped, for a few seconds; ammo only with a weapon that shoots it: no arrows without a bow). Nothing fits:
+	        toast "INVENTORY FULL" (InventoryController adds "[G] DROP THE HELD ITEM" under the crosshair with this
+	        device's button).
 	  QW11  Common and Uncommon ground items glint faintly too (Config.Loot.CommonGlint); an opened crate's straps go
 	        slack and its clasp stops glinting (ItemModels.slackenCrate).
 	  QW15  LootService.crateOpened: Signal(player, tier, runner) for the onboarding funnel.
@@ -107,6 +113,7 @@ type CrateState = {
 	opener: Player?,
 	spilled: { GroundState },
 	takeAll: ProximityPrompt?,
+	spot: Vector3, -- where it stands (the floor under it): crates keep Config.Loot.CrateSpacing apart
 }
 
 local groundItems: { [Model]: GroundState } = {}
@@ -779,6 +786,67 @@ local function rollRunner(): { { id: string, count: number } }
 	return out
 end
 
+-- QW8: where the spilled items land: where the opener can see them and take them without moving. Thrown toward the
+-- opener they landed at their feet, under the view, and E found no prompt until they moved. Each item gets a spot in an
+-- arc around the opener, beside the crate as they see it: 26, 34 and 42 degrees either side of it (alternating sides),
+-- 5.6 to 6.2 studs from them (nearer is under the usual downward look; further is out of an item prompt's reach of 7).
+-- A spot with something solid between it and the crate, no ground under it (a drop), or ground well above the crate's
+-- floor (another crate, a rock) is left out. Items without a spot get the old toss toward the opener.
+local SPILL_ANGLES = { 26, 34, 42 }
+local function spillSpots(state: CrateState, player: Player?, n: number): { [number]: Vector3 }
+	local spots: { [number]: Vector3 } = {}
+	local base = state.model.PrimaryPart :: BasePart
+	local root = player and rootOf(player)
+	if not root then
+		return spots
+	end
+	local center = base.Position
+	local floor = center.Y - base.Size.Y / 2
+	local toCrate = Util.flat(center - root.Position)
+	if toCrate.Magnitude < 0.5 then
+		return spots
+	end
+	local reach = math.clamp(toCrate.Magnitude + 0.6, 5.6, 6.2)
+	toCrate = toCrate.Unit
+	local from = Vector3.new(root.Position.X, floor, root.Position.Z)
+	local params = placementParams({ state.model })
+	local knee = Vector3.new(0, 1.2, 0)
+	local start = Vector3.new(center.X, floor, center.Z) + knee
+	local free = {}
+	for _, side in ipairs({ 1, -1 }) do
+		for k, angle in ipairs(SPILL_ANGLES) do
+			local turn = math.rad(angle + rng:NextNumber(-3, 3)) * side
+			local p = from + CFrame.Angles(0, turn, 0):VectorToWorldSpace(toCrate) * reach
+			if not workspace:Raycast(start, (p + knee) - start, params) then
+				local ground = workspace:Raycast(p + Vector3.new(0, 3, 0), Vector3.new(0, -7, 0), params)
+				if ground and ground.Position.Y > floor - 2.5 and ground.Position.Y < floor + 1.5 then
+					table.insert(free, { k = k, side = side, spot = ground.Position })
+				end
+			end
+		end
+	end
+	-- the nearest angles first, alternating sides from a random one
+	local firstSide = if rng:NextNumber() < 0.5 then 1 else -1
+	table.sort(free, function(x, y)
+		if x.k ~= y.k then
+			return x.k < y.k
+		end
+		return x.side == firstSide and y.side ~= firstSide
+	end)
+	for i = 1, math.min(n, #free) do
+		spots[i] = free[i].spot
+	end
+	return spots
+end
+
+-- The toss from `origin` that comes down on `spot`: rising at `up` studs/s, under Config.Loot.TossGravity.
+local function tossTo(origin: Vector3, spot: Vector3, up: number): Vector3
+	local g = LootCfg.TossGravity or 70
+	local drop = spot.Y - origin.Y
+	local t = (up + math.sqrt(math.max(0, up * up - 2 * g * drop))) / g
+	return Util.flat(spot - origin) / math.max(t, 0.05) + Vector3.new(0, up, 0)
+end
+
 -- Returns how many items pop out (they spawn over the next few tenths of a second; state.spilled collects them).
 local function spill(state: CrateState, player: Player?): number
 	local model = state.model
@@ -797,12 +865,19 @@ local function spill(state: CrateState, player: Player?): number
 		end
 	end
 	toward = if toward.Magnitude > 1e-3 then toward.Unit else Vector3.new(0, 0, -1)
+	local spots = spillSpots(state, player, #items)
 	local gen = generation
 	local ignore = { model }
 	for i, item in ipairs(items) do
-		local spread = (i - (#items + 1) / 2) * 0.42 + rng:NextNumber(-0.15, 0.15)
-		local direction = CFrame.Angles(0, spread, 0):VectorToWorldSpace(toward)
-		local velocity = direction * rng:NextNumber(5.5, 8.5) + Vector3.new(0, rng:NextNumber(11, 14), 0)
+		local spot = spots[i]
+		local velocity
+		if spot then
+			velocity = tossTo(origin, spot + Vector3.new(0, 0.3, 0), rng:NextNumber(9.5, 11.5)) -- a low toss onto its spot
+		else
+			local spread = (i - (#items + 1) / 2) * 0.42 + rng:NextNumber(-0.15, 0.15)
+			local direction = CFrame.Angles(0, spread, 0):VectorToWorldSpace(toward)
+			velocity = direction * rng:NextNumber(5.5, 8.5) + Vector3.new(0, rng:NextNumber(11, 14), 0)
+		end
 		task.delay(0.12 + (i - 1) * (LootCfg.SpillDelay or 0.09), function()
 			if gen == generation and model.Parent then
 				local spawned = spawnGround(item.id, item.count, origin, velocity, ignore)
@@ -857,13 +932,15 @@ local function takeAll(state: CrateState, player: Player)
 			end
 		end
 	end
+	-- one press either way: what is left (the bag filled up, or nothing fitted) is taken item by item, with each item's
+	-- own prompt, which LootCueController gives back once this one has gone
+	local prompt = state.takeAll
+	state.takeAll = nil
+	if prompt then
+		prompt:Destroy()
+	end
 	if got > 0 then
 		Sfx.playFor(player, "PickUp")
-		local prompt = state.takeAll
-		state.takeAll = nil
-		if prompt then
-			prompt:Destroy()
-		end
 	end
 	if left > 0 then
 		inventoryFull(player)
@@ -871,10 +948,10 @@ local function takeAll(state: CrateState, player: Player)
 end
 
 local function offerTakeAll(state: CrateState, player: Player, delay: number)
-	local window = tonumber(LootCfg.TakeAllTime) or 0
-	if window <= 0 then
+	if LootCfg.TakeAll == false then
 		return
 	end
+	local walkAway = tonumber(LootCfg.TakeAllWalkAway) or 14
 	local gen = generation
 	task.delay(delay, function()
 		local model = state.model
@@ -895,14 +972,35 @@ local function offerTakeAll(state: CrateState, player: Player, delay: number)
 		prompt.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
 		prompt:SetAttribute("Range", prompt.MaxActivationDistance)
 		prompt:SetAttribute("OwnerUserId", player.UserId)
-		prompt:SetAttribute("Until", workspace:GetServerTimeNow() + window)
 		CollectionService:AddTag(prompt, TAKE_ALL_TAG)
 		prompt.Parent = base:FindFirstChild("PromptAttachment") or base
 		state.takeAll = prompt
 		prompt.Triggered:Connect(function(who: Player)
 			takeAll(state, who)
 		end)
-		task.delay(window, function()
+		-- it stays until it is pressed (takeAll), or the opener walks away, falls or leaves, or nothing is left to take
+		-- (a 3 s window ran out before players found it, and their items' own prompts were held back meanwhile)
+		task.spawn(function()
+			while state.takeAll == prompt and prompt.Parent do
+				task.wait(0.25)
+				if gen ~= generation or not model.Parent or player.Parent ~= Players or not isAliveContender(player) then
+					break
+				end
+				local root = rootOf(player)
+				if not root or (root.Position - base.Position).Magnitude > walkAway then
+					break
+				end
+				local left = false
+				for _, item in ipairs(state.spilled) do
+					if not item.taken and item.model.Parent then
+						left = true
+						break
+					end
+				end
+				if not left then
+					break
+				end
+			end
 			if state.takeAll == prompt then
 				state.takeAll = nil
 			end
@@ -1020,6 +1118,79 @@ local function crateFrame(marker: BasePart, params: RaycastParams): CFrame
 	return surfaceFrame(floor, up, marker.CFrame.LookVector) * CFrame.Angles(0, rng:NextNumber(-0.16, 0.16), 0)
 end
 
+-- Crates stand at least Config.Loot.CrateSpacing apart (QA: at the lake three markers put crates inside and on top of
+-- each other). A crate whose spot is too close to one already standing moves aside to the nearest spot clear of every
+-- crate, level with its marker, on firm ground, with nothing solid in it or in the way; with none nearby, that marker
+-- gets no crate this round. `params` must look past the Crates folder. Returns the frame (nil = left out) and whether
+-- it moved.
+local crateProbe: Part? = nil
+
+local function crateTooClose(position: Vector3): boolean
+	local spacing = math.max(0, tonumber(LootCfg.CrateSpacing) or 5)
+	for _, other in pairs(crates) do
+		if (other.spot - position).Magnitude < spacing then
+			return true
+		end
+	end
+	return false
+end
+
+local function spacedCrateFrame(marker: BasePart, params: RaycastParams): (CFrame?, boolean)
+	local frame = crateFrame(marker, params)
+	if not crateTooClose(frame.Position) then
+		return frame, false
+	end
+	local spacing = math.max(0, tonumber(LootCfg.CrateSpacing) or 5)
+	local origin = frame.Position
+	local nearest, best = nil, math.huge
+	for _, other in pairs(crates) do
+		local d = (other.spot - origin).Magnitude
+		if d < best then
+			nearest, best = other.spot, d
+		end
+	end
+	-- away from the nearest crate first, then turning further round
+	local away = if nearest then Util.flat(origin - nearest) else Vector3.zero
+	if away.Magnitude < 0.05 then
+		away = Util.flat(marker.CFrame.RightVector)
+	end
+	away = if away.Magnitude > 0.05 then away.Unit else Vector3.xAxis
+	local probe = crateProbe
+	if not probe then
+		probe = Instance.new("Part")
+		probe.Name = "CrateProbe"
+		probe.Anchored = true
+		probe.CanCollide = false
+		probe.CanQuery = false
+		probe.CanTouch = false
+		probe.Size = Vector3.new(3.6, 1.9, 2.3) -- a crate's body, a little smaller (it may touch things, not sink into them)
+		crateProbe = probe
+	end
+	local overlap = OverlapParams.new()
+	overlap.FilterType = Enum.RaycastFilterType.Exclude
+	overlap.FilterDescendantsInstances = params.FilterDescendantsInstances
+	overlap.RespectCanCollide = true
+	local waist = Vector3.new(0, 1.3, 0)
+	for _, distance in ipairs({ spacing, spacing + 1.5, spacing + 3 }) do
+		for _, turn in ipairs({ 0, 40, -40, 80, -80, 120, -120, 160, -160 }) do
+			local spot = origin + CFrame.Angles(0, math.rad(turn), 0):VectorToWorldSpace(away) * distance
+			if not workspace:Raycast(origin + waist, spot - origin, params) then
+				local hit = workspace:Raycast(spot + Vector3.new(0, 3, 0), Vector3.new(0, -6, 0), params)
+				if hit and hit.Normal.Y >= 0.8 and math.abs(hit.Position.Y - origin.Y) <= 2 and not crateTooClose(hit.Position) then
+					local up = Vector3.yAxis:Lerp(clampUp(hit.Normal, math.rad(14)), 0.6).Unit
+					local candidate = surfaceFrame(hit.Position, up, marker.CFrame.LookVector)
+						* CFrame.Angles(0, rng:NextNumber(-0.16, 0.16), 0)
+					probe.CFrame = candidate * CFrame.new(0, 1.25, 0)
+					if #workspace:GetPartsInPart(probe, overlap) == 0 then
+						return candidate, true
+					end
+				end
+			end
+		end
+	end
+	return nil, false
+end
+
 -- QW7: a pale canvas hung from a crossbar on a pole beside a runner's cache (Parts only), facing the Spire so it reads
 -- from the launch plates.
 local function buildRunnerMarker(frame: CFrame, params: RaycastParams): Model
@@ -1107,6 +1278,7 @@ local function spawnCrate(marker: BasePart?, tier: number, frame: CFrame, dropIn
 		opener = nil,
 		spilled = {},
 		takeAll = nil,
+		spot = frame.Position,
 	}
 	crates[model] = state
 	if marker then
@@ -1239,11 +1411,12 @@ function LootService.populate()
 		return
 	end
 	task.spawn(function()
-		local params = placementParams()
-		local crateCount, itemCount, skipped = 0, 0, 0
-		-- QW3: loot only where the people are (this round's starting ring plus a margin)
+		-- crates stand on the ground, never on another crate (their rays look past the Crates folder)
+		local params = placementParams({ getFolder("Crates") })
+		local crateCount, itemCount, skipped, moved, crowded = 0, 0, 0, 0, 0
+		-- QW3: loot only where the people are: inside this round's starting ring (BorderMargin < 0: that far in from it)
 		local r0 = tonumber(GameState:GetAttribute("BorderStartRadius")) or Config.Border.StartRadius
-		local limit = r0 + (LootCfg.BorderMargin or 30)
+		local limit = r0 + (tonumber(LootCfg.BorderMargin) or -10)
 		for index, marker in ipairs(markers) do
 			if gen ~= generation then
 				return
@@ -1256,8 +1429,16 @@ function LootService.populate()
 				local ok, err = pcall(function()
 					local tier = tierOf(marker)
 					if marker:GetAttribute("Kind") == "Crate" then
-						spawnCrate(marker, tier, crateFrame(marker, params), false)
-						crateCount += 1
+						local frame, shifted = spacedCrateFrame(marker, params)
+						if frame then
+							spawnCrate(marker, tier, frame, false)
+							crateCount += 1
+							if shifted then
+								moved += 1
+							end
+						else
+							crowded += 1
+						end
 					elseif rng:NextNumber() < (LootCfg.GroundSpawnChance or 0.65) then
 						if spawnAtGroundMarker(marker, tier) then
 							itemCount += 1
@@ -1272,13 +1453,14 @@ function LootService.populate()
 				task.wait()
 			end
 		end
-		print(string.format("[LootService] %d crates and %d ground items from %d markers (%d skipped outside r %d)", crateCount, itemCount, #markers, skipped, math.floor(limit)))
+		print(string.format("[LootService] %d crates and %d ground items from %d markers (%d skipped outside r %d; %d crates moved aside and %d left out to keep them %s studs apart)",
+			crateCount, itemCount, #markers, skipped, math.floor(limit), moved, crowded, tostring(LootCfg.CrateSpacing or 5)))
 	end)
 end
 
 function LootService.refillSpire()
 	local radius = LootCfg.SpireRefillRadius or 90
-	local params = placementParams()
+	local params = placementParams({ getFolder("Crates") })
 	local crateCount, itemCount = 0, 0
 	for _, marker in ipairs(collectMarkers()) do
 		if marker.Parent and tierOf(marker) == 3 and ArenaLayout.flatDistance(marker.Position) <= radius then
@@ -1289,8 +1471,11 @@ function LootService.refillSpire()
 						destroyCrate(old)
 					end
 					-- DropIn = false (the Spire's niche markers, Populate v2): restocked in place, not dropped through the Spire
-					spawnCrate(marker, 3, crateFrame(marker, params), marker:GetAttribute("DropIn") ~= false, crateCount * 0.18)
-					crateCount += 1
+					local frame = spacedCrateFrame(marker, params)
+					if frame then
+						spawnCrate(marker, 3, frame, marker:GetAttribute("DropIn") ~= false, crateCount * 0.18)
+						crateCount += 1
+					end
 				else
 					local existing = itemAtMarker[marker]
 					if not (existing and existing.Parent) and rng:NextNumber() < (LootCfg.GroundSpawnChance or 0.65) then
@@ -1315,6 +1500,31 @@ end
 -- Lifecycle
 --------------------------------------------------------------------------------------------------------------------
 
+-- Ammo is walked up only by someone who carries a weapon that shoots it (arrows with no bow cluttered the bag; E still
+-- takes them). AMMO_USERS[ammo id] = the bows that shoot it.
+local AMMO_USERS: { [string]: { string } } = {}
+for id, def in pairs(ItemDefs.Items) do
+	if def.kind == "Bow" then
+		local ammo = def.ammo or "arrow"
+		AMMO_USERS[ammo] = AMMO_USERS[ammo] or {}
+		table.insert(AMMO_USERS[ammo], id)
+	end
+end
+
+local function shootsIt(inventory: any, player: Player, itemId: string): boolean
+	local def = ItemDefs.get(itemId)
+	if not def or def.kind ~= "Ammo" then
+		return true
+	end
+	for _, weaponId in ipairs(AMMO_USERS[itemId] or {}) do
+		local ok, has = pcall(inventory.has, player, weaponId, 1)
+		if ok and has == true then
+			return true
+		end
+	end
+	return false
+end
+
 -- QW8: ammo and throwing knives you already carry are picked up as you walk over them (server-checked range)
 local function autoPickupTick()
 	local ids = LootCfg.AutoPickup
@@ -1326,7 +1536,8 @@ local function autoPickupTick()
 		return
 	end
 	local inventory = Services.InventoryService
-	if not inventory or type(inventory.count) ~= "function" or type(inventory.give) ~= "function" then
+	if not inventory or type(inventory.count) ~= "function" or type(inventory.give) ~= "function"
+		or type(inventory.has) ~= "function" then
 		return
 	end
 	local candidates = {}
@@ -1349,7 +1560,7 @@ local function autoPickupTick()
 				if not state.taken and math.abs(d.Y) <= 5 and Vector3.new(d.X, 0, d.Z).Magnitude <= range
 					and not (state.noAutoPlayer == player and clock < state.noAutoUntil) then
 					local okCount, have = pcall(inventory.count, player, state.id)
-					if okCount and (tonumber(have) or 0) > 0 then
+					if okCount and (tonumber(have) or 0) > 0 and shootsIt(inventory, player, state.id) then
 						local ok, result = pcall(inventory.give, player, state.id, state.count)
 						local added = if ok then math.clamp(math.floor(tonumber(result) or 0), 0, state.count) else 0
 						if added > 0 then

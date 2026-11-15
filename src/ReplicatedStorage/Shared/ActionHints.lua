@@ -10,16 +10,22 @@
 	    text: the line with button names in [brackets], e.g. "HOLD [LMB] EAT · +12 HUNGER"
 	    keys: those button names in order ({ "LMB" }); stage: "full" | "key" (ctx.keyOnly: just the button, "[LMB]")
 	    ctx.arrows: arrows carried (the bow line counts them); ctx.climbing: "[C] LET GO" while on a trunk
+	    ctx.worn: the armor id you wear (default: the LocalPlayer's Armor attribute); armor that's no better than it
+	    gets a warning instead of the put-on line ("WORSE THAN YOUR PADDED ARMOR · -15% VS -28% DAMAGE")
+	    The bow line names the Aim button too ("HOLD [LMB] DRAW · [RMB] AIM · RELEASE TO SHOOT · 12 ARROWS").
+	ActionHints.isDowngrade(def?, wornId?) -> boolean   armor no better than the armor you wear
 	ActionHints.touchLabel(def?, aiming?) -> string   the big touch button: EAT, DRINK, HEAL, WEAR, DRAW, THROW, ATTACK
 	ActionHints.count(hintsSeen, action) -> 0..7      ActionHints.bump(hintsSeen, action) -> hintsSeen (stops at 7)
 	ActionHints.split(text) -> { { text: string, key: boolean } }   for renderers that draw the [KEY] parts as key caps
 	ActionHints.keyOf(name, device?) -> string        a button name ("Attack", "Aim", "Drink", "Crouch", "Drop"...)
 ]]
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Glyphs = require(Shared:WaitForChild("Glyphs"))
 local Input = require(Shared:WaitForChild("Input"))
+local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 
 local ActionHints = {}
 
@@ -85,6 +91,31 @@ function ActionHints.keyOf(name: string, device: string?): string
 	return Glyphs.forAction(name, d) or string.upper(name)
 end
 
+-- The armor you wear (wornId, else the LocalPlayer's Armor attribute), or nil.
+local function wornArmor(wornId: any): any
+	local id = wornId
+	if id == nil then
+		local lp = Players.LocalPlayer
+		id = if lp then lp:GetAttribute("Armor") else nil
+	end
+	if type(id) ~= "string" or id == "" then
+		return nil
+	end
+	return ItemDefs.get(id)
+end
+
+-- Armor that's no better than the armor you wear: putting it on would be a step down (survival QA P3).
+function ActionHints.isDowngrade(def: any, wornId: string?): boolean
+	if type(def) ~= "table" or def.kind ~= "Armor" then
+		return false
+	end
+	local worn = wornArmor(wornId)
+	if type(worn) ~= "table" then
+		return false
+	end
+	return (tonumber(worn.damageMultiplier) or 1) <= (tonumber(def.damageMultiplier) or 1)
+end
+
 local function stats(def: any): string
 	local parts = {}
 	if tonumber(def.hunger) then
@@ -126,6 +157,17 @@ local function lines(action: string, def: any, device: string, ctx: { [string]: 
 		if action == "Wear" then
 			local mult = tonumber(def and def.damageMultiplier) or 1
 			tail = string.format("-%d%% DAMAGE", math.floor((1 - mult) * 100 + 0.5))
+			-- no better than the armor you wear: say so instead of teaching the put-on (survival QA P3)
+			if ActionHints.isDowngrade(def, ctx.worn) then
+				local worn = wornArmor(ctx.worn)
+				if worn.id == def.id then
+					return "YOU'RE ALREADY WEARING ONE", "YOU'RE ALREADY WEARING ONE"
+				end
+				local warning = "WORSE THAN YOUR " .. string.upper(tostring(worn.name or "ARMOR"))
+				local wornPct = math.floor((1 - (tonumber(worn.damageMultiplier) or 1)) * 100 + 0.5)
+				local pct = math.floor((1 - mult) * 100 + 0.5)
+				return string.format("%s · -%d%% VS -%d%% DAMAGE", warning, pct, wornPct), warning
+			end
 		else
 			tail = if def then stats(def) else ""
 		end
@@ -137,10 +179,13 @@ local function lines(action: string, def: any, device: string, ctx: { [string]: 
 	elseif action == "Bow" then
 		local arrows = math.max(0, math.floor(tonumber(ctx.arrows) or 0))
 		local count = if arrows == 0 then "NO ARROWS" elseif arrows == 1 then "1 ARROW" else string.format("%d ARROWS", arrows)
+		-- the Aim button too, as the spear's line does (combat QA: right-click aiming was never taught)
+		local aim = ActionHints.keyOf("Aim", device)
 		if touch then
-			return string.format("HOLD [DRAW] · LET GO TO SHOOT · %s", count), "[DRAW]"
+			return string.format("HOLD [DRAW] · TAP [%s] · LET GO TO SHOOT · %s", aim, count), string.format("[DRAW] · [%s]", aim)
 		end
-		return string.format("HOLD [%s] DRAW · RELEASE TO SHOOT · %s", attack, count), string.format("[%s]", attack)
+		return string.format("HOLD [%s] DRAW · [%s] AIM · RELEASE TO SHOOT · %s", attack, aim, count),
+			string.format("[%s] · [%s] AIM", attack, aim)
 	elseif action == "Spear" then
 		local aim = ActionHints.keyOf("Aim", device)
 		if touch then

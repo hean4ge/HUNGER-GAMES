@@ -1,5 +1,7 @@
 --[[
-	ViewmodelController.Shade - lights the first-person avatar arms like the world around them (Config.Viewmodel.Shade).
+	ViewmodelController.Shade - lights the first-person arms like the world around them (Config.Viewmodel.Shade): the
+	faceted arms (ArmStyle "Faceted", whose painted skin and charcoal sleeve need no shade layer: Rig:setShade does
+	nothing for them) and the avatar arms.
 
 	The engine lights the arms where they float, a few studs above the ground in the open air. In daylight that already
 	looks right (the sun gives them a lit side and a shadow side). But at dusk and at night the light is mostly the flat

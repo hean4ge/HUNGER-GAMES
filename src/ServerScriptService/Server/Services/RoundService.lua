@@ -12,8 +12,10 @@
 	       Still alone when their practice round ends, a player goes again after a PracticeIntermissionTime s Intermission
 	       (no second wait); a contender arriving during it makes it a normal Intermission.
 	       Practice rounds add no Wins and no RoundsPlayed.
-	  QW3  GameState.BorderStartRadius at each Countdown: clamp(640 * sqrt(N / 24), 320, 640) for N contenders (set
-	       before LootService.populate; ArenaService and the wall start from it).
+	  QW3  GameState.BorderStartRadius at each Countdown: 500 + 140 * sqrt((N - 1) / 23) for N contenders (500 alone,
+	       640 at 24; Config.Border.MinStartRadius, StartRadius, FullContenders) (set before LootService.populate;
+	       ArenaService and the wall start from it).
+	       Practice results rank nobody who fell (placement 0: the result card shows no "#1" for a lone player's death).
 	  Q1   player attribute NewPlayer at each Countdown: RoundsPlayed < Config.Guidance.NewPlayerRounds.
 	  QW6  no banner at the horn of a real round (it covered the first sprint); practice rounds keep PRACTICE ROUND.
 	  QW14 a timeout with two or more alive goes to the healthiest, then the most kills (Config.Round.LastStand);
@@ -135,15 +137,19 @@ local function practiceAgain(): boolean
 		and player:GetAttribute("Alive") ~= true
 end
 
--- QW3: the border's starting radius for n contenders (the arena is as crowded as a full round from 6 up)
+-- QW3: the border's starting radius for n contenders: MinStartRadius for a lone contender (500 since wave 2: a practice
+-- round's ring takes in the caves, the hunter's cabin and the watchtower), growing with the headcount to StartRadius
+-- at FullContenders
 local function startRadiusFor(n: number): number
 	local border = Config.Border
 	local full = border.StartRadius or 640
 	if border.ScaleWithContenders == false then
 		return full
 	end
-	local r = full * math.sqrt(math.max(1, n) / math.max(1, border.FullContenders or 24))
-	return math.floor(math.clamp(r, math.min(border.MinStartRadius or 320, full), full) + 0.5)
+	local solo = math.min(tonumber(border.MinStartRadius) or 500, full)
+	local most = math.max(2, tonumber(border.FullContenders) or 24)
+	local t = math.sqrt(math.clamp((n - 1) / (most - 1), 0, 1))
+	return math.floor(solo + (full - solo) * t + 0.5)
 end
 
 -- QW14: who wins a timeout: the healthiest, then the one with more kills
@@ -382,11 +388,17 @@ local function endRound(winner: Player?, reason: string)
 			info.placement = place
 		end
 	end
+	local survived = {}
+	for _, player in ipairs(alive) do
+		survived[player] = true
+	end
 	for player, info in pairs(contenders) do
 		if player.Parent == Players then
 			info.kills = tonumber(player:GetAttribute("Kills")) or info.kills
 		end
-		if info.placement <= 0 then
+		if practice and not survived[player] then
+			info.placement = 0 -- a practice round ranks nobody who fell: no "#1" for a lone player's death (the card shows "-")
+		elseif info.placement <= 0 then
 			info.placement = #alive + 1
 		end
 	end
@@ -415,7 +427,7 @@ local function endRound(winner: Player?, reason: string)
 		sub = string.format("%d contenders survived. Nobody claims the win.", #alive)
 	elseif practice then
 		text = "PRACTICE OVER"
-		sub = "You were eliminated. A new round starts soon."
+		sub = "You were eliminated." -- the death card's note already said a new round starts soon
 	else
 		text = "NO SURVIVORS"
 		sub = "The arena claimed everyone"
@@ -470,7 +482,10 @@ local function countdownTick(t: number)
 		return
 	end
 	local remaining = math.ceil(phaseEndsAt - t)
-	if remaining >= 1 and remaining ~= lastCountdownSecond then
+	-- with the launch intro only the last seconds are announced (the intro shot plays before them)
+	local announceFrom = if (GameState:GetAttribute("LaunchCut") or "") ~= ""
+		then tonumber((Config.Launch or {}).AnnounceLast) or 10 else math.huge
+	if remaining >= 1 and remaining ~= lastCountdownSecond and remaining <= announceFrom then
 		lastCountdownSecond = remaining
 		announce({
 			style = "Countdown",
@@ -483,6 +498,41 @@ local function countdownTick(t: number)
 	if t >= phaseEndsAt then
 		enterActive(t)
 	end
+end
+
+-- The launch intro (Config.Launch, LaunchIntroController): the cut this round plays. "Full" when any contender hasn't
+-- seen the full shot yet this session (player attribute Launched), "Short" otherwise, PracticeCut in a practice round;
+-- "" without the intro (today's countdown and plate rise). Studio only: GameState attribute LaunchCutTest = "Full" |
+-- "Short" forces a cut, even with the intro off (tests).
+local function launchCut(): string
+	local launch = Config.Launch
+	if Config.IsStudio then
+		local test = GameState:GetAttribute("LaunchCutTest")
+		if test == "Full" or test == "Short" then
+			return test
+		end
+	end
+	if type(launch) ~= "table" or launch.Intro ~= true then
+		return ""
+	end
+	if practice then
+		return if launch.PracticeCut == "Full" then "Full" else "Short"
+	end
+	for player in pairs(contenders) do
+		if player:GetAttribute("Launched") ~= true then
+			return "Full"
+		end
+	end
+	return "Short"
+end
+
+-- A cut's countdown (seconds from the call to the horn) and when the plates start rising in it (LaunchAt).
+local function launchTiming(cut: string): (number, number)
+	local launch = Config.Launch or {}
+	if cut == "Full" then
+		return tonumber(launch.FullCountdown) or 22, tonumber(launch.FullRiseAt) or 15.4
+	end
+	return tonumber(launch.ShortCountdown) or 12, tonumber(launch.ShortRiseAt) or 6.2
 end
 
 local function enterCountdown()
@@ -532,11 +582,26 @@ local function enterCountdown()
 	for player in pairs(contenders) do
 		player:SetAttribute("NewPlayer", (tonumber(player:GetAttribute("RoundsPlayed")) or 0) < newRounds)
 	end
-	-- the launch: every client raises the plates out of their tubes on this shared timeline (LaunchController)
-	GameState:SetAttribute("LaunchAt", now() + (RoundCfg.LaunchDelay or 0.8))
+	-- the launch: every client raises the plates out of their tubes on this shared timeline (LaunchController). With
+	-- the launch intro (LaunchIntroController) the countdown first covers the intro shot, and the plates rise at
+	-- LaunchAt, as its white-out ends; everyone is placed and anchored on their plate well before that (PlayerService).
+	local callAt = now()
+	local cut = launchCut()
+	local countdownTime, riseAt = RoundCfg.CountdownTime, RoundCfg.LaunchDelay or 0.8
+	if cut ~= "" then
+		countdownTime, riseAt = launchTiming(cut)
+		if cut == "Full" then
+			for player in pairs(contenders) do
+				player:SetAttribute("Launched", true) -- has seen the full shot this session
+			end
+		end
+	end
+	GameState:SetAttribute("LaunchCut", cut)
+	GameState:SetAttribute("LaunchCallAt", callAt)
+	GameState:SetAttribute("LaunchAt", callAt + riseAt)
 	GameState:SetAttribute("LaunchRise", RoundCfg.LaunchRiseTime or 3.4)
 	GameState:SetAttribute("LaunchDepth", RoundCfg.LaunchDepth or 10)
-	setPhase("Countdown", RoundCfg.CountdownTime)
+	setPhase("Countdown", countdownTime)
 	task.spawn(call, "LootService", "populate")
 	RoundService.roundStarting:Fire(roundId)
 end
@@ -548,10 +613,13 @@ local function enterIntermission(solo: boolean?, quick: boolean?)
 		duration = math.min(duration, tonumber(RoundCfg.PracticeIntermissionTime) or duration)
 	end
 	quickIntermission = quick == true
+	if solo then
+		-- before the Phase, so the lobby never sees a practice Intermission without its countdown (LobbyController)
+		setAttr("SoloStartAt", now() + duration)
+	end
 	setPhase("Intermission", duration)
 	local seconds = math.floor(duration + 0.5)
 	if solo then
-		setAttr("SoloStartAt", phaseEndsAt)
 		announce({
 			style = "Banner",
 			text = "PRACTICE ROUND",
@@ -691,6 +759,13 @@ local function step()
 	elseif phase == "Ending" then
 		if t >= phaseEndsAt then
 			finishRound(false)
+			-- QW1: still alone after their practice round, a player goes again from this same step: one step of Lobby
+			-- with no SoloStartAt showed WAITING FOR PLAYERS 1 / 2 for a moment before the practice countdown
+			if phase == "Lobby" and soloEnabled() and ps.getWaitingCount() == 1 and practiceAgain() then
+				againFor = nil
+				soloRound = true
+				enterIntermission(true, true)
+			end
 		end
 	else
 		setPhase("Lobby")

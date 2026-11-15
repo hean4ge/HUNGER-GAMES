@@ -3,8 +3,17 @@
 	can be previewed in Edit mode. Every part is Anchored, CanCollide / CanQuery / CanTouch = false, CastShadow = false
 	(avatar arms: Config.Viewmodel.ArmShadows), and all of them are moved together with one workspace:BulkMoveTo per frame.
 
-	Two arm styles (Config.Viewmodel.ArmStyle), posed with the same two-bone IK on the same hand frames:
-	- "Avatar" (default): the player's own R15 arms. rig:setAvatar(character) clones the character's UpperArm, LowerArm
+	Three arm styles (Config.Viewmodel.ArmStyle), posed with the same two-bone IK on the same hand frames:
+	- "Faceted" (default): bare hands and forearms built from chunky flat facets with a charcoal sleeve, the Blender kit
+	  in ReplicatedStorage.Assets.Viewmodel.ArmsFaceted (ServerStorage.WorldGen.ArmsFacetedAssets; art/README.md section
+	  12) at world scale. Per side an UpperArm (shoulder pivot), a Forearm (elbow pivot) and four hands (wrist pivot), one
+	  shown at a time (rig:setHands): Relaxed (empty hands at rest), Fist (only while punching), Grip (closed round a
+	  handle or the bow string) and Open (food and bottles on the palm). The hand frame's origin is the wrist joint; a
+	  held item's Grip goes on the Grip hand's own grip frame (Rig.GRIP), food on the Open hand's palm (Rig.PALM). The skin
+	  takes the avatar's arm colours through SurfaceAppearance.Color (rig:setSkin). The forearm turns with the hand, so
+	  the wrist ring lines up; the elbow turns toward where the forearm would line up with the hand (Rig.AUTO_POLE) and
+	  any bend past Rig.MAX_WRIST is taken out of the hand, so the faceted wrist (good to about 30 degrees) never folds.
+	- "Avatar": the player's own R15 arms. rig:setAvatar(character) clones the character's UpperArm, LowerArm
 	  and Hand MeshParts (meshes, sizes, colours, any SurfaceAppearance) into a Model "AvatarArms" with a Humanoid and the
 	  character's Shirt and arm colours (BodyColors), so the engine draws the shirt on them, at Config.Viewmodel.ArmScale
 	  of their size (a full-size Roblox hand would fill the view and cover the crosshair at the bow grip). R6 avatars,
@@ -33,8 +42,12 @@
 	A bow sits in the left hand on Rig.BOW_GRIP: top limb along the thumb, shooting toward the knuckles.
 	Rig.ITEM_HOLD[itemId] moves an item within the fist (things wider than the fist sit in it on the palm side).
 
-	Rig.new(skinColor?, style?) -> rig    rig.model: parent it to the camera to show it; style "Avatar" | "Classic"
-	rig:setSkin(color)                              (the Classic fists)
+	Rig.new(skinColor?, style?) -> rig    rig.model: parent it to the camera to show it; style "Faceted" | "Avatar" |
+	                                      "Classic" (rig.style: the style it got; Faceted falls back to Avatar without
+	                                      its templates)
+	rig:setSkin(color, leftColor?)                  the Classic fists, the Faceted skin (each side its arm colour)
+	rig:setHands(right?, left?)                     (Faceted) the hand meshes: "Relaxed" | "Fist" | "Grip" | "Open"
+	rig:itemHand() -> "Grip" | "Open" | nil         (Faceted) the hand mesh the held item wants
 	rig:setAvatar(character?) -> "Avatar" | "Standard" | "Classic"   (Avatar style) the arms from that character
 	Rig.avatarSignature(character?) -> string       changes when its arms, shirt or arm colours change
 	Rig.useStyle(style, spec?)                      swaps the module's arm constants (setAvatar calls it)
@@ -118,6 +131,21 @@ Rig.AVATAR_HOOK_IN = 0.05
 -- (the avatar elbows hang under the hands, so the forearms rise into view from the bottom edge; the string hand's elbow
 -- hangs lower still, so the wider avatar forearm stays below the hotbar at the low ready)
 Rig.AVATAR_POLE = { Right = Vector3.new(0.25, -1, 0), Left = Vector3.new(-0.25, -1, 0), BowRight = Vector3.new(0.5, -1, 0.3) }
+-- Faceted arms: the camera-space shoulders they hang from (before any pull, Rig.REACH_DRAG), the elbow poles, the wrist
+-- limit (the faceted wrist is modelled for bends up to about 30 degrees), how far the elbow turns toward a straight
+-- wrist (free hands, and hands that may not turn: frame.lock[side] = "hand") and how far below the nock the drawing
+-- hand's grip sits on the bow string (toward the bottom limb: three fingers under the arrow).
+Rig.FACETED_SHOULDER = { Right = Vector3.new(0.5, -0.72, 0.15), Left = Vector3.new(-0.5, -0.72, 0.15) }
+Rig.FACETED_POLE = {
+	Right = Vector3.new(0.45, -1, 0.1),
+	Left = Vector3.new(-0.45, -1, 0.1),
+	BowRight = Vector3.new(1.2, -1, 0),
+	BowRightDrawn = Vector3.new(0.8, -0.6, 1),
+}
+Rig.FACETED_MAX_WRIST = math.rad(34)
+Rig.FACETED_AUTO_POLE = 0.5
+Rig.FACETED_HAND_LOCK_POLE = 0.6
+Rig.FACETED_HOOK_BELOW = 0.1
 local CLASSIC = {
 	UPPER_ARM = Rig.UPPER_ARM,
 	FOREARM = Rig.FOREARM,
@@ -125,11 +153,38 @@ local CLASSIC = {
 	SHOULDER = { Right = Rig.SHOULDER.Right, Left = Rig.SHOULDER.Left },
 	POLE = { Right = Rig.POLE.Right, Left = Rig.POLE.Left },
 	BOW_POLE = Rig.POLE.BowRight,
+	BOW_POLE_DRAWN = Rig.POLE.BowRightDrawn,
+	GRIP = { Right = Rig.GRIP.Right, Left = Rig.GRIP.Left },
+	GRIP_POINT = { Right = Rig.GRIP_POINT.Right, Left = Rig.GRIP_POINT.Left },
+	BOW_GRIP = Rig.BOW_GRIP,
+	MAX_WRIST = Rig.MAX_WRIST,
 }
 
--- Swaps the module's arm constants: "Avatar" with `spec` (viewmodel-scale joint lengths: upper, fore, hand) or Classic.
-function Rig.useStyle(style: string, spec: { [string]: number }?)
-	if style == "Avatar" and spec then
+-- Swaps the module's arm constants: "Avatar" with `spec` (viewmodel-scale joint lengths: upper, fore, hand), "Faceted"
+-- with `spec` (joint lengths upper, fore and the hand frames grip, bowGrip, hook from the templates) or Classic. Every
+-- style starts from the Classic values.
+function Rig.useStyle(style: string, spec: { [string]: any }?)
+	Rig.POLE.BowRightDrawn = CLASSIC.BOW_POLE_DRAWN
+	Rig.GRIP.Right, Rig.GRIP.Left = CLASSIC.GRIP.Right, CLASSIC.GRIP.Left
+	Rig.GRIP_POINT.Right, Rig.GRIP_POINT.Left = CLASSIC.GRIP_POINT.Right, CLASSIC.GRIP_POINT.Left
+	Rig.BOW_GRIP = CLASSIC.BOW_GRIP
+	Rig.MAX_WRIST = CLASSIC.MAX_WRIST
+	if style == "Faceted" and spec then
+		Rig.STYLE = "Faceted"
+		Rig.UPPER_ARM, Rig.FOREARM = spec.upper, spec.fore
+		Rig.SHOULDER.Right, Rig.SHOULDER.Left = Rig.FACETED_SHOULDER.Right, Rig.FACETED_SHOULDER.Left
+		Rig.WRIST = Vector3.zero
+		Rig.HOOK = spec.hook
+		Rig.POLE.Right, Rig.POLE.Left = Rig.FACETED_POLE.Right, Rig.FACETED_POLE.Left
+		Rig.POLE.BowRight, Rig.POLE.BowRightDrawn = Rig.FACETED_POLE.BowRight, Rig.FACETED_POLE.BowRightDrawn
+		Rig.GRIP.Right, Rig.GRIP.Left = spec.grip.Right, spec.grip.Left
+		Rig.GRIP_POINT.Right, Rig.GRIP_POINT.Left = spec.grip.Right.Position, spec.grip.Left.Position
+		Rig.BOW_GRIP = spec.bowGrip
+		Rig.PALM.Right, Rig.PALM.Left = spec.palm.Right, spec.palm.Left
+		Rig.MAX_WRIST = Rig.FACETED_MAX_WRIST
+		Rig.REACH_DRAG = true
+		Rig.AUTO_POLE = Rig.FACETED_AUTO_POLE
+	elseif style == "Avatar" and spec then
 		Rig.STYLE = "Avatar"
 		Rig.UPPER_ARM, Rig.FOREARM = spec.upper, spec.fore
 		Rig.SHOULDER.Right, Rig.SHOULDER.Left = Rig.AVATAR_SHOULDER.Right, Rig.AVATAR_SHOULDER.Left
@@ -590,13 +645,149 @@ local function boneFrame(at: Vector3, up: Vector3, front: Vector3): CFrame
 	return CFrame.fromMatrix(at, up:Cross(back), up, back)
 end
 
+--------------------------------------------------------------------------------------------------------------------
+-- Faceted arms
+--------------------------------------------------------------------------------------------------------------------
+
+-- hand space -> faceted piece space. The pieces' bone runs along +Y, the palm faces +Z and the R_ thumb is +X (the L_
+-- pieces are X mirrors): piece +X = the right thumb (hand +Y), +Y = toward the fingers (hand -Z), +Z = the palm (hand
+-- -X on the right, +X on the left).
+local MESH_IN_HAND = {
+	Right = CFrame.fromMatrix(Vector3.zero, Vector3.new(0, 1, 0), Vector3.new(0, 0, -1)),
+	Left = CFrame.fromMatrix(Vector3.zero, Vector3.new(0, -1, 0), Vector3.new(0, 0, -1)),
+}
+Rig.MESH_IN_HAND = MESH_IN_HAND
+Rig.HAND_SHAPES = { "Relaxed", "Fist", "Grip", "Open" }
+-- The Grip hand's own grip frame (look = the handle toward the thumb, up = toward the fingers) turned about the handle
+-- into an item's Grip frame (its edge, -UpVector, toward the knuckles).
+local GRIP_FLIP = CFrame.Angles(0, 0, math.pi)
+-- (Faceted) the hand an item is held in ("Grip" by default) and, for the open hand, where its Grip frame sits on the
+-- palm (Rig.PALM space: -Z out of the palm, +Y toward the fingers, +X toward the little finger on the right hand). Round
+-- food sits in the cupped palm, the tin across it, the bottle lies along the palm with its neck past the thumb.
+Rig.FACETED_HAND = {
+	apple = "Open", berries = "Open", ration = "Open", water_bottle = "Open", empty_bottle = "Open", bandage = "Open",
+} :: { [string]: string }
+Rig.FACETED_PALM_HOLD = {
+	apple = CFrame.new(0, 0.02, -0.135),
+	berries = CFrame.new(0, 0.05, -0.08) * CFrame.Angles(math.rad(80), 0, 0),
+	ration = CFrame.new(0, 0.05, -0.25) * CFrame.Angles(0, math.rad(90), 0),
+	water_bottle = CFrame.new(0, 0.05, -0.23) * CFrame.Angles(0, math.rad(90), 0),
+	empty_bottle = CFrame.new(0, 0.05, -0.23) * CFrame.Angles(0, math.rad(90), 0),
+	bandage = CFrame.new(0, 0.04, -0.17),
+} :: { [string]: CFrame }
+-- (Faceted) where a gripped item sits in the fist, relative to Rig.GRIP (Grip space, as Rig.ITEM_HOLD)
+Rig.FACETED_ITEM_HOLD = {} :: { [string]: CFrame }
+-- (Faceted) the open hand's palm frame in hand space (look = out of the palm, up = toward the fingers)
+Rig.PALM = { Right = CFrame.identity, Left = CFrame.identity }
+
+local function facetedFolder(): Instance?
+	local assets = ReplicatedStorage:FindFirstChild("Assets") or ReplicatedStorage:WaitForChild("Assets", 5)
+	local viewmodel = assets and (assets:FindFirstChild("Viewmodel") or assets:WaitForChild("Viewmodel", 5))
+	return viewmodel and (viewmodel:FindFirstChild("ArmsFaceted") or viewmodel:WaitForChild("ArmsFaceted", 5))
+end
+
+-- A faceted piece: a clone of its template, every part's offset from the pivot (the joint), its skin and sleeve parts
+-- (with their SurfaceAppearances) and its attachment frames (piece space).
+local function facetedPiece(template: Instance, parent: Instance): { [string]: any }
+	local model = template:Clone()
+	local inverse = if model:IsA("Model") then model.WorldPivot:Inverse() else CFrame.identity -- (the joint)
+	local piece = { model = model, parts = {}, offsets = {}, skins = {}, sleeves = {}, att = {} }
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+			d.Massless = true
+			d.CastShadow = Rig.Options.ArmShadows == true
+			table.insert(piece.parts, d)
+			table.insert(piece.offsets, inverse * d.CFrame)
+			local role = d:GetAttribute("Role")
+			if role == "Skin" then
+				table.insert(piece.skins, d)
+			elseif role == "Sleeve" then
+				table.insert(piece.sleeves, d)
+			end
+		elseif d:IsA("Attachment") then
+			piece.att[d.Name] = inverse * d.WorldCFrame
+		end
+	end
+	for _, p in ipairs(piece.parts) do
+		p.CFrame = PARKED
+	end
+	model.Parent = parent
+	return piece
+end
+
+-- Writes a faceted piece's part frames for its pivot at `at` into cframes after index i; returns the last index.
+local function placePiece(cframes: { CFrame }, i: number, piece: { [string]: any }, at: CFrame): number
+	for _, offset in ipairs(piece.offsets) do
+		i += 1
+		cframes[i] = at * offset
+	end
+	return i
+end
+
+-- Builds the faceted arms from the templates (nil when they are missing) and the hand frames the style needs.
+local function buildFaceted(parent: Instance): ({ [string]: any }?, { [string]: any }?)
+	local folder = facetedFolder()
+	if not folder then
+		return nil, nil
+	end
+	local arms = {}
+	for _, side in ipairs({ "Right", "Left" }) do
+		local prefix = if side == "Right" then "R_" else "L_"
+		local function piece(name: string)
+			local template = folder:FindFirstChild(prefix .. name)
+			return template and facetedPiece(template, parent)
+		end
+		local arm = { upper = piece("UpperArm"), fore = piece("Forearm"), hands = {}, hand = "Relaxed" }
+		for _, shape in ipairs(Rig.HAND_SHAPES) do
+			arm.hands[shape] = piece("Hand" .. shape)
+		end
+		if not (arm.upper and arm.fore and arm.hands.Relaxed and arm.hands.Fist and arm.hands.Grip and arm.hands.Open) then
+			for _, p in ipairs({ arm.upper, arm.fore, arm.hands.Relaxed, arm.hands.Fist, arm.hands.Grip, arm.hands.Open }) do
+				if p then
+					p.model:Destroy()
+				end
+			end
+			for _, done in pairs(arms) do
+				for _, p in ipairs({ done.upper, done.fore, done.hands.Relaxed, done.hands.Fist, done.hands.Grip, done.hands.Open }) do
+					p.model:Destroy()
+				end
+			end
+			return nil, nil
+		end
+		arms[side] = arm
+	end
+	local elbow = arms.Right.upper.att.Elbow
+	local wrist = arms.Right.fore.att.Wrist
+	local spec = { upper = if elbow then elbow.Position.Y else 0.95, fore = if wrist then wrist.Position.Y else 0.85, grip = {}, palm = {} }
+	for _, side in ipairs({ "Right", "Left" }) do
+		local arm = arms[side]
+		local grip = arm.hands.Grip.att.Grip or CFrame.lookAt(Vector3.new(0, 0.257, 0.118), Vector3.new(1, 0.43, 0.118), Vector3.yAxis)
+		local palm = arm.hands.Open.att.Palm or CFrame.lookAt(Vector3.new(0, 0.18, 0.063), Vector3.new(0, 0.18, 1), Vector3.yAxis)
+		local handGrip = MESH_IN_HAND[side] * grip
+		spec.grip[side] = handGrip * GRIP_FLIP
+		spec.palm[side] = MESH_IN_HAND[side] * palm
+		if side == "Right" then
+			spec.handGrip = handGrip
+		else
+			spec.bowGrip = handGrip -- the bow: top limb along the thumb, shooting toward the knuckles
+		end
+	end
+	spec.hook = spec.handGrip.Position + Vector3.new(0, Rig.FACETED_HOOK_BELOW, 0)
+	return arms, spec
+end
+
 function Rig.new(skin: Color3?, style: string?)
 	local self = setmetatable({}, Rig)
 	self.model = Instance.new("Model")
 	self.model.Name = "Viewmodel"
 	self.skin = skin or DEFAULT_SKIN
-	self.style = if style == "Avatar" then "Avatar" else "Classic"
+	self.style = if style == "Avatar" or style == "Faceted" then style else "Classic"
 	self.avatar = nil
+	self.faceted = nil -- (Faceted) per side: upper, fore, hands[shape], hand (the shape shown)
 	self.arms = {}
 	self.item = nil
 	self.arrow = nil
@@ -646,12 +837,69 @@ function Rig.new(skin: Color3?, style: string?)
 	-- (Avatar arms) the bandage wound onto the left forearm while bandaging (Rig:setWrap)
 	self.wrapBand = newPart(self.model, "WrapBand", Enum.PartType.Block, Vector3.new(0.5, 0.05, 0.5), Color3.fromRGB(236, 232, 222), Enum.Material.Fabric)
 	self.wrapLength = 0
-	if self.style == "Avatar" then
+	if self.style == "Faceted" then
+		local arms, spec = buildFaceted(self.model)
+		if arms then
+			self.faceted = arms
+			self.facetedSpec = spec
+		else
+			warn("[ViewmodelController.Rig] ReplicatedStorage.Assets.Viewmodel.ArmsFaceted is missing; using the avatar arms")
+			self.style = "Avatar"
+		end
+	end
+	if self.style == "Faceted" then
+		self:_useFaceted()
+	elseif self.style == "Avatar" then
 		self:setAvatar(nil) -- the standard arms in the skin colour until the character's own arms are measured
 	else
 		self:_useAvatarArms(nil)
 	end
 	return self
+end
+
+-- (Faceted) shows the faceted arms: the part-built arms are hidden and the style's constants swapped in.
+function Rig:_useFaceted()
+	for _, arm in pairs(self.arms) do
+		for _, p in ipairs({ arm.upper, arm.elbow, arm.fore, arm.cuff }) do
+			p.LocalTransparencyModifier = 1
+			p.CFrame = PARKED
+		end
+		for _, entry in ipairs(arm.hand) do
+			entry.part.LocalTransparencyModifier = 1
+			entry.part.CFrame = PARKED
+		end
+	end
+	Rig.useStyle("Faceted", self.facetedSpec)
+	self:setSkin(self.skin, self.skinLeft)
+	self:_rebuild()
+end
+
+-- (Faceted) the hand meshes shown: "Relaxed" | "Fist" | "Grip" | "Open" (nil keeps a side's current one).
+function Rig:setHands(right: string?, left: string?)
+	local fac = self.faceted
+	if not fac then
+		return
+	end
+	local changed = false
+	for _, side in ipairs({ "Right", "Left" }) do
+		local shape = if side == "Right" then right else left
+		local arm = fac[side]
+		if shape and arm.hands[shape] and arm.hand ~= shape then
+			for _, p in ipairs(arm.hands[arm.hand].parts) do
+				p.CFrame = PARKED
+			end
+			arm.hand = shape
+			changed = true
+		end
+	end
+	if changed then
+		self:_rebuild()
+	end
+end
+
+-- (Faceted) the hand mesh the held item wants ("Grip" | "Open"), nil with nothing in hand.
+function Rig:itemHand(): string?
+	return if self.item then self.item.handShape else nil
 end
 
 -- Where the key light's part lives (the workspace while the arms are shown, nil otherwise; nil also switches it off).
@@ -682,7 +930,7 @@ function Rig:setWrap(length: number)
 	end
 	self.wrapLength = length
 	local arms = self.avatar
-	local width = if arms then arms.parts.Left.LowerArm.Size.X else 0.46
+	local width = if arms then arms.parts.Left.LowerArm.Size.X elseif self.faceted then 0.24 else 0.46
 	if length > 0.01 then
 		self.wrapBand.Size = Vector3.new(width + 0.035, length, width + 0.035)
 	end
@@ -710,12 +958,41 @@ function Rig:setShade(color: Color3, transparency: number, handTransparency: num
 	end
 end
 
-function Rig:setSkin(color: Color3)
+-- (Faceted) tints a skin part: its SurfaceAppearance's Color multiplies the neutral light ColorMap; without one (or if
+-- the engine refuses the write) the part is plain SmoothPlastic in that colour, its facets read from the flat shading.
+local function tintSkin(part: BasePart, color: Color3)
+	local sa = part:FindFirstChildOfClass("SurfaceAppearance")
+	if sa and not pcall(function()
+		sa.Color = color
+	end) then
+		sa:Destroy()
+		sa = nil
+	end
+	if not sa then
+		part.Material = Enum.Material.SmoothPlastic
+	end
+	part.Color = color
+end
+
+-- The skin colour: the Classic fists, and (Faceted) the bare skin, each side in its arm colour (left: `left` or `color`).
+function Rig:setSkin(color: Color3, left: Color3?)
 	self.skin = color
+	self.skinLeft = left or color
 	local black = Color3.new(0, 0, 0)
 	for _, arm in pairs(self.arms) do
 		for _, entry in ipairs(arm.hand) do
 			entry.part.Color = if entry.shade then color:Lerp(black, 1 - entry.shade) else color
+		end
+	end
+	local fac = self.faceted
+	if fac then
+		for side, arm in pairs(fac) do
+			local c = if side == "Left" then self.skinLeft else color
+			for _, piece in ipairs({ arm.upper, arm.fore, arm.hands.Relaxed, arm.hands.Fist, arm.hands.Grip, arm.hands.Open }) do
+				for _, p in ipairs(piece.skins) do
+					tintSkin(p, c)
+				end
+			end
 		end
 	end
 end
@@ -914,8 +1191,16 @@ end
 function Rig:_rebuild()
 	local parts = {}
 	local avatar = self.avatar
+	local fac = self.faceted
 	for _, side in ipairs({ "Right", "Left" }) do
-		if avatar then
+		if fac then
+			local arm = fac[side]
+			for _, piece in ipairs({ arm.upper, arm.fore, arm.hands[arm.hand] }) do
+				for _, p in ipairs(piece.parts) do
+					table.insert(parts, p)
+				end
+			end
+		elseif avatar then
 			for _, segment in ipairs(ARM_SEGMENTS) do
 				table.insert(parts, avatar.parts[side][segment])
 			end
@@ -976,7 +1261,18 @@ function Rig:setItem(itemId: string?, hand: string?)
 			local info = prepareItem(model, ITEM_SCALE[itemId])
 			info.itemId = itemId
 			info.hand = if hand == "Left" then "Left" else "Right"
-			info.hold = (if Rig.STYLE == "Avatar" then Rig.AVATAR_ITEM_HOLD[itemId] else nil) or ITEM_HOLD[itemId] or CFrame.identity
+			if self.faceted then
+				-- (Faceted) gripped in the fist, or lying on the open palm (Rig.FACETED_PALM_HOLD)
+				local shape = Rig.FACETED_HAND[itemId] or "Grip"
+				info.handShape = shape
+				if shape == "Open" then
+					info.hold = Rig.GRIP[info.hand]:Inverse() * Rig.PALM[info.hand] * (Rig.FACETED_PALM_HOLD[itemId] or CFrame.identity)
+				else
+					info.hold = Rig.FACETED_ITEM_HOLD[itemId] or CFrame.identity
+				end
+			else
+				info.hold = (if Rig.STYLE == "Avatar" then Rig.AVATAR_ITEM_HOLD[itemId] else nil) or ITEM_HOLD[itemId] or CFrame.identity
+			end
 			local nock = info.attachments.Nock
 			if nock and info.attachments.StringTop then -- a bow (an arrow has a Nock too)
 				info.bow = true
@@ -1120,7 +1416,53 @@ function Rig:pose(frame: { [string]: any })
 		local shoulder: Vector3 = if right then frame.shoulderRight else frame.shoulderLeft
 		local pole: Vector3 = if right then frame.poleRight else frame.poleLeft
 		local avatar = self.avatar
-		if avatar then
+		local fac = self.faceted
+		if fac then
+			-- the faceted arm: the hand piece on the hand frame (its pivot is the wrist), the forearm from the elbow to the
+			-- wrist turned with the hand's palm (so the wrist ring lines up), the upper arm from the shoulder to the elbow,
+			-- its inner elbow toward the forearm. Locks and the wrist limit as for the avatar arms (frame.lock[side]).
+			local lock = frame.lock and frame.lock[side]
+			local free = not lock
+			local target = hand.Position
+			if lock ~= true and Rig.AUTO_POLE > 0 then
+				local w = if free then Rig.AUTO_POLE else Rig.FACETED_HAND_LOCK_POLE
+				pole = towardElbow(shoulder, target, pole, target - hand.LookVector * Rig.FOREARM, w)
+			end
+			local elbow, wrist, from = solveArm(shoulder, target, pole)
+			hand += wrist - target
+			if free then
+				hand = limitWrist(hand, wrist, elbow)
+			end
+			if self.lastDrag then
+				self.lastDrag[side] = (from - shoulder).Magnitude
+			end
+			arm.solved = hand
+			local fa = fac[side]
+			local mesh = hand * MESH_IN_HAND[side]
+			local fore = wrist - elbow
+			fore = if fore.Magnitude > 1e-4 then fore.Unit else mesh.UpVector
+			local palm = mesh.ZVector
+			local zF = palm - fore * palm:Dot(fore)
+			if zF.Magnitude < 1e-3 then
+				zF = mesh.XVector:Cross(fore)
+			end
+			zF = zF.Unit
+			local upper = elbow - from
+			upper = if upper.Magnitude > 1e-4 then upper.Unit else fore
+			local zU = fore - upper * fore:Dot(upper)
+			if zU.Magnitude < 0.05 then
+				zU = zF - upper * zF:Dot(upper) -- (a straight arm: the inner elbow with the palm)
+			end
+			zU = if zU.Magnitude > 1e-4 then zU.Unit else zF
+			local upperCF = CFrame.fromMatrix(from, upper:Cross(zU), upper, zU)
+			local foreCF = CFrame.fromMatrix(elbow, fore:Cross(zF), fore, zF)
+			if not right then
+				wrapAt = if self.wrapLength > 0.01 then foreCF.Rotation + (wrist - fore * (Rig.WRAP_FROM + self.wrapLength / 2)) else nil
+			end
+			i = placePiece(cframes, i, fa.upper, upperCF)
+			i = placePiece(cframes, i, fa.fore, foreCF)
+			i = placePiece(cframes, i, fa.hands[fa.hand], mesh)
+		elseif avatar then
 			-- the R15 arm: the hand on the hand frame (its wrist joint at Rig.WRIST), the forearm turned with the hand;
 			-- a free hand turns about its thumb to meet the forearm and never folds past Rig.MAX_WRIST
 			-- (frame.lock[side]: true = the hand and the elbow exactly as given; "hand" = the hand exactly as given (a bow,

@@ -19,7 +19,8 @@
 	                                       -- what an action is bound to right now (nil while unbound); keyboard holds the
 	                                       -- keyboard and mouse inputs, gamepad the controller ones
 	Input.list() -> { string }             -- every action bound right now, sorted
-	Input.isTouch() / Input.isGamepad()    -- based on the last input device used
+	Input.isTouch() / Input.isGamepad()    -- based on the last input device used (seeded at load: a console is a gamepad,
+	                                       -- else the engine's last input type; a pad with no keyboard or touch is a pad)
 	Input.device() -> "KeyboardMouse" | "Gamepad" | "Touch"     Input.deviceChanged: Signal(device)
 	Input.getTouchLayout(name) -> (UDim2, number, string)  -- where a touch button sits (position, size, label) on this screen
 	Input.setLookSpeed(device, k)          -- "Gamepad" | "Touch" | "Mouse": scale the default camera's look speed for that
@@ -34,6 +35,7 @@
 ]]
 local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
@@ -62,17 +64,52 @@ local function setKind(kind: string)
 	end
 end
 
-UserInputService.LastInputTypeChanged:Connect(function(inputType: Enum.UserInputType)
+-- "Touch" | "Gamepad" | "KeyboardMouse" for an input type; nil for the rest (Focus, None, TextInput...)
+local function kindOf(inputType: Enum.UserInputType): string?
 	if inputType == Enum.UserInputType.Touch then
-		setKind("Touch")
+		return "Touch"
 	elseif string.sub(inputType.Name, 1, 7) == "Gamepad" then
-		setKind("Gamepad")
+		return "Gamepad"
 	elseif inputType == Enum.UserInputType.Keyboard or string.sub(inputType.Name, 1, 5) == "Mouse" then
-		setKind("KeyboardMouse")
+		return "KeyboardMouse"
+	end
+	return nil
+end
+
+UserInputService.LastInputTypeChanged:Connect(function(inputType: Enum.UserInputType)
+	local kind = kindOf(inputType)
+	if kind then
+		setKind(kind)
 	end
 end)
 if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
 	lastInputKind = "Touch"
+end
+-- Seed the device at load (wave-1 audit): a console or controller player never sees keyboard hints first. A ten-foot
+-- interface (a console) is a gamepad; otherwise the last input the engine saw before this ran decides; a gamepad with
+-- no keyboard and no touch screen is a gamepad too.
+do
+	local seeded: string? = nil
+	local okTen, tenFoot = pcall(function()
+		return GuiService:IsTenFootInterface()
+	end)
+	if okTen and tenFoot == true then
+		seeded = "Gamepad"
+	else
+		local okLast, last = pcall(function()
+			return UserInputService:GetLastInputType()
+		end)
+		if okLast and typeof(last) == "EnumItem" then
+			seeded = kindOf(last)
+		end
+		if seeded == nil and UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled
+			and not UserInputService.TouchEnabled then
+			seeded = "Gamepad"
+		end
+	end
+	if seeded then
+		lastInputKind = seeded
+	end
 end
 
 if RunService:IsStudio() and RunService:IsClient() then

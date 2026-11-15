@@ -76,11 +76,13 @@ Config.Border = {
 	WarningLeadTime = 30, -- warn this many seconds before it starts moving
 	WallPanels = 96, -- segments in the client-side border wall
 	WallHeight = 520, -- studs (the wall starts 110 studs below the clearing)
-	-- Small rounds start small (QW3): the start radius is clamp(StartRadius * sqrt(N / FullContenders), MinStartRadius,
-	-- StartRadius) for N contenders (320 up to 6, 370 at 8, 453 at 12, 640 at 24), published at the Countdown as
-	-- GameState.BorderStartRadius (read it instead of StartRadius).
+	-- Small rounds start smaller (QW3; opened up in wave 2 after "why so small"): the start radius grows with the
+	-- headcount N, from MinStartRadius for a lone contender to StartRadius at FullContenders:
+	-- MinStartRadius + (StartRadius - MinStartRadius) * sqrt((N - 1) / (FullContenders - 1)) (500 alone, 529 for 2,
+	-- 565 for 6, 597 for 12, 640 at 24: a lone player's ring takes in the caves, the hunter's cabin and the watchtower),
+	-- published at the Countdown as GameState.BorderStartRadius (read it instead of StartRadius).
 	ScaleWithContenders = true,
-	MinStartRadius = 320,
+	MinStartRadius = 500,
 	FullContenders = 24,
 	-- The Last Stand (QW14, Config.Round.LastStand): from ShrinkStartTime + ShrinkDuration (830 s) the ring closes from
 	-- FinalRadius to nothing over LastStandDuration seconds (by 885 s). While the border closes its centre slides from
@@ -270,6 +272,11 @@ Config.Camera = {
 	SprintFovAdd = 3.5, -- subtle widening at a full sprint
 	SlideFovAdd = 6,
 	AimFovMultiplier = 0.76, -- aiming a bow or spear zooms in a little
+	-- Zoom (V held, R3 or the touch ZOOM button toggled; CameraController): a slight look closer, gentler than the aim.
+	-- It never adds to the aim zoom (the stronger of the two wins) and it turns the sprint widening off.
+	ZoomFovMultiplier = 0.88, -- 72 -> 63.4 vertical (about 1.18x; the bow's aim is about 1.4x)
+	ZoomInTime = 0.15, -- seconds to ease in...
+	ZoomOutTime = 0.18, -- ...and back out
 	-- First-person head motion from the gait (mostly translation: real eyes stabilise the gaze)
 	BobWalkAmplitude = 0.085, -- studs of vertical head travel at a jog (peak to peak)...
 	BobSprintAmplitude = 0.14, -- ...and at a full sprint
@@ -325,16 +332,26 @@ Config.Combat = {
 	BowAimOnTarget = true,
 	BowZeroDistance = 100,
 	BowMaxLiftDegrees = 25, -- never lift the release more than this above the crosshair
+	-- Thrown knives and spears land on the crosshair the same way: the throw is lifted so its own arc (speed, gravity)
+	-- passes through the point under the crosshair (CombatController.releaseThrow). false = thrown along the look.
+	ThrowAimOnTarget = true,
 	EquipTime = 0.32, -- seconds after equipping before you can attack (bows take a little longer)
 	-- PlayabilityPlan Q2 (decided 14 Nov, owner's note): 1.8 = a full-draw headshot does 90, so one arrow can't kill
 	-- from full health (2 did 100, a whole health bar).
 	BowHeadshotMultiplier = 1.8,
+	-- Swing sets (#90, CombatController): a swing that starts this soon (s) after the same weapon's last swing ended
+	-- continues the chain (the next set in order); later, a fresh click takes another set at random. Never one set twice.
+	SwingChainWindow = 0.45,
+	ThirdPersonSwings = true, -- other players' swings show on their bodies (CharacterVisuals, from CombatAction "Swing")
 }
 
--- First-person arms (ViewmodelController). "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when
--- your appearance changes), lit like the world; "Classic": the original part-built arms (dark sleeves, block fists).
+-- First-person arms (ViewmodelController). "Faceted": the faceted Blender hands and forearms (Assets.Viewmodel.ArmsFaceted:
+-- bare skin in your avatar's arm colours, a charcoal sleeve; relaxed when empty, a fist only while punching), lit like
+-- the world; "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when your appearance changes);
+-- "Classic": the original part-built arms (dark sleeves, block fists).
 Config.Viewmodel = {
-	ArmStyle = "Avatar",
+	ArmStyle = "Faceted",
+	GuardHold = 1.5, -- (Faceted) seconds the fists stay up as a guard after the last punch before the hands relax
 	ArmScale = 0.46, -- avatar arms are drawn this wide, a fraction of the avatar's (a full-width Roblox arm fills the view)
 	ArmReach = 1.34, -- ... and this long, shoulder to wrist in studs, whatever the avatar's proportions (the poses' reach)
 	ArmMaterial = Enum.Material.SmoothPlastic,
@@ -352,7 +369,7 @@ Config.Viewmodel = {
 		NightShadeDarken = 0.5,
 		SunShadeDarken = 0.3, -- (by day, when the sun is up but hidden from the eye: canopy, roofs)
 		MinExposure = 0.18,
-		KeyBrightness = 1.5,
+		KeyBrightness = 0, -- owner, 15 Nov: no lamp over the hands ("weird glowy light"); was 1.5
 		KeyDuskBoost = 1.2, -- (the key x (1 + this) in the twilight, whose flat fill is bright)
 		KeyRange = 4.5,
 		KeyAngle = 120,
@@ -392,11 +409,16 @@ Config.Loot = {
 	FeastDropHeight = 55, -- Feast crates fall into place from this height
 	ItemLightRange = 5,
 	ItemLightBrightness = 0.9,
-	BorderMargin = 30, -- QW3: markers more than this far outside the round's start radius get no loot
-	-- QW8: after the open, the opener gets "Take all" on the crate for TakeAllTime seconds (everything that fits goes in
-	-- the bag; the rest stays for anyone). Items in AutoPickup that you already carry are picked up when you walk
-	-- within AutoPickupRange studs of them.
-	TakeAllTime = 3,
+	-- QW3: markers further out than the round's start radius + BorderMargin get no loot (negative: that far inside the
+	-- ring, so nothing lies out at the wall where the border hurts)
+	BorderMargin = -10,
+	CrateSpacing = 5, -- studs kept between crates: one whose marker is closer to another moves aside, or is left out
+	-- QW8: an opened crate's items land beside it, in view. The opener gets "Take all" on the crate (everything that fits
+	-- goes in the bag; the rest stays for anyone) until they press it or walk TakeAllWalkAway studs from the crate.
+	-- Items in AutoPickup that you already carry are picked up when you walk within AutoPickupRange studs of them (spent
+	-- ones ProjectileService left in the world even if you carry none); arrows only with a bow (E still takes them).
+	TakeAll = true,
+	TakeAllWalkAway = 14,
 	AutoPickup = { arrow = true, throwing_knife = true },
 	AutoPickupRange = 3.5,
 	-- QW11: Common and Uncommon ground items glint faintly too. New players (Config.Guidance) see an outline on the
@@ -429,6 +451,28 @@ Config.Guidance = {
 -- One threshold per feedback signal (PlayabilityPlan QW5)
 Config.Feedback = {
 	LowHealth = 0.35, -- health fraction for the LOW tag, the red vignette and the heartbeat
+}
+
+-- The launch intro for the beta (LaunchIntroController; TwoArenas.md section 2, Tier 1: built from Parts on each
+-- client). At the call every contender watches one shot on the round's clock: the red room under the net, the cut to
+-- the glass cases (the full shot only), the rise up the pole through the round hall with the camera circling, a short
+-- white-out, then today's plate rise in first person and the last seconds of the countdown. The full shot plays when
+-- any contender in the round hasn't seen it yet this session (player attribute Launched), the short cut otherwise;
+-- practice rounds play PracticeCut. The countdown grows to fit: FullCountdown / ShortCountdown seconds from the call
+-- to the horn, the plates rising at FullRiseAt / ShortRiseAt (GameState LaunchAt) as the white-out ends, and the
+-- "Stay on your plate" announcements only in the last AnnounceLast seconds. Intro = false: today's countdown
+-- (Round.CountdownTime) and plate rise, unchanged. Studio only: GameState attribute LaunchCutTest = "Full" | "Short"
+-- forces a cut (tests).
+Config.Launch = {
+	Intro = true,
+	FullCountdown = 22,
+	FullRiseAt = 15.4,
+	ShortCountdown = 12,
+	ShortRiseAt = 6.2,
+	PracticeCut = "Short", -- "Short" | "Full"
+	AnnounceLast = 10,
+	SkipHold = 0.6, -- seconds to hold Skip (Space / A / the SKIP button); it only cuts your own camera to your plate
+	StandIns = 8, -- other contenders shown as copies of their avatars (the rest as plain figures); fewer on Medium / Low
 }
 
 Config.Studio = {
