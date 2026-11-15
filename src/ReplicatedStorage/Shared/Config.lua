@@ -49,11 +49,13 @@ Config.Round = {
 	StudioTimeScale = 1, -- Studio only: > 1 runs the round schedule (clock, Feast, border, Roll Call, time limit) faster
 	-- Quiet servers (PlayabilityPlan QW1, Q5): a player alone in the lobby of a live server for SoloWaitTime seconds
 	-- gets a practice round (training dummies included); GameState.SoloStartAt = when its contenders are chosen.
+	-- Still alone when it ends, they go again after a PracticeIntermissionTime-second Intermission (no second wait).
 	-- A player who arrives during a practice round ends it PracticeHandoffTime seconds later (the lone contender
 	-- "survived the practice round"). Practice rounds never add Wins, TotalKills or RoundsPlayed.
 	SoloPractice = true,
 	SoloWaitTime = 30,
 	PracticeHandoffTime = 60,
+	PracticeIntermissionTime = 8,
 	-- The finale (QW14, Q3): the ring keeps closing to nothing beside the Spire (Config.Border.LastStand*), the border
 	-- never takes the last contender standing, and a timeout with two or more alive goes to the healthiest (then the
 	-- most kills). Roll Calls once the border moves post their names in the 2D list only (no sky show, no silence).
@@ -324,8 +326,9 @@ Config.Combat = {
 	BowZeroDistance = 100,
 	BowMaxLiftDegrees = 25, -- never lift the release more than this above the crosshair
 	EquipTime = 0.32, -- seconds after equipping before you can attack (bows take a little longer)
-	-- PlayabilityPlan Q2 (open): 2 = a full-draw headshot does 100, a full health bar; the plan proposes 1.8 (90).
-	BowHeadshotMultiplier = 2,
+	-- PlayabilityPlan Q2 (decided 14 Nov, owner's note): 1.8 = a full-draw headshot does 90, so one arrow can't kill
+	-- from full health (2 did 100, a whole health bar).
+	BowHeadshotMultiplier = 1.8,
 }
 
 -- First-person arms (ViewmodelController). "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when

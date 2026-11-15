@@ -1,8 +1,9 @@
 --[[
-	CombatService - server-authoritative melee and ranged combat, plus the Studio training dummies.
+	CombatService - server-authoritative melee and ranged combat, plus the training dummies of practice rounds.
 
 	Client -> server
-	  MeleeSwing(lookDirection: Vector3)                       sent at the strike moment of a swing
+	  MeleeSwing(lookDirection: Vector3, predictedHit: boolean) sent at the strike moment of a swing; predictedHit = the
+	    attacker's own trace touched someone (CombatController): a swing their screen showed as a miss never lands
 	  RangedRelease(shotId, origin, direction, charge, mode)
 	    "Fire"   bow shot: consumes 1 arrow; speed and damage scale with charge (capped by the measured draw time)
 	    "Throw"  throwing knife (consumes 1) or spear (removes the equipped spear)
@@ -50,6 +51,17 @@ local CombatConfig = Config.Combat
 local DUMMY_TAG = "TrainingDummy"
 local FISTS = ItemDefs.get("fists")
 local MELEE_FACING_DOT = -0.2 -- flat swing direction vs. character facing; lenient because the server's view lags
+-- Melee reach. The attacker's screen shows a hit when CombatController's sphere (MeleeHitRadius * MELEE_PREDICT_RADIUS)
+-- swept `range` studs from the first-person camera (MELEE_CAMERA_BEHIND behind the head) touches someone. The server
+-- sweeps from the head and reaches MELEE_REACH_ALLOWANCE studs further for latency, plus what the attacker closes in
+-- MELEE_LAG_TIME (the server sees a running attacker up to about 0.25 s behind where their screen had them). A target
+-- that can move (a player) was on the attacker's screen up to interpolation plus ping ago and may have backed off
+-- several studs since, so a hit seen on one is checked out to range + MeleeLagTolerance + MeleeHitRadius. The front
+-- never passes that, since the attacker's speed is reported by their own client.
+local MELEE_PREDICT_RADIUS = 0.85
+local MELEE_CAMERA_BEHIND = 0.5
+local MELEE_REACH_ALLOWANCE = 1
+local MELEE_LAG_TIME = 0.25
 local RANGED_FACING_DOT = -0.35
 local HEAVY_SWING_COOLDOWN = 0.75 -- weapons at least this slow use the heavy swing sound
 local BOW_MIN_INTERVAL = 0.3 -- seconds between two arrows, on top of the draw time
@@ -731,10 +743,11 @@ type MeleeHit = {
 
 -- A forgiving sphere sweep against characters, a point-blank overlap check (Spherecast skips parts that already
 -- overlap its start), a line-of-sight check so nobody is hit through a wall, then a thin ray for the world sound.
-local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number): MeleeHit?
+-- worldOnly skips the characters (the attacker's own trace missed them) and keeps the world sound.
+local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, worldOnly: boolean?): MeleeHit?
 	local targets = CombatService.getTargets(character)
 	local world = worldParams(targets, character)
-	if #targets > 0 then
+	if #targets > 0 and not worldOnly then
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Include
 		params.FilterDescendantsInstances = targets
@@ -783,11 +796,26 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 	return nil
 end
 
+-- Whether a target that can move (a player; training dummies are anchored) is in front of the swing.
+local function movableTargetAhead(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number): boolean
+	for _, target in ipairs(CombatService.getTargets(character)) do
+		local root = target:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") and not root.Anchored then
+			local offset = root.Position - origin
+			local along = offset:Dot(direction)
+			if along > 0 and along < reach + 3 and (offset - direction * along).Magnitude < radius + 3 then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 --------------------------------------------------------------------------------------------------------------------
 -- Remotes
 --------------------------------------------------------------------------------------------------------------------
 
-local function onMeleeSwing(player: Player, lookDirection: any)
+local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any)
 	if not Net.rateLimit(player, "MeleeSwing", 5, 3) then
 		return
 	end
@@ -816,8 +844,20 @@ local function onMeleeSwing(player: Player, lookDirection: any)
 	Sfx.play(if heavy then "Swing_Heavy" else "Swing_Light", { position = origin, exclude = player })
 	broadcastAction(player, "Swing", def.id)
 
-	local reach = (def.range or 5) + CombatConfig.MeleeLagTolerance
-	local hit = meleeTrace(ctx.character, origin, direction, reach, CombatConfig.MeleeHitRadius)
+	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
+	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE, plus lag, past the front of the attacker's own
+	local range = def.range or 5
+	local radius = CombatConfig.MeleeHitRadius
+	local maxFront = range + CombatConfig.MeleeLagTolerance + radius
+	local closing = ctx.root.AssemblyLinearVelocity:Dot(direction)
+	closing = if Util.isFiniteNumber(closing) then math.clamp(closing, 0, Config.Movement.SprintSpeed or 21) else 0
+	local front = range + radius * MELEE_PREDICT_RADIUS - MELEE_CAMERA_BEHIND + MELEE_REACH_ALLOWANCE
+		+ closing * MELEE_LAG_TIME
+	if predictedHit == true and movableTargetAhead(ctx.character, origin, direction, maxFront, radius) then
+		front = maxFront
+	end
+	front = math.min(front, maxFront)
+	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true)
 	if not hit then
 		return
 	end
@@ -997,18 +1037,18 @@ function CombatService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		playerState[player] = nil
 	end)
-	if Config.IsStudio then
-		GameState:GetAttributeChangedSignal("Phase"):Connect(refreshDummies)
-		GameState:GetAttributeChangedSignal("Practice"):Connect(refreshDummies)
-		local round = Services.RoundService
-		if round and type(round.roundEnded) == "table" and type(round.roundEnded.Connect) == "function" then
-			round.roundEnded:Connect(function()
-				clearDummies()
-			end)
-		end
-		RunService.Heartbeat:Connect(updateDummies)
-		refreshDummies()
+	-- Training dummies come and go with practice rounds, in Studio and on live servers alike (wantDummies decides);
+	-- updateDummies returns at once while there are none.
+	GameState:GetAttributeChangedSignal("Phase"):Connect(refreshDummies)
+	GameState:GetAttributeChangedSignal("Practice"):Connect(refreshDummies)
+	local round = Services.RoundService
+	if round and type(round.roundEnded) == "table" and type(round.roundEnded.Connect) == "function" then
+		round.roundEnded:Connect(function()
+			clearDummies()
+		end)
 	end
+	RunService.Heartbeat:Connect(updateDummies)
+	refreshDummies()
 end
 
 return CombatService

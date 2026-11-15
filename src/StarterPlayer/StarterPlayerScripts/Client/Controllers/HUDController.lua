@@ -1635,7 +1635,10 @@ local function updateVignettes(dt: number, t: number, combat: boolean)
 end
 
 local function updateCore(combat: boolean)
+	-- Reset (Roblox menu): in the lobby, and in the arena once the round is on and you are off your plate - a way out
+	-- of a spot you can't leave. It counts as a death (PlayerService credits a recent attacker with the kill).
 	local allowReset = not ClientState.inArena
+		or (combat and not ClientState.frozen and GameState:GetAttribute("Phase") == "Active")
 	if allowReset ~= lastResetAllowed then
 		lastResetAllowed = allowReset
 		setCore("ResetButtonCallback", allowReset)

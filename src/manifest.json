@@ -1,23 +1,23 @@
 {
   "generatedAt": "2026-11-12T11:52:30Z",
   "placeId": 120572716460286,
-  "placeVersion": 199,
+  "placeVersion": 258,
   "studioReportedPlaceVersion": 147,
   "totals": {
     "scripts": 91,
-    "bytes": 2467603,
+    "bytes": 2481267,
     "byService": {
       "StarterPlayer": {
         "scripts": 28,
-        "bytes": 878725
+        "bytes": 887553
       },
       "ReplicatedStorage": {
         "scripts": 20,
-        "bytes": 270168
+        "bytes": 270372
       },
       "ServerScriptService": {
         "scripts": 13,
-        "bytes": 305601
+        "bytes": 310233
       },
       "ServerStorage": {
         "scripts": 30,
@@ -76,8 +76,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/CombatController.lua",
-      "bytes": 36126,
-      "fnv1a": "b49bb43e"
+      "bytes": 36337,
+      "fnv1a": "6ada8d9d"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.AudioController",
@@ -132,8 +132,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/CameraController.lua",
-      "bytes": 27814,
-      "fnv1a": "beb2f707"
+      "bytes": 29486,
+      "fnv1a": "39814114"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.InventoryController",
@@ -148,32 +148,32 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/HUDController.lua",
-      "bytes": 76987,
-      "fnv1a": "2ae23e47"
+      "bytes": 77301,
+      "fnv1a": "d6fea8ae"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.LobbyController",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua",
-      "bytes": 15622,
-      "fnv1a": "f4a92fc3"
+      "bytes": 16078,
+      "fnv1a": "22dd7a7d"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.MovementController",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/MovementController.lua",
-      "bytes": 106427,
-      "fnv1a": "be849130"
+      "bytes": 109975,
+      "fnv1a": "06ee0945"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.NotificationController",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/NotificationController.lua",
-      "bytes": 64166,
-      "fnv1a": "fa38db4c"
+      "bytes": 64360,
+      "fnv1a": "e962166e"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.SpectateController",
@@ -212,8 +212,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LaunchController.lua",
-      "bytes": 21934,
-      "fnv1a": "88228b36"
+      "bytes": 24367,
+      "fnv1a": "9bc46aab"
     },
     {
       "studioPath": "StarterPlayer.StarterPlayerScripts.Client.Controllers.LootCueController",
@@ -276,8 +276,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ReplicatedStorage/Shared/Config.lua",
-      "bytes": 24972,
-      "fnv1a": "218560ee"
+      "bytes": 25176,
+      "fnv1a": "8c81cdb7"
     },
     {
       "studioPath": "ReplicatedStorage.Shared.ItemDefs",
@@ -404,8 +404,8 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerScriptService/Server/Services/CombatService.lua",
-      "bytes": 35342,
-      "fnv1a": "58706444"
+      "bytes": 38125,
+      "fnv1a": "433597f2"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.ProjectileService",
@@ -420,16 +420,16 @@
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerScriptService/Server/Services/PlayerService.lua",
-      "bytes": 36939,
-      "fnv1a": "57175056"
+      "bytes": 37183,
+      "fnv1a": "9fe0334c"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.RoundService",
       "class": "ModuleScript",
       "runContext": null,
       "file": "src/ServerScriptService/Server/Services/RoundService.lua",
-      "bytes": 27430,
-      "fnv1a": "5d7ddf27"
+      "bytes": 29035,
+      "fnv1a": "0768364d"
     },
     {
       "studioPath": "ServerScriptService.Server.Services.ArenaService",
@@ -843,6 +843,6 @@
     "Services with no scripts: Workspace, Lighting, SoundService, StarterGui, StarterPack, ReplicatedFirst, Teams, Chat, TextChatService and the rest. ServerStorage.Docs, ServerStorage.WorldAssets and ServerStorage.ArenaData contain no scripts.",
     "A second listing taken after the export matched the first for every script in the place (no edits during the export)."
   ],
-  "updatedAt": "2026-11-12",
-  "updateNote": "Place version 199: avatar arms (ViewmodelController, Rig, Poses, new Shade), persistent pickable arrows (ProjectileController, new WorldItemController, Net, Config, new WorldItems, CombatService, ProjectileService now a folder with the new WorldProjectiles, LootService) and the art-style test builder (new ServerStorage.StyleTest.StyleTestBuilder with Manifest). Every script in the manifest was re-checked against a fresh Studio listing (bytes and FNV-1a) and against the written file."
+  "updatedAt": "2026-11-14",
+  "updateNote": "Place version 258: the beta release fixes, wave 1 (training dummies on live servers, facing the Spire at launch, the wedge escape and Reset in the arena, melee reach with the predictedHit veto and the pre-fix cap, the 8-second practice rematch, and BowHeadshotMultiplier 1.8). 11 scripts changed: Config, CombatService, PlayerService, RoundService, and the Camera, Combat, HUD, Launch, Lobby, Movement and Notification controllers. All 91 files were re-checked against a fresh Studio listing (bytes and FNV-1a) and against the written files."
 }

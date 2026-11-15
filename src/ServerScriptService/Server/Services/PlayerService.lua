@@ -15,6 +15,7 @@
 	  PlayerService.died: Signal(victim: Player, killer: Player?, cause: string)
 	      Fires once per contender elimination during Countdown/Active, including contenders who leave
 	      (cause "Left": the victim is already leaving, so don't FireClient to it). Lobby deaths don't fire it.
+	      Cause "Reset": the contender reset their own character (the Roblox menu's Reset).
 	Used by RoundService:
 	  PlayerService.loadIntoLobby(player)                      (re)load the character into the lobby, reset life attributes
 	  PlayerService.getLobbyPlayers() -> { Player }            waiting in the lobby with a live character
@@ -893,7 +894,9 @@ local function onHumanoidDied(player: Player, character: Model)
 	st.deathHandled = true
 	local root = character:FindFirstChild("HumanoidRootPart")
 	local position = if root and root:IsA("BasePart") then root.Position else nil
-	local cause = "Other"
+	-- PlayerService.damage sets deathHandled before it kills, so a humanoid that dies here above the void was killed
+	-- by its own client: the Reset button
+	local cause = "Reset"
 	if not position or position.Y < VOID_HEIGHT then
 		cause = "Fall"
 		position = st.lastSafePosition

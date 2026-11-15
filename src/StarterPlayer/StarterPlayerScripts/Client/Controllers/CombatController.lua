@@ -5,7 +5,8 @@
 	for the bow and the spear) through Shared.Input, and only while alive in the arena and not spectating, so lobby
 	clicks and the third-person camera are untouched. Input is ignored while ClientState.menuOpen.
 	  Melee: windup -> strike -> recover, timed from ItemDefs (windup, cooldown). At the strike moment MeleeSwing is
-	    sent with the camera look vector. Holding Attack keeps swinging; a press just before a swing ends is buffered, and a press during an item switch is kept
+	    sent with the camera look vector and whether the local trace touched someone (only such a swing can land).
+	    Holding Attack keeps swinging; a press just before a swing ends is buffered, and a press during an item switch is kept
     for the whole switch. Attacking while climbing or swimming answers with Feedback.deny.
 	  Bow: hold Attack to draw (ClientState.drawAlpha over drawTime), release to shoot (RangedRelease "Fire") when
 	    there are arrows; a very light draw is let down instead. Aim zooms (ClientState.aiming / aimAlpha) and
@@ -507,12 +508,13 @@ local function strike(rec: any, now: number)
 	rec.struck = true
 	lastStrikeAt = now
 	local cf = camera.CFrame
+	local hit = predictMelee(rec.def, cf)
 	if MeleeSwing then
-		MeleeSwing:FireServer(cf.LookVector)
+		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts
+		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character)
 	end
 	Sfx.play(if rec.weight == "Light" then "Swing_Light" else "Swing_Heavy")
 
-	local hit = predictMelee(rec.def, cf)
 	rec.hit = if hit then (if hit.character then "Character" else "World") else nil
 	if hit then
 		if hit.character then

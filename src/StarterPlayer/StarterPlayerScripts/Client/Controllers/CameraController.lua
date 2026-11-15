@@ -39,6 +39,11 @@
 	  CameraController.getBaseCFrame() -> CFrame   the default camera's CFrame this frame, before our offsets
 	  CameraController.isFirstPerson() -> boolean
 	  CameraController.shake(amount: number)       same as ClientState.cameraImpulse:Fire(Vector3.zero, amount)
+	  CameraController.faceToward(direction: Vector3, pitchDegrees: number?)
+	                                               turn the view once: along `direction` (flattened), at `pitchDegrees`
+	                                               (0 = level, negative = down), e.g. to the Spire on your plate. It is
+	                                               written before the default camera runs, on FACE_FRAMES frames; the
+	                                               look is free again right after
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -103,6 +108,7 @@ local K = {
 }
 
 local EYE_MARGIN = 0.3 -- keep the near plane this far from walls
+local FACE_FRAMES = 3 -- a faceToward turn is written on this many frames in a row, so it holds whatever else runs
 
 -- Initial velocity that makes a spring at rest peak at `peak` (so kicks are specified as peak displacements).
 local function impulseForPeak(speed: number, damping: number, peak: number): number
@@ -150,6 +156,8 @@ local eyeVy = 0 -- filtered vertical speed (prediction)
 local eyeCharacter: Model? = nil
 local jumpAt = -math.huge -- os.clock() of the last take-off (ClientState.jumped)
 local prepCur = 0 -- 0..1 the eye's share of the knee dip before a take-off
+local faceLook: Vector3? = nil -- the look direction of a requested turn (faceToward)
+local faceFrames = 0 -- frames left to write it
 
 local eyeParams = RaycastParams.new()
 eyeParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -275,6 +283,15 @@ local function restoreBase()
 	-- hand the default camera its own Focus back too (step() points Focus ahead of the eye in first person)
 	if cam and lastFocusSet and savedFocus and (cam.Focus.Position - lastFocusSet.Position).Magnitude < 1e-3 then
 		cam.Focus = savedFocus
+	end
+	-- a requested turn (faceToward): the default camera, next to run, rebuilds its CFrame from this look direction
+	if faceFrames > 0 then
+		faceFrames -= 1
+		if cam and faceLook and ClientState.spectating == nil and cam.CameraType == Enum.CameraType.Custom then
+			local position = cam.CFrame.Position
+			cam.CFrame = CFrame.lookAt(position, position + faceLook)
+			prevYaw = nil -- not a look movement: no viewmodel sway or turn lean from it
+		end
 	end
 	lastSet = nil
 	lastFocusSet = nil
@@ -598,6 +615,20 @@ function CameraController.shake(amount: number)
 	if type(amount) == "number" and amount == amount then
 		trauma = math.clamp(trauma + amount, 0, 1)
 	end
+end
+
+function CameraController.faceToward(direction: Vector3, pitchDegrees: number?)
+	if typeof(direction) ~= "Vector3" then
+		return
+	end
+	local flat = Vector3.new(direction.X, 0, direction.Z)
+	local length = flat.Magnitude
+	if not (length > 1e-3 and length < math.huge) then
+		return
+	end
+	local pitch = math.rad(math.clamp(tonumber(pitchDegrees) or 0, -80, 80))
+	faceLook = flat.Unit * math.cos(pitch) + Vector3.new(0, math.sin(pitch), 0)
+	faceFrames = FACE_FRAMES
 end
 
 function CameraController.Init(registry)

@@ -882,6 +882,8 @@ local function tipClass(data: { [string]: any }): string
 		return "Border"
 	elseif cause == "Fall" then
 		return "Fall"
+	elseif cause == "Reset" then
+		return "Reset" -- no tip: you chose to go
 	elseif cause == "Combat" then
 		local def = if type(data.weapon) == "string" then ItemDefs.get(data.weapon) else nil
 		if def then
@@ -950,6 +952,8 @@ local function causeLine(data: { [string]: any }): string
 		return "You starved"
 	elseif cause == "Dehydration" then
 		return "You died of thirst"
+	elseif cause == "Reset" then
+		return if killer then "You reset   ·   after a fight with " .. killer else "You reset"
 	end
 	return if killer then "Eliminated by " .. killer else "You were eliminated"
 end

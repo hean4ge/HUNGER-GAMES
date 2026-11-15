@@ -9,6 +9,8 @@
 	       counted from joining for a newcomer (player attribute JoinedAt = server time they joined)
 	       (GameState.SoloStartAt = server time its contenders are chosen, 0 otherwise). A player who arrives during a
 	       practice round ends it PracticeHandoffTime s later (PhaseEndsAt moves up; the lone contender is the winner).
+	       Still alone when their practice round ends, a player goes again after a PracticeIntermissionTime s Intermission
+	       (no second wait); a contender arriving during it makes it a normal Intermission.
 	       Practice rounds add no Wins and no RoundsPlayed.
 	  QW3  GameState.BorderStartRadius at each Countdown: clamp(640 * sqrt(N / 24), 320, 640) for N contenders (set
 	       before LootService.populate; ArenaService and the wall start from it).
@@ -71,6 +73,8 @@ local soloSince: number? = nil -- QW1: when the one waiting player started waiti
 local joinedAt: { [Player]: number } = {} -- QW1: server time each player joined (a newcomer's wait counts from here)
 local soloRound = false -- QW1: this Intermission was started for a lone player (it doesn't drop back to Lobby)
 local handoffAt = 0 -- QW1: the practice round ends at this server time because a contender arrived
+local againFor: Player? = nil -- QW1: the contender of the practice round that just ended (alone, they go again sooner)
+local quickIntermission = false -- QW1: this Intermission is the short one before that player's next practice round
 
 -- Helpers ----------------------------------------------------------------------------------------------------------
 
@@ -122,6 +126,13 @@ end
 -- QW1: lone players get practice rounds on servers that need more than one player to start
 local function soloEnabled(): boolean
 	return RoundCfg.SoloPractice ~= false and minPlayers() > 1
+end
+
+-- QW1: the contender of the practice round that just ended is back in the lobby (with one waiting: they're alone)
+local function practiceAgain(): boolean
+	local player = againFor
+	return player ~= nil and player.Parent == Players and player:GetAttribute("InArena") ~= true
+		and player:GetAttribute("Alive") ~= true
 end
 
 -- QW3: the border's starting radius for n contenders (the arena is as crowded as a full round from 6 up)
@@ -351,6 +362,8 @@ local function endRound(winner: Player?, reason: string)
 	if phase ~= "Active" then
 		return
 	end
+	-- QW1: a practice round's contender who is still alone afterwards goes again sooner (step)
+	againFor = if practice then next(contenders) else nil
 	local ps = playerService()
 	local duration = math.max(0, now() - roundStartedAt)
 	local alive = ps.getAlivePlayers()
@@ -528,9 +541,15 @@ local function enterCountdown()
 	RoundService.roundStarting:Fire(roundId)
 end
 
-local function enterIntermission(solo: boolean?)
-	setPhase("Intermission", RoundCfg.IntermissionTime)
-	local seconds = math.floor(RoundCfg.IntermissionTime + 0.5)
+local function enterIntermission(solo: boolean?, quick: boolean?)
+	-- QW1: quick = the short Intermission before a lone player's next practice round (never longer than the normal one)
+	local duration = RoundCfg.IntermissionTime
+	if quick then
+		duration = math.min(duration, tonumber(RoundCfg.PracticeIntermissionTime) or duration)
+	end
+	quickIntermission = quick == true
+	setPhase("Intermission", duration)
+	local seconds = math.floor(duration + 0.5)
 	if solo then
 		setAttr("SoloStartAt", phaseEndsAt)
 		announce({
@@ -616,8 +635,14 @@ local function step()
 		if waiting >= minPlayers() then
 			soloSince = nil
 			soloRound = false
+			againFor = nil
 			setAttr("SoloStartAt", 0)
 			enterIntermission(false)
+		elseif waiting == 1 and soloEnabled() and practiceAgain() then
+			-- QW1: still alone after their practice round: the next one follows a short Intermission, not a second wait
+			againFor = nil
+			soloRound = true
+			enterIntermission(true, true)
 		elseif waiting == 1 and soloEnabled() then
 			-- QW1: never wait alone. One countdown covers the wait and the Intermission (LobbyController shows it).
 			local wait = math.max(0, tonumber(RoundCfg.SoloWaitTime) or 30)
@@ -642,6 +667,9 @@ local function step()
 		if soloRound and waiting >= minPlayers() then
 			soloRound = false -- someone arrived during the practice countdown: this is a full round now
 			setAttr("SoloStartAt", 0)
+			if quickIntermission then
+				enterIntermission(false) -- with the normal Intermission (the short one was for a lone player)
+			end
 		end
 		if waiting < minPlayers() and not (soloRound and waiting >= 1) then
 			soloSince = nil

@@ -43,6 +43,8 @@ Use a published copy, or a Studio test with `Config.Studio.SoloTest` on, so you 
 - Nothing on screen covers the crosshair while you draw the bow.
 - No red errors in the Output window (Studio) or the developer console (F9 in a published game).
 
+**First publish only: saving.** Studio never saves (its DataStore is off) and practice rounds add no stats, so saving first runs on a real server. On a private server with two players: change a setting (for example the field of view), play one normal round, then both leave and rejoin. The setting is kept, and the lobby's record card shows the round. If it isn't, don't make the game public yet; pass it on.
+
 **When something fails**, write down the device and its model, the step, what you pressed and what happened, then pass it to the lead before publishing.
 
 ---

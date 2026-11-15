@@ -10,6 +10,10 @@
 	on one shared timeline (GameState LaunchAt / LaunchRise / LaunchDepth, set by RoundService), and finally restores
 	the exact server positions, always before the start horn. A plate with no tube under it (nothing to sink into)
 	stays put; a contender with no plate model rises only if there is a tube under their feet.
+	The server faces every contender toward the Spire, but in first person your body follows your camera. So once a
+	round, when you first stand frozen on the plate ring, your view is turned to the Spire (CameraController.faceToward)
+	and you look around freely from then on; while you ride, your own root is only moved and keeps the facing your
+	camera gives it.
 	API:
 	  LaunchController.isLaunching() -> boolean
 	  LaunchController.getRise() -> number   0..1 progress of the rise (1 when done or idle)
@@ -36,12 +40,14 @@ local NEAR_EFFECTS = 140 -- other plates within this range get sound / light / d
 local MAX_ASSUMED_PLATE = 4 -- a plate model taller than this is assumed to be a column reaching into the tube
 local DUST_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
 local LIGHT_COLOR = Color3.fromRGB(255, 226, 188)
+local FACE_PITCH = -6 -- degrees: on your plate the view looks a little down, at the Spire and the crates at its foot
 
 local LaunchController = {}
 
 local Controllers: any = nil
 local state = nil
 local watchedRound = nil
+local facedRound: any = false -- the RoundId whose placement turned your view to the Spire (false: none yet)
 
 local function now(): number
 	return workspace:GetServerTimeNow()
@@ -300,7 +306,9 @@ local function restoreAll()
 		if root.Parent and root.Anchored and rider.lastSet then
 			-- only if we're still the last writer (the server hasn't moved it since)
 			if (root.CFrame.Position - rider.lastSet.Position).Magnitude < 0.05 then
-				root.CFrame = rider.base
+				-- your own body keeps the facing your camera gave it
+				root.CFrame = if rider.player == localPlayer then CFrame.new(rider.base.Position) * root.CFrame.Rotation
+					else rider.base
 			end
 		end
 	end
@@ -566,6 +574,10 @@ local function step()
 			local source = rider.plate or rider
 			if source.depth > 0 then
 				local cf = rider.base + Vector3.new(0, offsetFor(source, t), 0)
+				if player == localPlayer then
+					-- your own body turns with your camera (first person): move it, keep its facing
+					cf = CFrame.new(cf.Position) * root.CFrame.Rotation
+				end
 				root.CFrame = cf
 				rider.lastSet = cf
 			end
@@ -574,6 +586,35 @@ local function step()
 	-- placed after the rise began: your own whir and light start now
 	if state.started and not state.locked then
 		startLocalLift(t)
+	end
+end
+
+-- Your placement: once a round, when you first stand frozen on the plate ring (the server can keep you in the lobby
+-- for a moment while it waits for streaming), turn your view to the Spire, as the server turned your body.
+local function faceSpire()
+	if not (ClientState.inArena and ClientState.frozen) then
+		return
+	end
+	local character = localPlayer.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root or not root:IsA("BasePart") or not root.Anchored then
+		return
+	end
+	-- the centre the server faces you toward (RoundService.faceSpire)
+	local arena = workspace:FindFirstChild("Arena")
+	local centre = arena and arena:GetAttribute("Center")
+	if typeof(centre) ~= "Vector3" then
+		centre = ArenaLayout.Center or Vector3.zero
+	end
+	local position = root.Position
+	local toSpire = Vector3.new(centre.X - position.X, 0, centre.Z - position.Z)
+	if math.abs(toSpire.Magnitude - (ArenaLayout.PlinthRingRadius or 52)) > 8 then
+		return
+	end
+	facedRound = GameState:GetAttribute("RoundId")
+	local camera = Controllers and Controllers.CameraController
+	if camera and type(camera.faceToward) == "function" then
+		camera.faceToward(toSpire, FACE_PITCH)
 	end
 end
 
@@ -644,6 +685,13 @@ function LaunchController.Start()
 				warn("[LaunchController] " .. tostring(err))
 				pcall(restoreAll)
 				state = nil
+			end
+		end
+		if GameState:GetAttribute("Phase") == "Countdown" and facedRound ~= GameState:GetAttribute("RoundId") then
+			local ok, err = pcall(faceSpire)
+			if not ok then
+				facedRound = GameState:GetAttribute("RoundId") -- not again this round
+				warn("[LaunchController] " .. tostring(err))
 			end
 		end
 	end)

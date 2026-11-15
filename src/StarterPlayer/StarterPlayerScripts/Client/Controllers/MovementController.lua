@@ -20,7 +20,8 @@
 	  - Terrain: speed follows the slope along your path (uphill slower and tiring, downhill faster up to a
 	    point, then you brake); sprinting down steep ground builds instability until you stumble. Ground
 	    steeper than MaxWalkableAngle (Humanoid.MaxSlopeAngle) can't be walked up: you slide down it with
-	    friction. Surfaces (mud, sand, snow, ice, rock, grass...) change speed, grip and effort, and wading
+	    friction; held fast there (a pocket between rocks) you get one jump or mantle out (SLOPE.Wedge*).
+	    Surfaces (mud, sand, snow, ice, rock, grass...) change speed, grip and effort, and wading
 	    slows you by water depth.
 	  - Air: a lighter, human-scale gravity while airborne (Roblox's default gravity is ~6.6 g at character
 	    scale), applied with a local VectorForce; Humanoid.JumpHeight is converted so the jump apex is
@@ -183,6 +184,16 @@ SLOPE.MaxSin = math.sin(math.rad(SLOPE.MaxWalkable))
 SLOPE.FadeSin = math.sin(math.rad(SLOPE.MaxWalkable - 6)) -- uphill headway fades to nothing from here...
 SLOPE.FadeCos = math.cos(math.rad(SLOPE.MaxWalkable - 6)) -- ...when the ground ahead really is that steep
 SLOPE.RecoverCos = math.cos(math.rad(math.max(5, SLOPE.MaxWalkable - 5)))
+-- Wedged: held fast on ground too steep to stand on (a rock pocket, a V between two faces) or hung up in the air,
+-- moving less than WedgeRadius in WedgeTime. The slide stops pushing (steering still works) and one jump, mantle or
+-- climb may start there until you move WedgeLeave off the spot. At most once per WedgeCooldown and only up to
+-- WedgeRise above the last ground you stood on; that jump and grab reach no higher than they would from that ground,
+-- so pockets can't be used to climb a cliff.
+SLOPE.WedgeTime = 1
+SLOPE.WedgeRadius = 0.5
+SLOPE.WedgeLeave = 1
+SLOPE.WedgeCooldown = 2.5
+SLOPE.WedgeRise = 1.5
 -- Swimming and wading
 local SWM = {
 	Speed = num(MOVE, "SwimSpeed", 8),
@@ -370,6 +381,11 @@ local PUSH = { mantle = 0, climb = 0, swim = 0 }
 local G = {
 	hit = false, normal = Vector3.yAxis, material = Enum.Material.Air, y = 0, dist = math.huge,
 	alongSin = 0, alongSmooth = 0, steepTime = 0, aheadNY = 1,
+}
+-- Wedge watch (SLOPE.Wedge*): where we were held and since when, whether the escape is open, the last walkable feet
+-- height, and whether this frame's jump or mantle is one only the escape allows (measured from standY)
+local WEDGE = {
+	anchor = nil :: Vector3?, since = 0, ready = false, cooldownUntil = 0, standY = nil :: number?, escape = false,
 }
 local W = { depth = 0, surfaceY = -math.huge, inWater = false }
 local SURF = { speed = 1, grip = 1, effort = 1, name = "Ground" }
@@ -1618,9 +1634,11 @@ local function slopeSlideStep(c, dt: number, t: number, wishDir: Vector3): Vecto
 		if downhill.Magnitude > 1e-3 then
 			downhill = downhill.Unit
 			sl.dir = downhill
-			local sinT = math.sqrt(math.max(0, 1 - n.Y * n.Y))
-			local a = SLOPE.SlideAccel * math.max(0.12, sinT - SLOPE.SlideFriction * SURF.grip * n.Y)
-			v += downhill * a * dt
+			if not WEDGE.ready then -- (wedged: stop pushing into what holds us)
+				local sinT = math.sqrt(math.max(0, 1 - n.Y * n.Y))
+				local a = SLOPE.SlideAccel * math.max(0.12, sinT - SLOPE.SlideFriction * SURF.grip * n.Y)
+				v += downhill * a * dt
+			end
 			-- no walking back up it
 			local into = v:Dot(downhill)
 			if into < 0 then
@@ -1715,6 +1733,9 @@ local function onJumped(c)
 	AIR.coyoteUntil = 0
 	AIR.startAt = t
 	AIR.takeoffY = c.root.Position.Y - (c.humanoid.HipHeight + c.rig.rootHalf)
+	if WEDGE.escape then
+		AIR.takeoffY = math.min(AIR.takeoffY, WEDGE.standY) -- out of a wedge: the hands reach from the last ground stood on
+	end
 	spend(JMP.Stamina * (if t - AIR.lastLandAt < JMP.RepeatWindow and AIR.lastLandWasJump then 1.5 else 1), t)
 	AIR.wishSpeed = math.max(stateSpeedFor(moveState), velocity.Magnitude)
 	if slide then
@@ -2025,6 +2046,7 @@ local function update(dt: number)
 		velocity = Vector3.zero
 		swimVelocity = Vector3.zero
 		motion.accel = Vector3.zero
+		WEDGE.anchor, WEDGE.ready, WEDGE.standY, WEDGE.escape = nil, false, nil, false
 		if slide then
 			endSlide(c, t)
 		end
@@ -2130,6 +2152,25 @@ local function update(dt: number)
 		return
 	end
 
+	-- Wedged (SLOPE.Wedge*): held fast on unstandable ground, or hung up in the air, without headway. The escape
+	-- stays open until we move off the spot.
+	local footY = pos.Y - (humanoid.HipHeight + c.rig.rootHalf)
+	if grounded and not slide and G.hit and G.dist < 0.8 and G.normal.Y >= SLOPE.MaxCos then
+		WEDGE.standY = footY
+	end
+	local heldFast = not swimming and not nativeClimb and ((slide ~= nil and slide.kind == "Slope")
+		or (slide == nil and (inAir or (G.hit and G.dist < 1.4 and G.normal.Y < SLOPE.MaxCos))))
+	if not heldFast then
+		WEDGE.anchor, WEDGE.ready = nil, false
+	elseif WEDGE.anchor == nil or (pos - WEDGE.anchor).Magnitude > (if WEDGE.ready then SLOPE.WedgeLeave else SLOPE.WedgeRadius) then
+		WEDGE.anchor, WEDGE.since, WEDGE.ready = pos, t, false
+	elseif not WEDGE.ready and t - WEDGE.since >= SLOPE.WedgeTime and t >= WEDGE.cooldownUntil
+		and (WEDGE.standY == nil or footY <= WEDGE.standY + SLOPE.WedgeRise) then
+		WEDGE.ready = true
+		WEDGE.cooldownUntil = t + SLOPE.WedgeCooldown
+		velocity = Vector3.zero -- the slide was only pushing into what holds us
+	end
+
 	-- Ground too steep to stand on: the Humanoid (MaxSlopeAngle) has lost its floor and the ground under us
 	-- is steeper than walkable
 	local steep = G.hit and G.dist < 0.8 and G.normal.Y < SLOPE.MaxCos and not swimming
@@ -2142,14 +2183,18 @@ local function update(dt: number)
 		G.steepTime = 0
 	end
 	local slopeSliding = slide ~= nil and slide.kind == "Slope"
+	-- A jump or mantle that only the open escape allows (off unstandable ground, or from mid-air) is measured from the
+	-- last ground stood on: it gets no higher than the same jump or grab from there, wherever in the pocket it starts.
+	WEDGE.escape = WEDGE.ready and WEDGE.standY ~= nil and (slopeSliding or steep or not grounded)
 
 	-- Jumping, edge-triggered: holding the key (or the default controls' Humanoid.Jump) never repeats a jump.
 	-- A press on the ground asks for a take-off; once the feet are ready (JumpGroundTime after a landing, no
 	-- hard-landing stun) a short knee dip plays (JumpPrepTime, shorter on the move) and the take-off fires at its
 	-- end. A press just before landing is buffered; coyote time still allows a jump just after walking off a
-	-- ledge. No jumping off unstandable ground or while stumbling.
+	-- ledge. No jumping off unstandable ground (unless wedged there) or while stumbling.
 	local stumbling = t < AIR.stumbleUntil
-	local canJump = t - AIR.lastJumpAt >= JMP.Cooldown and not spectating and not slopeSliding and not steep and not stumbling
+	local canJump = t - AIR.lastJumpAt >= JMP.Cooldown and not spectating and not stumbling
+		and (WEDGE.ready or (not slopeSliding and not steep))
 	local apex = JMP.Height
 	if exhausted then
 		apex *= JMP.ExhaustedScale
@@ -2159,6 +2204,9 @@ local function update(dt: number)
 	end
 	if W.depth > SWM.WadeStart then
 		apex *= math.clamp(1 - W.depth / SWM.WadeFull, 0.35, 1)
+	end
+	if WEDGE.escape and footY > WEDGE.standY then
+		apex = math.max(0, apex - (footY - WEDGE.standY)) -- no higher than the same jump from the last ground stood on
 	end
 	local jumpHeight = humanoidJumpHeight(apex)
 	if lastJumpHeight == nil or math.abs(lastJumpHeight - jumpHeight) > 1e-3 then
@@ -2198,6 +2246,9 @@ local function update(dt: number)
 	if not fire and inAir and not AIR.jumped and t < AIR.coyoteUntil and jumpEdge and canJump then
 		fire = true -- just walked off a ledge: no dip, the feet already left
 	end
+	if not fire and WEDGE.ready and not grounded and jumpEdge and canJump then
+		fire = true -- wedged with nothing under the feet: push off whatever holds us (no dip)
+	end
 	if fire then
 		AIR.prepAt = nil
 		AIR.jumpWanted = nil
@@ -2214,7 +2265,8 @@ local function update(dt: number)
 	AIR.armed = fire or t - AIR.firedAt < 0.05
 
 	-- Climb entry: face a Climbable and push into it (or jump at it)
-	if not useBusy and not swimming and not nativeClimb and not slide and stamina > 0.05 and t - lastKinematicEndAt > 0.3 and forwardAmount > 0.2 then
+	if not useBusy and not swimming and not nativeClimb and (not slide or WEDGE.ready) and stamina > 0.05 and t - lastKinematicEndAt > 0.3
+		and forwardAmount > 0.2 then
 		local hit, hitNormal = probeClimbable(c, faceDir)
 		if hit and hitNormal then
 			if forwardAmount > 0.6 and (actualH:Dot(faceDir) < 4 or inAir) then
@@ -2237,8 +2289,8 @@ local function update(dt: number)
 	end
 
 	-- Mantle / vault / climb out of the water
-	if not useBusy and not nativeClimb and not slopeSliding and inputMag > 0.3 and (not firstPerson or wishDir:Dot(fwd) > 0.5)
-		and t - lastKinematicEndAt > 0.25 then
+	if not useBusy and not nativeClimb and (not slopeSliding or WEDGE.ready) and inputMag > 0.3
+		and (not firstPerson or wishDir:Dot(fwd) > 0.5) and t - lastKinematicEndAt > 0.25 then
 		local ledge = nil
 		local rigScale = c.rig.scale or 1
 		if swimming then
@@ -2274,6 +2326,9 @@ local function update(dt: number)
 					ledge = candidate
 				end
 			end
+		end
+		if ledge and slopeSliding and WEDGE.escape and ledge.topY > WEDGE.standY + MT.AirMax * rigScale then
+			ledge = nil -- out of a wedge: no higher than a jump-and-grab from the last ground stood on
 		end
 		if ledge then
 			cancelJumpPrep()
@@ -2514,6 +2569,7 @@ local function update(dt: number)
 	debugOut.prep = prepPose
 	debugOut.rigScale = c.rig.scale or 1
 	debugOut.strideScale = c.rig.strideScale or 1
+	debugOut.wedged = WEDGE.ready
 	-- tuning probes: mirrored onto dbg_* attributes of the local player while it has LS_MoveDebug = true
 	if t >= debugNextAt and player:GetAttribute("LS_MoveDebug") == true then
 		debugNextAt = t + 0.1
@@ -2773,6 +2829,7 @@ local function cleanupCharacter()
 	jumpEnabledState = nil
 	lastJumpHeight = nil
 	lastRootPos = nil
+	WEDGE.anchor, WEDGE.ready, WEDGE.standY, WEDGE.cooldownUntil, WEDGE.escape = nil, false, nil, 0, false
 	AIR.bufferedJump, AIR.landSlide, AIR.mantleStep = false, false, nil
 	AIR.stunUntil, AIR.stumbleUntil, AIR.instability = 0, 0, 0
 	landPose = 0

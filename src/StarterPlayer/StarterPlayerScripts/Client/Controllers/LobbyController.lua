@@ -43,6 +43,7 @@ local spectateAvailable = false
 local spectateBound = false
 local visible = nil :: boolean?
 local howToTouched = false -- the player opened or closed HOW TO PLAY themselves: leave it as they set it
+local soloBar = { at = 0, total = 1 } -- QW1: the practice countdown on show (its SoloStartAt) and its bar's full length
 
 local function settingsController()
 	return Controllers and Controllers.SettingsController
@@ -231,10 +232,16 @@ local function updateStatus()
 	if (phase == "Lobby" or phase == "Intermission") and soloAt > now then
 		-- QW1: alone on the server, one countdown to the practice round covers the wait and the Intermission
 		local left = soloAt - now
-		local total = math.max(1, (tonumber(Config.Round.SoloWaitTime) or 30) + (tonumber(Config.Round.IntermissionTime) or 25))
+		if math.abs(soloAt - soloBar.at) > 5 then
+			-- a new countdown. One that starts in the Intermission (a lone player's next practice round, no wait) fills the
+			-- bar by itself; otherwise the bar spans the wait and the Intermission.
+			soloBar.at = soloAt
+			soloBar.total = if phase == "Intermission" then math.max(1, left)
+				else math.max(1, (tonumber(Config.Round.SoloWaitTime) or 30) + (tonumber(Config.Round.IntermissionTime) or 25))
+		end
 		local text = if phone() then string.format("PRACTICE IN   <b>%s</b>", Util.formatTime(left))
 			else string.format("PRACTICE ROUND IN   <b>%s</b>   ·   OR WAIT FOR CONTENDERS", Util.formatTime(left))
-		setStatus(text, math.clamp(left / total, 0, 1), false, phase == "Lobby")
+		setStatus(text, math.clamp(left / soloBar.total, 0, 1), false, phase == "Lobby")
 	elseif phase == "Lobby" then
 		local count = math.floor(tonumber(GameState:GetAttribute("LobbyCount")) or 0)
 		local need = math.max(1, math.floor(tonumber(GameState:GetAttribute("MinPlayers")) or Config.Round.MinPlayers))
