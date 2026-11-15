@@ -6,6 +6,21 @@ This page is the one list of your requests. [Status.md](Status.md) says what the
 
 ---
 
+## 0. Your corrections on 15 November (these come first)
+
+You sent these while the beta update was being built. They override the rows below wherever they differ: the Hands and Zoom rows in section 1, and Map 1 moves from section 4 ("after the beta") to now.
+
+| You said | What it changes |
+|---|---|
+| **The map:** "i told you to vault the map that u are using and to recreate the map of the trailers i sent and images"; "you ignored the map generation requests i made ... generate the ... map in blendr before you go doing [the rest]" | <ul><li>Map 1, made in Blender from the trailer frames, goes into the beta, ahead of everything else.</li><li>The current forest arena is vaulted: taken out of the game and kept so it can come back.</li><li>What went wrong: Claude had moved this to "after the beta" without your OK. The Blender map was already generated, but you had never been shown it. The renders were sent to you on 15 Nov.</li></ul> |
+| **Your long design prompts:** "dont be a smartass and follow them" | Their build order is the build order: the arena and environment first, made in Blender; then interaction, creatures and events, combat and the match, progression, monetisation. Both prompts are kept word for word in [docs/design/owner](../design/owner). |
+| **The look:** "it should just be roblox with good graphics realistic SHADERS like how minecraft shaders make minecraft feel real without changing the whole game and making it look ugly" | A lighting and shading pass on Roblox's own look: shadows, sun, water, sky, mist and colour. No different art style laid over the game. |
+| **Hands:** "fix the hands make them robloxy"; "why is there aweird glowy light around the hands just make them not glossy" | <ul><li>The faceted hands are out. The new ones are Roblox-style block arms, matte, relaxed at rest, with a fist only for a punch.</li><li>The glow was a small lamp over the hands for dusk and shade. It's switched off (15 Nov).</li></ul> |
+| **Zoom:** "v should have a better zoom then it has now" | A much stronger zoom on V than the slight one built first. |
+| **Multiplayer and launch:** "also make the game multiplayer and playable bug test and launch for beta testing" | <ul><li>The game is built for many players, but every test so far was one player against dummies. A real test with two or more players comes before launch.</li><li>Then a bug hunt on the new map, then the launch.</li></ul> |
+
+---
+
 ## 1. Being built now (the beta update)
 
 You approved this batch with "Yes, all of it" (15 Nov), "Yes, in the beta" for the launch intro, and "do it yourself" for the rest.

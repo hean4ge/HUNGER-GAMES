@@ -1471,6 +1471,7 @@ pivots, chain and attachments, in its own GLB.
 - **Not done here:** no Studio import, no upload, no game code. Check it in the StyleTest diorama and in a playtest
   at 14:00 and 17:30 before it replaces the avatar arms (ArtStyle rule 10), and check the L_ normal maps (the L_
   tangents have w = -1, correct glTF, not yet verified in Roblox).
+- **In Roblox (2026-11-15):** uploaded once (model 78153646757113; Skin Color/Normal/Rough 125941381612580 / 131554387088209 / 84042274742334, Sleeve 85613396924504 / 76773041012836 / 105858932067299; all ids in `art/manifests/ArmsFaceted.manifest.json` "assetIds"); templates `ReplicatedStorage.Assets.Viewmodel.ArmsFaceted` built by `ServerStorage.WorldGen.ArmsFacetedAssets` (build/verify; importer turn undone, no PrimaryPart, pivot = joint); in game as `Config.Viewmodel.ArmStyle = "Faceted"` (ViewmodelController Rig/Poses).
 
 ## 13. Train - the station and the train after Sunrise on the Reaping (2026-11-14)
 

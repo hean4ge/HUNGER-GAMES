@@ -31,6 +31,97 @@
    ]
   }
  ],
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 2026-11-15. Never re-upload a file listed here; reuse its id.",
+   "The game's SurfaceAppearances use the six image uploads below. The Open Cloud importer also made its own images from the GLB's embedded textures (importerUnused); no template uses them."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "file": "ArmsFaceted.glb",
+   "displayName": "LS_ArmsFaceted_v1",
+   "operationId": "0296cb13-f215-43da-98e1-6dab8ddfe022",
+   "uploadedUtc": "2026-11-15T14:11:43.262Z",
+   "assetId": 78153646757113,
+   "moderationState": "Approved",
+   "bytes": 2211040,
+   "revisionId": "1",
+   "rawInsert": "ServerStorage.MeshImports.LS_ArmsFaceted_v1",
+   "templates": "ReplicatedStorage.Assets.Viewmodel.ArmsFaceted"
+  },
+  "images": {
+   "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png": {
+    "displayName": "ArmsFaceted_Skin_Color",
+    "assetType": "Image",
+    "operationId": "d8739056-d936-4126-b844-191d124fba18",
+    "uploadedUtc": "2026-11-15T14:12:00.732Z",
+    "assetId": 125941381612580,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   },
+   "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png": {
+    "displayName": "ArmsFaceted_Skin_Normal",
+    "assetType": "Image",
+    "operationId": "cb21c4c8-a190-4b79-b94b-ae86da0cc11f",
+    "uploadedUtc": "2026-11-15T14:12:00.390Z",
+    "assetId": 131554387088209,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   },
+   "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png": {
+    "displayName": "ArmsFaceted_Skin_Rough",
+    "assetType": "Image",
+    "operationId": "6c454054-fca0-4dc7-ac3b-e25f76f80ca8",
+    "uploadedUtc": "2026-11-15T14:11:59.766Z",
+    "assetId": 84042274742334,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   },
+   "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png": {
+    "displayName": "ArmsFaceted_Sleeve_Color",
+    "assetType": "Image",
+    "operationId": "dfaf29db-bc7f-4ea9-baed-9121b0599ef6",
+    "uploadedUtc": "2026-11-15T14:12:00.271Z",
+    "assetId": 85613396924504,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   },
+   "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png": {
+    "displayName": "ArmsFaceted_Sleeve_Normal",
+    "assetType": "Image",
+    "operationId": "cbca52bc-391e-4839-8c57-ff207b55e704",
+    "uploadedUtc": "2026-11-15T14:12:01.960Z",
+    "assetId": 76773041012836,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   },
+   "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png": {
+    "displayName": "ArmsFaceted_Sleeve_Rough",
+    "assetType": "Image",
+    "operationId": "c188ad92-d5c9-4ccd-b58c-181d79f28678",
+    "uploadedUtc": "2026-11-15T14:12:01.317Z",
+    "assetId": 105858932067299,
+    "moderationState": "Approved",
+    "verified": "EditableImage readback in Studio: 1024 x 1024, 9 sample pixels equal to the PNG"
+   }
+  },
+  "importerUnused": {
+   "ArmsFaceted_Skin": {
+    "colorMap": 119103103194741,
+    "normalMap": 117693782335205,
+    "roughnessMap": 130389349520418,
+    "metalnessMap": 106365681288071
+   },
+   "ArmsFaceted_Sleeve": {
+    "colorMap": 82944345794251,
+    "normalMap": 95631803310299,
+    "roughnessMap": 84067664662625,
+    "metalnessMap": 106365681288071
+   }
+  }
+ },
  "units": "1 Blender unit = 1 Roblox stud (world scale)",
  "axes": "Roblox (x, y, z) = Blender (x, z, -y). Arm pieces: origin = proximal joint, bone axis = Roblox +Y (UpVector), LookVector (-Z) = back of the arm / hand, thumb +X on R_ pieces; L_ = exact X-mirrors.",
  "chain": {
@@ -57,7 +148,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "RGB"
+   "channels": "RGB",
+   "assetId": 125941381612580
   },
   {
    "file": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
@@ -68,7 +160,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "RGB"
+   "channels": "RGB",
+   "assetId": 131554387088209
   },
   {
    "file": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
@@ -79,7 +172,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "gray"
+   "channels": "gray",
+   "assetId": 84042274742334
   },
   {
    "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
@@ -90,7 +184,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "RGB"
+   "channels": "RGB",
+   "assetId": 85613396924504
   },
   {
    "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
@@ -101,7 +196,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "RGB"
+   "channels": "RGB",
+   "assetId": 76773041012836
   },
   {
    "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
@@ -112,7 +208,8 @@
     1024
    ],
    "bitDepth": 8,
-   "channels": "gray"
+   "channels": "gray",
+   "assetId": 105858932067299
   }
  ],
  "glbOnlyTextures": [
