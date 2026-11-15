@@ -1,0 +1,835 @@
+{
+ "category": "Map1_Plants",
+ "glb": "Map1_Plants.glb",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox: X east, Y up, Z south (glTF +Y up; Blender (x,y,z) -> Roblox (x,z,-y))",
+ "generator": "art/blender/map1_green_land.py",
+ "seed": 50,
+ "warnings": [],
+ "placeholder": true,
+ "assets": [
+  {
+   "name": "M1_Fir_A",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER fir 38 tall (style A star-lobed tiers)",
+   "origin": [
+    12.03,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    18.297,
+    38.6,
+    19.498
+   ],
+   "boundsMin": [
+    -10.03,
+    -0.6,
+    -10.299
+   ],
+   "boundsMax": [
+    8.267,
+    38.0,
+    9.199
+   ],
+   "tris": 281,
+   "parts": [
+    {
+     "name": "M1_Fir_A_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 19,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Fir_A_Needles",
+     "role": "Needles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      55,
+      75,
+      51
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 262,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Fir_B",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER fir 44 tall (style A star-lobed tiers)",
+   "origin": [
+    34.055,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    19.795,
+    44.6,
+    23.24
+   ],
+   "boundsMin": [
+    -9.758,
+    -0.6,
+    -11.689
+   ],
+   "boundsMax": [
+    10.037,
+    44.0,
+    11.551
+   ],
+   "tris": 273,
+   "parts": [
+    {
+     "name": "M1_Fir_B_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 19,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Fir_B_Needles",
+     "role": "Needles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      70,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 254,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Fir_C",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER fir 48 tall (style A star-lobed tiers)",
+   "origin": [
+    59.093,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    23.583,
+    48.6,
+    22.82
+   ],
+   "boundsMin": [
+    -11.001,
+    -0.6,
+    -10.476
+   ],
+   "boundsMax": [
+    12.582,
+    48.0,
+    12.344
+   ],
+   "tris": 281,
+   "parts": [
+    {
+     "name": "M1_Fir_C_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 19,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Fir_C_Needles",
+     "role": "Needles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      70,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 262,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Pine_A",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER pine 42 tall, tall clear pinkish trunk",
+   "origin": [
+    83.321,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    13.15,
+    41.814,
+    12.983
+   ],
+   "boundsMin": [
+    -7.646,
+    -0.6,
+    -6.602
+   ],
+   "boundsMax": [
+    5.504,
+    41.214,
+    6.381
+   ],
+   "tris": 173,
+   "parts": [
+    {
+     "name": "M1_Pine_A_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 49,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Pine_A_Needles",
+     "role": "Needles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      64,
+      83,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 124,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Pine_B",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER pine 48 tall, tall clear pinkish trunk",
+   "origin": [
+    98.892,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    13.48,
+    47.966,
+    14.307
+   ],
+   "boundsMin": [
+    -6.067,
+    -0.6,
+    -6.362
+   ],
+   "boundsMax": [
+    7.413,
+    47.366,
+    7.945
+   ],
+   "tris": 161,
+   "parts": [
+    {
+     "name": "M1_Pine_B_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      112,
+      98,
+      86
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 49,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Pine_B_Needles",
+     "role": "Needles",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      57,
+      74,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 112,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Beech_A",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER beech 26 tall, 6-8 crown lobes",
+   "origin": [
+    120.59,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    19.954,
+    25.255,
+    19.951
+   ],
+   "boundsMin": [
+    -10.284,
+    -0.6,
+    -9.373
+   ],
+   "boundsMax": [
+    9.671,
+    24.655,
+    10.578
+   ],
+   "tris": 288,
+   "parts": [
+    {
+     "name": "M1_Beech_A_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 100,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Beech_A_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      70,
+      87,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 188,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Beech_B",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER beech 32 tall, 6-8 crown lobes",
+   "origin": [
+    146.698,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    26.635,
+    32.515,
+    27.851
+   ],
+   "boundsMin": [
+    -12.438,
+    -0.6,
+    -15.39
+   ],
+   "boundsMax": [
+    14.197,
+    31.915,
+    12.461
+   ],
+   "tris": 314,
+   "parts": [
+    {
+     "name": "M1_Beech_B_Bark",
+     "role": "Bark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 126,
+     "metalness": 0.0,
+     "roughness": 0.9
+    },
+    {
+     "name": "M1_Beech_B_Leaves",
+     "role": "Leaves",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      69,
+      86,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 188,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Gorse_A",
+   "kind": "Plant",
+   "tags": [
+    "Bush",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER gorse clump with yellow flower facets",
+   "origin": [
+    166.821,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5.104,
+    4.31,
+    4.813
+   ],
+   "boundsMin": [
+    -1.925,
+    -0.431,
+    -1.832
+   ],
+   "boundsMax": [
+    3.179,
+    3.879,
+    2.98
+   ],
+   "tris": 96,
+   "parts": [
+    {
+     "name": "M1_Gorse_A_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      62,
+      78,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 96,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Heather_A",
+   "kind": "Plant",
+   "tags": [
+    "Heather",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER heather mat",
+   "origin": [
+    176.883,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    4.227,
+    1.223,
+    3.434
+   ],
+   "boundsMin": [
+    -2.883,
+    -0.177,
+    -2.864
+   ],
+   "boundsMax": [
+    1.343,
+    1.046,
+    0.57
+   ],
+   "tris": 20,
+   "parts": [
+    {
+     "name": "M1_Heather_A_Heather",
+     "role": "Heather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      132,
+      84,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 20,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Gorse_B",
+   "kind": "Plant",
+   "tags": [
+    "Bush",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER gorse clump with yellow flower facets",
+   "origin": [
+    186.42,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6.488,
+    3.913,
+    7.219
+   ],
+   "boundsMin": [
+    -4.194,
+    -0.035,
+    -4.553
+   ],
+   "boundsMax": [
+    2.294,
+    3.878,
+    2.667
+   ],
+   "tris": 72,
+   "parts": [
+    {
+     "name": "M1_Gorse_B_Bush",
+     "role": "Bush",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      62,
+      78,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Heather_B",
+   "kind": "Plant",
+   "tags": [
+    "Heather",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER heather mat",
+   "origin": [
+    195.317,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    4.846,
+    1.355,
+    3.444
+   ],
+   "boundsMin": [
+    -2.603,
+    -0.154,
+    -2.681
+   ],
+   "boundsMax": [
+    2.244,
+    1.2,
+    0.763
+   ],
+   "tris": 20,
+   "parts": [
+    {
+     "name": "M1_Heather_B_Heather",
+     "role": "Heather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      132,
+      84,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 20,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Wildflowers_A",
+   "kind": "Plant",
+   "tags": [
+    "Wildflowers",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER wildflower clump (yellow, blue, white)",
+   "origin": [
+    204.067,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5.161,
+    0.875,
+    5.586
+   ],
+   "boundsMin": [
+    -2.507,
+    -0.24,
+    -2.782
+   ],
+   "boundsMax": [
+    2.654,
+    0.635,
+    2.804
+   ],
+   "tris": 280,
+   "parts": [
+    {
+     "name": "M1_Wildflowers_A_BedFlowers",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      124,
+      152,
+      198
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 280,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_TallGrass_A",
+   "kind": "Plant",
+   "tags": [
+    "TallGrass",
+    "Placeholder"
+   ],
+   "notes": "PLACEHOLDER tall pale grass clump 2.5-3.5",
+   "origin": [
+    211.982,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    2.3,
+    3.424,
+    1.948
+   ],
+   "boundsMin": [
+    -1.261,
+    0.0,
+    -0.754
+   ],
+   "boundsMax": [
+    1.039,
+    3.424,
+    1.194
+   ],
+   "tris": 21,
+   "parts": [
+    {
+     "name": "M1_TallGrass_A_Grass",
+     "role": "Grass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      164,
+      150,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 21,
+     "metalness": 0.0,
+     "roughness": 0.95
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  }
+ ],
+ "notes": "Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; the Blender previews add +-3-6% facet value jitter and top/underside shading that a later baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."
+}

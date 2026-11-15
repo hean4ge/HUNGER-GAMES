@@ -1471,3 +1471,58 @@ pivots, chain and attachments, in its own GLB.
 - **Not done here:** no Studio import, no upload, no game code. Check it in the StyleTest diorama and in a playtest
   at 14:00 and 17:30 before it replaces the avatar arms (ArtStyle rule 10), and check the L_ normal maps (the L_
   tangents have w = -1, correct glTF, not yet verified in Roblox).
+
+## 13. Train - the station and the train after Sunrise on the Reaping (2026-11-14)
+
+The owner: "AND MAKE THE TRAINS LOOK LIKE THEM TOO", with "semi realistic colour tones". `train_sotr.py` builds the
+station hall and the seven-car train of `docs/design/UpcomingFilm_Brief.md` section 4, with the rooms of the owner's
+TRIBUTE spec section 9, in style A (`docs/design/ArtStyle.md`) and the brief's semi-real palette (4.6). The primary
+reference is the owner's frame `References/owner/train_station_owner_frame.png` (Trailer 1 @35.7 s). Nothing from the
+film is copied: every sign, emblem, poster, board row, plate and upholstery motif is our own, and there is no lettering.
+
+```powershell
+& $blender --background --factory-startup --python art/blender/train_sotr.py -- $out $prev [stages]   # ~10 min
+#   stages: build,preview (default) | build | preview[:station+exterior+interiors+compare+tones]
+#           quick[:station|exterior|interiors|carN]  (look-dev renders from the painted meshes, no bake, into the work folder)
+#   env TRAIN_SOTR_WORK (work folder), TRAIN_SOTR_REFS (LastStanding/References, for the compare sheets),
+#       TRAIN_SOTR_FAST=1 (quarter samples, half size)
+```
+
+- **Output** (`BlenderExports/Train/`): `Train_Station.glb`, `Train_StationProps.glb`, `Train_Exterior.glb`,
+  `Train_InteriorsA/B/C.glb` (25.4 MB in all, the largest 7.8 MB), `Train.manifest.json` (+ copy in `art/manifests/`)
+  and `textures/` (129 upload PNGs in 33 sets; `glb_only/*_MR.png` are never uploaded). The manifest is LS-Real-1 plus
+  `layout`, `colliders`, `lighting`, `motion`, `cars` and `tones`.
+- **Assets** (34; every MeshPart under 5k triangles, every car under 10k with its interior):
+
+  | Group | Assets |
+  |---|---|
+  | Station hall, 170 x 420 | `Station_Coffer` (12 x 12 module, placed 160 times), `_EntranceCeiling` (the collar round the 100 x 50 oval), `_Lantern`, `_Sunburst` (10 gold blades, our sculpture), `_EntranceWalls`, `_EntranceFloor`, `_Portal` (white cross-beam, our emblem), `_ShedBay` and `_FloorBay` (24-stud modules, 17 each), `_ShedEnd` |
+  | Station props | `Station_Banner` (5 x 18, our gold motif), `_Board` (abstract glyph rows), `_Poster` (our faceted guard), `_Guard` (static statue NPC, 650 tris) |
+  | Train exterior | `Train_NoseCar` (90; car 1, and car 7 turned round as the tail), `_BodyCar` (80, cars 2-5), `_ObservationCar` (80, car 6: glass flanks and roof), `_DoorLeaf` (plug door) |
+  | Interiors | `Train_Car1_Vestibule`, `_Car2_Dining`, `_Car3_Lounge`, `_Car4_Corridor`, `_Car5_Compartment`, `_Car6_Observation`, `_Car7_Guard` (a room set and a furniture set each) |
+  | Moving / loose | `Train_Chandelier`, `_PendantLamp`, `_CompartmentDoor`, `_VestibuleDoor`, `_GangwayDoor`, `_GlobeLid`, `_BudVase`, `_Crystal`; `Train_BridgeBackdrop` (the night bridge) |
+
+  | Car (shell + interior) | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+  |---|---|---|---|---|---|---|---|
+  | Triangles | 9,521 | 8,784 | 8,374 | 7,044 | 7,759 | 3,590 | 6,975 |
+
+- **Layout:** the manifest's `layout` places every station module, banner, board, poster and guard, and both trains
+  with their doors, chandeliers, lamps, lid, vase and glasses (Roblox positions relative to the hall's floor centre,
+  yaw about +Y). The same pieces are also attachments on each car (`DoorR_1`, `Chandelier_1`, `GuardPost_1` ...).
+- **Collision:** every mesh part is visual (CanCollide/CanQuery/CanTouch off). Build the collision from each asset's
+  `colliders` (anchored invisible Parts; `Floor` marks walkable tops; doors leave 4 x 7.5 gaps).
+- **Light:** the rigs are in `lighting` (station: an amber key from the glazing, Ambient (70, 56, 44), ColorShift_Top
+  (200, 140, 90); cars: amber cove SurfaceLights, chandeliers that swing, the lounge screen as the only cool light).
+  Glow, cove, glyph, lamp and screen parts are Neon; if a big Glow panel blooms too hard in game, make it SmoothPlastic
+  in the same colour and keep the SurfaceLights.
+- **Textures:** one baked set per asset (two per interior): painted facets x two-radius AO (never below half), rough,
+  metal where real, a bevel normal, and our patterns baked in (upholstery C-arcs, carpet lattice, runner). Density:
+  4-8 px/stud on the big station sets (flat paint), 10-14 on car bodies and rooms, 20-34 on furniture, 20-60 on
+  props. UV packing uses CONCAVE with an additive margin (CONVEX + FRACTION took up to 47 s per small mesh in 5.3).
+- **Previews** (`previews/Train/`), rendered from the exported GLBs: `station_frame` (the T1 wide view),
+  `station_owner_match`, `station_platform`, `exterior_nose`, `exterior_side`, `exterior_night_bridge`,
+  `interior_car1..7` (+ `interior_car5_compartment_b`), `tones_palette` (each paint key's brief tone beside its baked
+  mean; all 67 inside the band). `compare_station/train/interiors.png` put film frames beside ours, so `.gitignore`
+  keeps them out of the repo.
+- **Not done here:** no Studio import, no upload; the District 12 platform and railcar; the guard is a static statue.
+  Check the set in Studio at 14:00 and 17:30 and under the car light rigs before it ships (ArtStyle rule 10).

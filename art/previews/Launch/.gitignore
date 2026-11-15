@@ -1,0 +1,3 @@
+# The compare sheets put our render beside the owner's film frame. Film frames are study-only references and
+# never go into the repo, so the sheets stay local (regenerate them with art/blender/launch_rooms.py).
+compare_*.png

@@ -1,0 +1,138 @@
+{
+ "red_a": {
+  "ours": {
+   "meanLuma": 33.8,
+   "p95Luma": 74.1,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.435,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": -14.4,
+   "shadowGreenMinusRed": -14.0
+  },
+  "frame": {
+   "meanLuma": 41.4,
+   "p95Luma": 107.3,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.463,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": -4.9,
+   "shadowGreenMinusRed": -7.5
+  }
+ },
+ "red_b": {
+  "ours": {
+   "meanLuma": 64.5,
+   "p95Luma": 158.6,
+   "clippedPct": 0.31,
+   "meanSaturationLit": 0.329,
+   "vividPct": 0.08,
+   "shadowBlueMinusRed": -18.0,
+   "shadowGreenMinusRed": -17.4
+  },
+  "frame": {
+   "meanLuma": 68.8,
+   "p95Luma": 152.5,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.56,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 24.1,
+   "shadowGreenMinusRed": 12.5
+  }
+ },
+ "cases": {
+  "ours": {
+   "meanLuma": 50.7,
+   "p95Luma": 109.1,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.265,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 8.3,
+   "shadowGreenMinusRed": 2.5
+  },
+  "frame": {
+   "meanLuma": 58.4,
+   "p95Luma": 169.3,
+   "clippedPct": 0.03,
+   "meanSaturationLit": 0.465,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 22.2,
+   "shadowGreenMinusRed": 13.0
+  }
+ },
+ "wide": {
+  "ours": {
+   "meanLuma": 40.5,
+   "p95Luma": 138.6,
+   "clippedPct": 0.04,
+   "meanSaturationLit": 0.259,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 7.4,
+   "shadowGreenMinusRed": 2.9
+  },
+  "frame": {
+   "meanLuma": 50.1,
+   "p95Luma": 157.0,
+   "clippedPct": 0.1,
+   "meanSaturationLit": 0.571,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 23.6,
+   "shadowGreenMinusRed": 12.3
+  }
+ },
+ "rise": {
+  "ours": {
+   "meanLuma": 39.4,
+   "p95Luma": 212.1,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.246,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 7.0,
+   "shadowGreenMinusRed": 2.6
+  },
+  "frame": {
+   "meanLuma": 37.8,
+   "p95Luma": 166.2,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.44,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 7.8,
+   "shadowGreenMinusRed": 2.8
+  }
+ },
+ "red_interior": {
+  "ours": {
+   "meanLuma": 33.5,
+   "p95Luma": 109.8,
+   "clippedPct": 0.32,
+   "meanSaturationLit": 0.447,
+   "vividPct": 0.02,
+   "shadowBlueMinusRed": -17.2,
+   "shadowGreenMinusRed": -16.7
+  },
+  "frame": null
+ },
+ "case_bay": {
+  "ours": {
+   "meanLuma": 44.8,
+   "p95Luma": 115.0,
+   "clippedPct": 0.0,
+   "meanSaturationLit": 0.328,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 4.0,
+   "shadowGreenMinusRed": -1.0
+  },
+  "frame": null
+ },
+ "hall": {
+  "ours": {
+   "meanLuma": 50.6,
+   "p95Luma": 117.9,
+   "clippedPct": 0.02,
+   "meanSaturationLit": 0.239,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 7.8,
+   "shadowGreenMinusRed": 2.9
+  },
+  "frame": null
+ }
+}

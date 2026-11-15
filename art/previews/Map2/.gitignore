@@ -1,0 +1,4 @@
+# compare_*.png carry film/fan reference frames beside our renders: study only, never commit them
+# (owner rule: reference images never go into the game or the repo). Regenerate with
+# art/blender/map2_clock_arena.py (stage compare).
+compare_*.png

@@ -35,3 +35,21 @@ art/previews/StyleTest/Studio/*
 # Train set (art/blender/train_sotr.py): the compare sheets put film frames beside our renders for review. Film
 # imagery never goes into the repo (docs/design/UpcomingFilm_Brief.md), so they stay local; the renders are kept.
 art/previews/Train/compare_*
+
+# Map 1, Map 2, the launch rooms and the train (arenas v5, 2026-11-14): keep the renders the design docs link to and the
+# colour checks; every other render regenerates from art/blender/{map1_green_land,map2_clock_arena,launch_rooms,
+# train_sotr}.py. The compare sheets hold film frames and are never committed (see the per-set .gitignore files).
+art/previews/Map1/*
+art/previews/Map2/*
+art/previews/Launch/*
+art/previews/Train/*
+!art/previews/Map1/overview_aerial.png
+!art/previews/Map2/overview_high_aerial.png
+!art/previews/Map2/sector_reads.png
+!art/previews/Map2/tones.json
+!art/previews/Launch/rise_path_sheet.png
+!art/previews/Launch/palette_swatches.png
+!art/previews/Launch/colour_check.json
+!art/previews/Train/exterior_night_bridge.png
+!art/previews/Train/tones_palette.png
+!art/previews/*/.gitignore

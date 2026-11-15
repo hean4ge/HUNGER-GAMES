@@ -1,0 +1,151 @@
+{
+ "overview": {
+  "lumaMean": 122.9,
+  "lumaP1": 57.6,
+  "lumaP99": 197.8,
+  "satMean": 0.231,
+  "satP95": 0.325,
+  "highSatShare": 0.0,
+  "vividShare": 0.0
+ },
+ "birdseye": {
+  "lumaMean": 118.7,
+  "lumaP1": 41.7,
+  "lumaP99": 202.0,
+  "satMean": 0.253,
+  "satP95": 0.403,
+  "highSatShare": 0.0,
+  "vividShare": 0.0
+ },
+ "concept": {
+  "lumaMean": 107.9,
+  "lumaP1": 31.3,
+  "lumaP99": 188.3,
+  "satMean": 0.277,
+  "satP95": 0.529,
+  "highSatShare": 0.0264,
+  "vividShare": 0.0
+ },
+ "girders": {
+  "lumaMean": 110.7,
+  "lumaP1": 42.4,
+  "lumaP99": 166.5,
+  "satMean": 0.135,
+  "satP95": 0.263,
+  "highSatShare": 0.0,
+  "vividShare": 0.0
+ },
+ "plate": {
+  "lumaMean": 104.0,
+  "lumaP1": 28.9,
+  "lumaP99": 196.4,
+  "satMean": 0.225,
+  "satP95": 0.48,
+  "highSatShare": 0.0,
+  "vividShare": 0.0
+ },
+ "topdown": {
+  "lumaMean": 103.3,
+  "lumaP1": 3.1,
+  "lumaP99": 206.0,
+  "satMean": 0.469,
+  "satP95": 0.649,
+  "highSatShare": 0.104,
+  "vividShare": 0.0002
+ },
+ "topdownSamples": {
+  "lagoon deep (r 300-600)": [
+   42,
+   104,
+   101
+  ],
+  "beach (r 960-1040)": [
+   200,
+   191,
+   172
+  ],
+  "jungle (r 1500-2400)": [
+   100,
+   111,
+   60
+  ],
+  "sector 12": [
+   94,
+   111,
+   57
+  ],
+  "sector 1": [
+   115,
+   116,
+   63
+  ],
+  "sector 2": [
+   101,
+   107,
+   71
+  ],
+  "sector 3": [
+   88,
+   110,
+   55
+  ],
+  "sector 4": [
+   90,
+   99,
+   60
+  ],
+  "sector 5": [
+   98,
+   104,
+   54
+  ],
+  "sector 6": [
+   80,
+   97,
+   50
+  ],
+  "sector 7": [
+   153,
+   142,
+   96
+  ],
+  "sector 8": [
+   98,
+   106,
+   46
+  ],
+  "sector 9": [
+   91,
+   106,
+   55
+  ],
+  "sector 10": [
+   110,
+   117,
+   64
+  ],
+  "sector 11": [
+   92,
+   116,
+   56
+  ]
+ },
+ "lagoon": {
+  "lumaMean": 124.4,
+  "lumaP1": 4.8,
+  "lumaP99": 208.8,
+  "satMean": 0.393,
+  "satP95": 0.6,
+  "highSatShare": 0.2838,
+  "vividShare": 0.0
+ },
+ "sectors": {
+  "lumaMean": 97.4,
+  "lumaP1": 20.0,
+  "lumaP99": 204.8,
+  "satMean": 0.192,
+  "satP95": 0.387,
+  "highSatShare": 0.0,
+  "vividShare": 0.0
+ }
+}
