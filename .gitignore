@@ -31,3 +31,7 @@ art/previews/StyleTest/Studio/*
 !art/previews/StyleTest/A/A_lineup_midday.png
 !art/previews/StyleTest/B/_B_overview.png
 !art/previews/StyleTest/C/lineup_midday.png
+
+# Train set (art/blender/train_sotr.py): the compare sheets put film frames beside our renders for review. Film
+# imagery never goes into the repo (docs/design/UpcomingFilm_Brief.md), so they stay local; the renders are kept.
+art/previews/Train/compare_*

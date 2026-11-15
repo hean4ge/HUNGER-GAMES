@@ -1,0 +1,4678 @@
+diff --git a/src/ReplicatedStorage/Shared/Config.lua b/src/ReplicatedStorage/Shared/Config.lua
+index 1bb863d6cbd43c096a6be32c6fd099d6de981e56..12a880a7c4b472169d9c7367c8671223dfaf816c 100644
+--- a/src/ReplicatedStorage/Shared/Config.lua
++++ b/src/ReplicatedStorage/Shared/Config.lua
+@@ -428,6 +428,81 @@ Config.Feedback = {
+ 	LowHealth = 0.35, -- health fraction for the LOW tag, the red vignette and the heartbeat
+ }
+ 
++-- Proximity Voice (docs/design/VoiceMode.md). Nothing changes until Enabled is true: Roblox's default voice then runs as
++-- it does today. Roblox builds the voice graph (Studio: VoiceChatService.UseAudioApi = Enabled, EnableDefaultVoice = true);
++-- VoiceService (server) decides who can hear whom, VoiceController (client) how it sounds, and draws the voice UI.
++-- Distances are in studs (an R15 contender is ~5.2 studs tall, so 1 stud ~ 0.33 m).
++Config.Voice = {
++	Enabled = false,
++	ServerMode = "Proximity", -- "Proximity" | "Off" (every microphone muted on this server, e.g. a future text-only server)
++	DefaultOn = true, -- the choice of a player who never made one, once their saved settings have loaded
++	-- (There is no time limit: a player stays muted until DataService says their settings loaded, or they choose.
++	-- A failed load keeps them muted, with a note on the lobby card, until they turn voice on themselves.)
++	-- Phases in which a round is running: the fallen and late joiners ("the stands") are heard only by each other.
++	-- The coming train, training room and launch phases are listed already (RoundService.isRoundRunning reads this too).
++	RoundPhases = { Countdown = true, Active = true, Train = true, Training = true, Launch = true },
++	-- How voice fades with distance where you listen. Full: full volume up to here. Silent: nothing from here on.
++	-- Shape: 1 = the inverse law between them (realistic), lower = flatter. VoiceController.Curves builds the curve.
++	Profiles = {
++		Social = { Full = 15, Silent = 110, Shape = 0.6 }, -- the Tor; later the train station and the training room
++		Arena = { Full = 8, Silent = 90, Shape = 0.8 }, -- ~3 m at full voice, gone by ~30 m (footsteps carry 70-80 studs)
++		Cabin = { Full = 8, Silent = 45, Shape = 0.9 }, -- indoors: train cars, the launch room
++		Whisper = { Full = 4, Silent = 18, Shape = 1 }, -- a truce ally's whisper (on top of the place's profile)
++	},
++	-- The profile for contenders and spectators in each phase (everyone else uses Social). A part tagged VoiceZone with a
++	-- VoiceProfile attribute overrides it inside its box; a VoiceRoom attribute muffles voices from other rooms (train cars).
++	PhaseProfiles = { Countdown = "Arena", Active = "Arena", Ending = "Arena", Train = "Cabin", Training = "Social", Launch = "Cabin" },
++	-- Walls and terrain. "Raycast": a client ray from the listener to each nearby speaker's head (terrain, rock, cliffs,
++	-- buildings and trunks block it; foliage crowns don't take raycasts). "Engine": Roblox's acoustic simulation
++	-- (SoundService.AcousticSimulationEnabled, a Studio switch; test its cost first). "None": distance only.
++	Occlusion = {
++		Mode = "Raycast",
++		Profiles = { Arena = true, Cabin = true }, -- where rays run (not on the Tor: its third-person camera sits behind walls)
++		Interval = 0.2, -- seconds between ray passes
++		MaxRays = 8, -- the nearest speakers tested per pass
++		Volume = 0.55, -- a blocked voice keeps this much of its volume...
++		HighGainDb = -24, -- ...and loses this much treble (dB)...
++		MidGainDb = -6, -- ...and some middle
++		Smoothing = 6, -- 1/s: how fast a voice muffles and clears
++	},
++	Spectators = {
++		HearArena = true, -- spectators hear the arena around the contender they watch
++		ListenAt = "Target", -- "Target": through the watched contender's ears (Custom); "Camera": from the orbit camera
++		-- The stands' channel: while you spectate, the other spectators come in with no distance. It wires their voice
++		-- devices straight to this client, so it stays off until the published safety gate shows Roblox's own mute, block,
++		-- voice volume and age rules reach it (VoiceMode.md, test plan G1-G6).
++		StandsBus = false,
++		Volume = 0.85, -- the stands' channel volume
++	},
++	Whisper = {
++		Enabled = false, -- needs truces (VoiceService.setAllies): hold to whisper, and only your allies hear you, from close
++		Keys = { Enum.KeyCode.V, Enum.KeyCode.DPadLeft },
++	},
++	-- UI
++	TalkingLevel = 0.02, -- AudioAnalyzer RmsLevel above which someone counts as talking
++	TalkingHold = 0.45, -- seconds a talker stays listed after they stop
++	MaxTalkers = 4, -- rows in "who's talking near you" (3 on phones)
++	MinAudibility = 0.04, -- a talker is listed only when you can hear them at least this loud
++	ShowTalkerNames = true, -- false: contenders see "SOMEONE NEARBY" instead of names in the arena
++	Tips = true, -- the one-line toasts that explain the mode (lobby, arena, after you fall)
++	TipRepeats = 2, -- times each tip is shown per player (counters saved in settings.voiceTips)
++	-- "Default" (the safe setting): Roblox's own listener and playback, untouched. We only give Roblox's emitters our
++	-- distance curves, and move one to a silent group while you mute that player or turn voice off (and move it back
++	-- once, only if nothing else changed it). Roblox's own mute, block and volume controls keep working as Roblox built
++	-- them. "Custom": our own listener and an emitter per speaker, wired from each voice device (Voice volume,
++	-- muffling by walls, listening through the watched contender's ears). Switch to "Custom" (and StandsBus on) only
++	-- after the published safety gate passes (VoiceMode.md, test plan G1-G6). ("Engine" is gone: it rewrote Roblox's own
++	-- emitters every half second, which could undo Roblox's own mute.)
++	ClientGraph = "Default",
++	-- Phase 2 (VoiceService.VoiceServers): voice-only reserved servers. Off until the beta has the players to fill them.
++	VoiceServers = {
++		Enabled = false,
++		MaxPlayers = 24, -- the place's server size
++		AdvertiseInterval = 15, -- seconds between a voice-only server's MemoryStore updates
++	},
++	Debug = false, -- print role changes (server) and the client's voice state every 10 s
++}
++
+ Config.Studio = {
+ 	-- Only applied inside Roblox Studio. Set to false to test real pacing.
+ 	SoloTest = true, -- a round can start with 1 player (practice mode)
+diff --git a/src/ReplicatedStorage/Shared/Lore.lua b/src/ReplicatedStorage/Shared/Lore.lua
+index bf79326e40c1835010d79e951857adc411a3b74e..66b7adf35d2af6d4f69b739929a2b265ee4539f8 100644
+--- a/src/ReplicatedStorage/Shared/Lore.lua
++++ b/src/ReplicatedStorage/Shared/Lore.lua
+@@ -35,6 +35,7 @@ Lore.Tor = "the Tor" -- the lobby island
+ Lore.RunnerCache = "runner's cache" -- a supply crate at the meadow edge, marked by a pale flag (QW7)
+ Lore.RunnerCaches = "runner's caches"
+ Lore.WaitingGrounds = "the Waiting Grounds" -- the Tor's courtyard
++Lore.Stands = "the stands" -- during a round, everyone not in the arena: the fallen, spectators, the lobby (Proximity Voice)
+ 
+ -- The round's beats
+ Lore.Horn = "the horn" -- the start of a round
+diff --git a/src/ReplicatedStorage/Shared/Net.lua b/src/ReplicatedStorage/Shared/Net.lua
+index 6d27f2303c1fac248da95983a21c244d07db3771..ec16722d54d890782fe8312a9403535c22aadc3c 100644
+--- a/src/ReplicatedStorage/Shared/Net.lua
++++ b/src/ReplicatedStorage/Shared/Net.lua
+@@ -17,7 +17,7 @@ Net.Names = {
+ 	"HitConfirm", "DamageTaken", "CombatAction", "RoundSummary",
+ 	-- client -> server
+ 	"EquipSlot", "DropSlot", "UseStart", "UseFinish", "UseCancel", "Drink", "MeleeSwing", "RangedRelease",
+-	"SetStance", "SaveSettings", "SpectateTarget", "TakeWorldItem",
++	"SetStance", "SaveSettings", "SpectateTarget", "TakeWorldItem", "VoiceRequest",
+ }
+ 
+ local folder = ReplicatedStorage:WaitForChild("Remotes")
+diff --git a/src/ServerScriptService/Server/Main.server.lua b/src/ServerScriptService/Server/Main.server.lua
+index 0130a361bd829913a3d03c1e819c5a63b44a0b90..64cecd851a3dee86ca77aa725cde82c8cd1ce1d3 100644
+--- a/src/ServerScriptService/Server/Main.server.lua
++++ b/src/ServerScriptService/Server/Main.server.lua
+@@ -7,7 +7,7 @@ local servicesFolder = script.Parent:WaitForChild("Services")
+ 
+ local ORDER = {
+ 	"DataService", "PlayerService", "MovementService", "InventoryService", "LootService",
+-	"CombatService", "ProjectileService", "ArenaService", "RoundService",
++	"CombatService", "ProjectileService", "ArenaService", "RoundService", "VoiceService",
+ }
+ 
+ local Services = {}
+diff --git a/src/ServerScriptService/Server/Services/DataService.lua b/src/ServerScriptService/Server/Services/DataService.lua
+index 4cda2603bba5a7b4c90cf50dfa7840e5ce9a2b57..b7f738ca5244d5ab98532f80bba300c7417ea8a9 100644
+--- a/src/ServerScriptService/Server/Services/DataService.lua
++++ b/src/ServerScriptService/Server/Services/DataService.lua
+@@ -2,17 +2,22 @@
+ 	DataService - persistent player stats and settings in the DataStore "PlayerStats_v1" (key "Player_<UserId>").
+ 	Stored keys: Wins, TotalKills, RoundsPlayed (numbers) and Settings ({ [string]: number }).
+ 	Mirrored to player attributes: Wins, TotalKills, RoundsPlayed, SettingsJson (HttpService:JSONEncode of Settings;
+-	set once the profile has loaded).
++	set once the profile has loaded), then SettingsLoaded: true when the stored profile was read (or, in Studio only,
++	when DataStores are off and session defaults apply), false when the load failed (SettingsJson then holds only what
++	the player changed this session). Proximity Voice keeps a player muted until it is true or they choose.
+ 
+ 	API:
+ 	  DataService.increment(player, key, n?)      key = "Wins" | "TotalKills" | "RoundsPlayed" (n defaults to 1)
+ 	  DataService.get(player, key) -> any         a number for stats, a copy of the settings table for "Settings"
+ 	  DataService.setSettings(player, settings)   merges known keys (clamped), same rules as the SaveSettings remote
+ 	Remote: SaveSettings({ [string]: number }) - only fov, sensitivity, headBob, cameraShake, musicVolume, sfxVolume,
+-	        ambienceVolume, guidance, hintsSeen, the sprint / crouch modes, padLook, touchLook; values clamped; rate-limited (bursts are coalesced, so the last change always lands).
++	        ambienceVolume, guidance, hintsSeen, the sprint / crouch modes, padLook, touchLook,
++	        voiceOn, voiceVolume, voiceTips (Proximity Voice); values clamped; rate-limited (bursts are coalesced, so the last change always lands).
+ 
+ 	Saving: autosave every 120 s, on leave and in game:BindToClose. Stats are written as deltas through UpdateAsync, so
+-	a failed load or a quick server hop never wipes or double-counts them. Every call is pcall-wrapped with retries.
++	a failed load or a quick server hop never wipes or double-counts them. Settings are merged key by key into the
++	stored table, so a session that couldn't load them (or a client that sends only what changed) never erases the
++	others. Every call is pcall-wrapped with retries.
+ 	In Studio without API access (or an unpublished place) it logs once and keeps session-only defaults.
+ ]]
+ local DataStoreService = game:GetService("DataStoreService")
+@@ -50,6 +55,10 @@ local SETTING_LIMITS = {
+ 	crouchModeTouch = { 0, 1 },
+ 	padLook = { 0.5, 2 }, -- controller look speed (x)
+ 	touchLook = { 0.5, 2 }, -- touch look speed (x)
++	-- Proximity Voice (Config.Voice; SettingsController's VOICE rows, VoiceController)
++	voiceOn = { 0, 1 }, -- 0 Off, 1 On
++	voiceVolume = { 0, 2 },
++	voiceTips = { 0, 255 }, -- the voice tips' show counters
+ }
+ 
+ local DataService = {}
+@@ -220,6 +229,12 @@ local function loadPlayer(player: Player)
+ 		session.loaded = true -- session-only defaults
+ 	end
+ 	mirror(player, session, true)
++	-- after SettingsJson: true only when the stored profile was read (Studio without DataStores counts, live doesn't)
++	local loaded = session.loaded and (available or Config.IsStudio == true)
++	if Config.IsStudio and workspace:GetAttribute("DevFailSettingsLoad") == true then
++		loaded = false -- Studio test hook: what a failed load looks like to Proximity Voice (VoiceMode.md, test S5)
++	end
++	player:SetAttribute("SettingsLoaded", loaded)
+ end
+ 
+ local function savePlayer(player: Player, session): boolean
+@@ -253,7 +268,12 @@ local function savePlayer(player: Player, session): boolean
+ 					data[stat] = math.max(0, math.floor((tonumber(data[stat]) or 0) + deltas[stat]))
+ 				end
+ 				if settingsDirty then
+-					data.Settings = settingsCopy
++					-- merge, don't replace: keys this session never loaded or changed keep their stored values
++					local stored = if type(data.Settings) == "table" then table.clone(data.Settings) else {}
++					for k, v in pairs(settingsCopy) do
++						stored[k] = v
++					end
++					data.Settings = stored
+ 				elseif type(data.Settings) ~= "table" then
+ 					data.Settings = {}
+ 				end
+diff --git a/src/ServerScriptService/Server/Services/PlayerService.lua b/src/ServerScriptService/Server/Services/PlayerService.lua
+index 4b1d8aafadbac1a0d998da71901bf9054020200f..a13d2b0502ff17ae076bd64e2f8b13a10bd3a494 100644
+--- a/src/ServerScriptService/Server/Services/PlayerService.lua
++++ b/src/ServerScriptService/Server/Services/PlayerService.lua
+@@ -22,7 +22,11 @@
+ 	  PlayerService.prepareContender(player, ground: CFrame) -> boolean   frozen on a plinth (feet CFrame facing the Spire)
+ 	  PlayerService.setFrozen(player, frozen)
+ 	  PlayerService.clearSpectate(player)
+-	Remote: SpectateTarget(target: Player?) points the requester's ReplicationFocus at an alive contender.
++	Remote: SpectateTarget(target: Player?) points the requester's ReplicationFocus at an alive contender, and sets their
++	Spectating attribute (true while they watch someone: Proximity Voice's stands channel). A fallen contender who is
++	watching keeps both when they respawn on the Tor during the round (SpectateController sends SpectateTarget only when
++	the target changes, so clearing them there used to pull streaming back to the Tor for the rest of the watch).
++	A contender's death moves their voice to the bench at once (VoiceService.onEliminated), before the cannon.
+ YouDied { placement, total, killer, killerUserId?, cause, weapon, weaponName, headshot, phase ("Active" | "Countdown"),
+ 	practice } goes to the victim, who also
+ 	gets the attribute KilledBy (the killer's UserId, or 0). Practice rounds add no TotalKills.
+@@ -412,9 +416,24 @@ function PlayerService.clearSpectate(player: Player)
+ 	spectateTargets[player] = nil
+ 	if player.Parent == Players then
+ 		player.ReplicationFocus = nil
++		if player:GetAttribute("Spectating") == true then
++			player:SetAttribute("Spectating", false)
++		end
+ 	end
+ end
+ 
++-- A fallen contender watching the round keeps their spectate target across their respawn on the Tor: their
++-- SpectateController keeps watching and only sends SpectateTarget when the target changes.
++local function keepsSpectate(player: Player): boolean
++	local target = spectateTargets[player]
++	return target ~= nil
++		and phaseNow() == "Active"
++		and player:GetAttribute("Alive") ~= true
++		and target.Parent == Players
++		and target:GetAttribute("Alive") == true
++end
++
++-- (Spectating stays true here: the requester's SpectateController moves on to the next contender by itself.)
+ local function releaseSpectatorsOf(target: Player)
+ 	for requester, current in pairs(spectateTargets) do
+ 		if current == target then
+@@ -438,7 +457,9 @@ function PlayerService.loadIntoLobby(player: Player)
+ 	st.pendingPlacement = nil
+ 	st.missingSince = nil
+ 	resetLifeAttributes(player)
+-	PlayerService.clearSpectate(player)
++	if not keepsSpectate(player) then
++		PlayerService.clearSpectate(player)
++	end
+ 	task.spawn(doLoad, player, st, st.loadToken)
+ end
+ 
+@@ -489,6 +510,8 @@ local function handleDeath(victim: Player, info, position: Vector3?, leaving: bo
+ 		victim:SetAttribute("Frozen", false)
+ 		victim:SetAttribute("Regen", "")
+ 		victim:SetAttribute("KilledBy", if killer then killer.UserId else 0) -- SpectateController opens on the killer (QW4)
++		-- Proximity Voice: the fallen join the bench now, before the cannon, so not a word reaches the living from the body
++		call("VoiceService", "onEliminated", victim)
+ 		if killer then
+ 			killer:SetAttribute("Kills", (tonumber(killer:GetAttribute("Kills")) or 0) + 1)
+ 			if GameState:GetAttribute("Practice") ~= true then -- practice rounds never add Kills
+@@ -913,7 +936,9 @@ local function onCharacterAdded(player: Player, character: Model)
+ 		connection:Disconnect()
+ 	end
+ 	table.clear(st.charConnections)
+-	PlayerService.clearSpectate(player)
++	if not keepsSpectate(player) then
++		PlayerService.clearSpectate(player)
++	end
+ 
+ 	for _, child in ipairs(character:GetChildren()) do
+ 		removeDefaultHealth(child)
+@@ -1042,6 +1067,7 @@ local function onSpectateTarget(player: Player, target: any)
+ 		if root then
+ 			spectateTargets[player] = target
+ 			player.ReplicationFocus = root
++			player:SetAttribute("Spectating", true)
+ 			return
+ 		end
+ 	end
+diff --git a/src/ServerScriptService/Server/Services/RoundService.lua b/src/ServerScriptService/Server/Services/RoundService.lua
+index c800d3360b46e2bec20cf98029f5913785e4d196..3294902dd5c2a82598f8f7bcdda789c34f639a9a 100644
+--- a/src/ServerScriptService/Server/Services/RoundService.lua
++++ b/src/ServerScriptService/Server/Services/RoundService.lua
+@@ -28,6 +28,8 @@
+ 	  RoundService.phaseChanged: Signal(newPhase, oldPhase)
+ 	  RoundService.getRoundId() -> number
+ 	  RoundService.isContender(player) -> boolean         picked for the current round
++	  RoundService.isRoundRunning() -> boolean           a round is under way (Countdown, Active and the pre-arena phases
++	                                                      named in Config.Voice.RoundPhases): VoiceService's bench rule
+ 	  RoundService.getElapsed() -> number                 round-schedule seconds since the horn (0 outside Active/Ending)
+ 	  RoundService.getTimeScale() -> number               Config.Round.StudioTimeScale in Studio, else 1
+ 
+@@ -700,6 +702,17 @@ function RoundService.isContender(player: Player): boolean
+ 	return contenders[player] ~= nil
+ end
+ 
++-- A round is under way: its contenders are picked, and the bench (the fallen, late joiners) must not reach them by voice
++-- (VoiceService). Countdown and Active today; the coming train, training room and launch phases join through
++-- Config.Voice.RoundPhases.
++function RoundService.isRoundRunning(): boolean
++	if phase == "Countdown" or phase == "Active" then
++		return true
++	end
++	local extra = Config.Voice and Config.Voice.RoundPhases
++	return type(extra) == "table" and extra[phase] == true
++end
++
+ function RoundService.getElapsed(): number
+ 	if roundStartedAt <= 0 or (phase ~= "Active" and phase ~= "Ending") then
+ 		return 0
+diff --git a/src/ServerScriptService/Server/Services/VoiceService/Routing.lua b/src/ServerScriptService/Server/Services/VoiceService/Routing.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..a4fd9e53d9999c4906ee4fe5b27a8a4515e8346e
+--- /dev/null
++++ b/src/ServerScriptService/Server/Services/VoiceService/Routing.lua
+@@ -0,0 +1,154 @@
++--[[
++	Routing - Proximity Voice's server rules as pure functions (docs/design/VoiceMode.md). No services, no instances:
++	VoiceService feeds it plain tables and runs the writes it plans; ServerStorage.Dev.VoiceRoutingTest checks every rule
++	in Edit mode, and voice_mode/_tools/routing_model.py model-checks plan() exhaustively.
++
++	A device state is { muted: boolean, allow: boolean, list: { number } } (list sorted, UserIds):
++	  allow = false (AccessType Deny): everyone except the list may hear the device; we only ever use an empty list.
++	  allow = true  (AccessType Allow): only the list may hear it.
++	  muted = true: nobody hears it.
++
++	  Routing.assign(roster, running) -> (roles, bench)
++	      roster = { { key: any, id: number, alive: boolean } }; roles[key] = "Open" | "Contender" | "Bench";
++	      bench = the sorted UserIds of every Bench player (the stands: the fallen, late joiners, the lobby)
++	  Routing.choice(st, defaultOn) -> boolean?
++	      st = { explicit: boolean?, saved: boolean?, loadState: "Loading" | "Loaded" | "Failed" }
++	      The player's Proximity voice choice. nil = not known yet: the player stays muted, however long that takes.
++	      There is no time limit after which it turns on by itself.
++	  Routing.desired(role, on, whisper, allies, bench, serverMode) -> state
++	  Routing.plan(current, target) -> { { op: "Muted" | "AccessType" | "List", value: any } }
++	      The writes that take a device from current to target. No intermediate state lets anyone hear the player who
++	      isn't allowed to both before and after the switch: mute first, unmute last; when narrowing to an allow list,
++	      the type goes before the list; when opening up, the list is emptied before the type.
++	  Routing.audience(state, everyone) -> { [number]: true }   who could hear a device in that state (tests)
++	  Routing.exempt(action, value) -> boolean   requests that are never rate-limited or dropped: SetVoice(false)
++	  Routing.sameList(a, b) -> boolean    Routing.sortedIds(list) -> { number }
++]]
++local Routing = {}
++
++function Routing.sortedIds(list: { any }?): { number }
++	local out = {}
++	if type(list) == "table" then
++		for _, value in ipairs(list) do
++			local id = tonumber(value)
++			if id then
++				table.insert(out, id)
++			end
++		end
++	end
++	table.sort(out)
++	return out
++end
++
++function Routing.sameList(a: { number }, b: { number }): boolean
++	if #a ~= #b then
++		return false
++	end
++	for i = 1, #a do
++		if a[i] ~= b[i] then
++			return false
++		end
++	end
++	return true
++end
++
++function Routing.role(running: boolean, alive: boolean): string
++	if not running then
++		return "Open"
++	end
++	return if alive then "Contender" else "Bench"
++end
++
++function Routing.assign(roster: { { [string]: any } }, running: boolean): ({ [any]: string }, { number })
++	local roles = {}
++	local bench = {}
++	for _, entry in ipairs(roster) do
++		local role = Routing.role(running, entry.alive == true)
++		roles[entry.key] = role
++		if role == "Bench" then
++			table.insert(bench, entry.id) -- listeners: everyone on the bench, with or without a microphone
++		end
++	end
++	table.sort(bench)
++	return roles, bench
++end
++
++function Routing.choice(st: { [string]: any }, defaultOn: boolean): boolean?
++	if st.explicit ~= nil then
++		return st.explicit == true -- chosen this session: newer than any saved copy
++	end
++	if st.loadState == "Loaded" then
++		if st.saved ~= nil then
++			return st.saved == true
++		end
++		return defaultOn -- loaded, never chosen
++	end
++	return nil -- still loading, or the load failed: unknown, so muted until the player chooses
++end
++
++function Routing.desired(role: string, on: boolean?, whisper: boolean, allies: { number }, bench: { number },
++	serverMode: string): { [string]: any }
++	local muted = serverMode == "Off" or on ~= true
++	if role == "Bench" then
++		return { muted = muted, allow = true, list = table.clone(bench) }
++	end
++	if role == "Contender" and whisper and #allies > 0 then
++		return { muted = muted, allow = true, list = table.clone(allies) }
++	end
++	return { muted = muted, allow = false, list = {} }
++end
++
++function Routing.plan(current: { [string]: any }, target: { [string]: any }): { { [string]: any } }
++	local steps = {}
++	local tempMuted = false
++	if target.muted and not current.muted then
++		table.insert(steps, { op = "Muted", value = true })
++	end
++	if target.allow then
++		if not current.allow then
++			if #current.list > 0 and not target.muted and not current.muted then
++				-- Allow with a deny list that isn't empty would let exactly the excluded players in: mute for the switch
++				table.insert(steps, { op = "Muted", value = true })
++				tempMuted = true
++			end
++			table.insert(steps, { op = "AccessType", value = "Allow" })
++		end
++		if not Routing.sameList(current.list, target.list) then
++			table.insert(steps, { op = "List", value = table.clone(target.list) })
++		end
++	else
++		if #current.list > 0 then
++			table.insert(steps, { op = "List", value = {} }) -- with Allow: nobody; with Deny: widening to the target anyway
++		end
++		if current.allow then
++			table.insert(steps, { op = "AccessType", value = "Deny" })
++		end
++	end
++	if not target.muted and (current.muted or tempMuted) then
++		table.insert(steps, { op = "Muted", value = false })
++	end
++	return steps
++end
++
++function Routing.audience(state: { [string]: any }, everyone: { number }): { [number]: boolean }
++	local out = {}
++	if state.muted then
++		return out
++	end
++	local listed = {}
++	for _, id in ipairs(state.list) do
++		listed[id] = true
++	end
++	for _, id in ipairs(everyone) do
++		if (state.allow and listed[id]) or (not state.allow and not listed[id]) then
++			out[id] = true
++		end
++	end
++	return out
++end
++
++function Routing.exempt(action: any, value: any): boolean
++	return action == "SetVoice" and value == false
++end
++
++return Routing
+diff --git a/src/ServerScriptService/Server/Services/VoiceService/VoiceServers.lua b/src/ServerScriptService/Server/Services/VoiceService/VoiceServers.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..e3f6932e86dad37bf46a160ff4647981f5001cfe
+--- /dev/null
++++ b/src/ServerScriptService/Server/Services/VoiceService/VoiceServers.lua
+@@ -0,0 +1,312 @@
++--[[
++	VoiceServers - Proximity Voice, phase 2: voice-only servers (docs/design/VoiceMode.md, "Phase 2"). VoiceService loads it
++	only when Config.Voice.VoiceServers.Enabled is true. Off for the beta: one pool of players fills 24-contender rounds
++	faster, and Roblox's matchmaking already groups voice users (its Voice Chat signal).
++
++	  * Joining (in a public server's lobby, VOICE-ONLY SERVER on the lobby card -> VoiceRequest "JoinVoiceServer"): the
++	    server checks the player can use voice (VoiceChatService:IsVoiceEnabledForUserIdAsync) and isn't in a round, picks
++	    the voice-only server with room that starts soonest and is fullest (the MemoryStore sorted map VoiceServers_v1)
++	    or opens a new one (a GUID ticket in the MemoryStore hash map VoiceTickets_v1), and teleports the player there
++	    with TeleportOptions.ReservedServerId = that GUID.
++	  * A voice-only server (a reserved server whose ticket says VoiceOnly) returns "VoiceOnly" from resolve() (VoiceService
++	    publishes GameState.VoiceMode), advertises { count, max, phase, t } every AdvertiseInterval seconds, and sends anyone
++	    without voice back to the public servers with a toast.
++	  * Leaving (LEAVE VOICE-ONLY SERVER on the lobby card -> "LeaveVoiceServer"): a plain TeleportAsync to this place,
++	    which is Roblox matchmaking.
++	Teleport data is only a pointer to the ticket; the ticket in MemoryStore is the authority (modes-progression.md 4.3).
++	MemoryStore and reserved servers work only in a published game (TeleportAsync also runs in Team Test).
++	API: init(VoiceService)   resolve() -> "VoiceOnly"? (yields)   onPlayerAdded(player)   request(player, action)
++	     isVoiceServer() -> boolean
++]]
++local HttpService = game:GetService("HttpService")
++local MemoryStoreService = game:GetService("MemoryStoreService")
++local Players = game:GetService("Players")
++local ReplicatedStorage = game:GetService("ReplicatedStorage")
++local TeleportService = game:GetService("TeleportService")
++local VoiceChatService = game:GetService("VoiceChatService")
++
++local Shared = ReplicatedStorage:WaitForChild("Shared")
++local Config = require(Shared:WaitForChild("Config"))
++local Net = require(Shared:WaitForChild("Net"))
++
++local GameState = ReplicatedStorage:WaitForChild("GameState")
++local Cfg = (Config.Voice and Config.Voice.VoiceServers) or {}
++
++local SERVERS_MAP = "VoiceServers_v1"
++local TICKETS_MAP = "VoiceTickets_v1"
++local TICKET_TTL = 6 * 60 * 60 -- seconds; a running voice server refreshes its own ticket every 10 minutes
++local ADVERT_TTL = 60
++local STALE_AFTER = 45 -- an advert older than this belongs to a server that has gone
++local PHASE_RANK = { Lobby = 3, Intermission = 2, Ending = 1 } -- where a joiner gets into a round soonest
++
++local VoiceServers = {}
++local voiceServer = false
++local matchId: string? = nil
++local busy: { [Player]: boolean } = {}
++local gated: { [Player]: boolean } = {}
++local lastTicketWrite = -math.huge
++
++local function maxPlayers(): number
++	return math.max(2, math.floor(tonumber(Cfg.MaxPlayers) or 24))
++end
++
++local function notify(player: Player, text: string, sub: string?)
++	pcall(function()
++		Net.event("Announce"):FireClient(player, { style = "Toast", text = text, sub = sub, duration = 4 })
++	end)
++end
++
++-- true / false, or nil when Roblox couldn't say (an HTTP error)
++local function voiceEnabled(player: Player): boolean?
++	local ok, result = pcall(function()
++		return VoiceChatService:IsVoiceEnabledForUserIdAsync(player.UserId)
++	end)
++	if not ok then
++		return nil
++	end
++	return result == true
++end
++
++local function readTicket(id: string): { [string]: any }?
++	local ok, value = pcall(function()
++		return MemoryStoreService:GetHashMap(TICKETS_MAP):GetAsync(id)
++	end)
++	return if ok and type(value) == "table" then value else nil
++end
++
++local function writeTicket(id: string): boolean
++	local ok = pcall(function()
++		MemoryStoreService:GetHashMap(TICKETS_MAP):SetAsync(id, { mode = "VoiceOnly", t = os.time() }, TICKET_TTL)
++	end)
++	return ok
++end
++
++-- Teleports ----------------------------------------------------------------------------------------------------------
++
++local function teleportTo(player: Player, id: string): boolean
++	local options = Instance.new("TeleportOptions")
++	local okId, err = pcall(function()
++		(options :: any).ReservedServerId = id -- the GUID names the server: the first teleport creates it
++	end)
++	if not okId then
++		warn("[VoiceServers] TeleportOptions.ReservedServerId is unavailable: " .. tostring(err))
++		return false
++	end
++	options:SetTeleportData({ voiceMatch = id })
++	for attempt = 1, 3 do
++		local ok, result = pcall(function()
++			return TeleportService:TeleportAsync(game.PlaceId, { player }, options)
++		end)
++		if ok then
++			return true
++		end
++		warn(string.format("[VoiceServers] Teleport attempt %d failed: %s", attempt, tostring(result)))
++		task.wait(2 * attempt)
++		if player.Parent ~= Players then
++			return false
++		end
++	end
++	return false
++end
++
++-- Back to the public servers: no options means Roblox matchmaking picks one.
++local function toPublic(player: Player): boolean
++	for attempt = 1, 3 do
++		local ok, result = pcall(function()
++			return TeleportService:TeleportAsync(game.PlaceId, { player })
++		end)
++		if ok then
++			return true
++		end
++		warn(string.format("[VoiceServers] Return attempt %d failed: %s", attempt, tostring(result)))
++		task.wait(2 * attempt)
++		if player.Parent ~= Players then
++			return false
++		end
++	end
++	return false
++end
++
++-- Matching -----------------------------------------------------------------------------------------------------------
++
++local function pickServer(): string?
++	local ok, items = pcall(function()
++		return MemoryStoreService:GetSortedMap(SERVERS_MAP):GetRangeAsync(Enum.SortDirection.Descending, 50)
++	end)
++	if not ok or type(items) ~= "table" then
++		return nil
++	end
++	local now = os.time()
++	local best, bestScore = nil, -math.huge
++	for _, item in ipairs(items) do
++		local value = item.value
++		if type(item.key) == "string" and type(value) == "table" then
++			local count = tonumber(value.count) or 0
++			local max = tonumber(value.max) or maxPlayers()
++			local fresh = now - (tonumber(value.t) or 0) < STALE_AFTER
++			if fresh and count < max - 1 then -- leave a seat for a party member who follows
++				local score = (PHASE_RANK[value.phase] or 0) * 1000 + count
++				if score > bestScore then
++					best, bestScore = item.key, score
++				end
++			end
++		end
++	end
++	return best
++end
++
++-- In a voice-only server: tell the public servers we're here and how full we are.
++local function advertise()
++	local id = matchId
++	if not id then
++		return
++	end
++	local count = #Players:GetPlayers()
++	pcall(function()
++		MemoryStoreService:GetSortedMap(SERVERS_MAP):SetAsync(id, {
++			count = count,
++			max = maxPlayers(),
++			phase = GameState:GetAttribute("Phase") or "Lobby",
++			t = os.time(),
++		}, ADVERT_TTL, count)
++	end)
++	if os.clock() - lastTicketWrite > 600 then
++		lastTicketWrite = os.clock()
++		writeTicket(id)
++	end
++end
++
++local function unadvertise()
++	local id = matchId
++	if id then
++		pcall(function()
++			MemoryStoreService:GetSortedMap(SERVERS_MAP):RemoveAsync(id)
++		end)
++	end
++end
++
++-- Public API ---------------------------------------------------------------------------------------------------------
++
++function VoiceServers.isVoiceServer(): boolean
++	return voiceServer
++end
++
++-- On a reserved server: is it voice-only? Yields for MemoryStore (and up to 30 s for the first arrival).
++function VoiceServers.resolve(): string?
++	if game.PrivateServerId == "" or game.PrivateServerOwnerId ~= 0 then
++		return nil -- a public server, or a Roblox private server (Private Games)
++	end
++	local id = game.PrivateServerId
++	local ticket = readTicket(id)
++	if not ticket then
++		-- the ticket's GUID may not equal PrivateServerId: follow the first arrival's pointer, then check it in MemoryStore
++		local first = Players:GetPlayers()[1]
++		local deadline = os.clock() + 30
++		while not first and os.clock() < deadline do
++			task.wait(0.5)
++			first = Players:GetPlayers()[1]
++		end
++		if first then
++			local okJoin, joinData = pcall(function()
++				return first:GetJoinData()
++			end)
++			local data = if okJoin and type(joinData) == "table" then joinData.TeleportData else nil
++			local pointer = if type(data) == "table" then data.voiceMatch else nil
++			if type(pointer) == "string" and #pointer <= 64 then
++				ticket = readTicket(pointer)
++				if ticket then
++					id = pointer
++				end
++			end
++		end
++	end
++	if not (ticket and ticket.mode == "VoiceOnly") then
++		return nil
++	end
++	voiceServer = true
++	matchId = id
++	game:BindToClose(unadvertise)
++	task.spawn(function()
++		while true do
++			advertise()
++			task.wait(math.max(5, tonumber(Cfg.AdvertiseInterval) or 15))
++		end
++	end)
++	for _, player in ipairs(Players:GetPlayers()) do
++		task.spawn(VoiceServers.onPlayerAdded, player)
++	end
++	return "VoiceOnly"
++end
++
++-- On a voice-only server: anyone Roblox says can't use voice goes back to the public servers.
++function VoiceServers.onPlayerAdded(player: Player)
++	if not voiceServer or gated[player] then
++		return
++	end
++	gated[player] = true
++	if voiceEnabled(player) == false and player.Parent == Players then
++		notify(player, "THIS IS A VOICE-ONLY SERVER", "Voice isn't on for your account · taking you to a regular server")
++		task.wait(3)
++		if player.Parent == Players then
++			toPublic(player)
++		end
++	end
++end
++
++function VoiceServers.request(player: Player, action: string)
++	if busy[player] then
++		return
++	end
++	busy[player] = true
++	local ok, err = pcall(function()
++		if action == "LeaveVoiceServer" then
++			if voiceServer then
++				notify(player, "LEAVING THE VOICE-ONLY SERVER", "Taking you to a regular server")
++				toPublic(player)
++			end
++			return
++		end
++		if voiceServer then
++			return -- already on one
++		end
++		if player:GetAttribute("Alive") == true or player:GetAttribute("InArena") == true then
++			notify(player, "FINISH YOUR ROUND FIRST", "Voice-only servers open from the lobby")
++			return
++		end
++		if voiceEnabled(player) ~= true then
++			notify(player, "VOICE ISN'T ON FOR YOUR ACCOUNT", "Voice-only servers need Roblox voice chat")
++			return
++		end
++		local id = pickServer()
++		if not id then
++			id = HttpService:GenerateGUID(false)
++			if not writeTicket(id) then
++				notify(player, "COULDN'T OPEN A VOICE-ONLY SERVER", "Try again in a moment")
++				return
++			end
++		end
++		notify(player, "VOICE-ONLY SERVER", "Taking you there…")
++		if not teleportTo(player, id :: string) then
++			notify(player, "TELEPORT FAILED", "You're still here · try again in a moment")
++		end
++	end)
++	busy[player] = nil
++	if not ok then
++		warn("[VoiceServers] " .. tostring(err))
++	end
++end
++
++function VoiceServers.init(_voiceService)
++	TeleportService.TeleportInitFailed:Connect(function(player: Player, result, message)
++		if player and player.Parent == Players then
++			warn(string.format("[VoiceServers] Teleport failed for %s: %s %s", player.Name, tostring(result), tostring(message)))
++			notify(player, "TELEPORT FAILED", "You're still here · try again in a moment")
++		end
++	end)
++	Players.PlayerRemoving:Connect(function(player)
++		busy[player] = nil
++		gated[player] = nil
++	end)
++end
++
++return VoiceServers
+diff --git a/src/ServerScriptService/Server/Services/VoiceService/init.lua b/src/ServerScriptService/Server/Services/VoiceService/init.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..b0ad7f88de0deede20fe0af640306da87342700c
+--- /dev/null
++++ b/src/ServerScriptService/Server/Services/VoiceService/init.lua
+@@ -0,0 +1,607 @@
++--[[
++	VoiceService - Proximity Voice, server side: who can hear whom (docs/design/VoiceMode.md). Behind Config.Voice.Enabled:
++	while that is false this service does nothing. (Roblox's own voice still runs: how it sounds then depends on the
++	place's VoiceChatService settings, not on this flag. See studio/ApplyVoiceSettings.lua.)
++
++	With VoiceChatService.UseAudioApi = Enabled and EnableDefaultVoice = true, Roblox gives every voice-eligible player an
++	AudioDeviceInput under their Player. This service writes three things on each of those devices, on the server (the
++	access list is set on the server and replicates to clients):
++	  * AccessType + SetUserIdAccessList, from the player's voice role (Player attribute VoiceRole):
++	      "Open"       no round running (Lobby, Intermission, Ending): Deny + an empty list = anyone in range hears them.
++	      "Contender"  alive in a running round: anyone in range (other contenders, and spectators watching close by).
++	                   While whispering (Config.Voice.Whisper, truce allies): Allow + those allies only.
++	      "Bench"      everyone else while a round runs (the fallen, late joiners, the lobby: "the stands"): Allow + the
++	                   bench's UserIds. The living are never on that list, wherever their body or their camera is.
++	  * Muted, unless the player's choice is known and On (Routing.choice): their choice this session (VoiceRequest
++	    SetVoice), else their saved one once DataService says the profile loaded (SettingsLoaded = true). Until then, and
++	    for the whole session if the load failed, they stay muted: nothing turns a saved OFF back on by itself.
++	    ServerMode "Off" mutes everyone. Roblox's own mic toggle (AudioDeviceInput.Active) is never touched.
++	A contender who falls moves to the bench the moment PlayerService handles the death (onEliminated), before the cannon.
++	Every pass reads each device back and rewrites whatever differs from the rules, in Routing.plan's fail-closed order;
++	a write that fails is retried on the next pass (at most 5 s later), and a device someone else changed is logged.
++	What this does not prove: where Roblox applies the list (the docs don't say whether a modified client could still
++	receive a stream it isn't listed for), and whether Roblox's own mute, block and volume controls reach the client's
++	custom audio chain. Those are the published safety gate (VoiceMode.md, test plan G1-G6).
++	It never records: no AudioRecorder, no speech-to-text, no audio analysis on the server.
++
++	Attributes (replicated):
++	  GameState.VoiceMode   "Proximity" | "Off" | "VoiceOnly" (a voice-only server, VoiceServers); not set while disabled
++	  Player.VoiceRole      "Open" | "Contender" | "Bench"
++	  Player.VoiceOn        true while the server lets this player be heard (the device is unmuted)
++	  Player.VoiceHold      "" | "Loading" (the saved choice is still loading) | "NotLoaded" (it couldn't load): why a
++	                        player who hasn't chosen this session is muted
++	  Player.VoiceWhisper   true while this player whispers to allies (clients shorten that voice's reach)
++	  Player.VoiceAllies    how many allies would hear a whisper (0 = nothing to whisper to)
++	  (Player.Spectating is written by PlayerService; Player.SettingsLoaded by DataService)
++	API (through the registry):
++	  VoiceService.isEnabled() -> boolean
++	  VoiceService.getRole(player) -> string
++	  VoiceService.onEliminated(player)            PlayerService.handleDeath, right after the victim's Alive goes false
++	  VoiceService.refresh()                       recompute and re-check every device now
++	  VoiceService.setAllies(player, { Player })   for a future TruceService (Config.Voice.Whisper)
++	  VoiceService.changed: Signal()               after every pass
++	  VoiceService.debugState() -> { [string]: any }
++	Remote VoiceRequest(action: string, value: any), validated; each action has its own rate limit, and a request over
++	the limit is applied shortly instead of dropped (the last one always lands). SetVoice(false) is never limited.
++	  "SetVoice" (boolean)   the player's explicit Proximity voice choice (the client sends it only when they toggle it)
++	  "Whisper"  (boolean)   hold to whisper; ignored unless Config.Voice.Whisper.Enabled and the player has allies
++	  "JoinVoiceServer" / "LeaveVoiceServer"   phase 2: VoiceServers (Config.Voice.VoiceServers.Enabled)
++]]
++local HttpService = game:GetService("HttpService")
++local Players = game:GetService("Players")
++local ReplicatedStorage = game:GetService("ReplicatedStorage")
++local VoiceChatService = game:GetService("VoiceChatService")
++
++local Shared = ReplicatedStorage:WaitForChild("Shared")
++local Config = require(Shared:WaitForChild("Config"))
++local Net = require(Shared:WaitForChild("Net"))
++local Signal = require(Shared:WaitForChild("Signal"))
++
++-- (a timeout, so a missing child makes this one service fail to load instead of stalling the server's loader)
++local Routing = require(script:WaitForChild("Routing", 10))
++
++local GameState = ReplicatedStorage:WaitForChild("GameState")
++local VoiceCfg = Config.Voice or {}
++
++local SAFETY_INTERVAL = 5 -- seconds between full re-checks (each reads every device back; unchanged ones aren't written)
++local NO_DEVICE_WARNING = 30 -- seconds a voice-enabled player may go without a device before we say why
++local FLUSH_DELAY = 0.5 -- seconds before a request that was over the rate limit is applied
++local DEFAULT_ROUND_PHASES = { Countdown = true, Active = true }
++
++-- Enum.AccessModifierType (Allow / Deny) comes with the Audio API; without it there is nothing to route
++local ALLOW: EnumItem? = nil
++local DENY: EnumItem? = nil
++pcall(function()
++	ALLOW = (Enum :: any).AccessModifierType.Allow
++	DENY = (Enum :: any).AccessModifierType.Deny
++end)
++
++local VoiceService = {}
++VoiceService.changed = Signal.new()
++
++local Services = nil
++local enabled = false
++local serverMode = "Proximity" -- "Proximity" | "Off" | "VoiceOnly"
++local states = {} -- [Player] = per-player state (newState)
++local queued = false
++local warned = {}
++local VoiceServers = nil -- the phase-2 module, when Config.Voice.VoiceServers.Enabled
++
++-- Helpers ----------------------------------------------------------------------------------------------------------
++
++local function warnOnce(key: string, message: string)
++	if warned[key] then
++		return
++	end
++	warned[key] = true
++	warn("[VoiceService] " .. message)
++end
++
++local function debugPrint(...: any)
++	if VoiceCfg.Debug == true then
++		print("[VoiceService]", ...)
++	end
++end
++
++local function setAttr(player: Player, name: string, value: any)
++	if player:GetAttribute(name) ~= value then
++		player:SetAttribute(name, value)
++	end
++end
++
++local function newState()
++	return {
++		device = nil :: AudioDeviceInput?,
++		explicit = nil :: boolean?, -- the player's choice this session (SetVoice): newer than any saved copy
++		saved = nil :: boolean?, -- the saved choice (SettingsJson voiceOn), read only once the profile has loaded
++		loadState = "Loading", -- "Loading" | "Loaded" | "Failed" (DataService's SettingsLoaded attribute)
++		whisper = false,
++		allies = {} :: { [Player]: boolean },
++		role = "Open",
++		lastTarget = nil :: { [string]: any }?, -- what this service last wrote to the device (drift check)
++		failed = false, -- the last write failed: the next pass tries again
++		eligible = nil :: boolean?,
++		connections = {} :: { RBXScriptConnection },
++		pending = {} :: { [string]: { value: any } }, -- requests over the rate limit, applied shortly
++		flushQueued = false,
++	}
++end
++
++-- Roles ------------------------------------------------------------------------------------------------------------
++
++local function roundRunning(): boolean
++	local rs = Services and Services.RoundService
++	if rs and type(rs.isRoundRunning) == "function" then
++		local ok, running = pcall(rs.isRoundRunning)
++		if ok then
++			return running == true
++		end
++	end
++	local phases = VoiceCfg.RoundPhases or DEFAULT_ROUND_PHASES
++	return phases[GameState:GetAttribute("Phase")] == true
++end
++
++local function isAlive(player: Player): boolean
++	local ps = Services and Services.PlayerService
++	if ps and type(ps.isAlive) == "function" then
++		local ok, alive = pcall(ps.isAlive, player)
++		if ok then
++			return alive == true
++		end
++	end
++	return player:GetAttribute("Alive") == true
++end
++
++-- The saved choice ---------------------------------------------------------------------------------------------------
++
++-- DataService sets SettingsJson, then SettingsLoaded: true once the stored profile was read (or, in Studio only, when
++-- DataStores are off), false when the load failed. Only a loaded profile counts; "{}" after a failed load is not a
++-- choice. (The player's explicit choice this session, st.explicit, always wins over this.)
++local function readSaved(player: Player, st)
++	local loaded = player:GetAttribute("SettingsLoaded")
++	local json = player:GetAttribute("SettingsJson")
++	st.saved = nil
++	if loaded == false then
++		st.loadState = "Failed"
++		return
++	end
++	if loaded ~= true or type(json) ~= "string" or json == "" then
++		st.loadState = "Loading"
++		return
++	end
++	st.loadState = "Loaded"
++	local ok, decoded = pcall(HttpService.JSONDecode, HttpService, json)
++	if ok and type(decoded) == "table" and type(decoded.voiceOn) == "number" then
++		st.saved = decoded.voiceOn >= 0.5
++	end
++end
++
++-- Devices ----------------------------------------------------------------------------------------------------------
++
++local function findDevice(player: Player): AudioDeviceInput?
++	for _, child in ipairs(player:GetChildren()) do
++		if child:IsA("AudioDeviceInput") then
++			local owner = (child :: any).Player
++			if owner == nil or owner == player then
++				return child :: AudioDeviceInput
++			end
++		end
++	end
++	return nil
++end
++
++-- The device as it is now (nil if it can't be read: the next pass tries again)
++local function readDevice(device: AudioDeviceInput): { [string]: any }?
++	local ok, state = pcall(function()
++		return {
++			muted = device.Muted == true,
++			allow = device.AccessType == ALLOW,
++			list = Routing.sortedIds(device:GetUserIdAccessList()),
++		}
++	end)
++	return if ok then state else nil
++end
++
++local function runSteps(device: AudioDeviceInput, steps: { { [string]: any } })
++	for _, step in ipairs(steps) do
++		if step.op == "Muted" then
++			device.Muted = step.value == true
++		elseif step.op == "AccessType" then
++			device.AccessType = (if step.value == "Allow" then ALLOW else DENY) :: any
++		elseif step.op == "List" then
++			device:SetUserIdAccessList(step.value)
++		end
++	end
++end
++
++local function describe(state: { [string]: any }): string
++	return string.format("%s %s(%d)", if state.muted then "muted" else "live", if state.allow then "Allow" else "Deny", #state.list)
++end
++
++local function allyIds(player: Player, st): { number }
++	local ids = {}
++	for ally in pairs(st.allies) do
++		if ally.Parent == Players and ally ~= player then
++			table.insert(ids, ally.UserId)
++		end
++	end
++	table.sort(ids)
++	return ids
++end
++
++local function applyPlayer(player: Player, st, bench: { number })
++	local on = Routing.choice(st, VoiceCfg.DefaultOn ~= false)
++	local allies = allyIds(player, st)
++	local whisper = st.whisper and st.role == "Contender" and #allies > 0
++	local target = Routing.desired(st.role, on, whisper, allies, bench, serverMode)
++	local live = not target.muted
++	setAttr(player, "VoiceRole", st.role)
++	setAttr(player, "VoiceHold", if on ~= nil then "" elseif st.loadState == "Failed" then "NotLoaded" else "Loading")
++	setAttr(player, "VoiceWhisper", whisper)
++	setAttr(player, "VoiceAllies", if st.role == "Contender" then #allies else 0)
++	if not live then
++		setAttr(player, "VoiceOn", false) -- the client closes its mic on this at once (VoiceController)
++	end
++
++	local device = st.device
++	if not device or device.Parent ~= player then
++		setAttr(player, "VoiceOn", live)
++		return
++	end
++	local current = readDevice(device)
++	if not current then
++		st.failed = true
++		warnOnce("read:" .. player.UserId, "Couldn't read " .. player.Name .. "'s voice device; trying again.")
++		return
++	end
++	local last = st.lastTarget
++	if last and not st.failed and (current.muted ~= last.muted or current.allow ~= last.allow
++		or not Routing.sameList(current.list, last.list)) then
++		-- something other than this service changed the device: put it back, and say so once (worth knowing in tests)
++		warnOnce("drift:" .. player.UserId, string.format("%s's voice device changed under us (%s, expected %s); rewritten.",
++			player.Name, describe(current), describe(last)))
++	end
++	local steps = Routing.plan(current, target)
++	if #steps > 0 then
++		local ok, err = pcall(runSteps, device, steps)
++		if not ok then
++			st.failed = true
++			st.lastTarget = nil
++			warnOnce("write:" .. tostring(err), "Couldn't set a voice device: " .. tostring(err))
++			return
++		end
++		debugPrint(player.Name, st.role, describe(current), "->", describe(target))
++	end
++	st.failed = false
++	st.lastTarget = target
++	if live then
++		setAttr(player, "VoiceOn", true) -- only once the device really is open
++	end
++end
++
++-- Recompute every role, read every device back and write what differs.
++local function refreshNow()
++	queued = false
++	if not enabled then
++		return
++	end
++	local running = roundRunning()
++	local roster = {}
++	for player, st in pairs(states) do
++		if player.Parent == Players then
++			table.insert(roster, { key = player, id = player.UserId, alive = isAlive(player) })
++		end
++	end
++	local roles, bench = Routing.assign(roster, running)
++	for player, st in pairs(states) do
++		if player.Parent == Players then
++			st.role = roles[player] or "Open"
++			applyPlayer(player, st, bench)
++		end
++	end
++	VoiceService.changed:Fire()
++end
++
++local function safeRefresh()
++	local ok, err = pcall(refreshNow)
++	if not ok then
++		queued = false
++		warnOnce("refresh:" .. tostring(err), "Refresh failed: " .. tostring(err))
++	end
++end
++
++local function queueRefresh()
++	if queued or not enabled then
++		return
++	end
++	queued = true
++	task.defer(safeRefresh)
++end
++
++-- Players ----------------------------------------------------------------------------------------------------------
++
++-- Diagnostics only: a voice-enabled player without a device means the place still runs Roblox's old built-in voice.
++local function checkEligibility(player: Player, st)
++	local ok, result = pcall(function()
++		return VoiceChatService:IsVoiceEnabledForUserIdAsync(player.UserId)
++	end)
++	if not ok or states[player] ~= st then
++		return
++	end
++	st.eligible = result == true
++	if st.eligible then
++		task.delay(NO_DEVICE_WARNING, function()
++			if states[player] == st and player.Parent == Players and not st.device then
++				warnOnce("nodevice", string.format("A voice-enabled player still has no AudioDeviceInput after %d s. Is "
++					.. "VoiceChatService.UseAudioApi = Enabled in Studio? (Automatic still runs the old built-in voice, which "
++					.. "these rules can't reach.)", NO_DEVICE_WARNING))
++			end
++		end)
++	end
++end
++
++local function useDevice(player: Player, st)
++	local device = findDevice(player)
++	if device ~= st.device then
++		st.device = device
++		st.lastTarget = nil
++		st.failed = false
++		queueRefresh()
++	end
++end
++
++local function onPlayerAdded(player: Player)
++	if states[player] or player.Parent ~= Players then
++		return
++	end
++	local st = newState()
++	states[player] = st
++	setAttr(player, "VoiceOn", false) -- muted until the choice is known
++	table.insert(st.connections, player.ChildAdded:Connect(function(child)
++		if child:IsA("AudioDeviceInput") then
++			useDevice(player, st)
++		end
++	end))
++	table.insert(st.connections, player.ChildRemoved:Connect(function(child)
++		if child == st.device then
++			useDevice(player, st)
++		end
++	end))
++	table.insert(st.connections, player:GetAttributeChangedSignal("Alive"):Connect(queueRefresh))
++	for _, attribute in ipairs({ "SettingsJson", "SettingsLoaded" }) do
++		table.insert(st.connections, player:GetAttributeChangedSignal(attribute):Connect(function()
++			readSaved(player, st)
++			queueRefresh()
++		end))
++	end
++	readSaved(player, st)
++	useDevice(player, st)
++	queueRefresh()
++	task.spawn(checkEligibility, player, st)
++	if VoiceServers then
++		task.spawn(VoiceServers.onPlayerAdded, player)
++	end
++end
++
++local function onPlayerRemoving(player: Player)
++	local st = states[player]
++	if not st then
++		return
++	end
++	for _, connection in ipairs(st.connections) do
++		connection:Disconnect()
++	end
++	states[player] = nil
++	for _, other in pairs(states) do
++		other.allies[player] = nil
++	end
++	queueRefresh()
++end
++
++local function handleRequest(player: Player, st, action: string, value: any)
++	if action == "SetVoice" then
++		if type(value) ~= "boolean" then
++			return
++		end
++		st.explicit = value
++		if value == false then
++			st.pending.SetVoice = nil -- an older ON still waiting for its turn must not land after this OFF
++		end
++		safeRefresh()
++	elseif action == "Whisper" then
++		if type(value) ~= "boolean" then
++			return
++		end
++		st.whisper = value and (VoiceCfg.Whisper or {}).Enabled == true
++		safeRefresh()
++	elseif action == "JoinVoiceServer" or action == "LeaveVoiceServer" then
++		if VoiceServers then
++			task.spawn(VoiceServers.request, player, action)
++		end
++	end
++end
++
++local ACTIONS = { SetVoice = true, Whisper = true, JoinVoiceServer = true, LeaveVoiceServer = true }
++
++local function onRequest(player: Player, action: any, value: any)
++	local st = states[player]
++	if not st or type(action) ~= "string" or ACTIONS[action] ~= true then
++		return
++	end
++	if Routing.exempt(action, value) then
++		handleRequest(player, st, action, value) -- turning voice off is never limited or delayed
++		return
++	end
++	if Net.rateLimit(player, "Voice:" .. action, 4, 8) then
++		handleRequest(player, st, action, value)
++		return
++	end
++	-- over the limit: keep the latest of each action and apply it shortly, so the last request always lands
++	st.pending[action] = { value = value }
++	if st.flushQueued then
++		return
++	end
++	st.flushQueued = true
++	task.delay(FLUSH_DELAY, function()
++		st.flushQueued = false
++		if states[player] ~= st then
++			return
++		end
++		local pending = st.pending
++		st.pending = {}
++		for pendingAction, entry in pairs(pending) do
++			handleRequest(player, st, pendingAction, entry.value)
++		end
++	end)
++end
++
++-- Public API ---------------------------------------------------------------------------------------------------------
++
++function VoiceService.isEnabled(): boolean
++	return enabled
++end
++
++function VoiceService.getRole(player: Player): string
++	local st = states[player]
++	return if st then st.role else "Open"
++end
++
++function VoiceService.refresh()
++	if enabled then
++		safeRefresh()
++	end
++end
++
++-- PlayerService.handleDeath calls this right after the victim's Alive attribute goes false: they join the bench now,
++-- not a frame later, so not a word reaches the living from the body.
++function VoiceService.onEliminated(_player: Player)
++	if enabled then
++		safeRefresh()
++	end
++end
++
++-- For a future TruceService: the allies who may hear this player's whisper (Config.Voice.Whisper). An empty list ends it.
++function VoiceService.setAllies(player: Player, allies: { Player })
++	local st = states[player]
++	if not st then
++		return
++	end
++	table.clear(st.allies)
++	if type(allies) == "table" then
++		for _, ally in ipairs(allies) do
++			if typeof(ally) == "Instance" and ally:IsA("Player") and ally ~= player then
++				st.allies[ally] = true
++			end
++		end
++	end
++	if next(st.allies) == nil then
++		st.whisper = false
++	end
++	if enabled then
++		safeRefresh()
++	end
++end
++
++function VoiceService.debugState(): { [string]: any }
++	local players = {}
++	for player, st in pairs(states) do
++		local entry: { [string]: any } = {
++			name = player.Name,
++			role = st.role,
++			on = Routing.choice(st, VoiceCfg.DefaultOn ~= false),
++			explicit = st.explicit,
++			saved = st.saved,
++			loadState = st.loadState,
++			eligible = st.eligible,
++			device = st.device ~= nil,
++			failed = st.failed,
++		}
++		local device = st.device
++		if device then
++			pcall(function()
++				entry.muted = device.Muted
++				entry.micActive = device.Active
++				entry.accessType = tostring(device.AccessType)
++				entry.listSize = #device:GetUserIdAccessList()
++			end)
++		end
++		table.insert(players, entry)
++	end
++	return { enabled = enabled, mode = serverMode, roundRunning = roundRunning(), players = players }
++end
++
++-- Lifecycle ----------------------------------------------------------------------------------------------------------
++
++function VoiceService.Init(registry)
++	Services = registry
++	if VoiceCfg.Enabled ~= true then
++		return
++	end
++	if not (ALLOW and DENY) then
++		warnOnce("enum", "Enum.AccessModifierType is missing (no Audio API in this build?): Proximity Voice stays off.")
++		return
++	end
++	enabled = true
++	serverMode = if VoiceCfg.ServerMode == "Off" then "Off" else "Proximity"
++	GameState:SetAttribute("VoiceMode", serverMode)
++	Net.event("VoiceRequest").OnServerEvent:Connect(onRequest)
++
++	local serversCfg = VoiceCfg.VoiceServers or {}
++	local module = script:FindFirstChild("VoiceServers")
++	if serversCfg.Enabled == true and module and module:IsA("ModuleScript") then
++		local ok, result = pcall(require, module)
++		if ok and type(result) == "table" then
++			VoiceServers = result
++			result.init(VoiceService)
++		else
++			warn("[VoiceService] VoiceServers failed to load: " .. tostring(result))
++		end
++	end
++end
++
++function VoiceService.Start()
++	if not enabled then
++		return
++	end
++	GameState:GetAttributeChangedSignal("Phase"):Connect(queueRefresh)
++	Players.PlayerAdded:Connect(onPlayerAdded)
++	Players.PlayerRemoving:Connect(onPlayerRemoving)
++	for _, player in ipairs(Players:GetPlayers()) do
++		task.spawn(onPlayerAdded, player)
++	end
++	if VoiceServers then
++		task.spawn(function()
++			local ok, mode = pcall(VoiceServers.resolve) -- yields (MemoryStore); a public server returns nil at once
++			if ok and mode == "VoiceOnly" and serverMode ~= "Off" then
++				serverMode = "VoiceOnly"
++				GameState:SetAttribute("VoiceMode", "VoiceOnly")
++				queueRefresh()
++			elseif not ok then
++				warn("[VoiceService] VoiceServers.resolve failed: " .. tostring(mode))
++			end
++		end)
++	end
++	while true do
++		task.wait(SAFETY_INTERVAL)
++		-- the backstop: a missed device, a missed attribute change or a failed write is caught here
++		for player, st in pairs(states) do
++			if player.Parent == Players then
++				local ok = pcall(function()
++					readSaved(player, st)
++					local device = findDevice(player)
++					if device ~= st.device then
++						st.device = device
++						st.lastTarget = nil
++						st.failed = false
++					end
++				end)
++				if not ok then
++					st.failed = true
++				end
++			end
++		end
++		safeRefresh()
++	end
++end
++
++return VoiceService
+diff --git a/src/ServerStorage/Dev/VoiceRoutingTest.lua b/src/ServerStorage/Dev/VoiceRoutingTest.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..8e64830f735891b1b39cb3b4e9b4f565a4352099
+--- /dev/null
++++ b/src/ServerStorage/Dev/VoiceRoutingTest.lua
+@@ -0,0 +1,206 @@
++--[[
++	VoiceRoutingTest - checks Proximity Voice's server rules (ServerScriptService.Server.Services.VoiceService.Routing)
++	in Edit mode, with no playtest, no voice and no second player (docs/design/VoiceMode.md, test plan S1).
++	Command bar (or execute_luau, Edit):
++	  print(require(game.ServerStorage.Dev.VoiceRoutingTest:Clone()).run())
++	-> "PASS 4416 checks (VoiceRoutingTest)" or "FAIL n of m" plus the first failures. Run it after installing the drafts
++	and after any change to Routing; it must PASS before the test publish.
++	What it proves: roles per phase; the living are never on the bench's list; a saved OFF never turns on by itself (a
++	slow or failed load stays muted, with no time limit); turning voice off is never rate-limited; and every write order
++	Routing.plan produces, from every device state to every target (4 players, 2,176 switches), ends in the target and
++	never lets anyone hear the player who isn't allowed to both before and after the switch.
++	What it can't prove: what Roblox's voice servers do with the lists (the published safety gate G1-G6 covers that).
++]]
++local ServerScriptService = game:GetService("ServerScriptService")
++
++local VoiceRoutingTest = {}
++
++local USERS = { 1, 2, 3, 4 }
++
++local function loadRouting(): any
++	local module = ServerScriptService:FindFirstChild("Server")
++	module = module and module:FindFirstChild("Services")
++	module = module and module:FindFirstChild("VoiceService")
++	module = module and module:FindFirstChild("Routing")
++	assert(module and module:IsA("ModuleScript"), "ServerScriptService.Server.Services.VoiceService.Routing is missing")
++	return require(module:Clone()) -- a fresh copy, so an edit made a moment ago counts
++end
++
++local function subsets(items: { number }): { { number } }
++	local out = {}
++	for mask = 0, 2 ^ #items - 1 do
++		local set = {}
++		for i, id in ipairs(items) do
++			if math.floor(mask / 2 ^ (i - 1)) % 2 == 1 then
++				table.insert(set, id)
++			end
++		end
++		table.insert(out, set)
++	end
++	return out
++end
++
++local function keys(set: { [number]: boolean }): string
++	local list = {}
++	for id in pairs(set) do
++		table.insert(list, id)
++	end
++	table.sort(list)
++	return "{" .. table.concat(list, ",") .. "}"
++end
++
++local function subsetOf(a: { [number]: boolean }, b: { [number]: boolean }): boolean
++	for id in pairs(a) do
++		if not b[id] then
++			return false
++		end
++	end
++	return true
++end
++
++local function intersect(a: { [number]: boolean }, b: { [number]: boolean }): { [number]: boolean }
++	local out = {}
++	for id in pairs(a) do
++		if b[id] then
++			out[id] = true
++		end
++	end
++	return out
++end
++
++local function describe(state: { [string]: any }): string
++	return string.format("%s/%s/{%s}", if state.muted then "muted" else "live", if state.allow then "Allow" else "Deny",
++		table.concat(state.list, ","))
++end
++
++-- A fake device: applies one planned write the way VoiceService.runSteps does
++local function applyStep(state: { [string]: any }, step: { [string]: any }): { [string]: any }
++	local nextState = { muted = state.muted, allow = state.allow, list = table.clone(state.list) }
++	if step.op == "Muted" then
++		nextState.muted = step.value == true
++	elseif step.op == "AccessType" then
++		nextState.allow = step.value == "Allow"
++	elseif step.op == "List" then
++		nextState.list = table.clone(step.value)
++		table.sort(nextState.list)
++	else
++		error("unknown op " .. tostring(step.op))
++	end
++	return nextState
++end
++
++function VoiceRoutingTest.run(): string
++	local Routing = loadRouting()
++	local passed, failed, notes = 0, 0, {}
++	local function check(ok: boolean, label: string)
++		if ok then
++			passed += 1
++		else
++			failed += 1
++			if #notes < 12 then
++				table.insert(notes, "  FAIL " .. label)
++			end
++		end
++	end
++
++	-- 1. Roles
++	check(Routing.role(false, true) == "Open", "no round: an alive player is Open")
++	check(Routing.role(false, false) == "Open", "no round: everyone is Open")
++	check(Routing.role(true, true) == "Contender", "round running: alive = Contender")
++	check(Routing.role(true, false) == "Bench", "round running: not alive = Bench")
++	local roster = {
++		{ key = "alive1", id = 11, alive = true },
++		{ key = "fallen", id = 12, alive = false },
++		{ key = "alive2", id = 13, alive = true },
++		{ key = "lateJoiner", id = 14, alive = false },
++	}
++	local roles, bench = Routing.assign(roster, true)
++	check(roles.alive1 == "Contender" and roles.alive2 == "Contender", "assign: the living are contenders")
++	check(roles.fallen == "Bench" and roles.lateJoiner == "Bench", "assign: the fallen and late joiners are on the bench")
++	check(#bench == 2 and bench[1] == 12 and bench[2] == 14, "assign: the bench list is exactly the bench, sorted")
++	for _, id in ipairs(bench) do
++		check(id ~= 11 and id ~= 13, "assign: no living contender is on the bench list")
++	end
++	local openRoles, openBench = Routing.assign(roster, false)
++	check(openRoles.fallen == "Open" and #openBench == 0, "assign: no round running: nobody on the bench")
++
++	-- 2. The choice: a saved OFF never turns on by itself
++	check(Routing.choice({ loadState = "Loading" }, true) == nil, "choice: still loading = unknown (muted), however long")
++	check(Routing.choice({ loadState = "Failed" }, true) == nil, "choice: the load failed = unknown (muted)")
++	check(Routing.choice({ loadState = "Loaded", saved = false }, true) == false, "choice: saved OFF stays OFF")
++	check(Routing.choice({ loadState = "Loaded", saved = true }, false) == true, "choice: saved ON stays ON")
++	check(Routing.choice({ loadState = "Loaded" }, true) == true, "choice: loaded, never chosen = DefaultOn (true)")
++	check(Routing.choice({ loadState = "Loaded" }, false) == false, "choice: loaded, never chosen = DefaultOn (false)")
++	check(Routing.choice({ loadState = "Failed", explicit = true }, false) == true, "choice: an explicit ON wins")
++	check(Routing.choice({ loadState = "Loaded", saved = true, explicit = false }, true) == false, "choice: an explicit OFF wins")
++
++	-- 3. Desired device states
++	local bench3 = { 2, 3 }
++	local d = Routing.desired("Bench", true, false, {}, bench3, "Proximity")
++	check(d.allow == true and not d.muted and #d.list == 2 and d.list[1] == 2 and d.list[2] == 3, "desired: bench = Allow + the bench")
++	d.list[1] = 99
++	check(bench3[1] == 2, "desired: the bench list is copied, not shared")
++	d = Routing.desired("Contender", true, false, {}, bench3, "Proximity")
++	check(d.allow == false and #d.list == 0 and not d.muted, "desired: contender = Deny + empty (anyone in range)")
++	d = Routing.desired("Contender", true, true, { 4 }, bench3, "Proximity")
++	check(d.allow == true and #d.list == 1 and d.list[1] == 4, "desired: whisper = Allow + allies only")
++	d = Routing.desired("Contender", true, true, {}, bench3, "Proximity")
++	check(d.allow == false, "desired: whisper with no allies = normal voice")
++	d = Routing.desired("Open", true, false, {}, bench3, "Proximity")
++	check(d.allow == false and #d.list == 0 and not d.muted, "desired: open = Deny + empty")
++	check(Routing.desired("Open", nil, false, {}, bench3, "Proximity").muted == true, "desired: unknown choice = muted")
++	check(Routing.desired("Open", false, false, {}, bench3, "Proximity").muted == true, "desired: OFF = muted")
++	check(Routing.desired("Bench", true, false, {}, bench3, "Off").muted == true, "desired: ServerMode Off = muted")
++
++	-- 4. Requests: turning voice off is never rate-limited or dropped
++	check(Routing.exempt("SetVoice", false) == true, "exempt: SetVoice(false)")
++	check(Routing.exempt("SetVoice", true) == false, "exempt: not SetVoice(true)")
++	check(Routing.exempt("Whisper", true) == false and Routing.exempt("Whisper", false) == false, "exempt: not Whisper")
++
++	-- 5. Every write order, from every device state to every target the rules can produce
++	local states = {}
++	for _, muted in ipairs({ false, true }) do
++		for _, allow in ipairs({ false, true }) do
++			for _, list in ipairs(subsets(USERS)) do
++				table.insert(states, { muted = muted, allow = allow, list = list })
++			end
++		end
++	end
++	local targets = {}
++	for _, muted in ipairs({ false, true }) do
++		for _, list in ipairs(subsets(USERS)) do
++			table.insert(targets, { muted = muted, allow = true, list = list })
++		end
++		table.insert(targets, { muted = muted, allow = false, list = {} })
++	end
++	for _, current in ipairs(states) do
++		for _, target in ipairs(targets) do
++			local steps = Routing.plan(current, target)
++			local label = describe(current) .. " -> " .. describe(target)
++			local allowed = intersect(Routing.audience(current, USERS), Routing.audience(target, USERS))
++			local s = current
++			local leaked = nil
++			for i, step in ipairs(steps) do
++				s = applyStep(s, step)
++				if i < #steps and not subsetOf(Routing.audience(s, USERS), allowed) then
++					leaked = string.format("step %d of %d lets %s hear", i, #steps, keys(Routing.audience(s, USERS)))
++					break
++				end
++			end
++			check(leaked == nil, label .. ": " .. tostring(leaked))
++			check(s.muted == target.muted and s.allow == target.allow and Routing.sameList(s.list, target.list),
++				label .. ": ends in " .. describe(s))
++			if current.muted == target.muted and current.allow == target.allow and Routing.sameList(current.list, target.list) then
++				check(#steps == 0, label .. ": no writes when nothing changes")
++			end
++		end
++	end
++
++	local total = passed + failed
++	if failed == 0 then
++		return string.format("PASS %d checks (VoiceRoutingTest)", total)
++	end
++	return string.format("FAIL %d of %d checks (VoiceRoutingTest)\n%s", failed, total, table.concat(notes, "\n"))
++end
++
++return VoiceRoutingTest
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/ClientMain.client.lua b/src/StarterPlayer/StarterPlayerScripts/Client/ClientMain.client.lua
+index bcd49f5526f50da0d3909304681f9b30f0a485b9..024d77c8b6d84f2dbf60523691b50bfa8fa7fdc9 100644
+--- a/src/StarterPlayer/StarterPlayerScripts/Client/ClientMain.client.lua
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/ClientMain.client.lua
+@@ -14,7 +14,7 @@ local ORDER = {
+ 	"SettingsController", "CameraController", "MovementController", "CharacterVisuals",
+ 	"InventoryController", "CombatController", "ViewmodelController", "ProjectileController",
+ 	"AudioController", "ArenaController", "HUDController", "LobbyController",
+-	"NotificationController", "SpectateController",
++	"NotificationController", "SpectateController", "VoiceController",
+ }
+ 
+ local Controllers = {}
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/ClientState.lua b/src/StarterPlayer/StarterPlayerScripts/Client/ClientState.lua
+index 3587aae484decbb373c36d98f03a2a17590dc8dc..44243bb097ed9fc470c1039c2071b353daff7540 100644
+--- a/src/StarterPlayer/StarterPlayerScripts/Client/ClientState.lua
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/ClientState.lua
+@@ -47,6 +47,18 @@ local ClientState = {
+ 	-- SpectateController writes:
+ 	spectating = nil :: Player?,
+ 
++	-- VoiceController writes (Proximity Voice, Config.Voice):
++	voice = {
++		available = false, -- this account can use voice here (Roblox voice on, 13+ and age-checked)
++		connected = false, -- Roblox has made this player's voice device
++		on = false, -- voice is on for you now: your choice this session, else the server's (off until your saved one loads)
++		hold = "", -- why voice is off before you chose: "Loading" (your saved setting is loading) | "NotLoaded" | ""
++		micOn = false, -- Roblox's own mic toggle (AudioDeviceInput.Active)
++		talking = false, -- the player is talking right now
++		channel = "", -- who hears you: "Nearby" | "Stands" | "Whisper" | "Off" | "" (no voice)
++		watching = 0, -- other spectators in the stands' channel
++	},
++
+ 	-- UI writes:
+ 	menuOpen = false, -- true while a menu needs the mouse; gameplay ignores attack input
+ 	settings = {
+@@ -68,6 +80,10 @@ local ClientState = {
+ 		crouchModeTouch = 1, -- touch (CROUCH): Toggle
+ 		padLook = 1, -- controller look speed (x)
+ 		touchLook = 1, -- touch look speed (x)
++		-- Proximity Voice (Config.Voice; SettingsController's VOICE rows, DataService saves them):
++		voiceOn = if (Config.Voice or {}).DefaultOn == false then 0 else 1, -- 0 Off, 1 On (the lobby card's choice)
++		voiceVolume = 1, -- 0..2: other players' voices
++		voiceTips = 0, -- the voice tips' show counters, 2 bits per tip (VoiceController)
+ 	},
+ 
+ 	-- Mirrors of LocalPlayer attributes (kept in sync below):
+@@ -95,6 +111,7 @@ ClientState.slotDenied = Signal.new() -- (slot) an empty slot was pressed (it sh
+ ClientState.settingsChanged = Signal.new() -- (settings)                           UI (via setSettings)
+ ClientState.lifeChanged = Signal.new() -- ()  when inArena / alive / frozen change  (this module)
+ ClientState.spectateChanged = Signal.new() -- (player?)                            SpectateController
++ClientState.voiceChanged = Signal.new() -- (voice)                                 VoiceController
+ 
+ local function syncAttributes()
+ 	local inArena = player:GetAttribute("InArena") == true
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua
+index d968e454daf32e4f3adbee7896793bc10453b649..02696ebe642a9261718008865313e46af069f018 100644
+--- a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/LobbyController.lua
+@@ -12,6 +12,9 @@
+ 	  * SETTINGS opens the menu (SettingsController).
+ 	Shown while you're not in the arena and not spectating.
+ 	Public API (Controllers.LobbyController): setHowToVisible(visible: boolean)
++	  mountCard(card: GuiObject, order: number?)   adds a card to the left column (VoiceController's PROXIMITY VOICE
++	                                               card, order 7: under the buttons); it shows and hides with the
++	                                               lobby, and the column grows to fit it
+ ]]
+ local Players = game:GetService("Players")
+ local ReplicatedStorage = game:GetService("ReplicatedStorage")
+@@ -43,6 +46,8 @@ local spectateAvailable = false
+ local spectateBound = false
+ local visible = nil :: boolean?
+ local howToTouched = false -- the player opened or closed HOW TO PLAY themselves: leave it as they set it
++local mounted: { GuiObject } = {} -- cards other controllers added to the left column (mountCard)
++local brandHeight: number? = nil -- the left column's height as UIBuilder made it
+ 
+ local function settingsController()
+ 	return Controllers and Controllers.SettingsController
+@@ -323,6 +328,34 @@ local function styleButton(button: GuiButton, normal: number, hover: number)
+ 	end)
+ end
+ 
++-- The left column grows by the cards mounted into it, so its bottom-aligned list keeps everything inside it.
++local function fitBrand()
++	local brand = R.brand
++	if not brand or not brandHeight then
++		return
++	end
++	local extra = 0
++	for _, card in ipairs(mounted) do
++		if card.Parent == brand and card.Visible then
++			extra += card.Size.Y.Offset + 8 -- (the column's list padding)
++		end
++	end
++	brand.Size = UDim2.fromOffset(brand.Size.X.Offset, brandHeight + extra)
++end
++
++function LobbyController.mountCard(card: GuiObject, order: number?)
++	card.LayoutOrder = order or 7
++	if not table.find(mounted, card) then
++		table.insert(mounted, card)
++		card:GetPropertyChangedSignal("Size"):Connect(fitBrand)
++		card:GetPropertyChangedSignal("Visible"):Connect(fitBrand)
++	end
++	if R.brand then
++		card.Parent = R.brand
++		fitBrand()
++	end
++end
++
+ function LobbyController.Init(registry)
+ 	Controllers = registry
+ end
+@@ -363,6 +396,11 @@ function LobbyController.Start()
+ 	end
+ 	R.controlRow = root:WaitForChild("Templates"):WaitForChild("ControlRow")
+ 	R.title.Text = Config.GameTitle
++	brandHeight = R.brand.Size.Y.Offset
++	for _, card in ipairs(mounted) do -- cards mounted before the lobby screen was ready
++		card.Parent = R.brand
++	end
++	fitBrand()
+ 
+ 	local bg = R.howTo:FindFirstChild("Bg")
+ 	if bg then
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SettingsController.lua b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SettingsController.lua
+index c6dfe9e3546cd8a68282d3f06a6f4ba9ced8ebab..6711d589d3729990c0e71f939c1dcec0c229ca83 100644
+--- a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SettingsController.lua
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/SettingsController.lua
+@@ -4,7 +4,10 @@
+ 
+ 	* Loads ClientState.settings from the SettingsJson player attribute (DataService) and applies them with
+ 	  ClientState.setSettings; other controllers (camera, audio, movement) react to ClientState.settingsChanged.
+-	* Saves with the SaveSettings remote, debounced (~1 s after the last change).
++	* Saves with the SaveSettings remote, debounced (~1 s after the last change), sending only the keys that changed
++	  (DataService merges them), so an early save can never overwrite saved settings with this client's defaults.
++	  A key changed this session wins over later server copies; every other key still takes the saved value when it
++	  arrives.
+ 	* Menu opens with M / DPadUp / the on-screen button (touch, in the arena) / the lobby SETTINGS button.
+ 	  While it's open ClientState.menuOpen = true and a Modal button frees the mouse in first person.
+ 	  Gamepad: D-pad up/down to move, D-pad left/right to adjust, LB/RB to switch tabs, B to close.
+@@ -18,6 +21,14 @@
+ 	  screen; the floor is 55 (about 86 degrees across on 16:9).
+ 	  Guidance (Off / Auto / Always; default Config.Guidance.Mode) is the help for new players (PlayabilityPlan Q1).
+ 	  Hidden settings (no row) are saved the same way: hintsSeen (Shared.ActionHints' fade counters).
++	  Proximity Voice (Config.Voice.Enabled): a VOICE section (Proximity voice Off / On, Voice volume 0-200%) and an
++	  action row, "Players and muting", that opens VoiceController's panel. The voice rows show only while this account
++	  can use voice (ClientState.voice.available); Voice volume only while VoiceController has a volume of its own.
++	  Moving the Proximity voice row is the player's explicit choice (VoiceController.setOn); Reset leaves it alone.
++	  Hidden: voiceTips (the voice tips' counters).
++	  A def may carry visible = () -> boolean (rows and sections), keepOnReset = true, and onPlayerChange(value) (called
++	  when the player moves that row, never for saved values or set()); an action row ({ action, label, value? }) has
++	  no slider, saves nothing and runs its action when pressed.
+ 
+ 	Public API (Controllers.SettingsController):
+ 	  open(page: "Settings" | "Controls"?)   close()   toggle()   isOpen() -> boolean
+@@ -42,6 +53,7 @@ local Glyphs = require(Shared:WaitForChild("Glyphs"))
+ local Net = require(Shared:WaitForChild("Net"))
+ local Signal = require(Shared:WaitForChild("Signal"))
+ local Sfx = require(Shared:WaitForChild("Sfx"))
++local Config = require(Shared:WaitForChild("Config"))
+ 
+ local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+ 
+@@ -50,6 +62,7 @@ local C = Theme.Colors
+ 
+ local SettingsController = {}
+ SettingsController.menuChanged = Signal.new()
++local Controllers: any = nil
+ 
+ --------------------------------------------------------------------------------------------------------------------
+ -- Data
+@@ -107,6 +120,33 @@ local DEFS = {
+ 	-- saved like the rest, but no row
+ 	{ key = "hintsSeen", hidden = true, min = 0, max = 2 ^ 30 - 1, step = 1, format = tostring },
+ }
++-- Proximity Voice (Config.Voice): its rows show only while this account can use voice (VoiceController publishes it).
++if Config.Voice and Config.Voice.Enabled == true then
++	local function voiceRows(): boolean
++		local voice = ClientState.voice
++		return type(voice) == "table" and voice.available == true
++	end
++	local function voicePlayers(): string
++		local vc = Controllers and Controllers.VoiceController
++		local n = if vc and vc.mutedCount then vc.mutedCount() else 0
++		return if n > 0 then string.format("%d MUTED  ›", n) else "›"
++	end
++	local function volumeRow(): boolean
++		local vc = Controllers and Controllers.VoiceController
++		return voiceRows() and vc ~= nil and vc.hasOwnVolume ~= nil and vc.hasOwnVolume()
++	end
++	local function choose(v: number)
++		local vc = Controllers and Controllers.VoiceController
++		if vc and vc.setOn then
++			vc.setOn(v >= 0.5) -- the player's explicit choice: VoiceController tells the server and saves it
++		end
++	end
++	table.insert(DEFS, { section = "VOICE", visible = voiceRows })
++	table.insert(DEFS, { key = "voiceOn", label = "Proximity voice", min = 0, max = 1, step = 1, format = words({ "Off", "On" }), visible = voiceRows, keepOnReset = true, onPlayerChange = choose })
++	table.insert(DEFS, { key = "voiceVolume", label = "Voice volume", min = 0, max = 2, step = 0.05, format = percent, visible = volumeRow })
++	table.insert(DEFS, { action = "VoicePlayers", label = "Players and muting", value = voicePlayers, visible = voiceRows })
++	table.insert(DEFS, { key = "voiceTips", hidden = true, min = 0, max = 255, step = 1, format = tostring })
++end
+ SettingsController.DEFS = DEFS
+ 
+ local DEF_BY_KEY: { [string]: any } = {}
+@@ -232,7 +272,8 @@ end
+ --------------------------------------------------------------------------------------------------------------------
+ -- Settings values
+ --------------------------------------------------------------------------------------------------------------------
+-local localDirty = false -- the player changed something this session; later server copies don't override it
++local changedKeys: { [string]: boolean } = {} -- keys changed this session: later server copies don't override them
++local unsentKeys: { [string]: boolean } = {} -- keys changed since the last save
+ local saveToken = 0
+ 
+ local function quantize(def, value: number): number
+@@ -254,29 +295,41 @@ local function currentValue(def): number
+ 	return math.clamp(v, def.min, def.max)
+ end
+ 
+-local function snapshot(): { [string]: number }
++-- Only the keys that changed since the last save: DataService merges them into the stored settings, so a save made
++-- before the saved copy arrived can't overwrite the other keys with this client's defaults.
++local function changedValues(): { [string]: number }
+ 	local out = {}
+-	for _, def in ipairs(DEFS) do
+-		if def.key then
+-			out[def.key] = currentValue(def)
++	for key in pairs(unsentKeys) do
++		local def = DEF_BY_KEY[key]
++		if def then
++			out[key] = currentValue(def)
+ 		end
+ 	end
+ 	return out
+ end
+ 
+-local function scheduleSave()
+-	localDirty = true
++local function scheduleSave(key: string)
++	changedKeys[key] = true
++	unsentKeys[key] = true
+ 	saveToken += 1
+ 	local token = saveToken
+ 	task.delay(1, function()
+ 		if token ~= saveToken then
+ 			return
+ 		end
++		local values = changedValues()
++		table.clear(unsentKeys)
++		if next(values) == nil then
++			return
++		end
+ 		local ok, err = pcall(function()
+-			Net.event("SaveSettings"):FireServer(snapshot())
++			Net.event("SaveSettings"):FireServer(values)
+ 		end)
+ 		if not ok then
+ 			warn("[SettingsController] Couldn't save settings: " .. tostring(err))
++			for k in pairs(values) do
++				unsentKeys[k] = true -- sent with the next change
++			end
+ 		end
+ 	end)
+ end
+@@ -306,7 +359,7 @@ function SettingsController.set(key: string, value: number)
+ 	local q = quantize(def, value)
+ 	if ClientState.settings[key] ~= q then
+ 		ClientState.setSettings({ [key] = q })
+-		scheduleSave()
++		scheduleSave(key)
+ 	end
+ end
+ 
+@@ -324,6 +377,7 @@ local gui: ScreenGui? = nil
+ local refs: { [string]: any } = {}
+ local rows: { [string]: any } = {}
+ local rowOrder: { any } = {}
++local extraRows: { any } = {} -- sections and action rows that have a visible() rule
+ local isOpen = false
+ local currentPage = "Settings"
+ local controlsDevice: string? = nil
+@@ -347,7 +401,11 @@ local function refreshRows()
+ end
+ 
+ local function rowShown(entry): boolean
+-	return entry.def.device == nil or entry.def.device == Input.device()
++	local def = entry.def
++	if def.visible and not def.visible() then
++		return false
++	end
++	return def.device == nil or def.device == Input.device()
+ end
+ 
+ -- Rows for another device hide; a gamepad selection on a hidden row moves to the first shown one.
+@@ -358,6 +416,15 @@ local function refreshRowVisibility()
+ 			entry.row.Visible = on
+ 		end
+ 	end
++	for _, entry in ipairs(extraRows) do -- sections and action rows (no slider)
++		local on = rowShown(entry)
++		if entry.row.Visible ~= on then
++			entry.row.Visible = on
++		end
++		if entry.value and entry.def.value then
++			entry.value.Text = entry.def.value()
++		end
++	end
+ 	local selected = GuiService.SelectedObject
+ 	if selected and gui and selected:IsDescendantOf(gui) and not selected.Visible then
+ 		for _, entry in ipairs(rowOrder) do
+@@ -373,18 +440,19 @@ local function setValue(entry, value: number, tick: boolean?)
+ 	local q = quantize(entry.def, value)
+ 	if ClientState.settings[entry.def.key] ~= q then
+ 		ClientState.setSettings({ [entry.def.key] = q })
+-		scheduleSave()
++		scheduleSave(entry.def.key)
+ 		if tick then
+ 			Sfx.play("UIHover")
+ 		end
++		local onPlayerChange = entry.def.onPlayerChange
++		if type(onPlayerChange) == "function" then
++			task.spawn(onPlayerChange, q) -- the player moved this row (Proximity voice: their explicit choice)
++		end
+ 	end
+ 	paintRow(entry)
+ end
+ 
+ local function applyAttribute()
+-	if localDirty then
+-		return
+-	end
+ 	local json = player:GetAttribute("SettingsJson")
+ 	if type(json) ~= "string" or json == "" then
+ 		return
+@@ -396,6 +464,9 @@ local function applyAttribute()
+ 		return
+ 	end
+ 	local values = sanitize(decoded)
++	for key in pairs(changedKeys) do
++		values[key] = nil -- changed this session: the local value is newer than any server copy
++	end
+ 	if next(values) ~= nil then
+ 		ClientState.setSettings(values)
+ 		refreshRows()
+@@ -614,6 +685,16 @@ bindMenuKeys = function()
+ 	end
+ end
+ 
++-- Action rows (no slider): what they open.
++local function runAction(action: string)
++	if action == "VoicePlayers" then
++		local vc = Controllers and Controllers.VoiceController
++		if vc and vc.openPanel then
++			vc.openPanel() -- closes this menu and opens the VOICE panel
++		end
++	end
++end
++
+ local function buildRows()
+ 	local list = refs.settingsPage
+ 	local templates = refs.templates
+@@ -624,6 +705,31 @@ local function buildRows()
+ 			section.Text = def.section
+ 			section.LayoutOrder = i
+ 			section.Parent = list
++			if def.visible then
++				table.insert(extraRows, { row = section, def = def })
++			end
++		elseif def.action then
++			-- an action row: the slider row without its track; the value says where it leads
++			local row = templates.SliderRow:Clone()
++			row.Name = def.action
++			row.LayoutOrder = i
++			row.Size = UDim2.new(1, 0, 0, 44)
++			row.Label.Text = def.label
++			row.Track.Visible = false
++			row.Value.Text = if def.value then def.value() else "›"
++			row.SelectionImageObject = templates.Selection
++			row.Parent = list
++			local entry = { row = row, def = def, value = row.Value }
++			table.insert(extraRows, entry)
++			table.insert(rowOrder, entry)
++			styleButton(row, function(on)
++				Theme.tween(row, Theme.Tween.Fast, { BackgroundTransparency = if on then 0.62 else 1 })
++				entry.value.TextColor3 = if on then C.Text else C.TextDim
++			end)
++			row.Activated:Connect(function()
++				Sfx.play("UIClick")
++				runAction(def.action)
++			end)
+ 		elseif not def.hidden then
+ 			local row = templates.SliderRow:Clone()
+ 			row.Name = def.key
+@@ -756,12 +862,15 @@ local function wire()
+ 	click(refs.reset, function()
+ 		local values = {}
+ 		for _, def in ipairs(DEFS) do
+-			if def.key and not def.hidden then -- progress (hintsSeen) is not a preference: keep it
++			-- progress (hintsSeen) is not a preference: keep it; nor is a privacy choice (Proximity voice: keepOnReset)
++			if def.key and not def.hidden and not def.keepOnReset then
+ 				values[def.key] = quantize(def, DEFAULTS[def.key] or def.min)
+ 			end
+ 		end
+ 		ClientState.setSettings(values)
+-		scheduleSave()
++		for key in pairs(values) do
++			scheduleSave(key)
++		end
+ 		refreshRows()
+ 	end)
+ 	styleButton(refs.reset, function(on)
+@@ -790,7 +899,8 @@ end
+ --------------------------------------------------------------------------------------------------------------------
+ -- Lifecycle
+ --------------------------------------------------------------------------------------------------------------------
+-function SettingsController.Init(_registry)
++function SettingsController.Init(registry)
++	Controllers = registry
+ 	-- apply saved settings as early as possible so other controllers start with them
+ 	applyAttribute()
+ end
+@@ -800,6 +910,9 @@ function SettingsController.Start()
+ 	ClientState.lifeChanged:Connect(updateLauncher)
+ 	ClientState.spectateChanged:Connect(updateLauncher)
+ 	ClientState.settingsChanged:Connect(applyControls)
++	if ClientState.voiceChanged then
++		ClientState.voiceChanged:Connect(refreshRowVisibility) -- the VOICE rows appear once voice is known to work here
++	end
+ 	applyControls()
+ 	bindMenuKeys()
+ 
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Curves.lua b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Curves.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..020906262e41c8198d38b4fdd245644d35620110
+--- /dev/null
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Curves.lua
+@@ -0,0 +1,51 @@
++--[[
++	Curves - Proximity Voice distance curves (VoiceController). A profile { Full, Silent, Shape } from Config.Voice.Profiles
++	becomes the { [studs] = volume } table that AudioListener:SetDistanceAttenuation / AudioEmitter:SetDistanceAttenuation
++	take: full volume up to Full, nothing from Silent on, and between them the inverse law raised to Shape (1 = realistic,
++	lower = flatter) times a taper that reaches 0 at Silent. The engine draws straight lines between points and holds the
++	end values (at most 400 points; we send about 50).
++	  Curves.build(profile) -> { [number]: number }
++	  Curves.value(profile, distance) -> number    the same curve, evaluated (UI and fallbacks)
++	  Curves.FLAT                                   { [0] = 1 }: no falloff (put on emitters, so the listener's curve rules)
++	Arena (8 / 90 / 0.8): 16 studs -5 dB, 32 -10 dB, 48 -15 dB, 64 -20 dB, 80 -29 dB, silent at 90 (~30 m).
++]]
++local Curves = {}
++
++Curves.FLAT = { [0] = 1 }
++
++local STEPS = 48
++
++local function params(profile: { [string]: any }?): (number, number, number)
++	local p = profile or {}
++	local full = math.max(0, tonumber(p.Full) or 8)
++	local silent = math.max(full + 1, tonumber(p.Silent) or 90)
++	local shape = math.clamp(tonumber(p.Shape) or 1, 0.1, 2)
++	return full, silent, shape
++end
++
++function Curves.value(profile: { [string]: any }?, distance: number): number
++	local full, silent, shape = params(profile)
++	if distance <= full then
++		return 1
++	end
++	if distance >= silent then
++		return 0
++	end
++	local inverse = (math.max(full, 1) / distance) ^ shape
++	local t = (distance - full) / (silent - full)
++	return math.clamp(inverse * (1 - t * t), 0, 1)
++end
++
++function Curves.build(profile: { [string]: any }?): { [number]: number }
++	local full, silent = params(profile)
++	local points: { [number]: number } = { [0] = 1 }
++	points[full] = 1
++	for i = 1, STEPS - 1 do
++		local d = math.floor((full + (silent - full) * i / STEPS) * 100 + 0.5) / 100
++		points[d] = math.floor(Curves.value(profile, d) * 1000 + 0.5) / 1000
++	end
++	points[silent] = 0
++	return points
++end
++
++return Curves
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Hud.lua b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Hud.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..9df5a0bee68f867ac18bc8f48f60fdf9d010645e
+--- /dev/null
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/Hud.lua
+@@ -0,0 +1,783 @@
++--[[
++	Hud - the Proximity Voice UI (VoiceController builds and drives it). Built at runtime from Theme tokens, the way
++	Shared.Input builds its touch buttons, so nothing has to be added to StarterGui. (Move it into
++	ServerStorage.WorldGen.UIBuilder later if you prefer edit-time UI; the instance names below are the contract.)
++	  ScreenGui "Voice" (DisplayOrder 13): Root > Stack = the mic chip (who can hear you, a light while you talk) over
++	    who's talking near you (up to Config.Voice.MaxTalkers rows, 3 on phones). Left middle on desktop, top right on
++	    touch. Shown in the arena and while spectating; the lobby has the card instead.
++	  Frame "VoiceCard": the lobby card. The mode (PROXIMITY VOICE, ON / OFF), what it means in one line, PLAYERS ›, and
++	    VOICE-ONLY SERVER › / LEAVE when phase 2 is on. LobbyController.mountCard puts it in the lobby's left column.
++	  ScreenGui "VoicePanel" (DisplayOrder 41, over the Menu): your voice on / off, every other player with voice on
++	    this server with MUTE and BLOCK (a player you blocked on Roblox reads BLOCKED), and where to report.
++	    B / Backspace / the dimmed backdrop close it.
++	Text is never below 13 px (Theme).
++	API: build(handlers)  applyLayout()  setStackVisible(on)  setChip(text, talking, dim)  setTalkers(rows)  animate(dt)
++	     getCard()  setCard(state)  openPanel()  closePanel()  isPanelOpen()  setPanel(state)
++	handlers: onToggle(), onOpenPanel(), onClosePanel(), onMute(player, muted), onBlock(player), onServer("Join" | "Leave")
++]]
++local GuiService = game:GetService("GuiService")
++local Players = game:GetService("Players")
++local ReplicatedStorage = game:GetService("ReplicatedStorage")
++local UserInputService = game:GetService("UserInputService")
++
++local Shared = ReplicatedStorage:WaitForChild("Shared")
++local Config = require(Shared:WaitForChild("Config"))
++local Theme = require(Shared:WaitForChild("Theme"))
++local Input = require(Shared:WaitForChild("Input"))
++local Sfx = require(Shared:WaitForChild("Sfx"))
++
++local player = Players.LocalPlayer
++local C = Theme.Colors
++local VoiceCfg = Config.Voice or {}
++local ROW_POOL = math.clamp(math.floor(tonumber(VoiceCfg.MaxTalkers) or 4), 1, 6)
++
++local Hud = {}
++
++local handlers: { [string]: any } = {}
++local R: { [string]: any } = {}
++local rows: { any } = {} -- talker rows, pooled
++local rowLevels: { number } = {}
++local panelRows: { [Player]: any } = {}
++local panelOpen = false
++local maxRows = ROW_POOL
++local dotLit = false
++local wobble = 0
++
++local function call(name: string, ...: any)
++	local fn = handlers[name]
++	if type(fn) == "function" then
++		task.spawn(fn, ...)
++	end
++end
++
++------------------------------------------------------------------------------------------------
++-- Construction helpers (the same shapes as UIBuilder's)
++------------------------------------------------------------------------------------------------
++local function new(className: string, props: { [string]: any }?, children: { Instance }?): any
++	local inst = Instance.new(className)
++	local parent: Instance? = nil
++	if props then
++		for key, value in pairs(props) do
++			if key == "Parent" then
++				parent = value
++			else
++				(inst :: any)[key] = value
++			end
++		end
++	end
++	if children then
++		for _, child in ipairs(children) do
++			child.Parent = inst
++		end
++	end
++	if parent then
++		inst.Parent = parent
++	end
++	return inst
++end
++
++local function frame(name: string, props: { [string]: any }?, children: { Instance }?): any
++	local p = props or {}
++	p.Name = name
++	if p.BackgroundTransparency == nil then
++		p.BackgroundTransparency = 1
++	end
++	p.BorderSizePixel = 0
++	return new("Frame", p, children)
++end
++
++local function label(name: string, text: string, fontKey: string, size: number, props: { [string]: any }?): any
++	local p = props or {}
++	p.Name = name
++	p.Text = text
++	p.FontFace = Theme.Fonts[fontKey] or Theme.Fonts.Body
++	p.TextSize = math.max(Theme.TextSize.Small, size)
++	if p.TextColor3 == nil then
++		p.TextColor3 = C.Text
++	end
++	if p.BackgroundTransparency == nil then
++		p.BackgroundTransparency = 1
++	end
++	p.BorderSizePixel = 0
++	if p.TextXAlignment == nil then
++		p.TextXAlignment = Enum.TextXAlignment.Left
++	end
++	return new("TextLabel", p)
++end
++
++local function button(name: string, text: string, fontKey: string, size: number, props: { [string]: any }?, children: { Instance }?): any
++	local p = props or {}
++	p.Name = name
++	p.Text = text
++	p.FontFace = Theme.Fonts[fontKey] or Theme.Fonts.Heading
++	p.TextSize = math.max(Theme.TextSize.Small, size)
++	if p.TextColor3 == nil then
++		p.TextColor3 = C.Text
++	end
++	if p.BackgroundColor3 == nil then
++		p.BackgroundColor3 = C.Panel
++	end
++	if p.BackgroundTransparency == nil then
++		p.BackgroundTransparency = Theme.Transparency.Panel
++	end
++	p.BorderSizePixel = 0
++	p.AutoButtonColor = false
++	return new("TextButton", p, children)
++end
++
++local function corner(radius: UDim?): UICorner
++	return new("UICorner", { CornerRadius = radius or Theme.Corner })
++end
++
++local function stroke(transparency: number?): UIStroke
++	return new("UIStroke", {
++		Color = C.Stroke,
++		Transparency = transparency or Theme.Transparency.Stroke,
++		Thickness = 1,
++		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
++	})
++end
++
++local function padding(left: number, right: number?, top: number?, bottom: number?): UIPadding
++	return new("UIPadding", {
++		Name = "Pad",
++		PaddingLeft = UDim.new(0, left),
++		PaddingRight = UDim.new(0, right or left),
++		PaddingTop = UDim.new(0, top or 0),
++		PaddingBottom = UDim.new(0, bottom or top or 0),
++	})
++end
++
++local function list(direction: Enum.FillDirection, gap: number?, h: Enum.HorizontalAlignment?, v: Enum.VerticalAlignment?): UIListLayout
++	return new("UIListLayout", {
++		Name = "Layout",
++		FillDirection = direction,
++		Padding = UDim.new(0, gap or 0),
++		HorizontalAlignment = h or Enum.HorizontalAlignment.Left,
++		VerticalAlignment = v or Enum.VerticalAlignment.Top,
++		SortOrder = Enum.SortOrder.LayoutOrder,
++	})
++end
++
++-- A ScreenGui with Root > Scale + SafePad, kept fitted by Theme.bindRoot like every other screen.
++local function screen(name: string, displayOrder: number): (ScreenGui, Frame)
++	local playerGui = player:WaitForChild("PlayerGui")
++	local old = playerGui:FindFirstChild(name)
++	if old then
++		old:Destroy()
++	end
++	local gui = Instance.new("ScreenGui")
++	gui.Name = name
++	gui.ResetOnSpawn = false
++	gui.DisplayOrder = displayOrder
++	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
++	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
++	gui.Enabled = true
++	local root = frame("Root", { Size = UDim2.fromScale(1, 1), ZIndex = 2 })
++	new("UIScale", { Name = "Scale", Scale = 1, Parent = root })
++	local pad = padding(16, 16, 16, 16)
++	pad.Name = "SafePad"
++	pad.Parent = root
++	root.Parent = gui
++	gui.Parent = playerGui
++	Theme.bindRoot(gui)
++	return gui, root
++end
++
++local function hover(b: GuiButton, normal: number, over: number)
++	local hovered, selected = false, false
++	local function apply()
++		Theme.tween(b, Theme.Tween.Fast, { BackgroundTransparency = if hovered or selected then over else normal })
++	end
++	b.MouseEnter:Connect(function()
++		hovered = true
++		apply()
++		if not Input.isTouch() then
++			Sfx.play("UIHover")
++		end
++	end)
++	b.MouseLeave:Connect(function()
++		hovered = false
++		apply()
++	end)
++	b.SelectionGained:Connect(function()
++		selected = true
++		apply()
++	end)
++	b.SelectionLost:Connect(function()
++		selected = false
++		apply()
++	end)
++end
++
++local function click(b: GuiButton, name: string, ...: any)
++	local args = table.pack(...)
++	b.Activated:Connect(function()
++		Sfx.play("UIClick")
++		call(name, table.unpack(args, 1, args.n))
++	end)
++end
++
++local function styleToggle(b: TextButton, on: boolean)
++	b.Text = if on then "ON" else "OFF"
++	b.BackgroundColor3 = if on then C.Accent else C.PanelLight
++	b.BackgroundTransparency = if on then 0.05 else 0.4
++	b.TextColor3 = if on then C.TextDark else C.Text
++end
++
++------------------------------------------------------------------------------------------------
++-- The stack: mic chip + who's talking
++------------------------------------------------------------------------------------------------
++local function buildStack()
++	local _, root = screen("Voice", 13)
++	local stack = frame("Stack", {
++		Size = UDim2.fromOffset(240, 0),
++		AutomaticSize = Enum.AutomaticSize.Y,
++		Visible = false,
++		Parent = root,
++	})
++	local layout = list(Enum.FillDirection.Vertical, 6, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top)
++	layout.Parent = stack
++	R.stack, R.stackLayout = stack, layout
++
++	local chip = frame("Chip", {
++		Size = UDim2.fromOffset(0, 28),
++		AutomaticSize = Enum.AutomaticSize.X,
++		BackgroundColor3 = C.Panel,
++		BackgroundTransparency = Theme.Transparency.Panel,
++		LayoutOrder = 0,
++		Parent = stack,
++	}, {
++		corner(Theme.CornerPill),
++		stroke(),
++		padding(10, 12, 0, 0),
++		list(Enum.FillDirection.Horizontal, 8, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center),
++	})
++	R.dot = frame("Dot", { Size = UDim2.fromOffset(8, 8), BackgroundColor3 = C.Text, BackgroundTransparency = 0.7, LayoutOrder = 1, Parent = chip }, {
++		corner(Theme.CornerPill),
++	})
++	R.chipLabel = label("Label", "VOICE", "Heading", 13, { Size = UDim2.fromScale(0, 1), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = 2, Parent = chip })
++	R.chip = chip
++
++	for i = 1, ROW_POOL do
++		local row = frame("Talker" .. i, {
++			Size = UDim2.fromOffset(0, 26),
++			AutomaticSize = Enum.AutomaticSize.X,
++			BackgroundColor3 = C.Panel,
++			BackgroundTransparency = 0.45,
++			LayoutOrder = i,
++			Visible = false,
++			Parent = stack,
++		}, {
++			corner(Theme.CornerPill),
++			padding(10, 12, 0, 0),
++			list(Enum.FillDirection.Horizontal, 8, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center),
++			new("UISizeConstraint", { MaxSize = Vector2.new(230, 26) }),
++		})
++		local bars = frame("Bars", { Size = UDim2.fromOffset(13, 12), LayoutOrder = 1, Parent = row })
++		for b = 1, 3 do
++			frame("Bar" .. b, {
++				AnchorPoint = Vector2.new(0, 1),
++				Position = UDim2.new(0, (b - 1) * 5, 1, 0),
++				Size = UDim2.new(0, 3, 0.3, 0),
++				BackgroundColor3 = C.Text,
++				BackgroundTransparency = 0.1,
++				Parent = bars,
++			}, { corner(Theme.CornerPill) })
++		end
++		label("Who", "", "Body", 14, {
++			Size = UDim2.fromScale(0, 1),
++			AutomaticSize = Enum.AutomaticSize.X,
++			TextTruncate = Enum.TextTruncate.AtEnd,
++			LayoutOrder = 2,
++			Parent = row,
++		})
++		label("Tag", "", "Heading", 13, {
++			Size = UDim2.fromScale(0, 1),
++			AutomaticSize = Enum.AutomaticSize.X,
++			TextColor3 = C.TextDim,
++			LayoutOrder = 3,
++			Visible = false,
++			Parent = row,
++		})
++		rows[i] = row
++		rowLevels[i] = 0
++	end
++end
++
++------------------------------------------------------------------------------------------------
++-- The lobby card
++------------------------------------------------------------------------------------------------
++-- Three rows: the header with the ON / OFF toggle; what the mode means (two lines); the links (VOICE-ONLY SERVER › at
++-- the left, PLAYERS › at the right). Without links (voice not on this account) the card is shorter.
++local CARD_TALL, CARD_SHORT = 96, 70
++
++local function buildCard()
++	local card = frame("VoiceCard", {
++		Size = UDim2.new(1, 0, 0, CARD_SHORT),
++		BackgroundColor3 = C.Panel,
++		BackgroundTransparency = Theme.Transparency.Panel,
++	}, { corner(Theme.Corner), stroke() })
++	R.cardHeader = label("Header", "PROXIMITY VOICE", "Heading", 13, {
++		Position = UDim2.fromOffset(14, 10),
++		Size = UDim2.new(1, -104, 0, 15),
++		TextColor3 = C.TextDim,
++		Parent = card,
++	})
++	R.cardText = label("State", "", "Body", 13, {
++		Position = UDim2.fromOffset(14, 31),
++		Size = UDim2.new(1, -28, 0, 34),
++		TextWrapped = true,
++		TextYAlignment = Enum.TextYAlignment.Top,
++		Parent = card,
++	})
++	R.cardToggle = button("Toggle", "ON", "Heading", 13, {
++		AnchorPoint = Vector2.new(1, 0),
++		Position = UDim2.new(1, -12, 0, 6),
++		Size = UDim2.fromOffset(64, 24),
++		Visible = false,
++		Parent = card,
++	}, { corner(Theme.CornerPill), stroke(0.7) })
++	R.cardPlayers = button("Players", "PLAYERS ›", "Heading", 13, {
++		AnchorPoint = Vector2.new(1, 1),
++		Position = UDim2.new(1, -12, 1, -8),
++		Size = UDim2.fromOffset(0, 22),
++		AutomaticSize = Enum.AutomaticSize.X,
++		BackgroundTransparency = 1,
++		TextColor3 = C.AccentSoft,
++		Visible = false,
++		Parent = card,
++	})
++	R.cardServer = button("Server", "VOICE-ONLY SERVER ›", "Heading", 13, {
++		AnchorPoint = Vector2.new(0, 1),
++		Position = UDim2.new(0, 14, 1, -8),
++		Size = UDim2.fromOffset(0, 22),
++		AutomaticSize = Enum.AutomaticSize.X,
++		BackgroundTransparency = 1,
++		TextColor3 = C.AccentSoft,
++		Visible = false,
++		Parent = card,
++	})
++	click(R.cardToggle, "onToggle")
++	click(R.cardPlayers, "onOpenPanel")
++	R.cardServer.Activated:Connect(function()
++		Sfx.play("UIClick")
++		call("onServer", R.cardServer:GetAttribute("Action") or "Join")
++	end)
++	R.card = card
++end
++
++------------------------------------------------------------------------------------------------
++-- The players panel
++------------------------------------------------------------------------------------------------
++local function buildPanel()
++	local gui, root = screen("VoicePanel", 41)
++	R.panelGui = gui
++	R.dim = button("Dim", "", "Body", 13, {
++		Position = UDim2.fromOffset(-240, -240),
++		Size = UDim2.new(1, 480, 1, 480),
++		BackgroundColor3 = Color3.new(0, 0, 0),
++		BackgroundTransparency = 1,
++		Modal = true, -- frees the mouse in first person, like the Menu
++		Selectable = false,
++		Visible = false,
++		ZIndex = 1,
++		Parent = gui,
++	})
++	local panel = new("CanvasGroup", {
++		Name = "Panel",
++		AnchorPoint = Vector2.new(0.5, 0.5),
++		Position = UDim2.fromScale(0.5, 0.5),
++		Size = UDim2.new(1, -24, 1, -24),
++		BackgroundTransparency = 1,
++		BorderSizePixel = 0,
++		GroupTransparency = 1,
++		Visible = false,
++		ZIndex = 2,
++		Parent = root,
++	}, { new("UISizeConstraint", { MaxSize = Vector2.new(440, 480) }) })
++	frame("Bg", {
++		Position = UDim2.fromOffset(1, 1),
++		Size = UDim2.new(1, -2, 1, -2),
++		BackgroundColor3 = C.Panel,
++		BackgroundTransparency = 0.08,
++		Active = true,
++		ZIndex = 1,
++		Parent = panel,
++	}, { corner(Theme.CornerLarge), stroke(0.84) })
++	label("Title", "VOICE", "Heading", 18, { Position = UDim2.fromOffset(20, 0), Size = UDim2.new(1, -80, 0, 50), ZIndex = 2, Parent = panel })
++	R.close = button("Close", "×", "Body", 24, {
++		AnchorPoint = Vector2.new(1, 0),
++		Position = UDim2.new(1, -10, 0, 5),
++		Size = UDim2.fromOffset(40, 40),
++		BackgroundColor3 = C.PanelLight,
++		BackgroundTransparency = 1,
++		ZIndex = 2,
++		Parent = panel,
++	}, { corner(Theme.CornerPill) })
++	frame("Divider", { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = C.Text, BackgroundTransparency = 0.9, ZIndex = 2, Parent = panel })
++
++	label("YouHeader", "YOU", "Heading", 13, { Position = UDim2.fromOffset(20, 62), Size = UDim2.new(1, -130, 0, 15), TextColor3 = C.TextDim, ZIndex = 2, Parent = panel })
++	R.youText = label("YouText", "", "Body", 14, {
++		Position = UDim2.fromOffset(20, 80),
++		Size = UDim2.new(1, -130, 0, 38),
++		TextWrapped = true,
++		TextYAlignment = Enum.TextYAlignment.Top,
++		ZIndex = 2,
++		Parent = panel,
++	})
++	R.youToggle = button("YouToggle", "ON", "Heading", 13, {
++		AnchorPoint = Vector2.new(1, 0),
++		Position = UDim2.new(1, -20, 0, 64),
++		Size = UDim2.fromOffset(76, 30),
++		ZIndex = 2,
++		Parent = panel,
++	}, { corner(Theme.CornerPill), stroke(0.7) })
++	frame("Divider2", { Position = UDim2.fromOffset(20, 128), Size = UDim2.new(1, -40, 0, 1), BackgroundColor3 = C.Text, BackgroundTransparency = 0.9, ZIndex = 2, Parent = panel })
++
++	R.listHeader = label("ListHeader", "PLAYERS WITH VOICE", "Heading", 13, { Position = UDim2.fromOffset(20, 138), Size = UDim2.new(1, -40, 0, 15), TextColor3 = C.TextDim, ZIndex = 2, Parent = panel })
++	R.list = new("ScrollingFrame", {
++		Name = "List",
++		Position = UDim2.fromOffset(0, 158),
++		Size = UDim2.new(1, 0, 1, -158 - 72),
++		BackgroundTransparency = 1,
++		BorderSizePixel = 0,
++		CanvasSize = UDim2.new(),
++		AutomaticCanvasSize = Enum.AutomaticSize.Y,
++		ScrollingDirection = Enum.ScrollingDirection.Y,
++		ScrollBarThickness = 3,
++		ScrollBarImageColor3 = C.Text,
++		ScrollBarImageTransparency = 0.7,
++		Selectable = false,
++		ZIndex = 2,
++		Parent = panel,
++	}, {
++		padding(20, 20, 4, 8),
++		list(Enum.FillDirection.Vertical, 4, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top),
++	})
++	R.empty = label("Empty", "Nobody else here has voice right now.", "Body", 14, {
++		Position = UDim2.fromOffset(20, 164),
++		Size = UDim2.new(1, -40, 0, 20),
++		TextColor3 = C.TextDim,
++		Visible = false,
++		ZIndex = 2,
++		Parent = panel,
++	})
++	frame("Divider3", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, -70), Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = C.Text, BackgroundTransparency = 0.9, ZIndex = 2, Parent = panel })
++	label("Footer", "Mutes last while you're on this server. Roblox only connects voice between players of similar ages. "
++		.. "To report someone, open Roblox's menu (Esc) › Report.", "Body", 13, {
++		AnchorPoint = Vector2.new(0, 1),
++		Position = UDim2.new(0, 20, 1, -10),
++		Size = UDim2.new(1, -40, 0, 54),
++		TextWrapped = true,
++		TextColor3 = C.TextDim,
++		ZIndex = 2,
++		Parent = panel,
++	})
++	R.panel = panel
++
++	click(R.youToggle, "onToggle")
++	click(R.close, "onClosePanel")
++	R.dim.Activated:Connect(function()
++		call("onClosePanel")
++	end)
++	R.close.MouseEnter:Connect(function()
++		Theme.tween(R.close, Theme.Tween.Fast, { BackgroundTransparency = 0.5 })
++	end)
++	R.close.MouseLeave:Connect(function()
++		Theme.tween(R.close, Theme.Tween.Fast, { BackgroundTransparency = 1 })
++	end)
++end
++
++local function panelRow(p: Player): any
++	local row = frame("P" .. p.UserId, {
++		Size = UDim2.new(1, 0, 0, 46),
++		BackgroundColor3 = C.PanelLight,
++		BackgroundTransparency = 0.7,
++		ZIndex = 2,
++	}, { corner(Theme.Corner) })
++	frame("Talking", {
++		AnchorPoint = Vector2.new(0, 0.5),
++		Position = UDim2.new(0, 10, 0.5, 0),
++		Size = UDim2.fromOffset(6, 6),
++		BackgroundColor3 = C.Text,
++		BackgroundTransparency = 0.85,
++		ZIndex = 3,
++		Parent = row,
++	}, { corner(Theme.CornerPill) })
++	label("Who", p.DisplayName, "BodyBold", 15, {
++		Position = UDim2.fromOffset(24, 5),
++		Size = UDim2.new(1, -196, 0, 20),
++		TextTruncate = Enum.TextTruncate.AtEnd,
++		ZIndex = 3,
++		Parent = row,
++	})
++	label("User", "@" .. p.Name, "Body", 13, {
++		Position = UDim2.fromOffset(24, 25),
++		Size = UDim2.new(1, -196, 0, 16),
++		TextColor3 = C.TextDim,
++		TextTruncate = Enum.TextTruncate.AtEnd,
++		ZIndex = 3,
++		Parent = row,
++	})
++	local mute = button("Mute", "MUTE", "Heading", 13, {
++		AnchorPoint = Vector2.new(1, 0.5),
++		Position = UDim2.new(1, -86, 0.5, 0),
++		Size = UDim2.fromOffset(84, 30),
++		BackgroundColor3 = C.PanelLight,
++		BackgroundTransparency = 0.4,
++		ZIndex = 3,
++		Parent = row,
++	}, { corner(Theme.CornerPill), stroke(0.8) })
++	local block = button("Block", "BLOCK", "Heading", 13, {
++		AnchorPoint = Vector2.new(1, 0.5),
++		Position = UDim2.new(1, -8, 0.5, 0),
++		Size = UDim2.fromOffset(72, 30),
++		BackgroundColor3 = C.PanelLight,
++		BackgroundTransparency = 0.6,
++		ZIndex = 3,
++		Parent = row,
++	}, { corner(Theme.CornerPill), stroke(0.85) })
++	mute.Activated:Connect(function()
++		if row:GetAttribute("Blocked") == true then
++			return -- blocked on Roblox: silent anyway (unblock them in Roblox's menu)
++		end
++		Sfx.play("UIClick")
++		call("onMute", p, row:GetAttribute("Muted") ~= true)
++	end)
++	block.Activated:Connect(function()
++		if row:GetAttribute("Blocked") == true then
++			return
++		end
++		Sfx.play("UIClick")
++		call("onBlock", p)
++	end)
++	hover(mute, 0.4, 0.15)
++	hover(block, 0.6, 0.3)
++	return row
++end
++
++------------------------------------------------------------------------------------------------
++-- Public
++------------------------------------------------------------------------------------------------
++function Hud.build(h: { [string]: any })
++	handlers = h or {}
++	buildStack()
++	buildCard()
++	buildPanel()
++	Hud.applyLayout()
++end
++
++-- Desktop: left middle (clear of the vitals at the bottom left and the kill feed at the top right).
++-- Touch: top right, left of the DROP button's column (the vitals and kill feed sit at the top left there).
++function Hud.applyLayout()
++	if not R.stack then
++		return
++	end
++	local touch = UserInputService.TouchEnabled
++	local phone = touch and Theme.isSmallScreen()
++	maxRows = if phone then math.min(3, ROW_POOL) else ROW_POOL
++	if touch then
++		R.stack.AnchorPoint = Vector2.new(1, 0)
++		R.stack.Position = UDim2.new(1, -66, 0, 0)
++		R.stackLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
++	else
++		R.stack.AnchorPoint = Vector2.new(0, 0.5)
++		R.stack.Position = UDim2.fromScale(0, 0.5)
++		R.stackLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
++	end
++end
++
++function Hud.setStackVisible(on: boolean)
++	if R.stack and R.stack.Visible ~= on then
++		R.stack.Visible = on
++	end
++end
++
++function Hud.setChip(text: string, talking: boolean, dim: boolean)
++	if not R.chip then
++		return
++	end
++	if R.chipLabel.Text ~= text then
++		R.chipLabel.Text = text
++	end
++	R.chipLabel.TextColor3 = if dim then C.TextDim else C.Text
++	if talking ~= dotLit then
++		dotLit = talking
++		Theme.tween(R.dot, Theme.Tween.Fast, { BackgroundTransparency = if talking then 0 else 0.7 })
++	end
++end
++
++-- rows: { { name: string, tag: string, level: number } }, loudest first
++function Hud.setTalkers(entries: { { [string]: any } })
++	for i, row in ipairs(rows) do
++		local entry = if i <= maxRows then entries[i] else nil
++		if entry then
++			local who = row:FindFirstChild("Who")
++			local tag = row:FindFirstChild("Tag")
++			if who and who.Text ~= entry.name then
++				who.Text = entry.name
++			end
++			if tag then
++				tag.Text = entry.tag or ""
++				tag.Visible = tag.Text ~= ""
++			end
++			rowLevels[i] = tonumber(entry.level) or 0
++			row.Visible = true
++		else
++			row.Visible = false
++			rowLevels[i] = 0
++		end
++	end
++end
++
++-- The talking bars: a light wobble scaled by each voice's level.
++function Hud.animate(dt: number)
++	if not (R.stack and R.stack.Visible) then
++		return
++	end
++	wobble += dt * 9
++	for i, row in ipairs(rows) do
++		if row.Visible then
++			local level = math.clamp((rowLevels[i] or 0) * 18, 0.15, 1)
++			local bars = row:FindFirstChild("Bars")
++			if bars then
++				for b = 1, 3 do
++					local bar = bars:FindFirstChild("Bar" .. b)
++					if bar then
++						local k = 0.55 + 0.45 * math.abs(math.sin(wobble + b * 1.7 + i))
++						bar.Size = UDim2.new(0, 3, math.clamp(level * k, 0.15, 1), 0)
++					end
++				end
++			end
++		end
++	end
++end
++
++function Hud.getCard(): Frame?
++	return R.card
++end
++
++-- state: { title, text, toggle: boolean, on: boolean, players: boolean, mutedCount: number, server: "Join" | "Leave" | nil }
++function Hud.setCard(state: { [string]: any })
++	if not R.card then
++		return
++	end
++	R.cardHeader.Text = state.title or "PROXIMITY VOICE"
++	R.cardText.Text = state.text or ""
++	R.cardToggle.Visible = state.toggle == true
++	if state.toggle then
++		styleToggle(R.cardToggle, state.on == true)
++	end
++	R.cardPlayers.Visible = state.players == true
++	local mutedCount = tonumber(state.mutedCount) or 0
++	R.cardPlayers.Text = if mutedCount > 0 then string.format("PLAYERS · %d MUTED ›", mutedCount) else "PLAYERS ›"
++	local server = state.server
++	R.cardServer.Visible = server ~= nil
++	if server then
++		R.cardServer:SetAttribute("Action", server)
++		R.cardServer.Text = if server == "Leave" then "LEAVE VOICE-ONLY SERVER ›" else "VOICE-ONLY SERVER ›"
++	end
++	-- the links' row only when there is a link to show
++	local height = if state.players == true or server ~= nil then CARD_TALL else CARD_SHORT
++	if R.card.Size.Y.Offset ~= height then
++		R.card.Size = UDim2.new(1, 0, 0, height) -- (LobbyController.mountCard follows the card's height)
++	end
++end
++
++function Hud.isPanelOpen(): boolean
++	return panelOpen
++end
++
++function Hud.openPanel()
++	if panelOpen or not R.panel then
++		return
++	end
++	panelOpen = true
++	R.dim.Visible = true
++	R.panel.Visible = true
++	R.panel.GroupTransparency = 1
++	R.panel.Position = UDim2.new(0.5, 0, 0.5, 14)
++	Theme.tween(R.panel, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 0.5) })
++	Theme.tween(R.dim, Theme.Tween.Normal, { BackgroundTransparency = Theme.Transparency.Dim })
++	if Input.isGamepad() then
++		GuiService.SelectedObject = if R.youToggle.Visible then R.youToggle else R.close
++	end
++	Input.bind("VoicePanelBack", function(state)
++		if state == Enum.UserInputState.Begin then
++			call("onClosePanel")
++		end
++		return Enum.ContextActionResult.Sink
++	end, { keys = { Enum.KeyCode.ButtonB, Enum.KeyCode.Backspace }, priority = 3100 })
++	Sfx.play("UIClick")
++end
++
++function Hud.closePanel()
++	if not panelOpen then
++		return
++	end
++	panelOpen = false
++	Input.unbind("VoicePanelBack")
++	local t = Theme.tween(R.panel, Theme.Tween.Fast, { GroupTransparency = 1, Position = UDim2.new(0.5, 0, 0.5, 10) })
++	Theme.tween(R.dim, Theme.Tween.Fast, { BackgroundTransparency = 1 })
++	t.Completed:Once(function()
++		if not panelOpen then
++			R.panel.Visible = false
++			R.dim.Visible = false
++		end
++	end)
++	local selected = GuiService.SelectedObject
++	if selected and R.panelGui and selected:IsDescendantOf(R.panelGui) then
++		GuiService.SelectedObject = nil
++	end
++end
++
++-- state: { text: string, toggle: boolean, on: boolean, rows = { { player, muted: boolean, blocked: boolean, talking: boolean } } }
++function Hud.setPanel(state: { [string]: any })
++	if not R.panel then
++		return
++	end
++	R.youText.Text = state.text or ""
++	R.youToggle.Visible = state.toggle == true
++	if state.toggle then
++		styleToggle(R.youToggle, state.on == true)
++	end
++	local entries = state.rows or {}
++	local seen: { [Player]: boolean } = {}
++	for i, entry in ipairs(entries) do
++		local p = entry.player
++		seen[p] = true
++		local row = panelRows[p]
++		if not row then
++			row = panelRow(p)
++			panelRows[p] = row
++			row.Parent = R.list
++		end
++		row.LayoutOrder = i
++		row:SetAttribute("Muted", entry.muted == true)
++		row:SetAttribute("Blocked", entry.blocked == true)
++		local mute = row:FindFirstChild("Mute")
++		if mute then
++			mute.Text = if entry.blocked then "BLOCKED" elseif entry.muted then "UNMUTE" else "MUTE"
++			mute.TextColor3 = if entry.blocked then C.TextDim elseif entry.muted then C.AccentSoft else C.Text
++		end
++		local block = row:FindFirstChild("Block")
++		if block then
++			block.Visible = entry.blocked ~= true
++		end
++		local talking = row:FindFirstChild("Talking")
++		if talking then
++			talking.BackgroundTransparency = if entry.talking and not entry.muted and not entry.blocked then 0 else 0.85
++		end
++	end
++	for p, row in pairs(panelRows) do
++		if not seen[p] then
++			row:Destroy()
++			panelRows[p] = nil
++		end
++	end
++	R.empty.Visible = #entries == 0
++	R.listHeader.Text = if #entries > 0 then string.format("PLAYERS WITH VOICE · %d", #entries) else "PLAYERS WITH VOICE"
++end
++
++return Hud
+diff --git a/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/init.lua b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/init.lua
+new file mode 100644
+index 0000000000000000000000000000000000000000..8610e27eda80f4e9df330451fa27005b76033e56
+--- /dev/null
++++ b/src/StarterPlayer/StarterPlayerScripts/Client/Controllers/VoiceController/init.lua
+@@ -0,0 +1,1787 @@
++--[[
++	VoiceController - Proximity Voice on this client (docs/design/VoiceMode.md). Behind Config.Voice.Enabled: while that is
++	false it does nothing.
++
++	VoiceService (server) decides who may hear whom; nothing here can widen that (the access lists are the server's).
++	This controller decides how voice sounds on this client and draws the voice UI. Two graphs (Config.Voice.ClientGraph):
++	  * "Default" (the safe setting, until the published safety gate passes): Roblox's own listener and playback stay as
++	    Roblox built them. We only give Roblox's emitter on each speaker's character our distance curve (the profile of
++	    where you listen), and move it to the silent group "VoiceOff" while you mute that player, they are blocked, or you
++	    turned voice off. We move it back once, and only if nothing else changed it meanwhile: this controller can make
++	    Roblox's voice quieter, never louder than Roblox left it.
++	  * "Custom": our own AudioListener (group "Voice") on an Attachment of ours under workspace.Terrain, moved every
++	    frame to your camera or, while you spectate, to the watched contender's head facing your camera
++	    (Spectators.ListenAt). Per speaker: their voice device -> a fader (your mute, a block, muffling) -> an
++	    AudioEqualizer -> our own AudioEmitter on another Attachment of ours, moved every frame to their head. Nothing of
++	    ours lives inside another player's character, so a character that is destroyed or streams out can't take our
++	    listener with it. Roblox's emitters go to "VoiceOff" on this client only, so no voice is heard twice. The
++	    listener's curve does the falloff; walls and terrain muffle (Config.Voice.Occlusion).
++	  * The stands' channel (Spectators.StandsBus, off until the gate passes): while you spectate, every other spectator
++	    comes in with no distance, through the same per-speaker fader (your mutes and blocks apply).
++	Your choice: the lobby card, the VOICE panel and Settings › VOICE all call setOn, the only path that sends SetVoice.
++	Turning voice off mutes your own device on this client at once (as Roblox's push-to-talk sample does) and keeps it
++	muted while your choice is off, whatever arrives from the server. What the UI shows comes from the server's VoiceOn /
++	VoiceHold attributes: before you choose this session, voice stays off until your saved choice has loaded, and stays
++	off if it couldn't load (the card says so). If the server still shows something else 2 s after you chose, the choice
++	is sent again.
++	Safety: Roblox's own mute, block, report and voice volume controls are Roblox's. This client also honours blocks
++	(StarterGui:GetCore "GetBlockedUserIds" and the PlayerBlocked / PlayerUnblocked events) and Roblox's mute events in
++	every graph. Whether Roblox's own mute and volume reach the "Custom" chain isn't documented: that is the safety gate.
++	Talking lights: an AudioAnalyzer per voice reads RmsLevel only (Roblox blocks spectra for voice). Levels never leave
++	this client: nothing is recorded, transcribed or sent anywhere.
++	Public API (Controllers.VoiceController):
++	  isAvailable() -> boolean        isOn() -> boolean          setOn(on: boolean)          hasOwnVolume() -> boolean
++	  isMuted(player) -> boolean      setMuted(player, muted)    mutedCount() -> number
++	  openPanel()   closePanel()      getTalkers() -> { { player: Player, level: number, tag: string } }
++	  debugState() -> { [string]: any }
++]]
++local CollectionService = game:GetService("CollectionService")
++local Players = game:GetService("Players")
++local ReplicatedStorage = game:GetService("ReplicatedStorage")
++local RunService = game:GetService("RunService")
++local SoundService = game:GetService("SoundService")
++local StarterGui = game:GetService("StarterGui")
++local VoiceChatService = game:GetService("VoiceChatService")
++
++local Shared = ReplicatedStorage:WaitForChild("Shared")
++local Config = require(Shared:WaitForChild("Config"))
++local Input = require(Shared:WaitForChild("Input"))
++local Lore = require(Shared:WaitForChild("Lore"))
++local Net = require(Shared:WaitForChild("Net"))
++local Util = require(Shared:WaitForChild("Util"))
++
++local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
++-- (timeouts, so a missing child makes this one controller fail to load instead of stalling the client's loader)
++local Curves = require(script:WaitForChild("Curves", 10))
++local Hud = require(script:WaitForChild("Hud", 10))
++
++local GameState = ReplicatedStorage:WaitForChild("GameState")
++local player = Players.LocalPlayer
++
++local VoiceCfg = Config.Voice or {}
++local Profiles = VoiceCfg.Profiles or {}
++local Occ = VoiceCfg.Occlusion or {}
++local Spect = VoiceCfg.Spectators or {}
++local WhisperCfg = VoiceCfg.Whisper or {}
++local GRAPH = if VoiceCfg.ClientGraph == "Custom" then "Custom" else "Default"
++local STANDS_BUS = Spect.StandsBus == true
++local OWN_GAIN = GRAPH == "Custom" or STANDS_BUS -- each speaker has a fader of ours (your mutes and blocks reach it)
++
++local GROUP_VOICE = "Voice" -- the only group our listener hears
++local GROUP_OFF = "VoiceOff" -- nothing listens here: Roblox's emitters (Custom), silenced voices (Default)
++local OUR_EMITTER = "ProximityVoiceEmitter"
++local LEGACY_AFTER = 20 -- seconds a voice-enabled player can go without a device: the place runs Roblox's old voice
++local ENGINE_SEARCH_INTERVAL = 3 -- seconds between searches for Roblox's emitter on a character that has none yet
++local RESEND_AFTER = 2 -- seconds before your choice is sent again if the server still shows something else
++local PARKED = Vector3.new(0, -50000, 0) -- where an emitter of ours waits while its speaker has no head (far out of earshot)
++local TICK = 0.1
++
++local VoiceController = {}
++local Controllers: any = nil
++
++local enabled = false
++local startedAt = 0
++local available: boolean? = nil -- this account can use voice here (nil until Roblox says)
++local checkDone = false -- the availability check has finished (it may have failed: then available stays nil)
++local myDevice: AudioDeviceInput? = nil
++local myAnalyzer: AudioAnalyzer? = nil
++local myMutedConn: RBXScriptConnection? = nil
++local myTalkingUntil = 0
++local rootFolder: Folder? = nil
++local listener: AudioListener? = nil
++local listenerWire: Wire? = nil
++local ear: Attachment? = nil -- our own Attachment under workspace.Terrain: where our listener hears from
++local mainFader: AudioFader? = nil
++local standsFader: AudioFader? = nil
++local speakers: { [Player]: any } = {}
++local muted: { [number]: boolean } = {} -- UserIds you muted here (this server only)
++local blocked: { [number]: boolean } = {} -- UserIds you blocked on Roblox (StarterGui GetCore)
++local robloxMuted: { [number]: boolean } = {} -- UserIds Roblox reports you muted (PlayerMutedEvent)
++local profileName = ""
++local curveCache: { [string]: { [number]: number } } = {}
++local standsActive = false
++local explicitChoice: boolean? = nil -- what you chose this session (setOn); nil = follow the server (your saved choice)
++local lastSendAt = -math.huge
++local zones: { BasePart } = {}
++local talkers: { any } = {}
++local tipsShown: { [number]: boolean } = {}
++local whisperBound = false
++local whisperHeld = false
++local cardKey = ""
++local warned: { [string]: boolean } = {}
++local lastDebug = 0
++
++local rayParams = RaycastParams.new()
++rayParams.FilterType = Enum.RaycastFilterType.Exclude
++rayParams.IgnoreWater = true
++
++--------------------------------------------------------------------------------------------------------------------
++-- Helpers
++--------------------------------------------------------------------------------------------------------------------
++local function warnOnce(key: string, message: string)
++	if warned[key] then
++		return
++	end
++	warned[key] = true
++	warn("[VoiceController] " .. message)
++end
++
++-- Each step runs on its own: one failing step never stops the others (or the next pass).
++local function guarded(name: string, fn: () -> ())
++	local ok, err = pcall(fn)
++	if not ok then
++		warnOnce(name .. ":" .. tostring(err), name .. " failed: " .. tostring(err))
++	end
++end
++
++local function volumeSetting(): number
++	return math.clamp(tonumber(ClientState.settings.voiceVolume) or 1, 0, 2)
++end
++
++local function roleOf(p: Player): string
++	local role = p:GetAttribute("VoiceRole")
++	return if type(role) == "string" then role else "Open"
++end
++
++local function wire(source: Instance, target: Instance, parent: Instance): Wire
++	local w = Instance.new("Wire")
++	w.SourceInstance = source
++	w.TargetInstance = target
++	w.Parent = parent
++	return w
++end
++
++local function headOf(p: Player?): BasePart?
++	local character = p and p.Character
++	if not character then
++		return nil
++	end
++	local head = character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
++	if head and head:IsA("BasePart") then
++		return head
++	end
++	return nil
++end
++
++local function findDevice(p: Player): AudioDeviceInput?
++	for _, child in ipairs(p:GetChildren()) do
++		if child:IsA("AudioDeviceInput") then
++			return child :: AudioDeviceInput
++		end
++	end
++	return nil
++end
++
++-- Roblox's own voice emitter on a character (a direct child named AudioEmitter in the default setup)
++local function engineEmitterOf(character: Model?): AudioEmitter?
++	if not character then
++		return nil
++	end
++	local direct = character:FindFirstChild("AudioEmitter")
++	if direct and direct:IsA("AudioEmitter") then
++		return direct
++	end
++	for _, d in ipairs(character:GetDescendants()) do
++		if d:IsA("AudioEmitter") and d.Name ~= OUR_EMITTER then
++			return d
++		end
++	end
++	return nil
++end
++
++local function curveFor(name: string): { [number]: number }
++	local cached = curveCache[name]
++	if cached then
++		return cached
++	end
++	local points = Curves.build(Profiles[name] or Profiles.Arena)
++	curveCache[name] = points
++	return points
++end
++
++local function newAnalyzer(name: string, parent: Instance): AudioAnalyzer
++	local analyzer = Instance.new("AudioAnalyzer")
++	analyzer.Name = name
++	pcall(function()
++		(analyzer :: any).SpectrumEnabled = false -- loudness only (Roblox blocks voice spectra anyway)
++	end)
++	analyzer.Parent = parent
++	return analyzer
++end
++
++local function readLevel(analyzer: AudioAnalyzer?): number
++	if not analyzer then
++		return 0
++	end
++	local ok, value = pcall(function()
++		return analyzer.RmsLevel
++	end)
++	return if ok and type(value) == "number" then value else 0
++end
++
++local function micActive(): boolean
++	local device = myDevice
++	if not device then
++		return false
++	end
++	local ok, active = pcall(function()
++		return device.Active -- Roblox's own mic toggle (readable; only Roblox sets it)
++	end)
++	return ok and active == true
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Your choice (the server's VoiceOn / VoiceHold, and what you chose this session)
++--------------------------------------------------------------------------------------------------------------------
++local function serverOn(): boolean
++	return player:GetAttribute("VoiceOn") == true
++end
++
++-- why the server keeps you muted before you choose: "" | "Loading" | "NotLoaded"
++local function holdReason(): string
++	local hold = player:GetAttribute("VoiceHold")
++	return if type(hold) == "string" then hold else "Loading"
++end
++
++-- What you chose this session, else what the server applied (your saved choice once it loaded; off until then).
++local function isOnNow(): boolean
++	if explicitChoice ~= nil then
++		return explicitChoice
++	end
++	return serverOn()
++end
++
++local function silenced(p: Player): boolean
++	local id = p.UserId
++	return muted[id] == true or blocked[id] == true or robloxMuted[id] == true
++end
++
++local function settingsReady(): boolean
++	return player:GetAttribute("SettingsLoaded") == true and player:GetAttribute("SettingsJson") ~= nil
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Listening: our listener and ear (Custom), the volume faders, the stands' bus
++--------------------------------------------------------------------------------------------------------------------
++local function buildGraph()
++	local folder = Instance.new("Folder")
++	folder.Name = "ProximityVoice"
++	folder.Parent = SoundService
++	rootFolder = folder
++
++	if GRAPH == "Custom" then
++		local out = Instance.new("AudioDeviceOutput")
++		out.Name = "VoiceOut"
++		out.Parent = folder
++		local fader = Instance.new("AudioFader")
++		fader.Name = "VoiceVolume"
++		fader.Volume = 0 -- silent until applyVolumes knows your choice
++		fader.Parent = folder
++		wire(fader, out, folder)
++		mainFader = fader
++	end
++	if STANDS_BUS then
++		local standsOut = Instance.new("AudioDeviceOutput")
++		standsOut.Name = "StandsOut"
++		standsOut.Parent = folder
++		local stands = Instance.new("AudioFader")
++		stands.Name = "StandsVolume"
++		stands.Volume = 0
++		stands.Parent = folder
++		wire(stands, standsOut, folder)
++		standsFader = stands
++	end
++end
++
++-- Our ear is an Attachment of our own under workspace.Terrain (followCamera moves it every frame); the listener lives in
++-- it. Rebuilt whenever something removed either.
++local function ensureListener()
++	local fader, root = mainFader, rootFolder
++	if GRAPH ~= "Custom" or not (fader and root) then
++		return
++	end
++	local terrain = workspace.Terrain
++	local a = ear
++	if not (a and a.Parent == terrain) then
++		if a then
++			pcall(function()
++				(a :: Attachment):Destroy()
++			end)
++		end
++		local fresh = Instance.new("Attachment")
++		fresh.Name = "ProximityVoiceEar"
++		fresh.Parent = terrain
++		a = fresh
++		ear = fresh
++	end
++	local l, w = listener, listenerWire
++	if l and l.Parent == a and w and w.Parent == root then
++		return
++	end
++	if l then
++		pcall(function()
++			(l :: AudioListener):Destroy()
++		end)
++	end
++	if w then
++		pcall(function()
++			(w :: Wire):Destroy()
++		end)
++	end
++	local fresh = Instance.new("AudioListener")
++	fresh.Name = "ProximityVoiceListener"
++	fresh.AudioInteractionGroup = GROUP_VOICE
++	fresh.Parent = a
++	listener = fresh
++	listenerWire = wire(fresh, fader, root)
++	profileName = "" -- the new listener needs its curve (updateProfile)
++end
++
++local function listenHead(): BasePart?
++	local target = ClientState.spectating
++	if target and Spect.ListenAt ~= "Camera" then
++		local head = headOf(target)
++		if head and head.Parent then
++			return head
++		end
++	end
++	return nil
++end
++
++-- Every frame (Custom): the ear sits at your camera, or at the watched contender's head turned with your camera, so
++-- left and right stay where you look.
++local function followCamera()
++	local a = ear
++	if not (a and a.Parent) then
++		return
++	end
++	local camera = workspace.CurrentCamera
++	if not camera then
++		return
++	end
++	local head = listenHead()
++	if head then
++		a.WorldCFrame = CFrame.new(head.Position) * camera.CFrame.Rotation
++	else
++		a.WorldCFrame = camera.CFrame
++	end
++end
++
++local function listenerPosition(): Vector3?
++	local a = ear
++	if a and a.Parent then
++		return a.WorldPosition
++	end
++	local camera = workspace.CurrentCamera -- Default: Roblox's own listener follows the camera
++	return if camera then camera.CFrame.Position else nil
++end
++
++local function applyVolumes()
++	local volume = if isOnNow() then volumeSetting() else 0
++	local fader = mainFader
++	if fader then
++		local main = volume
++		if ClientState.spectating and Spect.HearArena == false then
++			main = 0
++		end
++		if fader.Volume ~= main then
++			fader.Volume = main
++		end
++	end
++	local stands = standsFader
++	if stands then
++		local value = if standsActive then volume * math.clamp(tonumber(Spect.Volume) or 0.85, 0, 2) else 0
++		if stands.Volume ~= value then
++			stands.Volume = value
++		end
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Places: profiles and rooms (VoiceZone parts)
++--------------------------------------------------------------------------------------------------------------------
++local function addZone(part: Instance)
++	if part:IsA("BasePart") and not table.find(zones, part) then
++		table.insert(zones, part)
++	end
++end
++
++local function removeZone(part: Instance)
++	local index = table.find(zones, part :: any)
++	if index then
++		table.remove(zones, index)
++	end
++end
++
++local function zoneAt(position: Vector3): BasePart?
++	for _, part in ipairs(zones) do
++		if part.Parent then
++			local rel = part.CFrame:PointToObjectSpace(position)
++			local half = part.Size * 0.5
++			if math.abs(rel.X) <= half.X and math.abs(rel.Y) <= half.Y and math.abs(rel.Z) <= half.Z then
++				return part
++			end
++		end
++	end
++	return nil
++end
++
++local function roomAt(position: Vector3): string?
++	local zone = zoneAt(position)
++	local room = zone and zone:GetAttribute("VoiceRoom")
++	return if type(room) == "string" and room ~= "" then room else nil
++end
++
++local function pickProfile(position: Vector3?): string
++	local zone = if position then zoneAt(position) else nil
++	local zoneProfile = zone and zone:GetAttribute("VoiceProfile")
++	if type(zoneProfile) == "string" and Profiles[zoneProfile] then
++		return zoneProfile
++	end
++	if ClientState.spectating or ClientState.inArena then
++		local name = (VoiceCfg.PhaseProfiles or {})[GameState:GetAttribute("Phase")]
++		return if type(name) == "string" and Profiles[name] then name else "Arena"
++	end
++	return "Social"
++end
++
++local applySpeaker: (any) -> () -- (below)
++
++local function updateProfile()
++	local name = pickProfile(listenerPosition())
++	if name == profileName then
++		return
++	end
++	profileName = name
++	local l = listener
++	if l and l.Parent then
++		l:SetDistanceAttenuation(curveFor(name))
++	end
++	if GRAPH == "Default" then
++		-- there is no listener of ours: the place's curve goes on Roblox's emitters instead
++		for _, s in pairs(speakers) do
++			applySpeaker(s)
++		end
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Speakers
++--------------------------------------------------------------------------------------------------------------------
++local function destroy(instance: Instance?)
++	if instance then
++		pcall(function()
++			instance:Destroy()
++		end)
++	end
++end
++
++local function clearChain(s)
++	destroy(s.standsWire)
++	destroy(s.emitter)
++	destroy(s.anchor)
++	destroy(s.folder)
++	s.standsWire, s.emitter, s.anchor, s.folder, s.emitterWire = nil, nil, nil, nil, nil
++	s.analyzer, s.fader, s.eq, s.out = nil, nil, nil, nil
++	s.curveKey, s.curveOn = "", nil
++end
++
++local function buildChain(s)
++	clearChain(s)
++	local device, root = s.device, rootFolder
++	if not (device and root) then
++		return
++	end
++	local folder = Instance.new("Folder")
++	folder.Name = "Speaker" .. s.player.UserId
++	folder.Parent = root
++	s.folder = folder
++	s.analyzer = newAnalyzer("Level", folder)
++	wire(device, s.analyzer, folder)
++	if not OWN_GAIN then
++		return -- Default without the stands' bus: Roblox's own path plays them; we only measure the talking light
++	end
++	local fader = Instance.new("AudioFader")
++	fader.Name = "Gain"
++	fader.Volume = 0 -- silent until applyGain decides
++	fader.Parent = folder
++	wire(device, fader, folder)
++	s.fader, s.out = fader, fader
++	if GRAPH == "Custom" then
++		local eq = Instance.new("AudioEqualizer")
++		local toneOk = pcall(function()
++			eq.HighGain = 0
++			eq.MidGain = 0
++		end)
++		if toneOk then
++			eq.Name = "Muffle"
++			eq.Parent = folder
++			wire(fader, eq, folder)
++			s.eq, s.out = eq, eq
++		else
++			eq:Destroy() -- no equalizer gains in this build: muffling is volume only
++		end
++	end
++end
++
++-- The speaker's character: Roblox's emitter on it, and their head (where our emitter goes, Custom).
++local function refreshCharacter(s)
++	local character = s.player.Character
++	local now = os.clock()
++	if character ~= s.character then
++		s.character = character
++		s.engineEmitter = engineEmitterOf(character)
++		s.engineSaved = nil -- (it belonged to the old character's emitter)
++		s.nextSearch = now + ENGINE_SEARCH_INTERVAL
++	elseif not (s.engineEmitter and s.engineEmitter.Parent) and now >= s.nextSearch then
++		s.engineEmitter = engineEmitterOf(character)
++		s.nextSearch = now + ENGINE_SEARCH_INTERVAL
++	end
++	local head = headOf(s.player)
++	s.head = head
++	local a = s.anchor
++	if a and a.Parent then
++		a.WorldPosition = if head then head.Position else PARKED -- (moveAnchors keeps it there every frame)
++	end
++end
++
++-- Custom: our own emitter for this speaker, on an Attachment of ours under workspace.Terrain that moveAnchors keeps at
++-- their head. Rebuilt whenever something removed it.
++local function attachEmitter(s)
++	if GRAPH ~= "Custom" or not (s.out and s.folder) then
++		return
++	end
++	local terrain = workspace.Terrain
++	local a = s.anchor
++	if not (a and a.Parent == terrain) then
++		destroy(a)
++		destroy(s.emitter)
++		a = Instance.new("Attachment")
++		a.Name = "PV_" .. s.player.UserId
++		a.Parent = terrain
++		s.anchor = a
++		s.emitter = nil
++		local head = s.head
++		-- (a new Attachment sits at the world origin, the Spire: never let a voice start there)
++		a.WorldPosition = if head and head.Parent then head.Position else PARKED
++	end
++	local emitter = s.emitter
++	if emitter and emitter.Parent == a and s.emitterWire and s.emitterWire.Parent == s.folder then
++		return
++	end
++	destroy(emitter)
++	destroy(s.emitterWire)
++	local fresh = Instance.new("AudioEmitter")
++	fresh.Name = OUR_EMITTER
++	fresh.AudioInteractionGroup = GROUP_VOICE
++	pcall(function()
++		(fresh :: any).DistanceAttenuationMode = (Enum :: any).DistanceAttenuationMode.Custom -- (the default, made sure)
++	end)
++	fresh:SetDistanceAttenuation(Curves.FLAT)
++	fresh.Parent = a
++	s.emitterWire = wire(s.out, fresh, s.folder)
++	s.emitter = fresh
++	s.curveKey = "F"
++end
++
++-- Roblox's own emitter on the speaker's character. We may always move it to the silent group; we move it back only to
++-- undo our own change, once, and only if nothing else changed it meanwhile.
++local function silenceEngine(s, silent: boolean)
++	local engine = s.engineEmitter
++	if not (engine and engine.Parent) then
++		return
++	end
++	if silent then
++		if engine.AudioInteractionGroup ~= GROUP_OFF then
++			s.engineSaved = { emitter = engine, group = engine.AudioInteractionGroup }
++			engine.AudioInteractionGroup = GROUP_OFF
++		end
++	else
++		local saved = s.engineSaved
++		s.engineSaved = nil
++		if saved and saved.emitter == engine and engine.AudioInteractionGroup == GROUP_OFF then
++			engine.AudioInteractionGroup = saved.group
++		end
++	end
++end
++
++-- The hot path (muffling changes): this speaker's gain and tone only.
++local function applyGain(s)
++	local fader, eq = s.fader, s.eq
++	if not fader then
++		return
++	end
++	local gain = 0
++	if not (silenced(s.player) or not isOnNow()) then
++		if GRAPH ~= "Custom" then
++			gain = 1 -- (Default: this fader only feeds the stands' bus)
++		elseif s.standsWire or (s.head and s.head.Parent) then
++			local keep = math.clamp(tonumber(Occ.Volume) or 0.55, 0, 1)
++			gain = 1 - (1 - keep) * s.occlusion
++		end
++	end
++	if math.abs(fader.Volume - gain) > 0.001 then
++		fader.Volume = gain
++	end
++	if eq then
++		local high = (tonumber(Occ.HighGainDb) or -24) * s.occlusion
++		local mid = (tonumber(Occ.MidGainDb) or -6) * s.occlusion
++		if math.abs(eq.HighGain - high) > 0.05 then
++			eq.HighGain = high
++		end
++		if math.abs(eq.MidGain - mid) > 0.05 then
++			eq.MidGain = mid
++		end
++	end
++end
++
++local function wantsStands(s): boolean
++	return STANDS_BUS
++		and standsActive
++		and not silenced(s.player)
++		and s.player:GetAttribute("Spectating") == true
++		and roleOf(s.player) ~= "Contender"
++end
++
++function applySpeaker(s)
++	local whisper = s.player:GetAttribute("VoiceWhisper") == true
++	if GRAPH == "Custom" then
++		silenceEngine(s, true) -- this client plays the voice through our own emitter: never heard twice
++		local emitter = s.emitter
++		local key = if whisper then "W" else "F"
++		if emitter and emitter.Parent and s.curveKey ~= key then
++			s.curveKey = key
++			emitter:SetDistanceAttenuation(if whisper then curveFor("Whisper") else Curves.FLAT)
++		end
++	else
++		local silent = silenced(s.player) or not isOnNow()
++		silenceEngine(s, silent)
++		local engine = s.engineEmitter
++		if engine and engine.Parent and not silent then
++			-- Roblox's emitter carries the place's curve itself (there is no listener of ours)
++			local curveKey = (if whisper then "W" else "F") .. profileName
++			if s.curveOn ~= engine or s.curveKey ~= curveKey then
++				s.curveOn, s.curveKey = engine, curveKey
++				local curve = if whisper then curveFor("Whisper") else curveFor(if profileName ~= "" then profileName else "Social")
++				pcall(function()
++					(engine :: any).DistanceAttenuationMode = (Enum :: any).DistanceAttenuationMode.Custom
++				end)
++				pcall(function()
++					engine:SetDistanceAttenuation(curve)
++				end)
++			end
++		end
++	end
++	-- the stands' channel (StandsBus): spectators hear each other with no distance, through this speaker's fader
++	local source, bus = s.fader, standsFader
++	local want = wantsStands(s) and source ~= nil and bus ~= nil
++	if want and not (s.standsWire and s.standsWire.Parent) then
++		s.standsWire = wire(source, bus :: AudioFader, (s.folder or rootFolder) :: Instance)
++	elseif not want and s.standsWire then
++		destroy(s.standsWire)
++		s.standsWire = nil
++	end
++	applyGain(s)
++end
++
++local function setSpeakerDevice(s, device: AudioDeviceInput?)
++	if s.device == device and (device == nil or s.folder ~= nil) then
++		return
++	end
++	s.device = device
++	buildChain(s)
++	refreshCharacter(s)
++	attachEmitter(s)
++	applySpeaker(s)
++end
++
++-- maintain(): the backstop for anything an event missed (a new device, a respawn, a removed chain)
++local function refreshSpeaker(s)
++	local device = findDevice(s.player)
++	if device ~= s.device then
++		setSpeakerDevice(s, device)
++	elseif s.device and not (s.folder and s.folder.Parent == rootFolder) then
++		buildChain(s) -- something removed our chain for this speaker: build it again
++	end
++	refreshCharacter(s)
++	attachEmitter(s)
++	applySpeaker(s)
++end
++
++local function trackPlayer(p: Player)
++	if p == player or speakers[p] then
++		return
++	end
++	local s = {
++		player = p,
++		device = nil :: AudioDeviceInput?,
++		folder = nil :: Folder?,
++		analyzer = nil :: AudioAnalyzer?,
++		fader = nil :: AudioFader?,
++		eq = nil :: AudioEqualizer?,
++		out = nil :: Instance?, -- the node that feeds our emitter (the equalizer, or the fader without one)
++		anchor = nil :: Attachment?, -- ours, under workspace.Terrain, kept at their head (Custom)
++		emitter = nil :: AudioEmitter?,
++		emitterWire = nil :: Wire?,
++		engineEmitter = nil :: AudioEmitter?,
++		engineSaved = nil :: { [string]: any }?, -- the group we moved Roblox's emitter from (silenceEngine)
++		standsWire = nil :: Wire?,
++		character = nil :: Model?,
++		head = nil :: BasePart?,
++		nextSearch = 0,
++		curveKey = "",
++		curveOn = nil :: AudioEmitter?,
++		occlusion = 0,
++		occlusionTarget = 0,
++		level = 0,
++		talkingUntil = 0,
++		audible = 0,
++		conns = {} :: { RBXScriptConnection },
++		charConn = nil :: RBXScriptConnection?,
++	}
++	speakers[p] = s
++	local function hookCharacter(character: Model?)
++		if s.charConn then
++			s.charConn:Disconnect()
++			s.charConn = nil
++		end
++		if character then
++			s.charConn = character.ChildAdded:Connect(function(child)
++				guarded("character", function()
++					if child:IsA("AudioEmitter") and child.Name ~= OUR_EMITTER then
++						s.engineEmitter = child
++						s.engineSaved = nil
++						applySpeaker(s) -- (Custom: moved out of earshot at once, so nobody is heard twice)
++					elseif child.Name == "Head" then
++						refreshCharacter(s)
++						attachEmitter(s)
++						applySpeaker(s)
++					end
++				end)
++			end)
++		end
++		guarded("character", function()
++			refreshCharacter(s)
++			attachEmitter(s)
++			applySpeaker(s)
++		end)
++	end
++	table.insert(s.conns, p.ChildAdded:Connect(function(child)
++		if child:IsA("AudioDeviceInput") then
++			guarded("device", function()
++				setSpeakerDevice(s, findDevice(p))
++			end)
++		end
++	end))
++	table.insert(s.conns, p.ChildRemoved:Connect(function(child)
++		if child == s.device then
++			guarded("device", function()
++				setSpeakerDevice(s, findDevice(p))
++			end)
++		end
++	end))
++	table.insert(s.conns, p.CharacterAdded:Connect(hookCharacter))
++	for _, attribute in ipairs({ "VoiceWhisper", "Spectating", "VoiceRole" }) do
++		table.insert(s.conns, p:GetAttributeChangedSignal(attribute):Connect(function()
++			guarded("speaker", function()
++				applySpeaker(s)
++			end)
++		end))
++	end
++	guarded("device", function()
++		setSpeakerDevice(s, findDevice(p))
++	end)
++	hookCharacter(p.Character)
++end
++
++local function untrackPlayer(p: Player)
++	local s = speakers[p]
++	if not s then
++		return
++	end
++	speakers[p] = nil
++	for _, connection in ipairs(s.conns) do
++		connection:Disconnect()
++	end
++	if s.charConn then
++		s.charConn:Disconnect()
++	end
++	clearChain(s) -- your mute stays (by UserId) in case they come back to this server
++end
++
++-- Every frame (Custom): our emitters follow their speakers' heads. A head that went away (destroyed, streamed out)
++-- parks that emitter and silences it until refreshCharacter finds the new one.
++local function moveAnchors()
++	for _, s in pairs(speakers) do
++		local a, head = s.anchor, s.head
++		if a and head and a.Parent then
++			if head.Parent then
++				a.WorldPosition = head.Position
++			else
++				s.head = nil
++				a.WorldPosition = PARKED
++				applyGain(s)
++			end
++		end
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Your own device
++--------------------------------------------------------------------------------------------------------------------
++-- While your choice is off (or the server hasn't opened your mic yet) this client keeps your own device muted too, as
++-- Roblox's push-to-talk sample does: OFF takes effect at once, and a server write arriving late can't reopen it.
++local function syncLocalMute()
++	local device = myDevice
++	if not device then
++		return
++	end
++	local want = not (isOnNow() and serverOn())
++	pcall(function()
++		if device.Muted ~= want then
++			device.Muted = want
++		end
++	end)
++end
++
++local function setMyDevice(device: AudioDeviceInput?)
++	if device == myDevice then
++		return
++	end
++	if myMutedConn then
++		myMutedConn:Disconnect()
++		myMutedConn = nil
++	end
++	myDevice = device
++	if myAnalyzer then
++		myAnalyzer:Destroy()
++		myAnalyzer = nil
++	end
++	local root = rootFolder
++	if device and root then
++		local analyzer = newAnalyzer("You", root)
++		wire(device, analyzer, analyzer) -- your talking light; it measures your mic and goes nowhere else
++		myAnalyzer = analyzer
++		available = true -- Roblox only makes a device for players who can use voice
++		myMutedConn = device:GetPropertyChangedSignal("Muted"):Connect(syncLocalMute)
++		syncLocalMute()
++	end
++end
++
++local function updateStands()
++	local on = STANDS_BUS and ClientState.spectating ~= nil and roleOf(player) ~= "Contender"
++	if on ~= standsActive then
++		standsActive = on
++		for _, s in pairs(speakers) do
++			applySpeaker(s)
++		end
++	end
++	applyVolumes()
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Walls, terrain and rooms (Custom)
++--------------------------------------------------------------------------------------------------------------------
++local function characterList(): { Instance }
++	local list = {}
++	for _, p in ipairs(Players:GetPlayers()) do
++		if p.Character then
++			table.insert(list, p.Character)
++		end
++	end
++	return list
++end
++
++local function occlusionPass()
++	local origin = listenerPosition()
++	if not origin or GRAPH ~= "Custom" then
++		return -- (muffling needs our own per-speaker fader and equalizer)
++	end
++	local profile = Profiles[profileName] or Profiles.Arena or {}
++	local reach = tonumber(profile.Silent) or 90
++	local rays = Occ.Mode == "Raycast" and (Occ.Profiles or { Arena = true, Cabin = true })[profileName] == true
++	local myRoom = roomAt(origin)
++	local near = {}
++	for _, s in pairs(speakers) do
++		local target = 0
++		local head = s.head
++		if head and head.Parent and s.device and not s.standsWire then
++			local offset = head.Position - origin
++			local distance = offset.Magnitude
++			if distance < reach then
++				local theirRoom = roomAt(head.Position)
++				if (myRoom or theirRoom) and myRoom ~= theirRoom then
++					target = 1 -- another room (a train car): through the wall
++				elseif rays then
++					table.insert(near, { s = s, distance = distance, offset = offset })
++					target = s.occlusionTarget -- the ray below decides
++				end
++			end
++		end
++		s.occlusionTarget = target
++	end
++	if #near == 0 then
++		return
++	end
++	table.sort(near, function(a, b)
++		return a.distance < b.distance
++	end)
++	rayParams.FilterDescendantsInstances = characterList()
++	local maxRays = math.max(1, math.floor(tonumber(Occ.MaxRays) or 8))
++	for i, entry in ipairs(near) do
++		if i > maxRays then
++			entry.s.occlusionTarget = 0
++		else
++			local hit = workspace:Raycast(origin, entry.offset, rayParams)
++			entry.s.occlusionTarget = if hit then 1 else 0
++		end
++	end
++end
++
++local function smoothOcclusion(dt: number)
++	local k = Util.damp(tonumber(Occ.Smoothing) or 6, dt)
++	for _, s in pairs(speakers) do
++		local diff = s.occlusionTarget - s.occlusion
++		if diff ~= 0 then
++			if math.abs(diff) < 0.003 then
++				s.occlusion = s.occlusionTarget
++			else
++				s.occlusion += diff * k
++			end
++			applyGain(s)
++		end
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Talking, state and UI
++--------------------------------------------------------------------------------------------------------------------
++local function audibility(s): number
++	if silenced(s.player) or not isOnNow() then
++		return 0
++	end
++	if s.standsWire then
++		return 1
++	end
++	local l, emitter = listener, s.emitter
++	if GRAPH == "Custom" and emitter and emitter.Parent and l and l.Parent then
++		local ok, value = pcall(function()
++			return (emitter :: any):GetAudibilityFor(l)
++		end)
++		if ok and type(value) == "number" then
++			return value
++		end
++	end
++	local origin, head = listenerPosition(), s.head
++	if not (origin and head and head.Parent) then
++		return 0
++	end
++	local profile = if s.player:GetAttribute("VoiceWhisper") == true then Profiles.Whisper else (Profiles[profileName] or Profiles.Social)
++	local keep = math.clamp(tonumber(Occ.Volume) or 0.55, 0, 1)
++	return Curves.value(profile, (head.Position - origin).Magnitude) * (1 - (1 - keep) * s.occlusion)
++end
++
++local function talkPass()
++	local now = os.clock()
++	local threshold = tonumber(VoiceCfg.TalkingLevel) or 0.02
++	local hold = tonumber(VoiceCfg.TalkingHold) or 0.45
++	local minAudible = tonumber(VoiceCfg.MinAudibility) or 0.04
++	if readLevel(myAnalyzer) > threshold then
++		myTalkingUntil = now + hold
++	end
++	local list = {}
++	for p, s in pairs(speakers) do
++		if s.analyzer and not silenced(p) then
++			s.level = readLevel(s.analyzer) -- silence when the server doesn't let you hear them
++			if s.level > threshold then
++				s.talkingUntil = now + hold
++			end
++		else
++			s.level = 0
++			s.talkingUntil = 0
++		end
++		if s.talkingUntil > now then
++			s.audible = audibility(s)
++			if s.audible >= minAudible then
++				table.insert(list, s)
++			end
++		end
++	end
++	table.sort(list, function(a, b)
++		return a.audible * math.max(a.level, 0.005) > b.audible * math.max(b.level, 0.005)
++	end)
++	talkers = list
++end
++
++local function spectatorsWatching(): number
++	local n = 0
++	for p in pairs(speakers) do
++		if p:GetAttribute("Spectating") == true and roleOf(p) ~= "Contender" then
++			n += 1
++		end
++	end
++	return n
++end
++
++-- Who can hear you: "Nearby" | "Stands" | "Whisper" | "Off" | "" (no voice on this account)
++local function channel(): string
++	if available == false then
++		return ""
++	end
++	if not isOnNow() then
++		return "Off"
++	end
++	local role = roleOf(player)
++	if role == "Bench" then
++		return "Stands"
++	end
++	if player:GetAttribute("VoiceWhisper") == true then
++		return "Whisper"
++	end
++	return "Nearby"
++end
++
++local function isLegacy(): boolean
++	return available == true and myDevice == nil and os.clock() - startedAt > LEGACY_AFTER
++end
++
++local function chipText(): (string, boolean)
++	local ch = channel()
++	if ch == "Off" then
++		local loading = explicitChoice == nil and holdReason() == "Loading"
++		local text = if loading then "VOICE · LOADING YOUR SETTING" else "VOICE OFF"
++		return text, true
++	end
++	local label = if ch == "Stands" then Lore.upper("Stands") elseif ch == "Whisper" then "WHISPER · ALLIES ONLY" else "NEARBY"
++	if ch == "Stands" and ClientState.spectating and STANDS_BUS then
++		local n = spectatorsWatching()
++		if n > 0 then
++			label ..= string.format(" · %d WATCHING", n)
++		end
++	end
++	if not serverOn() or not micActive() then
++		return "MIC OFF · " .. label, true
++	end
++	return "VOICE · " .. label, false
++end
++
++local function cardState(): { [string]: any }
++	local mode = GameState:GetAttribute("VoiceMode")
++	local title = if mode == "VoiceOnly" then "VOICE-ONLY SERVER" else "PROXIMITY VOICE"
++	local serversCfg = VoiceCfg.VoiceServers or {}
++	local server = nil
++	if serversCfg.Enabled == true and available == true then
++		server = if mode == "VoiceOnly" then "Leave" else "Join"
++	end
++	if available == false then
++		return { title = title, text = "Not on your account. Roblox voice needs its 13+ age check; text chat works as usual." }
++	end
++	if not myDevice then
++		local text = if available == nil and checkDone then "Couldn't reach Roblox voice just now. Text chat works as usual."
++			elseif available == nil then "Checking your voice settings…"
++			elseif isLegacy() then "Roblox's standard voice is on here."
++			else "Connecting to voice…"
++		return { title = title, text = text, server = server }
++	end
++	if explicitChoice == nil then
++		local hold = holdReason()
++		if hold == "Loading" then
++			return { title = title, text = "Loading your voice setting… voice stays off until it's in.", server = server }
++		elseif hold == "NotLoaded" then
++			return {
++				title = title,
++				text = "Off · your saved setting didn't load. Turn voice on to talk and listen.",
++				toggle = true,
++				on = false,
++				players = true,
++				mutedCount = VoiceController.mutedCount(),
++				server = server,
++			}
++		end
++	end
++	local on = isOnNow()
++	return {
++		title = title,
++		text = if on then "On · players near you hear you. In a round, the fallen only hear each other."
++			else "Off · you don't hear voice, and nobody hears you.",
++		toggle = true,
++		on = on,
++		players = true,
++		mutedCount = VoiceController.mutedCount(),
++		server = server,
++	}
++end
++
++local function panelState(): { [string]: any }
++	local entries = {}
++	local now = os.clock()
++	for p, s in pairs(speakers) do
++		if s.device then
++			table.insert(entries, {
++				player = p,
++				muted = muted[p.UserId] == true,
++				blocked = blocked[p.UserId] == true,
++				talking = s.talkingUntil > now,
++			})
++		end
++	end
++	table.sort(entries, function(a, b)
++		local an, bn = string.lower(a.player.DisplayName), string.lower(b.player.DisplayName)
++		if an ~= bn then
++			return an < bn
++		end
++		return a.player.UserId < b.player.UserId
++	end)
++	local card = cardState()
++	return { text = card.text, toggle = card.toggle == true, on = card.on == true, rows = entries }
++end
++
++local function stackVisible(): boolean
++	if available ~= true or not myDevice or ClientState.menuOpen then
++		return false
++	end
++	return ClientState.inArena or ClientState.spectating ~= nil
++end
++
++local function render()
++	local visible = stackVisible()
++	Hud.setStackVisible(visible)
++	if visible then
++		local text, dim = chipText()
++		Hud.setChip(text, myTalkingUntil > os.clock() and micActive() and serverOn(), dim)
++		local hideNames = VoiceCfg.ShowTalkerNames == false and roleOf(player) == "Contender"
++		local rows = {}
++		for _, s in ipairs(talkers) do
++			local tag = if s.standsWire then "SPECTATOR" elseif s.player:GetAttribute("VoiceWhisper") == true then "WHISPER" else ""
++			table.insert(rows, {
++				name = if hideNames and tag == "" then "SOMEONE NEARBY" else s.player.DisplayName,
++				tag = tag,
++				level = s.level,
++			})
++		end
++		Hud.setTalkers(rows)
++	end
++	local card = cardState()
++	local key = table.concat({
++		tostring(card.title), tostring(card.text), tostring(card.toggle), tostring(card.on), tostring(card.players),
++		tostring(card.mutedCount), tostring(card.server),
++	}, "|")
++	if key ~= cardKey then
++		cardKey = key
++		Hud.setCard(card)
++	end
++	if Hud.isPanelOpen() then
++		Hud.setPanel(panelState())
++	end
++end
++
++local function publishState()
++	local v = ClientState.voice
++	if type(v) ~= "table" then
++		return
++	end
++	local fields = {
++		available = available == true,
++		connected = myDevice ~= nil,
++		on = isOnNow(),
++		hold = if explicitChoice == nil then holdReason() else "",
++		micOn = micActive(),
++		talking = myTalkingUntil > os.clock() and micActive() and serverOn(),
++		channel = channel(),
++		watching = if STANDS_BUS then spectatorsWatching() else 0,
++	}
++	local changed = false
++	for key, value in pairs(fields) do
++		if v[key] ~= value then
++			v[key] = value
++			changed = true
++		end
++	end
++	if changed and ClientState.voiceChanged then
++		ClientState.voiceChanged:Fire(v)
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- One-line tips (each shown at most Config.Voice.TipRepeats times per player; counters in settings.voiceTips)
++--------------------------------------------------------------------------------------------------------------------
++local TIPS = {
++	[0] = { text = "PROXIMITY VOICE IS ON", sub = "Players near you can hear you · turn it off or mute someone in SETTINGS › VOICE" },
++	[1] = { text = "ARENA VOICE", sub = "Only contenders within about 30 m hear you · and talking gives you away" },
++	[2] = { text = "ONLY " .. Lore.upper("Stands") .. " HEAR YOU NOW", sub = "Spectators and the lobby hear you · the arena can't" },
++}
++
++local function tipCount(id: number): number
++	local bits = math.floor(tonumber(ClientState.settings.voiceTips) or 0)
++	return (bits // (4 ^ id)) % 4
++end
++
++-- Never before the saved settings are in: the counter it saves must start from the saved one.
++local function showTip(id: number)
++	if VoiceCfg.Tips == false or tipsShown[id] or not settingsReady() then
++		return
++	end
++	if tipCount(id) >= (tonumber(VoiceCfg.TipRepeats) or 2) then
++		return
++	end
++	tipsShown[id] = true
++	local tip = TIPS[id]
++	local notifications = Controllers and Controllers.NotificationController
++	if tip and notifications and notifications.toast then
++		notifications.toast(tip.text, tip.sub, 6)
++	end
++	local sc = Controllers and Controllers.SettingsController
++	if sc and sc.set then
++		sc.set("voiceTips", math.floor(tonumber(ClientState.settings.voiceTips) or 0) + 4 ^ id)
++	end
++end
++
++local tipsReadyAt: number? = nil
++
++local function checkTips()
++	if not settingsReady() then
++		tipsReadyAt = nil
++		return
++	end
++	tipsReadyAt = tipsReadyAt or os.clock()
++	if os.clock() - tipsReadyAt < 2 then
++		return -- (SettingsController applies the saved copy first, so the tip counters start from the saved ones)
++	end
++	if available ~= true or not myDevice or not isOnNow() or not serverOn() then
++		return
++	end
++	local phase = GameState:GetAttribute("Phase")
++	local role = roleOf(player)
++	if role == "Contender" and ClientState.inArena then
++		showTip(1)
++	elseif role == "Bench" and (ClientState.spectating ~= nil or not ClientState.inArena) then
++		showTip(2)
++	elseif role == "Open" and not ClientState.inArena and (phase == "Lobby" or phase == "Intermission") then
++		showTip(0)
++	end
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- The choice (Proximity voice on / off) and the optional whisper
++--------------------------------------------------------------------------------------------------------------------
++-- Only your explicit choice is ever sent (setOn); the server reads your saved one itself.
++local function sendChoice()
++	local choice = explicitChoice
++	if choice == nil then
++		return
++	end
++	lastSendAt = os.clock()
++	local ok, err = pcall(function()
++		Net.event("VoiceRequest"):FireServer("SetVoice", choice)
++	end)
++	if not ok then
++		warnOnce("send", "Couldn't send the voice choice: " .. tostring(err))
++	end
++end
++
++-- If the server still shows something other than what you chose, send it again (at most every RESEND_AFTER seconds).
++local function checkChoice()
++	syncLocalMute()
++	local choice = explicitChoice
++	if choice == nil or serverOn() == choice or GameState:GetAttribute("VoiceMode") == "Off" then
++		return
++	end
++	if os.clock() - lastSendAt >= RESEND_AFTER then
++		sendChoice()
++	end
++end
++
++-- Until you choose this session, the Settings row shows what the server applied (shown only; never saved from here).
++local function syncDisplayedChoice()
++	if explicitChoice ~= nil then
++		return
++	end
++	local value = if serverOn() then 1 else 0
++	if (tonumber(ClientState.settings.voiceOn) or -1) ~= value then
++		ClientState.setSettings({ voiceOn = value })
++	end
++end
++
++local function sendWhisper(on: boolean)
++	if whisperHeld == on then
++		return
++	end
++	whisperHeld = on
++	pcall(function()
++		Net.event("VoiceRequest"):FireServer("Whisper", on)
++	end)
++end
++
++-- Hold to whisper (Config.Voice.Whisper): only while you're a contender with truce allies (VoiceService.setAllies).
++local function updateWhisperBinding()
++	local want = WhisperCfg.Enabled == true
++		and isOnNow()
++		and roleOf(player) == "Contender"
++		and (tonumber(player:GetAttribute("VoiceAllies")) or 0) > 0
++	if want == whisperBound then
++		return
++	end
++	whisperBound = want
++	if want then
++		Input.bind("VoiceWhisper", function(state)
++			sendWhisper(state == Enum.UserInputState.Begin)
++			return Enum.ContextActionResult.Sink
++		end, {
++			keys = WhisperCfg.Keys or { Enum.KeyCode.V, Enum.KeyCode.DPadLeft },
++			touch = { label = "WHISPER", position = UDim2.new(1, -268, 1, -234), size = 52 },
++			priority = 2000,
++		})
++	else
++		Input.unbind("VoiceWhisper")
++		task.spawn(sendWhisper, false)
++	end
++end
++
++local function refreshAll()
++	applyVolumes()
++	for _, s in pairs(speakers) do
++		applySpeaker(s)
++	end
++	updateWhisperBinding()
++	render()
++end
++
++-- The server's VoiceOn / VoiceHold changed: follow it (the mic, the display, the speakers)
++local function onServerChoice()
++	syncLocalMute()
++	syncDisplayedChoice()
++	refreshAll()
++end
++
++local function maintain()
++	guarded("listener", ensureListener)
++	guarded("profile", updateProfile)
++	guarded("device", function()
++		if not (myDevice and myDevice.Parent == player) then
++			setMyDevice(findDevice(player))
++		end
++	end)
++	for _, s in pairs(speakers) do
++		guarded("speaker", function()
++			refreshSpeaker(s)
++		end)
++	end
++	guarded("stands", updateStands)
++	guarded("whisper", updateWhisperBinding)
++	guarded("choice", checkChoice)
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Public API
++--------------------------------------------------------------------------------------------------------------------
++function VoiceController.isAvailable(): boolean
++	return available == true
++end
++
++function VoiceController.isOn(): boolean
++	return isOnNow()
++end
++
++-- Your explicit choice: the lobby card, the VOICE panel and Settings › VOICE all come here.
++function VoiceController.setOn(on: boolean)
++	if not enabled then
++		return
++	end
++	explicitChoice = on == true
++	syncLocalMute() -- OFF closes your mic on this device at once
++	sendChoice()
++	local value = if explicitChoice then 1 else 0
++	local sc = Controllers and Controllers.SettingsController
++	if sc and sc.set then
++		sc.set("voiceOn", value) -- saved (only this key is sent)
++	end
++	if (tonumber(ClientState.settings.voiceOn) or -1) ~= value then
++		ClientState.setSettings({ voiceOn = value }) -- (a SettingsController without the VOICE rows: not saved)
++	end
++	refreshAll()
++end
++
++function VoiceController.hasOwnVolume(): boolean
++	return GRAPH == "Custom" or STANDS_BUS
++end
++
++function VoiceController.isMuted(p: Player): boolean
++	return typeof(p) == "Instance" and p:IsA("Player") and muted[p.UserId] == true
++end
++
++function VoiceController.setMuted(p: Player, on: boolean)
++	if typeof(p) ~= "Instance" or not p:IsA("Player") or p == player then
++		return
++	end
++	muted[p.UserId] = if on then true else nil
++	local s = speakers[p]
++	if s then
++		applySpeaker(s)
++	end
++	render()
++end
++
++function VoiceController.mutedCount(): number
++	local n = 0
++	for userId in pairs(muted) do
++		if Players:GetPlayerByUserId(userId) then
++			n += 1
++		end
++	end
++	return n
++end
++
++function VoiceController.openPanel()
++	if not enabled then
++		return
++	end
++	local sc = Controllers and Controllers.SettingsController
++	if sc and sc.isOpen and sc.isOpen() and sc.close then
++		sc.close()
++	end
++	if sc and sc.setModal then
++		sc.setModal("VoicePanel", true) -- frees the mouse; gameplay ignores attack input meanwhile
++	end
++	Hud.setPanel(panelState())
++	Hud.openPanel()
++end
++
++function VoiceController.closePanel()
++	Hud.closePanel()
++	local sc = Controllers and Controllers.SettingsController
++	if sc and sc.setModal then
++		sc.setModal("VoicePanel", false)
++	end
++end
++
++function VoiceController.getTalkers(): { { [string]: any } }
++	local out = {}
++	for _, s in ipairs(talkers) do
++		table.insert(out, {
++			player = s.player,
++			level = s.level,
++			tag = if s.standsWire then "Spectator" elseif s.player:GetAttribute("VoiceWhisper") == true then "Whisper" else "Nearby",
++		})
++	end
++	return out
++end
++
++function VoiceController.debugState(): { [string]: any }
++	local list = {}
++	for p, s in pairs(speakers) do
++		table.insert(list, {
++			name = p.Name,
++			role = roleOf(p),
++			device = s.device ~= nil,
++			emitter = s.emitter ~= nil,
++			engineEmitter = s.engineEmitter ~= nil,
++			engineGroup = if s.engineEmitter then s.engineEmitter.AudioInteractionGroup else nil,
++			head = s.head ~= nil,
++			stands = s.standsWire ~= nil,
++			occlusion = math.floor(s.occlusion * 100 + 0.5) / 100,
++			level = math.floor(s.level * 1000 + 0.5) / 1000,
++			muted = muted[p.UserId] == true,
++			blocked = blocked[p.UserId] == true,
++			robloxMuted = robloxMuted[p.UserId] == true,
++		})
++	end
++	local l = listener
++	return {
++		enabled = enabled,
++		graph = GRAPH,
++		standsBus = STANDS_BUS,
++		available = available,
++		device = myDevice ~= nil,
++		micActive = micActive(),
++		on = isOnNow(),
++		explicit = explicitChoice,
++		serverOn = serverOn(),
++		hold = holdReason(),
++		volume = volumeSetting(),
++		profile = profileName,
++		stands = standsActive,
++		listenerAt = if l and l.Parent then l.Parent:GetFullName() else "Roblox's own",
++		channel = channel(),
++		speakers = list,
++	}
++end
++
++--------------------------------------------------------------------------------------------------------------------
++-- Lifecycle
++--------------------------------------------------------------------------------------------------------------------
++local function mountCard()
++	local card = Hud.getCard()
++	if not card then
++		return
++	end
++	local lobby = Controllers and Controllers.LobbyController
++	if lobby and type(lobby.mountCard) == "function" then
++		lobby.mountCard(card, 7)
++		return
++	end
++	-- an older LobbyController without mountCard: put the card at the bottom of the lobby's left column ourselves
++	task.spawn(function()
++		local gui = player:WaitForChild("PlayerGui"):WaitForChild("Lobby", 30)
++		local root = gui and gui:FindFirstChild("Root")
++		local brand = root and root:FindFirstChild("Brand")
++		if brand then
++			card.LayoutOrder = 7
++			card.Parent = brand
++		end
++	end)
++end
++
++-- A client can only ask about its own player; the call can fail on an HTTP error, so it is retried twice.
++local function checkAvailable()
++	for attempt = 1, 3 do
++		local ok, result = pcall(function()
++			return VoiceChatService:IsVoiceEnabledForUserIdAsync(player.UserId)
++		end)
++		if ok then
++			available = result == true or myDevice ~= nil
++			break
++		end
++		if myDevice then
++			available = true
++			break
++		end
++		if attempt < 3 then
++			task.wait(5 * attempt)
++		end
++	end
++	checkDone = true
++end
++
++-- Roblox's own block list and mute events, honoured in every graph (a blocked player is silent in our chain and the
++-- stands' bus, and never listed as talking). The CoreScripts register these a little after the game starts.
++local function hookRobloxLists()
++	local function idOf(value: any): number?
++		if typeof(value) == "Instance" and value:IsA("Player") then
++			return value.UserId
++		end
++		return tonumber(value)
++	end
++	local function changed()
++		for _, s in pairs(speakers) do
++			applySpeaker(s)
++		end
++		render()
++	end
++	local events = {
++		{ name = "PlayerBlockedEvent", list = blocked, on = true },
++		{ name = "PlayerUnblockedEvent", list = blocked, on = false },
++		{ name = "PlayerMutedEvent", list = robloxMuted, on = true },
++		{ name = "PlayerUnmutedEvent", list = robloxMuted, on = false },
++	}
++	task.spawn(function()
++		local haveIds = false
++		local hooked: { [string]: boolean } = {}
++		for _ = 1, 30 do
++			if not haveIds then
++				local ok, ids = pcall(function()
++					return StarterGui:GetCore("GetBlockedUserIds")
++				end)
++				if ok and type(ids) == "table" then
++					haveIds = true
++					for _, value in ipairs(ids) do
++						local id = idOf(value)
++						if id then
++							blocked[id] = true
++						end
++					end
++					guarded("blocks", changed)
++				end
++			end
++			local all = haveIds
++			for _, spec in ipairs(events) do
++				if not hooked[spec.name] then
++					local ok, event = pcall(function()
++						return StarterGui:GetCore(spec.name)
++					end)
++					if ok and typeof(event) == "Instance" and event:IsA("BindableEvent") then
++						hooked[spec.name] = true
++						event.Event:Connect(function(who)
++							local id = idOf(who)
++							if id then
++								spec.list[id] = if spec.on then true else nil
++								guarded("blocks", changed)
++							end
++						end)
++					else
++						all = false
++					end
++				end
++			end
++			if all then
++				return
++			end
++			task.wait(1)
++		end
++		warnOnce("core", "Roblox's block list or mute events weren't available; only this game's own mutes apply here.")
++	end)
++end
++
++function VoiceController.Init(registry)
++	Controllers = registry
++	enabled = VoiceCfg.Enabled == true
++end
++
++function VoiceController.Start()
++	if not enabled then
++		return
++	end
++	startedAt = os.clock()
++	buildGraph()
++	guarded("listener", ensureListener)
++	Hud.build({
++		onToggle = function()
++			VoiceController.setOn(not isOnNow())
++		end,
++		onOpenPanel = VoiceController.openPanel,
++		onClosePanel = VoiceController.closePanel,
++		onMute = function(p: Player, on: boolean)
++			VoiceController.setMuted(p, on)
++		end,
++		onBlock = function(p: Player)
++			pcall(function()
++				StarterGui:SetCore("PromptBlockPlayer", p) -- Roblox's own block (voice and text), with its confirmation
++			end)
++		end,
++		onServer = function(action: string)
++			pcall(function()
++				Net.event("VoiceRequest"):FireServer(if action == "Leave" then "LeaveVoiceServer" else "JoinVoiceServer")
++			end)
++		end,
++	})
++	mountCard()
++	hookRobloxLists()
++
++	for _, p in ipairs(Players:GetPlayers()) do
++		trackPlayer(p)
++	end
++	Players.PlayerAdded:Connect(trackPlayer)
++	Players.PlayerRemoving:Connect(untrackPlayer)
++	player.ChildAdded:Connect(function(child)
++		if child:IsA("AudioDeviceInput") then
++			guarded("device", function()
++				setMyDevice(findDevice(player))
++				render()
++			end)
++		end
++	end)
++	player.ChildRemoved:Connect(function(child)
++		if child == myDevice then
++			guarded("device", function()
++				setMyDevice(findDevice(player))
++				render()
++			end)
++		end
++	end)
++	guarded("device", function()
++		setMyDevice(findDevice(player))
++	end)
++	task.spawn(function()
++		checkAvailable()
++		guarded("render", render)
++	end)
++
++	for _, part in ipairs(CollectionService:GetTagged("VoiceZone")) do
++		addZone(part)
++	end
++	CollectionService:GetInstanceAddedSignal("VoiceZone"):Connect(addZone)
++	CollectionService:GetInstanceRemovedSignal("VoiceZone"):Connect(removeZone)
++
++	local function onContext()
++		guarded("context", function()
++			ensureListener()
++			updateProfile()
++			updateStands()
++			updateWhisperBinding()
++			render()
++		end)
++	end
++	ClientState.spectateChanged:Connect(onContext)
++	ClientState.lifeChanged:Connect(onContext)
++	ClientState.settingsChanged:Connect(function()
++		guarded("settings", refreshAll)
++	end)
++	player:GetAttributeChangedSignal("VoiceRole"):Connect(onContext)
++	player:GetAttributeChangedSignal("VoiceAllies"):Connect(function()
++		guarded("whisper", updateWhisperBinding)
++	end)
++	player:GetAttributeChangedSignal("VoiceWhisper"):Connect(function()
++		guarded("render", render)
++	end)
++	for _, name in ipairs({ "VoiceOn", "VoiceHold" }) do
++		player:GetAttributeChangedSignal(name):Connect(function()
++			guarded("choice", onServerChoice)
++		end)
++	end
++	player:GetAttributeChangedSignal("SettingsLoaded"):Connect(function()
++		guarded("render", render)
++	end)
++	GameState:GetAttributeChangedSignal("Phase"):Connect(onContext)
++	GameState:GetAttributeChangedSignal("VoiceMode"):Connect(function()
++		guarded("render", render)
++	end)
++	local sc = Controllers and Controllers.SettingsController
++	if sc and sc.menuChanged then
++		sc.menuChanged:Connect(function()
++			guarded("render", render)
++		end)
++	end
++	Input.deviceChanged:Connect(function()
++		Hud.applyLayout()
++	end)
++	local camera = workspace.CurrentCamera
++	if camera then
++		camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
++			Hud.applyLayout()
++		end)
++	end
++
++	guarded("choice", onServerChoice)
++	onContext()
++
++	local function frameStep(dt: number)
++		followCamera()
++		moveAnchors()
++		smoothOcclusion(dt)
++		Hud.animate(dt)
++	end
++	RunService.RenderStepped:Connect(function(dt: number)
++		local ok, err = pcall(frameStep, dt)
++		if not ok then
++			warnOnce("frame:" .. tostring(err), "frame failed: " .. tostring(err))
++		end
++	end)
++
++	local lastRays, lastMaintain, lastTips = 0, 0, 0
++	while true do
++		local now = os.clock()
++		guarded("talk", talkPass)
++		if now - lastRays >= math.max(0.05, tonumber(Occ.Interval) or 0.2) then
++			lastRays = now
++			guarded("occlusion", occlusionPass)
++		end
++		if now - lastMaintain >= 0.5 then
++			lastMaintain = now
++			maintain() -- (every step guarded on its own)
++		end
++		if now - lastTips >= 1 then
++			lastTips = now
++			guarded("tips", checkTips)
++		end
++		guarded("state", publishState)
++		guarded("render", render)
++		if VoiceCfg.Debug == true and now - lastDebug >= 10 then
++			lastDebug = now
++			local d = VoiceController.debugState()
++			print(string.format("[VoiceController] %s · %s graph · profile %s · listener %s · %d speakers · stands %s",
++				tostring(d.channel), tostring(d.graph), tostring(d.profile), tostring(d.listenerAt), #d.speakers, tostring(d.stands)))
++		end
++		task.wait(TICK)
++	end
++end
++
++return VoiceController

@@ -32,6 +32,7 @@ $prev    = "art/previews"          # run from the repo root
 & $blender --background --factory-startup --python art/blender/buildings.py -- $out $prev   # Buildings.glb + Props.glb
 & $blender --background --factory-startup --python art/blender/items.py     -- $out $prev   # Items.glb
 & $blender --background --factory-startup --python art/blender/arms.py      -- $out $prev   # Arms.glb
+& $blender --background --factory-startup --python art/blender/arms_faceted.py -- $out $prev   # ArmsFaceted.glb (section 12)
 # review sheets made from the exported GLBs (optional; ~1 min per category)
 & $blender --background --factory-startup --python art/blender/lineup.py    -- $out $prev
 ```
@@ -1402,3 +1403,71 @@ same message appeared in another agent's playtest for `77422452927444`, the pack
 Campfire / Tent cloth SurfaceAppearances (world set). Neither fix-round playtest logged a failure for any
 `rbxassetid`. The first one logged `rbxassethash://3d4aec1366ed452a9bf9a6d30d78988e` "Request asset was not found",
 which was already in an earlier playtest's log and was not traced.
+
+## 12. ArmsFaceted - faceted first-person hands (2026-11-14)
+
+The owner's brief after the block fists, the leather gloves and the avatar arms: "dont make the hands like before js
+make them one blockish realistic ish". `arms_faceted.py` builds bare hands and forearms with real proportions out of
+chunky flat-shaded facets, in the world's style A (docs/design/ArtStyle.md rule 2: 0.1-0.4-stud facets on items and
+hands; rules 4-6 painted colour, matte, values). It is a drop-in sibling of the section 4 Arms kit: same asset names,
+pivots, chain and attachments, in its own GLB.
+
+```powershell
+& $blender --background --factory-startup --python art/blender/arms_faceted.py -- $out $prev [stages]   # ~3 min
+#   stages: build,preview (default) | build | preview | preview:sheet / :tones / :pieces / :compare | quick (look-dev)
+#   env ARMS_FACETED_WORK = work folder (default %TEMP%/ArmsFaceted_build); ARMS_FACETED_ITEMS = ItemsReal.glb
+```
+
+- **Output:** `ArmsFaceted.glb` (2.21 MB, 12 assets, 14 MeshParts, tangents on every primitive, metallicFactor 0),
+  `ArmsFaceted.manifest.json` (+ copy in `art/manifests/`), and `textures/ArmsFaceted/`: Skin and Sleeve sets, each
+  1024 px Color, Normal (OpenGL) and grayscale Rough (6 upload PNGs; `glb_only/*_MR.png` are never uploaded).
+- **Pieces** (world scale; L_ = exact X-mirrors that reuse the R_ texels; every skin is one closed manifold shell):
+
+  | Asset | Parts (tris) | Attachments (Roblox space, relative to the pivot) |
+  |---|---|---|
+  | R_/L_UpperArm | Sleeve 198 | Shoulder (0,0,0); Elbow (0, 0.95, 0) |
+  | R_/L_Forearm | Sleeve 236, Skin 140 | Elbow (0,0,0); Wrist (0, 0.85, 0) |
+  | R_/L_HandGrip | Skin 1,020 | Wrist; Grip (+-0.0131, 0.2573, 0.1175), look (+-0.985, 0.174, 0), up (-+0.174, 0.985, 0): unchanged from Arms |
+  | R_/L_HandOpen | Skin 738 | Wrist; Palm (0, 0.18, 0.0631), look out of the palm (Roblox +Z), up toward the fingers |
+  | R_/L_HandFist | Skin 870 | Wrist; Knuckles (+-0.0663, 0.3225, 0.031), look = punch (+Y), up = back of the hand |
+  | R_/L_HandRelaxed | Skin 730 | Wrist; Palm (0, 0.18, 0.0631). The idle shape for empty hands (fists only while punching) |
+
+- **Build:**
+  - Skin rings have *fixed face directions*, so every band between two rings is one flat facet (no twisted quads that
+    crumple into small triangles). Fingers: 6 sides, three phalanges, one band per phalanx, knuckle bulges on bent
+    joints, chamfered padded tips, no nails.
+  - The palm is the convex hull of a few 12-sided rings (a three-plane back, bevelled sides, a three-plane palm), so
+    the back of the hand and the palm are broad planes (area-weighted median facet ~0.13 stud).
+  - Thenar and web are ONE convex wedge from the thumb side of the palm to the thumb's MCP; the thumb tube starts
+    inside it and tapers over its two phalanges to a padded tip. Palm, wedge, thumb, fingers (and the hidden core of
+    the fist) are unioned into one closed skin per hand with an exact boolean, the cut lines tidied (welded, slivers
+    collapsed, coplanar neighbours merged) while the skin stays manifold.
+  - Painting is one value per modelled facet (all triangles of a face share it), so no triangle reads on its own.
+- **Wrist joint (no seam):** the forearm's wrist skin ends at the pivot in exactly the hands' wrist ring, so a straight
+  wrist is one continuous skin. Behind the pivot every hand has a rolling "heel" on arcs centred on the pivot; past
+  the pivot the forearm has a ball on the same arcs, 0.002 inside. When the wrist flexes or deviates (0-30 degrees)
+  the heel rolls along its own circle, so the stretched side stays one smooth surface and the other side creases.
+- **Grip:** the fingers are solved to wrap as far round the old 0.15-stud handle as their length allows (pads pressing
+  up to 0.026 into it), the thumb the other way onto the index. Fingertip wrap angles 150-176 degrees round the handle
+  axis (180 = the far side), thumb tip 190; rays from the Grip axis meet skin over 340 / 300 / 260 / 230 degrees at
+  the index / middle / ring / little finger (round 1: 120-180 at the ring and little). With the Grip fixed (the
+  handle's top already inside the palm, its axis 0.12 under the knuckles) the ring and little fingers are too short to
+  go further without burying the pads.
+- **Tinting:** both ColorMaps are neutral light bases (facet values +-3.5% per phalanx, +-3% per facet, warmer
+  knuckles and tips, lighter palms, warm two-radius AO never below 0.61). Set `SurfaceAppearance.Color` to the avatar's
+  arm colour on every `*_Skin` part (BodyColors Right/LeftArmColor3) and to the sleeve colour on `*_Sleeve` (default
+  charcoal 96, 88, 80). Checked in Light orange, Nougat and Reddish brown (`skin_tones.png`).
+- **Every part:** non-colliding, CanQuery/CanTouch off, CollisionFidelity Box, CastShadow off (as Config.Viewmodel).
+- **Previews** in `previews/ArmsFaceted/`, rendered from the exported GLB with the ItemsReal sword, bow, arrow and
+  apple, Khronos PBR Neutral view (AgX's high-contrast look made the skin pale and pinkish-grey):
+  `firstperson_sheet.png` (eye at the camera, 70 degree FOV, shoulders 0.5 below and 0.4 out: 1-2 the idle low in the
+  corners at midday and dusk, 3 punch, 4 sword, 5 bow at low ready with the string hand hooking, 6 apple),
+  `skin_tones.png` (punch fists at midday, the idle at dusk), `pieces.png` (every piece, front and back) and
+  `compare.png` (the three past versions from `previews/Viewmodel/HandVersions.jpg` and the new set).
+- **Round 2 (art-direction fixes, 2026-11-14):** the idle replaces the raised fists as the first view; the wrist seam
+  is gone (shared ring + rolling heel and ball); the thumb root is one wedge with no shell intersections; the grip
+  closes round its handle; the bow view shows both hands (string-hand wrist 3 degrees); facets are broader (round 1:
+  550-690 visible facets per hand, area-weighted median 0.07-0.08 stud; now 290-450 and 0.10-0.11).
+- **Not done here:** no Studio import, no upload, no game code. Check it in the StyleTest diorama and in a playtest
+  at 14:00 and 17:30 before it replaces the avatar arms (ArtStyle rule 10), and check the L_ normal maps (the L_
+  tangents have w = -1, correct glTF, not yet verified in Roblox).

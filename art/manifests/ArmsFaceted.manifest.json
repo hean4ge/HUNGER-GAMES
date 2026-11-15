@@ -1,0 +1,1793 @@
+{
+ "schema": "LS-Real-1 (viewmodel arms)",
+ "category": "ArmsFaceted",
+ "glb": "ArmsFaceted.glb",
+ "glbs": [
+  {
+   "file": "ArmsFaceted.glb",
+   "assets": [
+    "R_UpperArm",
+    "R_Forearm",
+    "R_HandGrip",
+    "R_HandOpen",
+    "R_HandFist",
+    "R_HandRelaxed",
+    "L_UpperArm",
+    "L_Forearm",
+    "L_HandGrip",
+    "L_HandOpen",
+    "L_HandFist",
+    "L_HandRelaxed"
+   ],
+   "bytes": 2211040,
+   "sizeMB": 2.21,
+   "embeddedImages": [
+    "ArmsFaceted_Skin_Normal",
+    "ArmsFaceted_Skin_Color",
+    "ArmsFaceted_Skin_MR",
+    "ArmsFaceted_Sleeve_Normal",
+    "ArmsFaceted_Sleeve_Color",
+    "ArmsFaceted_Sleeve_MR"
+   ]
+  }
+ ],
+ "units": "1 Blender unit = 1 Roblox stud (world scale)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y). Arm pieces: origin = proximal joint, bone axis = Roblox +Y (UpVector), LookVector (-Z) = back of the arm / hand, thumb +X on R_ pieces; L_ = exact X-mirrors.",
+ "chain": {
+  "UpperArm.Elbow": [
+   0,
+   0.95,
+   0
+  ],
+  "Forearm.Wrist": [
+   0,
+   0.85,
+   0
+  ],
+  "note": "UpperArm.Elbow -> Forearm origin; Forearm.Wrist -> hand origin; bend the elbow toward Roblox +Z (inner elbow)."
+ },
+ "textureFolder": "textures/ArmsFaceted",
+ "uploadTextures": [
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+   "kind": "color",
+   "set": "ArmsFaceted_Skin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB"
+  },
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+   "kind": "normal",
+   "set": "ArmsFaceted_Skin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB"
+  },
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+   "kind": "roughness",
+   "set": "ArmsFaceted_Skin",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray"
+  },
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+   "kind": "color",
+   "set": "ArmsFaceted_Sleeve",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB"
+  },
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+   "kind": "normal",
+   "set": "ArmsFaceted_Sleeve",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "RGB"
+  },
+  {
+   "file": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+   "kind": "roughness",
+   "set": "ArmsFaceted_Sleeve",
+   "size": [
+    1024,
+    1024
+   ],
+   "bitDepth": 8,
+   "channels": "gray"
+  }
+ ],
+ "glbOnlyTextures": [
+  "textures/ArmsFaceted/glb_only/ArmsFaceted_Skin_MR.png",
+  "textures/ArmsFaceted/glb_only/ArmsFaceted_Sleeve_MR.png"
+ ],
+ "textureSets": {
+  "ArmsFaceted_Skin": {
+   "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+   "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+   "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "coverage": 0.46,
+   "meanColorSRGB": [
+    237,
+    228,
+    218
+   ],
+   "aoTermMin": 0.611,
+   "roughness": [
+    0.8,
+    0.86
+   ]
+  },
+  "ArmsFaceted_Sleeve": {
+   "colorMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+   "normalMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+   "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+   "metalnessMap": null,
+   "size": 1024,
+   "coverage": 0.682,
+   "meanColorSRGB": [
+    220,
+    220,
+    222
+   ],
+   "aoTermMin": 0.64,
+   "roughness": [
+    0.92,
+    0.95
+   ]
+  }
+ },
+ "tinting": {
+  "skin": "Every *_Skin part: SurfaceAppearance.Color = the player's arm colour (BodyColors.RightArmColor3 on R_, LeftArmColor3 on L_). The ColorMap is a neutral light base (mean sRGB [237, 228, 218]), so the facet values, warm knuckles and AO multiply through any tone.",
+  "sleeve": "Every *_Sleeve part: SurfaceAppearance.Color = [96, 88, 80] (charcoal) by default; any colour works (neutral light ColorMap, mean sRGB [220, 220, 222]).",
+  "checkedTones": {
+   "Light orange": [
+    234,
+    184,
+    146
+   ],
+   "Nougat": [
+    204,
+    142,
+    105
+   ],
+   "Reddish brown": [
+    105,
+    64,
+    40
+   ]
+  },
+  "fallback": "Without a SurfaceAppearance, MeshPart.Color = the tone (the facets still read from the flat shading)."
+ },
+ "poses": {
+  "HandGrip": {
+   "jointAnglesDeg": {
+    "Index": [
+     45.0,
+     51.0,
+     37.4
+    ],
+    "Middle": [
+     57.0,
+     54.0,
+     38.8
+    ],
+    "Ring": [
+     58.0,
+     51.0,
+     39.0
+    ],
+    "Little": [
+     40.0,
+     57.0,
+     31.6
+    ],
+    "Thumb": [
+     0.0,
+     1.2,
+     32.3
+    ]
+   },
+   "thumbClearance": "Index -0.010, Middle 0.031, Ring 0.089",
+   "thumbPose": {
+    "az": 28.02,
+    "el": 43.93,
+    "roll": -49.07,
+    "mcp": 1.21,
+    "ip": 32.33
+   },
+   "fistCentreOnHandle": [
+    0.01,
+    0.2568,
+    0.1175
+   ],
+   "wrapAngleDeg": {
+    "note": "round the handle axis from the back-of-hand side: 90 = finger side, 180 = far side",
+    "fingertips": {
+     "Index": 156.9,
+     "Middle": 175.6,
+     "Ring": 174.3,
+     "Little": 150.0
+    },
+    "thumbTip": 190.0
+   },
+   "skinCoverageDeg": {
+    "Index": 340,
+    "Middle": 300,
+    "Ring": 260,
+    "Little": 230
+   }
+  },
+  "HandOpen": {
+   "jointAnglesDeg": {
+    "Index": [
+     22.0,
+     28.0,
+     14.0
+    ],
+    "Middle": [
+     25.0,
+     31.0,
+     15.0
+    ],
+    "Ring": [
+     28.0,
+     34.0,
+     16.0
+    ],
+    "Little": [
+     32.0,
+     38.0,
+     17.0
+    ],
+    "Thumb": [
+     0.0,
+     12.0,
+     12.0
+    ]
+   },
+   "thumbClearance": "Index 0.088, Middle 0.124, Ring 0.161",
+   "thumbPose": {
+    "az": 40.0,
+    "el": 26.0,
+    "roll": 36.0,
+    "mcp": 12.0,
+    "ip": 12.0
+   }
+  },
+  "HandFist": {
+   "jointAnglesDeg": {
+    "Index": [
+     86.0,
+     106.0,
+     66.0
+    ],
+    "Middle": [
+     89.0,
+     108.0,
+     66.0
+    ],
+    "Ring": [
+     91.0,
+     108.0,
+     64.0
+    ],
+    "Little": [
+     94.0,
+     104.0,
+     60.0
+    ],
+    "Thumb": [
+     0.0,
+     44.0,
+     45.0
+    ]
+   },
+   "thumbClearance": "Index 0.021, Middle 0.019, Ring 0.024",
+   "thumbPose": {
+    "az": 21.0,
+    "el": 53.0,
+    "roll": 6.0,
+    "mcp": 44.0,
+    "ip": 45.0
+   }
+  },
+  "HandRelaxed": {
+   "jointAnglesDeg": {
+    "Index": [
+     12.0,
+     18.0,
+     9.0
+    ],
+    "Middle": [
+     15.0,
+     22.0,
+     11.0
+    ],
+    "Ring": [
+     19.0,
+     27.0,
+     13.0
+    ],
+    "Little": [
+     23.0,
+     32.0,
+     15.0
+    ],
+    "Thumb": [
+     0.0,
+     12.0,
+     16.0
+    ]
+   },
+   "thumbClearance": "Index 0.062, Middle 0.088, Ring 0.124",
+   "thumbPose": {
+    "az": 22.0,
+    "el": 24.0,
+    "roll": 45.0,
+    "mcp": 12.0,
+    "ip": 16.0
+   }
+  }
+ },
+ "import": [
+  "Import the GLB; each asset root is a Model of MeshParts <Asset>_<Role>. Re-centre with 'origin' (WorldPivot = CFrame.new(origin), then PivotTo); measure and undo the importer's 180-degree turn about Y as ItemAssets does.",
+  "Give every part ONE SurfaceAppearance from its 'surfaceAppearance' block (ColorMap, NormalMap, RoughnessMap; MetalnessMap empty; AlphaMode Overlay); set its Color per 'tinting' at runtime.",
+  "Every part: CanCollide/CanQuery/CanTouch false, CastShadow false (Config.Viewmodel.ArmShadows may turn it on), CollisionFidelity Box, Anchored, Material = robloxMaterial, Color = rgb (fallback).",
+  "Attachments: create each one under the asset's first part with WorldCFrame = pivot * CFrame.lookAt(position, position + look, up) (art/README.md section 4).",
+  "Hold items by aligning the item's Grip frame with R_/L_HandGrip.Grip (item:PivotTo(handGrip.WorldCFrame * itemGripLocal:Inverse())). Round food sits on Palm: centre = Palm + look * radius."
+ ],
+ "glbCheck": {
+  "primitives": 14,
+  "meshes": 14,
+  "images": [
+   "ArmsFaceted_Skin_Normal",
+   "ArmsFaceted_Skin_Color",
+   "ArmsFaceted_Skin_MR",
+   "ArmsFaceted_Sleeve_Normal",
+   "ArmsFaceted_Sleeve_Color",
+   "ArmsFaceted_Sleeve_MR"
+  ],
+  "materials": [
+   "ArmsFaceted_Skin",
+   "ArmsFaceted_Sleeve"
+  ],
+  "bytes": 2211040,
+  "tangentsOnEveryPrimitive": true,
+  "problems": []
+ },
+ "styleRules": [
+  "Faceted realism (docs/design/ArtStyle.md style A): real hand and forearm proportions built from chunky flat-shaded facets, like a carved figure. Skin rings have FIXED face directions, so every band between two rings is a flat facet (no twisted quads crumpling into small triangles); the palm and the thenar-and-web wedge are convex hulls (every face one plane). 6-sided fingers and thumb with one band per phalanx, a 12-sided palm block (three-plane back and palm, bevelled sides), 10-sided sleeves; no nails or wrinkles.",
+  "One skin per hand: palm, thenar-and-web wedge, thumb and fingers (and the hidden core of the fist) are unioned into one closed mesh (exact boolean), so the parts meet in clean crease lines with no shell intersections.",
+  "Painted, not textured: one flat value per modelled facet (+-3.5% per phalanx or panel, +-3% per facet, slight warm/cool drift; all triangles of a face share it), warmer knuckles and fingertips, lighter palms; two-radius AO multiplied in (never below half the painted value; warm on the skin); a 0.0085-0.013-stud bevel normal only rounds the facet edges.",
+  "Matte: roughness 0.80-0.86 skin, 0.92-0.95 sleeve; metalness 0.",
+  "Tintable: both ColorMaps are neutral light bases. SurfaceAppearance.Color multiplies them: the avatar's arm colour on the Skin parts, any colour on the Sleeve parts (default charcoal)."
+ ],
+ "assets": [
+  {
+   "name": "R_UpperArm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "UpperArm"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the shoulder; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Sleeve from the shoulder (y=0) to the elbow (y=0.95) with a faceted elbow cap centred on the elbow pivot, so the joint stays closed when the forearm bends toward Roblox +Z. Attachments: Shoulder (origin), Elbow (0, 0.95, 0).",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "shoulder",
+   "boundsMin": [
+    -0.1557,
+    -0.05,
+    -0.148
+   ],
+   "boundsMax": [
+    0.1617,
+    1.0683,
+    0.153
+   ],
+   "size": [
+    0.317,
+    1.118,
+    0.301
+   ],
+   "tris": 198,
+   "parts": [
+    {
+     "name": "R_UpperArm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      82,
+      75,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 198,
+     "textureSet": "ArmsFaceted_Sleeve",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       96,
+       88,
+       80
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = sleeve colour (default charcoal)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Shoulder": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Elbow": {
+     "position": [
+      0.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    0.1557,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_Forearm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "Forearm"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the elbow; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Sleeve from the elbow to a clean cuff band (y 0.70-0.79), then the bare wrist (Skin) to the wrist pivot (y=0.85), whose last ring IS every hand's wrist ring, so at a straight wrist the skin runs on into the hand without a step. Past the pivot it ends in a ball on arcs centred on the pivot (inside the hand), which the hand's rolling heel slides over when the wrist bends up to 30 degrees. Attachments: Elbow (origin), Wrist (0, 0.85, 0).",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "elbow",
+   "boundsMin": [
+    -0.1392,
+    -0.04,
+    -0.121
+   ],
+   "boundsMax": [
+    0.14,
+    0.902,
+    0.1253
+   ],
+   "size": [
+    0.279,
+    0.942,
+    0.246
+   ],
+   "tris": 376,
+   "parts": [
+    {
+     "name": "R_Forearm_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 140,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.RightArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "R_Forearm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      82,
+      75,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 236,
+     "textureSet": "ArmsFaceted_Sleeve",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       96,
+       88,
+       80
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = sleeve colour (default charcoal)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Elbow": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Wrist": {
+     "position": [
+      0.0,
+      0.85,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    0.9567,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandGrip",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "Hand",
+    "Grip"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Hand closed round a 0.15-stud handle (power grip; Items handles are 0.10-0.19 across); also hooks the bow string. The fingers are solved to wrap as far round the handle as they reach (pads pressing up to 0.026 into it) and the thumb wraps the other way onto the index finger. Grip = on the handle axis at the centre of the fist: look = handle axis toward the thumb / index side, up = toward the fingers. Same Grip as the previous kit, so items line up unchanged.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1438,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1755,
+    0.3944,
+    0.2313
+   ],
+   "size": [
+    0.319,
+    0.446,
+    0.292
+   ],
+   "tris": 1020,
+   "parts": [
+    {
+     "name": "R_HandGrip_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 1020,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.RightArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Grip": {
+     "position": [
+      0.0131,
+      0.2573,
+      0.1175
+     ],
+     "look": [
+      0.9848,
+      0.1736,
+      -0.0
+     ],
+     "up": [
+      -0.1736,
+      0.9848,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    1.7405,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandOpen",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "Hand",
+    "Open"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Cupped open hand that cradles an apple or a bottle on the palm (fingers curled 22-38 degrees at each joint, thumb out to the side). Palm = centre of the palm surface, look = out of the palm, up = toward the fingers; a round item of radius r sits with its centre at Palm + look * r.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1534,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.2087,
+    0.4843,
+    0.2067
+   ],
+   "size": [
+    0.362,
+    0.536,
+    0.268
+   ],
+   "tris": 738,
+   "parts": [
+    {
+     "name": "R_HandOpen_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 738,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.RightArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      0.0,
+      0.18,
+      0.0631
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    2.5694,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandFist",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "Hand",
+    "Fist"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Tight punching fist, thumb across the index and middle fingers. Use it only while punching. Knuckles = on the striking knuckles (index + middle proximal phalanges), look = punch direction, up = back of the hand.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1462,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.157,
+    0.3225,
+    0.2344
+   ],
+   "size": [
+    0.303,
+    0.374,
+    0.295
+   ],
+   "tris": 870,
+   "parts": [
+    {
+     "name": "R_HandFist_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 870,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.RightArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Knuckles": {
+     "position": [
+      0.0663,
+      0.3225,
+      0.031
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    3.4243,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "R_HandRelaxed",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Right",
+    "Faceted",
+    "Hand",
+    "Relaxed"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on +X. Relaxed idle hand, the shape for empty hands (the owner: fists only while punching): fingers in an easy cascade, more curl toward the little finger, thumb resting by the index. Palm as on HandOpen.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1523,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1632,
+    0.5234,
+    0.2044
+   ],
+   "size": [
+    0.315,
+    0.575,
+    0.265
+   ],
+   "tris": 730,
+   "parts": [
+    {
+     "name": "R_HandRelaxed_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 730,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.RightArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      0.0,
+      0.18,
+      0.0631
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    4.2336,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_UpperArm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "UpperArm"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the shoulder; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Sleeve from the shoulder (y=0) to the elbow (y=0.95) with a faceted elbow cap centred on the elbow pivot, so the joint stays closed when the forearm bends toward Roblox +Z. Attachments: Shoulder (origin), Elbow (0, 0.95, 0).",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "shoulder",
+   "boundsMin": [
+    -0.1617,
+    -0.05,
+    -0.148
+   ],
+   "boundsMax": [
+    0.1557,
+    1.0683,
+    0.153
+   ],
+   "size": [
+    0.317,
+    1.118,
+    0.301
+   ],
+   "tris": 198,
+   "parts": [
+    {
+     "name": "L_UpperArm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      82,
+      75,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 198,
+     "textureSet": "ArmsFaceted_Sleeve",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       96,
+       88,
+       80
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = sleeve colour (default charcoal)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Shoulder": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Elbow": {
+     "position": [
+      -0.0,
+      0.95,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    5.0585,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_Forearm",
+   "kind": "ViewmodelArm",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "Forearm"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the elbow; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Sleeve from the elbow to a clean cuff band (y 0.70-0.79), then the bare wrist (Skin) to the wrist pivot (y=0.85), whose last ring IS every hand's wrist ring, so at a straight wrist the skin runs on into the hand without a step. Past the pivot it ends in a ball on arcs centred on the pivot (inside the hand), which the hand's rolling heel slides over when the wrist bends up to 30 degrees. Attachments: Elbow (origin), Wrist (0, 0.85, 0).",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "elbow",
+   "boundsMin": [
+    -0.14,
+    -0.04,
+    -0.121
+   ],
+   "boundsMax": [
+    0.1392,
+    0.902,
+    0.1253
+   ],
+   "size": [
+    0.279,
+    0.942,
+    0.246
+   ],
+   "tris": 376,
+   "parts": [
+    {
+     "name": "L_Forearm_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 140,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.LeftArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    },
+    {
+     "name": "L_Forearm_Sleeve",
+     "role": "Sleeve",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      82,
+      75,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 236,
+     "textureSet": "ArmsFaceted_Sleeve",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Sleeve_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       96,
+       88,
+       80
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = sleeve colour (default charcoal)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Elbow": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Wrist": {
+     "position": [
+      -0.0,
+      0.85,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    5.8542,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandGrip",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "Hand",
+    "Grip"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Hand closed round a 0.15-stud handle (power grip; Items handles are 0.10-0.19 across); also hooks the bow string. The fingers are solved to wrap as far round the handle as they reach (pads pressing up to 0.026 into it) and the thumb wraps the other way onto the index finger. Grip = on the handle axis at the centre of the fist: look = handle axis toward the thumb / index side, up = toward the fingers. Same Grip as the previous kit, so items line up unchanged.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1755,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1438,
+    0.3944,
+    0.2313
+   ],
+   "size": [
+    0.319,
+    0.446,
+    0.292
+   ],
+   "tris": 1020,
+   "parts": [
+    {
+     "name": "L_HandGrip_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 1020,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.LeftArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Grip": {
+     "position": [
+      -0.0131,
+      0.2573,
+      0.1175
+     ],
+     "look": [
+      -0.9848,
+      0.1736,
+      -0.0
+     ],
+     "up": [
+      0.1736,
+      0.9848,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    6.6689,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandOpen",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "Hand",
+    "Open"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Cupped open hand that cradles an apple or a bottle on the palm (fingers curled 22-38 degrees at each joint, thumb out to the side). Palm = centre of the palm surface, look = out of the palm, up = toward the fingers; a round item of radius r sits with its centre at Palm + look * r.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.2087,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1534,
+    0.4843,
+    0.2067
+   ],
+   "size": [
+    0.362,
+    0.536,
+    0.268
+   ],
+   "tris": 738,
+   "parts": [
+    {
+     "name": "L_HandOpen_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 738,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.LeftArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      -0.0,
+      0.18,
+      0.0631
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      -0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    7.5215,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandFist",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "Hand",
+    "Fist"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Tight punching fist, thumb across the index and middle fingers. Use it only while punching. Knuckles = on the striking knuckles (index + middle proximal phalanges), look = punch direction, up = back of the hand.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.157,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1462,
+    0.3225,
+    0.2344
+   ],
+   "size": [
+    0.303,
+    0.374,
+    0.295
+   ],
+   "tris": 870,
+   "parts": [
+    {
+     "name": "L_HandFist_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 870,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.LeftArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Knuckles": {
+     "position": [
+      -0.0663,
+      0.3225,
+      0.031
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "origin": [
+    8.3319,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "L_HandRelaxed",
+   "kind": "ViewmodelHand",
+   "tags": [
+    "Viewmodel",
+    "Left",
+    "Faceted",
+    "Hand",
+    "Relaxed"
+   ],
+   "notes": "Bone axis = Roblox +Y (UpVector), pivot (origin) at the wrist; LookVector (Roblox -Z) = back of the arm / hand; thumb on -X (exact X-mirror of the R_ piece). Relaxed idle hand, the shape for empty hands (the owner: fists only while punching): fingers in an easy cascade, more curl toward the little finger, thumb resting by the index. Palm as on HandOpen.",
+   "glb": "ArmsFaceted.glb",
+   "pivot": "wrist",
+   "boundsMin": [
+    -0.1632,
+    -0.052,
+    -0.061
+   ],
+   "boundsMax": [
+    0.1523,
+    0.5234,
+    0.2044
+   ],
+   "size": [
+    0.315,
+    0.575,
+    0.265
+   ],
+   "tris": 730,
+   "parts": [
+    {
+     "name": "L_HandRelaxed_Skin",
+     "role": "Skin",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      217,
+      164,
+      124
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 730,
+     "textureSet": "ArmsFaceted_Skin",
+     "surfaceAppearance": {
+      "colorMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Color.png",
+      "normalMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Normal.png",
+      "roughnessMap": "textures/ArmsFaceted/ArmsFaceted_Skin_Rough.png",
+      "metalnessMap": null,
+      "alphaMode": "Overlay",
+      "color": [
+       234,
+       184,
+       146
+      ]
+     },
+     "tint": "SurfaceAppearance.Color = the avatar's arm colour (BodyColors.LeftArmColor3)",
+     "transparency": 0,
+     "doubleSided": false,
+     "backFacesInMesh": false,
+     "neon": false,
+     "renderFidelity": "Automatic"
+    }
+   ],
+   "attachments": {
+    "Wrist": {
+     "position": [
+      -0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      -0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      -0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Palm": {
+     "position": [
+      -0.0,
+      0.18,
+      0.0631
+     ],
+     "look": [
+      -0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      -0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "origin": [
+    9.1413,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "warnings": []
+}
