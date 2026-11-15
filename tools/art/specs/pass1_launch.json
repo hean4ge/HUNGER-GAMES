@@ -1,0 +1,19 @@
+{
+ "pairs": [
+  {
+   "name": "launch_pole_hall_wide",
+   "ours": "art/previews/Launch/render_wide.png",
+   "film": "refs:trailer/trailer1_124.7s.png",
+   "sheet_label": "Blender iteration, pass 1",
+   "note": "Pass 1 render (16:30, sha1 c94290d4bb51) against the trailer frame T1 @124.7 s. Pass 1's own colour_check used the owner's copy of this shot (owner/launch_3_pole_hall_wide.png), which measures a little less saturated. The rectangles keep off the light fittings: the hub lamps, the wall light bars and our ring of lamps.",
+   "regions": [
+    {"class": "interior", "label": "ceiling wheel, left", "ours": [0.25, 0.02, 0.44, 0.24], "film": [0.20, 0.08, 0.40, 0.30]},
+    {"class": "interior", "label": "ceiling wheel, right", "ours": [0.56, 0.02, 0.75, 0.24], "film": [0.50, 0.08, 0.66, 0.30]},
+    {"class": "interior", "label": "back wall behind the poles", "ours": [0.32, 0.52, 0.68, 0.72], "film": [0.28, 0.62, 0.70, 0.76],
+     "note": "Poles included on both sides; ours carry the lit strips the critic asks to drop (critic #5c)."},
+    {"class": "interior", "label": "base of the hall", "ours": [0.28, 0.89, 0.72, 0.99], "film": [0.26, 0.92, 0.72, 0.99],
+     "note": "Not the same part: the film shows the tops of the case ring, ours the floor. Both are the hall's grey concrete at the foot of the frame."}
+   ]
+  }
+ ]
+}

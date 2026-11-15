@@ -1,138 +1,330 @@
 {
  "red_a": {
   "ours": {
-   "meanLuma": 33.8,
-   "p95Luma": 74.1,
+   "meanLuma": 44.7,
+   "p95Luma": 99.9,
    "clippedPct": 0.0,
-   "meanSaturationLit": 0.435,
+   "meanSaturationLit": 0.392,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": -14.4,
-   "shadowGreenMinusRed": -14.0
+   "shadowBlueMinusRed": -7.1,
+   "shadowGreenMinusRed": -9.7
   },
-  "frame": {
-   "meanLuma": 41.4,
-   "p95Luma": 107.3,
-   "clippedPct": 0.0,
-   "meanSaturationLit": 0.463,
-   "vividPct": 0.0,
-   "shadowBlueMinusRed": -4.9,
-   "shadowGreenMinusRed": -7.5
+  "frames": {
+   "OWNER, T1 @120.2 S": {
+    "meanLuma": 41.4,
+    "p95Luma": 107.8,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.465,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": -5.0,
+    "shadowGreenMinusRed": -7.6
+   },
+   "T1 @120.7 S": {
+    "meanLuma": 40.6,
+    "p95Luma": 111.5,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.472,
+    "vividPct": 0.03,
+    "shadowBlueMinusRed": -5.7,
+    "shadowGreenMinusRed": -8.1
+   }
   }
  },
  "red_b": {
   "ours": {
-   "meanLuma": 64.5,
-   "p95Luma": 158.6,
+   "meanLuma": 39.1,
+   "p95Luma": 145.1,
    "clippedPct": 0.31,
-   "meanSaturationLit": 0.329,
-   "vividPct": 0.08,
-   "shadowBlueMinusRed": -18.0,
-   "shadowGreenMinusRed": -17.4
-  },
-  "frame": {
-   "meanLuma": 68.8,
-   "p95Luma": 152.5,
-   "clippedPct": 0.0,
-   "meanSaturationLit": 0.56,
+   "meanSaturationLit": 0.377,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 24.1,
-   "shadowGreenMinusRed": 12.5
+   "shadowBlueMinusRed": -0.8,
+   "shadowGreenMinusRed": -3.0
+  },
+  "frames": {
+   "OWNER, T1 @122.7 S": {
+    "meanLuma": 68.8,
+    "p95Luma": 152.8,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.561,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 24.0,
+    "shadowGreenMinusRed": 12.5
+   },
+   "T1 @122.7 S": {
+    "meanLuma": 70.1,
+    "p95Luma": 152.8,
+    "clippedPct": 0.01,
+    "meanSaturationLit": 0.577,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 30.2,
+    "shadowGreenMinusRed": 18.5
+   }
   }
  },
  "cases": {
   "ours": {
-   "meanLuma": 50.7,
-   "p95Luma": 109.1,
-   "clippedPct": 0.0,
-   "meanSaturationLit": 0.265,
+   "meanLuma": 52.3,
+   "p95Luma": 170.2,
+   "clippedPct": 0.12,
+   "meanSaturationLit": 0.436,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 8.3,
-   "shadowGreenMinusRed": 2.5
+   "shadowBlueMinusRed": 15.8,
+   "shadowGreenMinusRed": 6.9
   },
-  "frame": {
-   "meanLuma": 58.4,
-   "p95Luma": 169.3,
-   "clippedPct": 0.03,
-   "meanSaturationLit": 0.465,
-   "vividPct": 0.0,
-   "shadowBlueMinusRed": 22.2,
-   "shadowGreenMinusRed": 13.0
+  "frames": {
+   "OWNER, T1 @125.9 S": {
+    "meanLuma": 58.4,
+    "p95Luma": 171.1,
+    "clippedPct": 0.03,
+    "meanSaturationLit": 0.467,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 22.2,
+    "shadowGreenMinusRed": 12.9
+   },
+   "T1 @125.9 S": {
+    "meanLuma": 61.6,
+    "p95Luma": 153.4,
+    "clippedPct": 0.26,
+    "meanSaturationLit": 0.494,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 27.5,
+    "shadowGreenMinusRed": 16.7
+   }
   }
  },
  "wide": {
   "ours": {
-   "meanLuma": 40.5,
-   "p95Luma": 138.6,
-   "clippedPct": 0.04,
-   "meanSaturationLit": 0.259,
+   "meanLuma": 47.7,
+   "p95Luma": 89.8,
+   "clippedPct": 0.13,
+   "meanSaturationLit": 0.529,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 7.4,
-   "shadowGreenMinusRed": 2.9
+   "shadowBlueMinusRed": 29.2,
+   "shadowGreenMinusRed": 14.9
   },
-  "frame": {
-   "meanLuma": 50.1,
-   "p95Luma": 157.0,
-   "clippedPct": 0.1,
-   "meanSaturationLit": 0.571,
-   "vividPct": 0.0,
-   "shadowBlueMinusRed": 23.6,
-   "shadowGreenMinusRed": 12.3
+  "frames": {
+   "OWNER, T1 @124.7 S": {
+    "meanLuma": 50.1,
+    "p95Luma": 160.8,
+    "clippedPct": 0.16,
+    "meanSaturationLit": 0.573,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 23.6,
+    "shadowGreenMinusRed": 12.3
+   },
+   "T1 @124.7 S": {
+    "meanLuma": 51.8,
+    "p95Luma": 134.0,
+    "clippedPct": 0.7,
+    "meanSaturationLit": 0.619,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 28.0,
+    "shadowGreenMinusRed": 15.3
+   }
   }
  },
  "rise": {
   "ours": {
-   "meanLuma": 39.4,
-   "p95Luma": 212.1,
+   "meanLuma": 35.8,
+   "p95Luma": 192.5,
    "clippedPct": 0.0,
-   "meanSaturationLit": 0.246,
+   "meanSaturationLit": 0.33,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 7.0,
-   "shadowGreenMinusRed": 2.6
+   "shadowBlueMinusRed": 8.9,
+   "shadowGreenMinusRed": 3.6
   },
-  "frame": {
-   "meanLuma": 37.8,
-   "p95Luma": 166.2,
-   "clippedPct": 0.0,
-   "meanSaturationLit": 0.44,
+  "frames": {
+   "OWNER, T1 @127.2 S": {
+    "meanLuma": 37.8,
+    "p95Luma": 166.4,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.44,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 7.8,
+    "shadowGreenMinusRed": 2.9
+   },
+   "T1 @127.2 S": {
+    "meanLuma": 39.7,
+    "p95Luma": 156.1,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.483,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 9.6,
+    "shadowGreenMinusRed": 3.7
+   }
+  }
+ },
+ "rise_end": {
+  "ours": {
+   "meanLuma": 44.3,
+   "p95Luma": 209.7,
+   "clippedPct": 1.27,
+   "meanSaturationLit": 0.298,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 7.8,
-   "shadowGreenMinusRed": 2.8
+   "shadowBlueMinusRed": 9.8,
+   "shadowGreenMinusRed": 4.0
+  },
+  "frames": {
+   "T1 @127.2 S, THE END FRAME": {
+    "meanLuma": 39.7,
+    "p95Luma": 156.1,
+    "clippedPct": 0.0,
+    "meanSaturationLit": 0.483,
+    "vividPct": 0.0,
+    "shadowBlueMinusRed": 9.6,
+    "shadowGreenMinusRed": 3.7
+   }
   }
  },
  "red_interior": {
   "ours": {
-   "meanLuma": 33.5,
-   "p95Luma": 109.8,
-   "clippedPct": 0.32,
-   "meanSaturationLit": 0.447,
-   "vividPct": 0.02,
-   "shadowBlueMinusRed": -17.2,
-   "shadowGreenMinusRed": -16.7
+   "meanLuma": 17.3,
+   "p95Luma": 95.9,
+   "clippedPct": 0.18,
+   "meanSaturationLit": 0.437,
+   "vividPct": 0.0,
+   "shadowBlueMinusRed": 0.0,
+   "shadowGreenMinusRed": 0.0
   },
-  "frame": null
+  "frames": null
  },
  "case_bay": {
   "ours": {
-   "meanLuma": 44.8,
-   "p95Luma": 115.0,
+   "meanLuma": 36.4,
+   "p95Luma": 135.6,
    "clippedPct": 0.0,
-   "meanSaturationLit": 0.328,
+   "meanSaturationLit": 0.527,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 4.0,
-   "shadowGreenMinusRed": -1.0
+   "shadowBlueMinusRed": 13.4,
+   "shadowGreenMinusRed": 5.6
   },
-  "frame": null
+  "frames": null
  },
  "hall": {
   "ours": {
-   "meanLuma": 50.6,
-   "p95Luma": 117.9,
-   "clippedPct": 0.02,
-   "meanSaturationLit": 0.239,
+   "meanLuma": 41.6,
+   "p95Luma": 97.8,
+   "clippedPct": 0.09,
+   "meanSaturationLit": 0.487,
    "vividPct": 0.0,
-   "shadowBlueMinusRed": 7.8,
-   "shadowGreenMinusRed": 2.9
+   "shadowBlueMinusRed": 21.1,
+   "shadowGreenMinusRed": 10.1
   },
-  "frame": null
- }
+  "frames": null
+ },
+ "reds": {
+  "oxblood": {
+   "sampled": "#281616",
+   "sampledSat": 0.45,
+   "tone": [
+    86,
+    53,
+    53
+   ],
+   "toneSat": 0.384,
+   "diff": -0.066,
+   "pass": true,
+   "rule": "room surface under the band: 0.65-0.85x the sample (ruling pending)",
+   "ratio": 0.853
+  },
+  "oxblood_dk": {
+   "sampled": "#241515",
+   "sampledSat": 0.417,
+   "tone": [
+    80,
+    52,
+    53
+   ],
+   "toneSat": 0.35,
+   "diff": -0.067,
+   "pass": true,
+   "rule": "room surface under the band: 0.65-0.85x the sample (ruling pending)",
+   "ratio": 0.84
+  },
+  "rail": {
+   "sampled": "#592a38",
+   "sampledSat": 0.528,
+   "tone": [
+    126,
+    63,
+    75
+   ],
+   "toneSat": 0.5,
+   "diff": -0.028,
+   "pass": true
+  },
+  "lamp": {
+   "sampled": "#582d3b",
+   "sampledSat": 0.489,
+   "tone": [
+    112,
+    57,
+    72
+   ],
+   "toneSat": 0.491,
+   "diff": 0.002,
+   "pass": true
+  },
+  "redmesh": {
+   "sampled": "#1c1015",
+   "sampledSat": 0.429,
+   "tone": [
+    87,
+    48,
+    61
+   ],
+   "toneSat": 0.448,
+   "diff": 0.02,
+   "pass": true
+  },
+  "post": {
+   "sampled": "#4b353c",
+   "sampledSat": 0.33,
+   "tone": [
+    90,
+    59,
+    63
+   ],
+   "toneSat": 0.344,
+   "diff": 0.014,
+   "pass": true
+  },
+  "case_disc": {
+   "sampled": "#452e30",
+   "sampledSat": 0.333,
+   "tone": [
+    89,
+    60,
+    62
+   ],
+   "toneSat": 0.326,
+   "diff": -0.007,
+   "pass": true
+  },
+  "wedge_red": {
+   "sampled": "#5d403e",
+   "sampledSat": 0.333,
+   "tone": [
+    92,
+    63,
+    62
+   ],
+   "toneSat": 0.326,
+   "diff": -0.007,
+   "pass": true
+  },
+  "rose": {
+   "sampled": "#5c4d5a",
+   "sampledSat": 0.163,
+   "tone": [
+    126,
+    101,
+    121
+   ],
+   "toneSat": 0.198,
+   "diff": 0.035,
+   "pass": true
+  }
+ },
+ "note": "pass 2: whole-frame numbers (pass 1's measure, kept for comparison). The pass/fail band is tools/art/colour_band.py on tools/art/specs/launch.json, region by region."
 }

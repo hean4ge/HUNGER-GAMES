@@ -1,0 +1,757 @@
+{
+ "category": "Map1_Skyline",
+ "glb": "Map1_Skyline.glb",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox: X east, Y up, Z south (glTF +Y up; Blender (x,y,z) -> Roblox (x,z,-y))",
+ "generator": "art/blender/map1_green_land.py",
+ "seed": 50,
+ "warnings": [],
+ "placeholder": false,
+ "assets": [
+  {
+   "name": "M1_Skyline_N",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector N (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    2910.394,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5816.788,
+    1285.878,
+    5197.913
+   ],
+   "boundsMin": [
+    -2908.394,
+    528.007,
+    -7600.0
+   ],
+   "boundsMax": [
+    2908.394,
+    1813.885,
+    -2402.087
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_N_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3113,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_N_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 494,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_N_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1893,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_NE",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector NE (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    4827.811,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6026.508,
+    1301.653,
+    6026.508
+   ],
+   "boundsMin": [
+    994.977,
+    501.555,
+    -7021.484
+   ],
+   "boundsMax": [
+    7021.484,
+    1803.208,
+    -994.977
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_NE_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2984,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_NE_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      50,
+      75,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 511,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_NE_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2005,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_E",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector E (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    9451.209,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5197.913,
+    1285.289,
+    5816.788
+   ],
+   "boundsMin": [
+    2402.087,
+    511.369,
+    -2908.394
+   ],
+   "boundsMax": [
+    7600.0,
+    1796.658,
+    2908.394
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_E_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3125,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_E_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 606,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_E_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1769,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_SE",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector SE (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    16060.232,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6026.508,
+    1578.62,
+    6026.508
+   ],
+   "boundsMin": [
+    994.977,
+    185.27,
+    994.977
+   ],
+   "boundsMax": [
+    7021.484,
+    1763.891,
+    7021.484
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_SE_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3758,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_SE_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 893,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_SE_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 849,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_S",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector S (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    25994.111,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5816.788,
+    1585.323,
+    5197.913
+   ],
+   "boundsMin": [
+    -2908.394,
+    206.572,
+    2402.087
+   ],
+   "boundsMax": [
+    2908.394,
+    1791.895,
+    7600.0
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_S_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3981,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_S_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 822,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_S_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 697,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_SW",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector SW (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    35927.989,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6026.508,
+    1601.283,
+    6026.508
+   ],
+   "boundsMin": [
+    -7021.484,
+    196.885,
+    994.977
+   ],
+   "boundsMax": [
+    -994.977,
+    1798.168,
+    7021.484
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_SW_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3393,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_SW_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 510,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_SW_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1597,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_W",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector W (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    42537.012,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5197.913,
+    1318.327,
+    5816.788
+   ],
+   "boundsMin": [
+    -7600.0,
+    489.494,
+    -2908.394
+   ],
+   "boundsMax": [
+    -2402.087,
+    1807.821,
+    2908.394
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_W_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      125,
+      127,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3027,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_W_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      51,
+      76,
+      49
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 657,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_W_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1816,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  },
+  {
+   "name": "M1_Skyline_NW",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range sector NW (45 deg), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    47160.41,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6026.508,
+    1276.409,
+    6026.508
+   ],
+   "boundsMin": [
+    -7021.484,
+    537.605,
+    -7021.484
+   ],
+   "boundsMax": [
+    -994.977,
+    1814.015,
+    -994.977
+   ],
+   "tris": 5500,
+   "parts": [
+    {
+     "name": "M1_Skyline_NW_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      103,
+      95
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3262,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_NW_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      50,
+      75,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 568,
+     "metalness": 0.0,
+     "roughness": 0.95
+    },
+    {
+     "name": "M1_Skyline_NW_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1670,
+     "metalness": 0.0,
+     "roughness": 0.9
+    }
+   ],
+   "attachments": {},
+   "pivot": "base centre on the ground (see notes)"
+  }
+ ],
+ "notes": "Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; the Blender previews add +-3-6% facet value jitter and top/underside shading that a later baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."
+}

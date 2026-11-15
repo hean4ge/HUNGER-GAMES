@@ -62,9 +62,9 @@
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      55,
-      75,
-      51
+      51,
+      77,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -134,9 +134,9 @@
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      52,
-      70,
-      48
+      48,
+      72,
+      46
      ],
      "collide": false,
      "collision": "Box",
@@ -206,9 +206,9 @@
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      52,
-      70,
-      48
+      48,
+      72,
+      46
      ],
      "collide": false,
      "collision": "Box",
@@ -278,9 +278,9 @@
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      64,
+      62,
       83,
-      56
+      54
      ],
      "collide": false,
      "collision": "Box",
@@ -350,9 +350,9 @@
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      57,
+      55,
       74,
-      50
+      48
      ],
      "collide": false,
      "collision": "Box",
@@ -423,8 +423,8 @@
      "robloxMaterial": "LeafyGrass",
      "rgb": [
       70,
-      87,
-      50
+      91,
+      49
      ],
      "collide": false,
      "collision": "Box",
@@ -495,8 +495,8 @@
      "robloxMaterial": "LeafyGrass",
      "rgb": [
       69,
-      86,
-      50
+      90,
+      48
      ],
      "collide": false,
      "collision": "Box",
@@ -731,37 +731,37 @@
     "Wildflowers",
     "Placeholder"
    ],
-   "notes": "PLACEHOLDER wildflower clump (yellow, blue, white)",
+   "notes": "PLACEHOLDER wildflower clump: sparse, small, muted blue and yellow",
    "origin": [
-    204.067,
+    203.31,
     0.0,
     -0.0
    ],
    "size": [
-    5.161,
-    0.875,
-    5.586
+    4.049,
+    0.784,
+    3.861
    ],
    "boundsMin": [
-    -2.507,
-    -0.24,
-    -2.782
+    -1.75,
+    -0.23,
+    -1.77
    ],
    "boundsMax": [
-    2.654,
-    0.635,
-    2.804
+    2.3,
+    0.554,
+    2.091
    ],
-   "tris": 280,
+   "tris": 130,
    "parts": [
     {
      "name": "M1_Wildflowers_A_BedFlowers",
      "role": "BedFlowers",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      124,
-      152,
-      198
+      120,
+      130,
+      156
      ],
      "collide": false,
      "collision": "Box",
@@ -769,7 +769,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 280,
+     "tris": 130,
      "metalness": 0.0,
      "roughness": 0.9
     }
@@ -786,7 +786,7 @@
    ],
    "notes": "PLACEHOLDER tall pale grass clump 2.5-3.5",
    "origin": [
-    211.982,
+    210.871,
     0.0,
     -0.0
    ],
@@ -812,9 +812,9 @@
      "role": "Grass",
      "robloxMaterial": "Grass",
      "rgb": [
-      164,
-      150,
-      92
+      138,
+      140,
+      96
      ],
      "collide": false,
      "collision": "Box",

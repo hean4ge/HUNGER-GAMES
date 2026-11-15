@@ -17,8 +17,8 @@
     "Station_FloorBay",
     "Station_ShedEnd"
    ],
-   "bytes": 6253828,
-   "sizeMB": 6.25,
+   "bytes": 7157492,
+   "sizeMB": 7.16,
    "meshes": 20,
    "embeddedImages": [
     "Train_Station_Coffer_Normal",
@@ -62,8 +62,8 @@
     "Station_Poster",
     "Station_Guard"
    ],
-   "bytes": 986336,
-   "sizeMB": 0.99,
+   "bytes": 887928,
+   "sizeMB": 0.89,
    "meshes": 7,
    "embeddedImages": [
     "Train_Station_Kit_Normal",
@@ -86,8 +86,8 @@
     "Train_ObservationCar",
     "Train_DoorLeaf"
    ],
-   "bytes": 1756812,
-   "sizeMB": 1.76,
+   "bytes": 1783460,
+   "sizeMB": 1.78,
    "meshes": 10,
    "embeddedImages": [
     "Train_BodyCar_Normal",
@@ -112,8 +112,8 @@
     "Train_Car2_Dining",
     "Train_Car3_Lounge"
    ],
-   "bytes": 7745956,
-   "sizeMB": 7.75,
+   "bytes": 8479600,
+   "sizeMB": 8.48,
    "meshes": 12,
    "embeddedImages": [
     "Train_Car1_Vestibule_Furniture_Normal",
@@ -144,8 +144,8 @@
     "Train_Car5_Compartment",
     "Train_Car6_Observation"
    ],
-   "bytes": 5733548,
-   "sizeMB": 5.73,
+   "bytes": 6456652,
+   "sizeMB": 6.46,
    "meshes": 12,
    "embeddedImages": [
     "Train_Car4_Corridor_Furniture_Normal",
@@ -183,8 +183,8 @@
     "Train_Crystal",
     "Train_BridgeBackdrop"
    ],
-   "bytes": 2954780,
-   "sizeMB": 2.95,
+   "bytes": 2964840,
+   "sizeMB": 2.96,
    "meshes": 19,
    "embeddedImages": [
     "Train_Bridge_Normal",
@@ -232,6 +232,17 @@
   {
    "file": "Train/textures/Train_Station_Coffer_Rough.png",
    "kind": "roughness",
+   "set": "Train_Station_Coffer",
+   "size": [
+    256,
+    256
+   ],
+   "bitDepth": 8,
+   "channels": "gray"
+  },
+  {
+   "file": "Train/textures/Train_Station_Coffer_Metal.png",
+   "kind": "metalness",
    "set": "Train_Station_Coffer",
    "size": [
     256,
@@ -1670,16 +1681,17 @@
    "color": "Train/textures/Train_Station_Coffer_Color.png",
    "normal": "Train/textures/Train_Station_Coffer_Normal.png",
    "rough": "Train/textures/Train_Station_Coffer_Rough.png",
+   "metal": "Train/textures/Train_Station_Coffer_Metal.png",
    "size": 256,
-   "coverage": 0.55,
-   "pxPerStud": 12.1,
+   "coverage": 0.652,
+   "pxPerStud": 13.5,
    "meanColorSRGB": [
-    126,
-    123,
-    119
+    130,
+    129,
+    127
    ],
-   "aoTermMin": 0.701,
-   "metalness": false
+   "aoTermMin": 0.587,
+   "metalness": true
   },
   "Train_Station_EntranceCeiling": {
    "members": [
@@ -1689,12 +1701,12 @@
    "normal": "Train/textures/Train_Station_EntranceCeiling_Normal.png",
    "rough": "Train/textures/Train_Station_EntranceCeiling_Rough.png",
    "size": 1024,
-   "coverage": 0.362,
-   "pxPerStud": 5.9,
+   "coverage": 0.314,
+   "pxPerStud": 6.5,
    "meanColorSRGB": [
-    142,
-    136,
-    129
+    137,
+    135,
+    132
    ],
    "aoTermMin": 0.567,
    "metalness": false
@@ -1707,12 +1719,12 @@
    "normal": "Train/textures/Train_Station_Lantern_Normal.png",
    "rough": "Train/textures/Train_Station_Lantern_Rough.png",
    "size": 1024,
-   "coverage": 0.606,
-   "pxPerStud": 5.7,
+   "coverage": 0.641,
+   "pxPerStud": 7.8,
    "meanColorSRGB": [
-    135,
     130,
-    124
+    128,
+    126
    ],
    "aoTermMin": 0.567,
    "metalness": false
@@ -1726,12 +1738,12 @@
    "rough": "Train/textures/Train_Station_Sunburst_Rough.png",
    "metal": "Train/textures/Train_Station_Sunburst_Metal.png",
    "size": 1024,
-   "coverage": 0.467,
-   "pxPerStud": 10.4,
+   "coverage": 0.539,
+   "pxPerStud": 13.3,
    "meanColorSRGB": [
-    182,
-    142,
-    88
+    179,
+    150,
+    110
    ],
    "aoTermMin": 0.609,
    "metalness": true
@@ -1745,12 +1757,12 @@
    "rough": "Train/textures/Train_Station_EntranceWalls_Rough.png",
    "metal": "Train/textures/Train_Station_EntranceWalls_Metal.png",
    "size": 1024,
-   "coverage": 0.407,
-   "pxPerStud": 3.7,
+   "coverage": 0.51,
+   "pxPerStud": 4.6,
    "meanColorSRGB": [
-    122,
+    119,
     115,
-    106
+    110
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -1764,12 +1776,12 @@
    "rough": "Train/textures/Train_Station_EntranceFloor_Rough.png",
    "metal": "Train/textures/Train_Station_EntranceFloor_Metal.png",
    "size": 1024,
-   "coverage": 0.805,
+   "coverage": 0.359,
    "pxPerStud": 5.5,
    "meanColorSRGB": [
-    116,
-    109,
-    100
+    94,
+    88,
+    81
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -1783,12 +1795,12 @@
    "rough": "Train/textures/Train_Station_Portal_Rough.png",
    "metal": "Train/textures/Train_Station_Portal_Metal.png",
    "size": 1024,
-   "coverage": 0.144,
-   "pxPerStud": 5.9,
+   "coverage": 0.452,
+   "pxPerStud": 16.3,
    "meanColorSRGB": [
-    206,
     199,
-    189
+    192,
+    181
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -1802,12 +1814,12 @@
    "rough": "Train/textures/Train_Station_ShedBay_Rough.png",
    "metal": "Train/textures/Train_Station_ShedBay_Metal.png",
    "size": 1024,
-   "coverage": 0.31,
-   "pxPerStud": 5.6,
+   "coverage": 0.54,
+   "pxPerStud": 6.7,
    "meanColorSRGB": [
-    202,
-    198,
-    191
+    175,
+    172,
+    165
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -1821,14 +1833,14 @@
    "rough": "Train/textures/Train_Station_FloorBay_Rough.png",
    "metal": "Train/textures/Train_Station_FloorBay_Metal.png",
    "size": 1024,
-   "coverage": 0.374,
-   "pxPerStud": 8.2,
+   "coverage": 0.819,
+   "pxPerStud": 16.3,
    "meanColorSRGB": [
     116,
     111,
-    103
+    104
    ],
-   "aoTermMin": 0.569,
+   "aoTermMin": 0.567,
    "metalness": true
   },
   "Train_Station_ShedEnd": {
@@ -1840,12 +1852,12 @@
    "rough": "Train/textures/Train_Station_ShedEnd_Rough.png",
    "metal": "Train/textures/Train_Station_ShedEnd_Metal.png",
    "size": 1024,
-   "coverage": 0.582,
-   "pxPerStud": 4.0,
+   "coverage": 0.593,
+   "pxPerStud": 4.9,
    "meanColorSRGB": [
-    155,
-    150,
-    143
+    148,
+    144,
+    138
    ],
    "aoTermMin": 0.57,
    "metalness": true
@@ -1860,12 +1872,12 @@
    "rough": "Train/textures/Train_Station_Kit_Rough.png",
    "metal": "Train/textures/Train_Station_Kit_Metal.png",
    "size": 512,
-   "coverage": 0.686,
-   "pxPerStud": 20.8,
+   "coverage": 0.153,
+   "pxPerStud": 9.8,
    "meanColorSRGB": [
-    103,
-    79,
-    65
+    115,
+    101,
+    89
    ],
    "aoTermMin": 0.609,
    "metalness": true
@@ -1902,7 +1914,7 @@
    "pxPerStud": 63.6,
    "meanColorSRGB": [
     151,
-    149,
+    150,
     146
    ],
    "aoTermMin": 0.629,
@@ -1917,12 +1929,12 @@
    "rough": "Train/textures/Train_NoseCar_Rough.png",
    "metal": "Train/textures/Train_NoseCar_Metal.png",
    "size": 1024,
-   "coverage": 0.529,
-   "pxPerStud": 11.2,
+   "coverage": 0.484,
+   "pxPerStud": 10.8,
    "meanColorSRGB": [
-    89,
-    61,
-    50
+    81,
+    69,
+    58
    ],
    "aoTermMin": 0.64,
    "metalness": true
@@ -1939,9 +1951,9 @@
    "coverage": 0.62,
    "pxPerStud": 12.5,
    "meanColorSRGB": [
-    89,
-    61,
-    50
+    81,
+    69,
+    58
    ],
    "aoTermMin": 0.639,
    "metalness": true
@@ -1958,9 +1970,9 @@
    "coverage": 0.368,
    "pxPerStud": 12.5,
    "meanColorSRGB": [
-    102,
-    73,
-    53
+    98,
+    81,
+    64
    ],
    "aoTermMin": 0.639,
    "metalness": true
@@ -1977,9 +1989,9 @@
    "coverage": 0.914,
    "pxPerStud": 30.6,
    "meanColorSRGB": [
-    118,
-    71,
-    52
+    107,
+    81,
+    64
    ],
    "aoTermMin": 0.709,
    "metalness": true
@@ -1993,12 +2005,12 @@
    "rough": "Train/textures/Train_Car1_Vestibule_Furniture_Rough.png",
    "metal": "Train/textures/Train_Car1_Vestibule_Furniture_Metal.png",
    "size": 1024,
-   "coverage": 0.659,
-   "pxPerStud": 20.6,
+   "coverage": 0.72,
+   "pxPerStud": 21.6,
    "meanColorSRGB": [
-    111,
-    76,
-    55
+    112,
+    88,
+    73
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2015,9 +2027,9 @@
    "coverage": 0.624,
    "pxPerStud": 13.9,
    "meanColorSRGB": [
-    145,
-    115,
-    88
+    147,
+    118,
+    90
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2031,12 +2043,12 @@
    "rough": "Train/textures/Train_Car2_Dining_Furniture_Rough.png",
    "metal": "Train/textures/Train_Car2_Dining_Furniture_Metal.png",
    "size": 1024,
-   "coverage": 0.503,
-   "pxPerStud": 23.8,
+   "coverage": 0.534,
+   "pxPerStud": 24.5,
    "meanColorSRGB": [
-    141,
-    123,
-    108
+    136,
+    120,
+    107
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2053,8 +2065,8 @@
    "coverage": 0.522,
    "pxPerStud": 11.9,
    "meanColorSRGB": [
-    140,
-    110,
+    142,
+    113,
     86
    ],
    "aoTermMin": 0.567,
@@ -2073,8 +2085,8 @@
    "pxPerStud": 20.4,
    "meanColorSRGB": [
     102,
-    55,
-    48
+    58,
+    51
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2091,9 +2103,9 @@
    "coverage": 0.613,
    "pxPerStud": 12.5,
    "meanColorSRGB": [
-    145,
-    113,
-    86
+    147,
+    117,
+    89
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2107,11 +2119,11 @@
    "rough": "Train/textures/Train_Car4_Corridor_Furniture_Rough.png",
    "metal": "Train/textures/Train_Car4_Corridor_Furniture_Metal.png",
    "size": 1024,
-   "coverage": 0.77,
-   "pxPerStud": 31.2,
+   "coverage": 0.778,
+   "pxPerStud": 31.4,
    "meanColorSRGB": [
-    131,
-    116,
+    129,
+    115,
     100
    ],
    "aoTermMin": 0.567,
@@ -2129,9 +2141,9 @@
    "coverage": 0.591,
    "pxPerStud": 11.0,
    "meanColorSRGB": [
-    152,
-    123,
-    94
+    154,
+    126,
+    97
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2145,12 +2157,12 @@
    "rough": "Train/textures/Train_Car5_Compartment_Furniture_Rough.png",
    "metal": "Train/textures/Train_Car5_Compartment_Furniture_Metal.png",
    "size": 1024,
-   "coverage": 0.587,
-   "pxPerStud": 23.3,
+   "coverage": 0.609,
+   "pxPerStud": 23.8,
    "meanColorSRGB": [
-    127,
+    125,
     110,
-    94
+    96
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2167,9 +2179,9 @@
    "coverage": 0.598,
    "pxPerStud": 10.4,
    "meanColorSRGB": [
-    152,
-    123,
-    95
+    154,
+    126,
+    96
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2183,12 +2195,12 @@
    "rough": "Train/textures/Train_Car6_Observation_Furniture_Rough.png",
    "metal": "Train/textures/Train_Car6_Observation_Furniture_Metal.png",
    "size": 1024,
-   "coverage": 0.713,
-   "pxPerStud": 28.8,
+   "coverage": 0.728,
+   "pxPerStud": 29.1,
    "meanColorSRGB": [
-    110,
-    75,
-    57
+    112,
+    88,
+    74
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2205,9 +2217,9 @@
    "coverage": 0.27,
    "pxPerStud": 12.5,
    "meanColorSRGB": [
-    125,
-    85,
-    56
+    126,
+    91,
+    65
    ],
    "aoTermMin": 0.567,
    "metalness": true
@@ -2268,9 +2280,9 @@
    "coverage": 0.617,
    "pxPerStud": 52.8,
    "meanColorSRGB": [
-    130,
-    91,
-    60
+    132,
+    103,
+    77
    ],
    "aoTermMin": 0.629,
    "metalness": true
@@ -2298,103 +2310,117 @@
  "tones": {
   "Station_Coffer": {
    "coffer": {
-    "texels": 32172,
+    "texels": 32754,
     "meanSRGB": [
-     125,
      122,
-     118
+     121,
+     119
     ],
-    "luma": 122.0,
+    "luma": 120.7,
     "target": [
-     138,
-     133,
-     126
+     136,
+     134,
+     131
     ]
    },
    "concrete": {
-    "texels": 3892,
+    "texels": 7248,
     "meanSRGB": [
-     133,
-     130,
-     126
+     138,
+     137,
+     136
     ],
-    "luma": 130.3,
+    "luma": 136.9,
     "target": [
-     148,
+     144,
      142,
-     134
+     139
+    ]
+   },
+   "white_steel": {
+    "texels": 2714,
+    "meanSRGB": [
+     184,
+     181,
+     175
+    ],
+    "luma": 181.4,
+    "target": [
+     212,
+     208,
+     200
     ]
    }
   },
   "Station_EntranceCeiling": {
    "concrete": {
-    "texels": 380032,
+    "texels": 329214,
     "meanSRGB": [
-     141,
-     136,
-     129
+     137,
+     135,
+     131
     ],
-    "luma": 136.4,
+    "luma": 134.8,
     "target": [
-     148,
+     144,
      142,
-     134
+     139
     ]
    }
   },
   "Station_Lantern": {
    "coffer": {
-    "texels": 136753,
+    "texels": 89556,
     "meanSRGB": [
-     120,
-     117,
-     113
+     112,
+     112,
+     111
     ],
-    "luma": 117.2,
+    "luma": 111.6,
     "target": [
-     138,
-     133,
-     126
+     136,
+     134,
+     131
     ]
    },
    "concrete": {
-    "texels": 498586,
+    "texels": 582751,
     "meanSRGB": [
-     138,
-     133,
-     126
+     131,
+     130,
+     128
     ],
-    "luma": 133.6,
+    "luma": 130.2,
     "target": [
-     148,
+     144,
      142,
-     134
+     139
     ]
    }
   },
   "Station_Sunburst": {
    "gold": {
-    "texels": 442651,
+    "texels": 558404,
     "meanSRGB": [
-     185,
-     141,
-     77
+     178,
+     150,
+     109
     ],
-    "luma": 145.5,
+    "luma": 152.9,
     "target": [
      186,
-     142,
-     78
+     156,
+     114
     ]
    },
    "steel": {
-    "texels": 47194,
+    "texels": 7111,
     "meanSRGB": [
      150,
-     151,
-     153
+     152,
+     154
     ],
-    "luma": 151.2,
+    "luma": 151.4,
     "target": [
      150,
      152,
@@ -2404,13 +2430,13 @@
   },
   "Station_EntranceWalls": {
    "bronze": {
-    "texels": 197449,
+    "texels": 238732,
     "meanSRGB": [
      90,
      79,
-     68
+     67
     ],
-    "luma": 80.4,
+    "luma": 80.2,
     "target": [
      96,
      84,
@@ -2418,57 +2444,57 @@
     ]
    },
    "concrete": {
-    "texels": 225556,
+    "texels": 290132,
     "meanSRGB": [
-     143,
-     137,
-     130
-    ],
-    "luma": 137.7,
-    "target": [
-     148,
-     142,
+     138,
+     136,
      134
+    ],
+    "luma": 136.5,
+    "target": [
+     144,
+     142,
+     139
     ]
    },
    "wood_dark": {
-    "texels": 3824,
+    "texels": 5964,
     "meanSRGB": [
-     100,
-     61,
-     44
+     98,
+     67,
+     52
     ],
-    "luma": 68.1,
+    "luma": 72.6,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
   "Station_EntranceFloor": {
    "brass": {
-    "texels": 4684,
+    "texels": 2880,
     "meanSRGB": [
-     187,
-     136,
-     74
+     195,
+     157,
+     107
     ],
-    "luma": 142.2,
+    "luma": 161.3,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "concrete_dark": {
-    "texels": 18301,
+    "texels": 14869,
     "meanSRGB": [
      102,
-     99,
+     98,
      93
     ],
-    "luma": 98.9,
+    "luma": 98.7,
     "target": [
      112,
      108,
@@ -2476,41 +2502,41 @@
     ]
    },
    "floor": {
-    "texels": 799130,
+    "texels": 348156,
     "meanSRGB": [
-     115,
-     108,
-     100
+     92,
+     86,
+     79
     ],
-    "luma": 108.6,
+    "luma": 86.8,
     "target": [
-     110,
-     104,
-     98
+     88,
+     83,
+     78
     ]
    },
    "floor_light": {
-    "texels": 19151,
+    "texels": 8174,
     "meanSRGB": [
-     149,
-     139,
-     124
+     120,
+     111,
+     100
     ],
-    "luma": 140.4,
+    "luma": 112.0,
     "target": [
-     150,
-     142,
-     130
+     124,
+     116,
+     106
     ]
    },
    "steel_dark": {
-    "texels": 2906,
+    "texels": 2520,
     "meanSRGB": [
-     73,
-     75,
-     76
+     74,
+     76,
+     78
     ],
-    "luma": 74.4,
+    "luma": 76.0,
     "target": [
      84,
      86,
@@ -2520,209 +2546,35 @@
   },
   "Station_Portal": {
    "concrete": {
-    "texels": 3678,
+    "texels": 22474,
     "meanSRGB": [
-     142,
-     137,
-     129
+     138,
+     136,
+     133
     ],
-    "luma": 137.2,
+    "luma": 135.9,
     "target": [
-     148,
+     144,
      142,
-     134
+     139
     ]
    },
    "gold": {
-    "texels": 18036,
+    "texels": 95360,
     "meanSRGB": [
-     174,
-     133,
-     73
-    ],
-    "luma": 137.5,
-    "target": [
-     186,
-     142,
-     78
-    ]
-   },
-   "white_steel": {
-    "texels": 129460,
-    "meanSRGB": [
-     211,
-     207,
-     200
-    ],
-    "luma": 207.3,
-    "target": [
-     212,
-     208,
-     200
-    ]
-   }
-  },
-  "Station_ShedBay": {
-   "concrete_dark": {
-    "texels": 24611,
-    "meanSRGB": [
-     116,
-     112,
+     172,
+     145,
      106
     ],
-    "luma": 112.6,
+    "luma": 147.8,
     "target": [
-     112,
-     108,
-     102
+     186,
+     156,
+     114
     ]
    },
    "white_steel": {
-    "texels": 300619,
-    "meanSRGB": [
-     206,
-     203,
-     195
-    ],
-    "luma": 202.9,
-    "target": [
-     212,
-     208,
-     200
-    ]
-   }
-  },
-  "Station_FloorBay": {
-   "concrete": {
-    "texels": 1602,
-    "meanSRGB": [
-     149,
-     143,
-     133
-    ],
-    "luma": 143.3,
-    "target": [
-     148,
-     142,
-     134
-    ]
-   },
-   "concrete_dark": {
-    "texels": 84339,
-    "meanSRGB": [
-     104,
-     100,
-     93
-    ],
-    "luma": 100.2,
-    "target": [
-     112,
-     108,
-     102
-    ]
-   },
-   "edge_strip": {
-    "texels": 3998,
-    "meanSRGB": [
-     198,
-     182,
-     139
-    ],
-    "luma": 182.2,
-    "target": [
-     190,
-     176,
-     136
-    ]
-   },
-   "floor": {
-    "texels": 202582,
-    "meanSRGB": [
-     116,
-     108,
-     100
-    ],
-    "luma": 109.4,
-    "target": [
-     110,
-     104,
-     98
-    ]
-   },
-   "guideway": {
-    "texels": 88334,
-    "meanSRGB": [
-     118,
-     114,
-     107
-    ],
-    "luma": 114.4,
-    "target": [
-     138,
-     133,
-     126
-    ]
-   },
-   "steel": {
-    "texels": 11586,
-    "meanSRGB": [
-     132,
-     134,
-     136
-    ],
-    "luma": 134.1,
-    "target": [
-     150,
-     152,
-     154
-    ]
-   }
-  },
-  "Station_ShedEnd": {
-   "concrete": {
-    "texels": 133837,
-    "meanSRGB": [
-     154,
-     146,
-     135
-    ],
-    "luma": 146.8,
-    "target": [
-     148,
-     142,
-     134
-    ]
-   },
-   "concrete_dark": {
-    "texels": 147154,
-    "meanSRGB": [
-     108,
-     104,
-     97
-    ],
-    "luma": 104.0,
-    "target": [
-     112,
-     108,
-     102
-    ]
-   },
-   "guideway": {
-    "texels": 170919,
-    "meanSRGB": [
-     123,
-     119,
-     113
-    ],
-    "luma": 119.3,
-    "target": [
-     138,
-     133,
-     126
-    ]
-   },
-   "white_steel": {
-    "texels": 157941,
+    "texels": 355646,
     "meanSRGB": [
      208,
      205,
@@ -2736,43 +2588,217 @@
     ]
    }
   },
-  "Station_Kit": {
-   "banner": {
-    "texels": 79198,
+  "Station_ShedBay": {
+   "concrete_dark": {
+    "texels": 201578,
     "meanSRGB": [
-     89,
-     48,
-     46
+     110,
+     107,
+     101
     ],
-    "luma": 56.8,
+    "luma": 107.1,
+    "target": [
+     112,
+     108,
+     102
+    ]
+   },
+   "white_steel": {
+    "texels": 365039,
+    "meanSRGB": [
+     199,
+     196,
+     189
+    ],
+    "luma": 196.2,
+    "target": [
+     212,
+     208,
+     200
+    ]
+   }
+  },
+  "Station_FloorBay": {
+   "concrete": {
+    "texels": 6432,
+    "meanSRGB": [
+     150,
+     147,
+     142
+    ],
+    "luma": 147.1,
+    "target": [
+     144,
+     142,
+     139
+    ]
+   },
+   "concrete_dark": {
+    "texels": 260138,
+    "meanSRGB": [
+     103,
+     99,
+     94
+    ],
+    "luma": 99.8,
+    "target": [
+     112,
+     108,
+     102
+    ]
+   },
+   "edge_strip": {
+    "texels": 15678,
+    "meanSRGB": [
+     201,
+     185,
+     141
+    ],
+    "luma": 185.0,
+    "target": [
+     190,
+     176,
+     136
+    ]
+   },
+   "floor": {
+    "texels": 180498,
+    "meanSRGB": [
+     93,
+     87,
+     80
+    ],
+    "luma": 87.7,
     "target": [
      88,
-     48,
-     46
+     83,
+     78
+    ]
+   },
+   "guideway": {
+    "texels": 354127,
+    "meanSRGB": [
+     123,
+     119,
+     112
+    ],
+    "luma": 119.3,
+    "target": [
+     138,
+     133,
+     126
+    ]
+   },
+   "steel": {
+    "texels": 41544,
+    "meanSRGB": [
+     132,
+     135,
+     137
+    ],
+    "luma": 134.5,
+    "target": [
+     150,
+     152,
+     154
+    ]
+   }
+  },
+  "Station_ShedEnd": {
+   "concrete": {
+    "texels": 48516,
+    "meanSRGB": [
+     151,
+     149,
+     144
+    ],
+    "luma": 148.8,
+    "target": [
+     144,
+     142,
+     139
+    ]
+   },
+   "concrete_dark": {
+    "texels": 166302,
+    "meanSRGB": [
+     105,
+     101,
+     95
+    ],
+    "luma": 101.3,
+    "target": [
+     112,
+     108,
+     102
+    ]
+   },
+   "guideway": {
+    "texels": 257596,
+    "meanSRGB": [
+     122,
+     118,
+     112
+    ],
+    "luma": 118.6,
+    "target": [
+     138,
+     133,
+     126
+    ]
+   },
+   "white_steel": {
+    "texels": 149289,
+    "meanSRGB": [
+     206,
+     203,
+     196
+    ],
+    "luma": 203.2,
+    "target": [
+     212,
+     208,
+     200
+    ]
+   }
+  },
+  "Station_Kit": {
+   "banner": {
+    "texels": 17737,
+    "meanSRGB": [
+     101,
+     89,
+     84
+    ],
+    "luma": 91.0,
+    "target": [
+     100,
+     88,
+     84
     ]
    },
    "banner_gold": {
-    "texels": 20366,
+    "texels": 4937,
     "meanSRGB": [
-     177,
-     138,
-     79
+     179,
+     147,
+     97
     ],
-    "luma": 142.4,
+    "luma": 149.9,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "board": {
-    "texels": 50422,
+    "texels": 11220,
     "meanSRGB": [
-     45,
-     45,
-     47
+     43,
+     43,
+     45
     ],
-    "luma": 44.7,
+    "luma": 43.0,
     "target": [
      44,
      44,
@@ -2780,27 +2806,27 @@
     ]
    },
    "brass": {
-    "texels": 5238,
+    "texels": 1358,
     "meanSRGB": [
-     174,
-     128,
-     72
+     181,
+     146,
+     102
     ],
-    "luma": 133.8,
+    "luma": 150.4,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "steel": {
-    "texels": 7119,
+    "texels": 4090,
     "meanSRGB": [
-     152,
+     153,
      154,
      154
     ],
-    "luma": 153.5,
+    "luma": 153.6,
     "target": [
      150,
      152,
@@ -2808,13 +2834,13 @@
     ]
    },
    "steel_dark": {
-    "texels": 17497,
+    "texels": 653,
     "meanSRGB": [
-     83,
-     85,
+     84,
+     86,
      87
     ],
-    "luma": 84.6,
+    "luma": 85.6,
     "target": [
      84,
      86,
@@ -2968,15 +2994,15 @@
    "brass": {
     "texels": 1279,
     "meanSRGB": [
-     163,
-     120,
-     68
+     170,
+     138,
+     97
     ],
-    "luma": 125.3,
+    "luma": 142.1,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "harness": {
@@ -3024,13 +3050,13 @@
   },
   "Train_NoseCar": {
    "bellows": {
-    "texels": 8537,
+    "texels": 7872,
     "meanSRGB": [
-     48,
-     46,
+     49,
+     47,
      47
     ],
-    "luma": 46.7,
+    "luma": 47.5,
     "target": [
      52,
      50,
@@ -3038,13 +3064,13 @@
     ]
    },
    "bezel": {
-    "texels": 5941,
+    "texels": 2260,
     "meanSRGB": [
-     43,
-     41,
-     45
+     42,
+     40,
+     44
     ],
-    "luma": 41.7,
+    "luma": 40.5,
     "target": [
      44,
      42,
@@ -3052,51 +3078,51 @@
     ]
    },
    "brass": {
-    "texels": 49264,
+    "texels": 45417,
     "meanSRGB": [
-     176,
-     129,
-     72
+     185,
+     149,
+     104
     ],
-    "luma": 135.3,
+    "luma": 153.5,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "lacquer": {
-    "texels": 366817,
+    "texels": 382927,
     "meanSRGB": [
-     46,
-     40,
-     44
+     42,
+     43,
+     46
     ],
-    "luma": 41.4,
+    "luma": 42.8,
     "target": [
-     46,
-     40,
-     44
+     42,
+     43,
+     46
     ]
    },
    "maroon": {
-    "texels": 107816,
+    "texels": 54867,
     "meanSRGB": [
-     111,
-     46,
-     48
+     87,
+     69,
+     69
     ],
-    "luma": 59.8,
+    "luma": 73.0,
     "target": [
-     112,
-     46,
-     48
+     88,
+     70,
+     70
     ]
    },
    "pinstripe": {
-    "texels": 13454,
+    "texels": 11919,
     "meanSRGB": [
-     184,
+     183,
      146,
      90
     ],
@@ -3108,13 +3134,13 @@
     ]
    },
    "underframe": {
-    "texels": 2595,
+    "texels": 2272,
     "meanSRGB": [
-     56,
-     56,
-     58
+     58,
+     58,
+     59
     ],
-    "luma": 56.4,
+    "luma": 57.7,
     "target": [
      58,
      58,
@@ -3138,49 +3164,49 @@
     ]
    },
    "brass": {
-    "texels": 58103,
+    "texels": 57975,
     "meanSRGB": [
-     177,
-     130,
-     73
+     185,
+     149,
+     104
     ],
-    "luma": 135.6,
+    "luma": 153.7,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "lacquer": {
-    "texels": 432683,
+    "texels": 481387,
     "meanSRGB": [
-     46,
-     40,
-     44
+     42,
+     43,
+     46
     ],
-    "luma": 41.3,
+    "luma": 42.8,
     "target": [
-     46,
-     40,
-     44
+     42,
+     43,
+     46
     ]
    },
    "maroon": {
-    "texels": 117380,
+    "texels": 69644,
     "meanSRGB": [
-     111,
-     46,
-     48
+     87,
+     69,
+     69
     ],
-    "luma": 59.6,
+    "luma": 72.8,
     "target": [
-     112,
-     46,
-     48
+     88,
+     70,
+     70
     ]
    },
    "pinstripe": {
-    "texels": 16230,
+    "texels": 15314,
     "meanSRGB": [
      183,
      146,
@@ -3210,13 +3236,13 @@
   },
   "Train_ObservationCar": {
    "bellows": {
-    "texels": 20092,
+    "texels": 20271,
     "meanSRGB": [
      49,
      47,
      47
     ],
-    "luma": 47.6,
+    "luma": 47.5,
     "target": [
      52,
      50,
@@ -3224,55 +3250,55 @@
     ]
    },
    "brass": {
-    "texels": 72816,
+    "texels": 72737,
     "meanSRGB": [
-     181,
-     132,
-     74
+     189,
+     152,
+     106
     ],
-    "luma": 138.6,
+    "luma": 156.9,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "lacquer": {
-    "texels": 236154,
+    "texels": 259842,
     "meanSRGB": [
-     44,
-     39,
-     43
-    ],
-    "luma": 40.2,
-    "target": [
-     46,
      40,
-     44
+     42,
+     45
+    ],
+    "luma": 41.6,
+    "target": [
+     42,
+     43,
+     46
     ]
    },
    "maroon": {
-    "texels": 43540,
+    "texels": 24720,
     "meanSRGB": [
-     111,
-     46,
-     48
+     88,
+     70,
+     70
     ],
-    "luma": 59.9,
+    "luma": 73.6,
     "target": [
-     112,
-     46,
-     48
+     88,
+     70,
+     70
     ]
    },
    "pinstripe": {
-    "texels": 7344,
+    "texels": 2472,
     "meanSRGB": [
-     184,
-     146,
+     183,
+     145,
      90
     ],
-    "luma": 149.8,
+    "luma": 149.5,
     "target": [
      184,
      146,
@@ -3280,13 +3306,13 @@
     ]
    },
    "underframe": {
-    "texels": 6167,
+    "texels": 6125,
     "meanSRGB": [
      58,
-     58,
+     57,
      59
     ],
-    "luma": 57.8,
+    "luma": 57.5,
     "target": [
      58,
      58,
@@ -3298,47 +3324,47 @@
    "brass": {
     "texels": 4344,
     "meanSRGB": [
-     176,
-     129,
-     73
+     184,
+     149,
+     104
     ],
-    "luma": 135.2,
+    "luma": 153.2,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "lacquer": {
-    "texels": 993,
+    "texels": 8803,
     "meanSRGB": [
-     46,
-     40,
-     45
+     42,
+     44,
+     47
     ],
-    "luma": 42.0,
+    "luma": 43.5,
     "target": [
-     46,
-     40,
-     44
+     42,
+     43,
+     46
     ]
    },
    "maroon": {
-    "texels": 22448,
+    "texels": 14636,
     "meanSRGB": [
-     114,
-     47,
-     49
+     89,
+     71,
+     71
     ],
-    "luma": 61.1,
+    "luma": 75.0,
     "target": [
-     112,
-     46,
-     48
+     88,
+     70,
+     70
     ]
    },
    "pinstripe": {
-    "texels": 1983,
+    "texels": 1985,
     "meanSRGB": [
      185,
      147,
@@ -3354,35 +3380,35 @@
    "wood_dark": {
     "texels": 30156,
     "meanSRGB": [
-     105,
-     64,
-     46
+     103,
+     70,
+     54
     ],
-    "luma": 71.7,
+    "luma": 76.2,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
   "Train_Car1_Vestibule_Furniture": {
    "brass": {
-    "texels": 58480,
+    "texels": 40101,
     "meanSRGB": [
-     162,
-     119,
-     66
+     169,
+     137,
+     96
     ],
-    "luma": 124.4,
+    "luma": 141.1,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "leather": {
-    "texels": 19765,
+    "texels": 12962,
     "meanSRGB": [
      99,
      58,
@@ -3396,45 +3422,45 @@
     ]
    },
    "upholstery": {
-    "texels": 312003,
+    "texels": 506266,
     "meanSRGB": [
-     107,
-     66,
-     53
+     102,
+     76,
+     73
     ],
-    "luma": 74.0,
+    "luma": 81.6,
     "target": [
-     100,
-     46,
-     38
+     84,
+     52,
+     62
     ]
    },
    "wood": {
-    "texels": 10778,
+    "texels": 7232,
     "meanSRGB": [
      125,
-     80,
-     57
+     97,
+     82
     ],
-    "luma": 87.7,
+    "luma": 101.7,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
-    "texels": 289464,
+    "texels": 188003,
     "meanSRGB": [
-     90,
-     55,
-     39
+     88,
+     61,
+     47
     ],
-    "luma": 61.5,
+    "luma": 65.5,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -3442,29 +3468,29 @@
    "banner_gold": {
     "texels": 8802,
     "meanSRGB": [
-     178,
-     139,
-     78
+     180,
+     147,
+     96
     ],
-    "luma": 142.7,
+    "luma": 150.2,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 39652,
     "meanSRGB": [
-     157,
-     115,
-     65
+     164,
+     133,
+     93
     ],
-    "luma": 120.6,
+    "luma": 136.8,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -3484,15 +3510,15 @@
    "hammered": {
     "texels": 151625,
     "meanSRGB": [
-     181,
-     154,
-     119
+     187,
+     152,
+     106
     ],
-    "luma": 157.0,
+    "luma": 155.9,
     "target": [
-     198,
-     166,
-     126
+     204,
+     164,
+     112
     ]
    },
    "marble": {
@@ -3555,54 +3581,54 @@
     "texels": 166723,
     "meanSRGB": [
      114,
-     72,
-     52
+     88,
+     75
     ],
-    "luma": 79.6,
+    "luma": 92.6,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 75034,
     "meanSRGB": [
-     91,
-     56,
-     40
+     90,
+     61,
+     48
     ],
-    "luma": 62.4,
+    "luma": 66.4,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
   "Train_Car2_Dining_Furniture": {
    "brass": {
-    "texels": 32146,
+    "texels": 27225,
     "meanSRGB": [
-     169,
-     124,
-     69
+     176,
+     143,
+     99
     ],
-    "luma": 129.4,
+    "luma": 146.6,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "linen": {
-    "texels": 98015,
+    "texels": 82510,
     "meanSRGB": [
      209,
      202,
      187
     ],
-    "luma": 202.2,
+    "luma": 202.3,
     "target": [
      214,
      208,
@@ -3610,13 +3636,13 @@
     ]
    },
    "porcelain": {
-    "texels": 15209,
+    "texels": 12800,
     "meanSRGB": [
      180,
      178,
-     173
+     172
     ],
-    "luma": 178.0,
+    "luma": 177.7,
     "target": [
      212,
      208,
@@ -3624,13 +3650,13 @@
     ]
    },
    "runner": {
-    "texels": 12656,
+    "texels": 10108,
     "meanSRGB": [
-     153,
-     103,
-     66
+     155,
+     105,
+     67
     ],
-    "luma": 111.1,
+    "luma": 113.1,
     "target": [
      112,
      50,
@@ -3638,7 +3664,7 @@
     ]
    },
    "silver": {
-    "texels": 25727,
+    "texels": 22192,
     "meanSRGB": [
      150,
      153,
@@ -3652,21 +3678,21 @@
     ]
    },
    "upholstery": {
-    "texels": 97292,
+    "texels": 199040,
     "meanSRGB": [
-     107,
-     66,
-     53
+     103,
+     77,
+     73
     ],
-    "luma": 73.5,
+    "luma": 81.9,
     "target": [
-     100,
-     46,
-     38
+     84,
+     52,
+     62
     ]
    },
    "wall_cream": {
-    "texels": 15953,
+    "texels": 13366,
     "meanSRGB": [
      163,
      144,
@@ -3680,17 +3706,17 @@
     ]
    },
    "wood_dark": {
-    "texels": 230434,
+    "texels": 192520,
     "meanSRGB": [
-     90,
-     55,
-     39
-    ],
-    "luma": 61.4,
-    "target": [
-     104,
-     64,
+     88,
+     60,
      46
+    ],
+    "luma": 65.3,
+    "target": [
+     102,
+     70,
+     54
     ]
    }
   },
@@ -3698,29 +3724,29 @@
    "banner_gold": {
     "texels": 13512,
     "meanSRGB": [
-     164,
-     128,
-     72
+     166,
+     135,
+     88
     ],
-    "luma": 131.4,
+    "luma": 138.4,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 16687,
     "meanSRGB": [
-     177,
-     130,
-     73
+     185,
+     149,
+     104
     ],
-    "luma": 135.6,
+    "luma": 153.6,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -3740,15 +3766,15 @@
    "hammered": {
     "texels": 138448,
     "meanSRGB": [
-     180,
-     153,
-     120
+     186,
+     151,
+     106
     ],
-    "luma": 156.6,
+    "luma": 155.5,
     "target": [
-     198,
-     166,
-     126
+     204,
+     164,
+     112
     ]
    },
    "marble": {
@@ -3797,28 +3823,28 @@
     "texels": 76112,
     "meanSRGB": [
      123,
-     78,
-     55
+     95,
+     80
     ],
-    "luma": 85.8,
+    "luma": 99.7,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 158252,
     "meanSRGB": [
-     95,
-     58,
-     42
-    ],
-    "luma": 64.6,
-    "target": [
-     104,
+     93,
      64,
-     46
+     49
+    ],
+    "luma": 68.7,
+    "target": [
+     102,
+     70,
+     54
     ]
    }
   },
@@ -3826,15 +3852,15 @@
    "brass": {
     "texels": 16184,
     "meanSRGB": [
-     157,
-     115,
-     64
+     164,
+     133,
+     93
     ],
-    "luma": 120.3,
+    "luma": 136.5,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "globe_land": {
@@ -3925,28 +3951,28 @@
     "texels": 12444,
     "meanSRGB": [
      119,
-     75,
-     53
+     92,
+     77
     ],
-    "luma": 83.0,
+    "luma": 96.5,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 96064,
     "meanSRGB": [
-     86,
-     52,
-     37
+     84,
+     58,
+     44
     ],
-    "luma": 58.5,
+    "luma": 62.3,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -3954,29 +3980,29 @@
    "banner_gold": {
     "texels": 7905,
     "meanSRGB": [
-     164,
-     128,
-     72
+     166,
+     135,
+     88
     ],
-    "luma": 131.3,
+    "luma": 138.3,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 39714,
     "meanSRGB": [
-     163,
-     119,
-     67
+     170,
+     138,
+     96
     ],
-    "luma": 124.7,
+    "luma": 141.4,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -3996,15 +4022,15 @@
    "hammered": {
     "texels": 134787,
     "meanSRGB": [
-     182,
-     154,
-     119
+     188,
+     152,
+     106
     ],
-    "luma": 157.6,
+    "luma": 156.5,
     "target": [
-     198,
-     166,
-     126
+     204,
+     164,
+     112
     ]
    },
    "marble": {
@@ -4067,34 +4093,34 @@
     "texels": 172137,
     "meanSRGB": [
      122,
-     78,
-     55
+     94,
+     80
     ],
-    "luma": 85.4,
+    "luma": 99.2,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 48905,
     "meanSRGB": [
-     89,
-     54,
-     39
-    ],
-    "luma": 60.6,
-    "target": [
-     104,
-     64,
+     87,
+     60,
      46
+    ],
+    "luma": 64.5,
+    "target": [
+     102,
+     70,
+     54
     ]
    }
   },
   "Train_Car4_Corridor_Furniture": {
    "blind": {
-    "texels": 224430,
+    "texels": 197241,
     "meanSRGB": [
      142,
      128,
@@ -4108,27 +4134,27 @@
     ]
    },
    "brass": {
-    "texels": 35205,
+    "texels": 30379,
     "meanSRGB": [
-     164,
-     120,
-     68
+     171,
+     139,
+     97
     ],
-    "luma": 125.9,
+    "luma": 142.8,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "cotton": {
-    "texels": 208670,
+    "texels": 183422,
     "meanSRGB": [
      155,
      153,
      145
     ],
-    "luma": 152.5,
+    "luma": 152.6,
     "target": [
      186,
      182,
@@ -4136,31 +4162,31 @@
     ]
    },
    "upholstery": {
-    "texels": 80606,
+    "texels": 177976,
     "meanSRGB": [
-     107,
-     67,
-     54
+     101,
+     76,
+     73
     ],
-    "luma": 74.6,
+    "luma": 80.8,
     "target": [
-     100,
-     46,
-     38
+     84,
+     52,
+     62
     ]
    },
    "wood_dark": {
-    "texels": 258070,
+    "texels": 226773,
     "meanSRGB": [
-     88,
-     54,
-     38
+     86,
+     59,
+     45
     ],
-    "luma": 59.9,
+    "luma": 63.8,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -4168,29 +4194,29 @@
    "banner_gold": {
     "texels": 10242,
     "meanSRGB": [
-     165,
-     129,
-     73
+     167,
+     136,
+     90
     ],
-    "luma": 132.2,
+    "luma": 139.2,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 50078,
     "meanSRGB": [
-     163,
-     120,
-     67
+     171,
+     138,
+     96
     ],
-    "luma": 125.3,
+    "luma": 142.1,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -4210,15 +4236,15 @@
    "hammered": {
     "texels": 149499,
     "meanSRGB": [
-     175,
-     149,
-     116
+     181,
+     147,
+     103
     ],
-    "luma": 152.1,
+    "luma": 151.0,
     "target": [
-     198,
-     166,
-     126
+     204,
+     164,
+     112
     ]
    },
    "marble": {
@@ -4281,48 +4307,48 @@
     "texels": 136614,
     "meanSRGB": [
      121,
-     77,
-     55
+     94,
+     79
     ],
-    "luma": 84.8,
+    "luma": 98.5,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 52314,
     "meanSRGB": [
-     94,
-     58,
-     42
+     92,
+     63,
+     49
     ],
-    "luma": 64.2,
+    "luma": 68.3,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
   "Train_Car5_Compartment_Furniture": {
    "banner": {
-    "texels": 14326,
+    "texels": 12538,
     "meanSRGB": [
+     89,
      78,
-     42,
-     40
+     75
     ],
-    "luma": 49.4,
+    "luma": 80.2,
     "target": [
+     100,
      88,
-     48,
-     46
+     84
     ]
    },
    "blind": {
-    "texels": 71604,
+    "texels": 62743,
     "meanSRGB": [
      152,
      137,
@@ -4336,27 +4362,27 @@
     ]
    },
    "brass": {
-    "texels": 37905,
+    "texels": 33934,
     "meanSRGB": [
-     161,
-     118,
-     66
+     169,
+     137,
+     95
     ],
-    "luma": 123.4,
+    "luma": 140.4,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "cotton": {
-    "texels": 143944,
+    "texels": 126689,
     "meanSRGB": [
      151,
      148,
      141
     ],
-    "luma": 148.3,
+    "luma": 148.4,
     "target": [
      186,
      182,
@@ -4364,13 +4390,13 @@
     ]
    },
    "harness": {
-    "texels": 897,
+    "texels": 850,
     "meanSRGB": [
-     36,
      37,
-     38
+     37,
+     39
     ],
-    "luma": 36.7,
+    "luma": 37.0,
     "target": [
      48,
      48,
@@ -4378,13 +4404,13 @@
     ]
    },
    "porcelain": {
-    "texels": 3370,
+    "texels": 3063,
     "meanSRGB": [
      196,
-     194,
+     193,
      189
     ],
-    "luma": 193.8,
+    "luma": 193.6,
     "target": [
      212,
      208,
@@ -4392,13 +4418,13 @@
     ]
    },
    "silk": {
-    "texels": 29069,
+    "texels": 25346,
     "meanSRGB": [
      161,
      146,
      119
     ],
-    "luma": 147.0,
+    "luma": 147.1,
     "target": [
      198,
      178,
@@ -4406,7 +4432,7 @@
     ]
    },
    "uniform": {
-    "texels": 13816,
+    "texels": 12161,
     "meanSRGB": [
      81,
      85,
@@ -4420,31 +4446,31 @@
     ]
    },
    "upholstery": {
-    "texels": 75271,
+    "texels": 163986,
     "meanSRGB": [
-     106,
-     66,
-     53
-    ],
-    "luma": 73.6,
-    "target": [
      100,
-     46,
-     38
+     75,
+     72
+    ],
+    "luma": 80.2,
+    "target": [
+     84,
+     52,
+     62
     ]
    },
    "wood_dark": {
-    "texels": 225825,
+    "texels": 197715,
     "meanSRGB": [
-     87,
-     53,
-     38
+     85,
+     58,
+     45
     ],
-    "luma": 59.0,
+    "luma": 62.8,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -4452,29 +4478,29 @@
    "banner_gold": {
     "texels": 14900,
     "meanSRGB": [
-     162,
-     127,
-     72
+     164,
+     134,
+     89
     ],
-    "luma": 130.2,
+    "luma": 137.1,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 37864,
     "meanSRGB": [
-     165,
-     121,
-     67
+     172,
+     139,
+     96
     ],
-    "luma": 126.0,
+    "luma": 142.9,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -4494,15 +4520,15 @@
    "hammered": {
     "texels": 163878,
     "meanSRGB": [
-     170,
-     144,
-     112
+     175,
+     142,
+     100
     ],
-    "luma": 147.2,
+    "luma": 146.2,
     "target": [
-     198,
-     166,
-     126
+     204,
+     164,
+     112
     ]
    },
    "marble": {
@@ -4579,86 +4605,86 @@
     "texels": 124442,
     "meanSRGB": [
      119,
-     76,
-     54
+     92,
+     78
     ],
-    "luma": 83.4,
+    "luma": 97.0,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 36056,
     "meanSRGB": [
-     90,
-     55,
-     39
-    ],
-    "luma": 61.1,
-    "target": [
-     104,
-     64,
+     88,
+     60,
      46
+    ],
+    "luma": 65.0,
+    "target": [
+     102,
+     70,
+     54
     ]
    }
   },
   "Train_Car6_Observation_Furniture": {
    "brass": {
-    "texels": 11967,
+    "texels": 6270,
     "meanSRGB": [
-     166,
-     122,
-     68
+     173,
+     140,
+     97
     ],
-    "luma": 127.2,
+    "luma": 144.0,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "upholstery": {
-    "texels": 379137,
+    "texels": 472683,
     "meanSRGB": [
-     115,
-     70,
-     56
+     110,
+     82,
+     79
     ],
-    "luma": 78.2,
+    "luma": 87.9,
     "target": [
-     100,
-     46,
-     38
+     84,
+     52,
+     62
     ]
    },
    "wood": {
-    "texels": 13694,
+    "texels": 6901,
     "meanSRGB": [
      128,
-     82,
-     58
+     99,
+     84
     ],
-    "luma": 89.8,
+    "luma": 104.3,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
-    "texels": 343035,
+    "texels": 277697,
     "meanSRGB": [
      90,
-     55,
-     40
+     62,
+     47
     ],
-    "luma": 61.6,
+    "luma": 66.5,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -4666,29 +4692,29 @@
    "banner_gold": {
     "texels": 11256,
     "meanSRGB": [
-     166,
-     130,
-     75
+     168,
+     137,
+     92
     ],
-    "luma": 133.3,
+    "luma": 140.3,
     "target": [
-     176,
-     138,
-     80
+     178,
+     146,
+     98
     ]
    },
    "brass": {
     "texels": 36310,
     "meanSRGB": [
-     168,
-     123,
-     68
+     176,
+     142,
+     98
     ],
-    "luma": 128.6,
+    "luma": 145.9,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "carpet": {
@@ -4723,28 +4749,28 @@
     "texels": 17147,
     "meanSRGB": [
      130,
-     83,
-     59
+     100,
+     85
     ],
-    "luma": 91.0,
+    "luma": 105.6,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 18000,
     "meanSRGB": [
-     92,
-     56,
-     40
+     90,
+     62,
+     48
     ],
-    "luma": 62.8,
+    "luma": 66.8,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -4824,15 +4850,15 @@
    "brass": {
     "texels": 5784,
     "meanSRGB": [
-     174,
-     128,
-     71
+     182,
+     147,
+     102
     ],
-    "luma": 133.5,
+    "luma": 151.2,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "steel": {
@@ -4896,15 +4922,15 @@
    "brass": {
     "texels": 156649,
     "meanSRGB": [
-     178,
-     131,
-     73
+     186,
+     150,
+     105
     ],
-    "luma": 136.4,
+    "luma": 154.6,
     "target": [
-     180,
-     132,
-     74
+     188,
+     152,
+     106
     ]
    },
    "flower": {
@@ -4981,28 +5007,28 @@
     "texels": 113853,
     "meanSRGB": [
      120,
-     76,
-     54
+     92,
+     78
     ],
-    "luma": 83.5,
+    "luma": 97.1,
     "target": [
      132,
-     84,
-     60
+     102,
+     86
     ]
    },
    "wood_dark": {
     "texels": 343320,
     "meanSRGB": [
-     100,
-     62,
-     44
+     98,
+     67,
+     52
     ],
-    "luma": 68.6,
+    "luma": 72.9,
     "target": [
-     104,
-     64,
-     46
+     102,
+     70,
+     54
     ]
    }
   },
@@ -5068,21 +5094,21 @@
  "palette": {
   "concrete": {
    "rgb": [
-    148,
+    144,
     142,
-    134
+    139
    ],
-   "luma": 142.7,
+   "luma": 142.2,
    "roughness": 0.88,
    "metalness": 0.0
   },
   "coffer": {
    "rgb": [
-    138,
-    133,
-    126
+    136,
+    134,
+    131
    ],
-   "luma": 133.6,
+   "luma": 134.2,
    "roughness": 0.9,
    "metalness": 0.0
   },
@@ -5098,21 +5124,21 @@
   },
   "floor": {
    "rgb": [
-    110,
-    104,
-    98
+    88,
+    83,
+    78
    ],
-   "luma": 104.8,
+   "luma": 83.7,
    "roughness": 0.4,
    "metalness": 0.0
   },
   "floor_light": {
    "rgb": [
-    150,
-    142,
-    130
+    124,
+    116,
+    106
    ],
-   "luma": 142.8,
+   "luma": 117.0,
    "roughness": 0.4,
    "metalness": 0.0
   },
@@ -5149,21 +5175,21 @@
   "gold": {
    "rgb": [
     186,
-    142,
-    78
+    156,
+    114
    ],
-   "luma": 146.7,
+   "luma": 159.3,
    "roughness": 0.3,
    "metalness": 0.9
   },
   "brass": {
    "rgb": [
-    180,
-    132,
-    74
+    188,
+    152,
+    106
    ],
-   "luma": 138.0,
-   "roughness": 0.35,
+   "luma": 156.3,
+   "roughness": 0.3,
    "metalness": 0.9
   },
   "steel": {
@@ -5198,21 +5224,21 @@
   },
   "banner": {
    "rgb": [
+    100,
     88,
-    48,
-    46
+    84
    ],
-   "luma": 56.4,
+   "luma": 90.3,
    "roughness": 0.92,
    "metalness": 0.0
   },
   "banner_gold": {
    "rgb": [
-    176,
-    138,
-    80
+    178,
+    146,
+    98
    ],
-   "luma": 141.9,
+   "luma": 149.3,
    "roughness": 0.45,
    "metalness": 0.6
   },
@@ -5348,22 +5374,22 @@
   },
   "lacquer": {
    "rgb": [
-    46,
-    40,
-    44
+    42,
+    43,
+    46
    ],
-   "luma": 41.6,
-   "roughness": 0.3,
+   "luma": 43.0,
+   "roughness": 0.18,
    "metalness": 0.2
   },
   "maroon": {
    "rgb": [
-    112,
-    46,
-    48
+    88,
+    70,
+    70
    ],
-   "luma": 60.2,
-   "roughness": 0.3,
+   "luma": 73.8,
+   "roughness": 0.2,
    "metalness": 0.2
   },
   "pinstripe": {
@@ -5408,11 +5434,11 @@
   },
   "upholstery": {
    "rgb": [
-    100,
-    46,
-    38
+    84,
+    52,
+    62
    ],
-   "luma": 56.9,
+   "luma": 59.5,
    "roughness": 0.92,
    "metalness": 0.0
   },
@@ -5439,30 +5465,30 @@
   "wood": {
    "rgb": [
     132,
-    84,
-    60
+    102,
+    86
    ],
-   "luma": 92.5,
+   "luma": 107.2,
    "roughness": 0.55,
    "metalness": 0.0
   },
   "wood_dark": {
    "rgb": [
-    104,
-    64,
-    46
+    102,
+    70,
+    54
    ],
-   "luma": 71.2,
+   "luma": 75.6,
    "roughness": 0.6,
    "metalness": 0.0
   },
   "hammered": {
    "rgb": [
-    198,
-    166,
-    126
+    204,
+    164,
+    112
    ],
-   "luma": 169.9,
+   "luma": 168.7,
    "roughness": 0.5,
    "metalness": 0.35
   },
@@ -5759,19 +5785,29 @@
    70
   ],
   "downlight": [
-   255,
-   238,
-   214
+   250,
+   248,
+   242
   ],
   "glow": [
-   248,
-   232,
-   222
+   240,
+   236,
+   230
+  ],
+  "glow_hall": [
+   236,
+   236,
+   232
+  ],
+  "glow_e": [
+   250,
+   222,
+   190
   ],
   "glow_roof": [
-   240,
-   226,
-   214
+   228,
+   222,
+   212
   ],
   "glyph": [
    232,
@@ -5785,8 +5821,8 @@
   ],
   "cove": [
    255,
-   196,
-   128
+   214,
+   168
   ],
   "bulb": [
    255,
@@ -5838,20 +5874,28 @@
     228
    ],
    "transparency": 0.6
+  },
+  "window": {
+   "rgb": [
+    62,
+    70,
+    80
+   ],
+   "transparency": 0.7
   }
  },
  "patterns": {
-  "1": "upholstery: cream C-arcs (openings alternating by row) and dots on burgundy, 1.4-stud cells",
+  "1": "upholstery: cream rings 0.66 across (a left and a right arc with gaps at top and bottom, a dot inside) on a 0.8-stud pitch, rows 0.52 apart and offset by half a ring, so the rings of one row pass through the gaps of the next and interlock (the film's pattern; pass 2a's lined up in wavy columns)",
   "2": "carpet: gold diagonal lattice with cream lozenges, 2-stud cells",
   "3": "table runner: gold chevrons on burgundy, 1.2-stud cells"
  },
  "layout": {
-  "hall": "Blender hall space: x across (west -85 .. east +85), y along (entrance +210 .. far end -210), floor 0 -> Roblox (x, y, z) = (x, z, -y): the entrance end is Roblox -Z. Positions below are Roblox, relative to the hall origin (the hall's floor centre); yawDeg about +Y.",
+  "hall": "Blender hall space: x across (the shed's glazing at -31 .. +31, the entrance hall's walls at -37 .. +37), y along (entrance +210 .. far end), floor 0 -> Roblox (x, y, z) = (x, z, -y): the entrance end is Roblox -Z. The island platform is x -15 .. 15, the tracks at x -21.25 and 21.25. Positions below are Roblox, relative to the hall origin (the hall's floor centre); yawDeg about +Y.",
   "station": [
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -60.0
     ],
@@ -5860,25 +5904,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -78.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -78.0,
+     -30.0,
      0.0,
      -96.0
     ],
@@ -5887,7 +5913,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -108.0
     ],
@@ -5896,7 +5922,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -120.0
     ],
@@ -5905,7 +5931,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -132.0
     ],
@@ -5914,7 +5940,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -144.0
     ],
@@ -5923,7 +5949,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -156.0
     ],
@@ -5932,7 +5958,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -168.0
     ],
@@ -5941,7 +5967,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -180.0
     ],
@@ -5950,7 +5976,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -192.0
     ],
@@ -5959,7 +5985,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -78.0,
+     -30.0,
      0.0,
      -204.0
     ],
@@ -5968,7 +5994,331 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
+     -18.0,
+     0.0,
+     -108.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -120.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -132.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -144.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -156.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -168.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -180.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -192.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -18.0,
+     0.0,
+     -204.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -108.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -120.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -132.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -144.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -156.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -168.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -180.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -192.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     -6.0,
+     0.0,
+     -204.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -108.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -120.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -132.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -144.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -156.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -168.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -180.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -192.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     6.0,
+     0.0,
+     -204.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -108.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -120.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -132.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -144.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -156.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -168.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -180.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -192.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     18.0,
+     0.0,
+     -204.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Coffer",
+    "position": [
+     30.0,
      0.0,
      -60.0
     ],
@@ -5977,25 +6327,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
+     30.0,
      0.0,
      -96.0
     ],
@@ -6004,7 +6336,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
+     30.0,
      0.0,
      -108.0
     ],
@@ -6013,7 +6345,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
+     30.0,
      0.0,
      -120.0
     ],
@@ -6022,7 +6354,7 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
+     30.0,
      0.0,
      -132.0
     ],
@@ -6031,600 +6363,6 @@
    {
     "asset": "Station_Coffer",
     "position": [
-     -66.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -66.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -132.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -54.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -42.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -30.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -18.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     -6.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     6.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     18.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     30.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     30.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
      30.0,
      0.0,
      -144.0
@@ -6671,402 +6409,6 @@
     "asset": "Station_Coffer",
     "position": [
      30.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     42.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -132.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     54.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -96.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -108.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -120.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -132.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     66.0,
-     0.0,
-     -204.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -72.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -84.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -96.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -108.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -120.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -132.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -144.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -156.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -168.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -180.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
-     0.0,
-     -192.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Coffer",
-    "position": [
-     78.0,
      0.0,
      -204.0
     ],
@@ -7077,7 +6419,7 @@
     "position": [
      0.0,
      0.0,
-     -110.0
+     -76.0
     ],
     "yawDeg": 0.0
    },
@@ -7086,7 +6428,7 @@
     "position": [
      0.0,
      0.0,
-     -110.0
+     -76.0
     ],
     "yawDeg": 0.0
    },
@@ -7095,7 +6437,7 @@
     "position": [
      0.0,
      0.0,
-     -110.0
+     -76.0
     ],
     "yawDeg": 0.0
    },
@@ -7104,7 +6446,7 @@
     "position": [
      0.0,
      0.0,
-     -110.0
+     -76.0
     ],
     "yawDeg": 0.0
    },
@@ -7113,7 +6455,7 @@
     "position": [
      0.0,
      0.0,
-     -110.0
+     -76.0
     ],
     "yawDeg": 0.0
    },
@@ -7444,270 +6786,234 @@
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     -42.0
+     -7.5,
+     31.0,
+     -48.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     -42.0
+     7.5,
+     31.0,
+     -48.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     -18.0
+     -7.5,
+     31.0,
+     -24.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     -18.0
+     7.5,
+     31.0,
+     -24.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     6.0
+     -7.5,
+     31.0,
+     -0.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     6.0
+     7.5,
+     31.0,
+     -0.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     30.0
+     -7.5,
+     31.0,
+     24.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     30.0
+     7.5,
+     31.0,
+     24.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     54.0
+     -7.5,
+     31.0,
+     48.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     54.0
+     7.5,
+     31.0,
+     48.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     78.0
+     -7.5,
+     31.0,
+     72.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     78.0
+     7.5,
+     31.0,
+     72.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     102.0
+     -7.5,
+     31.0,
+     96.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     102.0
+     7.5,
+     31.0,
+     96.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     126.0
+     -7.5,
+     31.0,
+     120.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     126.0
+     7.5,
+     31.0,
+     120.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     150.0
+     -7.5,
+     31.0,
+     144.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     150.0
+     7.5,
+     31.0,
+     144.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     -11.0,
-     34.0,
-     174.0
+     -7.5,
+     31.0,
+     168.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Banner",
     "position": [
-     11.0,
-     34.0,
-     174.0
+     7.5,
+     31.0,
+     168.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Board",
     "position": [
-     -46.0,
+     -21.75,
      0.0,
-     -46.0
+     -54.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Board",
     "position": [
-     46.0,
+     21.75,
      0.0,
-     -46.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Board",
-    "position": [
-     -46.0,
-     0.0,
-     50.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Board",
-    "position": [
-     46.0,
-     0.0,
-     50.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Board",
-    "position": [
-     -46.0,
-     0.0,
-     146.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Board",
-    "position": [
-     46.0,
-     0.0,
-     146.0
+     -54.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Poster",
     "position": [
-     -84.1,
+     -36.1,
      13.0,
-     -100.8
+     -66.8
     ],
     "yawDeg": -90.0
    },
    {
     "asset": "Station_Poster",
     "position": [
-     84.1,
+     36.1,
      13.0,
-     -100.8
+     -66.8
     ],
     "yawDeg": 90.0
    },
    {
     "asset": "Station_Poster",
     "position": [
-     -84.1,
+     -36.1,
      13.0,
-     -132.0
+     -98.0
     ],
     "yawDeg": -90.0
    },
    {
     "asset": "Station_Poster",
     "position": [
-     84.1,
+     36.1,
      13.0,
-     -132.0
+     -98.0
     ],
     "yawDeg": 90.0
    }
@@ -7716,270 +7022,450 @@
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -46.0
+     -49.0
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -39.0
+     -42.5
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -32.0
+     -36.0
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -25.0
+     -29.5
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -18.0
+     -23.0
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -11.0
+     -16.5
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     -4.0
+     -10.0
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
+     0.0,
+     -3.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -12.4,
      0.0,
      3.0
     ],
-    "yawDeg": 90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -59.5,
+     -12.4,
      0.0,
-     10.0
-    ],
-    "yawDeg": 90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -59.5,
-     0.0,
-     17.0
-    ],
-    "yawDeg": 90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -59.5,
-     0.0,
-     24.0
-    ],
-    "yawDeg": 90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -59.5,
-     0.0,
-     31.0
-    ],
-    "yawDeg": 90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -54.0,
-     0.0,
-     -55.0
+     9.5
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -51.0,
+     -12.4,
      0.0,
-     -55.0
+     16.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -48.0,
+     -12.4,
      0.0,
-     -55.0
+     22.5
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     -3.2,
      0.0,
-     -46.0
+     -40.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     -3.2,
      0.0,
-     -39.0
+     -31.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     -3.2,
      0.0,
-     -32.0
+     -22.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     -3.2,
      0.0,
-     -25.0
+     -13.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
-     0.0,
-     -18.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     59.5,
-     0.0,
-     -11.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     59.5,
+     -3.2,
      0.0,
      -4.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     -3.2,
+     0.0,
+     5.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -3.2,
+     0.0,
+     14.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -3.2,
+     0.0,
+     23.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -3.2,
+     0.0,
+     32.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -3.2,
+     0.0,
+     41.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -10.4,
+     0.0,
+     -55.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -7.8,
+     0.0,
+     -55.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     -5.2,
+     0.0,
+     -55.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -49.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -42.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -36.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -29.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -23.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -16.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -10.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
+     0.0,
+     -3.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     12.4,
      0.0,
      3.0
     ],
-    "yawDeg": -90.0
+    "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     59.5,
+     12.4,
      0.0,
-     10.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     59.5,
-     0.0,
-     17.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     59.5,
-     0.0,
-     24.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     59.5,
-     0.0,
-     31.0
-    ],
-    "yawDeg": -90.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     54.0,
-     0.0,
-     -55.0
+     9.5
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     51.0,
+     12.4,
      0.0,
-     -55.0
+     16.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     48.0,
+     12.4,
      0.0,
-     -55.0
+     22.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     -40.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     -31.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     -22.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     -13.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     -4.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     5.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     14.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     23.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     32.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     3.2,
+     0.0,
+     41.0
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     10.4,
+     0.0,
+     -55.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     7.8,
+     0.0,
+     -55.5
+    ],
+    "yawDeg": 0.0
+   },
+   {
+    "asset": "Station_Guard",
+    "position": [
+     5.2,
+     0.0,
+     -55.5
     ],
     "yawDeg": 0.0
    },
@@ -7988,7 +7474,7 @@
     "position": [
      -3.0,
      0.0,
-     -52.0
+     -57.0
     ],
     "yawDeg": 0.0
    },
@@ -7997,196 +7483,52 @@
     "position": [
      3.0,
      0.0,
-     -52.0
+     -57.0
     ],
     "yawDeg": 0.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -11.0,
+     -10.0,
      0.0,
-     -176.0
+     -172.0
     ],
     "yawDeg": 180.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     11.0,
+     10.0,
      0.0,
-     -176.0
+     -172.0
     ],
     "yawDeg": 180.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     -10.5,
+     -12.0,
      0.0,
-     -189.0
+     -183.0
     ],
     "yawDeg": 180.0
    },
    {
     "asset": "Station_Guard",
     "position": [
-     10.5,
+     12.0,
      0.0,
-     -189.0
+     -183.0
     ],
     "yawDeg": 180.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     -24.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     -24.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     -10.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     -10.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     4.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     4.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     18.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     18.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     32.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     32.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     46.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     46.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     60.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     -4.0,
-     0.0,
-     74.0
-    ],
-    "yawDeg": 0.0
-   },
-   {
-    "asset": "Station_Guard",
-    "position": [
-     4.0,
-     0.0,
-     74.0
-    ],
-    "yawDeg": 0.0
    }
   ],
   "trainWest": [
    {
     "asset": "Train_NoseCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      -7.0
     ],
@@ -8195,7 +7537,7 @@
    {
     "asset": "Train_Car1_Vestibule",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      -7.0
     ],
@@ -8204,7 +7546,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      33.0
     ],
@@ -8213,7 +7555,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      33.0
     ],
@@ -8222,7 +7564,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      -30.0
     ],
@@ -8231,7 +7573,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      -30.0
     ],
@@ -8240,7 +7582,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      37.4
     ],
@@ -8249,7 +7591,7 @@
    {
     "asset": "Train_VestibuleDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      -24.5
     ],
@@ -8258,7 +7600,7 @@
    {
     "asset": "Train_BudVase",
     "position": [
-     -65.55,
+     -17.55,
      3.15,
      -33.6
     ],
@@ -8267,7 +7609,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      79.5
     ],
@@ -8276,7 +7618,7 @@
    {
     "asset": "Train_Car2_Dining",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      79.5
     ],
@@ -8285,7 +7627,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      114.5
     ],
@@ -8294,7 +7636,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      114.5
     ],
@@ -8303,7 +7645,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      44.5
     ],
@@ -8312,7 +7654,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      44.5
     ],
@@ -8321,7 +7663,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      118.9
     ],
@@ -8330,7 +7672,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      40.1
     ],
@@ -8339,7 +7681,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      92.4
     ],
@@ -8348,7 +7690,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      86.9
     ],
@@ -8357,7 +7699,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      81.4
     ],
@@ -8366,7 +7708,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      75.9
     ],
@@ -8375,7 +7717,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      70.4
     ],
@@ -8384,7 +7726,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -70.55,
+     -22.55,
      3.015,
      64.9
     ],
@@ -8393,7 +7735,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      92.4
     ],
@@ -8402,7 +7744,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      86.9
     ],
@@ -8411,7 +7753,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      81.4
     ],
@@ -8420,7 +7762,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      75.9
     ],
@@ -8429,7 +7771,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      70.4
     ],
@@ -8438,7 +7780,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     -69.75,
+     -21.75,
      3.015,
      64.9
     ],
@@ -8447,7 +7789,7 @@
    {
     "asset": "Train_Chandelier",
     "position": [
-     -70.15,
+     -22.15,
      9.8,
      88.5
     ],
@@ -8456,7 +7798,7 @@
    {
     "asset": "Train_Chandelier",
     "position": [
-     -70.15,
+     -22.15,
      9.8,
      70.5
     ],
@@ -8465,7 +7807,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      161.0
     ],
@@ -8474,7 +7816,7 @@
    {
     "asset": "Train_Car3_Lounge",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      161.0
     ],
@@ -8483,7 +7825,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      196.0
     ],
@@ -8492,7 +7834,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      196.0
     ],
@@ -8501,7 +7843,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      126.0
     ],
@@ -8510,7 +7852,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      126.0
     ],
@@ -8519,7 +7861,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      200.4
     ],
@@ -8528,7 +7870,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      121.6
     ],
@@ -8537,7 +7879,7 @@
    {
     "asset": "Train_GlobeLid",
     "position": [
-     -69.25,
+     -21.25,
      3.0,
      188.0
     ],
@@ -8546,7 +7888,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     -69.25,
+     -21.25,
      9.85,
      173.0
     ],
@@ -8555,7 +7897,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     -69.25,
+     -21.25,
      9.85,
      157.0
     ],
@@ -8564,7 +7906,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     -69.25,
+     -21.25,
      9.85,
      141.0
     ],
@@ -8573,7 +7915,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      242.5
     ],
@@ -8582,7 +7924,7 @@
    {
     "asset": "Train_Car4_Corridor",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      242.5
     ],
@@ -8591,7 +7933,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      277.5
     ],
@@ -8600,7 +7942,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      277.5
     ],
@@ -8609,7 +7951,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      207.5
     ],
@@ -8618,7 +7960,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      207.5
     ],
@@ -8627,7 +7969,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      281.9
     ],
@@ -8636,7 +7978,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      203.1
     ],
@@ -8645,7 +7987,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     -68.45,
+     -20.45,
      0.3,
      247.75
     ],
@@ -8654,7 +7996,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     -68.45,
+     -20.45,
      0.3,
      237.25
     ],
@@ -8663,7 +8005,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      324.0
     ],
@@ -8672,7 +8014,7 @@
    {
     "asset": "Train_Car5_Compartment",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      324.0
     ],
@@ -8681,7 +8023,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      359.0
     ],
@@ -8690,7 +8032,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      359.0
     ],
@@ -8699,7 +8041,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      289.0
     ],
@@ -8708,7 +8050,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      289.0
     ],
@@ -8717,7 +8059,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      363.4
     ],
@@ -8726,7 +8068,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      284.6
     ],
@@ -8735,7 +8077,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     -68.45,
+     -20.45,
      0.3,
      345.0
     ],
@@ -8744,7 +8086,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     -68.45,
+     -20.45,
      0.3,
      324.0
     ],
@@ -8753,7 +8095,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     -68.45,
+     -20.45,
      0.3,
      303.0
     ],
@@ -8762,7 +8104,7 @@
    {
     "asset": "Train_ObservationCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      405.5
     ],
@@ -8771,7 +8113,7 @@
    {
     "asset": "Train_Car6_Observation",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      405.5
     ],
@@ -8780,7 +8122,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      444.9
     ],
@@ -8789,7 +8131,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      366.1
     ],
@@ -8798,7 +8140,7 @@
    {
     "asset": "Train_NoseCar",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      492.0
     ],
@@ -8807,7 +8149,7 @@
    {
     "asset": "Train_Car7_Guard",
     "position": [
-     -69.25,
+     -21.25,
      0.0,
      492.0
     ],
@@ -8816,7 +8158,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      452.0
     ],
@@ -8825,7 +8167,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      452.0
     ],
@@ -8834,7 +8176,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -63.6,
+     -15.6,
      0.3,
      515.0
     ],
@@ -8843,7 +8185,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     -74.9,
+     -26.9,
      0.3,
      515.0
     ],
@@ -8852,7 +8194,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     -69.25,
+     -21.25,
      0.3,
      447.6
     ],
@@ -8861,7 +8203,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     -67.05,
+     -19.05,
      0.3,
      486.0
     ],
@@ -8870,7 +8212,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     -71.45,
+     -23.45,
      0.3,
      486.0
     ],
@@ -8879,7 +8221,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     -67.05,
+     -19.05,
      0.3,
      500.0
     ],
@@ -8888,7 +8230,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     -71.45,
+     -23.45,
      0.3,
      500.0
     ],
@@ -8899,7 +8241,7 @@
    {
     "asset": "Train_NoseCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      -7.0
     ],
@@ -8908,7 +8250,7 @@
    {
     "asset": "Train_Car1_Vestibule",
     "position": [
-     69.25,
+     21.25,
      0.0,
      -7.0
     ],
@@ -8917,7 +8259,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      33.0
     ],
@@ -8926,7 +8268,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      33.0
     ],
@@ -8935,7 +8277,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      -30.0
     ],
@@ -8944,7 +8286,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      -30.0
     ],
@@ -8953,7 +8295,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      37.4
     ],
@@ -8962,7 +8304,7 @@
    {
     "asset": "Train_VestibuleDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      -24.5
     ],
@@ -8971,7 +8313,7 @@
    {
     "asset": "Train_BudVase",
     "position": [
-     72.95,
+     24.95,
      3.15,
      -33.6
     ],
@@ -8980,7 +8322,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      79.5
     ],
@@ -8989,7 +8331,7 @@
    {
     "asset": "Train_Car2_Dining",
     "position": [
-     69.25,
+     21.25,
      0.0,
      79.5
     ],
@@ -8998,7 +8340,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      114.5
     ],
@@ -9007,7 +8349,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      114.5
     ],
@@ -9016,7 +8358,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      44.5
     ],
@@ -9025,7 +8367,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      44.5
     ],
@@ -9034,7 +8376,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      118.9
     ],
@@ -9043,7 +8385,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      40.1
     ],
@@ -9052,7 +8394,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      92.4
     ],
@@ -9061,7 +8403,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      86.9
     ],
@@ -9070,7 +8412,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      81.4
     ],
@@ -9079,7 +8421,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      75.9
     ],
@@ -9088,7 +8430,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      70.4
     ],
@@ -9097,7 +8439,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     67.95,
+     19.95,
      3.015,
      64.9
     ],
@@ -9106,7 +8448,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      92.4
     ],
@@ -9115,7 +8457,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      86.9
     ],
@@ -9124,7 +8466,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      81.4
     ],
@@ -9133,7 +8475,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      75.9
     ],
@@ -9142,7 +8484,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      70.4
     ],
@@ -9151,7 +8493,7 @@
    {
     "asset": "Train_Crystal",
     "position": [
-     68.75,
+     20.75,
      3.015,
      64.9
     ],
@@ -9160,7 +8502,7 @@
    {
     "asset": "Train_Chandelier",
     "position": [
-     68.35,
+     20.35,
      9.8,
      88.5
     ],
@@ -9169,7 +8511,7 @@
    {
     "asset": "Train_Chandelier",
     "position": [
-     68.35,
+     20.35,
      9.8,
      70.5
     ],
@@ -9178,7 +8520,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      161.0
     ],
@@ -9187,7 +8529,7 @@
    {
     "asset": "Train_Car3_Lounge",
     "position": [
-     69.25,
+     21.25,
      0.0,
      161.0
     ],
@@ -9196,7 +8538,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      196.0
     ],
@@ -9205,7 +8547,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      196.0
     ],
@@ -9214,7 +8556,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      126.0
     ],
@@ -9223,7 +8565,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      126.0
     ],
@@ -9232,7 +8574,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      200.4
     ],
@@ -9241,7 +8583,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      121.6
     ],
@@ -9250,7 +8592,7 @@
    {
     "asset": "Train_GlobeLid",
     "position": [
-     69.25,
+     21.25,
      3.0,
      188.0
     ],
@@ -9259,7 +8601,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     69.25,
+     21.25,
      9.85,
      173.0
     ],
@@ -9268,7 +8610,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     69.25,
+     21.25,
      9.85,
      157.0
     ],
@@ -9277,7 +8619,7 @@
    {
     "asset": "Train_PendantLamp",
     "position": [
-     69.25,
+     21.25,
      9.85,
      141.0
     ],
@@ -9286,7 +8628,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      242.5
     ],
@@ -9295,7 +8637,7 @@
    {
     "asset": "Train_Car4_Corridor",
     "position": [
-     69.25,
+     21.25,
      0.0,
      242.5
     ],
@@ -9304,7 +8646,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      277.5
     ],
@@ -9313,7 +8655,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      277.5
     ],
@@ -9322,7 +8664,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      207.5
     ],
@@ -9331,7 +8673,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      207.5
     ],
@@ -9340,7 +8682,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      281.9
     ],
@@ -9349,7 +8691,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      203.1
     ],
@@ -9358,7 +8700,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     70.05,
+     22.05,
      0.3,
      247.75
     ],
@@ -9367,7 +8709,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     70.05,
+     22.05,
      0.3,
      237.25
     ],
@@ -9376,7 +8718,7 @@
    {
     "asset": "Train_BodyCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      324.0
     ],
@@ -9385,7 +8727,7 @@
    {
     "asset": "Train_Car5_Compartment",
     "position": [
-     69.25,
+     21.25,
      0.0,
      324.0
     ],
@@ -9394,7 +8736,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      359.0
     ],
@@ -9403,7 +8745,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      359.0
     ],
@@ -9412,7 +8754,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      289.0
     ],
@@ -9421,7 +8763,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      289.0
     ],
@@ -9430,7 +8772,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      363.4
     ],
@@ -9439,7 +8781,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      284.6
     ],
@@ -9448,7 +8790,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     70.05,
+     22.05,
      0.3,
      345.0
     ],
@@ -9457,7 +8799,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     70.05,
+     22.05,
      0.3,
      324.0
     ],
@@ -9466,7 +8808,7 @@
    {
     "asset": "Train_CompartmentDoor",
     "position": [
-     70.05,
+     22.05,
      0.3,
      303.0
     ],
@@ -9475,7 +8817,7 @@
    {
     "asset": "Train_ObservationCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      405.5
     ],
@@ -9484,7 +8826,7 @@
    {
     "asset": "Train_Car6_Observation",
     "position": [
-     69.25,
+     21.25,
      0.0,
      405.5
     ],
@@ -9493,7 +8835,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      444.9
     ],
@@ -9502,7 +8844,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      366.1
     ],
@@ -9511,7 +8853,7 @@
    {
     "asset": "Train_NoseCar",
     "position": [
-     69.25,
+     21.25,
      0.0,
      492.0
     ],
@@ -9520,7 +8862,7 @@
    {
     "asset": "Train_Car7_Guard",
     "position": [
-     69.25,
+     21.25,
      0.0,
      492.0
     ],
@@ -9529,7 +8871,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      452.0
     ],
@@ -9538,7 +8880,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      452.0
     ],
@@ -9547,7 +8889,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     74.9,
+     26.9,
      0.3,
      515.0
     ],
@@ -9556,7 +8898,7 @@
    {
     "asset": "Train_DoorLeaf",
     "position": [
-     63.6,
+     15.6,
      0.3,
      515.0
     ],
@@ -9565,7 +8907,7 @@
    {
     "asset": "Train_GangwayDoor",
     "position": [
-     69.25,
+     21.25,
      0.3,
      447.6
     ],
@@ -9574,7 +8916,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     71.45,
+     23.45,
      0.3,
      486.0
     ],
@@ -9583,7 +8925,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     67.05,
+     19.05,
      0.3,
      486.0
     ],
@@ -9592,7 +8934,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     71.45,
+     23.45,
      0.3,
      500.0
     ],
@@ -9601,7 +8943,7 @@
    {
     "asset": "Station_Guard",
     "position": [
-     67.05,
+     19.05,
      0.3,
      500.0
     ],
@@ -9661,9 +9003,9 @@
   ]
  },
  "lighting": {
-  "station": "Lighting.Ambient (70, 56, 44), ColorShift_Top (200, 140, 90), a warm low sun through the west glazing; SurfaceLights facing in on every ShedBay/EntranceWalls/ShedEnd Glow part (Color (248, 232, 222), Brightness 1.5, Range 40); warm downlights in the coffers; the nose lamps' red PointLights.",
-  "train": "Amber cove SurfaceLights on the Cove parts (255, 196, 128), the chandeliers' and pendants' PointLights (swing with them), the lounge screen's cool SurfaceLight (the only cool light), guard-car strip lights; the windows glow amber from outside at night (Roblox does this from the interior lights).",
-  "night journey": "Moonlit blue outside (Ambient ~ (40, 48, 70)), amber windows inside; Train_BridgeBackdrop with its DeckLights."
+  "station": "Pass 2 (critic #6c and the pass 2 review): daylight from the glazing, with the gold and amber as accents, not a wash. Lighting.Ambient about (62, 64, 68) and OutdoorAmbient neutral; a warm low late-day sun (Color about (255, 190, 122)) from the west, entering through the west glazing (the shed has a solid roof) and falling on the east wall and the platform. SurfaceLights facing in on the Glow parts: the west glazing (Glow, which reads white (240, 236, 230)) throws warm light (252, 212, 168) across onto the east wall; the east glazing (GlowEast, which reads warmer (250, 222, 190)) throws cool sky light (226, 232, 240) onto the west wall; Brightness about 1, Range 40. The entrance hall's windows (EntranceWalls Glow, (236, 236, 232)) give neutral daylight, the west ones warmer. The coffers' downlights are Neon lenses only. A neutral SpotLight or two in the lantern on the gold blades; the nose lamps' red PointLights (Range 8, dim).",
+  "train": "Two SurfaceLights on each Cove part: Face Bottom (the stronger, about four fifths) down the walls onto the brass window frames and benches, and Face Top (about a fifth, wide angle) washing the hammered vault; Color (255, 214, 163), between pass 1's orange (255, 173, 102) and pass 2a's pale (255, 204, 153). The chandeliers', pendants' and sconces' PointLights warm-white (255, 230, 199), bright enough to light the wood arches, swinging with them; the lounge screen's cool SurfaceLight (the only cool light); guard-car strip lights; night outside, so the window glass (dark cool Glass, 0.7 transparent) reads dark with faint reflections.",
+  "night journey": "Moonlit blue outside (Ambient ~ (40, 48, 70)); the cars lit by their coves, so from outside the windows read as an amber strip, with the red-orange nose lamp; Train_BridgeBackdrop with its DeckLights."
  },
  "motion": {
   "sway": "constant 1.5 degree roll and a 0.4-stud vertical float on a slow sine (period ~6 s), out of phase front to back (spec section 9); move each car model as a whole (shell + interior + pieces welded to its root).",
@@ -9690,9 +9032,9 @@
  "cars": {
   "Train_Car1_Vestibule": {
    "shell": "Train_NoseCar",
-   "shellTris": 3778,
+   "shellTris": 4158,
    "interiorTris": 5743,
-   "total": 9521,
+   "total": 9901,
    "turned": false
   },
   "Train_Car2_Dining": {
@@ -9725,16 +9067,16 @@
   },
   "Train_Car6_Observation": {
    "shell": "Train_ObservationCar",
-   "shellTris": 2592,
+   "shellTris": 2496,
    "interiorTris": 998,
-   "total": 3590,
+   "total": 3494,
    "turned": false
   },
   "Train_Car7_Guard": {
    "shell": "Train_NoseCar",
-   "shellTris": 3778,
+   "shellTris": 4158,
    "interiorTris": 3197,
-   "total": 6975,
+   "total": 7355,
    "turned": true
   }
  },
@@ -9748,8 +9090,8 @@
     "Ceiling",
     "Modular"
    ],
-   "notes": "One 12 x 12 coffer of the entrance hall's concrete ceiling (1-stud chamfered rib soffit, a sloped recess 4 deep, a round downlight), tiled 160 times round the oval (layout). Out of reach: no collision.",
-   "pivot": "on the floor under the cell centre (the soffit is 40 up)",
+   "notes": "One 12 x 12 module of the entrance hall's concrete ceiling: four 6-stud coffers (0.8-stud chamfered ribs, a shallow sloped recess 1.4 deep), each with a round downlight on a short can whose lens sits just above the soffit, so it reads from the platform as in the film (T1 @35.7 s). Tiled round the oval (layout). The lenses are Neon only: light the hall with the glazing's SurfaceLights, not one light per coffer. Out of reach: no collision.",
+   "pivot": "on the floor under the module's centre (the soffit is 40 up)",
    "boundsMin": [
     -6.0,
     40.0,
@@ -9757,15 +9099,15 @@
    ],
    "boundsMax": [
     6.0,
-    44.0,
+    41.4,
     6.0
    ],
    "size": [
     12.0,
-    4.0,
+    1.4,
     12.0
    ],
-   "tris": 32,
+   "tris": 192,
    "parts": [
     {
      "name": "Station_Coffer_Concrete",
@@ -9773,9 +9115,9 @@
      "kind": "tex",
      "robloxMaterial": "Concrete",
      "rgb": [
-      139,
-      134,
-      127
+      143,
+      141,
+      137
      ],
      "collide": false,
      "collision": "Box",
@@ -9783,13 +9125,13 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 26,
+     "tris": 168,
      "textureSet": "Train_Station_Coffer",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_Coffer_Color.png",
       "normalMap": "Train/textures/Train_Station_Coffer_Normal.png",
       "roughnessMap": "Train/textures/Train_Station_Coffer_Rough.png",
-      "metalnessMap": null,
+      "metalnessMap": "Train/textures/Train_Station_Coffer_Metal.png",
       "alphaMode": "Overlay",
       "color": [
        255,
@@ -9804,8 +9146,9 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "coffer": 0.903,
-      "concrete": 0.097
+      "coffer": 0.778,
+      "concrete": 0.165,
+      "white_steel": 0.057
      }
     },
     {
@@ -9814,9 +9157,9 @@
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      255,
-      238,
-      214
+      250,
+      248,
+      242
      ],
      "collide": false,
      "collision": "Box",
@@ -9824,7 +9167,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 6,
+     "tris": 24,
      "textureSet": null,
      "surfaceAppearance": null,
      "transparency": 0,
@@ -9839,10 +9182,10 @@
     }
    ],
    "attachments": {
-    "Downlight": {
+    "Downlights": {
      "position": [
       0.0,
-      43.9,
+      40.25,
       -0.0
      ],
      "look": [
@@ -9855,7 +9198,7 @@
       0.0,
       -1.0
      ],
-     "note": "warm SpotLight (255, 214, 170), Brightness 1, Range 40, Angle 70, or a SurfaceLight on the disc"
+     "note": "four Neon lenses (255, 238, 214); no light objects (the hall is lit by the glazing's SurfaceLights)"
     }
    },
    "colliders": [],
@@ -9876,21 +9219,21 @@
    "notes": "The unique part of the entrance hall's coffered ceiling: the soffit collar round the 100 x 50 oval with 28 radial ribs, the deep fascia ring that rises to the lantern, the perimeter strips and the header wall over the shed's mouth. The regular coffers are Station_Coffer modules (layout). Origin = the oval's centre on the floor. Out of reach: no collision.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -85.0,
-    36.5,
-    -100.0
+    -37.0,
+    0.0,
+    -134.0
    ],
    "boundsMax": [
-    85.0,
-    62.0,
-    57.0
+    37.0,
+    86.0,
+    23.0
    ],
    "size": [
-    170.0,
-    25.5,
+    74.0,
+    86.0,
     157.0
    ],
-   "tris": 836,
+   "tris": 868,
    "parts": [
     {
      "name": "Station_EntranceCeiling_Concrete",
@@ -9898,9 +9241,9 @@
      "kind": "tex",
      "robloxMaterial": "Concrete",
      "rgb": [
-      148,
+      144,
       142,
-      134
+      139
      ],
      "collide": false,
      "collision": "Box",
@@ -9908,7 +9251,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 836,
+     "tris": 868,
      "textureSet": "Train_Station_EntranceCeiling",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_EntranceCeiling_Color.png",
@@ -9936,7 +9279,7 @@
    "attachments": {},
    "colliders": [],
    "origin": [
-    107.0,
+    59.0,
     0.0,
     0.0
    ],
@@ -9952,19 +9295,19 @@
    "notes": "Elliptical drum (z 44-72) and coffered dome above the oval: 24 pilasters, 24 radial ribs, a ring rib and a hub the sculpture hangs from. Origin = the oval's centre on the floor.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -50.0,
+    -24.0,
     44.0,
-    -25.0
+    -18.0
    ],
    "boundsMax": [
-    50.0,
+    24.0,
     72.0,
-    25.0
+    18.0
    ],
    "size": [
-    100.0,
+    48.0,
     28.0,
-    50.0
+    36.0
    ],
    "tris": 2348,
    "parts": [
@@ -9974,9 +9317,9 @@
      "kind": "tex",
      "robloxMaterial": "Concrete",
      "rgb": [
-      146,
-      140,
-      132
+      143,
+      141,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -10005,8 +9348,8 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "concrete": 0.782,
-      "coffer": 0.218
+      "concrete": 0.869,
+      "coffer": 0.131
      }
     },
     {
@@ -10015,9 +9358,9 @@
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      255,
-      238,
-      214
+      250,
+      248,
+      242
      ],
      "collide": false,
      "collision": "Box",
@@ -10042,7 +9385,7 @@
    "attachments": {},
    "colliders": [],
    "origin": [
-    252.0,
+    130.0,
     0.0,
     0.0
    ],
@@ -10055,24 +9398,24 @@
     "Station",
     "Sculpture"
    ],
-   "notes": "Our own sculpture in the film's spirit: 10 long tapered gold blades in two fans of five, gathered by two collars at the centre and rising to the drum's rim (40-52 studs long, 6-sided sections, a slight sag and twist), with a faceted gold drop between the collars. Hung from the lantern by steel rods. Brushed gold: metalness 0.9, roughness 0.3. Origin = the oval's centre on the floor.",
+   "notes": "Our own sculpture: one radial fan of 10 broad gold blades fanning down through the oval from a ring hub up in the lantern, evenly spread over 160 degrees. Each blade is about a fifth as wide as it is long, broad for most of its length with a rounded end, and rounded in section (8 sides), so it catches the light along its length; each is as long as the oval allows (the longest pass through the opening and hang under the coffers). There is no pendant and no gap in the middle: it reads as rays of light, never as wings or an emblem (critic #6b). Alternate blades lean 10 degrees towards and away from the entrance for depth. Hung from the lantern's dome by steel rods. Brushed gold (#ba8e4e): metalness 0.9, roughness 0.3. Origin = the oval's centre on the floor.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -48.5466,
-    19.5,
-    -21.4936
+    -27.8999,
+    24.1064,
+    -10.4429
    ],
    "boundsMax": [
-    48.5142,
-    71.8,
-    20.9548
+    27.9384,
+    71.8318,
+    9.853
    ],
    "size": [
-    97.061,
-    52.3,
-    42.448
+    55.838,
+    47.725,
+    20.296
    ],
-   "tris": 2308,
+   "tris": 2172,
    "parts": [
     {
      "name": "Station_Sunburst_Gold",
@@ -10081,8 +9424,8 @@
      "robloxMaterial": "Metal",
      "rgb": [
       186,
-      142,
-      78
+      156,
+      114
      ],
      "collide": false,
      "collision": "Box",
@@ -10090,7 +9433,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2152,
+     "tris": 2136,
      "textureSet": "Train_Station_Sunburst",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_Sunburst_Color.png",
@@ -10130,7 +9473,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 156,
+     "tris": 36,
      "textureSet": "Train_Station_Sunburst",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_Sunburst_Color.png",
@@ -10158,7 +9501,7 @@
    "attachments": {},
    "colliders": [],
    "origin": [
-    360.5466,
+    191.8999,
     0.0,
     0.0
    ],
@@ -10171,24 +9514,24 @@
     "Station",
     "Wall"
    ],
-   "notes": "The entrance hall's side walls (columns, a stone base with service doors, tall bronze-framed glazing glowing amber from behind) and the end wall (three glass doorways, clerestory). Origin = the oval's centre on the floor. Collision: use the colliders (mesh parts are visual).",
+   "notes": "The entrance hall's side walls, 74 apart (columns, a stone base with service doors, tall bronze-framed glazing with white daylight behind it) and the end wall (three glass doorways, clerestory). Origin = the oval's centre on the floor. Collision: use the colliders (mesh parts are visual).",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -89.0,
+    -41.0,
     0.0,
-    -105.0
+    -139.0
    ],
    "boundsMax": [
-    89.0,
+    41.0,
     44.0,
-    56.0
+    22.0
    ],
    "size": [
-    178.0,
+    82.0,
     44.0,
     161.0
    ],
-   "tris": 2810,
+   "tris": 2666,
    "parts": [
     {
      "name": "Station_EntranceWalls_Walls",
@@ -10196,9 +9539,9 @@
      "kind": "tex",
      "robloxMaterial": "Concrete",
      "rgb": [
-      130,
-      122,
-      113
+      128,
+      123,
+      118
      ],
      "collide": false,
      "collision": "Box",
@@ -10206,7 +9549,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2748,
+     "tris": 2604,
      "textureSet": "Train_Station_EntranceWalls",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_EntranceWalls_Color.png",
@@ -10227,9 +9570,9 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "concrete": 0.585,
-      "bronze": 0.403,
-      "wood_dark": 0.012
+      "concrete": 0.599,
+      "bronze": 0.387,
+      "wood_dark": 0.014
      }
     },
     {
@@ -10267,9 +9610,9 @@
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      248,
-      232,
-      222
+      236,
+      236,
+      232
      ],
      "collide": false,
      "collision": "Box",
@@ -10282,12 +9625,12 @@
      "surfaceAppearance": null,
      "transparency": 0,
      "neon": true,
-     "emitKey": "glow",
+     "emitKey": "glow_hall",
      "doubleSided": false,
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "glow": 1.0
+      "glow_hall": 1.0
      }
     }
    ],
@@ -10295,9 +9638,9 @@
    "colliders": [
     {
      "centre": [
-      -85.5,
+      -37.5,
       20.0,
-      -22.0
+      -56.0
      ],
      "size": [
       2.0,
@@ -10308,9 +9651,9 @@
     },
     {
      "centre": [
-      85.5,
+      37.5,
       20.0,
-      -22.0
+      -56.0
      ],
      "size": [
       2.0,
@@ -10323,10 +9666,10 @@
      "centre": [
       0.0,
       20.0,
-      -100.75
+      -134.75
      ],
      "size": [
-      170.0,
+      74.0,
       40.0,
       1.5
      ],
@@ -10334,7 +9677,7 @@
     }
    ],
    "origin": [
-    508.061,
+    270.838,
     0.0,
     0.0
    ],
@@ -10351,21 +9694,21 @@
    "notes": "Polished stone floor of the entrance hall (6-stud slabs, roughness 0.4) with our own brass 'sunrise' inlay at the shed's mouth; the guideway pits' end walls and buffer stops. Origin = the oval's centre on the floor.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -85.0,
+    -37.0,
     -5.0,
-    -100.0
+    -134.0
    ],
    "boundsMax": [
-    85.0,
+    37.0,
     0.016,
-    58.5
+    24.5
    ],
    "size": [
-    170.0,
+    74.0,
     5.016,
     158.5
    ],
-   "tris": 1796,
+   "tris": 1016,
    "parts": [
     {
      "name": "Station_EntranceFloor_Floor",
@@ -10373,9 +9716,9 @@
      "kind": "tex",
      "robloxMaterial": "Marble",
      "rgb": [
-      111,
-      105,
-      99
+      91,
+      85,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -10383,7 +9726,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1796,
+     "tris": 1016,
      "textureSet": "Train_Station_EntranceFloor",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_EntranceFloor_Color.png",
@@ -10404,11 +9747,11 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "floor": 0.957,
-      "floor_light": 0.023,
-      "concrete_dark": 0.015,
-      "brass": 0.004,
-      "steel_dark": 0.002
+      "floor": 0.94,
+      "concrete_dark": 0.029,
+      "floor_light": 0.022,
+      "brass": 0.005,
+      "steel_dark": 0.004
      }
     }
    ],
@@ -10418,10 +9761,10 @@
      "centre": [
       0.0,
       -0.5,
-      -22.0
+      -56.0
      ],
      "size": [
-      170.0,
+      74.0,
       1.0,
       156.0
      ],
@@ -10429,9 +9772,9 @@
     },
     {
      "centre": [
-      -69.25,
+      -21.25,
       -2.8,
-      57.25
+      23.25
      ],
      "size": [
       6.4,
@@ -10442,9 +9785,9 @@
     },
     {
      "centre": [
-      69.25,
+      21.25,
       -2.8,
-      57.25
+      23.25
      ],
      "size": [
       6.4,
@@ -10455,7 +9798,7 @@
     }
    ],
    "origin": [
-    692.061,
+    358.838,
     0.0,
     0.0
    ],
@@ -10468,24 +9811,24 @@
     "Station",
     "Portal"
    ],
-   "notes": "The white cross-beam (6 high) at the shed's mouth on four columns, carrying our own gold emblem (a rayed disc and bars; no lettering). Origin = floor centre at the shed's mouth (hall y 126).",
+   "notes": "The white cross-beam (3.5 high, its underside at 19.5) across the shed's mouth on four columns: two against the glazing, standing in the guideway bays, and two on the platform that the first banners hang beside. It carries our own gold emblem (a rayed disc) and a row of abstract gold glyph blocks along its top (no lettering). The two departure boards hang from its underside over the tracks. Origin = floor centre at the shed's mouth (hall y 54).",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -85.0,
-    0.0,
+    -31.1,
+    -5.0,
     -1.3
    ],
    "boundsMax": [
-    85.0,
-    39.6,
+    31.1,
+    32.4,
     1.3
    ],
    "size": [
-    170.0,
-    39.6,
+    62.2,
+    37.4,
     2.6
    ],
-   "tris": 740,
+   "tris": 1576,
    "parts": [
     {
      "name": "Station_Portal_Steel",
@@ -10493,9 +9836,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      209,
-      202,
-      192
+      205,
+      197,
+      185
      ],
      "collide": false,
      "collision": "Box",
@@ -10503,7 +9846,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 740,
+     "tris": 1576,
      "textureSet": "Train_Station_Portal",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_Portal_Color.png",
@@ -10524,69 +9867,106 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "white_steel": 0.887,
-      "gold": 0.093,
-      "concrete": 0.02
+      "white_steel": 0.771,
+      "gold": 0.184,
+      "concrete": 0.045
      }
     }
    ],
-   "attachments": {},
+   "attachments": {
+    "BoardW": {
+     "position": [
+      -21.75,
+      0.0,
+      -1.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "note": "Station_Board hangs here from the beam's underside, over the track"
+    },
+    "BoardE": {
+     "position": [
+      21.75,
+      0.0,
+      -1.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "note": "Station_Board hangs here from the beam's underside, over the track"
+    }
+   },
    "colliders": [
     {
      "centre": [
-      -61.5,
-      12.0,
+      -29.8,
+      7.25,
       -0.0
      ],
      "size": [
       2.6,
-      24.0,
+      24.5,
       2.6
      ],
      "tag": "Solid"
     },
     {
      "centre": [
-      -33.0,
-      12.0,
+      -7.5,
+      9.75,
       -0.0
      ],
      "size": [
       2.6,
-      24.0,
+      19.5,
       2.6
      ],
      "tag": "Solid"
     },
     {
      "centre": [
-      33.0,
-      12.0,
+      7.5,
+      9.75,
       -0.0
      ],
      "size": [
       2.6,
-      24.0,
+      19.5,
       2.6
      ],
      "tag": "Solid"
     },
     {
      "centre": [
-      61.5,
-      12.0,
+      29.8,
+      7.25,
       -0.0
      ],
      "size": [
       2.6,
-      24.0,
+      24.5,
       2.6
      ],
      "tag": "Solid"
     }
    ],
    "origin": [
-    872.061,
+    436.938,
     0.0,
     0.0
    ],
@@ -10600,24 +9980,24 @@
     "Shed",
     "Modular"
    ],
-   "notes": "One 24-stud slice of the train shed, repeated 14 times (+4 as backdrop): glazed walls 60 high with white mullions every 6 studs and stepped fins (deep low, shallow high), transoms, the amber-pink glow behind the glass (emissive backdrop: add warm SurfaceLights facing in), the roof's white beams every 6 studs and purlins under roof glazing. Origin = the slice's floor centre.",
+   "notes": "One 24-stud slice of the train shed, repeated 11 times (+6 as backdrop): glazed walls 84 high, 62 apart, with white mullions every 6 studs and stepped fins (1.4 deep beside the trains, 2.2 and 3.0 overhead), transoms, white daylight behind the glass (an emissive backdrop: add SurfaceLights facing in), the roof's white beams and purlins under a solid roof. Origin = the slice's floor centre.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -90.0,
+    -36.0,
     -5.0,
     -12.0
    ],
    "boundsMax": [
+    36.0,
     90.0,
-    66.0,
     12.5
    ],
    "size": [
-    180.0,
-    71.0,
+    72.0,
+    95.0,
     24.5
    ],
-   "tris": 1966,
+   "tris": 2052,
    "parts": [
     {
      "name": "Station_ShedBay_Steel",
@@ -10625,9 +10005,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      205,
-      201,
-      193
+      186,
+      182,
+      174
      ],
      "collide": false,
      "collision": "Box",
@@ -10635,7 +10015,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1948,
+     "tris": 2040,
      "textureSet": "Train_Station_ShedBay",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_ShedBay_Color.png",
@@ -10656,8 +10036,8 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "white_steel": 0.897,
-      "concrete_dark": 0.103
+      "white_steel": 0.657,
+      "concrete_dark": 0.343
      }
     },
     {
@@ -10676,7 +10056,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 12,
+     "tris": 8,
      "textureSet": null,
      "surfaceAppearance": null,
      "transparency": 0.7,
@@ -10695,9 +10075,9 @@
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      248,
-      232,
-      222
+      240,
+      236,
+      230
      ],
      "collide": false,
      "collision": "Box",
@@ -10705,7 +10085,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 4,
+     "tris": 2,
      "textureSet": null,
      "surfaceAppearance": null,
      "transparency": 0,
@@ -10719,14 +10099,14 @@
      }
     },
     {
-     "name": "Station_ShedBay_GlowRoof",
-     "role": "GlowRoof",
+     "name": "Station_ShedBay_GlowEast",
+     "role": "GlowEast",
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      240,
-      226,
-      214
+      250,
+      222,
+      190
      ],
      "collide": false,
      "collision": "Box",
@@ -10739,12 +10119,12 @@
      "surfaceAppearance": null,
      "transparency": 0,
      "neon": true,
-     "emitKey": "glow_roof",
+     "emitKey": "glow_e",
      "doubleSided": false,
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "glow_roof": 1.0
+      "glow_e": 1.0
      }
     }
    ],
@@ -10752,33 +10132,33 @@
    "colliders": [
     {
      "centre": [
-      -85.0,
-      27.5,
+      -31.0,
+      39.5,
       -0.0
      ],
      "size": [
       2.0,
-      65.0,
+      89.0,
       24.0
      ],
      "tag": "Solid"
     },
     {
      "centre": [
-      85.0,
-      27.5,
+      31.0,
+      39.5,
       -0.0
      ],
      "size": [
       2.0,
-      65.0,
+      89.0,
       24.0
      ],
      "tag": "Solid"
     }
    ],
    "origin": [
-    1057.061,
+    514.038,
     0.0,
     0.0
    ],
@@ -10793,34 +10173,34 @@
     "Walkable",
     "Modular"
    ],
-   "notes": "One 24-stud slice of floor: the concourse (66) and two platforms (30) in polished stone slabs, a muted edge band and nosing, the guideway pits (22, floor at -5) with the maglev T-beam and its guide rails under each track (no sleepers, no rails to ride on). Origin = the slice's floor centre.",
+   "notes": "One 24-stud slice of floor: the island platform between the trains (30 wide: the aisle of guards) in polished stone slabs, a muted edge band and nosing on both edges, and the two guideway bays (16 wide, floor at -5) with the maglev T-beam and its guide rails under each track (no sleepers, no rails to ride on). Origin = the slice's floor centre.",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -85.0,
+    -31.0,
     -5.0,
     -12.0
    ],
    "boundsMax": [
-    85.0,
+    31.0,
     0.0,
     12.0
    ],
    "size": [
-    170.0,
+    62.0,
     5.0,
     24.0
    ],
-   "tris": 460,
+   "tris": 340,
    "parts": [
     {
      "name": "Station_FloorBay_Floor",
      "role": "Floor",
      "kind": "tex",
-     "robloxMaterial": "Marble",
+     "robloxMaterial": "Concrete",
      "rgb": [
-      120,
-      115,
-      108
+      124,
+      119,
+      113
      ],
      "collide": false,
      "collision": "Box",
@@ -10828,7 +10208,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 460,
+     "tris": 340,
      "textureSet": "Train_Station_FloorBay",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_FloorBay_Color.png",
@@ -10849,12 +10229,12 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "floor": 0.51,
-      "guideway": 0.229,
-      "concrete_dark": 0.221,
-      "steel": 0.025,
-      "edge_strip": 0.01,
-      "concrete": 0.005
+      "guideway": 0.416,
+      "concrete_dark": 0.311,
+      "floor": 0.202,
+      "steel": 0.045,
+      "edge_strip": 0.017,
+      "concrete": 0.009
      }
     }
    ],
@@ -10862,12 +10242,12 @@
    "colliders": [
     {
      "centre": [
-      -74.0,
+      -23.0,
       -5.5,
       -0.0
      ],
      "size": [
-      22.0,
+      16.0,
       1.0,
       24.0
      ],
@@ -10875,7 +10255,7 @@
     },
     {
      "centre": [
-      -69.25,
+      -21.25,
       -3.725,
       -0.0
      ],
@@ -10888,12 +10268,12 @@
     },
     {
      "centre": [
-      74.0,
+      23.0,
       -5.5,
       -0.0
      ],
      "size": [
-      22.0,
+      16.0,
       1.0,
       24.0
      ],
@@ -10901,7 +10281,7 @@
     },
     {
      "centre": [
-      69.25,
+      21.25,
       -3.725,
       -0.0
      ],
@@ -10919,7 +10299,7 @@
       -0.0
      ],
      "size": [
-      126.0,
+      30.0,
       1.0,
       24.0
      ],
@@ -10927,7 +10307,7 @@
     }
    ],
    "origin": [
-    1242.061,
+    591.038,
     0.0,
     0.0
    ],
@@ -10943,31 +10323,31 @@
    "notes": "The far end of the shed, open to the light: a white portal frame, a glazed upper band with fins, a pale apron and the glow beyond; the pits and maglev beams run 180 studs out under the parked trains. Origin = floor centre at the end (hall y -354).",
    "pivot": "base centre on the floor",
    "boundsMin": [
-    -145.0,
+    -91.0,
     -5.0,
     -1.6
    ],
    "boundsMax": [
-    145.0,
-    90.0,
+    91.0,
+    114.0,
     180.0
    ],
    "size": [
-    290.0,
-    95.0,
+    182.0,
+    119.0,
     181.6
    ],
-   "tris": 1516,
+   "tris": 724,
    "parts": [
     {
      "name": "Station_ShedEnd_Steel",
      "role": "Steel",
      "kind": "tex",
-     "robloxMaterial": "Metal",
+     "robloxMaterial": "Concrete",
      "rgb": [
-      161,
-      157,
-      149
+      158,
+      154,
+      147
      ],
      "collide": false,
      "collision": "Box",
@@ -10975,7 +10355,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1510,
+     "tris": 718,
      "textureSet": "Train_Station_ShedEnd",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_ShedEnd_Color.png",
@@ -10996,10 +10376,10 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "white_steel": 0.285,
-      "guideway": 0.27,
-      "concrete_dark": 0.235,
-      "concrete": 0.21
+      "guideway": 0.399,
+      "white_steel": 0.268,
+      "concrete_dark": 0.259,
+      "concrete": 0.074
      }
     },
     {
@@ -11037,9 +10417,9 @@
      "kind": "neon",
      "robloxMaterial": "Neon",
      "rgb": [
-      248,
-      232,
-      222
+      240,
+      236,
+      230
      ],
      "collide": false,
      "collision": "Box",
@@ -11065,7 +10445,7 @@
    "colliders": [
     {
      "centre": [
-      -69.25,
+      -21.25,
       -3.725,
       90.5
      ],
@@ -11078,7 +10458,7 @@
     },
     {
      "centre": [
-      69.25,
+      21.25,
       -3.725,
       90.5
      ],
@@ -11096,7 +10476,7 @@
       30.0
      ],
      "size": [
-      126.0,
+      30.0,
       1.0,
       60.0
      ],
@@ -11104,7 +10484,7 @@
     }
    ],
    "origin": [
-    1482.061,
+    723.038,
     0.0,
     0.0
    ],
@@ -11127,12 +10507,12 @@
    ],
    "boundsMax": [
     3.55,
-    24.0,
+    51.6,
     0.22
    ],
    "size": [
     7.1,
-    43.437,
+    71.037,
     0.466
    ],
    "tris": 242,
@@ -11143,9 +10523,9 @@
      "kind": "tex",
      "robloxMaterial": "Fabric",
      "rgb": [
-      114,
-      77,
-      55
+      122,
+      104,
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -11224,7 +10604,7 @@
     "Hang": {
      "position": [
       0.0,
-      24.0,
+      51.6,
       -0.0
      ],
      "look": [
@@ -11237,7 +10617,7 @@
       0.0,
       -1.0
      ],
-     "note": "top of the cable: weld to the roof beam above"
+     "note": "top of the cable: weld to the roof purlin above"
     }
    },
    "colliders": [],
@@ -11255,24 +10635,24 @@
     "Station",
     "Sign"
    ],
-   "notes": "Departure board 10 x 5 on two posts (board z 11-16), with rows of our own abstract glyph blocks in white and amber on both faces (no words, no film text). Glyphs are Neon parts.",
+   "notes": "Departure board 10 x 5 hanging from the portal beam's underside on two rods (board z 11.6-16.6, over the track just clear of the train's roof at 11, with the shed wall showing between it and the beam), as in the film, with rows of our own abstract glyph blocks in white and amber on both faces (no words, no film text). Glyphs are Neon parts. Origin = on the floor (or the track's level line) under the board's centre.",
    "pivot": "base centre on the floor",
    "boundsMin": [
     -5.0,
-    0.0,
-    -0.45
+    11.6,
+    -0.3607
    ],
    "boundsMax": [
     5.0,
-    16.0,
-    0.45
+    19.5,
+    0.3607
    ],
    "size": [
     10.0,
-    16.0,
-    0.9
+    7.9,
+    0.721
    ],
-   "tris": 732,
+   "tris": 644,
    "parts": [
     {
      "name": "Station_Board_Frame",
@@ -11280,9 +10660,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      60,
-      60,
-      61
+      52,
+      50,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -11290,7 +10670,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 224,
+     "tris": 136,
      "textureSet": "Train_Station_Kit",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_Station_Kit_Color.png",
@@ -11311,9 +10691,9 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "board": 0.73,
-      "steel_dark": 0.26,
-      "brass": 0.009
+      "board": 0.945,
+      "steel_dark": 0.043,
+      "brass": 0.012
      }
     },
     {
@@ -11379,7 +10759,7 @@
     "Light": {
      "position": [
       0.0,
-      13.5,
+      14.1,
       -0.8
      ],
      "look": [
@@ -11399,39 +10779,13 @@
     {
      "centre": [
       0.0,
-      13.5,
+      14.1,
       -0.0
      ],
      "size": [
       10.0,
       5.0,
       0.7
-     ],
-     "tag": "Solid"
-    },
-    {
-     "centre": [
-      -3.8,
-      5.5,
-      -0.0
-     ],
-     "size": [
-      0.9,
-      11.0,
-      0.9
-     ],
-     "tag": "Solid"
-    },
-    {
-     "centre": [
-      3.8,
-      5.5,
-      -0.0
-     ],
-     "size": [
-      0.9,
-      11.0,
-      0.9
      ],
      "tag": "Solid"
     }
@@ -11641,12 +10995,12 @@
     "Car",
     "Moving"
    ],
-   "notes": "Nose car (car 1; car 7 is the same car turned round as the tail), 90 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon flank between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
+   "notes": "Nose car (car 1; car 7 is the same car turned round as the tail), 90 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon band through the window line between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
    "pivot": "base centre on the floor",
    "boundsMin": [
     -5.8,
     -2.2,
-    -45.2
+    -46.36
    ],
    "boundsMax": [
     5.8,
@@ -11656,9 +11010,9 @@
    "size": [
     11.6,
     13.2,
-    90.95
+    92.11
    ],
-   "tris": 3778,
+   "tris": 4158,
    "parts": [
     {
      "name": "Train_NoseCar_Body",
@@ -11666,9 +11020,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      87,
-      59,
-      49
+      78,
+      66,
+      57
      ],
      "collide": false,
      "collision": "Box",
@@ -11676,7 +11030,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3468,
+     "tris": 3848,
      "textureSet": "Train_NoseCar",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_NoseCar_Color.png",
@@ -11697,12 +11051,12 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "lacquer": 0.683,
-      "maroon": 0.195,
-      "brass": 0.071,
+      "lacquer": 0.773,
+      "maroon": 0.111,
+      "brass": 0.072,
       "pinstripe": 0.022,
       "bellows": 0.014,
-      "bezel": 0.01
+      "bezel": 0.004
      }
     },
     {
@@ -11711,9 +11065,9 @@
      "kind": "glass",
      "robloxMaterial": "Glass",
      "rgb": [
-      178,
-      196,
-      198
+      62,
+      70,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -11731,7 +11085,7 @@
      "backFacesInMesh": true,
      "renderFidelity": "Automatic",
      "keys": {
-      "glass": 1.0
+      "window": 1.0
      }
     },
     {
@@ -11869,8 +11223,8 @@
     "Lamp": {
      "position": [
       0.0,
-      4.6,
-      -44.85
+      4.4,
+      -46.06
      ],
      "look": [
       0.0,
@@ -11882,7 +11236,7 @@
       1.0,
       -0.0
      ],
-     "note": "SpotLight forward: Color (232, 88, 52), Brightness 2, Range 60, Angle 50; plus a PointLight Range 8 for the red glow on the platform"
+     "note": "SpotLight forward: Color (232, 88, 52), Brightness 1.5, Range 50, Angle 50; plus a PointLight Range 8 for the red glow on the platform"
     },
     "GangwayRear": {
      "position": [
@@ -11908,12 +11262,12 @@
      "centre": [
       0.0,
       -0.95,
-      7.5
+      6.5
      ],
      "size": [
       11.5,
       2.5,
-      75.0
+      77.0
      ],
      "tag": "Floor"
     },
@@ -11921,12 +11275,12 @@
      "centre": [
       0.0,
       10.45,
-      7.5
+      6.5
      ],
      "size": [
       11.5,
       1.1,
-      75.0
+      77.0
      ],
      "tag": "Solid"
     },
@@ -11986,12 +11340,12 @@
      "centre": [
       -5.5,
       5.1,
-      -27.5
+      -28.5
      ],
      "size": [
       0.5,
       9.6,
-      5.0
+      7.0
      ],
      "tag": "Solid"
     },
@@ -12051,12 +11405,12 @@
      "centre": [
       5.5,
       5.1,
-      -27.5
+      -28.5
      ],
      "size": [
       0.5,
       9.6,
-      5.0
+      7.0
      ],
      "tag": "Solid"
     },
@@ -12103,12 +11457,12 @@
      "centre": [
       0.0,
       3.9,
-      -37.5
+      -38.5
      ],
      "size": [
       11.5,
       12.2,
-      15.0
+      13.0
      ],
      "tag": "Solid"
     }
@@ -12128,7 +11482,7 @@
     "Car",
     "Moving"
    ],
-   "notes": "Body car (cars 2-5), 80 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon flank between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
+   "notes": "Body car (cars 2-5), 80 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon band through the window line between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
    "pivot": "base centre on the floor",
    "boundsMin": [
     -5.8,
@@ -12153,9 +11507,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      86,
-      59,
-      49
+      78,
+      66,
+      57
      ],
      "collide": false,
      "collision": "Box",
@@ -12184,8 +11538,8 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "lacquer": 0.686,
-      "maroon": 0.181,
+      "lacquer": 0.761,
+      "maroon": 0.107,
       "brass": 0.072,
       "bellows": 0.03,
       "pinstripe": 0.022,
@@ -12198,9 +11552,9 @@
      "kind": "glass",
      "robloxMaterial": "Glass",
      "rgb": [
-      178,
-      196,
-      198
+      62,
+      70,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -12218,7 +11572,7 @@
      "backFacesInMesh": true,
      "renderFidelity": "Automatic",
      "keys": {
-      "glass": 1.0
+      "window": 1.0
      }
     }
    ],
@@ -12583,7 +11937,7 @@
     "Car",
     "Moving"
    ],
-   "notes": "Observation car (car 6): floor-to-ceiling glass on both flanks and a glazed roof, 80 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon flank between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
+   "notes": "Observation car (car 6): floor-to-ceiling glass on both flanks and a glazed roof, 80 long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer with a maroon band through the window line between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief 4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front +Y (Roblox -Z). Interior kits fit inside (same origin).",
    "pivot": "base centre on the floor",
    "boundsMin": [
     -5.75,
@@ -12600,7 +11954,7 @@
     13.2,
     81.5
    ],
-   "tris": 2592,
+   "tris": 2496,
    "parts": [
     {
      "name": "Train_ObservationCar_Body",
@@ -12608,9 +11962,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      99,
-      71,
-      53
+      94,
+      79,
+      63
      ],
      "collide": false,
      "collision": "Box",
@@ -12618,7 +11972,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1920,
+     "tris": 1824,
      "textureSet": "Train_ObservationCar",
      "surfaceAppearance": {
       "colorMap": "Train/textures/Train_ObservationCar_Color.png",
@@ -12639,12 +11993,12 @@
      "backFacesInMesh": false,
      "renderFidelity": "Automatic",
      "keys": {
-      "lacquer": 0.633,
+      "lacquer": 0.696,
       "brass": 0.17,
-      "maroon": 0.11,
+      "maroon": 0.061,
       "bellows": 0.052,
-      "pinstripe": 0.02,
-      "underframe": 0.015
+      "underframe": 0.015,
+      "pinstripe": 0.007
      }
     },
     {
@@ -12653,9 +12007,9 @@
      "kind": "glass",
      "robloxMaterial": "Glass",
      "rgb": [
-      178,
-      196,
-      198
+      62,
+      70,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -12673,7 +12027,7 @@
      "backFacesInMesh": true,
      "renderFidelity": "Automatic",
      "keys": {
-      "glass": 1.0
+      "window": 1.0
      }
     }
    ],
@@ -12887,9 +12241,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      117,
-      70,
-      51
+      105,
+      79,
+      63
      ],
      "collide": false,
      "collision": "Box",
@@ -12919,10 +12273,10 @@
      "renderFidelity": "Automatic",
      "keys": {
       "wood_dark": 0.506,
-      "maroon": 0.382,
+      "maroon": 0.249,
+      "lacquer": 0.149,
       "brass": 0.064,
-      "pinstripe": 0.032,
-      "lacquer": 0.016
+      "pinstripe": 0.032
      }
     },
     {
@@ -12931,9 +12285,9 @@
      "kind": "glass",
      "robloxMaterial": "Glass",
      "rgb": [
-      178,
-      196,
-      198
+      62,
+      70,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -12951,7 +12305,7 @@
      "backFacesInMesh": true,
      "renderFidelity": "Automatic",
      "keys": {
-      "glass": 1.0
+      "window": 1.0
      }
     }
    ],
@@ -12998,9 +12352,9 @@
      "kind": "tex",
      "robloxMaterial": "Fabric",
      "rgb": [
-      111,
-      66,
-      46
+      105,
+      74,
+      63
      ],
      "collide": false,
      "collision": "Box",
@@ -13042,9 +12396,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      158,
-      125,
-      95
+      161,
+      128,
+      97
      ],
      "collide": false,
      "collision": "Box",
@@ -13088,8 +12442,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -13211,7 +12565,7 @@
       0.0,
       -1.0
      ],
-     "note": "SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 (amber cove light washing the vault); darkness comes from this rig, not the paint"
+     "note": "Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 (down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 (washing the hammered vault); darkness comes from this rig, not the paint"
     },
     "Beat_Window": {
      "position": [
@@ -13288,9 +12642,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      148,
-      127,
-      115
+      147,
+      130,
+      119
      ],
      "collide": false,
      "collision": "Box",
@@ -13333,9 +12687,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      145,
-      112,
-      87
+      147,
+      115,
+      88
      ],
      "collide": false,
      "collision": "Box",
@@ -13379,8 +12733,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -13940,7 +13294,7 @@
       0.0,
       -1.0
      ],
-     "note": "SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 (amber cove light washing the vault); darkness comes from this rig, not the paint"
+     "note": "Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 (down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 (washing the hammered vault); darkness comes from this rig, not the paint"
     },
     "Beat_Table": {
      "position": [
@@ -14004,8 +13358,8 @@
      "robloxMaterial": "Fabric",
      "rgb": [
       118,
-      63,
-      55
+      66,
+      59
      ],
      "collide": false,
      "collision": "Box",
@@ -14048,9 +13402,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      156,
-      121,
-      92
+      158,
+      125,
+      94
      ],
      "collide": false,
      "collision": "Box",
@@ -14094,8 +13448,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -14325,7 +13679,7 @@
       0.0,
       -1.0
      ],
-     "note": "SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 (amber cove light washing the vault); darkness comes from this rig, not the paint"
+     "note": "Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 (down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 (washing the hammered vault); darkness comes from this rig, not the paint"
     }
    },
    "colliders": [],
@@ -14370,9 +13724,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      155,
-      136,
-      118
+      154,
+      138,
+      120
      ],
      "collide": false,
      "collision": "Box",
@@ -14414,9 +13768,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      164,
-      132,
-      101
+      166,
+      135,
+      104
      ],
      "collide": false,
      "collision": "Box",
@@ -14460,8 +13814,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -14817,7 +14171,7 @@
       0.0,
       -1.0
      ],
-     "note": "SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 (amber cove light washing the vault); darkness comes from this rig, not the paint"
+     "note": "Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 (down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 (washing the hammered vault); darkness comes from this rig, not the paint"
     }
    },
    "colliders": [],
@@ -14862,9 +14216,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      147,
-      127,
-      111
+      146,
+      130,
+      115
      ],
      "collide": false,
      "collision": "Box",
@@ -14907,9 +14261,9 @@
      "kind": "tex",
      "robloxMaterial": "Fabric",
      "rgb": [
-      165,
-      134,
-      103
+      168,
+      137,
+      105
      ],
      "collide": false,
      "collision": "Box",
@@ -14953,8 +14307,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -15350,7 +14704,7 @@
       0.0,
       -1.0
      ],
-     "note": "SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 (amber cove light washing the vault); darkness comes from this rig, not the paint"
+     "note": "Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 (down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 (washing the hammered vault); darkness comes from this rig, not the paint"
     },
     "Beat_Window": {
      "position": [
@@ -15413,9 +14767,9 @@
      "kind": "tex",
      "robloxMaterial": "Fabric",
      "rgb": [
-      104,
-      58,
-      43
+      96,
+      65,
+      60
      ],
      "collide": false,
      "collision": "Box",
@@ -15456,9 +14810,9 @@
      "kind": "tex",
      "robloxMaterial": "WoodPlanks",
      "rgb": [
-      129,
-      85,
-      57
+      130,
+      91,
+      66
      ],
      "collide": false,
      "collision": "Box",
@@ -15502,8 +14856,8 @@
      "robloxMaterial": "Neon",
      "rgb": [
       255,
-      196,
-      128
+      214,
+      168
      ],
      "collide": false,
      "collision": "Box",
@@ -15945,9 +15299,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      180,
-      132,
-      74
+      188,
+      152,
+      106
      ],
      "collide": false,
      "collision": "Box",
@@ -16099,9 +15453,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      182,
-      146,
-      102
+      187,
+      157,
+      117
      ],
      "collide": false,
      "collision": "Box",
@@ -16225,9 +15579,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      116,
-      73,
-      52
+      115,
+      84,
+      68
      ],
      "collide": false,
      "collision": "Box",
@@ -16304,9 +15658,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      180,
-      132,
-      74
+      188,
+      152,
+      106
      ],
      "collide": false,
      "collision": "Box",
@@ -16410,9 +15764,9 @@
      "kind": "tex",
      "robloxMaterial": "Wood",
      "rgb": [
-      120,
-      79,
-      51
+      121,
+      89,
+      65
      ],
      "collide": false,
      "collision": "Box",
@@ -16451,9 +15805,9 @@
      "kind": "glass",
      "robloxMaterial": "Glass",
      "rgb": [
-      178,
-      196,
-      198
+      62,
+      70,
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -16471,7 +15825,7 @@
      "backFacesInMesh": true,
      "renderFidelity": "Automatic",
      "keys": {
-      "glass": 1.0
+      "window": 1.0
      }
     }
    ],
@@ -16518,8 +15872,8 @@
      "robloxMaterial": "Wood",
      "rgb": [
       122,
-      112,
-      99
+      117,
+      104
      ],
      "collide": false,
      "collision": "Box",
@@ -16596,9 +15950,9 @@
      "kind": "tex",
      "robloxMaterial": "Metal",
      "rgb": [
-      161,
-      124,
-      79
+      167,
+      138,
+      100
      ],
      "collide": false,
      "collision": "Box",

@@ -1,0 +1,101 @@
+{
+ "pairs": [
+  {
+   "name": "launch_red_room_a",
+   "ours": "art/previews/Launch/render_red_a.png",
+   "film": "refs:owner/launch_1_red_room_net_a.png",
+   "note": "Frame A (owner, T1 @120.2 s), the in-game shot: 75 deg down from just above the tube mouth through the far half of the hexagon at the stand-in on the lift disc. The red room is not a hall: no blue-minus-red target. RULING PENDING (review item 3b, the room's oxblood): the generator's default follows the band (OXBLOOD_RULING 'band': oxblood S 0.38, 15% under the sample), so the oxblood shaft and net regions are class interior. If the lead rules 'signal' instead (oxblood held at the sample, S 0.45), regions 3-4 become class signal with sat_within 0.05.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "net over the roof, top right", "ours": [0.8, 0.02, 0.98, 0.2], "film": [0.8, 0.02, 0.98, 0.2]},
+    {"class": "interior", "label": "net over the roof, top left", "ours": [0.02, 0.02, 0.18, 0.2], "film": [0.02, 0.02, 0.15, 0.15]},
+    {"class": "interior", "label": "the oxblood shaft under the frame, left", "ours": [0.14, 0.45, 0.33, 0.95], "film": [0.12, 0.45, 0.4, 0.92]},
+    {"class": "interior", "label": "the oxblood shaft under the frame, right", "ours": [0.67, 0.45, 0.86, 0.95], "film": [0.66, 0.55, 0.88, 0.92]},
+    {"class": "built", "label": "hex frame, upper left limb", "ours": [0.21, 0.22, 0.25, 0.3], "film": [0.21, 0.22, 0.25, 0.3]},
+    {"class": "built", "label": "hex frame, upper right limb", "ours": [0.75, 0.22, 0.79, 0.3], "film": [0.75, 0.24, 0.79, 0.32]}
+   ]
+  },
+  {
+   "name": "launch_red_room_b",
+   "ours": "art/previews/Launch/render_red_b.png",
+   "film": "refs:owner/launch_1_red_room_net_b.png",
+   "note": "Frame B (owner, T1 @122.7 s): the steel deck under the cool keys. The deck boxes are clean open plate (no rail bars, posts or stripes); the grate boxes sit between the near rail's bars. The rail is held to its frame sample's saturation (sat_within); the red mesh is a signal. The apron is the room's oxblood: class interior under the 'band' ruling (see launch_red_room_a's note).",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "built", "label": "steel deck, left, clean open plate (near)", "ours": [0.0, 0.5, 0.06, 0.565], "film": [0.06, 0.55, 0.3, 0.7]},
+    {"class": "built", "label": "steel deck, left, clean plate (lower)", "ours": [0.02, 0.4, 0.085, 0.46], "film": [0.06, 0.55, 0.3, 0.7]},
+    {"class": "built", "label": "steel deck, right, clean plate", "ours": [0.765, 0.405, 0.81, 0.46], "film": [0.75, 0.47, 0.95, 0.7]},
+    {"class": "built", "label": "black grates, left lane, between the rail bars", "ours": [0.31, 0.37, 0.46, 0.455], "film": [0.16, 0.23, 0.4, 0.37]},
+    {"class": "built", "label": "black grates, right lane, between the rail bars", "ours": [0.52, 0.37, 0.68, 0.455], "film": [0.6, 0.25, 0.7, 0.37]},
+    {"class": "signal", "label": "red rail", "ours": [0.25, 0.338, 0.62, 0.358], "film": [0.8, 0.18, 0.95, 0.192], "sat_within": 0.05},
+    {"class": "signal", "label": "red mesh, left opening", "ours": [0.04, 0.68, 0.12, 0.92], "film": [0.07, 0.87, 0.27, 0.99]},
+    {"class": "interior", "label": "oxblood apron behind the stand-in", "ours": [0.2, 0.64, 0.34, 0.92], "film": [0.33, 0.67, 0.37, 0.99]}
+   ]
+  },
+  {
+   "name": "launch_case_hall",
+   "ours": "art/previews/Launch/render_cases.png",
+   "film": "refs:trailer/trailer1_125.9s.png",
+   "note": "T1 @125.9 s (the owner's copy carries player icons). Regions re-matched in the review pass: the hall wall over the row in both frames (no lit column), and the floor beyond the cases. The disc is measured on its lit top beside the feet in both frames. The hall regions carry TwoArenas 8.2's +15..+25 (darkest quarter); see the ruling note on launch_case_hall_vs_T2.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "the far hall wall above the row, below the strip lights", "ours": [0.86, 0.22, 0.93, 0.3], "film": [0.6, 0.12, 0.68, 0.24], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the far hall wall over the far cases, between the strip lights", "ours": [0.71, 0.21, 0.75, 0.3], "film": [0.72, 0.17, 0.79, 0.25], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the floor beyond the near cases", "ours": [0.82, 0.78, 0.95, 0.92], "film": [0.86, 0.86, 0.97, 0.97], "b_minus_r_dark": [15, 25]},
+    {"class": "signal", "label": "oxblood case post (the neighbour's)", "ours": [0.54, 0.3, 0.56, 0.7], "film": [0.53, 0.35, 0.56, 0.7]},
+    {"class": "signal", "label": "case disc, lit top beside the feet", "ours": [0.45, 0.888, 0.525, 0.902], "film": [0.77, 0.768, 0.8, 0.784], "sat_within": 0.05}
+   ]
+  },
+  {
+   "name": "launch_case_hall_vs_T2_133.3s",
+   "ours": "art/previews/Launch/render_cases.png",
+   "film": "refs:trailer/trailer2_133.3s.png",
+   "note": "FOR THE LEAD'S RULING (review item 3): the same case hall in T2 @133.3 s, whose teal grade is lighter (whole-frame saturation 0.367 against T1 @125.9 s's 0.503). Information only until the lead picks the case hall's reference frame.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "the hall beyond, above the row", "ours": [0.86, 0.22, 0.93, 0.3], "film": [0.86, 0.36, 0.91, 0.5], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the floor beyond the cases", "ours": [0.82, 0.78, 0.95, 0.92], "film": [0.78, 0.86, 0.86, 0.97], "b_minus_r_dark": [15, 25]}
+   ]
+  },
+  {
+   "name": "launch_pole_hall_wide",
+   "ours": "art/previews/Launch/render_wide.png",
+   "film": "refs:trailer/trailer1_124.7s.png",
+   "note": "T1 @124.7 s (the owner's copy carries player icons). Re-framed in the review pass (18 mm from the far side of the hall); the boxes keep off the hub lamps, and the bar boxes match bar rows in both frames.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "inside the spoked ring, left", "ours": [0.29, 0.16, 0.41, 0.34], "film": [0.2, 0.08, 0.4, 0.3], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "inside the spoked ring, right", "ours": [0.55, 0.16, 0.69, 0.34], "film": [0.5, 0.08, 0.66, 0.3], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the far ceiling's dotted rows and the wall under the hub", "ours": [0.3, 0.5, 0.65, 0.64], "film": [0.28, 0.62, 0.7, 0.76], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the ceiling ring outside the wheel, left", "ours": [0.02, 0.28, 0.18, 0.45], "film": [0.02, 0.3, 0.2, 0.45], "b_minus_r_dark": [15, 25]},
+    {"class": "interior", "label": "the ceiling ring outside the wheel, right", "ours": [0.82, 0.28, 0.98, 0.45], "film": [0.75, 0.2, 0.98, 0.4], "b_minus_r_dark": [15, 25]}
+   ]
+  },
+  {
+   "name": "launch_rise_low_angle",
+   "ours": "art/previews/Launch/render_rise.png",
+   "film": "refs:trailer/trailer1_127.2s.png",
+   "note": "T1 @127.2 s (the owner's copy carries player icons). RULING PENDING (review item 3a): at the film's luma 15-18, a darkest-quarter blue minus red of +15 or more needs more saturation than the band allows, and the film's own darkest quarter here is only +6 to +9. Following the film (the task's rule), blue minus red is measured in the wide and case shots only, and the rise background takes about 15% less saturation (done: 0.72-0.83x). Under the design's rule these regions would add b_minus_r_dark [15, 25]; ours measure +10 to +11.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "dark hall left of the rider", "ours": [0.05, 0.6, 0.18, 0.85], "film": [0.02, 0.35, 0.28, 0.85]},
+    {"class": "interior", "label": "dark hall right of the rider", "ours": [0.82, 0.6, 0.95, 0.85], "film": [0.7, 0.35, 0.97, 0.85]},
+    {"class": "interior", "label": "the roof beyond, left", "ours": [0.05, 0.02, 0.18, 0.2], "film": [0.02, 0.0, 0.25, 0.3]},
+    {"class": "signal", "label": "the rider's disc", "ours": [0.38, 0.93, 0.62, 0.99], "film": [0.33, 0.92, 0.62, 0.99]}
+   ]
+  },
+  {
+   "name": "launch_rise_end_frame",
+   "ours": "art/previews/Launch/render_rise_end.png",
+   "film": "refs:trailer/trailer1_127.2s.png",
+   "note": "The rise's own camera keys at t 7.0 s of the full cut against T1 @127.2 s. RULING PENDING (review item 3a): as launch_rise_low_angle, blue minus red is not measured here; ours measure +8 to +9 in the darkest quarter, the film +6 to +9.",
+   "sheet_label": "Blender iteration, placeholder figures (no plants in this set)",
+   "regions": [
+    {"class": "interior", "label": "dark hall left of the rider", "ours": [0.05, 0.5, 0.18, 0.85], "film": [0.02, 0.35, 0.28, 0.85]},
+    {"class": "interior", "label": "dark hall right of the rider", "ours": [0.82, 0.5, 0.95, 0.85], "film": [0.7, 0.35, 0.97, 0.85]},
+    {"class": "interior", "label": "the roof beyond, left", "ours": [0.05, 0.02, 0.18, 0.2], "film": [0.02, 0.0, 0.25, 0.3]},
+    {"class": "signal", "label": "the rider's disc", "ours": [0.38, 0.95, 0.62, 0.995], "film": [0.33, 0.92, 0.62, 0.99]}
+   ]
+  }
+ ]
+}

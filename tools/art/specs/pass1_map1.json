@@ -1,0 +1,28 @@
+{
+ "pairs": [
+  {
+   "name": "map1_owner_t1_1.7s",
+   "ours": "art/previews/Map1/match_owner_t1_1.7s.png",
+   "film": "refs:owner/map1_green_land_owner_frame.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Pass 1 render (17:35, sha1 76844e1a8285) against the owner's frame of T1 @1.7 s. Every film rectangle avoids the three player icons (x 0.23-0.78, y 0.38-0.61) and the darkest vignetted corners. The horn is left out: in this frame it sits under the pause icon, and its colour is an open owner decision.",
+   "regions": [
+    {"class": "sky", "label": "sky above the peaks", "ours": [0.50, 0.005, 0.61, 0.05], "film": [0.70, 0.01, 0.92, 0.10]},
+    {"class": "haze", "label": "cloud bank", "ours": [0.44, 0.16, 0.74, 0.27], "film": [0.34, 0.10, 0.60, 0.20]},
+    {"class": "haze", "label": "far mountain flanks", "ours": [0.08, 0.03, 0.40, 0.11], "film": [0.03, 0.08, 0.22, 0.26]},
+    {"class": "foliage", "label": "forest on the slopes", "ours": [0.04, 0.31, 0.46, 0.40], "film": [0.01, 0.31, 0.19, 0.50],
+     "note": "The film's forest here is shade with the teal grade (mean RGB 29,70,82); most of its saturation is grade."},
+    {"class": "foliage", "label": "broadleaf clumps, right", "ours": [0.90, 0.49, 0.99, 0.60], "film": [0.82, 0.38, 0.95, 0.47],
+     "note": "The film's only sunlit foliage free of the teal grade in this frame."},
+    {"class": "ground", "label": "valley floor, mid-distance", "ours": [0.20, 0.38, 0.40, 0.44], "film": [0.32, 0.42, 0.45, 0.58]},
+    {"class": "ground", "label": "hillside, right", "ours": [0.82, 0.34, 0.99, 0.44], "film": [0.79, 0.50, 0.99, 0.64]},
+    {"class": "ground", "label": "meadow beside the ring, left", "ours": [0.03, 0.63, 0.15, 0.71], "film": [0.08, 0.62, 0.18, 0.71]},
+    {"class": "ground", "label": "meadow, front left", "ours": [0.05, 0.74, 0.15, 0.92], "film": [0.05, 0.74, 0.15, 0.92]},
+    {"class": "ground", "label": "meadow, front right", "ours": [0.86, 0.70, 0.95, 0.90], "film": [0.85, 0.72, 0.94, 0.90]},
+    {"class": "signal", "label": "flower beds, front left", "ours": [0.30, 0.72, 0.46, 0.86], "film": [0.24, 0.70, 0.40, 0.84]},
+    {"class": "signal", "label": "the heart: beds and plinths", "ours": [0.16, 0.56, 0.85, 1.0], "film": [0.16, 0.61, 0.84, 0.99],
+     "note": "Beds, copper plates and tributes are signals; this box keeps them out of the vivid-pixel check."}
+   ]
+  }
+ ]
+}

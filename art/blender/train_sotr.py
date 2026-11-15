@@ -24,25 +24,32 @@ Style A, "faceted realism" (docs/design/ArtStyle.md section 6; .claude/skills/bl
     (the red-orange nose lamp, the amber board rows, the propaganda screen's cool light).
 
 What it builds (see build_all_assets(); every asset is a root EMPTY <Asset> with MeshParts <Asset>_<Role>[_n]):
-  Station (Train_Station.glb, hall 170 x 420 studs after brief 4.2; the entrance hall is 156 deep so a camera can
-  stand as far back as the film's, the shed 264, and 6 more shed bays recede beyond as backdrop):
-    Station_Coffer           one 12 x 12 coffer of the concrete ceiling with its round downlight (placed 160 times)
-    Station_EntranceCeiling  the soffit collar, radial ribs and deep fascia round the 100 x 50 oval; header wall
+  Station (Train_Station.glb). Pass 2 (critic #6, TwoArenas.md 5.2): the film's tall, narrow glazed shed, 62 wide
+  with glazed walls 84 high, one island platform 30 wide (the aisle of guards) between the two trains, each train in
+  its guideway bay against the glazing; the entrance hall under the coffers is 74 wide and 156 deep (the camera can
+  stand as far back as the film's), the shed 264, and 6 more shed bays recede beyond as backdrop:
+    Station_Coffer           a 12 x 12 module of four 6-stud coffers, each with a round downlight that reads from the
+                             platform (tiled round the oval; the film's coffers are half the brief's 12 studs)
+    Station_EntranceCeiling  the soffit collar, radial ribs and rim round the 48 x 36 oval; header wall; mouth returns
     Station_Lantern          the elliptical drum and coffered dome above the oval
-    Station_Sunburst         10 tapered gold blades in two fans, two collars and a drop (our own sculpture)
+    Station_Sunburst         one radial fan of 10 broad, rounded gold blades from a ring hub (our own sculpture; no
+                             pendant), each as long as the oval allows
     Station_EntranceWalls    side walls of the entrance hall (columns, tall glazing, base with doors) + end wall
     Station_EntranceFloor    polished stone floor of the entrance hall with our own brass sunrise inlay
-    Station_Portal           the white cross-beam on four columns at the shed's mouth, with our own gold emblem
-    Station_ShedBay          a 24-stud slice of the train shed: glazed walls with stepped white fins, roof beams
-    Station_FloorBay         a 24-stud slice of floor: concourse, two platforms, the guideway pits and maglev beams
+    Station_Portal           the white cross-beam (3.5 deep) on four columns at the shed's mouth, with our own gold
+                             emblem and a row of abstract gold glyph blocks (no lettering)
+    Station_ShedBay          a 24-stud slice of the train shed: glazed walls 84 high with stepped white fins, roof beams
+                             under a solid roof
+    Station_FloorBay         a 24-stud slice of floor: the island platform, the two guideway bays and maglev beams
     Station_ShedEnd          the far end: portal frame, pits running out, a glowing backdrop
   Station props (Train_StationProps.glb):
-    Station_Banner (5 x 18, pointed, our own gold motif), Station_Board (10 x 5 on posts, glyph rows),
+    Station_Banner (5 x 18, pointed, our own gold motif), Station_Board (10 x 5, hung from the beam, glyph rows),
     Station_Poster (14 x 24, our own faceted-guard poster), Station_Guard (our own white-armoured guard, statue pose)
   Trains (Train_Exterior.glb, brief 4.3):
-    Train_NoseCar (90), Train_BodyCar (80), Train_ObservationCar (80): glossy black and maroon lacquer, gold
-    pinstripes, round-cornered brass windows, maglev skirt (no wheels), a faceted capsule nose with a 3.5-stud
-    gold-rimmed lamp round a glowing 2-stud core; Train_DoorLeaf (a separate moving mesh)
+    Train_NoseCar (90), Train_BodyCar (80), Train_ObservationCar (80): glossy black lacquer with a maroon band
+    through the window line between gold pinstripes, round-cornered brass windows, maglev skirt (no wheels); the
+    nose is a bullet capsule tapering over 13 studs to a round dark eye with a 3.5-stud gold-rimmed lamp round a
+    glowing 2-stud core; Train_DoorLeaf (a separate moving mesh)
   Interiors (Train_InteriorsA/B/C.glb, spec section 9 in the film's materials, brief 4.4; a room texture set and a
   furniture texture set per car):
     Train_Car1_Vestibule (fits the nose car), Train_Car2_Dining, Train_Car3_Lounge, Train_Car4_Corridor,
@@ -65,6 +72,10 @@ Run (headless, from the repo root; art/README.md section 1):
   env TRAIN_SOTR_WORK  work folder (default %TEMP%/TrainSotR_build)
   env TRAIN_SOTR_REFS  the LastStanding/References folder (owner frame for the compare sheets; never copied)
   env TRAIN_SOTR_FAST  1 = quarter samples and half resolution in preview renders (look-dev only)
+  env TRAIN_SOTR_QBAKE asset names (comma list): the quick stage bakes those assets' real texture sets (AO, patterns)
+                       into the work folder and renders with them (look-dev only; never touches the exports)
+  env TRAIN_SOTR_LIGHT / _ILIGHT / _EMIT / _GLOWL / _MK   JSON overrides of STATION_LIGHT, INTERIOR_LIGHT, EMIT,
+                       GLOW_LIGHT and paint rgb for look-dev renders; an export run must not set them
 Seeded (SEED = 50): the same script gives the same meshes and textures.
 
 Compare sheets (compare_*.png) put the owner's frame beside our render for review. They hold film imagery, so
@@ -132,20 +143,28 @@ PART_MAX_TRIS = 4900          # every MeshPart under 5k (brief 4.7)
 ASSET_MAX_TRIS = 10000        # a car or a hall section at most 10k
 
 # ================================================================================================ dimensions
-# Station hall space (Blender, Z up): x across the hall (west -85 .. east +85), y along it (entrance end +210 .. far
-# end -210), floor z = 0. Roblox (x, y, z) = Blender (x, z, -y), so the entrance end is Roblox -Z.
-HALL_W, HALL_L = 170.0, 420.0
-WALL_X = 85.0
-CONC_X = 33.0                 # concourse 66 wide (x -33 .. 33)
-PLAT_X = 63.0                 # platforms 30 wide (33 .. 63), the guideway bays 22 wide (63 .. 85)
-PIT_Z = -5.0                  # guideway bay floor
+# Station hall space (Blender, Z up): x across the hall, y along it (entrance end +210 .. far end), floor z = 0.
+# Roblox (x, y, z) = Blender (x, z, -y), so the entrance end is Roblox -Z.
+# Pass 2 (critic #6a, TwoArenas.md 5.2): the film's tall, narrow glazed shed. One island platform 30 wide (the aisle
+# of guards) runs between the two trains; each train sits in its guideway bay right against the glazing, and the
+# glazed walls rise 84. The entrance hall under the coffers is only a little wider than the shed (74 against 62),
+# as in the owner's frame, where the poster walls run almost in line with the shed's glazing.
+HALL_W, HALL_L = 74.0, 420.0
+ENT_X = 37.0                  # entrance-hall side walls (74 wide: six 12-stud coffers)
+WALL_X = 31.0                 # shed glazing line (the shed is 62 wide)
+PLAT_X = 15.0                 # the island platform between the trains: 30 wide (x -15 .. 15)
+CONC_X = PLAT_X               # (pass 1's separate concourse is gone: the platform is the concourse)
+PIT_Z = -5.0                  # guideway bay floor (the bays run 15 .. 31)
 ENT_Y0, ENT_Y1 = 54.0, 210.0   # entrance hall under the coffered ceiling (13 coffers deep)
-OVAL_Y = 110.0                # the oval's centre = origin of the entrance-hall assets
-OVAL_A, OVAL_B = 50.0, 25.0   # semi-axes of the 100 x 50 oval
+OVAL_Y = 76.0                 # the oval's centre = origin of the entrance-hall assets: near the shed's mouth, as
+#                               filmed (the oval's far rim stands just in front of the portal beam)
+OVAL_A, OVAL_B = 24.0, 18.0   # semi-axes of the 48 x 36 oval (about two thirds of the hall's width, as filmed)
 CEIL_Z = 40.0                 # coffer rib soffit; coffers recess up to 44
 COFFER = 12.0
 LANTERN_Z = 72.0              # coffered dome above the oval
-SHED_H = 60.0
+SHED_H = 84.0                 # the glazed walls (pass 1: 60 in a 170-wide hall)
+PORTAL_Z0, PORTAL_Z1 = 19.5, 23.0   # the white cross-beam at the shed's mouth (3.5 deep: the film's is thin)
+BANNER_Z = 31.0               # banner rods (the cloth hangs to about 12.5)
 BAY = 24.0
 NBAYS = 11                    # 11 x 24 = 264: the shed from y 54 to -210
 BACKDROP_BAYS = 6             # the shed recedes beyond the walkable 420 as a cheap backdrop
@@ -155,7 +174,7 @@ SHED_END_Y = ENT_Y0 - BAY * (NBAYS + BACKDROP_BAYS)
 CAR_W = 11.5
 HWID = CAR_W / 2.0
 CAR_L, NOSE_CAR_L = 80.0, 90.0
-NOSE_LEN = 15.0
+NOSE_LEN = 13.0               # the bullet capsule tapers over about one car width (critic #6d)
 FLOOR_Z = 0.3                 # interior floor (0.3 above the platform)
 SKIRT_Z = -2.2                # underside of the skirt; the guideway flange top is at -2.45
 LIN_X = 5.25                  # interior lining (0.5 inside the skin)
@@ -164,7 +183,7 @@ VAULT_Z = 9.9                 # interior ceiling crown (9.6 clear)
 WIN_W, WIN_Z0, WIN_Z1 = 5.0, 3.7, 7.3
 DOOR_W, DOOR_H = 4.0, 7.5     # z 0.3 .. 7.8
 DOOR_Z1 = FLOOR_Z + DOOR_H
-TRACK_X = PLAT_X + 0.5 + HWID  # 69.25: 0.5 gap to the platform edge
+TRACK_X = PLAT_X + 0.5 + HWID  # 21.25: 0.5 gap to the platform edge; the train's outer side is 4 from the glass
 GANGWAY_GAP = 1.5
 NOSE_FRONT_Y = 52.0           # noses stop 2 studs inside the shed's mouth
 
@@ -180,21 +199,30 @@ def mk(rgb, rough=0.85, metal=0.0, kv=0.05, kf=0.025, pat=0, grade=1.0):
 
 MK = {
     # station
-    "concrete": mk((148, 142, 134), 0.88),                        # brief: coffered concrete #948e86
-    "coffer": mk((138, 133, 126), 0.9, kv=0.03),                  # inside the coffers, a touch darker
+    "concrete": mk((144, 142, 139), 0.88),                        # brief: coffered concrete #948e86 (cooler: the
+    #                                                                film's west coffers are near neutral, S 0.09)
+    "coffer": mk((136, 134, 131), 0.9, kv=0.03),                  # inside the coffers, a touch darker
     "concrete_dark": mk((112, 108, 102), 0.9),                    # pits, plinths
-    "floor": mk((110, 104, 98), 0.4, kv=0.07, kf=0.0),            # polished platform stone (brief: roughness 0.4)
-    "floor_light": mk((150, 142, 130), 0.4, kv=0.05, kf=0.0),     # inlay stone
+    "floor": mk((88, 83, 78), 0.4, kv=0.07, kf=0.0),              # polished dark platform stone (the film's floor
+    #                                                                reads dark: luma 30-44 in T1 / T2 frames)
+    "floor_light": mk((124, 116, 106), 0.4, kv=0.05, kf=0.0),     # inlay stone
     "edge_strip": mk((190, 176, 136), 0.8, kv=0.03),              # platform edge band (muted, not a signal)
     "white_steel": mk((212, 208, 200), 0.6, 0.1, kv=0.025),       # mullions, fins, cross-beam (#d4d0c8)
     "bronze": mk((96, 84, 72), 0.55, 0.6, kv=0.03),               # entrance-hall window frames
-    "gold": mk((186, 142, 78), 0.3, 0.9, kv=0.03, kf=0.03),       # the sunburst blades (#ba8e4e)
-    "brass": mk((180, 132, 74), 0.35, 0.9, kv=0.03, kf=0.02),     # brass frames and fittings (#b4844a)
+    "gold": mk((186, 156, 114), 0.3, 0.9, kv=0.03, kf=0.03),      # the sunburst blades: the brief's #ba8e4e at its
+    #                                                                luma and hue, with less chroma. As a 0.9 metal the
+    #                                                                brief's tone itself renders at saturation 0.62-0.63
+    #                                                                under neutral light: vivid pixels, and 1.2x the
+    #                                                                film's blades (0.53); this one lands in the band
+    "brass": mk((188, 152, 106), 0.3, 0.9, kv=0.03, kf=0.02),     # brass frames and fittings: the brief's #b4844a
+    #                                                                (a touch less chroma), metalness 0.9 as in pass 1
     "steel": mk((150, 152, 154), 0.4, 0.8, kv=0.03),              # rails, rods
     "steel_dark": mk((84, 86, 88), 0.55, 0.6, kv=0.03),
     "guideway": mk((138, 133, 126), 0.9),
-    "banner": mk((88, 48, 46), 0.92, kv=0.03),                    # brief: banners #58302e
-    "banner_gold": mk((176, 138, 80), 0.45, 0.6, kv=0.02),        # our own motif (#b08a50)
+    "banner": mk((100, 88, 84), 0.92, kv=0.03),                   # banners: the film's #281c1a softened and lifted
+    #                                                                (re-derived on a box that covers the same banner
+    #                                                                and motif in both; the brief's #58302e ran 1.5x)
+    "banner_gold": mk((178, 146, 98), 0.45, 0.6, kv=0.02),        # our own motif (the brief's #b08a50, less chroma)
     "board": mk((44, 44, 46), 0.5, 0.2, kv=0.02),                 # departure boards (#2c2c2e)
     "poster_maroon": mk((122, 54, 54), 0.85, kv=0.0, kf=0.0),
     "poster_gold": mk((182, 140, 82), 0.85, kv=0.0, kf=0.0),
@@ -209,19 +237,25 @@ MK = {
     "suit": mk((74, 74, 78), 0.85, kv=0.03),
     "visor": mk((50, 52, 56), 0.15, 0.3, kv=0.0, kf=0.0),
     # train exterior (semi-gloss lacquer is the deliberate exception to the matte rule)
-    "lacquer": mk((46, 40, 44), 0.3, 0.2, kv=0.015, kf=0.012),    # body #2e282c
-    "maroon": mk((112, 46, 48), 0.3, 0.2, kv=0.015, kf=0.012),    # panels #702e30
+    "lacquer": mk((42, 43, 46), 0.18, 0.2, kv=0.015, kf=0.012),   # body (brief #2e282c): semi-gloss, roughness 0.18
+    #                                                                so the hall's light reflects along the flanks
+    "maroon": mk((88, 70, 70), 0.2, 0.2, kv=0.015, kf=0.012),     # the band: toward the brief's #702e30, darker and
+    #                                                                redder than pass 2a's (116, 84, 84)
     "pinstripe": mk((184, 146, 90), 0.35, 0.6, kv=0.01, kf=0.0),  # gold pinstripes #b8925a
     "bezel": mk((44, 42, 46), 0.35, 0.4, kv=0.01, kf=0.01),       # the lamp's dark surround
     "bellows": mk((52, 50, 50), 0.9, kv=0.02),
     "underframe": mk((58, 58, 60), 0.75, 0.3, kv=0.02),
     # train interior (film materials, brief 4.4)
-    "upholstery": mk((100, 46, 38), 0.92, kv=0.03, kf=0.0, pat=1),  # #642e26 with our cream arcs (#ceb48e)
+    "upholstery": mk((84, 52, 62), 0.92, kv=0.03, kf=0.0, pat=1),  # brief #642e26 (a burgundy that stays red under
+    #                                                                the amber light, which carries the warmth)
+    #                                                                with our cream rings
     "leather": mk((112, 66, 46), 0.6, kv=0.04),                   # pleated leather bench
     "velvet": mk((124, 54, 52), 0.95, kv=0.04),                   # oxblood velvet club chairs (lifted: baked 49)
-    "wood": mk((132, 84, 60), 0.55, kv=0.05),                     # arches and panelling (#84543c)
-    "wood_dark": mk((104, 64, 46), 0.6, kv=0.05),                 # mahogany skirting and frames
-    "hammered": mk((198, 166, 126), 0.5, 0.35, kv=0.02, kf=0.045),  # hammered cream-gold ceiling (#c6a67e)
+    "wood": mk((132, 102, 86), 0.55, kv=0.05),                    # arches and panelling (brief #84543c, softened:
+    #                                                                the amber light carries the warmth)
+    "wood_dark": mk((102, 70, 54), 0.6, kv=0.05),                 # mahogany skirting and frames
+    "hammered": mk((204, 164, 112), 0.5, 0.35, kv=0.02, kf=0.045),  # hammered cream-gold ceiling (#c6a67e, a touch
+    #                                                                more gold: the film's vault reads orange-gold)
     "wall_cream": mk((186, 164, 132), 0.9, kv=0.025),             # upper wall panels
     "carpet": mk((94, 42, 40), 0.95, kv=0.02, kf=0.0, pat=2),     # burgundy carpet, gold lattice
     "parquet": mk((126, 82, 58), 0.55, kv=0.06, kf=0.0),
@@ -255,18 +289,21 @@ MK = {
 
 # Emissive parts (Neon in Roblox, with the light objects the manifest lists). rgb, preview strength.
 EMIT = {
-    "lamp_core": ((232, 88, 52), 2.2),        # brief: nose lamp core #e85834
+    "lamp_core": ((232, 88, 52), 1.2),        # brief: nose lamp core #e85834 (a red-orange glow, not a flood)
     "marker": ((236, 150, 70), 8.0),
-    "downlight": ((255, 238, 214), 18.0),
-    "glow": ((248, 232, 222), 3.2),            # glazing glow backdrop #f8e8de
-    "glow_roof": ((240, 226, 214), 1.6),
+    "downlight": ((250, 248, 242), 18.0),
+    "glow": ((240, 236, 230), 1.9),            # the shed's west glazing glow: white daylight (brief #f8e8de)
+    "glow_hall": ((236, 236, 232), 2.0),       # the entrance hall's windows: neutral daylight (the shed stays warmer)
+    "glow_e": ((250, 222, 190), 2.2),          # the shed's east glazing: warmer, where the late sun falls
+    "glow_roof": ((228, 222, 212), 0.6),       # dimmer: the film's shed roof reads grey, and the black trains
+    #                                            reflect it
     "glyph": ((232, 232, 226), 4.0),           # board rows #e8e8e2
     "glyph_amber": ((236, 172, 76), 5.0),      # board rows #ecac4c
-    "cove": ((255, 196, 128), 9.0),            # amber cove strips
+    "cove": ((255, 214, 168), 6.0),            # amber cove strips (pass 1: (255, 196, 128) at 9)
     "bulb": ((255, 214, 160), 16.0),
     "screen": ((132, 172, 214), 1.3),          # the propaganda screen: the lounge's only cool light
     "striplight": ((226, 232, 236), 10.0),     # guard car
-    "deck_light": ((255, 200, 140), 20.0),     # the bridge's deck lights
+    "deck_light": ((255, 200, 140), 8.0),      # the bridge's deck lights (dimmer than the train's windows)
     "window_glow": ((236, 176, 112), 2.0),
 }
 # Glass parts (Roblox Glass, Transparency from here). rgb, transparency.
@@ -274,10 +311,19 @@ GLASS = {
     "glass": ((178, 196, 198), 0.7),
     "glass_dark": ((96, 104, 108), 0.45),
     "crystal": ((220, 226, 228), 0.6),
+    "window": ((62, 70, 80), 0.7),             # the cars' windows: Roblox Glass, a dark cool tint, so at night under the
+    #                                            amber coves they read dark and neutral with faint reflections (pass
+    #                                            2a's pale "glass" read grey-green)
 }
-PATTERNS = {1: "upholstery: cream C-arcs (openings alternating by row) and dots on burgundy, 1.4-stud cells",
+PATTERNS = {1: "upholstery: cream rings 0.66 across (a left and a right arc with gaps at top and bottom, a dot "
+               "inside) on a 0.8-stud pitch, rows 0.52 apart and offset by half a ring, so the rings of one row pass "
+               "through the gaps of the next and interlock (the film's pattern; pass 2a's lined up in wavy columns)",
             2: "carpet: gold diagonal lattice with cream lozenges, 2-stud cells",
             3: "table runner: gold chevrons on burgundy, 1.2-stud cells"}
+for _k, _v in json.loads(os.environ.get("TRAIN_SOTR_MK", "{}")).items():        # look-dev overrides (quick only)
+    MK[_k] = dict(MK[_k], rgb=tuple(_v))
+for _k, _v in json.loads(os.environ.get("TRAIN_SOTR_EMIT", "{}")).items():
+    EMIT[_k] = (tuple(_v[0]), _v[1])
 KEYS = sorted(MK) + sorted(EMIT) + sorted(GLASS)
 KEY_ID = {k: i for i, k in enumerate(KEYS)}
 
@@ -772,6 +818,16 @@ def link_only(nt, out_socket, in_socket):
 _QMATS = {}
 
 
+# Glow parts are what the camera sees through the glazing (warm-white, as filmed); the light they throw into the hall is
+# the white SurfaceLight the manifest puts on them in Roblox, so the preview lights with that colour instead.
+GLOW_LIGHT = {  # the light each glazing throws across the shed: the west side (the sun's side) warms the east wall,
+    #             the east side's sky light cools the west wall
+    "glow": ((252, 212, 168), 0.85), "glow_roof": ((240, 232, 220), 0.6), "glow_hall": ((232, 234, 236), 0.8),
+    "glow_e": ((226, 232, 240), 0.9)}
+for _k, _v in json.loads(os.environ.get("TRAIN_SOTR_GLOWL", "{}")).items():     # look-dev overrides
+    GLOW_LIGHT[_k] = (tuple(_v[0]), _v[1])
+
+
 def neon_material(key, strength_scale=1.0):
     nm = "PV_neon_%s_%.2f" % (key, strength_scale)
     if nm in bpy.data.materials:
@@ -785,7 +841,19 @@ def neon_material(key, strength_scale=1.0):
     rgb, s = EMIT[key]
     em.inputs["Color"].default_value = (*s2l(rgb), 1.0)
     em.inputs["Strength"].default_value = s * strength_scale
-    nt.links.new(em.outputs[0], out.inputs[0])
+    if key in GLOW_LIGHT:
+        lrgb, ls = GLOW_LIGHT[key]
+        el = nt.nodes.new("ShaderNodeEmission")
+        el.inputs["Color"].default_value = (*s2l(lrgb), 1.0)
+        el.inputs["Strength"].default_value = ls * strength_scale
+        lp = nt.nodes.new("ShaderNodeLightPath")
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        nt.links.new(lp.outputs["Is Camera Ray"], mix.inputs[0])
+        nt.links.new(el.outputs[0], mix.inputs[1])
+        nt.links.new(em.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs[0])
+    else:
+        nt.links.new(em.outputs[0], out.inputs[0])
     return m
 
 
@@ -804,7 +872,7 @@ def glass_material(key):
     tr.inputs["Color"].default_value = (*(0.85 + 0.15 * np.asarray(s2l(rgb))), 1.0)
     gl = nt.nodes.new("ShaderNodeBsdfPrincipled")
     gl.inputs["Base Color"].default_value = (*s2l(rgb), 1.0)
-    gl.inputs["Roughness"].default_value = 0.06
+    gl.inputs["Roughness"].default_value = 0.1 if key == "window" else 0.06   # the cars' glass: softer reflections
     gl.inputs["Metallic"].default_value = 0.0
     mix = nt.nodes.new("ShaderNodeMixShader")
     mix.inputs[0].default_value = 1.0 - transp
@@ -818,22 +886,50 @@ def glass_material(key):
     return m
 
 
-def quick_tex_material():
-    if "Q_tex" in _QMATS:
-        return _QMATS["Q_tex"]
-    m = new_material("Q_tex")
+def quick_tex_material(kind="Prop"):
+    """Look-dev material straight from the painted facets, with the bake's two-radius AO done at render time (local
+    to the object, floored at half the painted value), so quick renders sit close to the baked ones. No patterns."""
+    nm = "Q_tex_" + kind
+    if nm in _QMATS:
+        return _QMATS[nm]
+    p = BAKE.get(kind, BAKE["Prop"])
+    m = new_material(nm)
     nt = m.node_tree
-    bsdf = nt.nodes.get("Principled BSDF")
-    ac = nt.nodes.new("ShaderNodeAttribute")
+    N = nt.nodes
+    bsdf = N.get("Principled BSDF")
+    ac = N.new("ShaderNodeAttribute")
     ac.attribute_name = "bk_col"
-    ar = nt.nodes.new("ShaderNodeAttribute")
+    ar = N.new("ShaderNodeAttribute")
     ar.attribute_name = "bk_rmp"
-    sep = nt.nodes.new("ShaderNodeSeparateColor")
-    nt.links.new(ac.outputs["Color"], bsdf.inputs["Base Color"])
+    sep = N.new("ShaderNodeSeparateColor")
+    aos = []
+    for dist in (p["near"], p["far"]):
+        ao = N.new("ShaderNodeAmbientOcclusion")
+        ao.samples = 8
+        ao.only_local = True
+        ao.inputs["Distance"].default_value = dist
+        aos.append(ao)
+
+    def math(op, a, b):
+        n = N.new("ShaderNodeMath")
+        n.operation = op
+        for i, v in enumerate((a, b)):
+            if isinstance(v, (int, float)):
+                n.inputs[i].default_value = v
+            else:
+                nt.links.new(v, n.inputs[i])
+        return n.outputs[0]
+    ao = math("MULTIPLY", math("POWER", aos[0].outputs["AO"], p["pn"]), math("POWER", aos[1].outputs["AO"], p["pf"]))
+    term = math("MAXIMUM", math("SUBTRACT", 1.0, math("MULTIPLY", math("SUBTRACT", 1.0, ao), p["strength"])), 0.5)
+    sc = N.new("ShaderNodeVectorMath")
+    sc.operation = "SCALE"
+    nt.links.new(ac.outputs["Color"], sc.inputs[0])
+    nt.links.new(term, sc.inputs["Scale"])
+    nt.links.new(sc.outputs["Vector"], bsdf.inputs["Base Color"])
     nt.links.new(ar.outputs["Color"], sep.inputs["Color"])
     nt.links.new(sep.outputs["Red"], bsdf.inputs["Roughness"])
     nt.links.new(sep.outputs["Green"], bsdf.inputs["Metallic"])
-    _QMATS["Q_tex"] = m
+    _QMATS[nm] = m
     return m
 
 
@@ -841,11 +937,14 @@ def assign_quick_materials(asset):
     for role, o in asset.objs:
         o.data.materials.clear()
         if o["kind"] == "tex":
-            o.data.materials.append(quick_tex_material())
+            o.data.materials.append(quick_tex_material(asset.kind))
         elif o["kind"] == "neon":
             o.data.materials.append(neon_material(o["key"]))
         else:
             o.data.materials.append(glass_material(o["key"]))
+
+
+VIEW_TRANSFORM = "Standard"
 
 
 def render_setup(scene, res, samples, denoise=True):
@@ -873,9 +972,12 @@ def render_setup(scene, res, samples, denoise=True):
     r.image_settings.file_format = "PNG"
     r.image_settings.color_mode = "RGB"
     r.image_settings.color_depth = "8"
-    # Khronos PBR Neutral keeps the painted hue and value (closest of Blender's transforms to how Roblox shows paint)
+    # Pass 2: "Standard" (plain sRGB, no tone curve) shows the painted values as they are. Pass 1's Khronos PBR Neutral
+    # subtracts an offset from all three channels in the toe, which pushed every dark surface (the lacquer, the
+    # banners, the car interiors) to 0.6-0.9 saturation against the film's 0.2-0.4.
+    vt = os.environ.get("TRAIN_SOTR_VIEW") or VIEW_TRANSFORM
     try:
-        scene.view_settings.view_transform = "Khronos PBR Neutral"
+        scene.view_settings.view_transform = vt
         scene.view_settings.look = "None"
     except TypeError:
         scene.view_settings.view_transform = "AgX"
@@ -915,7 +1017,7 @@ def set_world(scene, kind, strength=1.0, sun_elev=14.0, sun_azim=-90.0):
 
 
 def add_light(scene, name, kind, loc, energy, color=(1, 1, 1), size=1.0, rot=None, target=None, shape="RECTANGLE",
-              size_y=None, spot=None):
+              size_y=None, spot=None, spread=None):
     ld = bpy.data.lights.new(name, kind)
     ld.energy = energy
     ld.color = color
@@ -924,6 +1026,8 @@ def add_light(scene, name, kind, loc, energy, color=(1, 1, 1), size=1.0, rot=Non
         ld.size = size
         if size_y is not None:
             ld.size_y = size_y
+        if spread is not None:
+            ld.spread = math.radians(spread)
     elif kind in ("POINT", "SPOT"):
         ld.shadow_soft_size = size
         if kind == "SPOT" and spot:
@@ -941,7 +1045,7 @@ def add_light(scene, name, kind, loc, energy, color=(1, 1, 1), size=1.0, rot=Non
     return o
 
 
-def camera(scene, loc, target, hfov=70.0, res=None, shift_y=0.0, roll=0.0):
+def camera(scene, loc, target, hfov=70.0, res=None, shift_y=0.0, roll=0.0, shift_x=0.0):
     cd = bpy.data.cameras.get("TS_Cam") or bpy.data.cameras.new("TS_Cam")
     cam = bpy.data.objects.get("TS_Cam")
     if cam is None:
@@ -951,6 +1055,7 @@ def camera(scene, loc, target, hfov=70.0, res=None, shift_y=0.0, roll=0.0):
     cd.angle = math.radians(hfov)
     cd.clip_start = 0.1
     cd.clip_end = 4000.0
+    cd.shift_x = shift_x
     cd.shift_y = shift_y
     cam.location = loc
     q = (V(target) - V(loc)).to_track_quat("-Z", "Y")
@@ -1080,8 +1185,8 @@ def boundary_loop(cells):
 def coffer_grid():
     """Kept coffer cells (centre x, y in entrance-asset space) and the skipped cells round the oval."""
     y0, y1 = ENT_Y0 - OVAL_Y, ENT_Y1 - OVAL_Y
-    x0 = -(WALL_X - 1.0)
-    nx = int(round(2 * (WALL_X - 1.0) / COFFER))
+    x0 = -(ENT_X - 1.0)
+    nx = int(round(2 * (ENT_X - 1.0) / COFFER))
     ny = int(round((y1 - y0) / COFFER))
     ea, eb = OVAL_A + 1.5, OVAL_B + 1.5
     skip, kept = set(), []
@@ -1096,31 +1201,43 @@ def coffer_grid():
     return kept, skip, (x0, y0, nx, ny)
 
 
+COFFER_CELL = 6.0         # pass 2 review: the film's coffers are about half our 12-stud module, each with a round
+#                           downlight that reads from the platform (the brief's 12-stud cell is overruled by the film)
+
+
 def build_coffer():
     A = Asset("Station_Coffer", "StationArch", "Train_Station.glb", tex_size=256, tags=["Station", "Ceiling",
                                                                                          "Modular"],
-              pivot="on the floor under the cell centre (the soffit is 40 up)",
-              notes="One 12 x 12 coffer of the entrance hall's concrete ceiling (1-stud chamfered rib soffit, a "
-                    "sloped recess 4 deep, a round downlight), tiled 160 times round the oval (layout). Out of reach: "
-                    "no collision.")
+              pivot="on the floor under the module's centre (the soffit is 40 up)",
+              notes="One 12 x 12 module of the entrance hall's concrete ceiling: four 6-stud coffers (0.8-stud "
+                    "chamfered ribs, a shallow sloped recess 1.4 deep), each with a round downlight on a short can "
+                    "whose lens sits just above the soffit, so it reads from the platform as in the film (T1 @35.7 "
+                    "s). Tiled round the oval (layout). The lenses are Neon only: light the hall with the glazing's "
+                    "SurfaceLights, not one light per coffer. Out of reach: no collision.")
     mb = A.part("Concrete")
     li = A.part("Downlight", kind="neon", shadow=False)
-    h = COFFER / 2
-    z0, z1, z2 = CEIL_Z, CEIL_Z + 3.3, CEIL_Z + 4.0
-    o = rect_loop(-h, -h, h, h, z0)
-    r1 = rect_loop(-h + 0.5, -h + 0.5, h - 0.5, h - 0.5, z0)
-    r2 = rect_loop(-h + 2.0, -h + 2.0, h - 2.0, h - 2.0, z1)
-    r3 = rect_loop(-h + 2.35, -h + 2.35, h - 2.35, h - 2.35, z2)
-    vol = mb.nv()
-    for k in range(4):
-        kk = (k + 1) % 4
-        mb.face([o[k], r1[k], r1[kk], o[kk]], "concrete", vol)
-        mb.face([r1[k], r2[k], r2[kk], r1[kk]], "coffer", vol)
-        mb.face([r2[k], r3[k], r3[kk], r2[kk]], "coffer", vol)
-    mb.face([r3[0], r3[3], r3[2], r3[1]], "coffer", vol)
-    disc(li, (0, 0, z2 - 0.03), 0.75, 8, (0, 0, -1), "downlight")
-    A.att("Downlight", (0, 0, z2 - 0.1), (0, 0, -1), (0, 1, 0),
-          note="warm SpotLight (255, 214, 170), Brightness 1, Range 40, Angle 70, or a SurfaceLight on the disc")
+    c = COFFER_CELL
+    z0, z1, z2 = CEIL_Z, CEIL_Z + 1.1, CEIL_Z + 1.4
+    for cx in (-c / 2, c / 2):
+        for cy in (-c / 2, c / 2):
+            h = c / 2
+            o = rect_loop(cx - h, cy - h, cx + h, cy + h, z0)
+            r1 = rect_loop(cx - h + 0.4, cy - h + 0.4, cx + h - 0.4, cy + h - 0.4, z0)
+            r2 = rect_loop(cx - h + 0.95, cy - h + 0.95, cx + h - 0.95, cy + h - 0.95, z1)
+            r3 = rect_loop(cx - h + 1.15, cy - h + 1.15, cx + h - 1.15, cy + h - 1.15, z2)
+            vol = mb.nv()
+            for k in range(4):
+                kk = (k + 1) % 4
+                mb.face([o[k], r1[k], r1[kk], o[kk]], "concrete", vol)
+                mb.face([r1[k], r2[k], r2[kk], r1[kk]], "coffer", vol)
+                mb.face([r2[k], r3[k], r3[kk], r2[kk]], "coffer", vol)
+            mb.face([r3[0], r3[3], r3[2], r3[1]], "coffer", vol)
+            # the downlight: a short white can hanging from the recess, its lens just above the soffit
+            cyl(mb, (cx, cy, z2), (cx, cy, z0 + 0.3), 0.46, 0.46, 8, "white_steel", cap0=False, cap1=False,
+                phase=math.radians(22.5))
+            disc(li, (cx, cy, z0 + 0.3), 0.42, 8, (0, 0, -1), "downlight", phase=math.radians(22.5))
+    A.att("Downlights", (0, 0, z0 + 0.25), (0, 0, -1), (0, 1, 0),
+          note="four Neon lenses (255, 238, 214); no light objects (the hall is lit by the glazing's SurfaceLights)")
     return A
 
 
@@ -1136,7 +1253,7 @@ def build_entrance_ceiling():
     z0, z2 = CEIL_Z, CEIL_Z + 4.0
     ea, eb = OVAL_A + 1.5, OVAL_B + 1.5
     for s_ in (-1, 1):
-        xa, xb = sorted((s_ * (WALL_X - 1.0), s_ * WALL_X))
+        xa, xb = sorted((s_ * (ENT_X - 1.0), s_ * ENT_X))
         mb.face(list(reversed(rect_loop(xa, y0, xb, y1, z0))), "concrete")
     loop = boundary_loop(skip)
     outer = [V((x0 + i * COFFER, y0 + j * COFFER, z0)) for i, j in loop]
@@ -1157,7 +1274,7 @@ def build_entrance_ceiling():
             continue
         beam(mb, d * r_in + V((0, 0, z0 - 0.45)), d * (r - 0.1) + V((0, 0, z0 - 0.45)), 0.9, 0.9, "concrete")
     a, b = OVAL_A, OVAL_B
-    zf = CEIL_Z - 3.5
+    zf = CEIL_Z - 1.2
     loft(mb, [list(reversed(ellipse_pts(a, b, n, zf))), list(reversed(ellipse_pts(a, b, n, z2)))], "concrete")
     loft(mb, [ellipse_pts(ea, eb, n, zf), ellipse_pts(ea, eb, n, z0)], "concrete")
     ia, oa = ellipse_pts(a, b, n, zf), ellipse_pts(ea, eb, n, zf)
@@ -1165,7 +1282,16 @@ def build_entrance_ceiling():
     for i in range(n):
         j = (i + 1) % n
         mb.face([ia[i], ia[j], oa[j], oa[i]][::-1], "concrete", vol)
-    box(mb, (-WALL_X, y0 - 1.0, CEIL_Z), (WALL_X, y0, SHED_H + 2.0), "concrete", skip=("+y", "+z", "-x", "+x"))
+    # the header wall over the shed's mouth (seen from the shed) and the returns either side of the mouth, between
+    # the shed's glazing (x 31) and the entrance hall's side walls (x 37), seen from the entrance hall
+    box(mb, (-ENT_X, y0 - 1.0, CEIL_Z), (ENT_X, y0, SHED_H + 2.0), "concrete", skip=("+y", "+z", "-x", "+x"))
+    for s_ in (-1, 1):
+        xa, xb = sorted((s_ * WALL_X, s_ * ENT_X))
+        face_toward(mb, [V((xa, y0, 0.0)), V((xb, y0, 0.0)), V((xb, y0, CEIL_Z)), V((xa, y0, CEIL_Z))], "concrete",
+                    V((0, 1, 0)))
+        xi = s_ * WALL_X
+        face_toward(mb, [V((xi, y0, 0.0)), V((xi, y0 - 1.0, 0.0)), V((xi, y0 - 1.0, CEIL_Z)), V((xi, y0, CEIL_Z))],
+                    "concrete", V((-s_, 0, 0)))
     return A
 
 
@@ -1210,112 +1336,168 @@ def build_lantern():
     return A
 
 
-def blade(mb, p0, p1, s, rng, segs=14):
-    p0, p1 = V(p0), V(p1)
-    L = (p1 - p0).length
-    path, secs = [], []
-    tw0 = rng.uniform(-0.1, 0.1)
-    for k in range(segs + 1):
-        u = k / segs
-        p = p0.lerp(p1, u) - UP * (0.045 * L * math.sin(math.pi * u))
-        path.append(p)
-        w = 1.2 + 5.4 * u ** 0.8
-        th = 0.6 + 1.3 * u
-        tw = tw0 + s * 0.22 * u
-        base = [(-0.5 * w, -0.05 * th), (-0.22 * w, -0.5 * th), (0.24 * w, -0.45 * th), (0.5 * w, 0.0),
-                (0.2 * w, 0.5 * th), (-0.25 * w, 0.42 * th)]
-        c, sn = math.cos(tw), math.sin(tw)
-        secs.append([(x * c - y * sn, x * sn + y * c) for x, y in base])
-    # chisel tip
-    d = (p1 - p0).normalized()
-    path.append(p1 + d * 1.6 + UP * 0.4)
-    secs.append([(0.55 * x, 0.3 * y) for x, y in secs[-1]])
-    return sweep(mb, path, lambda k: secs[k], "gold", up=V((0.0, 0.55, 0.83)), cap0=True, cap1=True)
+SUN_HUB_Z = 56.0          # the fan's hub, up in the lantern drum (asset space: the oval's centre on the floor)
+SUN_SPAN = 164.0          # the fan's spread in degrees, centred on straight down
+SUN_LEN_MAX = 46.0        # blade length wanted (the brief: 40-70); each blade is cut to what the oval allows
+SUN_ZMIN = 24.0           # no blade dips below this: it stays above the portal beam in the matched views
+SUN_LEAN = 13.0           # alternate blades lean towards and away from the entrance for depth
+
+
+def sun_blade(root, d, side, L, wmax, tw0, segs_u=(0.0, 0.07, 0.15, 0.25, 0.36, 0.48, 0.6, 0.71, 0.8, 0.88, 0.94,
+                                                     0.975)):
+    """One broad gold blade (pass 2 review): about a fifth as wide as it is long, narrower where it leaves the hub,
+    broad for the rest of its length and rounded at the end; a rounded 8-sided section about a third as thick as it
+    is wide; a gentle bow towards the hall and a slight twist, so its rounded back catches the light along its
+    length. -> (rings of 8 points, tip point)"""
+    d = V(d).normalized()
+    nrm = V(side).normalized()
+    across = d.cross(nrm).normalized()
+    rings = []
+    for u in segs_u:
+        w = wmax * (0.3 + 0.7 * float(sstep(0.0, 0.62, u))) * math.sqrt(max(0.0, 1.0 - u ** 6))
+        th = max(0.5, 0.34 * w)
+        c = V(root) + d * (L * u) + nrm * (0.05 * L * math.sin(math.pi * u))
+        tw = tw0 + 0.22 * u
+        cs, sn = math.cos(tw), math.sin(tw)
+        X = across * cs + nrm * sn
+        Y = nrm * cs - across * sn
+        rings.append([c + X * (0.5 * w * math.cos(math.radians(22.5 + 45.0 * i))) +
+                      Y * (0.5 * th * math.sin(math.radians(22.5 + 45.0 * i))) for i in range(8)])
+    tip = V(root) + d * L
+    return rings, tip
+
+
+def sun_blade_fits(rings, tip):
+    """True if the blade stays clear of the hall: inside the oval opening and the lantern drum wherever it is above
+    the collar's lip, under the ceiling and inside the entrance hall wherever it is below it, and above SUN_ZMIN."""
+    for p in [q for r in rings for q in r] + [tip]:
+        if p.z < SUN_ZMIN or abs(p.x) > ENT_X - 6.0:
+            return False
+        if p.z > CEIL_Z - 1.7:
+            if (p.x / (OVAL_A - 0.9)) ** 2 + (p.y / (OVAL_B - 0.9)) ** 2 > 1.0 or p.z > LANTERN_Z - 2.5:
+                return False
+    return True
+
+
+def sun_blade_mesh(mb, rings, tip, root, d, L, segs_u):
+    vol = mb.nv()
+    axis = [V(root) + V(d) * (L * u) for u in segs_u]
+    for k in range(len(rings) - 1):
+        a, b = rings[k], rings[k + 1]
+        ctr = (axis[k] + axis[k + 1]) * 0.5
+        for i in range(8):
+            j = (i + 1) % 8
+            face_toward(mb, [a[i], a[j], b[j], b[i]], "gold", (a[i] + a[j] + b[j] + b[i]) / 4.0 - ctr, vol)
+    for i in range(8):
+        j = (i + 1) % 8
+        face_toward(mb, [rings[-1][i], rings[-1][j], tip], "gold", (rings[-1][i] + rings[-1][j] + tip) / 3.0 -
+                    axis[-1], vol)
+    face_toward(mb, rings[0], "gold", -V(d), vol)
 
 
 def build_sunburst():
     A = Asset("Station_Sunburst", "Sculpture", "Train_Station.glb", tags=["Station", "Sculpture"],
-              notes="Our own sculpture in the film's spirit: 10 long tapered gold blades in two fans of five, "
-                    "gathered by two collars at the centre and rising to the drum's rim (40-52 studs long, 6-sided "
-                    "sections, a slight sag and twist), with a faceted gold drop between the collars. Hung from the "
-                    "lantern by steel rods. Brushed gold: metalness 0.9, roughness 0.3. Origin = the oval's centre on "
-                    "the floor.")
+              notes="Our own sculpture: one radial fan of 10 broad gold blades fanning down through the oval from a "
+                    "ring hub up in the lantern, evenly spread over 160 degrees. Each blade is about a fifth as wide "
+                    "as it is long, broad for most of its length with a rounded end, and rounded in section (8 "
+                    "sides), so it catches the light along its length; each is as long as the oval allows (the "
+                    "longest pass through the opening and hang under the coffers). There is no pendant and no gap in "
+                    "the middle: it reads as rays of light, never as wings or an emblem (critic #6b). Alternate "
+                    "blades lean 10 degrees towards and away from the entrance for depth. Hung from the lantern's "
+                    "dome by steel rods. Brushed gold (#ba8e4e): metalness 0.9, roughness 0.3. Origin = the oval's "
+                    "centre on the floor.")
     g = A.part("Gold")
     rods = A.part("Rods", shadow=False)
     rng = random.Random(SEED + 11)
-    hub_z = 32.0
+    hub = V((0.0, 0.0, SUN_HUB_Z))
+    segs_u = (0.0, 0.07, 0.15, 0.25, 0.36, 0.48, 0.6, 0.71, 0.8, 0.88, 0.94, 0.975)
+    n = 10
+    lengths = []
+    for k in range(n):
+        phi = math.radians(-SUN_SPAN / 2.0 + SUN_SPAN * (k + 0.5) / n)      # from straight down
+        lean = math.radians(SUN_LEAN if k % 2 == 0 else -SUN_LEAN)
+        d = V((math.sin(phi) * math.cos(lean), math.sin(lean), -math.cos(phi) * math.cos(lean))).normalized()
+        side = V((0.0, 1.0, 0.0)) - d * d.y
+        tw0 = rng.uniform(-0.08, 0.08)
+        root = hub + d * 3.0
+        L = SUN_LEN_MAX
+        while L > 12.0:
+            wmax = min(9.0, max(5.0, L / 5.0))
+            rings, tip = sun_blade(root, d, side, L, wmax, tw0, segs_u)
+            if sun_blade_fits(rings, tip):
+                break
+            L -= 0.5
+        lengths.append(round(L + 3.0, 1))
+        sun_blade_mesh(g, rings, tip, root, d, L, segs_u)
+    log("SUNBURST blade lengths from the hub: %s" % lengths)
+    # the hub: a faceted ring facing the hall round a boss, covering the blades' roots
+    torus(g, hub, (0, 1, 0), 3.4, 0.8, 16, 6, "gold")
+    cyl(g, hub + V((0, -0.9, 0)), hub + V((0, 0.9, 0)), 2.6, 2.6, 12, "gold")
     top = LANTERN_Z - 0.2
-    for s in (-1, 1):
-        for k, psi in enumerate((-58, -29, 0, 29, 58)):
-            t = math.radians(psi)
-            p0 = V((s * 3.3, 1.1 * math.sin(t), hub_z - 0.3 * math.cos(t)))
-            ang = t if s > 0 else math.pi - t
-            p1 = V(((OVAL_A - 3.5) * math.cos(ang), (OVAL_B - 3.0) * math.sin(ang), 45.5 + 2.5 * math.cos(t)))
-            blade(g, p0, p1, s, rng)
-            cyl(rods, p1 + V((0, 0, 0.6)), V((p1.x, p1.y, top)), 0.13, 0.13, 4, "steel")
-        torus(g, (s * 4.4, 0, hub_z), (1, 0, 0), 1.9, 0.5, 10, 4, "gold")
-        cyl(rods, (s * 4.4, 0, hub_z + 2.3), (s * 4.4, 0, top), 0.13, 0.13, 4, "steel")
-    lathe(g, [(0.0, 19.5), (1.0, 20.8), (1.8, 22.9), (2.1, 25.3), (1.7, 27.8), (0.9, 29.8), (0.45, 31.2),
-              (0.45, 32.6), (0.0, 32.8)], 8, "gold")
-    cyl(rods, (0, 0, 32.7), (0, 0, top), 0.16, 0.16, 4, "steel")
+    for a in (30.0, 90.0, 150.0):
+        t = math.radians(a)
+        p0 = hub + V((3.4 * math.cos(t), 0.0, 3.4 * math.sin(t)))
+        cyl(rods, p0, V((p0.x * 2.0, 2.5 if a == 90.0 else -2.0, top)), 0.13, 0.13, 4, "steel")
     return A
 
 
 def build_entrance_walls():
     A = Asset("Station_EntranceWalls", "StationArch", "Train_Station.glb", tags=["Station", "Wall"],
-              notes="The entrance hall's side walls (columns, a stone base with service doors, tall bronze-framed "
-                    "glazing glowing amber from behind) and the end wall (three glass doorways, clerestory). Origin = "
-                    "the oval's centre on the floor. Collision: use the colliders (mesh parts are visual).")
+              notes="The entrance hall's side walls, 74 apart (columns, a stone base with service doors, tall "
+                    "bronze-framed glazing with white daylight behind it) and the end wall (three glass doorways, "
+                    "clerestory). Origin = the oval's centre on the floor. Collision: use the colliders (mesh parts "
+                    "are visual).")
     c = A.part("Walls")
     gl = A.part("Glass", kind="glass")
     glow = A.part("Glow", kind="neon", shadow=False)
     y0, y1 = ENT_Y0 - OVAL_Y, ENT_Y1 - OVAL_Y
     cols = [y0 + 1.5] + [y0 + (y1 - y0) * k / 5.0 for k in range(1, 5)] + [y1 - 1.5]
     for s in (-1, 1):
-        xi, xo = s * (WALL_X - 3.0), s * (WALL_X + 0.5)
+        xi, xo = s * (ENT_X - 3.0), s * (ENT_X + 0.5)
         for cy in cols:
             cbox(c, (min(xi, xo), cy - 1.5, 0), (max(xi, xo), cy + 1.5, CEIL_Z), "concrete", ch=0.3)
         for k in range(len(cols) - 1):
             ya, yb = cols[k] + 1.5, cols[k + 1] - 1.5
             ym = 0.5 * (ya + yb)
-            xw, xb = s * (WALL_X - 0.5), s * (WALL_X + 0.5)
+            xw, xb = s * (ENT_X - 0.5), s * (ENT_X + 0.5)
             # stone base with a recessed service door
             grid_wall(c, xw, s, [ya, ym - 2.0, ym + 2.0, yb], [0.0, DOOR_H, 10.0],
                       [(ym - 2.0, ym + 2.0, 0.0, DOOR_H)], lambda z0, z1: "concrete")
-            face_toward(c, [V((s * (WALL_X + 0.2), ym - 2.0, 0)), V((s * (WALL_X + 0.2), ym + 2.0, 0)),
-                            V((s * (WALL_X + 0.2), ym + 2.0, DOOR_H)), V((s * (WALL_X + 0.2), ym - 2.0, DOOR_H))],
+            face_toward(c, [V((s * (ENT_X + 0.2), ym - 2.0, 0)), V((s * (ENT_X + 0.2), ym + 2.0, 0)),
+                            V((s * (ENT_X + 0.2), ym + 2.0, DOOR_H)), V((s * (ENT_X + 0.2), ym - 2.0, DOOR_H))],
                         "wood_dark", V((-s, 0, 0)))
             for (pa, pb) in (((ym - 2.0, 0), (ym - 2.0, DOOR_H)), ((ym + 2.0, 0), (ym + 2.0, DOOR_H))):
-                face_toward(c, [V((xw, pa[0], pa[1])), V((s * (WALL_X + 0.2), pa[0], pa[1])),
-                                V((s * (WALL_X + 0.2), pb[0], pb[1])), V((xw, pb[0], pb[1]))], "concrete",
+                face_toward(c, [V((xw, pa[0], pa[1])), V((s * (ENT_X + 0.2), pa[0], pa[1])),
+                                V((s * (ENT_X + 0.2), pb[0], pb[1])), V((xw, pb[0], pb[1]))], "concrete",
                             V((0, -1 if pa[0] > ym else 1, 0)))
             face_toward(c, [V((xw, ym - 2.0, DOOR_H)), V((xw, ym + 2.0, DOOR_H)),
-                            V((s * (WALL_X + 0.2), ym + 2.0, DOOR_H)), V((s * (WALL_X + 0.2), ym - 2.0, DOOR_H))],
+                            V((s * (ENT_X + 0.2), ym + 2.0, DOOR_H)), V((s * (ENT_X + 0.2), ym - 2.0, DOOR_H))],
                         "concrete", V((0, 0, -1)))
-            cbox(c, (min(s * (WALL_X - 1.2), xb), ya, 9.6), (max(s * (WALL_X - 1.2), xb), yb, 10.6), "concrete",
+            cbox(c, (min(s * (ENT_X - 1.2), xb), ya, 9.6), (max(s * (ENT_X - 1.2), xb), yb, 10.6), "concrete",
                  ch=0.15)
             # bronze glazing frame: mullions every ~4, transoms
             nm = max(1, int(round((yb - ya) / 4.0)))
             for m in range(nm + 1):
                 yy = ya + (yb - ya) * m / nm
-                box(c, (min(s * (WALL_X - 0.6), s * (WALL_X + 0.3)), yy - 0.25, 10.6),
-                    (max(s * (WALL_X - 0.6), s * (WALL_X + 0.3)), yy + 0.25, 38.0), "bronze",
+                box(c, (min(s * (ENT_X - 0.6), s * (ENT_X + 0.3)), yy - 0.25, 10.6),
+                    (max(s * (ENT_X - 0.6), s * (ENT_X + 0.3)), yy + 0.25, 38.0), "bronze",
                     skip=("+x" if s > 0 else "-x", "-z", "+z"))
             for zt in (17.0, 24.0, 31.0):
-                box(c, (min(s * (WALL_X - 0.5), s * (WALL_X + 0.3)), ya, zt - 0.25),
-                    (max(s * (WALL_X - 0.5), s * (WALL_X + 0.3)), yb, zt + 0.25), "bronze",
+                box(c, (min(s * (ENT_X - 0.5), s * (ENT_X + 0.3)), ya, zt - 0.25),
+                    (max(s * (ENT_X - 0.5), s * (ENT_X + 0.3)), yb, zt + 0.25), "bronze",
                     skip=("+x" if s > 0 else "-x", "-y", "+y"))
-            box(c, (min(s * (WALL_X - 0.5), xb), ya, 38.0), (max(s * (WALL_X - 0.5), xb), yb, CEIL_Z), "concrete",
+            box(c, (min(s * (ENT_X - 0.5), xb), ya, 38.0), (max(s * (ENT_X - 0.5), xb), yb, CEIL_Z), "concrete",
                 skip=("+z",))
-            box(gl, (min(s * WALL_X, s * (WALL_X + 0.1)), ya, 10.6), (max(s * WALL_X, s * (WALL_X + 0.1)), yb, 38.0),
+            box(gl, (min(s * ENT_X, s * (ENT_X + 0.1)), ya, 10.6), (max(s * ENT_X, s * (ENT_X + 0.1)), yb, 38.0),
                 "glass", skip=("-y", "+y", "-z", "+z"))
-        face_toward(glow, [V((s * 89.0, y0, 0)), V((s * 89.0, y1, 0)), V((s * 89.0, y1, CEIL_Z + 4)),
-                           V((s * 89.0, y0, CEIL_Z + 4))], "glow", V((-s, 0, 0)))
-        A.collider((s * (WALL_X - 0.5), y0, 0), (s * (WALL_X + 1.5), y1, CEIL_Z))
+        gx = s * (ENT_X + 4.0)
+        face_toward(glow, [V((gx, y0, 0)), V((gx, y1, 0)), V((gx, y1, CEIL_Z + 4)), V((gx, y0, CEIL_Z + 4))], "glow_hall",
+                    V((-s, 0, 0)))
+        A.collider((s * (ENT_X - 0.5), y0, 0), (s * (ENT_X + 1.5), y1, CEIL_Z))
     # end wall (hall entrance) with three doorways and a clerestory
     ye = y1
     doors = [(-34.0, -26.0), (-4.0, 4.0), (26.0, 34.0)]
-    xs = sorted({-WALL_X, WALL_X} | {d for p in doors for d in p})
+    xs = sorted({-ENT_X, ENT_X} | {d for p in doors for d in p})
     holes = [(d0, d1, 0.0, 10.0) for d0, d1 in doors]
     for i in range(len(xs) - 1):
         for (za, zb) in ((0.0, 10.0), (10.0, 14.0), (36.0, CEIL_Z)):
@@ -1336,16 +1518,16 @@ def build_entrance_walls():
         cbox(c, (0.5 * (d0 + d1) - 0.15, ye + 0.3, 0), (0.5 * (d0 + d1) + 0.15, ye + 0.6, 10), "bronze", ch=0.05)
         box(gl, (d0, ye + 0.42, 0), (d1, ye + 0.48, 10), "glass", skip=("-x", "+x", "-z", "+z"))
     for m in range(43):
-        xx = -WALL_X + 4.0 * m
-        if xx > WALL_X:
+        xx = -ENT_X + 4.0 * m
+        if xx > ENT_X:
             break
         box(c, (xx - 0.25, ye - 0.3, 14.0), (xx + 0.25, ye + 0.4, 36.0), "bronze", skip=("+y", "-z", "+z"))
     for zt in (14.0, 25.0, 36.0):
-        cbox(c, (-WALL_X, ye - 0.3, zt - 0.3), (WALL_X, ye + 0.4, zt + 0.3), "bronze", ch=0.06)
-    box(gl, (-WALL_X, ye + 0.1, 14.0), (WALL_X, ye + 0.2, 36.0), "glass", skip=("-x", "+x", "-z", "+z"))
-    face_toward(glow, [V((-WALL_X, ye + 5, 0)), V((WALL_X, ye + 5, 0)), V((WALL_X, ye + 5, CEIL_Z)),
-                       V((-WALL_X, ye + 5, CEIL_Z))], "glow", V((0, -1, 0)))
-    A.collider((-WALL_X, ye, 0), (WALL_X, ye + 1.5, CEIL_Z))
+        cbox(c, (-ENT_X, ye - 0.3, zt - 0.3), (ENT_X, ye + 0.4, zt + 0.3), "bronze", ch=0.06)
+    box(gl, (-ENT_X, ye + 0.1, 14.0), (ENT_X, ye + 0.2, 36.0), "glass", skip=("-x", "+x", "-z", "+z"))
+    face_toward(glow, [V((-ENT_X, ye + 5, 0)), V((ENT_X, ye + 5, 0)), V((ENT_X, ye + 5, CEIL_Z)),
+                       V((-ENT_X, ye + 5, CEIL_Z))], "glow_hall", V((0, -1, 0)))
+    A.collider((-ENT_X, ye, 0), (ENT_X, ye + 1.5, CEIL_Z))
     return A
 
 
@@ -1356,22 +1538,22 @@ def build_entrance_floor():
                     "oval's centre on the floor.")
     f = A.part("Floor")
     y0, y1 = ENT_Y0 - OVAL_Y, ENT_Y1 - OVAL_Y
-    xs = [-WALL_X] + [-81.0 + 6.0 * i for i in range(28)] + [WALL_X]
+    xs = [-ENT_X] + [-36.0 + 6.0 * i for i in range(13)] + [ENT_X]
     ys = [y0 + 6.0 * j for j in range(int(round((y1 - y0) / 6.0)) + 1)]
     for i in range(len(xs) - 1):
         for j in range(len(ys) - 1):
             f.face(rect_loop(xs[i], ys[j], xs[i + 1], ys[j + 1], 0.0), "floor", f.nv())
     # inlay: a darker stone half-disc with brass rays and arcs (our own sunrise)
     cy = y0
-    hd = [V((0, cy, 0.008))] + [V((20.0 * math.cos(math.radians(a)), cy + 20.0 * math.sin(math.radians(a)), 0.008))
+    hd = [V((0, cy, 0.008))] + [V((13.0 * math.cos(math.radians(a)), cy + 13.0 * math.sin(math.radians(a)), 0.008))
                                 for a in range(0, 181, 10)]
     f.face(hd, "floor_light")
     for a in range(10, 171, 20):
         t = math.radians(a)
         d, nx_ = V((math.cos(t), math.sin(t), 0)), V((-math.sin(t), math.cos(t), 0))
-        p0, p1 = V((0, cy, 0.016)) + d * 3.0, V((0, cy, 0.016)) + d * 19.0
-        f.face([p0 - nx_ * 0.3, p1 - nx_ * 0.15, p1 + nx_ * 0.15, p0 + nx_ * 0.3], "brass")
-    for r in (8.0, 20.0):
+        p0, p1 = V((0, cy, 0.016)) + d * 2.0, V((0, cy, 0.016)) + d * 12.4
+        f.face([p0 - nx_ * 0.25, p1 - nx_ * 0.12, p1 + nx_ * 0.12, p0 + nx_ * 0.25], "brass")
+    for r in (5.5, 13.0):
         for k in range(18):
             ta, tb = math.radians(10 * k), math.radians(10 * (k + 1))
             pa = [V((rr * math.cos(t), cy + rr * math.sin(t), 0.016)) for rr, t in
@@ -1385,7 +1567,7 @@ def build_entrance_floor():
         bx = s * TRACK_X
         cbox(f, (bx - 3.2, y0 - 2.2, PIT_Z), (bx + 3.2, y0, -0.6), "concrete_dark", ch=0.2)
         cbox(f, (bx - 2.6, y0 - 2.5, -3.4), (bx + 2.6, y0 - 2.1, -1.2), "steel_dark", ch=0.08)
-    A.collider((-WALL_X, y0, -1.0), (WALL_X, y1, 0.0), "Floor")
+    A.collider((-ENT_X, y0, -1.0), (ENT_X, y1, 0.0), "Floor")
     for s in (-1, 1):
         A.collider((s * TRACK_X - 3.2, y0 - 2.5, PIT_Z), (s * TRACK_X + 3.2, y0, -0.6))
     return A
@@ -1393,41 +1575,63 @@ def build_entrance_floor():
 
 def build_portal():
     A = Asset("Station_Portal", "StationArch", "Train_Station.glb", tags=["Station", "Portal"],
-              notes="The white cross-beam (6 high) at the shed's mouth on four columns, carrying our own gold emblem "
-                    "(a rayed disc and bars; no lettering). Origin = floor centre at the shed's mouth (hall y 126).")
+              notes="The white cross-beam (3.5 high, its underside at 19.5) across the shed's mouth on four columns: "
+                    "two against the glazing, standing in the guideway bays, and two on the platform that the first "
+                    "banners hang beside. It carries our own gold emblem (a rayed disc) and a row of abstract gold "
+                    "glyph blocks along its top (no lettering). The "
+                    "two departure boards hang from its underside over the tracks. Origin = floor centre at the "
+                    "shed's mouth (hall y 54).")
     c = A.part("Steel")
-    cbox(c, (-WALL_X, -1.0, 24.0), (WALL_X, 1.0, 30.0), "white_steel", ch=0.25)
-    for x in (-61.5, -33.0, 33.0, 61.5):
-        cbox(c, (x - 0.9, -0.9, 0.6), (x + 0.9, 0.9, 24.0), "white_steel", ch=0.15)
-        cbox(c, (x - 1.3, -1.3, 0.0), (x + 1.3, 1.3, 0.6), "concrete", ch=0.1)
-        A.collider((x - 1.3, -1.3, 0), (x + 1.3, 1.3, 24.0))
-    # our emblem: a rayed gold disc on the beam, flanked by bars
-    cyl(c, (0, -0.35, 33.6), (0, 0.35, 33.6), 2.6, 2.6, 16, "gold")
-    cyl(c, (0, -0.55, 33.6), (0, 0.55, 33.6), 1.2, 1.2, 12, "gold")
+    z0, z1 = PORTAL_Z0, PORTAL_Z1
+    cbox(c, (-WALL_X, -1.0, z0), (WALL_X, 1.0, z1), "white_steel", ch=0.25)
+    for x, zb in ((-(WALL_X - 1.2), PIT_Z), (-7.5, 0.0), (7.5, 0.0), (WALL_X - 1.2, PIT_Z)):
+        cbox(c, (x - 0.9, -0.9, zb + 0.6), (x + 0.9, 0.9, z0), "white_steel", ch=0.15)
+        cbox(c, (x - 1.3, -1.3, zb), (x + 1.3, 1.3, zb + 0.6), "concrete", ch=0.1)
+        A.collider((x - 1.3, -1.3, zb), (x + 1.3, 1.3, z0))
+    # our emblem: a rayed gold disc standing on the beam, flanked by bars
+    ez = z1 + 3.4
+    cyl(c, (0, -0.35, ez), (0, 0.35, ez), 2.6, 2.6, 16, "gold")
+    cyl(c, (0, -0.55, ez), (0, 0.55, ez), 1.2, 1.2, 12, "gold")
     for k in range(9):
         a = math.radians(-80 + 20 * k)
         d = V((math.sin(a), 0, math.cos(a)))
         n_ = V((math.cos(a), 0, -math.sin(a)))
-        p0, p1 = V((0, 0, 33.6)) + d * 2.9, V((0, 0, 33.6)) + d * 6.0
+        p0, p1 = V((0, 0, ez)) + d * 2.9, V((0, 0, ez)) + d * 6.0
         hull(c, [p0 + n_ * 0.4 + V((0, -0.25, 0)), p0 - n_ * 0.4 + V((0, -0.25, 0)), p0 + n_ * 0.4 + V((0, 0.25, 0)),
                  p0 - n_ * 0.4 + V((0, 0.25, 0)), p1 + n_ * 0.08 + V((0, -0.2, 0)), p1 - n_ * 0.08 + V((0, -0.2, 0)),
                  p1 + n_ * 0.08 + V((0, 0.2, 0)), p1 - n_ * 0.08 + V((0, 0.2, 0))], "gold")
-    cbox(c, (-14.0, -0.3, 30.0), (14.0, 0.3, 30.7), "gold", ch=0.08)
-    for s in (-1, 1):
-        cbox(c, (min(s * 17.0, s * 58.0), -0.25, 30.7), (max(s * 17.0, s * 58.0), 0.25, 31.2), "gold", ch=0.06)
+    cbox(c, (-8.0, -0.3, z1), (8.0, 0.3, z1 + 0.7), "gold", ch=0.08)
+    # a row of our own abstract gold glyph blocks along the beam's top, either side of the emblem: it breaks up the
+    # white beam as the film's lettering does, without any letters (the boards carry the same kind of glyphs)
+    rng = random.Random(SEED + 31)
+    for s_ in (-1, 1):
+        x = 10.0
+        while x < WALL_X - 3.5:
+            w = rng.choice((0.7, 1.0, 1.3, 1.6))
+            hgt = rng.choice((1.5, 1.8, 1.8, 2.1))
+            x0_, x1_ = sorted((s_ * x, s_ * min(x + w, WALL_X - 3.0)))
+            cbox(c, (x0_, -0.22, z1), (x1_, 0.22, z1 + hgt), "gold", ch=0.05)
+            x += w + rng.choice((0.35, 0.45, 0.9))
+    for s_ in (-1, 1):
+        A.att("Board%s" % ("W" if s_ < 0 else "E"), (s_ * (TRACK_X + 0.5), 1.6, 0.0), (0, 1, 0), (0, 0, 1),
+              note="Station_Board hangs here from the beam's underside, over the track")
     return A
+
+
+SHED_FINS = ((4.0, 26.0, 1.4), (26.0, 52.0, 2.2), (52.0, SHED_H, 3.0))   # (z0, z1, depth): shallow beside the
+#                                                                           trains, stepping deeper overhead
 
 
 def build_shed_bay():
     A = Asset("Station_ShedBay", "StationArch", "Train_Station.glb", tags=["Station", "Shed", "Modular"],
-              notes="One 24-stud slice of the train shed, repeated 14 times (+4 as backdrop): glazed walls 60 high "
-                    "with white mullions every 6 studs and stepped fins (deep low, shallow high), transoms, the "
-                    "amber-pink glow behind the glass (emissive backdrop: add warm SurfaceLights facing in), the roof's "
-                    "white beams every 6 studs and purlins under roof glazing. Origin = the slice's floor centre.")
+              notes="One 24-stud slice of the train shed, repeated 11 times (+6 as backdrop): glazed walls 84 high, "
+                    "62 apart, with white mullions every 6 studs and stepped fins (1.4 deep beside the trains, 2.2 "
+                    "and 3.0 overhead), transoms, white daylight behind the glass (an emissive backdrop: add "
+                    "SurfaceLights facing in), the roof's white beams and purlins under a solid roof. Origin = the "
+                    "slice's floor centre.")
     st = A.part("Steel")
     gl = A.part("Glass", kind="glass")
     glow = A.part("Glow", kind="neon", shadow=False)
-    glr = A.part("GlowRoof", kind="neon", shadow=False)
     h = BAY / 2.0
     for s in (-1, 1):
         def X(a, b):
@@ -1437,47 +1641,46 @@ def build_shed_bay():
         for y in (-12.0, -6.0, 0.0, 6.0):
             ma, mb_ = X(WALL_X - 0.6, WALL_X + 0.4)
             cbox(st, (ma, y - 0.3, 4.0), (mb_, y + 0.3, SHED_H), "white_steel", ch=0.08)
-            for (za, zb, dep) in ((4.0, 22.0, 3.2), (22.0, 40.0, 2.4), (40.0, SHED_H, 1.6)):
+            for (za, zb, dep) in SHED_FINS:
                 fa, fb = X(WALL_X - 0.6 - dep, WALL_X - 0.6)
                 cbox(st, (fa, y - 0.25, za), (fb, y + 0.25, zb - 0.02), "white_steel", ch=0.08)
-        for zt in (22.0, 40.0):
+        for zt in (26.0, 52.0, 70.0):
             ta, tb = X(WALL_X - 0.5, WALL_X + 0.3)
             cbox(st, (ta, -h, zt - 0.25), (tb, h, zt + 0.25), "white_steel", ch=0.06)
         ga, gb = X(WALL_X + 0.45, WALL_X + 0.55)
         box(gl, (ga, -h, 4.0), (gb, h, SHED_H), "glass", skip=("-y", "+y", "-z", "+z"))
-        face_toward(glow, [V((s * 90.0, -h, PIT_Z)), V((s * 90.0, h, PIT_Z)), V((s * 90.0, h, SHED_H + 6)),
-                           V((s * 90.0, -h, SHED_H + 6))], "glow", V((-s, 0, 0)))
+        gx = s * (WALL_X + 5.0)
+        gp = glow if s < 0 else A.part("GlowEast", kind="neon", shadow=False)
+        face_toward(gp, [V((gx, -h, PIT_Z)), V((gx, h, PIT_Z)), V((gx, h, SHED_H + 6)), V((gx, -h, SHED_H + 6))],
+                    "glow" if s < 0 else "glow_e", V((-s, 0, 0)))
         A.collider((s * (WALL_X - 1.0), -h, PIT_Z), (s * (WALL_X + 1.0), h, SHED_H))
     for y in (-12.0, 0.0):
         cbox(st, (-WALL_X, y - 0.5, SHED_H - 2.6), (WALL_X, y + 0.5, SHED_H), "white_steel", ch=0.12)
     for y in (-6.0, 6.0):
         cbox(st, (-WALL_X, y - 0.3, SHED_H - 1.4), (WALL_X, y + 0.3, SHED_H), "white_steel", ch=0.08)
-    for x in (-51.0, -17.0, 17.0, 51.0):
+    for x in (-18.0, -6.0, 6.0, 18.0):
         cbox(st, (x - 0.4, -h, SHED_H - 1.2), (x + 0.4, h, SHED_H), "white_steel", ch=0.08)
-    box(gl, (-WALL_X, -h, SHED_H), (WALL_X, h, SHED_H + 0.1), "glass", skip=("-x", "+x", "-y", "+y"))
-    glr.face(list(reversed(rect_loop(-WALL_X, -h, WALL_X, h, SHED_H + 5.0))), "glow_roof")
+    # a solid roof over the beams (the film's shed roof reads grey): the late sun comes in only through the west
+    # glazing and falls on the east wall, and the black trains reflect a grey roof, not a glowing one
+    box(st, (-WALL_X, -h, SHED_H), (WALL_X, h, SHED_H + 0.6), "concrete_dark", skip=("-x", "+x", "-y", "+y"))
     return A
 
 
 def build_floor_bay():
     A = Asset("Station_FloorBay", "StationArch", "Train_Station.glb", tags=["Station", "Floor", "Walkable",
                                                                             "Modular"],
-              notes="One 24-stud slice of floor: the concourse (66) and two platforms (30) in polished stone slabs, "
-                    "a muted edge band and nosing, the guideway pits (22, floor at -5) with the maglev T-beam and its "
-                    "guide rails under each track (no sleepers, no rails to ride on). Origin = the slice's floor "
-                    "centre.")
+              notes="One 24-stud slice of floor: the island platform between the trains (30 wide: the aisle of "
+                    "guards) in polished stone slabs, a muted edge band and nosing on both edges, and the two "
+                    "guideway bays (16 wide, floor at -5) with the maglev T-beam and its guide rails under each track "
+                    "(no sleepers, no rails to ride on). Origin = the slice's floor centre.")
     f = A.part("Floor")
     h = BAY / 2.0
-    xs = [-CONC_X + 6.0 * i for i in range(12)]
+    e = PLAT_X - 1.6
+    xs = [-e + 2.0 * e * i / 6.0 for i in range(7)]
     for i in range(len(xs) - 1):
         for y in (-h, -6.0, 0.0, 6.0):
             f.face(rect_loop(xs[i], y, xs[i + 1], y + 6.0, 0.0), "floor", f.nv())
     for s in (-1, 1):
-        px = [CONC_X + (PLAT_X - 1.6 - CONC_X) * k / 5.0 for k in range(6)]
-        for i in range(5):
-            xa, xb = sorted((s * px[i], s * px[i + 1]))
-            for y in (-h, -6.0, 0.0, 6.0):
-                f.face(rect_loop(xa, y, xb, y + 6.0, 0.0), "floor", f.nv())
         xa, xb = sorted((s * (PLAT_X - 1.6), s * (PLAT_X - 0.45)))
         f.face(rect_loop(xa, -h, xb, h, 0.0), "edge_strip")
         e0, e1 = s * (PLAT_X - 0.45), s * PLAT_X
@@ -1638,28 +1841,33 @@ def build_banner():
     for s in (-1, 1):
         hull(cl, [(s * 3.0, 0, 0.0), (s * 3.25, 0.22, 0), (s * 3.25, -0.22, 0), (s * 3.25, 0, 0.22),
                   (s * 3.25, 0, -0.22), (s * 3.55, 0, 0)], "brass")
-    cyl(cab, (0, 0, 0.15), (0, 0, 24.0), 0.08, 0.08, 4, "steel")
-    A.att("Hang", (0, 0, 24.0), (0, 0, 1), (0, 1, 0), note="top of the cable: weld to the roof beam above")
+    top = SHED_H - 1.4 - BANNER_Z
+    cyl(cab, (0, 0, 0.15), (0, 0, top), 0.08, 0.08, 4, "steel")
+    A.att("Hang", (0, 0, top), (0, 0, 1), (0, 1, 0), note="top of the cable: weld to the roof purlin above")
     return A
 
 
 def build_board():
     A = Asset("Station_Board", "Prop", "Train_StationProps.glb", tset="Station_Kit", tex_size=512, tags=["Station", "Sign"],
-              notes="Departure board 10 x 5 on two posts (board z 11-16), with rows of our own abstract glyph "
-                    "blocks in white and amber on both faces (no words, no film text). Glyphs are Neon parts.")
+              notes="Departure board 10 x 5 hanging from the portal beam's underside on two rods (board z 11.6-16.6, "
+                    "over the track just clear of the train's roof at 11, with the shed wall showing between it and "
+                    "the beam), as in the film, with rows of our own abstract "
+                    "glyph blocks in white and amber on both faces (no words, no film text). Glyphs are Neon parts. "
+                    "Origin = on the floor (or the track's level line) under the board's centre.")
     fr = A.part("Frame")
     gw = A.part("Glyphs", kind="neon", shadow=False)
     ga = A.part("GlyphsAmber", kind="neon", shadow=False)
+    z0 = 11.6                     # just above the trains' roofs (11), with the shed wall showing above, as filmed
+    dz = z0 - 11.0
     for x in (-3.8, 3.8):
-        cbox(fr, (x - 0.22, -0.22, 0.0), (x + 0.22, 0.22, 11.1), "steel_dark", ch=0.05)
-        cbox(fr, (x - 0.45, -0.45, 0.0), (x + 0.45, 0.45, 0.25), "steel_dark", ch=0.05)
-    cbox(fr, (-5.0, -0.35, 11.0), (5.0, 0.35, 16.0), "board", ch=0.12)
+        cbox(fr, (x - 0.12, -0.12, z0 + 5.0), (x + 0.12, 0.12, PORTAL_Z0), "steel_dark", ch=0.03)
+    cbox(fr, (-5.0, -0.35, z0), (5.0, 0.35, z0 + 5.0), "board", ch=0.12)
     rng = random.Random(SEED + 23)
     for side in (1, -1):
         yy = side * 0.36
-        face_toward(fr, [V((-4.7, yy, 15.0)), V((4.7, yy, 15.0)), V((4.7, yy, 15.08)), V((-4.7, yy, 15.08))],
-                    "brass", V((0, side, 0)))
-        rows = [(15.42, "head")] + [(14.6 - 0.66 * r, "row") for r in range(6)]
+        face_toward(fr, [V((-4.7, yy, 15.0 + dz)), V((4.7, yy, 15.0 + dz)), V((4.7, yy, 15.08 + dz)),
+                         V((-4.7, yy, 15.08 + dz))], "brass", V((0, side, 0)))
+        rows = [(15.42 + dz, "head")] + [(14.6 - 0.66 * r + dz, "row") for r in range(6)]
         for zc, kind in rows:
             x = -4.6
             groups = [7, 5, 4, 3] if kind == "row" else [4, 3, 3, 3]
@@ -1675,11 +1883,9 @@ def build_board():
                     face_toward(ga if amber else gw, pts, "glyph_amber" if amber else "glyph", V((0, side, 0)))
                     x += w + 0.08
                 x += 0.55
-    A.att("Light", (0, 0.8, 13.5), (0, 1, 0), (0, 0, 1), note="optional SurfaceLight on the Glyphs (white), "
-                                                                  "Brightness 0.3, Range 6")
-    A.collider((-5.0, -0.35, 11.0), (5.0, 0.35, 16.0))
-    for x in (-3.8, 3.8):
-        A.collider((x - 0.45, -0.45, 0), (x + 0.45, 0.45, 11.0))
+    A.att("Light", (0, 0.8, z0 + 2.5), (0, 1, 0), (0, 0, 1), note="optional SurfaceLight on the Glyphs (white), "
+                                                                     "Brightness 0.3, Range 6")
+    A.collider((-5.0, -0.35, z0), (5.0, 0.35, z0 + 5.0))
     return A
 
 
@@ -1801,52 +2007,56 @@ def station_layout():
     """[(asset, location (Blender hall space), yaw degrees)] for the station hall."""
     L = [("Station_Coffer", (cx, OVAL_Y + cy, 0), 0) for cx, cy in coffer_grid()[0]]
     L += [("Station_EntranceCeiling", (0, OVAL_Y, 0), 0), ("Station_Lantern", (0, OVAL_Y, 0), 0),
-         ("Station_Sunburst", (0, OVAL_Y, 0), 0), ("Station_EntranceWalls", (0, OVAL_Y, 0), 0),
-         ("Station_EntranceFloor", (0, OVAL_Y, 0), 0), ("Station_Portal", (0, ENT_Y0, 0), 0)]
+          ("Station_Sunburst", (0, OVAL_Y, 0), 0), ("Station_EntranceWalls", (0, OVAL_Y, 0), 0),
+          ("Station_EntranceFloor", (0, OVAL_Y, 0), 0), ("Station_Portal", (0, ENT_Y0, 0), 0)]
     for k in range(NBAYS + BACKDROP_BAYS):
         yc = ENT_Y0 - BAY * (k + 0.5)
         L += [("Station_ShedBay", (0, yc, 0), 0), ("Station_FloorBay", (0, yc, 0), 0)]
     L.append(("Station_ShedEnd", (0, SHED_END_Y, 0), 0))
+    # banners: two rows down the aisle, the first pair just behind the portal beam, beside its inner columns
     for k in range(NBAYS - 1):
-        for x in (-11.0, 11.0):
-            L.append(("Station_Banner", (x, ENT_Y0 - 12.0 - BAY * k, 34.0), 0))
-    for k in range(3):
-        for x in (-46.0, 46.0):
-            L.append(("Station_Board", (x, ENT_Y0 - 8.0 - 96.0 * k, 0), 0))
+        for x in (-7.5, 7.5):
+            L.append(("Station_Banner", (x, ENT_Y0 - 6.0 - BAY * k, BANNER_Z), 0))
+    # departure boards hang from the portal beam over each track, as in the film
+    for x in (-(TRACK_X + 0.5), TRACK_X + 0.5):
+        L.append(("Station_Board", (x, ENT_Y0, 0), 0))
+    # posters on the entrance hall's side walls, between the columns
     for y in (OVAL_Y - 9.2, OVAL_Y + 22.0):
-        L.append(("Station_Poster", (-(WALL_X - 0.9), y, 13.0), -90))
-        L.append(("Station_Poster", (WALL_X - 0.9, y, 13.0), 90))
+        L.append(("Station_Poster", (-(ENT_X - 0.9), y, 13.0), -90))
+        L.append(("Station_Poster", (ENT_X - 0.9, y, 13.0), 90))
     return L
 
 
 def guard_layout():
-    """Guard posts (preview dressing and GuardPost attachments for the integrator)."""
+    """Guard posts (preview dressing and GuardPost attachments for the integrator): a file along each platform edge
+    and a double file down the middle of the aisle, all facing the entrance, as in the film; a line in front of each
+    nose; two at the mouth; four in the entrance hall with their backs to the camera."""
     G = []
     for s in (-1, 1):
         for k in range(12):
-            G.append(((s * (PLAT_X - 3.5), NOSE_FRONT_Y - 6.0 - 7.0 * k, 0), 90 if s < 0 else -90))
+            G.append(((s * (PLAT_X - 2.6), NOSE_FRONT_Y - 3.0 - 6.5 * k, 0), 0))
+        for k in range(10):
+            G.append(((s * 3.2, ENT_Y0 - 14.0 - 9.0 * k, 0), 0))
         for k in range(3):
-            G.append(((s * (PLAT_X - 9.0 - 3.0 * k), NOSE_FRONT_Y + 3.0, 0), 0))
+            G.append(((s * (PLAT_X - 4.6 - 2.6 * k), NOSE_FRONT_Y + 3.5, 0), 0))
     for x in (-3.0, 3.0):
-        G.append(((x, ENT_Y0 - 2.0, 0), 0))
-    G.append(((-11.0, 176.0, 0), 180))
-    G.append(((11.0, 176.0, 0), 180))
-    G.append(((-10.5, 189.0, 0), 180))
-    G.append(((10.5, 189.0, 0), 180))
-    for k in range(8):
-        for x in (-4.0, 4.0):
-            G.append(((x, ENT_Y0 - 30.0 - 14.0 * k, 0), 0))
+        G.append(((x, ENT_Y0 + 3.0, 0), 0))
+    for x, y in ((-10.0, 172.0), (10.0, 172.0), (-12.0, 183.0), (12.0, 183.0)):
+        G.append(((x, y, 0), 180))
     return G
 
 
 # ================================================================================================ train: shells
 # Half profile of the car body (x >= 0, z), bottom centre to roof centre. The flank (x = 5.75) carries vertices at
-# every livery line and opening edge: door sill 0.3, pinstripes 0.55-0.8 and 7.55-7.8, the observation car's glass
-# 1.2, windows 3.7-7.3, door head 7.8.
-PROF = [(0.0, SKIRT_Z), (4.3, SKIRT_Z), (5.1, -1.75), (5.6, -1.0), (HWID, -0.2), (HWID, 0.3), (HWID, 0.55),
-        (HWID, 0.8), (HWID, 1.2), (HWID, WIN_Z0), (HWID, WIN_Z1), (HWID, 7.55), (HWID, DOOR_Z1), (HWID, 8.4),
+# every livery line and opening edge: door sill 0.3, the observation car's glass 1.2, the gold pinstripes 2.6-2.85 and
+# 7.55-7.8 that edge the maroon band, windows 3.7-7.3, door head 7.8.
+PROF = [(0.0, SKIRT_Z), (4.3, SKIRT_Z), (5.1, -1.75), (5.6, -1.0), (HWID, -0.2), (HWID, 0.3), (HWID, 1.2),
+        (HWID, 2.6), (HWID, 2.85), (HWID, WIN_Z0), (HWID, WIN_Z1), (HWID, 7.55), (HWID, DOOR_Z1), (HWID, 8.4),
         (5.55, 9.35), (5.05, 10.1), (4.15, 10.6), (2.9, 10.88), (1.45, 10.97), (0.0, 11.0)]
-NOSE_ZC, NOSE_R = 4.6, 4.9
+BAND_Z = (2.6, 2.85, 7.55, 7.8)   # pinstripe, maroon band, pinstripe (brief 4.3: black lacquer with a maroon band)
+NOSE_ZC = 0.5 * (SKIRT_Z + 11.0)  # the nose's axis height (4.4)
+NOSE_EA, NOSE_EB = HWID, 0.5 * (11.0 - SKIRT_Z)   # the ellipse the body section rounds into along the nose
+NOSE_RF = 0.52                    # the face's size against that ellipse (a 6 x 6.9 face round the lamp)
 
 
 def car_ring():
@@ -1859,14 +2069,15 @@ RING = car_ring()
 
 
 def seg_key(i, flank_band=True):
-    """Livery per ring segment: glossy black, a maroon flank between gold pinstripes."""
+    """Livery per ring segment: glossy black lacquer, with a maroon band through the window line between gold
+    pinstripes (pass 2, critic #6d: pass 1 painted the whole flank maroon under a black roof that read grey)."""
     (xa, za), (xb, zb) = RING[i], RING[(i + 1) % len(RING)]
     if not (abs(xa) > HWID - 0.01 and abs(xb) > HWID - 0.01) or not flank_band:
         return "lacquer"
     zc = 0.5 * (za + zb)
-    if 0.55 <= zc <= 0.8 or 7.55 <= zc <= 7.8:
+    if BAND_Z[0] <= zc <= BAND_Z[1] or BAND_Z[2] <= zc <= BAND_Z[3]:
         return "pinstripe"
-    if 0.8 < zc < 7.55:
+    if BAND_Z[1] < zc < BAND_Z[2]:
         return "maroon"
     return "lacquer"
 
@@ -1877,11 +2088,14 @@ def seg_flank(i):
 
 
 def nose_point(x, z, t):
-    """Blend a body-ring point toward the nose circle (t 0 = body, 1 = the round face)."""
+    """A body-ring point along the nose (t 0 = the body, 1 = the face's rim): the section rounds into an ellipse
+    and shrinks towards the axis on a bullet curve, so the nose tapers over its whole length."""
     th = math.atan2(x, z - NOSE_ZC)
-    cx, cz = NOSE_R * math.sin(th), NOSE_ZC + NOSE_R * math.cos(th)
-    w = t ** 1.25
-    return (x + (cx - x) * w, z + (cz - z) * w), th
+    ex, ez = NOSE_EA * math.sin(th), NOSE_ZC + NOSE_EB * math.cos(th)
+    w = sstep(0.0, 0.55, t) if t < 1.0 else 1.0
+    px, pz = x + (ex - x) * w, z + (ez - z) * w
+    sc = NOSE_RF + (1.0 - NOSE_RF) * (max(0.0, 1.0 - t ** 1.6)) ** 0.62
+    return (px * sc, NOSE_ZC + (pz - NOSE_ZC) * sc), th
 
 
 def car_layout(kind):
@@ -1902,8 +2116,9 @@ def car_layout(kind):
 
 
 def window_frame(mb, gl, side, y0, y1, z0=WIN_Z0, z1=WIN_Z1, x_out=HWID, x_in=LIN_X - 0.05, r=0.85, seg=2,
-                 inset=0.32):
-    """Brass frame filling a rectangular opening with a round-cornered window, and its glass."""
+                 inset=0.32, gkey="window"):
+    """Brass frame filling a rectangular opening with a round-cornered window, and its glass (the cars' dark
+    window glass by default)."""
     s = side
     yc, zc, w, h = 0.5 * (y0 + y1), 0.5 * (z0 + z1), y1 - y0, z1 - z0
     rr = rrect(yc, zc, w - 2 * inset, h - 2 * inset, r, seg)
@@ -1926,8 +2141,8 @@ def window_frame(mb, gl, side, y0, y1, z0=WIN_Z0, z1=WIN_Z1, x_out=HWID, x_in=LI
         face_toward(mb, pts, "brass", mid - V((0, yc, zc)), vol)
     if gl is not None:
         xg = s * (0.5 * (x_out + x_in))
-        face_toward(gl, [V((xg + s * 0.03, u, v)) for u, v in rr], "glass", V((s, 0, 0)))
-        face_toward(gl, [V((xg - s * 0.03, u, v)) for u, v in rr], "glass", V((-s, 0, 0)))
+        face_toward(gl, [V((xg + s * 0.03, u, v)) for u, v in rr], gkey, V((s, 0, 0)))
+        face_toward(gl, [V((xg - s * 0.03, u, v)) for u, v in rr], gkey, V((-s, 0, 0)))
 
 
 def door_jambs(mb, side, y0, y1, z0, z1, x_out=HWID, x_in=LIN_X, key="lacquer"):
@@ -2005,7 +2220,8 @@ def build_car_shell(kind):
             "obs": "Observation car (car 6): floor-to-ceiling glass on both flanks and a glazed roof"}[kind]
     A = Asset(name, "TrainCar", "Train_Exterior.glb", tags=["Train", "Car", "Moving"],
               notes=("%s, %g long, 11.5 wide, 13.2 tall over a maglev guideway (no wheels). Glossy black lacquer "
-                     "with a maroon flank between gold pinstripes (semi-gloss: roughness 0.3, metalness 0.2, brief "
+                     "with a maroon band through the window line between gold pinstripes (semi-gloss: roughness 0.3, "
+                     "metalness 0.2, brief "
                      "4.3), round-cornered brass windows, plug doors 4 x 7.5 (Train_DoorLeaf, separate), gangway "
                      "diaphragms. Origin = footprint centre at platform level; the interior floor is 0.3 up; front "
                      "+Y (Roblox -Z). Interior kits fit inside (same origin)." % (what, L)))
@@ -2055,16 +2271,16 @@ def build_car_shell(kind):
             sc = 0.985
             pa = [V((RING[i][0] * sc, ya, RING[i][1] * sc + 0.08)), V((RING[j][0] * sc, ya, RING[j][1] * sc + 0.08)),
                   V((RING[j][0] * sc, yb, RING[j][1] * sc + 0.08)), V((RING[i][0] * sc, yb, RING[i][1] * sc + 0.08))]
-            gl.face(pa, "glass")
+            gl.face(pa, "window")
             q = [p - (p - V((0, p.y, 4.0))).normalized() * 0.05 for p in pa]
-            gl.face(list(reversed(q)), "glass")
+            gl.face(list(reversed(q)), "window")
         for a_, b_ in lay["glass_bays"]:
             for s in (-1, 1):
                 xo = s * (HWID - 0.25)
                 face_toward(gl, [V((xo, a_ + 0.3, 1.2)), V((xo, b_ - 0.3, 1.2)), V((xo, b_ - 0.3, 8.4)),
-                                 V((xo, a_ + 0.3, 8.4))], "glass", V((s, 0, 0)))
+                                 V((xo, a_ + 0.3, 8.4))], "window", V((s, 0, 0)))
                 face_toward(gl, [V((xo - s * 0.05, a_ + 0.3, 1.2)), V((xo - s * 0.05, b_ - 0.3, 1.2)),
-                                 V((xo - s * 0.05, b_ - 0.3, 8.4)), V((xo - s * 0.05, a_ + 0.3, 8.4))], "glass",
+                                 V((xo - s * 0.05, b_ - 0.3, 8.4)), V((xo - s * 0.05, a_ + 0.3, 8.4))], "window",
                             V((-s, 0, 0)))
                 door_jambs(mb, s, a_ + 0.3, b_ - 0.3, 1.2, 8.4, x_out=HWID, x_in=HWID - 0.3, key="brass")
     for a_, b_ in lay["wins"]:
@@ -2127,13 +2343,15 @@ def build_car_shell(kind):
 
 
 def build_nose(A, mb, y_nose0):
-    """The faceted capsule nose: the body ring morphs into a round face (9.8 across) with a deep bezel and a
-    3.5-stud gold-rimmed lamp round a glowing 2-stud red-orange core."""
+    """The bullet capsule: over 13 studs (about one car width) the body section rounds into an ellipse and tapers on
+    a bullet curve to a domed oval face 6 x 6.9. The face is the film's dark round eye: a glossy black bezel 5
+    across round a gold-rimmed lamp 3.5 across with a red-orange core 2 across. The maroon band runs on into the nose
+    and stops short of the face, which is black lacquer (critic #6d)."""
     nR = len(RING)
-    ts = [0.0, 0.2, 0.38, 0.54, 0.68, 0.8, 0.9, 1.0]
+    ts = [0.0, 0.14, 0.28, 0.42, 0.55, 0.67, 0.77, 0.86, 0.93, 0.975, 1.0]
     rings, thetas = [], None
     for t in ts:
-        y = y_nose0 + NOSE_LEN * 0.93 * (1.0 - (1.0 - t) ** 1.6)
+        y = y_nose0 + NOSE_LEN * t
         pts, th = [], []
         for x, z in RING:
             (px, pz), a = nose_point(x, z, t)
@@ -2143,38 +2361,42 @@ def build_nose(A, mb, y_nose0):
         thetas = th
     for k in range(len(rings) - 1):
         vol = mb.nv()
+        band = 0.5 * (ts[k] + ts[k + 1]) < 0.6
         for i in range(nR):
             j = (i + 1) % nR
-            mb.face([rings[k][i], rings[k][j], rings[k + 1][j], rings[k + 1][i]], seg_key(i), vol)
+            mb.face([rings[k][i], rings[k][j], rings[k + 1][j], rings[k + 1][i]], seg_key(i, flank_band=band), vol)
     yf = rings[-1][0].y
 
     def face_ring(scale, dy):
-        return [V((NOSE_R * scale * math.sin(a), yf + dy, NOSE_ZC + NOSE_R * scale * math.cos(a))) for a in thetas]
-    fr = [rings[-1], face_ring(0.93, 0.62), face_ring(0.8, 1.08), face_ring(0.76, 0.92), face_ring(0.68, 0.5)]
-    keys = ["lacquer", "lacquer", "bezel", "bezel"]
+        return [V((NOSE_EA * NOSE_RF * scale * math.sin(a), yf + dy, NOSE_ZC + NOSE_EB * NOSE_RF * scale * math.cos(a)))
+                for a in thetas]
+    # the rim rounds over onto the face, then the eye: a glossy black bezel dished towards the lamp
+    fr = [rings[-1], face_ring(0.95, 0.42), face_ring(0.9, 0.6), face_ring(0.86, 0.52), face_ring(0.74, 0.74),
+          face_ring(0.66, 0.86)]
+    keys = ["lacquer", "lacquer", "bezel", "bezel", "bezel"]
     for k in range(len(fr) - 1):
         vol = mb.nv()
         for i in range(nR):
             j = (i + 1) % nR
             mb.face([fr[k][i], fr[k][j], fr[k + 1][j], fr[k + 1][i]], keys[k], vol)
     n = 20
-    yb_ = yf + 0.5
+    yb_ = yf + 0.86
 
     def lamp(r, dy):
         return [V((r * math.sin(TAU * i / n), yb_ + dy, NOSE_ZC + r * math.cos(TAU * i / n))) for i in range(n)]
-    poly_holes(mb, face_ring(0.68, 0.5), [lamp(1.75, 0.0)], "bezel", (0, 1, 0))
-    loft(mb, [lamp(1.75, 0.0), lamp(1.75, 0.55), lamp(1.45, 0.75), lamp(1.1, 0.6), lamp(1.0, 0.35)], "brass")
+    poly_holes(mb, face_ring(0.66, 0.86), [lamp(1.75, 0.0)], "bezel", (0, 1, 0))
+    loft(mb, [lamp(1.75, 0.0), lamp(1.75, 0.35), lamp(1.5, 0.5), lamp(1.12, 0.36), lamp(1.0, 0.12)], "brass")
     core = A.part("LampCore", kind="neon", shadow=False)
-    core.face(lamp(1.0, 0.36), "lamp_core")
-    A.att("Lamp", (0, yb_ + 0.4, NOSE_ZC), (0, 1, 0), (0, 0, 1),
-          note="SpotLight forward: Color (232, 88, 52), Brightness 2, Range 60, Angle 50; plus a PointLight Range 8 "
-               "for the red glow on the platform")
+    core.face(lamp(1.0, 0.13), "lamp_core")
+    A.att("Lamp", (0, yb_ + 0.2, NOSE_ZC), (0, 1, 0), (0, 0, 1),
+          note="SpotLight forward: Color (232, 88, 52), Brightness 1.5, Range 50, Angle 50; plus a PointLight "
+               "Range 8 for the red glow on the platform")
     mk_ = A.part("Marker", kind="neon", shadow=False)
     for s in (-1, 1):
-        cands = [i for i in range(nR) if RING[i][0] * s > 5.0 and abs(RING[i][1] - 3.7) < 0.01]
+        cands = [i for i in range(nR) if RING[i][0] * s > 5.0 and abs(RING[i][1] - BAND_Z[1]) < 0.01]
         if cands:
             p = rings[3][cands[0]]
-            disc(mk_, p + V((s * 0.06, 0, -1.7)), 0.32, 8, (s, 0.35, 0), "marker")
+            disc(mk_, p + V((s * 0.05, 0, 1.6)), 0.3, 8, (s, 0.3, 0), "marker")
 
 
 def build_door_leaf():
@@ -2187,13 +2409,14 @@ def build_door_leaf():
     gl = A.part("Glass", kind="glass", shadow=False)
     w, h, t = DOOR_W, DOOR_H, 0.2
     ys = [-w / 2, -0.75, 0.75, w / 2]
-    zs = [0.0, 0.25, 0.5, 4.0, 6.3, 7.25, 7.5]
+    b0, b1, b2, b3 = (z - FLOOR_Z for z in BAND_Z)        # the car's livery lines in door space
+    zs = [0.0, b0, b1, 4.0, 6.3, b2, b3]
 
     def lk(z0, z1):
         zc = 0.5 * (z0 + z1)
-        if 0.25 <= zc <= 0.5 or 7.25 <= zc <= 7.5:
+        if b0 <= zc <= b1 or b2 <= zc <= b3:
             return "pinstripe"
-        return "maroon" if 0.5 < zc < 7.25 else "lacquer"
+        return "maroon" if b1 < zc < b2 else "lacquer"
     grid_wall(lf, t, -1, ys, zs, [(-0.75, 0.75, 4.0, 6.3)], lk, inward=True)
     grid_wall(lf, 0.0, 1, ys, [0.0, 4.0, 6.3, h], [(-0.75, 0.75, 4.0, 6.3)], lambda z0, z1: "wood_dark", inward=True)
     box(lf, (0.0, -w / 2, 0.0), (t, w / 2, h), "wood_dark", skip=("+x", "-x"))
@@ -2662,8 +2885,9 @@ def kit_ends(A, lay, ends, style_key="wood", door_frame="brass", inset=0.0):
 
 def interior_lights_att(A, y0, y1):
     A.att("CoveLights", (0, 0.5 * (y0 + y1), WALL_TOP + 0.1), (0, 0, 1), (0, 1, 0),
-          note="SurfaceLights on the Cove parts, Face Top, Color (255, 196, 128), Brightness 1.2, Range 10, Angle 120 "
-               "(amber cove light washing the vault); darkness comes from this rig, not the paint")
+          note="Two SurfaceLights on the Cove parts, Color (255, 214, 163): Face Bottom, Brightness 1.2, Range 10 "
+               "(down the walls onto the brass frames and benches) and Face Top, Brightness 0.4, Range 10, Angle 120 "
+               "(washing the hammered vault); darkness comes from this rig, not the paint")
 
 
 def build_car1_vestibule():
@@ -3310,11 +3534,50 @@ def uv_unwrap(objs):
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.smart_project(angle_limit=math.radians(50.0), island_margin=0.002, area_weight=0.0,
                              correct_aspect=True, scale_to_bounds=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    upholstery_uv_boost(objs)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
     # CONCAVE + an additive margin: the best fill here, and fast (CONVEX + FRACTION took up to 47 s on a 107-triangle
     # poster in Blender 5.3)
     bpy.ops.uv.pack_islands(rotate=True, rotate_method="CARDINAL", scale=True, margin_method="ADD", margin=0.003,
                             shape_method="CONCAVE")
     bpy.ops.object.mode_set(mode="OBJECT")
+
+
+UPH_UV_BOOST = 1.6     # upholstery islands get 1.6x the texel density of the rest of their set (the ring pattern
+#                        needs it to stay crisp; Roblox caps a SurfaceAppearance map at 1024)
+
+
+def upholstery_uv_boost(objs):
+    """Scale the UV islands that are mostly upholstery up by UPH_UV_BOOST about their centres, before packing."""
+    from bpy_extras import bmesh_utils
+    kid_u = KEY_ID["upholstery"]
+    for o in objs:
+        at = o.data.attributes.get("mk")
+        if at is None or not o.data.uv_layers:
+            continue
+        kid = np.empty(len(o.data.polygons), np.int32)
+        at.data.foreach_get("value", kid)
+        if not (kid == kid_u).any():
+            continue
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bm.faces.ensure_lookup_table()
+        uvl = bm.loops.layers.uv.active
+        n = 0
+        for isl in bmesh_utils.bmesh_linked_uv_islands(bm, uvl):
+            if sum(1 for f in isl if kid[f.index] == kid_u) * 2 < len(isl):
+                continue
+            pts = [l_[uvl].uv.copy() for f in isl for l_ in f.loops]
+            c = sum(pts, V((0.0, 0.0))) / len(pts)
+            for f in isl:
+                for l_ in f.loops:
+                    l_[uvl].uv = c + (l_[uvl].uv - c) * UPH_UV_BOOST
+            n += 1
+        bm.to_mesh(o.data)
+        bm.free()
+        log("  upholstery UV boost x%.1f on %d islands of %s" % (UPH_UV_BOOST, n, o.name))
 
 
 def bake_material(name, p):
@@ -3385,23 +3648,40 @@ def sstep(e0, e1, x):
     return t * t * (3.0 - 2.0 * t)
 
 
-def pattern_mask(pid, u, v):
-    """Motif coverage (0..1) and colour index (0 = first motif colour, 1 = second) for pattern pid at (u, v) studs."""
-    if pid == 1:          # upholstery: cream C-arcs (opening alternates by row) and dots on the cell corners
-        cell = 1.4
-        cu, cv = u / cell, v / cell
-        row = np.floor(cv)
-        cu = cu + 0.5 * np.mod(row, 2)          # brick offset: the rows interlock like a woven chain
-        fu, fv = cu - np.floor(cu) - 0.5, cv - row - 0.5
-        r = np.hypot(fu, fv)
-        ring = sstep(0.18, 0.2, r) * (1.0 - sstep(0.345, 0.365, r))
-        th = np.arctan2(fv, fu)
-        opening = np.where(np.mod(row, 2) == 0, 0.0, math.pi)
-        dth = np.abs(np.angle(np.exp(1j * (th - opening))))
-        ring *= sstep(0.75, 0.9, dth)
-        du, dv = 0.5 - np.abs(fu), 0.5 - np.abs(fv)
-        dot = 1.0 - sstep(0.1, 0.12, np.hypot(du, dv))
-        return np.clip(ring + dot, 0, 1) * 0.72, np.zeros_like(u, dtype=int)   # woven, not printed: 72 % cover
+UPH_PITCH = 0.8                     # upholstery: ring pitch along a row (studs)
+UPH_ROW = 0.65 * UPH_PITCH          # rows 0.65 of the pitch apart, alternate rows offset by half a ring, so the rings
+#                                     of one row nest into the gaps of the next (the film's interlocking rings)
+UPH_R, UPH_T = 0.33, 0.10           # ring radius and stroke: each ring (0.76 across on the 0.8 pitch) all but meets
+#                                     its neighbours in the row, as in the film
+UPH_GAP = 45.0                      # each ring is a left and a right arc (each 90 degrees) with gaps at top and bottom
+#                                     (degrees from vertical): the arcs of the ring above and below pass through those
+#                                     gaps, so the rings interlock like chain links instead of lining up in columns
+
+
+def pattern_mask(pid, u, v, aa=0.02):
+    """Motif coverage (0..1) and colour index (0 = first motif colour, 1 = second) for pattern pid at (u, v) studs.
+    aa is the anti-aliasing half-width in studs (about half a texel)."""
+    if pid == 1:          # upholstery (pass 2 review): interlocking rings as in the film (FE @1.4 s). Pass 2a's rings
+        #                   (0.56 across on a 0.8 pitch, rows 0.44 apart) lined their arcs up into wavy columns
+        cover = np.zeros_like(u, dtype=np.float64)
+        row = np.floor(v / UPH_ROW)
+        r0, r1 = UPH_R - 0.5 * UPH_T, UPH_R + 0.5 * UPH_T
+        for dj in (-1.0, 0.0, 1.0):
+            j = row + dj
+            cy = (j + 0.5) * UPH_ROW
+            off = 0.5 * np.mod(j, 2)
+            c0 = np.floor(u / UPH_PITCH - off + 0.5)
+            for di in (-1.0, 0.0, 1.0):
+                cx = (c0 + di + off) * UPH_PITCH
+                fu, fv = u - cx, v - cy
+                r = np.hypot(fu, fv)
+                ring = sstep(r0 - aa, r0 + aa, r) * (1.0 - sstep(r1 - aa, r1 + aa, r))
+                ang = np.degrees(np.arctan2(np.abs(fu), fv))          # 0 straight up, 180 straight down
+                gap = np.minimum(ang, 180.0 - ang)
+                ring *= sstep(UPH_GAP - 4.0, UPH_GAP + 4.0, gap)
+                dot = 1.0 - sstep(0.055 - aa, 0.055 + aa, r)
+                cover = np.maximum(cover, np.maximum(ring, 0.7 * dot))
+        return np.clip(cover, 0, 1) * 0.9, np.zeros_like(u, dtype=int)
     if pid == 2:          # carpet: gold diagonal lattice, cream lozenges at the crossings
         cell = 2.0
         a, b = (u + v) / cell, (u - v) / cell
@@ -3422,8 +3702,9 @@ def pattern_mask(pid, u, v):
 PATTERN_COLS = {1: [(206, 180, 142)], 2: [(168, 132, 80), (200, 182, 150)], 3: [(176, 138, 80)]}
 
 
-def apply_patterns(col, rmp, pos, gn, cov, kid):
+def apply_patterns(col, rmp, pos, gn, cov, kid, pxs=20.0):
     pat = np.rint(rmp[..., 2] * 8.0).astype(int)
+    aa = max(0.5 / max(pxs, 1.0), 0.008)
     for pid in (1, 2, 3):
         m = cov & (pat == pid)
         if not m.any():
@@ -3432,7 +3713,7 @@ def apply_patterns(col, rmp, pos, gn, cov, kid):
         ax = np.argmax(np.abs(Nn), axis=1)
         u = np.where(ax == 0, P[:, 1], P[:, 0])
         v = np.where(ax == 2, P[:, 1], P[:, 2])
-        mask, ci = pattern_mask(pid, u, v)
+        mask, ci = pattern_mask(pid, u, v, aa)
         base_key = {1: "upholstery", 2: "carpet", 3: "runner"}[pid]
         base_lin = np.asarray(s2l(MK[base_key]["rgb"]))
         c = col[m]
@@ -3512,7 +3793,7 @@ def bake_set(tset, members):
     kid = np.rint(maps["kid"][..., 0] * 256.0 - 0.5).astype(int)
     pos = (maps["pos"][..., :3] - 0.5) / POS_SCALE
     gn = maps["gnrm"][..., :3] * 2.0 - 1.0
-    col = apply_patterns(col, rmp, pos, gn, cov, kid)
+    col = apply_patterns(col, rmp, pos, gn, cov, kid, pxs)
     aon = blur_masked(np.clip(maps["aon"][..., 0], 0, 1), cov, 1.0)
     aof = blur_masked(np.clip(maps["aof"][..., 0], 0, 1), cov, 1.6)
     ao = np.clip(aon, 0, 1) ** p["pn"] * np.clip(aof, 0, 1) ** p["pf"]
@@ -3704,14 +3985,26 @@ STYLE_NOTES = [
 ]
 
 LIGHTING = {
-    "station": "Lighting.Ambient (70, 56, 44), ColorShift_Top (200, 140, 90), a warm low sun through the west glazing; "
-               "SurfaceLights facing in on every ShedBay/EntranceWalls/ShedEnd Glow part (Color (248, 232, 222), "
-               "Brightness 1.5, Range 40); warm downlights in the coffers; the nose lamps' red PointLights.",
-    "train": "Amber cove SurfaceLights on the Cove parts (255, 196, 128), the chandeliers' and pendants' PointLights "
-             "(swing with them), the lounge screen's cool SurfaceLight (the only cool light), guard-car strip lights; "
-             "the windows glow amber from outside at night (Roblox does this from the interior lights).",
-    "night journey": "Moonlit blue outside (Ambient ~ (40, 48, 70)), amber windows inside; Train_BridgeBackdrop with "
-                     "its DeckLights.",
+    "station": "Pass 2 (critic #6c and the pass 2 review): daylight from the glazing, with the gold and amber as "
+               "accents, not a wash. Lighting.Ambient about (62, 64, 68) and OutdoorAmbient neutral; a warm low "
+               "late-day sun (Color about (255, 190, 122)) from the west, entering through the west glazing (the shed "
+               "has a solid roof) and falling on the east wall and the platform. SurfaceLights facing in on the Glow "
+               "parts: the west glazing (Glow, which reads white (240, 236, 230)) throws warm light (252, 212, 168) "
+               "across onto the east wall; the east glazing (GlowEast, which reads warmer (250, 222, 190)) throws cool "
+               "sky light (226, 232, 240) onto the west wall; Brightness about 1, Range 40. The entrance hall's "
+               "windows (EntranceWalls Glow, (236, 236, 232)) give neutral daylight, the west ones warmer. The coffers' "
+               "downlights are Neon lenses only. A neutral SpotLight or two in the lantern on the gold blades; the "
+               "nose lamps' red PointLights (Range 8, dim).",
+    "train": "Two SurfaceLights on each Cove part: Face Bottom (the stronger, about four fifths) down the walls onto "
+             "the brass window frames and benches, and Face Top (about a fifth, wide angle) washing the hammered "
+             "vault; Color (255, 214, 163), between pass 1's orange (255, 173, 102) and pass 2a's pale (255, 204, "
+             "153). The chandeliers', pendants' and sconces' PointLights warm-white (255, 230, 199), bright enough "
+             "to light the wood arches, swinging with them; the lounge screen's cool "
+             "SurfaceLight (the only cool light); guard-car strip lights; night outside, so the window glass (dark "
+             "cool Glass, 0.7 transparent) reads dark with faint reflections.",
+    "night journey": "Moonlit blue outside (Ambient ~ (40, 48, 70)); the cars lit by their coves, so from outside "
+                     "the windows read as an amber strip, with the red-orange nose lamp; Train_BridgeBackdrop with its "
+                     "DeckLights.",
 }
 MOTION = {
     "sway": "constant 1.5 degree roll and a 0.4-stud vertical float on a slow sine (period ~6 s), out of phase front "
@@ -3911,9 +4204,10 @@ def build_stage():
                     k, k), set=set_name(tset), **png_info(os.path.join(TEX, f[k]))))
     att = attach_table(assets)
     layout = {
-        "hall": "Blender hall space: x across (west -85 .. east +85), y along (entrance +210 .. far end -210), floor "
-                "0 -> Roblox (x, y, z) = (x, z, -y): the entrance end is Roblox -Z. Positions below are Roblox, "
-                "relative to the hall origin (the hall's floor centre); yawDeg about +Y.",
+        "hall": "Blender hall space: x across (the shed's glazing at -31 .. +31, the entrance hall's walls at "
+                "-37 .. +37), y along (entrance +210 .. far end), floor 0 -> Roblox (x, y, z) = (x, z, -y): the "
+                "entrance end is Roblox -Z. The island platform is x -15 .. 15, the tracks at x -21.25 and 21.25. "
+                "Positions below are Roblox, relative to the hall origin (the hall's floor centre); yawDeg about +Y.",
         "station": layout_entries(station_layout()),
         "guards": layout_entries([("Station_Guard", loc, yaw) for loc, yaw in guard_layout()]),
         "trainWest": layout_entries(train_layout(-TRACK_X, NOSE_FRONT_Y, att)),
@@ -4040,10 +4334,16 @@ def render_night_bridge(inst, att, path, samples=128):
         if name in inst:
             place_asset(inst[name], (loc[0], loc[1], loc[2] + z), yaw, coll)
     for shell, kit, length, turned in TRAIN_CARS:
+        # each car lit as it is on the ride: the amber coves wash the vault and walls, so the windows read as an
+        # amber strip from outside (Trailer 2 @24.7 s; pass 2 review)
         yc = y - length / 2
-        for dy in (-length / 4, length / 4):
-            add_light(scene, "TS_CarLight_%d" % int(yc + dy), "POINT", (0, yc + dy, z + 6.0), 1500.0,
-                      color=(1.0, 0.7, 0.42), size=1.0)
+        for s in (-1, 1):
+            add_light(scene, "TS_CarCoveUp_%d_%d" % (int(yc), s), "AREA", (s * (LIN_X - 0.8), yc, z + WALL_TOP + 0.1),
+                      9000.0, color=(1.0, 0.74, 0.46), size=0.35, size_y=length - 4,
+                      rot=(math.pi, -s * math.radians(27.0), 0), spread=80.0)
+            add_light(scene, "TS_CarCoveDown_%d_%d" % (int(yc), s), "AREA", (s * (LIN_X - 0.3), yc,
+                                                                            z + WALL_TOP + 0.1),
+                      6500.0, color=(1.0, 0.74, 0.46), size=0.35, size_y=length - 4, rot=(0, 0, 0))
         y -= length + GANGWAY_GAP
     add_light(scene, "TS_NoseLamp", "SPOT", (0, 300.0 + 1.5, z + NOSE_ZC), 4000.0, color=(1.0, 0.36, 0.2), size=0.8,
               target=(0, 420.0, z + 2.0), spot=(50.0, 0.4))
@@ -4084,11 +4384,11 @@ def preview_stage(only=None):
         assemble_station(inst, att, sc, trains=True, interiors=True)
         light_station(scene)
         if "station" in want:
-            render_setup(scene, (1600, 667), 160)
+            render_setup(scene, STATION_RES, 160)
             station_frame_camera(scene)
             shots["station_frame"] = render_to(scene, os.path.join(PREV, "station_frame.png"))
-            c = OWNER_CAM
-            camera(scene, c["loc"], V(c["loc"]) + V((0.0, -1.0, math.tan(math.radians(c["pitch"])))), hfov=c["hfov"])
+            render_setup(scene, OWNER_RES, 160)
+            owner_camera(scene)
             shots["station_owner_match"] = render_to(scene, os.path.join(PREV, "station_owner_match.png"))
         render_setup(scene, (1600, 900), 160)
         for nm, (cam, tgt, hfov) in EXTERIOR_SHOTS.items():
@@ -4236,27 +4536,43 @@ def compose(panels, cols, out_path, title=None, subtitle=None, label_h=40, pad=1
     return out_path
 
 
+SHEET_LABEL = "Blender iteration, placeholder plants"     # critic #16: every comparison sheet says what it is
+STATION_GAPS = ("One camera for both views (the owner's frame is T1 cropped 1.50x). Still not the film's proportions: "
+                "the beam spans 43% of the wide frame (film 49%) and the oval y 0.16-0.32 (film 0.12-0.50)")
+
+
 def compare_sheets():
     """Owner/trailer frames beside our renders (study only: these sheets are kept out of git by .gitignore)."""
     own = os.path.join(REFS, "owner", "train_station_owner_frame.png")
     tr = os.path.join(REFS, "trailer")
+    web = os.path.join(REFS, "web")
     pairs = [
-        ("compare_station.png", [(own, None, "Owner frame (T1 @35.7 s, study only)"),
-                                 (os.path.join(PREV, "station_owner_match.png"), None, "Ours, from higher up (the brief's tracks sit wider apart)"),
+        ("compare_station.png", [(own, None, "Owner frame (a later moment of T1 @35.7 s, study only)"),
+                                 (os.path.join(PREV, "station_owner_match.png"), None,
+                                  "Ours: the same camera, cropped as the owner's frame"),
                                  (os.path.join(tr, "trailer1_35.7s.png"), None, "Trailer 1 @35.7 s, the wide view"),
-                                 (os.path.join(PREV, "station_frame.png"), None, "Ours, wide: the coffers, oval and sunburst")],
-         (1100, 458), "The station hall: owner frame vs our build",
-         "Coffered ceiling and oval, gold sunburst, white cross-beam, banners, boards, posters, guards, two trains"),
+                                 (os.path.join(PREV, "station_frame.png"), None, "Ours, pass 2: the wide view")],
+         (1100, 458), "The station hall: film vs our build (%s)" % SHEET_LABEL, STATION_GAPS),
         ("compare_train.png", [(os.path.join(tr, "trailer1_35.7s_detail_trains.png"), None, "Trailer 1 @35.7 s (detail)"),
-                               (os.path.join(PREV, "exterior_nose.png"), None, "Ours: Train_NoseCar on the platform")],
-         (1000, 563), "The train: film detail vs our nose car",
-         "Bullet nose, round gold-rimmed lamp with a red-orange core, black lacquer, maroon flank, gold pinstripes"),
+                               (os.path.join(PREV, "exterior_nose.png"), None, "Ours, pass 2: the bullet nose"),
+                               (os.path.join(web, "train_capitol_main_station.png"), None, "Trailer 2 @1:03 (web frame)"),
+                               (os.path.join(PREV, "station_platform.png"), None, "Ours, pass 2: the aisle")],
+         (1000, 563), "The train: film vs our nose car (%s)" % SHEET_LABEL,
+         "A bullet capsule over one car width with the round dark eye and its red-orange core; semi-gloss black "
+         "lacquer (roughness 0.18) with a maroon band between gold pinstripes"),
         ("compare_interiors.png", [(os.path.join(tr, "fanedit_1.4s.png"), None, "Fan Edit @1.4 s: upholstery, brass window"),
-                                   (os.path.join(PREV, "interior_car1_vestibule.png"), None, "Ours: car 1 saloon"),
+                                   (os.path.join(PREV, "interior_car1_vestibule.png"), None, "Ours, pass 2: car 1 saloon"),
                                    (os.path.join(tr, "fanedit_3.8s.png"), None, "Fan Edit @3.8 s: hammered ceiling, arch"),
-                                   (os.path.join(PREV, "interior_car2_dining.png"), None, "Ours: car 2 dining")],
-         (800, 450), "The train inside: film frames vs our cars",
-         "Geometric burgundy-cream upholstery, round-cornered brass windows, hammered cream-gold vault, wood arches"),
+                                   (os.path.join(PREV, "interior_car2_dining.png"), None, "Ours, pass 2: car 2 dining")],
+         (800, 450), "The train inside: film vs our cars (%s)" % SHEET_LABEL,
+         "Interlocking cream rings on burgundy, round-cornered brass windows, the hammered vault washed by the amber "
+         "coves, wood arches, dark night windows (fan-edit frames: trust them less than the studio's)"),
+        ("compare_night.png", [(os.path.join(web, "train_night_bridge_over_reservoir.png"), None,
+                                "Trailer 2 @24.7 s (web frame): the train on the bridge at night"),
+                               (os.path.join(PREV, "exterior_night_bridge.png"), None,
+                                "Ours, pass 2: the lit cars cross our bridge")],
+         (900, 371), "The night crossing: film vs ours (%s)" % SHEET_LABEL,
+         "The film reads as an amber strip of lit windows and a red-orange headlight on a dark twin-pylon bridge"),
     ]
     for fname, items, (w, h), title, sub in pairs:
         panels = []
@@ -4378,6 +4694,8 @@ def place_asset(inst, loc, yaw=0.0, coll=None):
         for k in ("role", "kind", "key"):
             if k in o:
                 c[k] = o[k]
+        if o.get("kind") == "neon":
+            c.visible_shadow = False        # Neon parts cast no shadow in Roblox (castShadow false in the manifest)
         out.append(c)
     return out
 
@@ -4435,15 +4753,43 @@ def attach_table(assets):
                      for k, v in a.attach.items()} for a in assets}
 
 
-def station_frame_camera(scene, res=(1600, 667)):
-    c = STATION_CAM
+def _axis_camera(scene, c, res):
     loc = V(c["loc"])
-    tgt = loc + V((0.0, -1.0, math.tan(math.radians(c["pitch"]))))
-    return camera(scene, loc, tgt, hfov=c["hfov"], res=res)
+    tgt = loc + V((c.get("yaw", 0.0), -1.0, math.tan(math.radians(c["pitch"]))))
+    return camera(scene, loc, tgt, hfov=c["hfov"], res=res, shift_x=c.get("shift_x", 0.0),
+                  shift_y=c.get("shift_y", 0.0))
 
 
-STATION_CAM = dict(loc=(0.0, 205.0, 6.8), pitch=12.5, hfov=98.0)
-OWNER_CAM = dict(loc=(-4.0, 192.0, 19.0), pitch=5.7, hfov=88.0)     # the owner's tighter, elevated frame
+def station_frame_camera(scene, res=None):
+    return _axis_camera(scene, STATION_CAM, res or STATION_RES)
+
+
+def owner_camera(scene, res=None):
+    return _axis_camera(scene, OWNER_CAM, res or OWNER_RES)
+
+
+# The two matched views. STATION_RES has Trailer 1 @35.7 s's aspect (800 x 343), OWNER_RES the owner's frame's
+# (447 x 186). The owner's frame is a later moment of the same shot, framed as T1 cropped 1.50x (T1 x 0.1525-0.819,
+# y 0.353-1.0, by matching the two frames: work folder tools/owner_crop.py), so ONE camera serves both: the owner's
+# view is STATION_CAM's position and pitch with a longer lens shifted onto that crop (pass 2 review; pass 2a's second
+# camera stood 112 studs closer with a 99-degree lens).
+STATION_CAM = dict(loc=(0.0, 204.0, 7.5), pitch=8.0, hfov=51.0)     # fitted to T1 @35.7 s (tools: camfit)
+OWNER_CROP = (0.1525, 0.353, 0.8194, 1.0)                           # x0, y0, x1, y1 of T1 (fractions, top left)
+STATION_RES = (1600, 686)
+OWNER_RES = (1600, 666)
+
+
+def crop_camera(cam, crop, res_full):
+    """The camera that sees exactly `crop` of what `cam` sees (same position and pitch, longer lens, lens shift)."""
+    x0, y0, x1, y1 = crop
+    fw = x1 - x0
+    t = math.tan(math.radians(cam["hfov"]) / 2.0) * fw
+    full_h = res_full[1] / float(res_full[0])                # the full frame's height in widths
+    return dict(cam, hfov=math.degrees(2.0 * math.atan(t)), shift_x=(0.5 * (x0 + x1) - 0.5) / fw,
+                shift_y=-(0.5 * (y0 + y1) - 0.5) * full_h / fw)
+
+
+OWNER_CAM = crop_camera(STATION_CAM, OWNER_CROP, STATION_RES)      # hfov 35.3, shift (-0.021, -0.114)
 
 
 def assemble_station(inst, attach_by_asset, coll, trains=True, interiors=True):
@@ -4460,30 +4806,59 @@ def assemble_station(inst, attach_by_asset, coll, trains=True, interiors=True):
 
 
 # ================================================================================================ light rigs
-def light_station(scene, exposure=0.0):
-    set_world(scene, "sky", strength=0.32, sun_elev=13.0, sun_azim=-100.0)
-    d = V((0.93, -0.22, -0.30)).normalized()
-    sun = add_light(scene, "TS_Sun", "SUN", (0, 0, 200), 3.6, color=(1.0, 0.72, 0.46), size=1.2)
+STATION_LIGHT = dict(        # pass 2 (critic #6c): daylight from the glazing, gold and amber as accents
+    world=0.5, sun=8.0, sun_rgb=(1.0, 0.74, 0.48), sun_dir=(0.85, -0.25, -0.46),
+    shed=200.0, shed_rgb=(1.0, 0.97, 0.93), side=4500.0, side_rgb_w=(1.0, 0.7, 0.45), side_rgb_e=(0.88, 0.94, 1.0),
+    side_aim=-10.0,
+    ambient=3000.0, ambient_rgb=(0.98, 0.98, 0.98), shed_ambient=2200.0, shed_ambient_rgb=(1.0, 0.82, 0.62),
+    oval=600.0, oval_rgb=(1.0, 0.98, 0.95), lamp=5.0, exposure=-0.66)
+
+
+def light_station(scene, exposure=None):
+    """A warm key and a neutral fill, as filmed: the sun rakes in warm from the west through the glazing and the
+    fins; the glazing itself glows warm-white; neutral daylight comes in through the entrance hall's tall side
+    windows (lifting the coffers) and down from the shed's roof glazing; a warm light in the lantern catches the gold
+    rays. In Roblox: Ambient about (62, 64, 68), white SurfaceLights on the Glow parts, the sun through the glazing
+    (TwoArenas.md 6.10)."""
+    P = dict(STATION_LIGHT, **json.loads(os.environ.get("TRAIN_SOTR_LIGHT", "{}")))   # look-dev overrides
+    set_world(scene, "sky", strength=P["world"], sun_elev=38.0, sun_azim=-100.0)
+    d = V(P["sun_dir"]).normalized()
+    sun = add_light(scene, "TS_Sun", "SUN", (0, 0, 200), P["sun"], color=P["sun_rgb"], size=1.0)
     sun.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
-    for x in (-60.0, -20.0, 20.0, 60.0):
-        for y in (70.0, 115.0, 160.0, 198.0):
-            add_light(scene, "TS_Down_%d_%d" % (x, y), "AREA", (x, y, CEIL_Z - 1.5), 7000.0, color=(1.0, 0.78, 0.56),
-                      size=34.0, size_y=40.0, rot=(0, 0, 0))
     for k in range(9):
-        add_light(scene, "TS_Shed_%d" % k, "AREA", (0, ENT_Y0 - 20.0 - 40.0 * k, SHED_H - 4.0), 12000.0,
-                  color=(1.0, 0.8, 0.62), size=150.0, size_y=30.0, rot=(0, 0, 0))
-    add_light(scene, "TS_Oval", "AREA", (0, OVAL_Y, LANTERN_Z - 1.5), 14000.0, color=(1.0, 0.84, 0.64), size=70.0,
-              size_y=34.0, rot=(0, 0, 0))
+        add_light(scene, "TS_Shed_%d" % k, "AREA", (0, ENT_Y0 - 14.0 - 32.0 * k, SHED_H - 4.0), P["shed"],
+                  color=P["shed_rgb"], size=2 * WALL_X - 8.0, size_y=26.0, rot=(0, 0, 0))
+    for s_ in (-1, 1):                   # daylight through the entrance hall's side windows, washing up over the
+        #                                    ceiling on their own side: the sun's side warmer, the other side cooler
+        for y in (ENT_Y0 + 30.0, ENT_Y0 + 75.0, ENT_Y0 + 120.0):
+            add_light(scene, "TS_Side_%d_%d" % (s_, y), "AREA", (s_ * (ENT_X - 1.5), y, 22.0), P["side"],
+                      color=P["side_rgb_w"] if s_ < 0 else P["side_rgb_e"], size=24.0, size_y=40.0,
+                      target=(s_ * P["side_aim"], y, 40.0))
+    for y in (ENT_Y0 + 35.0, ENT_Y0 + 95.0, ENT_Y0 + 145.0):   # Roblox's Ambient: a soft neutral lift from below
+        add_light(scene, "TS_Ambient_%d" % y, "AREA", (0, y, 4.0), P["ambient"], color=P["ambient_rgb"],
+                  size=2 * ENT_X - 10.0, size_y=44.0, rot=(math.pi, 0, 0))
+    for k in range(6):                                        # ... and down the shed's aisle
+        add_light(scene, "TS_ShedAmbient_%d" % k, "AREA", (0, ENT_Y0 - 20.0 - 42.0 * k, 3.0), P["shed_ambient"],
+                  color=P["shed_ambient_rgb"], size=2 * PLAT_X - 4.0, size_y=40.0, rot=(math.pi, 0, 0))
+    add_light(scene, "TS_Oval", "AREA", (0, OVAL_Y, LANTERN_Z - 1.5), P["oval"], color=P["oval_rgb"],
+              size=2 * OVAL_A - 6.0, size_y=2 * OVAL_B - 4.0, rot=(0, 0, 0))
     for x in (-TRACK_X, TRACK_X):
-        add_light(scene, "TS_Lamp_%d" % x, "POINT", (x, NOSE_FRONT_Y + 1.5, 4.6), 90.0, color=(1.0, 0.36, 0.2),
-                  size=0.6)
-    scene.view_settings.exposure = exposure
+        add_light(scene, "TS_Lamp_%d" % x, "POINT", (x, NOSE_FRONT_Y + 1.5, NOSE_ZC), P["lamp"],
+                  color=(1.0, 0.36, 0.2), size=0.6)
+    scene.view_settings.exposure = P["exposure"] if exposure is None else exposure
 
 
-def light_interior(scene, car_kind, kit_name, attach, outside="dusk"):
-    """Amber coves (area lights along both coves), chandeliers / pendants / sconces, the screen, dim sky outside."""
+INTERIOR_LIGHT = dict(       # pass 2 review: the warm lamp-lit look back, by the light (the paint stays semi-real)
+    cove=2100.0, cove_up=0.19, cove_spread=80.0, cove_rgb=(1.0, 0.84, 0.64), fill=300.0, fill_rgb=(1.0, 0.8, 0.6),
+    lamp_rgb=(1.0, 0.9, 0.78), chandelier=900.0, sconce=420.0, exposure=-0.1, night=((48, 49, 52), 0.8))
+
+
+def light_interior(scene, car_kind, kit_name, attach, outside="night"):
+    """Amber coves (area lights along both coves), chandeliers / pendants / sconces, the screen; night outside (the
+    ride runs at night: TwoArenas.md 5.1). The coves and lamps are warm, but well short of pass 1's orange."""
+    P = dict(INTERIOR_LIGHT, **json.loads(os.environ.get("TRAIN_SOTR_ILIGHT", "{}")))   # look-dev overrides
     if outside == "night":
-        set_world(scene, (40, 52, 82), 0.6)
+        set_world(scene, P["night"][0], P["night"][1])
     else:
         set_world(scene, (92, 98, 124), 0.55)
     L = NOSE_CAR_L if car_kind == "nose" else CAR_L
@@ -4493,36 +4868,41 @@ def light_interior(scene, car_kind, kit_name, attach, outside="dusk"):
                       size=0.7, size_y=5.0, rot=(0, 0, 0))
     elif kit_name == "Train_Car6_Observation":
         for s in (-1, 1):
-            add_light(scene, "TS_Cove_%d" % s, "AREA", (s * (HWID - 0.6), 0, 1.35), 1600.0, color=(1.0, 0.7, 0.42),
+            add_light(scene, "TS_Cove_%d" % s, "AREA", (s * (HWID - 0.6), 0, 1.35), 1000.0, color=P["cove_rgb"],
                       size=0.3, size_y=L - 2, rot=(0, 0, 0))
-        add_light(scene, "TS_ObsFill", "AREA", (0, 0, 9.0), 500.0, color=(1.0, 0.72, 0.45), size=3.0,
+        add_light(scene, "TS_ObsFill", "AREA", (0, 0, 9.0), 320.0, color=P["fill_rgb"], size=3.0,
                   size_y=L - 10, rot=(0, 0, 0))
         add_light(scene, "TS_Moon", "SUN", (0, 0, 100), 0.25, color=(0.62, 0.72, 1.0), size=1.0,
                   rot=(math.radians(55), 0, math.radians(30)))
     else:
+        # the coves wash the vault (their SurfaceLights face up, as the manifest says) and spill down the walls onto
+        # the window frames (a second, weaker SurfaceLight facing down)
         for s in (-1, 1):
-            add_light(scene, "TS_Cove_%d" % s, "AREA", (s * (LIN_X - 0.3), 0, WALL_TOP + 0.12), 5200.0,
-                      color=(1.0, 0.68, 0.40), size=0.35, size_y=L - 2, rot=(0, 0, 0))
-        add_light(scene, "TS_Fill", "AREA", (0, 0, VAULT_Z - 0.4), 1400.0, color=(1.0, 0.75, 0.5), size=4.0,
+            add_light(scene, "TS_CoveUp_%d" % s, "AREA", (s * (LIN_X - 0.8), 0, WALL_TOP + 0.1),   # under the vault
+                      P["cove"] * P["cove_up"], color=P["cove_rgb"], size=0.35, size_y=L - 2,
+                      rot=(math.pi, -s * math.radians(27.0), 0), spread=P["cove_spread"])   # up and in, along the car
+            add_light(scene, "TS_CoveDown_%d" % s, "AREA", (s * (LIN_X - 0.3), 0, WALL_TOP + 0.1),
+                      P["cove"] * (1.0 - P["cove_up"]), color=P["cove_rgb"], size=0.35, size_y=L - 2, rot=(0, 0, 0))
+        add_light(scene, "TS_Fill", "AREA", (0, 0, VAULT_Z - 0.4), P["fill"], color=P["fill_rgb"], size=4.0,
                   size_y=L - 10, rot=(0, 0, 0))
     for nm, a in attach.items():
         p = V(a["pos"])
         if nm.startswith("Chandelier_"):
-            add_light(scene, "TS_" + nm, "POINT", p + V((0, 0, -1.8)), 260.0, color=(1.0, 0.8, 0.55), size=0.6)
+            add_light(scene, "TS_" + nm, "POINT", p + V((0, 0, -1.8)), P["chandelier"], color=P["lamp_rgb"], size=0.6)
         elif nm.startswith("CeilingLamp_"):
             add_light(scene, "TS_" + nm, "POINT", p + V((0, 0, -0.4)), 90.0 if nm[12:13].isdigit() else 240.0,
-                      color=(1.0, 0.78, 0.52), size=0.3)
+                      color=P["lamp_rgb"], size=0.3)
         elif nm.startswith("Pendant_"):
-            add_light(scene, "TS_" + nm, "POINT", p + V((0, 0, -1.85)), 140.0, color=(1.0, 0.78, 0.52), size=0.3)
+            add_light(scene, "TS_" + nm, "POINT", p + V((0, 0, -1.85)), 140.0, color=P["lamp_rgb"], size=0.3)
         elif nm == "Screen":
             add_light(scene, "TS_Screen", "AREA", p + V((0, 0.4, 0)), 90.0, color=(0.62, 0.78, 1.0), size=4.6,
                       size_y=2.8, target=p + V((0, 6, 0)))
     if kit_name == "Train_Car2_Dining":
         for s in (-1, 1):
             for c in (-28.0, -20.0, -12.0, -4.0, 4.0, 12.0, 20.0, 28.0):
-                add_light(scene, "TS_Sconce_%d_%d" % (s, c), "POINT", (s * (LIN_X - 0.45), c, 6.6), 18.0,
-                          color=(1.0, 0.8, 0.55), size=0.2)
-    scene.view_settings.exposure = 0.55
+                add_light(scene, "TS_Sconce_%d_%d" % (s, c), "POINT", (s * (LIN_X - 0.45), c, 6.6), P["sconce"],
+                          color=P["lamp_rgb"], size=0.2)
+    scene.view_settings.exposure = P["exposure"]
 
 
 def outside_dressing(scene, coll, night=False):
@@ -4532,10 +4912,10 @@ def outside_dressing(scene, coll, night=False):
     rng = random.Random(SEED + 400)
     for k in range(18):
         a = TAU * k / 18
-        r = rng.uniform(140.0, 260.0)
+        r = rng.uniform(220.0, 340.0)     # low and far: the night sky shows in the windows' upper half
         cx, cy = r * math.cos(a), r * math.sin(a)
         pts = [(cx + rng.uniform(-90, 90), cy + rng.uniform(-90, 90), -3.0) for _ in range(8)]
-        pts += [(cx + rng.uniform(-30, 30), cy + rng.uniform(-30, 30), rng.uniform(30, 80)) for _ in range(3)]
+        pts += [(cx + rng.uniform(-30, 30), cy + rng.uniform(-30, 30), rng.uniform(10, 26)) for _ in range(3)]
         hull(mb, pts, "hill")
     o = mb_object(mb, "TS_Outside", coll)
     paint(o, 99)
@@ -4554,6 +4934,8 @@ INTERIOR_SHOTS = {   # kit -> (camera, target, hfov) in car space
 }
 INTERIOR_EXTRA = {   # a second look where one doorway view cannot hold the room
     "Train_Car5_Compartment": [("interior_car5_compartment_b", (-0.8, -1.5, 5.5), (-3.0, 10.3, 4.4), 92.0)],
+    # the upholstery at play distance: a player standing in the aisle, about 5 studs from a bench back
+    "Train_Car1_Vestibule": [("interior_car1_bench_close", (-0.6, -29.0, 5.0), (4.6, -24.5, 2.4), 62.0)],
 }
 SHOT_NAMES = {"Train_Car1_Vestibule": "interior_car1_vestibule", "Train_Car2_Dining": "interior_car2_dining",
               "Train_Car3_Lounge": "interior_car3_lounge", "Train_Car4_Corridor": "interior_car4_corridor",
@@ -4584,14 +4966,14 @@ def render_interiors(inst, attach_by_asset, out_dir, which=None, prefix="", samp
                 elif piece == "Train_VestibuleDoor":
                     pos = pos + V((4.3, 0, 0))
                 objs += place_asset(inst[piece], pos, pyaw, coll)
-        night = kit == "Train_Car6_Observation"
-        if night and "Train_BridgeBackdrop" in inst:
+        bridge = kit == "Train_Car6_Observation"
+        if bridge and "Train_BridgeBackdrop" in inst:
             objs += place_asset(inst["Train_BridgeBackdrop"], (150.0, -160.0, -38.0), 28.0, coll)
         else:
             o = outside_dressing(scene, coll)
             o["_shot"] = True
         car_kind = {"Train_NoseCar": "nose", "Train_BodyCar": "body", "Train_ObservationCar": "obs"}[shell]
-        light_interior(scene, car_kind, kit, attach_by_asset.get(kit, {}), "night" if night else "dusk")
+        light_interior(scene, car_kind, kit, attach_by_asset.get(kit, {}), "night")
         cam, tgt, hfov = INTERIOR_SHOTS[kit]
         render_setup(scene, (1600, 900), samples)
         camera(scene, cam, tgt, hfov=hfov, res=None)
@@ -4602,7 +4984,7 @@ def render_interiors(inst, attach_by_asset, out_dir, which=None, prefix="", samp
 
 
 EXTERIOR_SHOTS = {
-    "exterior_nose": ((TRACK_X + 6.0, NOSE_FRONT_Y + 23.0, 5.2), (TRACK_X - 1.5, NOSE_FRONT_Y - 6.0, 4.4), 58.0),
+    "exterior_nose": ((PLAT_X - 4.0, NOSE_FRONT_Y + 21.0, 6.0), (TRACK_X - 0.5, NOSE_FRONT_Y - 7.0, 4.6), 56.0),
     "exterior_side": ((PLAT_X - 4.5, NOSE_FRONT_Y - 12.0, 5.8), (TRACK_X - 4.0, NOSE_FRONT_Y - 120.0, 5.4), 62.0),
     "station_platform": ((PLAT_X - 10.5, NOSE_FRONT_Y - 12.0, 5.6), (PLAT_X - 7.0, -120.0, 9.0), 82.0),
 }
@@ -4612,12 +4994,15 @@ EXTERIOR_SHOTS = {
 def quick_stage(what):
     reset()
     scene = bpy.context.scene
-    want_station = what in ("station", "exterior", "all")
+    want_station = what in ("station", "exterior", "all", "owner")
     want_interiors = what.startswith("car") or what in ("interiors", "all")
     assets = (build_station_assets() if want_station else [build_guard()]) + build_train_assets()
     coll = make_objects(assets)
     for a in assets:
         assign_quick_materials(a)
+    qb = [n for n in os.environ.get("TRAIN_SOTR_QBAKE", "").split(",") if n]
+    if qb:
+        quick_bake(assets, qb)
     exclude_collection(coll)
     inst = {a.name: a.inst for a in assets}
     att = attach_table(assets)
@@ -4625,21 +5010,52 @@ def quick_stage(what):
     if want_station:
         sc = bpy.data.collections.new("TS_Scene")
         scene.collection.children.link(sc)
-        assemble_station(inst, att, sc, trains=True, interiors=(what != "station"))
+        assemble_station(inst, att, sc, trains=True, interiors=(what not in ("station", "owner")))
         light_station(scene)
-        render_setup(scene, (1600, 667), 48)
+        render_setup(scene, STATION_RES, 48)
         station_frame_camera(scene)
         render_to(scene, os.path.join(WORK, "quick_station_frame.png"))
-        render_setup(scene, (1600, 900), 48)
-        for nm, (cam, tgt, hfov) in EXTERIOR_SHOTS.items():
-            camera(scene, cam, tgt, hfov=hfov)
-            render_to(scene, os.path.join(WORK, "quick_%s.png" % nm))
+        render_setup(scene, OWNER_RES, 48)
+        owner_camera(scene)
+        render_to(scene, os.path.join(WORK, "quick_station_owner_match.png"))
+        if what != "owner":
+            render_setup(scene, (1600, 900), 48)
+            for nm, (cam, tgt, hfov) in EXTERIOR_SHOTS.items():
+                camera(scene, cam, tgt, hfov=hfov)
+                render_to(scene, os.path.join(WORK, "quick_%s.png" % nm))
         bpy.data.collections.remove(sc)
     if want_interiors:
         which = None
         if what.startswith("car") and len(what) > 3:
             which = [k for k in SHOT_NAMES if k.startswith("Train_Car%s_" % what[3:])]
         render_interiors(inst, att, WORK, which, prefix="quick_", samples=48)
+
+
+def quick_bake(assets, names):
+    """Look-dev only: bake the real texture sets (AO, patterns) of the named assets into the work folder (never the
+    export folder) and use them in the quick renders; every other asset keeps its quick material."""
+    global TEX, GLB_ONLY
+    TEX = os.path.join(WORK, "qbake")
+    GLB_ONLY = os.path.join(TEX, "glb_only")
+    os.makedirs(GLB_ONLY, exist_ok=True)
+    tg.enable_gpu(bpy.context.scene)
+    sets = {}
+    for a in assets:
+        if a.name not in names:
+            continue
+        for _, o in a.objs:
+            if o["kind"] == "tex" and a not in sets.setdefault(o["tset"], []):
+                sets[o["tset"]].append(a)
+    for tset, members in sets.items():
+        files, stats = bake_set(tset, members)
+        mat = export_material(tset, files)
+        for a in members:
+            for _, o in a.objs:
+                if o["kind"] == "tex" and o["tset"] == tset:
+                    o.data.materials.clear()
+                    o.data.materials.append(mat)
+        log("QBAKE %s: %s px/stud, keys %s" % (tset, stats["pxPerStud"],
+                                                {k: v["meanSRGB"] for k, v in stats["keys"].items()}))
 
 
 def budget_report(assets):

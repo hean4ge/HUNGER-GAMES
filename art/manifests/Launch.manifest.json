@@ -1,5 +1,5 @@
 {
- "schema": "LS-Launch-1 (faceted style A, palette atlas)",
+ "schema": "LS-Launch-2 (faceted style A, palette atlas; pass 2)",
  "category": "Launch",
  "generator": "art/blender/launch_rooms.py (seed 50)",
  "glbs": [
@@ -8,8 +8,8 @@
    "assets": [
     "LaunchRedRoom"
    ],
-   "bytes": 953204,
-   "sizeMB": 0.909,
+   "bytes": 1029116,
+   "sizeMB": 0.981,
    "embeddedImages": [
     "LaunchRedRoom_Color",
     "LaunchRedRoom_MR"
@@ -18,10 +18,10 @@
     "LaunchRedRoom_Paint",
     "LaunchRedRoom_Neon_lens"
    ],
-   "primitives": 12,
+   "primitives": 13,
    "problems": [],
    "palette": {
-    "colours": 1981,
+    "colours": 1816,
     "grid": 64,
     "cellPx": 8,
     "sizePx": 512
@@ -34,8 +34,8 @@
     "LaunchCaseGallery",
     "LaunchRiserDisc"
    ],
-   "bytes": 338236,
-   "sizeMB": 0.323,
+   "bytes": 346504,
+   "sizeMB": 0.33,
    "embeddedImages": [
     "LaunchCaseHall_Color",
     "LaunchCaseHall_MR"
@@ -49,7 +49,7 @@
    "primitives": 10,
    "problems": [],
    "palette": {
-    "colours": 704,
+    "colours": 696,
     "grid": 32,
     "cellPx": 8,
     "sizePx": 256
@@ -62,22 +62,21 @@
     "LaunchPoleHallCrown",
     "LaunchPole"
    ],
-   "bytes": 782896,
-   "sizeMB": 0.747,
+   "bytes": 725032,
+   "sizeMB": 0.691,
    "embeddedImages": [
     "LaunchPoleHall_Color",
     "LaunchPoleHall_MR"
    ],
    "materials": [
     "LaunchPoleHall_Paint",
-    "LaunchPoleHall_Neon_strip",
     "LaunchPoleHall_Neon_spot",
     "LaunchPoleHall_Neon_light"
    ],
-   "primitives": 11,
+   "primitives": 10,
    "problems": [],
    "palette": {
-    "colours": 1217,
+    "colours": 1252,
     "grid": 64,
     "cellPx": 8,
     "sizePx": 512
@@ -197,36 +196,36 @@
   {
    "key": "oxblood",
    "tone": [
-    112,
-    46,
-    46
+    86,
+    53,
+    53
    ],
-   "hex": "#702e2e",
+   "hex": "#563535",
    "luma": 60.0,
    "sampled": "#281616",
    "roughness": 0.85,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "walls, roof panels (brief 2.8)",
+   "note": "walls, roof panels, the hood (brief 2.8; S 0.38, sample 0.45: ruling 'band')",
    "meanLumaAfterAO": 60.0,
-   "normaliseFactor": 1.234
+   "normaliseFactor": 1.188
   },
   {
    "key": "oxblood_dk",
    "tone": [
-    100,
-    46,
-    48
+    80,
+    52,
+    53
    ],
-   "hex": "#642e30",
-   "luma": 57.6,
-   "sampled": "#241316",
+   "hex": "#503435",
+   "luma": 58.0,
+   "sampled": "#241515",
    "roughness": 0.85,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "wall backing, lift apron (ours, from the floor sample)",
-   "meanLumaAfterAO": 57.6,
-   "normaliseFactor": 1.026
+   "note": "wall backing, lift apron (ours, from the floor sample, T1 @120.7 s; ruling 'band')",
+   "meanLumaAfterAO": 58.0,
+   "normaliseFactor": 1.018
   },
   {
    "key": "net",
@@ -243,7 +242,7 @@
    "kind": "paint",
    "note": "net and grating, dark teal-grey steel",
    "meanLumaAfterAO": 78.0,
-   "normaliseFactor": 1.258
+   "normaliseFactor": 1.239
   },
   {
    "key": "hex",
@@ -258,9 +257,9 @@
    "roughness": 0.6,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "hexagonal frame of square tube",
+   "note": "hexagonal frame of square tube, the brief's tone (S 0.46; review fix: measured on the limbs, the same surface in both frames, the frame renders under the band, not over it)",
    "meanLumaAfterAO": 104.4,
-   "normaliseFactor": 1.058
+   "normaliseFactor": 1.039
   },
   {
    "key": "bolt",
@@ -277,24 +276,24 @@
    "kind": "paint",
    "note": "gusset plates and bolts (ours)",
    "meanLumaAfterAO": 93.7,
-   "normaliseFactor": 1.169
+   "normaliseFactor": 1.159
   },
   {
    "key": "rose",
    "tone": [
-    150,
-    96,
-    104
+    126,
+    101,
+    121
    ],
-   "hex": "#966068",
-   "luma": 108.1,
+   "hex": "#7e6579",
+   "luma": 107.8,
    "sampled": "#5c4d5a",
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "the lift disc, dusty rose",
-   "meanLumaAfterAO": 108.1,
-   "normaliseFactor": 1.091
+   "note": "the lift disc, dusty rose (S 0.20; sampled 0.16)",
+   "meanLumaAfterAO": 107.8,
+   "normaliseFactor": 1.092
   },
   {
    "key": "deck",
@@ -309,9 +308,9 @@
    "roughness": 0.6,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "steel deck plate",
+   "note": "steel deck plate (neutral; the cool keys make it blue)",
    "meanLumaAfterAO": 128.3,
-   "normaliseFactor": 1.202
+   "normaliseFactor": 1.238
   },
   {
    "key": "grate",
@@ -326,43 +325,43 @@
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "floor grates (deliberate black, luma >= 40)",
+   "note": "floor grates and pit floors (deliberate black, luma >= 40)",
    "meanLumaAfterAO": 45.7,
-   "normaliseFactor": 1.173
+   "normaliseFactor": 1.2
   },
   {
    "key": "redmesh",
    "tone": [
-    120,
-    40,
-    42
+    87,
+    48,
+    61
    ],
-   "hex": "#78282a",
+   "hex": "#57303d",
    "luma": 57.2,
    "sampled": "#1c1015",
    "roughness": 0.8,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "red mesh under the grates, lit from below",
+   "note": "the red mesh in the two floor openings (S 0.45 as sampled)",
    "meanLumaAfterAO": 57.2,
-   "normaliseFactor": 1.143
+   "normaliseFactor": 1.259
   },
   {
    "key": "rail",
    "tone": [
-    156,
-    48,
-    50
+    126,
+    63,
+    75
    ],
-   "hex": "#9c3032",
-   "luma": 71.1,
+   "hex": "#7e3f4b",
+   "luma": 77.3,
    "sampled": "#592a38",
    "roughness": 0.55,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "red rails, painted steel tube",
-   "meanLumaAfterAO": 71.1,
-   "normaliseFactor": 1.209
+   "note": "red rails, painted steel tube (S 0.50; the sample is 0.53)",
+   "meanLumaAfterAO": 77.3,
+   "normaliseFactor": 1.253
   },
   {
    "key": "stripe",
@@ -379,24 +378,24 @@
    "kind": "paint",
    "note": "white floor stripes",
    "meanLumaAfterAO": 205.6,
-   "normaliseFactor": 1.159
+   "normaliseFactor": 1.143
   },
   {
    "key": "lamp",
    "tone": [
-    150,
-    46,
-    48
+    112,
+    57,
+    72
    ],
-   "hex": "#962e30",
-   "luma": 68.3,
+   "hex": "#703948",
+   "luma": 69.8,
    "sampled": "#582d3b",
    "roughness": 0.6,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "lamp housings",
-   "meanLumaAfterAO": 68.3,
-   "normaliseFactor": 1.411
+   "note": "lamp housings (S 0.49 as sampled)",
+   "meanLumaAfterAO": 69.8,
+   "normaliseFactor": 1.383
   },
   {
    "key": "concrete",
@@ -413,7 +412,7 @@
    "kind": "paint",
    "note": "concrete base course and steps",
    "meanLumaAfterAO": 125.7,
-   "normaliseFactor": 1.35
+   "normaliseFactor": 1.379
   },
   {
    "key": "door",
@@ -430,75 +429,75 @@
    "kind": "paint",
    "note": "steel door and intercom (ours)",
    "meanLumaAfterAO": 93.2,
-   "normaliseFactor": 1.562
+   "normaliseFactor": 1.572
   },
   {
    "key": "post",
    "tone": [
-    110,
-    54,
-    60
+    90,
+    59,
+    63
    ],
-   "hex": "#6e363c",
-   "luma": 66.3,
+   "hex": "#5a3b3f",
+   "luma": 65.9,
    "sampled": "#4b353c",
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "case posts",
-   "meanLumaAfterAO": 66.3,
-   "normaliseFactor": 1.133
+   "note": "case posts (S 0.34: the two samples are 0.29 and 0.37)",
+   "meanLumaAfterAO": 65.9,
+   "normaliseFactor": 1.13
   },
   {
    "key": "case_disc",
    "tone": [
-    126,
-    50,
-    54
+    89,
+    60,
+    62
    ],
-   "hex": "#7e3236",
-   "luma": 66.4,
+   "hex": "#593c3e",
+   "luma": 66.3,
    "sampled": "#452e30",
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "case and rider discs",
-   "meanLumaAfterAO": 66.4,
-   "normaliseFactor": 1.363
+   "note": "case and rider discs (S 0.33 as sampled)",
+   "meanLumaAfterAO": 66.3,
+   "normaliseFactor": 1.462
   },
   {
    "key": "disc_rim",
    "tone": [
-    110,
-    44,
-    48
+    82,
+    51,
+    54
    ],
-   "hex": "#6e2c30",
-   "luma": 58.3,
+   "hex": "#523336",
+   "luma": 57.8,
    "sampled": "#0d141b",
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "rider's disc rim",
-   "meanLumaAfterAO": 50.0,
+   "note": "rider's disc rim (sample graded blue; S 0.38, between the discs and the rails)",
+   "meanLumaAfterAO": 53.4,
    "normaliseFactor": 1.7
   },
   {
    "key": "unit",
    "tone": [
-    116,
-    52,
-    58
+    94,
+    58,
+    63
    ],
-   "hex": "#74343a",
+   "hex": "#5e3a3f",
    "luma": 66.0,
    "sampled": null,
    "roughness": 0.75,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "maroon wall unit (ours, between posts and discs)",
+   "note": "maroon wall unit (ours; S 0.38, with the posts)",
    "meanLumaAfterAO": 66.0,
-   "normaliseFactor": 1.182
+   "normaliseFactor": 1.118
   },
   {
    "key": "plinth",
@@ -515,24 +514,24 @@
    "kind": "paint",
    "note": "case plinth and pedestal, dark steel (ours)",
    "meanLumaAfterAO": 79.6,
-   "normaliseFactor": 1.103
+   "normaliseFactor": 1.095
   },
   {
    "key": "walkway",
    "tone": [
-    74,
-    80,
-    88
+    54,
+    59,
+    66
    ],
-   "hex": "#4a5058",
-   "luma": 79.3,
+   "hex": "#363b42",
+   "luma": 58.4,
    "sampled": null,
    "roughness": 0.7,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "gallery walkway deck (ours, dark blue-grey steel)",
-   "meanLumaAfterAO": 79.3,
-   "normaliseFactor": 1.025
+   "note": "gallery walkway deck (ours, dark blue-grey steel; review fix: luma 79 -> 58, the bottom of the built band, as the film's floor is dark: no light could dim the floor without also dimming the hall wall beyond)",
+   "meanLumaAfterAO": 58.4,
+   "normaliseFactor": 1.029
   },
   {
    "key": "shell_case",
@@ -549,7 +548,7 @@
    "kind": "paint",
    "note": "glass-hall shell: screens, gantry",
    "meanLumaAfterAO": 62.9,
-   "normaliseFactor": 1.085
+   "normaliseFactor": 1.076
   },
   {
    "key": "shell",
@@ -566,7 +565,7 @@
    "kind": "paint",
    "note": "pole-hall shell: wall, roof deck",
    "meanLumaAfterAO": 65.2,
-   "normaliseFactor": 1.047
+   "normaliseFactor": 1.048
   },
   {
    "key": "truss",
@@ -583,7 +582,7 @@
    "kind": "paint",
    "note": "spoked ring and truss",
    "meanLumaAfterAO": 103.0,
-   "normaliseFactor": 1.09
+   "normaliseFactor": 1.091
   },
   {
    "key": "floor",
@@ -600,24 +599,24 @@
    "kind": "paint",
    "note": "hall floor plates (ours, darker than the walkway)",
    "meanLumaAfterAO": 75.3,
-   "normaliseFactor": 0.994
+   "normaliseFactor": 0.997
   },
   {
    "key": "wedge_red",
    "tone": [
-    124,
-    54,
-    54
+    92,
+    63,
+    62
    ],
-   "hex": "#7c3636",
-   "luma": 68.9,
+   "hex": "#5c3f3e",
+   "luma": 69.1,
    "sampled": "#5d403e",
    "roughness": 0.85,
    "metalness": 0.0,
    "kind": "paint",
-   "note": "floor wedges, oxblood",
-   "meanLumaAfterAO": 68.9,
-   "normaliseFactor": 0.994
+   "note": "floor wedges, oxblood (S 0.33 as sampled)",
+   "meanLumaAfterAO": 69.1,
+   "normaliseFactor": 0.996
   },
   {
    "key": "wedge_pale",
@@ -634,7 +633,7 @@
    "kind": "paint",
    "note": "floor wedges, pale; also the kerb",
    "meanLumaAfterAO": 177.4,
-   "normaliseFactor": 1.007
+   "normaliseFactor": 0.983
   },
   {
    "key": "steel",
@@ -649,9 +648,26 @@
    "roughness": 0.4,
    "metalness": 1.0,
    "kind": "paint",
-   "note": "poles, bare steel (metal)",
+   "note": "the disc's collar, bare steel (metal)",
    "meanLumaAfterAO": 165.7,
-   "normaliseFactor": 1.053
+   "normaliseFactor": 1.484
+  },
+  {
+   "key": "pole",
+   "tone": [
+    112,
+    116,
+    122
+   ],
+   "hex": "#70747a",
+   "luma": 115.6,
+   "sampled": null,
+   "roughness": 0.45,
+   "metalness": 0.7,
+   "kind": "paint",
+   "note": "poles: plain steel rods (pass 2: no light on them; they read as thin dark lines against the lit hall)",
+   "meanLumaAfterAO": 115.6,
+   "normaliseFactor": 1.063
   },
   {
    "key": "copper",
@@ -668,7 +684,7 @@
    "kind": "paint",
    "note": "copper bands (metal)",
    "meanLumaAfterAO": 122.6,
-   "normaliseFactor": 1.047
+   "normaliseFactor": 1.036
   },
   {
    "key": "housing",
@@ -685,7 +701,7 @@
    "kind": "paint",
    "note": "LED bar housings, spot cans (ours)",
    "meanLumaAfterAO": 67.6,
-   "normaliseFactor": 1.118
+   "normaliseFactor": 1.098
   },
   {
    "key": "light",
@@ -718,21 +734,6 @@
    "note": "lamp lenses and spot lenses"
   },
   {
-   "key": "strip",
-   "tone": [
-    236,
-    240,
-    244
-   ],
-   "hex": "#ecf0f4",
-   "luma": 239.4,
-   "sampled": "#e2e6e9",
-   "roughness": 0.5,
-   "metalness": 0.0,
-   "kind": "neon",
-   "note": "the poles' segmented edge-lit strips (dimmer)"
-  },
-  {
    "key": "spot",
    "tone": [
     240,
@@ -763,14 +764,128 @@
    "note": "case glass, Transparency 0.65"
   }
  ],
+ "redCheck": {
+  "oxblood": {
+   "sampled": "#281616",
+   "sampledSat": 0.45,
+   "tone": [
+    86,
+    53,
+    53
+   ],
+   "toneSat": 0.384,
+   "diff": -0.066,
+   "pass": true,
+   "rule": "room surface under the band: 0.65-0.85x the sample (ruling pending)",
+   "ratio": 0.853
+  },
+  "oxblood_dk": {
+   "sampled": "#241515",
+   "sampledSat": 0.417,
+   "tone": [
+    80,
+    52,
+    53
+   ],
+   "toneSat": 0.35,
+   "diff": -0.067,
+   "pass": true,
+   "rule": "room surface under the band: 0.65-0.85x the sample (ruling pending)",
+   "ratio": 0.84
+  },
+  "rail": {
+   "sampled": "#592a38",
+   "sampledSat": 0.528,
+   "tone": [
+    126,
+    63,
+    75
+   ],
+   "toneSat": 0.5,
+   "diff": -0.028,
+   "pass": true
+  },
+  "lamp": {
+   "sampled": "#582d3b",
+   "sampledSat": 0.489,
+   "tone": [
+    112,
+    57,
+    72
+   ],
+   "toneSat": 0.491,
+   "diff": 0.002,
+   "pass": true
+  },
+  "redmesh": {
+   "sampled": "#1c1015",
+   "sampledSat": 0.429,
+   "tone": [
+    87,
+    48,
+    61
+   ],
+   "toneSat": 0.448,
+   "diff": 0.02,
+   "pass": true
+  },
+  "post": {
+   "sampled": "#4b353c",
+   "sampledSat": 0.33,
+   "tone": [
+    90,
+    59,
+    63
+   ],
+   "toneSat": 0.344,
+   "diff": 0.014,
+   "pass": true
+  },
+  "case_disc": {
+   "sampled": "#452e30",
+   "sampledSat": 0.333,
+   "tone": [
+    89,
+    60,
+    62
+   ],
+   "toneSat": 0.326,
+   "diff": -0.007,
+   "pass": true
+  },
+  "wedge_red": {
+   "sampled": "#5d403e",
+   "sampledSat": 0.333,
+   "tone": [
+    92,
+    63,
+    62
+   ],
+   "toneSat": 0.326,
+   "diff": -0.007,
+   "pass": true
+  },
+  "rose": {
+   "sampled": "#5c4d5a",
+   "sampledSat": 0.163,
+   "tone": [
+    126,
+    101,
+    121
+   ],
+   "toneSat": 0.198,
+   "diff": 0.035,
+   "pass": true
+  }
+ },
  "budgets": {
   "rooms": {
    "LaunchRedRoom": {
     "assets": [
      "LaunchRedRoom"
     ],
-    "uniqueTris": 9572,
-    "drawnTris": 9572
+    "uniqueTris": 9748,
+    "drawnTris": 9748
    },
    "LaunchCaseHall": {
     "assets": [
@@ -778,8 +893,8 @@
      "LaunchCaseGallery",
      "LaunchRiserDisc"
     ],
-    "uniqueTris": 3256,
-    "drawnTris": 68768
+    "uniqueTris": 3340,
+    "drawnTris": 69440
    },
    "LaunchPoleHall": {
     "assets": [
@@ -787,27 +902,28 @@
      "LaunchPoleHallCrown",
      "LaunchPole"
     ],
-    "uniqueTris": 7432,
-    "drawnTris": 71092
+    "uniqueTris": 6972,
+    "drawnTris": 53328
    }
   },
   "assets": {
    "LaunchRedRoom": {
     "parts": {
      "Shell": 1152,
-     "Roof": 664,
-     "NetA": 744,
-     "NetB": 744,
+     "Roof": 88,
+     "NetA": 1360,
+     "NetB": 1360,
      "HexFrame": 528,
+     "Hood": 120,
      "Deck": 1004,
-     "Grates": 1872,
+     "Grates": 1272,
      "Rails": 1672,
      "Lamps": 460,
      "Stairs": 224,
      "Lift": 284,
      "LampLights": 224
     },
-    "tris": 9572,
+    "tris": 9748,
     "instances": 1
    },
    "LaunchCaseBay": {
@@ -823,11 +939,11 @@
    },
    "LaunchCaseGallery": {
     "parts": {
-     "Walkway": 412,
+     "Walkway": 496,
      "Gantry": 1128,
      "Lights": 648
     },
-    "tris": 2188,
+    "tris": 2272,
     "instances": 8
    },
    "LaunchRiserDisc": {
@@ -843,28 +959,27 @@
      "Floor": 376,
      "Bank": 196,
      "Shell": 1512,
-     "Truss": 1464,
-     "LED": 336
+     "Truss": 1188,
+     "LED": 396
     },
-    "tris": 3884,
+    "tris": 3668,
     "instances": 8
    },
    "LaunchPoleHallCrown": {
     "parts": {
-     "Ring": 1536,
+     "Ring": 1628,
      "Hub": 804,
      "Spots": 432
     },
-    "tris": 2772,
+    "tris": 2864,
     "instances": 1
    },
    "LaunchPole": {
     "parts": {
      "Steel": 44,
-     "Copper": 396,
-     "Strip": 336
+     "Copper": 396
     },
-    "tris": 776,
+    "tris": 440,
     "instances": 48
    }
   },
@@ -890,10 +1005,48 @@
    "gantryY": 16.0,
    "ledRings": [
     104.0,
-    128.0,
-    152.0,
-    174.0
-   ]
+    117.0,
+    130.0,
+    143.0,
+    156.0,
+    169.0
+   ],
+   "ledRowBearingsPerSegment": [
+    0.0,
+    7.5,
+    15.0,
+    22.5,
+    30.0,
+    37.5
+   ],
+   "ledBarLength": 6.0,
+   "wallBars": {
+    "bearingsPerSegment": [
+     0.0,
+     7.5,
+     15.0,
+     22.5,
+     30.0,
+     37.5
+    ],
+    "radius": 177.75,
+    "heights": [
+     [
+      82.0,
+      96.0
+     ]
+    ]
+   },
+   "redRoomNet": {
+    "cell": 1.2,
+    "bar": 0.25,
+    "angleToHexDeg": 45.0,
+    "sag": 0.4,
+    "fixingsY": {
+     "NetA": 19.95,
+     "NetB": 21.45
+    }
+   }
   },
   "instances": [
    {
@@ -2600,32 +2753,2822 @@
   "discStartY": 1.6,
   "discEndY": 121.6,
   "riseStuds": 120.0,
+  "endFrame": {
+   "distance": 7.0,
+   "below": 1.6,
+   "pitchDeg": 35.0,
+   "fovV": 42.0,
+   "reference": "the film's low-angle, whole-body frame (T1 @127.2 s): in front of the rider, just below the disc, looking up past the body to the pole"
+  },
+  "cuts": {
+   "full": {
+    "duration": 9.0,
+    "riseStuds": 120.0,
+    "profile": "accelerate 2.0 s, cruise 5.0 s at 17.14 studs/s, brake 2.0 s",
+    "peakSpeed": 17.143,
+    "accel": 8.571,
+    "orbitDeg": 360.0,
+    "orbitStartDeg": 90.0,
+    "orbitDirection": "anticlockwise seen from above; 90 = in front of the rider (toward the hall centre), 180 = the rider's left, 270 = behind",
+    "orbitEndsAt": 6.8,
+    "settle": [
+     5.4,
+     6.8
+    ],
+    "whiteout": [
+     7.4,
+     9.0
+    ],
+    "radiusKeys": [
+     [
+      0.0,
+      6.5
+     ],
+     [
+      3.0,
+      8.5
+     ],
+     [
+      5.0,
+      8.2
+     ],
+     [
+      6.8,
+      7.0
+     ],
+     [
+      9.0,
+      7.0
+     ]
+    ],
+    "heightKeys": [
+     [
+      0.0,
+      4.4
+     ],
+     [
+      2.5,
+      -3.0
+     ],
+     [
+      5.0,
+      -2.4
+     ],
+     [
+      6.8,
+      -1.6
+     ],
+     [
+      9.0,
+      -1.6
+     ]
+    ],
+    "fovKeys": [
+     [
+      0.0,
+      50.0
+     ],
+     [
+      4.5,
+      54.0
+     ],
+     [
+      6.8,
+      42.0
+     ],
+     [
+      9.0,
+      42.0
+     ]
+    ],
+    "exposureKeys": [
+     [
+      0.0,
+      0.45
+     ],
+     [
+      4.5,
+      0.45
+     ],
+     [
+      6.8,
+      0.3
+     ],
+     [
+      9.0,
+      0.3
+     ]
+    ],
+    "minClearance": 2.528,
+    "minClearanceAt": 3.9,
+    "lineOfSightBlockedAt": [
+     1.2,
+     3.3,
+     3.4,
+     3.5,
+     9.0
+    ],
+    "blockedByOtherThanOwnPoleAt": [
+     1.2,
+     9.0
+    ],
+    "samples": 91,
+    "keys": [
+     {
+      "t": 0.0,
+      "discTopY": 1.6,
+      "cameraBay": [
+       0.0,
+       6.0,
+       -6.8
+      ],
+      "lookAtBay": [
+       -0.0,
+       4.784,
+       1.107
+      ],
+      "fovV": 50.0,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.1,
+      "discTopY": 1.643,
+      "cameraBay": [
+       -0.001,
+       6.008,
+       -6.807
+      ],
+      "lookAtBay": [
+       0.0,
+       4.834,
+       1.107
+      ],
+      "fovV": 50.01,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.2,
+      "discTopY": 1.771,
+      "cameraBay": [
+       -0.01,
+       6.037,
+       -6.825
+      ],
+      "lookAtBay": [
+       0.002,
+       4.985,
+       1.105
+      ],
+      "fovV": 50.02,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.3,
+      "discTopY": 1.986,
+      "cameraBay": [
+       -0.033,
+       6.092,
+       -6.856
+      ],
+      "lookAtBay": [
+       0.007,
+       5.235,
+       1.098
+      ],
+      "fovV": 50.05,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.4,
+      "discTopY": 2.286,
+      "cameraBay": [
+       -0.077,
+       6.178,
+       -6.897
+      ],
+      "lookAtBay": [
+       0.016,
+       5.583,
+       1.081
+      ],
+      "fovV": 50.09,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.5,
+      "discTopY": 2.671,
+      "cameraBay": [
+       -0.148,
+       6.302,
+       -6.946
+      ],
+      "lookAtBay": [
+       0.03,
+       6.025,
+       1.047
+      ],
+      "fovV": 50.14,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.6,
+      "discTopY": 3.143,
+      "cameraBay": [
+       -0.253,
+       6.469,
+       -7.003
+      ],
+      "lookAtBay": [
+       0.049,
+       6.557,
+       0.991
+      ],
+      "fovV": 50.19,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.7,
+      "discTopY": 3.7,
+      "cameraBay": [
+       -0.395,
+       6.684,
+       -7.064
+      ],
+      "lookAtBay": [
+       0.071,
+       7.174,
+       0.907
+      ],
+      "fovV": 50.26,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.8,
+      "discTopY": 4.343,
+      "cameraBay": [
+       -0.582,
+       6.955,
+       -7.126
+      ],
+      "lookAtBay": [
+       0.093,
+       7.869,
+       0.793
+      ],
+      "fovV": 50.33,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.9,
+      "discTopY": 5.071,
+      "cameraBay": [
+       -0.818,
+       7.285,
+       -7.184
+      ],
+      "lookAtBay": [
+       0.112,
+       8.635,
+       0.647
+      ],
+      "fovV": 50.42,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.0,
+      "discTopY": 5.886,
+      "cameraBay": [
+       -1.107,
+       7.681,
+       -7.231
+      ],
+      "lookAtBay": [
+       0.123,
+       9.464,
+       0.47
+      ],
+      "fovV": 50.5,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.1,
+      "discTopY": 6.786,
+      "cameraBay": [
+       -1.451,
+       8.149,
+       -7.26
+      ],
+      "lookAtBay": [
+       0.119,
+       10.352,
+       0.269
+      ],
+      "fovV": 50.6,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.2,
+      "discTopY": 7.771,
+      "cameraBay": [
+       -1.854,
+       8.693,
+       -7.261
+      ],
+      "lookAtBay": [
+       0.093,
+       11.296,
+       0.049
+      ],
+      "fovV": 50.7,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.3,
+      "discTopY": 8.843,
+      "cameraBay": [
+       -2.316,
+       9.321,
+       -7.224
+      ],
+      "lookAtBay": [
+       0.04,
+       12.293,
+       -0.18
+      ],
+      "fovV": 50.81,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.4,
+      "discTopY": 10.0,
+      "cameraBay": [
+       -2.834,
+       10.037,
+       -7.136
+      ],
+      "lookAtBay": [
+       -0.045,
+       13.347,
+       -0.408
+      ],
+      "fovV": 50.92,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.5,
+      "discTopY": 11.243,
+      "cameraBay": [
+       -3.403,
+       10.848,
+       -6.984
+      ],
+      "lookAtBay": [
+       -0.164,
+       14.46,
+       -0.622
+      ],
+      "fovV": 51.04,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.6,
+      "discTopY": 12.571,
+      "cameraBay": [
+       -4.016,
+       11.758,
+       -6.752
+      ],
+      "lookAtBay": [
+       -0.319,
+       15.637,
+       -0.812
+      ],
+      "fovV": 51.16,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.7,
+      "discTopY": 13.986,
+      "cameraBay": [
+       -4.662,
+       12.774,
+       -6.427
+      ],
+      "lookAtBay": [
+       -0.506,
+       16.885,
+       -0.965
+      ],
+      "fovV": 51.28,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.8,
+      "discTopY": 15.486,
+      "cameraBay": [
+       -5.323,
+       13.901,
+       -5.995
+      ],
+      "lookAtBay": [
+       -0.721,
+       18.211,
+       -1.071
+      ],
+      "fovV": 51.41,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.9,
+      "discTopY": 17.071,
+      "cameraBay": [
+       -5.982,
+       15.146,
+       -5.446
+      ],
+      "lookAtBay": [
+       -0.955,
+       19.621,
+       -1.121
+      ],
+      "fovV": 51.54,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.0,
+      "discTopY": 18.743,
+      "cameraBay": [
+       -6.612,
+       16.512,
+       -4.77
+      ],
+      "lookAtBay": [
+       -1.197,
+       21.124,
+       -1.109
+      ],
+      "fovV": 51.67,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.1,
+      "discTopY": 20.457,
+      "cameraBay": [
+       -7.187,
+       17.965,
+       -3.965
+      ],
+      "lookAtBay": [
+       -1.432,
+       22.683,
+       -1.03
+      ],
+      "fovV": 51.8,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.2,
+      "discTopY": 22.171,
+      "cameraBay": [
+       -7.677,
+       19.466,
+       -3.033
+      ],
+      "lookAtBay": [
+       -1.646,
+       24.263,
+       -0.886
+      ],
+      "fovV": 51.93,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.3,
+      "discTopY": 23.886,
+      "cameraBay": [
+       -8.05,
+       21.02,
+       -1.983
+      ],
+      "lookAtBay": [
+       -1.821,
+       25.868,
+       -0.681
+      ],
+      "fovV": 52.07,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.4,
+      "discTopY": 25.6,
+      "cameraBay": [
+       -8.275,
+       22.635,
+       -0.833
+      ],
+      "lookAtBay": [
+       -1.942,
+       27.506,
+       -0.425
+      ],
+      "fovV": 52.2,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.5,
+      "discTopY": 27.314,
+      "cameraBay": [
+       -8.323,
+       24.314,
+       0.391
+      ],
+      "lookAtBay": [
+       -1.995,
+       29.18,
+       -0.134
+      ],
+      "fovV": 52.33,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.6,
+      "discTopY": 29.029,
+      "cameraBay": [
+       -8.172,
+       26.031,
+       1.657
+      ],
+      "lookAtBay": [
+       -1.982,
+       30.877,
+       0.175
+      ],
+      "fovV": 52.46,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.7,
+      "discTopY": 30.743,
+      "cameraBay": [
+       -7.804,
+       27.754,
+       2.925
+      ],
+      "lookAtBay": [
+       -1.908,
+       32.581,
+       0.488
+      ],
+      "fovV": 52.59,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.8,
+      "discTopY": 32.457,
+      "cameraBay": [
+       -7.213,
+       29.481,
+       4.149
+      ],
+      "lookAtBay": [
+       -1.772,
+       34.291,
+       0.793
+      ],
+      "fovV": 52.72,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.9,
+      "discTopY": 34.171,
+      "cameraBay": [
+       -6.402,
+       31.213,
+       5.281
+      ],
+      "lookAtBay": [
+       -1.575,
+       36.007,
+       1.073
+      ],
+      "fovV": 52.84,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.0,
+      "discTopY": 35.886,
+      "cameraBay": [
+       -5.388,
+       32.948,
+       6.274
+      ],
+      "lookAtBay": [
+       -1.323,
+       37.73,
+       1.314
+      ],
+      "fovV": 52.96,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.1,
+      "discTopY": 37.6,
+      "cameraBay": [
+       -4.201,
+       34.687,
+       7.087
+      ],
+      "lookAtBay": [
+       -1.026,
+       39.458,
+       1.505
+      ],
+      "fovV": 53.08,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.2,
+      "discTopY": 39.314,
+      "cameraBay": [
+       -2.877,
+       36.429,
+       7.689
+      ],
+      "lookAtBay": [
+       -0.699,
+       41.189,
+       1.639
+      ],
+      "fovV": 53.19,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.3,
+      "discTopY": 41.029,
+      "cameraBay": [
+       -1.461,
+       38.174,
+       8.055
+      ],
+      "lookAtBay": [
+       -0.352,
+       42.922,
+       1.713
+      ],
+      "fovV": 53.3,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.4,
+      "discTopY": 42.743,
+      "cameraBay": [
+       -0.0,
+       39.92,
+       8.169
+      ],
+      "lookAtBay": [
+       -0.0,
+       44.657,
+       1.722
+      ],
+      "fovV": 53.4,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.5,
+      "discTopY": 44.457,
+      "cameraBay": [
+       1.456,
+       41.668,
+       8.027
+      ],
+      "lookAtBay": [
+       0.344,
+       46.394,
+       1.668
+      ],
+      "fovV": 53.5,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.6,
+      "discTopY": 46.171,
+      "cameraBay": [
+       2.858,
+       43.418,
+       7.636
+      ],
+      "lookAtBay": [
+       0.668,
+       48.133,
+       1.556
+      ],
+      "fovV": 53.58,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.7,
+      "discTopY": 47.886,
+      "cameraBay": [
+       4.16,
+       45.168,
+       7.015
+      ],
+      "lookAtBay": [
+       0.961,
+       49.872,
+       1.391
+      ],
+      "fovV": 53.67,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.8,
+      "discTopY": 49.6,
+      "cameraBay": [
+       5.322,
+       46.918,
+       6.192
+      ],
+      "lookAtBay": [
+       1.215,
+       51.612,
+       1.182
+      ],
+      "fovV": 53.74,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.9,
+      "discTopY": 51.314,
+      "cameraBay": [
+       6.311,
+       48.668,
+       5.201
+      ],
+      "lookAtBay": [
+       1.422,
+       53.352,
+       0.94
+      ],
+      "fovV": 53.81,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.0,
+      "discTopY": 53.029,
+      "cameraBay": [
+       7.107,
+       50.417,
+       4.083
+      ],
+      "lookAtBay": [
+       1.581,
+       55.091,
+       0.675
+      ],
+      "fovV": 53.86,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.1,
+      "discTopY": 54.743,
+      "cameraBay": [
+       7.696,
+       52.166,
+       2.881
+      ],
+      "lookAtBay": [
+       1.69,
+       56.83,
+       0.398
+      ],
+      "fovV": 53.91,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.2,
+      "discTopY": 56.457,
+      "cameraBay": [
+       8.077,
+       53.912,
+       1.635
+      ],
+      "lookAtBay": [
+       1.751,
+       58.568,
+       0.119
+      ],
+      "fovV": 53.95,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.3,
+      "discTopY": 58.171,
+      "cameraBay": [
+       8.256,
+       55.657,
+       0.386
+      ],
+      "lookAtBay": [
+       1.768,
+       60.305,
+       -0.153
+      ],
+      "fovV": 53.98,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.4,
+      "discTopY": 59.886,
+      "cameraBay": [
+       8.248,
+       57.399,
+       -0.832
+      ],
+      "lookAtBay": [
+       1.745,
+       62.04,
+       -0.413
+      ],
+      "fovV": 53.99,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.5,
+      "discTopY": 61.6,
+      "cameraBay": [
+       8.072,
+       59.138,
+       -1.988
+      ],
+      "lookAtBay": [
+       1.69,
+       63.773,
+       -0.653
+      ],
+      "fovV": 54.0,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.6,
+      "discTopY": 63.314,
+      "cameraBay": [
+       7.754,
+       60.873,
+       -3.061
+      ],
+      "lookAtBay": [
+       1.608,
+       65.503,
+       -0.872
+      ],
+      "fovV": 53.93,
+      "exposure": 0.449,
+      "riseProfile": 0.006,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.7,
+      "discTopY": 65.029,
+      "cameraBay": [
+       7.321,
+       62.605,
+       -4.033
+      ],
+      "lookAtBay": [
+       1.506,
+       67.23,
+       -1.068
+      ],
+      "fovV": 53.74,
+      "exposure": 0.447,
+      "riseProfile": 0.021,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.8,
+      "discTopY": 66.743,
+      "cameraBay": [
+       6.8,
+       64.332,
+       -4.897
+      ],
+      "lookAtBay": [
+       1.391,
+       68.954,
+       -1.24
+      ],
+      "fovV": 53.44,
+      "exposure": 0.443,
+      "riseProfile": 0.047,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.9,
+      "discTopY": 68.457,
+      "cameraBay": [
+       6.218,
+       66.054,
+       -5.649
+      ],
+      "lookAtBay": [
+       1.267,
+       70.675,
+       -1.39
+      ],
+      "fovV": 53.04,
+      "exposure": 0.438,
+      "riseProfile": 0.08,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.0,
+      "discTopY": 70.171,
+      "cameraBay": [
+       5.599,
+       67.771,
+       -6.291
+      ],
+      "lookAtBay": [
+       1.139,
+       72.391,
+       -1.519
+      ],
+      "fovV": 52.55,
+      "exposure": 0.432,
+      "riseProfile": 0.121,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.1,
+      "discTopY": 71.886,
+      "cameraBay": [
+       4.959,
+       69.493,
+       -6.817
+      ],
+      "lookAtBay": [
+       1.004,
+       74.113,
+       -1.62
+      ],
+      "fovV": 51.98,
+      "exposure": 0.425,
+      "riseProfile": 0.169,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.2,
+      "discTopY": 73.6,
+      "cameraBay": [
+       4.312,
+       71.227,
+       -7.226
+      ],
+      "lookAtBay": [
+       0.86,
+       75.848,
+       -1.682
+      ],
+      "fovV": 51.34,
+      "exposure": 0.417,
+      "riseProfile": 0.222,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.3,
+      "discTopY": 75.314,
+      "cameraBay": [
+       3.68,
+       72.974,
+       -7.528
+      ],
+      "lookAtBay": [
+       0.717,
+       77.595,
+       -1.709
+      ],
+      "fovV": 50.65,
+      "exposure": 0.408,
+      "riseProfile": 0.279,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.4,
+      "discTopY": 77.029,
+      "cameraBay": [
+       3.082,
+       74.73,
+       -7.735
+      ],
+      "lookAtBay": [
+       0.582,
+       79.353,
+       -1.704
+      ],
+      "fovV": 49.93,
+      "exposure": 0.399,
+      "riseProfile": 0.34,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.5,
+      "discTopY": 78.743,
+      "cameraBay": [
+       2.529,
+       76.494,
+       -7.862
+      ],
+      "lookAtBay": [
+       0.459,
+       81.118,
+       -1.671
+      ],
+      "fovV": 49.17,
+      "exposure": 0.39,
+      "riseProfile": 0.403,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.6,
+      "discTopY": 80.457,
+      "cameraBay": [
+       2.031,
+       78.265,
+       -7.923
+      ],
+      "lookAtBay": [
+       0.351,
+       82.89,
+       -1.616
+      ],
+      "fovV": 48.39,
+      "exposure": 0.38,
+      "riseProfile": 0.467,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.7,
+      "discTopY": 82.171,
+      "cameraBay": [
+       1.592,
+       80.04,
+       -7.932
+      ],
+      "lookAtBay": [
+       0.259,
+       84.666,
+       -1.543
+      ],
+      "fovV": 47.61,
+      "exposure": 0.37,
+      "riseProfile": 0.533,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.8,
+      "discTopY": 83.886,
+      "cameraBay": [
+       1.214,
+       81.819,
+       -7.903
+      ],
+      "lookAtBay": [
+       0.185,
+       86.444,
+       -1.457
+      ],
+      "fovV": 46.83,
+      "exposure": 0.36,
+      "riseProfile": 0.597,
+      "whiteout": 0.0
+     },
+     {
+      "t": 5.9,
+      "discTopY": 85.6,
+      "cameraBay": [
+       0.897,
+       83.6,
+       -7.847
+      ],
+      "lookAtBay": [
+       0.126,
+       88.223,
+       -1.363
+      ],
+      "fovV": 46.07,
+      "exposure": 0.351,
+      "riseProfile": 0.66,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.0,
+      "discTopY": 87.314,
+      "cameraBay": [
+       0.638,
+       85.381,
+       -7.773
+      ],
+      "lookAtBay": [
+       0.082,
+       89.999,
+       -1.265
+      ],
+      "fovV": 45.35,
+      "exposure": 0.342,
+      "riseProfile": 0.721,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.1,
+      "discTopY": 89.029,
+      "cameraBay": [
+       0.432,
+       87.16,
+       -7.691
+      ],
+      "lookAtBay": [
+       0.051,
+       91.773,
+       -1.166
+      ],
+      "fovV": 44.66,
+      "exposure": 0.333,
+      "riseProfile": 0.778,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.2,
+      "discTopY": 90.743,
+      "cameraBay": [
+       0.275,
+       88.935,
+       -7.606
+      ],
+      "lookAtBay": [
+       0.029,
+       93.543,
+       -1.071
+      ],
+      "fovV": 44.02,
+      "exposure": 0.325,
+      "riseProfile": 0.831,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.3,
+      "discTopY": 92.457,
+      "cameraBay": [
+       0.161,
+       90.706,
+       -7.525
+      ],
+      "lookAtBay": [
+       0.015,
+       95.308,
+       -0.982
+      ],
+      "fovV": 43.45,
+      "exposure": 0.318,
+      "riseProfile": 0.879,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.4,
+      "discTopY": 94.171,
+      "cameraBay": [
+       0.084,
+       92.47,
+       -7.451
+      ],
+      "lookAtBay": [
+       0.007,
+       97.067,
+       -0.904
+      ],
+      "fovV": 42.96,
+      "exposure": 0.312,
+      "riseProfile": 0.92,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.5,
+      "discTopY": 95.886,
+      "cameraBay": [
+       0.036,
+       94.226,
+       -7.389
+      ],
+      "lookAtBay": [
+       0.003,
+       98.819,
+       -0.839
+      ],
+      "fovV": 42.56,
+      "exposure": 0.307,
+      "riseProfile": 0.953,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.6,
+      "discTopY": 97.6,
+      "cameraBay": [
+       0.011,
+       95.973,
+       -7.341
+      ],
+      "lookAtBay": [
+       0.001,
+       100.563,
+       -0.789
+      ],
+      "fovV": 42.26,
+      "exposure": 0.303,
+      "riseProfile": 0.979,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.7,
+      "discTopY": 99.314,
+      "cameraBay": [
+       0.001,
+       97.707,
+       -7.311
+      ],
+      "lookAtBay": [
+       0.0,
+       102.296,
+       -0.758
+      ],
+      "fovV": 42.07,
+      "exposure": 0.301,
+      "riseProfile": 0.994,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.8,
+      "discTopY": 101.029,
+      "cameraBay": [
+       0.0,
+       99.429,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       104.017,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 6.9,
+      "discTopY": 102.743,
+      "cameraBay": [
+       0.0,
+       101.143,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       105.731,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.0,
+      "discTopY": 104.457,
+      "cameraBay": [
+       0.0,
+       102.857,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       107.446,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.1,
+      "discTopY": 106.129,
+      "cameraBay": [
+       0.0,
+       104.529,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       109.117,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.2,
+      "discTopY": 107.714,
+      "cameraBay": [
+       0.0,
+       106.114,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       110.703,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.3,
+      "discTopY": 109.214,
+      "cameraBay": [
+       0.0,
+       107.614,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       112.203,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.4,
+      "discTopY": 110.629,
+      "cameraBay": [
+       0.0,
+       109.029,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       113.617,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 7.5,
+      "discTopY": 111.957,
+      "cameraBay": [
+       0.0,
+       110.357,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       114.946,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.002
+     },
+     {
+      "t": 7.6,
+      "discTopY": 113.2,
+      "cameraBay": [
+       0.0,
+       111.6,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       116.189,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.016
+     },
+     {
+      "t": 7.7,
+      "discTopY": 114.357,
+      "cameraBay": [
+       0.0,
+       112.757,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       117.346,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.049
+     },
+     {
+      "t": 7.8,
+      "discTopY": 115.429,
+      "cameraBay": [
+       0.0,
+       113.829,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       118.417,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.104
+     },
+     {
+      "t": 7.9,
+      "discTopY": 116.414,
+      "cameraBay": [
+       0.0,
+       114.814,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       119.403,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.18
+     },
+     {
+      "t": 8.0,
+      "discTopY": 117.314,
+      "cameraBay": [
+       0.0,
+       115.714,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       120.303,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.275
+     },
+     {
+      "t": 8.1,
+      "discTopY": 118.129,
+      "cameraBay": [
+       0.0,
+       116.529,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       121.117,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.384
+     },
+     {
+      "t": 8.2,
+      "discTopY": 118.857,
+      "cameraBay": [
+       0.0,
+       117.257,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       121.846,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.5
+     },
+     {
+      "t": 8.3,
+      "discTopY": 119.5,
+      "cameraBay": [
+       0.0,
+       117.9,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       122.489,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.616
+     },
+     {
+      "t": 8.4,
+      "discTopY": 120.057,
+      "cameraBay": [
+       0.0,
+       118.457,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       123.046,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.725
+     },
+     {
+      "t": 8.5,
+      "discTopY": 120.529,
+      "cameraBay": [
+       0.0,
+       118.929,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       123.517,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.82
+     },
+     {
+      "t": 8.6,
+      "discTopY": 120.914,
+      "cameraBay": [
+       0.0,
+       119.314,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       123.903,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.896
+     },
+     {
+      "t": 8.7,
+      "discTopY": 121.214,
+      "cameraBay": [
+       0.0,
+       119.614,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.203,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.951
+     },
+     {
+      "t": 8.8,
+      "discTopY": 121.429,
+      "cameraBay": [
+       0.0,
+       119.829,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.417,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.984
+     },
+     {
+      "t": 8.9,
+      "discTopY": 121.557,
+      "cameraBay": [
+       0.0,
+       119.957,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.546,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.998
+     },
+     {
+      "t": 9.0,
+      "discTopY": 121.6,
+      "cameraBay": [
+       0.0,
+       120.0,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.589,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 1.0
+     }
+    ]
+   },
+   "short": {
+    "duration": 5.0,
+    "riseStuds": 120.0,
+    "profile": "accelerate 1.6 s, cruise 2.0 s at 34.29 studs/s, brake 1.4 s",
+    "peakSpeed": 34.286,
+    "accel": 21.429,
+    "orbitDeg": 155.0,
+    "orbitStartDeg": 295.0,
+    "orbitDirection": "anticlockwise seen from above; 90 = in front of the rider (toward the hall centre), 180 = the rider's left, 270 = behind",
+    "orbitEndsAt": 3.4,
+    "settle": [
+     2.4,
+     3.4
+    ],
+    "whiteout": [
+     4.2,
+     5.0
+    ],
+    "radiusKeys": [
+     [
+      0.0,
+      6.8
+     ],
+     [
+      1.6,
+      7.8
+     ],
+     [
+      3.4,
+      7.0
+     ],
+     [
+      5.0,
+      7.0
+     ]
+    ],
+    "heightKeys": [
+     [
+      0.0,
+      3.0
+     ],
+     [
+      1.4,
+      -2.4
+     ],
+     [
+      3.4,
+      -1.6
+     ],
+     [
+      5.0,
+      -1.6
+     ]
+    ],
+    "fovKeys": [
+     [
+      0.0,
+      52.0
+     ],
+     [
+      2.0,
+      54.0
+     ],
+     [
+      3.4,
+      42.0
+     ],
+     [
+      5.0,
+      42.0
+     ]
+    ],
+    "exposureKeys": [
+     [
+      0.0,
+      0.45
+     ],
+     [
+      2.0,
+      0.45
+     ],
+     [
+      3.4,
+      0.3
+     ],
+     [
+      5.0,
+      0.3
+     ]
+    ],
+    "minClearance": 2.459,
+    "minClearanceAt": 1.2,
+    "lineOfSightBlockedAt": [
+     0.5,
+     0.6,
+     0.7,
+     0.8,
+     5.0
+    ],
+    "blockedByOtherThanOwnPoleAt": [
+     0.5,
+     0.6,
+     0.7,
+     0.8,
+     5.0
+    ],
+    "samples": 51,
+    "keys": [
+     {
+      "t": 0.0,
+      "discTopY": 1.6,
+      "cameraBay": [
+       2.874,
+       4.6,
+       5.863
+      ],
+      "lookAtBay": [
+       -0.501,
+       5.07,
+       -1.375
+      ],
+      "fovV": 52.0,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.1,
+      "discTopY": 1.707,
+      "cameraBay": [
+       2.883,
+       4.628,
+       5.871
+      ],
+      "lookAtBay": [
+       -0.495,
+       5.189,
+       -1.359
+      ],
+      "fovV": 52.01,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.2,
+      "discTopY": 2.029,
+      "cameraBay": [
+       2.923,
+       4.729,
+       5.887
+      ],
+      "lookAtBay": [
+       -0.477,
+       5.543,
+       -1.309
+      ],
+      "fovV": 52.06,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.3,
+      "discTopY": 2.564,
+      "cameraBay": [
+       3.014,
+       4.927,
+       5.898
+      ],
+      "lookAtBay": [
+       -0.445,
+       6.118,
+       -1.216
+      ],
+      "fovV": 52.12,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.4,
+      "discTopY": 3.314,
+      "cameraBay": [
+       3.169,
+       5.244,
+       5.893
+      ],
+      "lookAtBay": [
+       -0.397,
+       6.898,
+       -1.075
+      ],
+      "fovV": 52.21,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.5,
+      "discTopY": 4.279,
+      "cameraBay": [
+       3.399,
+       5.704,
+       5.856
+      ],
+      "lookAtBay": [
+       -0.324,
+       7.867,
+       -0.887
+      ],
+      "fovV": 52.31,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.6,
+      "discTopY": 5.457,
+      "cameraBay": [
+       3.71,
+       6.332,
+       5.773
+      ],
+      "lookAtBay": [
+       -0.221,
+       9.007,
+       -0.661
+      ],
+      "fovV": 52.43,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.7,
+      "discTopY": 6.85,
+      "cameraBay": [
+       4.102,
+       7.15,
+       5.625
+      ],
+      "lookAtBay": [
+       -0.081,
+       10.311,
+       -0.417
+      ],
+      "fovV": 52.56,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.8,
+      "discTopY": 8.457,
+      "cameraBay": [
+       4.568,
+       8.183,
+       5.394
+      ],
+      "lookAtBay": [
+       0.097,
+       11.779,
+       -0.18
+      ],
+      "fovV": 52.7,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 0.9,
+      "discTopY": 10.279,
+      "cameraBay": [
+       5.093,
+       9.453,
+       5.059
+      ],
+      "lookAtBay": [
+       0.308,
+       13.423,
+       0.025
+      ],
+      "fovV": 52.85,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.0,
+      "discTopY": 12.314,
+      "cameraBay": [
+       5.655,
+       10.985,
+       4.601
+      ],
+      "lookAtBay": [
+       0.545,
+       15.259,
+       0.172
+      ],
+      "fovV": 53.0,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.1,
+      "discTopY": 14.564,
+      "cameraBay": [
+       6.223,
+       12.802,
+       4.007
+      ],
+      "lookAtBay": [
+       0.789,
+       17.31,
+       0.246
+      ],
+      "fovV": 53.15,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.2,
+      "discTopY": 17.029,
+      "cameraBay": [
+       6.759,
+       14.928,
+       3.269
+      ],
+      "lookAtBay": [
+       1.017,
+       19.601,
+       0.237
+      ],
+      "fovV": 53.3,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.3,
+      "discTopY": 19.707,
+      "cameraBay": [
+       7.222,
+       17.386,
+       2.393
+      ],
+      "lookAtBay": [
+       1.203,
+       22.154,
+       0.149
+      ],
+      "fovV": 53.44,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.4,
+      "discTopY": 22.6,
+      "cameraBay": [
+       7.57,
+       20.2,
+       1.394
+      ],
+      "lookAtBay": [
+       1.317,
+       24.991,
+       -0.005
+      ],
+      "fovV": 53.57,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.5,
+      "discTopY": 25.707,
+      "cameraBay": [
+       7.765,
+       23.313,
+       0.303
+      ],
+      "lookAtBay": [
+       1.366,
+       28.088,
+       -0.194
+      ],
+      "fovV": 53.69,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.6,
+      "discTopY": 29.029,
+      "cameraBay": [
+       7.781,
+       26.651,
+       -0.84
+      ],
+      "lookAtBay": [
+       1.368,
+       31.413,
+       -0.395
+      ],
+      "fovV": 53.79,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.7,
+      "discTopY": 32.457,
+      "cameraBay": [
+       7.608,
+       30.106,
+       -1.987
+      ],
+      "lookAtBay": [
+       1.324,
+       34.856,
+       -0.594
+      ],
+      "fovV": 53.88,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.8,
+      "discTopY": 35.886,
+      "cameraBay": [
+       7.255,
+       33.569,
+       -3.089
+      ],
+      "lookAtBay": [
+       1.24,
+       38.309,
+       -0.777
+      ],
+      "fovV": 53.94,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 1.9,
+      "discTopY": 39.314,
+      "cameraBay": [
+       6.741,
+       37.039,
+       -4.104
+      ],
+      "lookAtBay": [
+       1.122,
+       41.769,
+       -0.933
+      ],
+      "fovV": 53.99,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.0,
+      "discTopY": 42.743,
+      "cameraBay": [
+       6.099,
+       40.516,
+       -4.999
+      ],
+      "lookAtBay": [
+       0.982,
+       45.236,
+       -1.057
+      ],
+      "fovV": 54.0,
+      "exposure": 0.45,
+      "riseProfile": 0.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.1,
+      "discTopY": 46.171,
+      "cameraBay": [
+       5.366,
+       43.997,
+       -5.751
+      ],
+      "lookAtBay": [
+       0.831,
+       48.709,
+       -1.144
+      ],
+      "fovV": 53.83,
+      "exposure": 0.448,
+      "riseProfile": 0.015,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.2,
+      "discTopY": 49.6,
+      "cameraBay": [
+       4.586,
+       47.482,
+       -6.351
+      ],
+      "lookAtBay": [
+       0.677,
+       52.185,
+       -1.194
+      ],
+      "fovV": 53.34,
+      "exposure": 0.442,
+      "riseProfile": 0.055,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.3,
+      "discTopY": 53.029,
+      "cameraBay": [
+       3.801,
+       50.969,
+       -6.801
+      ],
+      "lookAtBay": [
+       0.532,
+       55.664,
+       -1.21
+      ],
+      "fovV": 52.58,
+      "exposure": 0.432,
+      "riseProfile": 0.118,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.4,
+      "discTopY": 56.457,
+      "cameraBay": [
+       3.047,
+       54.457,
+       -7.116
+      ],
+      "lookAtBay": [
+       0.402,
+       59.145,
+       -1.198
+      ],
+      "fovV": 51.62,
+      "exposure": 0.42,
+      "riseProfile": 0.198,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.5,
+      "discTopY": 59.886,
+      "cameraBay": [
+       2.353,
+       57.946,
+       -7.316
+      ],
+      "lookAtBay": [
+       0.29,
+       62.626,
+       -1.165
+      ],
+      "fovV": 50.5,
+      "exposure": 0.406,
+      "riseProfile": 0.292,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.6,
+      "discTopY": 63.314,
+      "cameraBay": [
+       1.741,
+       61.433,
+       -7.424
+      ],
+      "lookAtBay": [
+       0.199,
+       66.103,
+       -1.114
+      ],
+      "fovV": 49.28,
+      "exposure": 0.391,
+      "riseProfile": 0.394,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.7,
+      "discTopY": 66.743,
+      "cameraBay": [
+       1.224,
+       64.917,
+       -7.465
+      ],
+      "lookAtBay": [
+       0.129,
+       69.574,
+       -1.053
+      ],
+      "fovV": 48.0,
+      "exposure": 0.375,
+      "riseProfile": 0.5,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.8,
+      "discTopY": 70.171,
+      "cameraBay": [
+       0.806,
+       68.399,
+       -7.462
+      ],
+      "lookAtBay": [
+       0.077,
+       73.039,
+       -0.987
+      ],
+      "fovV": 46.72,
+      "exposure": 0.359,
+      "riseProfile": 0.606,
+      "whiteout": 0.0
+     },
+     {
+      "t": 2.9,
+      "discTopY": 73.6,
+      "cameraBay": [
+       0.487,
+       71.875,
+       -7.434
+      ],
+      "lookAtBay": [
+       0.042,
+       76.499,
+       -0.922
+      ],
+      "fovV": 45.5,
+      "exposure": 0.344,
+      "riseProfile": 0.708,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.0,
+      "discTopY": 77.029,
+      "cameraBay": [
+       0.26,
+       75.345,
+       -7.396
+      ],
+      "lookAtBay": [
+       0.021,
+       79.956,
+       -0.863
+      ],
+      "fovV": 44.38,
+      "exposure": 0.33,
+      "riseProfile": 0.802,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.1,
+      "discTopY": 80.457,
+      "cameraBay": [
+       0.114,
+       78.809,
+       -7.358
+      ],
+      "lookAtBay": [
+       0.008,
+       83.408,
+       -0.813
+      ],
+      "fovV": 43.42,
+      "exposure": 0.318,
+      "riseProfile": 0.882,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.2,
+      "discTopY": 83.886,
+      "cameraBay": [
+       0.035,
+       82.263,
+       -7.327
+      ],
+      "lookAtBay": [
+       0.002,
+       86.856,
+       -0.777
+      ],
+      "fovV": 42.66,
+      "exposure": 0.308,
+      "riseProfile": 0.945,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.3,
+      "discTopY": 87.314,
+      "cameraBay": [
+       0.005,
+       85.708,
+       -7.307
+      ],
+      "lookAtBay": [
+       0.0,
+       90.298,
+       -0.754
+      ],
+      "fovV": 42.17,
+      "exposure": 0.302,
+      "riseProfile": 0.985,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.4,
+      "discTopY": 90.743,
+      "cameraBay": [
+       0.0,
+       89.143,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       93.731,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.5,
+      "discTopY": 94.171,
+      "cameraBay": [
+       0.0,
+       92.571,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       97.16,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.6,
+      "discTopY": 97.6,
+      "cameraBay": [
+       0.0,
+       96.0,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       100.589,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.7,
+      "discTopY": 100.906,
+      "cameraBay": [
+       0.0,
+       99.306,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       103.895,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.8,
+      "discTopY": 103.967,
+      "cameraBay": [
+       0.0,
+       102.367,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       106.956,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 3.9,
+      "discTopY": 106.784,
+      "cameraBay": [
+       0.0,
+       105.184,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       109.772,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.0,
+      "discTopY": 109.355,
+      "cameraBay": [
+       0.0,
+       107.755,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       112.344,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.1,
+      "discTopY": 111.682,
+      "cameraBay": [
+       0.0,
+       110.082,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       114.67,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.2,
+      "discTopY": 113.763,
+      "cameraBay": [
+       0.0,
+       112.163,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       116.752,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.0
+     },
+     {
+      "t": 4.3,
+      "discTopY": 115.6,
+      "cameraBay": [
+       0.0,
+       114.0,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       118.589,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.016
+     },
+     {
+      "t": 4.4,
+      "discTopY": 117.192,
+      "cameraBay": [
+       0.0,
+       115.592,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       120.18,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.104
+     },
+     {
+      "t": 4.5,
+      "discTopY": 118.539,
+      "cameraBay": [
+       0.0,
+       116.939,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       121.527,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.275
+     },
+     {
+      "t": 4.6,
+      "discTopY": 119.641,
+      "cameraBay": [
+       0.0,
+       118.041,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       122.629,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.5
+     },
+     {
+      "t": 4.7,
+      "discTopY": 120.498,
+      "cameraBay": [
+       0.0,
+       118.898,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       123.487,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.725
+     },
+     {
+      "t": 4.8,
+      "discTopY": 121.11,
+      "cameraBay": [
+       0.0,
+       119.51,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.099,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.896
+     },
+     {
+      "t": 4.9,
+      "discTopY": 121.478,
+      "cameraBay": [
+       0.0,
+       119.878,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.466,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 0.984
+     },
+     {
+      "t": 5.0,
+      "discTopY": 121.6,
+      "cameraBay": [
+       0.0,
+       120.0,
+       -7.3
+      ],
+      "lookAtBay": [
+       0.0,
+       124.589,
+       -0.747
+      ],
+      "fovV": 42.0,
+      "exposure": 0.3,
+      "riseProfile": 1.0,
+      "whiteout": 1.0
+     }
+    ]
+   }
+  },
   "duration": 9.0,
   "profile": "accelerate 2.0 s, cruise 5.0 s at 17.14 studs/s, brake 2.0 s",
   "peakSpeed": 17.143,
   "accel": 8.571,
-  "orbitDeg": 270.0,
-  "orbitDirection": "counter-clockwise seen from above, starting in front of the case (toward the hall centre)",
+  "orbitDeg": 360.0,
+  "orbitDirection": "anticlockwise seen from above; 90 = in front of the rider (toward the hall centre), 180 = the rider's left, 270 = behind",
   "radiusKeys": [
    [
     0.0,
     6.5
    ],
    [
-    4.0,
+    3.0,
     8.5
    ],
    [
-    6.5,
-    8.0
+    5.0,
+    8.2
    ],
    [
-    8.0,
-    5.2
+    6.8,
+    7.0
    ],
    [
     9.0,
-    4.8
+    7.0
    ]
   ],
   "heightKeys": [
@@ -2634,20 +5577,20 @@
     4.4
    ],
    [
-    3.0,
+    2.5,
     -3.0
    ],
    [
-    6.0,
-    -1.0
+    5.0,
+    -2.4
    ],
    [
-    7.5,
+    6.8,
     -1.6
    ],
    [
     9.0,
-    -2.4
+    -1.6
    ]
   ],
   "fovKeys": [
@@ -2656,20 +5599,20 @@
     50.0
    ],
    [
-    7.0,
-    52.0
+    4.5,
+    54.0
+   ],
+   [
+    6.8,
+    42.0
    ],
    [
     9.0,
-    62.0
+    42.0
    ]
   ],
-  "minClearance": 1.826,
-  "minClearanceAt": 9.0,
-  "lineOfSightBlockedSamples": 7,
-  "blockedByOtherThanOwnPoleAt": [
-   1.2
-  ],
+  "minClearance": 2.528,
+  "minClearanceAt": 3.9,
   "samples": 91,
   "keys": [
    {
@@ -2681,1424 +5624,1878 @@
      -6.8
     ],
     "lookAtBay": [
-     0.0,
-     5.0,
-     -0.3
+     -0.0,
+     4.784,
+     1.107
     ],
-    "fovV": 50.0
+    "fovV": 50.0,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.1,
     "discTopY": 1.643,
     "cameraBay": [
-     -0.0,
-     6.019,
-     -6.804
+     -0.001,
+     6.008,
+     -6.807
     ],
     "lookAtBay": [
      0.0,
-     5.043,
-     -0.3
+     4.834,
+     1.107
     ],
-    "fovV": 50.0
+    "fovV": 50.01,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.2,
     "discTopY": 1.771,
     "cameraBay": [
-     -0.003,
-     6.077,
-     -6.814
+     -0.01,
+     6.037,
+     -6.825
     ],
     "lookAtBay": [
-     0.0,
-     5.171,
-     -0.3
+     0.002,
+     4.985,
+     1.105
     ],
-    "fovV": 50.0
+    "fovV": 50.02,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.3,
     "discTopY": 1.986,
     "cameraBay": [
-     -0.011,
-     6.179,
-     -6.832
+     -0.033,
+     6.092,
+     -6.856
     ],
     "lookAtBay": [
-     0.0,
-     5.386,
-     -0.3
+     0.007,
+     5.235,
+     1.098
     ],
-    "fovV": 50.01
+    "fovV": 50.05,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.4,
     "discTopY": 2.286,
     "cameraBay": [
-     -0.025,
-     6.326,
-     -6.856
+     -0.077,
+     6.178,
+     -6.897
     ],
     "lookAtBay": [
-     0.0,
-     5.686,
-     -0.3
+     0.016,
+     5.583,
+     1.081
     ],
-    "fovV": 50.02
+    "fovV": 50.09,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.5,
     "discTopY": 2.671,
     "cameraBay": [
-     -0.049,
-     6.523,
-     -6.886
+     -0.148,
+     6.302,
+     -6.946
     ],
     "lookAtBay": [
-     0.0,
-     6.071,
-     -0.3
+     0.03,
+     6.025,
+     1.047
     ],
-    "fovV": 50.03
+    "fovV": 50.14,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.6,
     "discTopY": 3.143,
     "cameraBay": [
-     -0.083,
-     6.773,
-     -6.921
+     -0.253,
+     6.469,
+     -7.003
     ],
     "lookAtBay": [
-     0.0,
-     6.543,
-     -0.3
+     0.049,
+     6.557,
+     0.991
     ],
-    "fovV": 50.04
+    "fovV": 50.19,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.7,
     "discTopY": 3.7,
     "cameraBay": [
-     -0.131,
-     7.079,
-     -6.961
+     -0.395,
+     6.684,
+     -7.064
     ],
     "lookAtBay": [
-     0.0,
-     7.1,
-     -0.3
+     0.071,
+     7.174,
+     0.907
     ],
-    "fovV": 50.06
+    "fovV": 50.26,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.8,
     "discTopY": 4.343,
     "cameraBay": [
-     -0.193,
-     7.445,
-     -7.005
+     -0.582,
+     6.955,
+     -7.126
     ],
     "lookAtBay": [
-     0.0,
-     7.743,
-     -0.3
+     0.093,
+     7.869,
+     0.793
     ],
-    "fovV": 50.07
+    "fovV": 50.33,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 0.9,
     "discTopY": 5.071,
     "cameraBay": [
-     -0.273,
-     7.873,
-     -7.053
+     -0.818,
+     7.285,
+     -7.184
     ],
     "lookAtBay": [
-     0.0,
-     8.471,
-     -0.3
+     0.112,
+     8.635,
+     0.647
     ],
-    "fovV": 50.09
+    "fovV": 50.42,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.0,
     "discTopY": 5.886,
     "cameraBay": [
-     -0.37,
-     8.367,
-     -7.102
+     -1.107,
+     7.681,
+     -7.231
     ],
     "lookAtBay": [
-     0.0,
-     9.286,
-     -0.3
+     0.123,
+     9.464,
+     0.47
     ],
-    "fovV": 50.11
+    "fovV": 50.5,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.1,
     "discTopY": 6.786,
     "cameraBay": [
-     -0.488,
-     8.931,
-     -7.153
+     -1.451,
+     8.149,
+     -7.26
     ],
     "lookAtBay": [
-     0.0,
-     10.186,
-     -0.3
+     0.119,
+     10.352,
+     0.269
     ],
-    "fovV": 50.13
+    "fovV": 50.6,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.2,
     "discTopY": 7.771,
     "cameraBay": [
-     -0.627,
-     9.567,
-     -7.204
+     -1.854,
+     8.693,
+     -7.261
     ],
     "lookAtBay": [
-     0.0,
-     11.171,
-     -0.3
+     0.093,
+     11.296,
+     0.049
     ],
-    "fovV": 50.16
+    "fovV": 50.7,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.3,
     "discTopY": 8.843,
     "cameraBay": [
-     -0.789,
-     10.278,
-     -7.252
+     -2.316,
+     9.321,
+     -7.224
     ],
     "lookAtBay": [
-     0.0,
-     12.243,
-     -0.3
+     0.04,
+     12.293,
+     -0.18
     ],
-    "fovV": 50.18
+    "fovV": 50.81,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.4,
     "discTopY": 10.0,
     "cameraBay": [
-     -0.976,
-     11.069,
-     -7.296
+     -2.834,
+     10.037,
+     -7.136
     ],
     "lookAtBay": [
-     0.0,
-     13.4,
-     -0.3
+     -0.045,
+     13.347,
+     -0.408
     ],
-    "fovV": 50.21
+    "fovV": 50.92,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.5,
     "discTopY": 11.243,
     "cameraBay": [
-     -1.187,
-     11.943,
-     -7.333
+     -3.403,
+     10.848,
+     -6.984
     ],
     "lookAtBay": [
-     0.0,
-     14.643,
-     -0.3
+     -0.164,
+     14.46,
+     -0.622
     ],
-    "fovV": 50.24
+    "fovV": 51.04,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.6,
     "discTopY": 12.571,
     "cameraBay": [
-     -1.425,
-     12.902,
-     -7.362
+     -4.016,
+     11.758,
+     -6.752
     ],
     "lookAtBay": [
-     0.0,
-     15.971,
-     -0.3
+     -0.319,
+     15.637,
+     -0.812
     ],
-    "fovV": 50.27
+    "fovV": 51.16,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.7,
     "discTopY": 13.986,
     "cameraBay": [
-     -1.69,
-     13.95,
-     -7.378
+     -4.662,
+     12.774,
+     -6.427
     ],
     "lookAtBay": [
-     0.0,
-     17.386,
-     -0.3
+     -0.506,
+     16.885,
+     -0.965
     ],
-    "fovV": 50.3
+    "fovV": 51.28,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.8,
     "discTopY": 15.486,
     "cameraBay": [
-     -1.981,
-     15.091,
-     -7.378
+     -5.323,
+     13.901,
+     -5.995
     ],
     "lookAtBay": [
-     0.0,
-     18.886,
-     -0.3
+     -0.721,
+     18.211,
+     -1.071
     ],
-    "fovV": 50.33
+    "fovV": 51.41,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 1.9,
     "discTopY": 17.071,
     "cameraBay": [
-     -2.299,
-     16.327,
-     -7.36
+     -5.982,
+     15.146,
+     -5.446
     ],
     "lookAtBay": [
-     0.0,
-     20.471,
-     -0.3
+     -0.955,
+     19.621,
+     -1.121
     ],
-    "fovV": 50.36
+    "fovV": 51.54,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.0,
     "discTopY": 18.743,
     "cameraBay": [
-     -2.643,
-     17.661,
-     -7.319
+     -6.612,
+     16.512,
+     -4.77
     ],
     "lookAtBay": [
-     0.0,
-     22.143,
-     -0.3
+     -1.197,
+     21.124,
+     -1.109
     ],
-    "fovV": 50.4
+    "fovV": 51.67,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.1,
     "discTopY": 20.457,
     "cameraBay": [
-     -3.01,
-     19.056,
-     -7.251
+     -7.187,
+     17.965,
+     -3.965
     ],
     "lookAtBay": [
-     0.0,
-     23.857,
-     -0.3
+     -1.432,
+     22.683,
+     -1.03
     ],
-    "fovV": 50.43
+    "fovV": 51.8,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.2,
     "discTopY": 22.171,
     "cameraBay": [
-     -3.4,
-     20.469,
-     -7.152
+     -7.677,
+     19.466,
+     -3.033
     ],
     "lookAtBay": [
-     0.0,
-     25.571,
-     -0.3
+     -1.646,
+     24.263,
+     -0.886
     ],
-    "fovV": 50.47
+    "fovV": 51.93,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.3,
     "discTopY": 23.886,
     "cameraBay": [
-     -3.81,
-     21.906,
-     -7.018
+     -8.05,
+     21.02,
+     -1.983
     ],
     "lookAtBay": [
-     0.0,
-     27.286,
-     -0.3
+     -1.821,
+     25.868,
+     -0.681
     ],
-    "fovV": 50.51
+    "fovV": 52.07,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.4,
     "discTopY": 25.6,
     "cameraBay": [
-     -4.235,
-     23.37,
-     -6.845
+     -8.275,
+     22.635,
+     -0.833
     ],
     "lookAtBay": [
-     0.0,
-     29.0,
-     -0.3
+     -1.942,
+     27.506,
+     -0.425
     ],
-    "fovV": 50.54
+    "fovV": 52.2,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.5,
     "discTopY": 27.314,
     "cameraBay": [
-     -4.673,
-     24.862,
-     -6.629
+     -8.323,
+     24.314,
+     0.391
     ],
     "lookAtBay": [
-     0.0,
-     30.714,
-     -0.3
+     -1.995,
+     29.18,
+     -0.134
     ],
-    "fovV": 50.58
+    "fovV": 52.33,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.6,
     "discTopY": 29.029,
     "cameraBay": [
-     -5.117,
-     26.388,
-     -6.367
+     -8.172,
+     26.031,
+     1.657
     ],
     "lookAtBay": [
-     0.0,
-     32.429,
-     -0.3
+     -1.982,
+     30.877,
+     0.175
     ],
-    "fovV": 50.62
+    "fovV": 52.46,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.7,
     "discTopY": 30.743,
     "cameraBay": [
-     -5.563,
-     27.95,
-     -6.054
+     -7.804,
+     27.754,
+     2.925
     ],
     "lookAtBay": [
-     0.0,
-     34.143,
-     -0.3
+     -1.908,
+     32.581,
+     0.488
     ],
-    "fovV": 50.66
+    "fovV": 52.59,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.8,
     "discTopY": 32.457,
     "cameraBay": [
-     -6.004,
-     29.551,
-     -5.69
+     -7.213,
+     29.481,
+     4.149
     ],
     "lookAtBay": [
-     0.0,
-     35.857,
-     -0.3
+     -1.772,
+     34.291,
+     0.793
     ],
-    "fovV": 50.7
+    "fovV": 52.72,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 2.9,
     "discTopY": 34.171,
     "cameraBay": [
-     -6.432,
-     31.196,
-     -5.272
+     -6.402,
+     31.213,
+     5.281
     ],
     "lookAtBay": [
-     0.0,
-     37.571,
-     -0.3
+     -1.575,
+     36.007,
+     1.073
     ],
-    "fovV": 50.75
+    "fovV": 52.84,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.0,
     "discTopY": 35.886,
     "cameraBay": [
-     -6.841,
-     32.886,
-     -4.799
+     -5.388,
+     32.948,
+     6.274
     ],
     "lookAtBay": [
-     0.0,
-     39.286,
-     -0.3
+     -1.323,
+     37.73,
+     1.314
     ],
-    "fovV": 50.79
+    "fovV": 52.96,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.1,
     "discTopY": 37.6,
     "cameraBay": [
-     -7.221,
-     34.607,
-     -4.273
+     -4.201,
+     34.687,
+     7.087
     ],
     "lookAtBay": [
-     0.0,
-     41.0,
-     -0.3
+     -1.026,
+     39.458,
+     1.505
     ],
-    "fovV": 50.83
+    "fovV": 53.08,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.2,
     "discTopY": 39.314,
     "cameraBay": [
-     -7.566,
-     36.34,
-     -3.694
+     -2.877,
+     36.429,
+     7.689
     ],
     "lookAtBay": [
-     0.0,
-     42.714,
-     -0.3
+     -0.699,
+     41.189,
+     1.639
     ],
-    "fovV": 50.87
+    "fovV": 53.19,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.3,
     "discTopY": 41.029,
     "cameraBay": [
-     -7.866,
-     38.085,
-     -3.065
+     -1.461,
+     38.174,
+     8.055
     ],
     "lookAtBay": [
-     0.0,
-     44.429,
-     -0.3
+     -0.352,
+     42.922,
+     1.713
     ],
-    "fovV": 50.91
+    "fovV": 53.3,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.4,
     "discTopY": 42.743,
     "cameraBay": [
-     -8.113,
-     39.84,
-     -2.391
+     -0.0,
+     39.92,
+     8.169
     ],
     "lookAtBay": [
-     0.0,
-     46.143,
-     -0.3
+     -0.0,
+     44.657,
+     1.722
     ],
-    "fovV": 50.96
+    "fovV": 53.4,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.5,
     "discTopY": 44.457,
     "cameraBay": [
-     -8.3,
-     41.605,
-     -1.678
+     1.456,
+     41.668,
+     8.027
     ],
     "lookAtBay": [
-     0.0,
-     47.857,
-     -0.3
+     0.344,
+     46.394,
+     1.668
     ],
-    "fovV": 51.0
+    "fovV": 53.5,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.6,
     "discTopY": 46.171,
     "cameraBay": [
-     -8.42,
-     43.379,
-     -0.932
+     2.858,
+     43.418,
+     7.636
     ],
     "lookAtBay": [
-     0.0,
-     49.571,
-     -0.3
+     0.668,
+     48.133,
+     1.556
     ],
-    "fovV": 51.04
+    "fovV": 53.58,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.7,
     "discTopY": 47.886,
     "cameraBay": [
-     -8.467,
-     45.162,
-     -0.161
+     4.16,
+     45.168,
+     7.015
     ],
     "lookAtBay": [
-     0.0,
-     51.286,
-     -0.3
+     0.961,
+     49.872,
+     1.391
     ],
-    "fovV": 51.09
+    "fovV": 53.67,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.8,
     "discTopY": 49.6,
     "cameraBay": [
-     -8.435,
-     46.951,
-     0.625
+     5.322,
+     46.918,
+     6.192
     ],
     "lookAtBay": [
-     0.0,
-     53.0,
-     -0.3
+     1.215,
+     51.612,
+     1.182
     ],
-    "fovV": 51.13
+    "fovV": 53.74,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 3.9,
     "discTopY": 51.314,
     "cameraBay": [
-     -8.321,
-     48.746,
-     1.415
+     6.311,
+     48.668,
+     5.201
     ],
     "lookAtBay": [
-     0.0,
-     54.714,
-     -0.3
+     1.422,
+     53.352,
+     0.94
     ],
-    "fovV": 51.17
+    "fovV": 53.81,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.0,
     "discTopY": 53.029,
     "cameraBay": [
-     -8.124,
-     50.547,
-     2.2
+     7.107,
+     50.417,
+     4.083
     ],
     "lookAtBay": [
-     0.0,
-     56.429,
-     -0.3
+     1.581,
+     55.091,
+     0.675
     ],
-    "fovV": 51.21
+    "fovV": 53.86,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.1,
     "discTopY": 54.743,
     "cameraBay": [
-     -7.844,
-     52.352,
-     2.968
+     7.696,
+     52.166,
+     2.881
     ],
     "lookAtBay": [
-     0.0,
-     58.143,
-     -0.3
+     1.69,
+     56.83,
+     0.398
     ],
-    "fovV": 51.25
+    "fovV": 53.91,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.2,
     "discTopY": 56.457,
     "cameraBay": [
-     -7.485,
-     54.161,
-     3.709
+     8.077,
+     53.912,
+     1.635
     ],
     "lookAtBay": [
-     0.0,
-     59.857,
-     -0.3
+     1.751,
+     58.568,
+     0.119
     ],
-    "fovV": 51.3
+    "fovV": 53.95,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.3,
     "discTopY": 58.171,
     "cameraBay": [
-     -7.05,
-     55.973,
-     4.413
+     8.256,
+     55.657,
+     0.386
     ],
     "lookAtBay": [
-     0.0,
-     61.571,
-     -0.3
+     1.768,
+     60.305,
+     -0.153
     ],
-    "fovV": 51.34
+    "fovV": 53.98,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.4,
     "discTopY": 59.886,
     "cameraBay": [
-     -6.544,
-     57.786,
-     5.071
+     8.248,
+     57.399,
+     -0.832
     ],
     "lookAtBay": [
-     0.0,
-     63.286,
-     -0.3
+     1.745,
+     62.04,
+     -0.413
     ],
-    "fovV": 51.38
+    "fovV": 53.99,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.5,
     "discTopY": 61.6,
     "cameraBay": [
-     -5.974,
-     59.6,
-     5.674
+     8.072,
+     59.138,
+     -1.988
     ],
     "lookAtBay": [
-     0.0,
-     65.0,
-     -0.3
+     1.69,
+     63.773,
+     -0.653
     ],
-    "fovV": 51.42
+    "fovV": 54.0,
+    "exposure": 0.45,
+    "riseProfile": 0.0,
+    "whiteout": 0.0
    },
    {
     "t": 4.6,
     "discTopY": 63.314,
     "cameraBay": [
-     -5.347,
-     61.414,
-     6.214
+     7.754,
+     60.873,
+     -3.061
     ],
     "lookAtBay": [
-     0.0,
-     66.714,
-     -0.3
+     1.608,
+     65.503,
+     -0.872
     ],
-    "fovV": 51.46
+    "fovV": 53.93,
+    "exposure": 0.449,
+    "riseProfile": 0.006,
+    "whiteout": 0.0
    },
    {
     "t": 4.7,
     "discTopY": 65.029,
     "cameraBay": [
-     -4.671,
-     63.227,
-     6.687
+     7.321,
+     62.605,
+     -4.033
     ],
     "lookAtBay": [
-     0.0,
-     68.429,
-     -0.3
+     1.506,
+     67.23,
+     -1.068
     ],
-    "fovV": 51.49
+    "fovV": 53.74,
+    "exposure": 0.447,
+    "riseProfile": 0.021,
+    "whiteout": 0.0
    },
    {
     "t": 4.8,
     "discTopY": 66.743,
     "cameraBay": [
-     -3.956,
-     65.039,
-     7.086
+     6.8,
+     64.332,
+     -4.897
     ],
     "lookAtBay": [
-     0.0,
-     70.143,
-     -0.3
+     1.391,
+     68.954,
+     -1.24
     ],
-    "fovV": 51.53
+    "fovV": 53.44,
+    "exposure": 0.443,
+    "riseProfile": 0.047,
+    "whiteout": 0.0
    },
    {
     "t": 4.9,
     "discTopY": 68.457,
     "cameraBay": [
-     -3.212,
-     66.848,
-     7.41
+     6.218,
+     66.054,
+     -5.649
     ],
     "lookAtBay": [
-     0.0,
-     71.857,
-     -0.3
+     1.267,
+     70.675,
+     -1.39
     ],
-    "fovV": 51.57
+    "fovV": 53.04,
+    "exposure": 0.438,
+    "riseProfile": 0.08,
+    "whiteout": 0.0
    },
    {
     "t": 5.0,
     "discTopY": 70.171,
     "cameraBay": [
-     -2.448,
-     68.653,
-     7.656
+     5.599,
+     67.771,
+     -6.291
     ],
     "lookAtBay": [
-     0.0,
-     73.571,
-     -0.3
+     1.139,
+     72.391,
+     -1.519
     ],
-    "fovV": 51.6
+    "fovV": 52.55,
+    "exposure": 0.432,
+    "riseProfile": 0.121,
+    "whiteout": 0.0
    },
    {
     "t": 5.1,
     "discTopY": 71.886,
     "cameraBay": [
-     -1.675,
-     70.454,
-     7.824
+     4.959,
+     69.493,
+     -6.817
     ],
     "lookAtBay": [
-     0.0,
-     75.286,
-     -0.3
+     1.004,
+     74.113,
+     -1.62
     ],
-    "fovV": 51.64
+    "fovV": 51.98,
+    "exposure": 0.425,
+    "riseProfile": 0.169,
+    "whiteout": 0.0
    },
    {
     "t": 5.2,
     "discTopY": 73.6,
     "cameraBay": [
-     -0.901,
-     72.249,
-     7.916
+     4.312,
+     71.227,
+     -7.226
     ],
     "lookAtBay": [
-     0.0,
-     77.0,
-     -0.3
+     0.86,
+     75.848,
+     -1.682
     ],
-    "fovV": 51.67
+    "fovV": 51.34,
+    "exposure": 0.417,
+    "riseProfile": 0.222,
+    "whiteout": 0.0
    },
    {
     "t": 5.3,
     "discTopY": 75.314,
     "cameraBay": [
-     -0.135,
-     74.038,
-     7.934
+     3.68,
+     72.974,
+     -7.528
     ],
     "lookAtBay": [
-     0.0,
-     78.714,
-     -0.3
+     0.717,
+     77.595,
+     -1.709
     ],
-    "fovV": 51.7
+    "fovV": 50.65,
+    "exposure": 0.408,
+    "riseProfile": 0.279,
+    "whiteout": 0.0
    },
    {
     "t": 5.4,
     "discTopY": 77.029,
     "cameraBay": [
-     0.614,
-     75.821,
-     7.882
+     3.082,
+     74.73,
+     -7.735
     ],
     "lookAtBay": [
-     0.0,
-     80.429,
-     -0.3
+     0.582,
+     79.353,
+     -1.704
     ],
-    "fovV": 51.73
+    "fovV": 49.93,
+    "exposure": 0.399,
+    "riseProfile": 0.34,
+    "whiteout": 0.0
    },
    {
     "t": 5.5,
     "discTopY": 78.743,
     "cameraBay": [
-     1.339,
-     77.595,
-     7.766
+     2.529,
+     76.494,
+     -7.862
     ],
     "lookAtBay": [
-     0.0,
-     82.143,
-     -0.3
+     0.459,
+     81.118,
+     -1.671
     ],
-    "fovV": 51.76
+    "fovV": 49.17,
+    "exposure": 0.39,
+    "riseProfile": 0.403,
+    "whiteout": 0.0
    },
    {
     "t": 5.6,
     "discTopY": 80.457,
     "cameraBay": [
-     2.034,
-     79.36,
-     7.59
+     2.031,
+     78.265,
+     -7.923
     ],
     "lookAtBay": [
-     0.0,
-     83.857,
-     -0.3
+     0.351,
+     82.89,
+     -1.616
     ],
-    "fovV": 51.79
+    "fovV": 48.39,
+    "exposure": 0.38,
+    "riseProfile": 0.467,
+    "whiteout": 0.0
    },
    {
     "t": 5.7,
     "discTopY": 82.171,
     "cameraBay": [
-     2.693,
-     81.115,
-     7.361
+     1.592,
+     80.04,
+     -7.932
     ],
     "lookAtBay": [
-     0.0,
-     85.571,
-     -0.3
+     0.259,
+     84.666,
+     -1.543
     ],
-    "fovV": 51.82
+    "fovV": 47.61,
+    "exposure": 0.37,
+    "riseProfile": 0.533,
+    "whiteout": 0.0
    },
    {
     "t": 5.8,
     "discTopY": 83.886,
     "cameraBay": [
-     3.313,
-     82.86,
-     7.087
+     1.214,
+     81.819,
+     -7.903
     ],
     "lookAtBay": [
-     0.0,
-     87.286,
-     -0.3
+     0.185,
+     86.444,
+     -1.457
     ],
-    "fovV": 51.84
+    "fovV": 46.83,
+    "exposure": 0.36,
+    "riseProfile": 0.597,
+    "whiteout": 0.0
    },
    {
     "t": 5.9,
     "discTopY": 85.6,
     "cameraBay": [
-     3.891,
-     84.593,
-     6.773
+     0.897,
+     83.6,
+     -7.847
     ],
     "lookAtBay": [
-     0.0,
-     89.0,
-     -0.3
+     0.126,
+     88.223,
+     -1.363
     ],
-    "fovV": 51.87
+    "fovV": 46.07,
+    "exposure": 0.351,
+    "riseProfile": 0.66,
+    "whiteout": 0.0
    },
    {
     "t": 6.0,
     "discTopY": 87.314,
     "cameraBay": [
-     4.425,
-     86.314,
-     6.427
+     0.638,
+     85.381,
+     -7.773
     ],
     "lookAtBay": [
-     0.0,
-     90.714,
-     -0.3
+     0.082,
+     89.999,
+     -1.265
     ],
-    "fovV": 51.89
+    "fovV": 45.35,
+    "exposure": 0.342,
+    "riseProfile": 0.721,
+    "whiteout": 0.0
    },
    {
     "t": 6.1,
     "discTopY": 89.029,
     "cameraBay": [
-     4.913,
-     88.021,
-     6.057
+     0.432,
+     87.16,
+     -7.691
     ],
     "lookAtBay": [
-     0.0,
-     92.429,
-     -0.3
+     0.051,
+     91.773,
+     -1.166
     ],
-    "fovV": 51.91
+    "fovV": 44.66,
+    "exposure": 0.333,
+    "riseProfile": 0.778,
+    "whiteout": 0.0
    },
    {
     "t": 6.2,
     "discTopY": 90.743,
     "cameraBay": [
-     5.358,
-     89.714,
-     5.668
+     0.275,
+     88.935,
+     -7.606
     ],
     "lookAtBay": [
-     0.0,
-     94.143,
-     -0.3
+     0.029,
+     93.543,
+     -1.071
     ],
-    "fovV": 51.93
+    "fovV": 44.02,
+    "exposure": 0.325,
+    "riseProfile": 0.831,
+    "whiteout": 0.0
    },
    {
     "t": 6.3,
     "discTopY": 92.457,
     "cameraBay": [
-     5.758,
-     91.395,
-     5.267
+     0.161,
+     90.706,
+     -7.525
     ],
     "lookAtBay": [
-     0.0,
-     95.857,
-     -0.3
+     0.015,
+     95.308,
+     -0.982
     ],
-    "fovV": 51.94
+    "fovV": 43.45,
+    "exposure": 0.318,
+    "riseProfile": 0.879,
+    "whiteout": 0.0
    },
    {
     "t": 6.4,
     "discTopY": 94.171,
     "cameraBay": [
-     6.117,
-     93.066,
-     4.86
+     0.084,
+     92.47,
+     -7.451
     ],
     "lookAtBay": [
-     0.0,
-     97.571,
-     -0.3
+     0.007,
+     97.067,
+     -0.904
     ],
-    "fovV": 51.96
+    "fovV": 42.96,
+    "exposure": 0.312,
+    "riseProfile": 0.92,
+    "whiteout": 0.0
    },
    {
     "t": 6.5,
     "discTopY": 95.886,
     "cameraBay": [
-     6.436,
-     94.73,
-     4.451
+     0.036,
+     94.226,
+     -7.389
     ],
     "lookAtBay": [
-     0.0,
-     99.286,
-     -0.3
+     0.003,
+     98.819,
+     -0.839
     ],
-    "fovV": 51.97
+    "fovV": 42.56,
+    "exposure": 0.307,
+    "riseProfile": 0.953,
+    "whiteout": 0.0
    },
    {
     "t": 6.6,
     "discTopY": 97.6,
     "cameraBay": [
-     6.687,
-     96.389,
-     4.027
+     0.011,
+     95.973,
+     -7.341
     ],
     "lookAtBay": [
-     0.0,
-     101.018,
-     -0.299
+     0.001,
+     100.563,
+     -0.789
     ],
-    "fovV": 51.98
+    "fovV": 42.26,
+    "exposure": 0.303,
+    "riseProfile": 0.979,
+    "whiteout": 0.0
    },
    {
     "t": 6.7,
     "discTopY": 99.314,
     "cameraBay": [
-     6.841,
-     98.044,
-     3.579
+     0.001,
+     97.707,
+     -7.311
     ],
     "lookAtBay": [
      0.0,
-     102.845,
-     -0.291
+     102.296,
+     -0.758
     ],
-    "fovV": 51.99
+    "fovV": 42.07,
+    "exposure": 0.301,
+    "riseProfile": 0.994,
+    "whiteout": 0.0
    },
    {
     "t": 6.8,
     "discTopY": 101.029,
     "cameraBay": [
-     6.905,
-     99.699,
-     3.126
+     0.0,
+     99.429,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     104.817,
-     -0.271
+     104.017,
+     -0.747
     ],
-    "fovV": 52.0
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 6.9,
     "discTopY": 102.743,
     "cameraBay": [
-     6.89,
-     101.354,
-     2.684
+     0.0,
+     101.143,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     106.951,
-     -0.236
+     105.731,
+     -0.747
     ],
-    "fovV": 52.0
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.0,
     "discTopY": 104.457,
     "cameraBay": [
-     6.808,
-     103.013,
-     2.263
+     0.0,
+     102.857,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     109.231,
-     -0.184
+     107.446,
+     -0.747
     ],
-    "fovV": 52.0
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.1,
     "discTopY": 106.129,
     "cameraBay": [
-     6.67,
-     104.634,
-     1.872
+     0.0,
+     104.529,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     111.585,
-     -0.113
+     109.117,
+     -0.747
     ],
-    "fovV": 52.07
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.2,
     "discTopY": 107.714,
     "cameraBay": [
-     6.49,
-     106.177,
-     1.517
+     0.0,
+     106.114,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     113.932,
-     -0.025
+     110.703,
+     -0.747
     ],
-    "fovV": 52.28
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.3,
     "discTopY": 109.214,
     "cameraBay": [
-     6.284,
-     107.643,
-     1.2
+     0.0,
+     107.614,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     116.228,
-     0.081
+     112.203,
+     -0.747
     ],
-    "fovV": 52.61
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.4,
     "discTopY": 110.629,
     "cameraBay": [
-     6.063,
-     109.036,
-     0.924
+     0.0,
+     109.029,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     118.433,
-     0.202
+     113.617,
+     -0.747
     ],
-    "fovV": 53.04
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.0
    },
    {
     "t": 7.5,
     "discTopY": 111.957,
     "cameraBay": [
-     5.843,
+     0.0,
      110.357,
-     0.687
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     120.508,
-     0.335
+     114.946,
+     -0.747
     ],
-    "fovV": 53.56
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.002
    },
    {
     "t": 7.6,
     "discTopY": 113.2,
     "cameraBay": [
-     5.637,
-     111.59,
-     0.486
+     0.0,
+     111.6,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     122.422,
-     0.477
+     116.189,
+     -0.747
     ],
-    "fovV": 54.16
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.016
    },
    {
     "t": 7.7,
     "discTopY": 114.357,
     "cameraBay": [
-     5.456,
-     112.718,
-     0.319
+     0.0,
+     112.757,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     124.152,
-     0.625
+     117.346,
+     -0.747
     ],
-    "fovV": 54.82
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.049
    },
    {
     "t": 7.8,
     "discTopY": 115.429,
     "cameraBay": [
-     5.314,
-     113.745,
-     0.183
+     0.0,
+     113.829,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     125.684,
-     0.775
+     118.417,
+     -0.747
     ],
-    "fovV": 55.52
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.104
    },
    {
     "t": 7.9,
     "discTopY": 116.414,
     "cameraBay": [
-     5.222,
-     114.674,
-     0.072
+     0.0,
+     114.814,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     127.01,
-     0.923
+     119.403,
+     -0.747
     ],
-    "fovV": 56.25
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.18
    },
    {
     "t": 8.0,
     "discTopY": 117.314,
     "cameraBay": [
-     5.192,
-     115.507,
-     -0.018
+     0.0,
+     115.714,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     128.133,
-     1.065
+     120.303,
+     -0.747
     ],
-    "fovV": 57.0
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.275
    },
    {
     "t": 8.1,
     "discTopY": 118.129,
     "cameraBay": [
-     5.185,
-     116.247,
-     -0.091
+     0.0,
+     116.529,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     129.061,
-     1.198
+     121.117,
+     -0.747
     ],
-    "fovV": 57.75
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.384
    },
    {
     "t": 8.2,
     "discTopY": 118.857,
     "cameraBay": [
-     5.156,
-     116.897,
-     -0.151
+     0.0,
+     117.257,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     129.807,
-     1.319
+     121.846,
+     -0.747
     ],
-    "fovV": 58.48
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.5
    },
    {
     "t": 8.3,
     "discTopY": 119.5,
     "cameraBay": [
-     5.113,
-     117.46,
-     -0.199
+     0.0,
+     117.9,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     130.388,
-     1.425
+     122.489,
+     -0.747
     ],
-    "fovV": 59.18
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.616
    },
    {
     "t": 8.4,
     "discTopY": 120.057,
     "cameraBay": [
-     5.059,
-     117.939,
-     -0.236
+     0.0,
+     118.457,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     130.826,
-     1.513
+     123.046,
+     -0.747
     ],
-    "fovV": 59.84
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.725
    },
    {
     "t": 8.5,
     "discTopY": 120.529,
     "cameraBay": [
-     5.0,
-     118.336,
-     -0.263
+     0.0,
+     118.929,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.14,
-     1.584
+     123.517,
+     -0.747
     ],
-    "fovV": 60.44
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.82
    },
    {
     "t": 8.6,
     "discTopY": 120.914,
     "cameraBay": [
-     4.941,
-     118.655,
-     -0.281
+     0.0,
+     119.314,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.353,
-     1.636
+     123.903,
+     -0.747
     ],
-    "fovV": 60.96
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.896
    },
    {
     "t": 8.7,
     "discTopY": 121.214,
     "cameraBay": [
-     4.886,
-     118.897,
-     -0.292
+     0.0,
+     119.614,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.484,
-     1.671
+     124.203,
+     -0.747
     ],
-    "fovV": 61.39
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.951
    },
    {
     "t": 8.8,
     "discTopY": 121.429,
     "cameraBay": [
-     4.842,
-     119.067,
-     -0.298
+     0.0,
+     119.829,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.553,
-     1.691
+     124.417,
+     -0.747
     ],
-    "fovV": 61.72
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.984
    },
    {
     "t": 8.9,
     "discTopY": 121.557,
     "cameraBay": [
-     4.811,
-     119.167,
-     -0.3
+     0.0,
+     119.957,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.58,
-     1.699
+     124.546,
+     -0.747
     ],
-    "fovV": 61.93
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 0.998
    },
    {
     "t": 9.0,
     "discTopY": 121.6,
     "cameraBay": [
-     4.8,
-     119.2,
-     -0.3
+     0.0,
+     120.0,
+     -7.3
     ],
     "lookAtBay": [
      0.0,
-     131.584,
-     1.7
+     124.589,
+     -0.747
     ],
-    "fovV": 62.0
+    "fovV": 42.0,
+    "exposure": 0.3,
+    "riseProfile": 1.0,
+    "whiteout": 1.0
    }
   ]
  },
- "sequence": [
-  {
-   "stage": "1 Red room (transition, loops while the map loads)",
-   "seconds": ">= 4, loops",
-   "camera": "first person while waiting (the room is walkable). When the map is ready: a chime, the player is set on the lift disc (Spawn) and the cinematic starts on CamTopDown: straight down through the hex frame, pushing in from y 33 to 27 over 2.5 s (the film's framing)."
-  },
-  {
-   "stage": "2 Up the lift",
-   "seconds": 3.0,
-   "camera": "the disc lifts; the camera rises ahead of the player through the hex frame into the dark above the roof (hidden cut 1)."
-  },
-  {
-   "stage": "3 The glass case",
-   "seconds": 4.0,
-   "camera": "open on the player in their case (CamCase); pull back out through the front glass to the walkway and sweep 20 degrees along the curving row of cases (others stand in theirs)."
-  },
-  {
-   "stage": "4 The rise (one shot)",
-   "seconds": 9.0,
-   "camera": "rise.keys: the disc rides the pole 120 studs while the camera orbits 270 degrees round the rider, low first (looking up the pole, T1 @127.2 s), then level, then up at the aperture."
-  },
-  {
-   "stage": "5 Whiteout",
-   "seconds": 1.0,
-   "camera": "overlaps the last 0.6 s of the rise: the aperture floods white (hidden cut 2 into the arena)."
-  },
-  {
-   "stage": "6 Arrival",
-   "seconds": 3.0,
-   "camera": "Map 1: up the brass-rimmed tube in the turf; Map 2: the plate surfaces in the lagoon. The camera finishes the circle (the last 90 degrees) and settles behind the head facing the horn; then first person."
-  }
- ],
+ "sequence": {
+  "rule": "TwoArenas 2.3: the full cut if any contender in the round has not launched yet this session, else the short cut; everyone in a round sees the same cut on the same clock",
+  "full": [
+   {
+    "stage": "Fade to black on the training floor",
+    "from": 0.0,
+    "to": 0.4
+   },
+   {
+    "stage": "1 The red room (loops while the arena streams in)",
+    "from": 0.4,
+    "to": 8.0,
+    "camera": "just above the hex frame's mouth (Blender (0, 2, 30), 7.5 studs over the frame), looking 75 deg down past the far half of the hexagon at the player's own stand-in on the lift disc (Spawn) far below, in the oxblood hood; a slow zoom, fov 50 -> 42 over 6 s, then a 4 deg/s drift if the wait runs on. At 6 s the player looks up into the tube.",
+    "cameraStart": {
+     "position": [
+      0.0,
+      30.0,
+      -2.0
+     ],
+     "lookAt": [
+      0.0,
+      0.15000000596046448,
+      -10.0
+     ],
+     "fovV": 50.0
+    }
+   },
+   {
+    "stage": "2 Up the teal tube",
+    "from": 8.0,
+    "to": 11.0,
+    "camera": "rises ahead of the player through the hex frame into the dark above the roof (hidden cut 1)"
+   },
+   {
+    "stage": "3 The cases",
+    "from": 11.0,
+    "to": 15.0,
+    "camera": "at face height just outside the glass, beside the player, looking past the player (who turns toward the row) along the tightly packed row of cases with a long lens (35 mm on 36 mm film, about 54 deg across; cameraStart, in the bay frame); then pulls back and arcs 40 deg round the hall, ending in front of the case at rise.cuts.full.keys[0]",
+    "cameraStart": {
+     "positionBay": [
+      8.0,
+      6.599999904632568,
+      -4.400000095367432
+     ],
+     "lookAtBay": [
+      -24.0,
+      5.300000190734863,
+      -0.0
+     ],
+     "fovV": 27.3
+    }
+   },
+   {
+    "stage": "4 The rise",
+    "from": 15.0,
+    "to": 24.0,
+    "keys": "rise.cuts.full",
+    "camera": "a whole turn anticlockwise from the front while climbing with the rider; from t 5.4 it settles into the film's low-angle, whole-body frame (rise.endFrame, T1 @127.2 s), held from t 6.8 while the rider is still in the open hall; the opening floods white from t 7.4"
+   },
+   {
+    "stage": "5 White-out (the cut into the arena hides here)",
+    "from": 24.0,
+    "to": 25.0
+   },
+   {
+    "stage": "6 The arrival",
+    "from": 25.0,
+    "to": 28.0,
+    "camera": "out of the white 14 studs above the plinth, looking down (T1 @129.2 s); drops behind the head facing the horn, then into first person at 28.0. The rise now ends in front of the rider, so reaching 'behind the head' is a further half turn, not pass 1's quarter."
+   },
+   {
+    "stage": "On the plinth: 10 to 1",
+    "from": 28.0,
+    "to": 38.0
+   }
+  ],
+  "short": [
+   {
+    "stage": "Fade",
+    "from": 0.0,
+    "to": 0.4
+   },
+   {
+    "stage": "1 The red room, only as long as loading needs",
+    "from": 0.4,
+    "to": 3.0
+   },
+   {
+    "stage": "4 The rise",
+    "from": 3.0,
+    "to": 8.0,
+    "keys": "rise.cuts.short",
+    "camera": "a cut straight to the disc leaving the case, seen from behind and to the right (clear of the gantry behind the cases); 155 deg anticlockwise to the same low-angle end frame by t 3.4, held; floods white from t 4.2"
+   },
+   {
+    "stage": "5 White-out",
+    "from": 8.0,
+    "to": 9.0
+   },
+   {
+    "stage": "6 The arrival",
+    "from": 9.0,
+    "to": 12.0
+   },
+   {
+    "stage": "On the plinth: 6 to 1",
+    "from": 12.0,
+    "to": 18.0
+   }
+  ]
+ },
  "lighting": {
+  "note": "pass 2 (TwoArenas 2.8) with the review's fixes: the hue rides on the light, not the paint. Cool keys and a navy ambient in both halls and blue keys over the deck turn the shadows blue; the red room keeps one cool white key down the tube and red light only in its two floor openings. Neon parts light nothing (as in Roblox): every light below is a real Light. Light colours are 0-1 RGB (Light.Color), gains are the Blender watts of the previews (relative only), ambients and exposures as Lighting.Ambient and ExposureCompensation. The values were set on the Blender previews (paint x ambient, AgX, the bloom and atmosphere stand-ins below) and measured with tools/art/colour_band.py (tools/art/specs/launch.json); confirm them in Studio (ArtStyle rule 10) before shipping.",
+  "colours": {
+   "coolWhite": [
+    0.86,
+    0.92,
+    1.0
+   ],
+   "coolKey": [
+    0.55,
+    0.75,
+    1.0
+   ],
+   "deckKey": [
+    0.34,
+    0.57,
+    1.0
+   ],
+   "lampLight": [
+    0.9,
+    0.94,
+    1.0
+   ],
+   "openingGlow": [
+    1.0,
+    0.36,
+    0.34
+   ],
+   "grateGlow": [
+    0.08,
+    0.26,
+    1.0
+   ],
+   "caseStageBars": [
+    0.26,
+    0.65,
+    1.0
+   ],
+   "caseStageGantry": [
+    0.86,
+    0.92,
+    1.0
+   ],
+   "poleHallBars": [
+    0.45,
+    0.7,
+    1.0
+   ],
+   "riseBars": [
+    0.76,
+    0.84,
+    1.0
+   ]
+  },
+  "previewGains": {
+   "red_key": 24000.0,
+   "opening": 60.0,
+   "lamp": 220.0,
+   "red_top": 3200.0,
+   "walkway": 1200.0,
+   "deck_key": 10000.0,
+   "grate_glow": 280.0,
+   "hub": 160000.0,
+   "led": 450.0,
+   "wall": 1200.0,
+   "case": 1800.0,
+   "unit": 60.0,
+   "gantry": 3.0,
+   "rider": 9000.0
+  },
   "LaunchRedRoom": {
    "ambient": [
-    30,
-    18,
-    20
+    26,
+    21,
+    28
    ],
    "exposure": 0.2,
-   "lights": "SpotLight at KeyLight (cool white, angle 78, aimed down); a red SurfaceLight (Face Top) in each grate pit at GrateGlow_n; PointLights (warm white, range 10) at Lamp_n"
+   "lights": "SpotLight at KeyLight (coolWhite, angle 13, aimed down the tube onto the lift disc only); SpotLights at DeckKey_1-4 (deckKey, angle 54, leaning in toward the grate lanes: they make the neutral steel deck read blue); a coolKey SpotLight (angle 26) at WalkwaySpot, over the walkway; a dim navy SurfaceLight (Face Bottom, grateGlow) under each grate lane's mesh at GrateGlow_1-4, so the voids read navy-black; a red SurfaceLight (Face Top) low in each floor opening at OpeningGlow_1-2, the only red light; white SpotLights (lampLight, angle 50, tipped 10 deg down) at Lamp_n, the way each lamp faces"
   },
   "LaunchCaseHall": {
    "ambient": [
-    24,
-    34,
-    48
+    14,
+    30,
+    44
    ],
-   "exposure": 0.3,
-   "lights": "SurfaceLight (Face Bottom) on each case top-light and each gantry strip; a small SurfaceLight on each unit panel"
+   "exposure": 0.75,
+   "lights": "a SurfaceLight (Face Bottom, Angle 50, coolWhite) on each case top-light, aimed at the disc; SurfaceLights (Face Bottom, caseStageGantry) on the gantry strips; a small SurfaceLight on each unit panel. While the cases stage runs, the pole hall's hub spots are off and its bars take caseStageBars at caseStageDim of their gains",
+   "caseStageDim": {
+    "HubSpot": 0.05,
+    "wallBars": 2.0,
+    "ceilingRingBars": 2.6
+   }
   },
   "LaunchPoleHall": {
    "ambient": [
-    12,
-    16,
-    24
+    56,
+    76,
+    94
    ],
    "exposure": 0.3,
-   "bloomThreshold": 1.4,
-   "lights": "SpotLights (angle 34) at the 12 HubSpot_n; a SurfaceLight (Face Bottom) on every LED bar; the poles' strips are Neon only; a SpotLight that rides 7 studs in front of and 10 above each rider (the rider key)"
+   "bloom": {
+    "threshold": 1.4,
+    "previewStandIn": [
+     "FOG_GLOW",
+     1.4,
+     0.6,
+     0.8
+    ]
+   },
+   "atmosphere": {
+    "note": "a thin navy haze (Lighting.Atmosphere in this profile): the preview blends toward the colour with distance",
+    "start": 40.0,
+    "depth": 300.0,
+    "amount": 0.3,
+    "color": [
+     30,
+     56,
+     84
+    ]
+   },
+   "lights": "SpotLights (angle 34, poleHallBars) at the 12 HubSpot_n, which hang in two tiers under the hub; a SurfaceLight (Face Bottom) on every ceiling-ring LED bar and one (Face Front, toward the hall centre) on every wall bar; no light on the poles; a SpotLight that rides 7 studs in front of and 10 above each rider (the rider key, coolWhite). Phones: only the own rider's key and the 4 nearest; Low graphics drops the wall bars' lights"
+  },
+  "LaunchPoleHallRise": {
+   "ambient": [
+    36,
+    40,
+    48
+   ],
+   "exposure": 0.3,
+   "note": "the rise's own profile: as the camera settles into the low-angle end frame the pole hall's ambient blends to this greyer navy, the bars take riseBars and the exposure eases (rise.cuts.*.keys[].riseProfile and .exposure), so the lit rider stands out against a hall that falls away (T1 @127.2 s)"
   }
  },
  "import": [
@@ -4112,7 +7509,7 @@
  ],
  "styleRules": [
   "Style A: chunky volumes at true scale, flat facets, built members as chamfered prisms; nothing under 0.25 stud except bolts and trim.",
-  "Colour: the brief's semi-real tones (UpcomingFilm_Brief section 2.8), +-6% per volume, +-3% per facet, warm tops and cool undersides, AO >= 0.5; each surface's mean after AO is normalised to the tone. Saturated colour only on the red rails and lamps and the light sources.",
+  "Colour: the brief's semi-real tones (UpcomingFilm_Brief section 2.8), +-6% per volume, +-3% per facet, warm tops and cool undersides, AO >= 0.5; each surface's mean after AO is normalised to the tone. The reds sit at their frame sample's saturation (within 0.05; palette.redCheck); saturated colour only on the light sources.",
   "Darkness comes from the lighting, never the paint: no painted value below luma 40 (grates); built surfaces 55-215."
  ],
  "assets": [
@@ -4122,7 +7519,7 @@
    "room": "LaunchRedRoom",
    "glb": "LaunchRedRoom.glb",
    "instances": 1,
-   "notes": "The transition room (client-local, one per player), loops while the map loads. Interior 30 x 24, net at 20. NOTE: dips 1.30 studs below its origin by design.",
+   "notes": "The transition room (client-local, one per player), loops while the map loads. Interior 30 x 24, net at 20. NOTE: dips 2.70 studs below its origin by design.",
    "origin": [
     16.0,
     0.0,
@@ -4130,7 +7527,7 @@
    ],
    "boundsMin": [
     -16.0,
-    -1.3,
+    -2.7,
     -13.0
    ],
    "boundsMax": [
@@ -4140,19 +7537,19 @@
    ],
    "size": [
     32.0,
-    24.1,
+    25.5,
     26.0
    ],
-   "tris": 9572,
+   "tris": 9748,
    "parts": [
     {
      "name": "LaunchRedRoom_Shell",
      "role": "Paint",
      "robloxMaterial": "Concrete",
      "rgb": [
-      85,
-      44,
-      44
+      67,
+      48,
+      48
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -4195,9 +7592,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      90,
-      38,
-      38
+      76,
+      47,
+      47
      ],
      "collide": false,
      "collision": "Box",
@@ -4205,7 +7602,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 664,
+     "tris": 88,
      "notes": "red roof panels between the nets",
      "transparency": 0.0,
      "neon": false,
@@ -4225,8 +7622,7 @@
       ]
      },
      "paletteKeys": [
-      "oxblood",
-      "oxblood_dk"
+      "oxblood"
      ]
     },
     {
@@ -4234,9 +7630,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      52,
-      69,
-      73
+      53,
+      72,
+      78
      ],
      "collide": false,
      "collision": "Box",
@@ -4244,8 +7640,8 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 744,
-     "notes": "the net seen from the room",
+     "tris": 1360,
+     "notes": "the net seen from the room: 1.2 cells, 0.25 bars, 45 deg, sagging",
      "transparency": 0.0,
      "neon": false,
      "doubleSided": false,
@@ -4272,9 +7668,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      52,
-      69,
-      72
+      62,
+      81,
+      85
      ],
      "collide": false,
      "collision": "Box",
@@ -4282,8 +7678,8 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 744,
-     "notes": "the net on top of the roof (establishing shot)",
+     "tris": 1360,
+     "notes": "the net over the roof (establishing shot): 1.2 cells, 0.25 bars, 45 deg, sagging",
      "transparency": 0.0,
      "neon": false,
      "doubleSided": false,
@@ -4310,9 +7706,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      66,
-      104,
-      110
+      61,
+      97,
+      102
      ],
      "collide": false,
      "collision": "Box",
@@ -4345,13 +7741,52 @@
      ]
     },
     {
+     "name": "LaunchRedRoom_Hood",
+     "role": "Paint",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      94,
+      56,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 120,
+     "notes": "the drop under the hex frame: an oxblood hood with thin red rails (frame A's shaft); the lift rises through it",
+     "transparency": 0.0,
+     "neon": false,
+     "doubleSided": false,
+     "renderFidelity": "Automatic",
+     "textureSet": "LaunchRedRoom",
+     "surfaceAppearance": {
+      "colorMap": "textures/LaunchRedRoom/LaunchRedRoom_Color.png",
+      "normalMap": null,
+      "roughnessMap": "textures/LaunchRedRoom/LaunchRedRoom_Rough.png",
+      "metalnessMap": "textures/LaunchRedRoom/LaunchRedRoom_Metal.png",
+      "alphaMode": "Overlay",
+      "color": [
+       255,
+       255,
+       255
+      ]
+     },
+     "paletteKeys": [
+      "oxblood",
+      "rail"
+     ]
+    },
+    {
      "name": "LaunchRedRoom_Deck",
      "role": "Paint",
      "robloxMaterial": "DiamondPlate",
      "rgb": [
-      67,
       68,
-      70
+      69,
+      71
      ],
      "collide": true,
      "collision": "Box",
@@ -4392,9 +7827,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      53,
-      34,
-      35
+      40,
+      40,
+      42
      ],
      "collide": false,
      "collision": "Box",
@@ -4402,8 +7837,8 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1872,
-     "notes": "grates and the red mesh pits (walk on the Deck collider)",
+     "tris": 1272,
+     "notes": "black grates over dark pits, and the red mesh in the two floor openings (walk on the Deck collider)",
      "transparency": 0.0,
      "neon": false,
      "doubleSided": false,
@@ -4431,9 +7866,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      140,
-      43,
-      45
+      116,
+      58,
+      69
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -4469,9 +7904,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      125,
-      38,
-      40
+      93,
+      47,
+      60
      ],
      "collide": false,
      "collision": "Box",
@@ -4507,9 +7942,9 @@
      "role": "Paint",
      "robloxMaterial": "Concrete",
      "rgb": [
-      107,
-      111,
-      110
+      103,
+      108,
+      109
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -4549,9 +7984,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      109,
-      69,
-      76
+      92,
+      73,
+      88
      ],
      "collide": true,
      "collision": "Hull",
@@ -4682,7 +8117,7 @@
     "GrateGlow_1": {
      "position": [
       -3.925,
-      -0.55,
+      -0.45,
       7.3
      ],
      "look": [
@@ -4699,7 +8134,7 @@
     "GrateGlow_2": {
      "position": [
       3.925,
-      -0.55,
+      -0.45,
       7.3
      ],
      "look": [
@@ -4716,7 +8151,7 @@
     "GrateGlow_3": {
      "position": [
       -3.925,
-      -0.55,
+      -0.45,
       -7.3
      ],
      "look": [
@@ -4733,7 +8168,7 @@
     "GrateGlow_4": {
      "position": [
       3.925,
-      -0.55,
+      -0.45,
       -7.3
      ],
      "look": [
@@ -4747,15 +8182,15 @@
       -1.0
      ]
     },
-    "GrateGlow_5": {
+    "OpeningGlow_1": {
      "position": [
       -8.75,
-      -0.55,
+      -1.45,
       -0.0
      ],
      "look": [
       0.0,
-      -1.0,
+      1.0,
       -0.0
      ],
      "up": [
@@ -4764,15 +8199,15 @@
       -1.0
      ]
     },
-    "GrateGlow_6": {
+    "OpeningGlow_2": {
      "position": [
       8.75,
-      -0.55,
+      -1.45,
       -0.0
      ],
      "look": [
       0.0,
-      -1.0,
+      1.0,
       -0.0
      ],
      "up": [
@@ -4817,9 +8252,9 @@
     },
     "GuardFloor": {
      "position": [
-      5.2,
+      5.0,
       0.0,
-      -7.3
+      -10.9
      ],
      "look": [
       0.0,
@@ -4834,19 +8269,87 @@
     },
     "WalkwaySpot": {
      "position": [
-      0.0,
-      19.2,
-      -1.0
+      -4.0,
+      19.4,
+      -10.6
      ],
      "look": [
-      0.0,
-      -0.5185,
-      -0.8551
+      -0.1056,
+      -0.9924,
+      -0.0633
+     ],
+     "up": [
+      0.0067,
+      0.063,
+      -0.998
+     ]
+    },
+    "DeckKey_1": {
+     "position": [
+      -11.0,
+      18.9,
+      7.0
+     ],
+     "look": [
+      0.1568,
+      -0.9876,
+      -0.0
      ],
      "up": [
       0.0,
-      0.8551,
-      -0.5185
+      0.0,
+      -1.0
+     ]
+    },
+    "DeckKey_2": {
+     "position": [
+      11.0,
+      18.9,
+      7.0
+     ],
+     "look": [
+      -0.1568,
+      -0.9876,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "DeckKey_3": {
+     "position": [
+      -11.0,
+      18.9,
+      -6.4
+     ],
+     "look": [
+      0.1568,
+      -0.9876,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "DeckKey_4": {
+     "position": [
+      11.0,
+      18.9,
+      -6.4
+     ],
+     "look": [
+      -0.1568,
+      -0.9876,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
      ]
     },
     "Lamp_1": {
@@ -4995,24 +8498,24 @@
    "instances": 48,
    "notes": "One bay of the glass-case ring (x48 at r 110, every 7.5 deg, facing the hall centre). Open top and back so the disc and collar can leave up the pole.",
    "origin": [
-    8.9626,
+    9.0804,
     0.0,
     0.0
    ],
    "boundsMin": [
-    -8.963,
+    -9.08,
     0.0,
     -2.6
    ],
    "boundsMax": [
     2.35,
     11.18,
-    2.618
+    2.85
    ],
    "size": [
-    11.313,
+    11.43,
     11.18,
-    5.218
+    5.45
    ],
    "tris": 632,
    "parts": [
@@ -5021,8 +8524,8 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      84,
-      55,
+      72,
+      56,
       60
      ],
      "collide": true,
@@ -5107,9 +8610,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      83,
-      48,
-      55
+      69,
+      50,
+      56
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -5222,9 +8725,9 @@
     },
     "UnitLight": {
      "position": [
-      -7.1616,
+      -7.2794,
       8.25,
-      -0.7344
+      1.0617
      ],
      "look": [
       0.0654,
@@ -5264,7 +8767,7 @@
    "instances": 8,
    "notes": "45-degree segment of the case gallery (x8, yaw k*45). NOTE: dips 0.30 studs below its origin by design.",
    "origin": [
-    19.6126,
+    19.7304,
     0.0,
     0.0
    ],
@@ -5283,16 +8786,16 @@
     124.212,
     52.281
    ],
-   "tris": 2188,
+   "tris": 2272,
    "parts": [
     {
      "name": "LaunchCaseGallery_Walkway",
      "role": "Paint",
      "robloxMaterial": "DiamondPlate",
      "rgb": [
-      73,
-      78,
-      84
+      61,
+      66,
+      74
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -5302,7 +8805,7 @@
      "tags": [
       "Floor"
      ],
-     "tris": 412,
+     "tris": 496,
      "notes": "walkway, kerb, back strip and screen",
      "transparency": 0.0,
      "neon": false,
@@ -5335,7 +8838,7 @@
      "rgb": [
       56,
       66,
-      79
+      78
      ],
      "collide": false,
      "collision": "Box",
@@ -5504,7 +9007,7 @@
    "instances": 48,
    "notes": "The disc a contender rides (x48), moved by the game up its pole. Origin = the standing surface (Stand). NOTE: dips 1.30 studs below its origin by design.",
    "origin": [
-    114.5924,
+    114.7101,
     0.0,
     0.0
    ],
@@ -5530,9 +9033,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      97,
-      39,
-      42
+      74,
+      48,
+      50
      ],
      "collide": true,
      "collision": "Hull",
@@ -5571,9 +9074,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      93,
-      95,
-      97
+      130,
+      133,
+      136
      ],
      "collide": false,
      "collision": "Box",
@@ -5669,7 +9172,7 @@
     130.832,
     182.0
    ],
-   "tris": 3884,
+   "tris": 3668,
    "parts": [
     {
      "name": "LaunchPoleHallSegment_Floor",
@@ -5717,9 +9220,9 @@
      "role": "Paint",
      "robloxMaterial": "Concrete",
      "rgb": [
-      88,
-      78,
-      80
+      84,
+      80,
+      81
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -5757,8 +9260,8 @@
      "role": "Paint",
      "robloxMaterial": "Concrete",
      "rgb": [
-      60,
-      68,
+      62,
+      69,
       80
      ],
      "collide": false,
@@ -5797,7 +9300,7 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      79,
+      78,
       85,
       93
      ],
@@ -5807,8 +9310,8 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1464,
-     "notes": "trusses, purlins, columns, LED housings",
+     "tris": 1188,
+     "notes": "trusses, purlins, columns, LED housings, wall-bar channels",
      "transparency": 0.0,
      "neon": false,
      "doubleSided": false,
@@ -5846,8 +9349,8 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 336,
-     "notes": "LED bars (Neon)",
+     "tris": 396,
+     "notes": "the ceiling ring's LED bars and the wall bars (Neon)",
      "transparency": 0.0,
      "neon": true,
      "doubleSided": false,
@@ -5865,35 +9368,35 @@
    "instances": 1,
    "notes": "The spoked ceiling ring and hub (x1, at the hall origin).",
    "origin": [
-    234.9934,
+    238.4934,
     0.0,
     0.0
    ],
    "boundsMin": [
-    -97.0,
-    116.068,
-    -97.0
+    -100.5,
+    103.356,
+    -100.5
    ],
    "boundsMax": [
-    97.0,
-    131.5,
-    97.0
+    100.5,
+    133.2,
+    100.5
    ],
    "size": [
-    194.0,
-    15.432,
-    194.0
+    201.0,
+    29.844,
+    201.0
    ],
-   "tris": 2772,
+   "tris": 2864,
    "parts": [
     {
      "name": "LaunchPoleHallCrown_Ring",
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      85,
-      93,
-      104
+      67,
+      74,
+      85
      ],
      "collide": false,
      "collision": "Box",
@@ -5901,7 +9404,7 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1536,
+     "tris": 1628,
      "notes": "spoked ring",
      "transparency": 0.0,
      "neon": false,
@@ -5930,9 +9433,9 @@
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
+      68,
       73,
-      78,
-      84
+      80
      ],
      "collide": false,
      "collision": "Box",
@@ -5992,206 +9495,206 @@
    "attachments": {
     "HubSpot_1": {
      "position": [
-      3.5172,
-      116.4211,
-      -13.1264
+      4.5875,
+      110.6659,
+      -11.0753
      ],
      "look": [
-      0.0206,
-      -0.9968,
-      -0.077
+      0.0456,
+      -0.9929,
+      -0.1101
      ],
      "up": [
-      -0.0016,
-      0.077,
-      -0.997
+      -0.005,
+      0.11,
+      -0.9939
      ]
     },
     "HubSpot_2": {
      "position": [
-      9.6092,
-      116.4211,
-      -9.6092
+      11.0753,
+      110.6659,
+      -4.5875
      ],
      "look": [
-      0.0564,
-      -0.9968,
-      -0.0564
+      0.1101,
+      -0.9929,
+      -0.0456
      ],
      "up": [
-      -0.0032,
-      0.0563,
-      -0.9984
+      -0.005,
+      0.0453,
+      -0.999
      ]
     },
     "HubSpot_3": {
      "position": [
-      13.1264,
-      116.4211,
-      -3.5172
+      11.0753,
+      110.6659,
+      4.5875
      ],
      "look": [
-      0.077,
-      -0.9968,
-      -0.0206
+      0.1101,
+      -0.9929,
+      0.0456
      ],
      "up": [
-      -0.0016,
-      0.0206,
-      -0.9998
+      0.005,
+      -0.0453,
+      -0.999
      ]
     },
     "HubSpot_4": {
      "position": [
-      13.1264,
-      116.4211,
-      3.5172
+      4.5875,
+      110.6659,
+      11.0753
      ],
      "look": [
-      0.077,
-      -0.9968,
-      0.0206
+      0.0456,
+      -0.9929,
+      0.1101
      ],
      "up": [
-      0.0016,
-      -0.0206,
-      -0.9998
+      0.005,
+      -0.11,
+      -0.9939
      ]
     },
     "HubSpot_5": {
      "position": [
-      9.6092,
-      116.4211,
-      9.6092
+      -4.5875,
+      110.6659,
+      11.0753
      ],
      "look": [
-      0.0564,
-      -0.9968,
-      0.0564
+      -0.0456,
+      -0.9929,
+      0.1101
      ],
      "up": [
-      0.0032,
-      -0.0563,
-      -0.9984
+      -0.005,
+      -0.11,
+      -0.9939
      ]
     },
     "HubSpot_6": {
      "position": [
-      3.5172,
-      116.4211,
-      13.1264
+      -11.0753,
+      110.6659,
+      4.5875
      ],
      "look": [
-      0.0206,
-      -0.9968,
-      0.077
+      -0.1101,
+      -0.9929,
+      0.0456
      ],
      "up": [
-      0.0016,
-      -0.077,
-      -0.997
+      -0.005,
+      -0.0453,
+      -0.999
      ]
     },
     "HubSpot_7": {
      "position": [
-      -3.5172,
-      116.4211,
-      13.1264
+      -11.0753,
+      110.6659,
+      -4.5875
      ],
      "look": [
-      -0.0206,
-      -0.9968,
-      0.077
+      -0.1101,
+      -0.9929,
+      -0.0456
      ],
      "up": [
-      -0.0016,
-      -0.077,
-      -0.997
+      0.005,
+      0.0453,
+      -0.999
      ]
     },
     "HubSpot_8": {
      "position": [
-      -9.6092,
-      116.4211,
-      9.6092
+      -4.5875,
+      110.6659,
+      -11.0753
      ],
      "look": [
-      -0.0564,
-      -0.9968,
-      0.0564
+      -0.0456,
+      -0.9929,
+      -0.1101
      ],
      "up": [
-      -0.0032,
-      -0.0563,
-      -0.9984
+      0.005,
+      0.11,
+      -0.9939
      ]
     },
     "HubSpot_9": {
      "position": [
-      -13.1264,
-      116.4211,
-      3.5172
+      0.0,
+      104.1659,
+      -5.9878
      ],
      "look": [
-      -0.077,
-      -0.9968,
-      0.0206
+      0.0,
+      -0.9929,
+      -0.1191
      ],
      "up": [
-      -0.0016,
-      -0.0206,
-      -0.9998
+      0.0,
+      0.1191,
+      -0.9929
      ]
     },
     "HubSpot_10": {
      "position": [
-      -13.1264,
-      116.4211,
-      -3.5172
+      5.9878,
+      104.1659,
+      -0.0
      ],
      "look": [
-      -0.077,
-      -0.9968,
-      -0.0206
+      0.1191,
+      -0.9929,
+      -0.0
      ],
      "up": [
-      0.0016,
-      0.0206,
-      -0.9998
+      -0.0,
+      0.0,
+      -1.0
      ]
     },
     "HubSpot_11": {
      "position": [
-      -9.6092,
-      116.4211,
-      -9.6092
+      0.0,
+      104.1659,
+      5.9878
      ],
      "look": [
-      -0.0564,
-      -0.9968,
-      -0.0564
+      0.0,
+      -0.9929,
+      0.1191
      ],
      "up": [
-      0.0032,
-      0.0563,
-      -0.9984
+      0.0,
+      -0.1191,
+      -0.9929
      ]
     },
     "HubSpot_12": {
      "position": [
-      -3.5172,
-      116.4211,
-      -13.1264
+      -5.9878,
+      104.1659,
+      0.0
      ],
      "look": [
-      -0.0206,
-      -0.9968,
-      -0.077
+      -0.1191,
+      -0.9929,
+      0.0
      ],
      "up": [
-      0.0016,
-      0.077,
-      -0.997
+      -0.0,
+      -0.0,
+      -1.0
      ]
     }
    }
@@ -6204,7 +9707,7 @@
    "instances": 48,
    "notes": "One pole (x48), base on the case plinth at y 0.4.",
    "origin": [
-    340.6134,
+    347.6134,
     0.0,
     0.0
    ],
@@ -6223,16 +9726,16 @@
     125.184,
     1.24
    ],
-   "tris": 776,
+   "tris": 440,
    "parts": [
     {
      "name": "LaunchPole_Steel",
      "role": "Paint",
      "robloxMaterial": "Metal",
      "rgb": [
-      167,
-      166,
-      165
+      110,
+      116,
+      124
      ],
      "collide": false,
      "collision": "Box",
@@ -6241,7 +9744,7 @@
      "canTouch": false,
      "tags": [],
      "tris": 44,
-     "notes": "12-sided steel pole",
+     "notes": "12-sided dark steel rod (no light on it)",
      "transparency": 0.0,
      "neon": false,
      "doubleSided": false,
@@ -6260,7 +9763,7 @@
       ]
      },
      "paletteKeys": [
-      "steel"
+      "pole"
      ]
     },
     {
@@ -6270,7 +9773,7 @@
      "rgb": [
       134,
       85,
-      53
+      54
      ],
      "collide": false,
      "collision": "Box",
@@ -6300,29 +9803,6 @@
      "paletteKeys": [
       "copper"
      ]
-    },
-    {
-     "name": "LaunchPole_Strip",
-     "role": "Light",
-     "robloxMaterial": "Neon",
-     "rgb": [
-      236,
-      240,
-      244
-     ],
-     "collide": false,
-     "collision": "Box",
-     "castShadow": false,
-     "canQuery": false,
-     "canTouch": false,
-     "tags": [],
-     "tris": 336,
-     "notes": "segmented edge-lit strips",
-     "transparency": 0.0,
-     "neon": true,
-     "doubleSided": false,
-     "renderFidelity": "Automatic",
-     "surfaceAppearance": null
     }
    ],
    "attachments": {

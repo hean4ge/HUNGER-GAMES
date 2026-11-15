@@ -8,9 +8,10 @@ sheets and never copied into any exported file.
 The three rooms, in the owner's order ("the red room with the metal on top is just the transition room ... it
 loads up to the room like the images i sent you"):
   1. LaunchRedRoom      the transition room (client-local, loops while the map loads): oxblood walls, a roof of
-                        red panels under a dark square net, a teal hexagonal frame of square tube over the lift,
-                        a blue-grey steel deck with black grates over glowing red mesh, white stripes, red rails,
-                        red lamp housings, an upper walkway with concrete stairs, a steel door and an intercom.
+                        red panels under a fine dark net set at 45 degrees to the hex frame and sagging slightly, a
+                        teal hexagonal frame of square tube over the lift, a blue-grey steel deck with black grates,
+                        red mesh in the two floor openings beside the lift, white stripes, red rails, red lamp
+                        housings, an upper walkway with concrete stairs, a steel door and an intercom.
   2. the glass-case hall, the ground ring of the pole hall:
      LaunchCaseBay      one bay (x48 at r 110): a tall glass case on oxblood posts with a dark-red disc on its
                         pedestal, a front top-light and the maroon wall unit beside it.
@@ -19,10 +20,38 @@ loads up to the room like the images i sent you"):
      LaunchRiserDisc    the moving disc (x48): dark-red top, rim, collar on the pole.
   3. the pole hall (the stage of the one-shot rise):
      LaunchPoleHallSegment  45-degree segment (x8): floor plates, the banked ring of oxblood and pale wedges,
-                        wall with columns and ledges, the truss dome with purlins, rings of LED bars, the
-                        apertures over the poles.
+                        wall with columns, ledges and two rows of vertical light bars, the truss dome with purlins,
+                        the ceiling ring of LED bars in radial rows, the apertures over the poles.
      LaunchPoleHallCrown    the spoked ceiling ring (48 spokes), the hub and its 12 spotlights.
-     LaunchPole         1-stud 12-sided steel pole with copper bands and segmented edge-lit strips (x48).
+     LaunchPole         1-stud 12-sided dark steel rod with copper bands (x48). No light on the poles.
+
+Pass 2 (TwoArenas.md sections 2.2, 2.4, 2.8, 7 and 8.2; critic #5 and #9):
+  - the hue rides on the light: cool blue-white keys and a navy ambient in the case hall, the pole hall and over the
+    deck, so the shadows go blue; the steel paint stays neutral. The reds are back at their sampled saturation
+    (rails 0.53, case discs 0.33, each red within 0.05 of its frame sample; see palette_swatches.png).
+  - the red room's net is the brief's spec: 1.2-stud cells, 0.25-stud bars, 45 degrees to the hex frame, a slight
+    sag; the grates read black, and red shows only in the two floor openings beside the lift; the figure in the
+    shot is the player's own stand-in in the white launch cape.
+  - the poles are dark rods; the light bars are on the ceiling ring and the walls.
+  - the rise ends on the film's low-angle, whole-body frame (T1 @127.2 s), then cuts to the whiteout; the manifest
+    carries the camera keys for both cuts of TwoArenas 2.3 (the full launch and the short cut).
+
+Pass 2, the review's must-fix items (14 Nov 2026):
+  - frame A is the in-game shot: from just above the tube mouth, 75 degrees down, the far half of the hexagon frames
+    the player's stand-in on the lift disc far below; an oxblood hood with thin red rails lines the drop under the
+    frame (the film shows an oxblood shaft there, not the deck).
+  - the light, not the paint, carries the band (TwoArenas 7): the deck keys cut by a quarter and leaning in over the
+    grate lanes, a dim navy light under each grate lane, white lamp spots on the rail, no bounce in the red room; the
+    case hall's own profile (deeper teal-navy bars, white gantry strips, a top-light cone on each disc); the pole
+    hall's haze and bloom stand-ins. Neon parts light nothing in the previews, as in Roblox, which also ends the
+    case hall's white speckle.
+  - the wide frame is shot from the far side of the hall at the riders' height with an 18 mm lens (the spoked ring an
+    ellipse across the top); the 12 hub spots hang in two tiers as one bright cluster; one wall bar per column, at the
+    top of the wall, and every second row only in the ceiling ring's outer rings.
+  - the case frame is a 35 mm view past the player along the tightly packed row; the neighbours stand in their suits
+    so their discs show.
+  - the red room's oxblood follows the band (OXBLOOD_RULING; the lead's ruling is pending) and the hex frame is back
+    at the brief's tone; the walkway is darker (luma 58), as the film's floor is.
 
 Run (headless, from the repo root; art/README.md section 1):
   blender --background --factory-startup --python art/blender/launch_rooms.py -- <out_dir> <preview_dir> [stages]
@@ -30,14 +59,17 @@ Run (headless, from the repo root; art/README.md section 1):
   preview_dir default art/previews/Launch
   stages      comma list (default build,preview,export):
                 build    geometry, paint, AO (always runs)
-                preview  compare sheets (render beside the owner's frame), overviews, the rise path sheet,
-                         colour checks -> <preview_dir>
+                preview  compare sheets (render beside the owner's frame and the trailer frame), overviews, the
+                         rise path sheet (both cuts), palette swatches, colour checks -> <preview_dir>
                 export   LaunchRedRoom.glb, LaunchCaseHall.glb, LaunchPoleHall.glb, textures,
                          Launch.manifest.json (+ copy in art/manifests)
-                only=<view,...>  render just these preview views
+                only=<view+view...>  render just these preview views (red_a, red_b, cases, wide, rise, rise_end,
+                         red_interior, case_bay, hall, risepath, palette)
   env LAUNCH_QUALITY = draft | final (samples; default final)
   env LAUNCH_REF     = folder of the owner's frames (default %USERPROFILE%/OneDrive/Documents/LastStanding/
                        References/owner). Only the compare sheets read it.
+  env LAUNCH_TRAILER = folder of the trailer frames (default <LAUNCH_REF>/../trailer). Compare sheets only.
+  The colour band (TwoArenas section 7) is checked with tools/art/colour_band.py on tools/art/specs/launch.json.
 
 Conventions (art/README.md section 3): 1 unit = 1 stud; Blender Z up; Roblox (x, y, z) = Blender (x, z, -y);
 an asset's front faces Blender +Y (Roblox LookVector); every asset root sits on z = 0 except LaunchRiserDisc
@@ -95,6 +127,8 @@ for s in _stage_arg.split(","):
 QUALITY = os.environ.get("LAUNCH_QUALITY", "final")
 REF = os.environ.get("LAUNCH_REF") or os.path.join(os.path.expanduser("~"), "OneDrive", "Documents",
                                                    "LastStanding", "References", "owner")
+TRAILER = os.environ.get("LAUNCH_TRAILER") or os.path.normpath(os.path.join(REF, "..", "trailer"))
+SHEET_LABEL = "BLENDER ITERATION - PLACEHOLDER FIGURES, NO PLANTS IN THIS SET"
 ART = os.path.normpath(os.path.join(HERE, ".."))
 CATEGORY = "Launch"
 TEX = os.path.join(OUT, "textures")
@@ -103,46 +137,60 @@ GLB_ONLY = os.path.join(TEX, "glb_only")
 # =============================================================================================== palette
 # key: tone (the semi-real base, sRGB 0-255, = the area mean after AO), sampled (frame value, evidence only),
 #      roughness, metalness, kind (paint | neon | glass), note.  Brief section 2.8 unless marked "ours".
+# Pass 2: every red is back at the saturation of its frame sample (HSV S within 0.05, TwoArenas 8.2): pass 1 had
+# pushed them to 0.55-0.69. The blue-greys stay as the brief set them: the navy is carried by the light.
+# The red room's oxblood (review item 3b; THE LEAD'S RULING IS PENDING): TwoArenas 2.2 names only the rails and the
+# case discs as the reds held at their sample, and 7's rules 3 and 5 keep strong colour for signals, so the oxblood
+# walls, roof and hood are room surfaces under the band (0.65-0.85x the film's saturation): 15% under the sample, S 0.38
+# (OXBLOOD_RULING "band", the default). Held at the sample (S 0.45) they render at 0.89-0.99x, over the band; the
+# other ruling, "signal", holds them there and classes the room's oxblood regions as launch reds (sat_within 0.05).
+OXBLOOD_RULING = os.environ.get("LAUNCH_OXBLOOD", "band")
+_OXB = {"band": ((86, 53, 53), (80, 52, 53)), "signal": ((93, 51, 51), (86, 49, 51))}[OXBLOOD_RULING]
+if os.environ.get("LAUNCH_OXBLOOD_DK") == "held":                              # look-dev
+    _OXB = (_OXB[0], (86, 49, 51))
 PAL = {
     # 1 red room
-    "oxblood":     ((112, 46, 46), "#281616", 0.85, 0.0, "paint", "walls, roof panels (brief 2.8)"),
-    "oxblood_dk":  ((100, 46, 48), "#241316", 0.85, 0.0, "paint", "wall backing, lift apron (ours, from the floor sample)"),
+    "oxblood":     (_OXB[0], "#281616", 0.85, 0.0, "paint", "walls, roof panels, the hood (brief 2.8; S %.2f, sample 0.45: ruling '%s')" % ((max(_OXB[0]) - min(_OXB[0])) / max(_OXB[0]), OXBLOOD_RULING)),
+    "oxblood_dk":  (_OXB[1], "#241515", 0.85, 0.0, "paint", "wall backing, lift apron (ours, from the floor sample, T1 @120.7 s; ruling '%s')" % OXBLOOD_RULING),
     "net":         ((62, 82, 86), "#1d4250", 0.6, 0.0, "paint", "net and grating, dark teal-grey steel"),
-    "hex":         ((66, 114, 122), "#205766", 0.6, 0.0, "paint", "hexagonal frame of square tube"),
+    "hex":         ((66, 114, 122), "#205766", 0.6, 0.0, "paint", "hexagonal frame of square tube, the brief's tone (S 0.46; review fix: measured on the limbs, the same surface in both frames, the frame renders under the band, not over it)"),
     "bolt":        ((84, 96, 100), None, 0.55, 0.0, "paint", "gusset plates and bolts (ours)"),
-    "rose":        ((150, 96, 104), "#5c4d5a", 0.7, 0.0, "paint", "the lift disc, dusty rose"),
-    "deck":        ((120, 130, 136), "#205169", 0.6, 0.0, "paint", "steel deck plate"),
-    "grate":       ((44, 46, 48), "#031a2a", 0.7, 0.0, "paint", "floor grates (deliberate black, luma >= 40)"),
-    "redmesh":     ((120, 40, 42), "#1c1015", 0.8, 0.0, "paint", "red mesh under the grates, lit from below"),
-    "rail":        ((156, 48, 50), "#592a38", 0.55, 0.0, "paint", "red rails, painted steel tube"),
+    "rose":        ((126, 101, 121), "#5c4d5a", 0.7, 0.0, "paint", "the lift disc, dusty rose (S 0.20; sampled 0.16)"),
+    "deck":        ((120, 130, 136), "#205169", 0.6, 0.0, "paint", "steel deck plate (neutral; the cool keys make it blue)"),
+    "grate":       ((44, 46, 48), "#031a2a", 0.7, 0.0, "paint", "floor grates and pit floors (deliberate black, luma >= 40)"),
+    "redmesh":     ((87, 48, 61), "#1c1015", 0.8, 0.0, "paint", "the red mesh in the two floor openings (S 0.45 as sampled)"),
+    "rail":        ((126, 63, 75), "#592a38", 0.55, 0.0, "paint", "red rails, painted steel tube (S 0.50; the sample is 0.53)"),
     "stripe":      ((206, 206, 200), "#697c87", 0.8, 0.0, "paint", "white floor stripes"),
-    "lamp":        ((150, 46, 48), "#582d3b", 0.6, 0.0, "paint", "lamp housings"),
+    "lamp":        ((112, 57, 72), "#582d3b", 0.6, 0.0, "paint", "lamp housings (S 0.49 as sampled)"),
     "concrete":    ((126, 126, 122), "#2a3945", 0.9, 0.0, "paint", "concrete base course and steps"),
     "door":        ((88, 94, 100), None, 0.6, 0.0, "paint", "steel door and intercom (ours)"),
     # 2 glass-case hall
-    "post":        ((110, 54, 60), "#4b353c", 0.7, 0.0, "paint", "case posts"),
-    "case_disc":   ((126, 50, 54), "#452e30", 0.7, 0.0, "paint", "case and rider discs"),
-    "disc_rim":    ((110, 44, 48), "#0d141b", 0.7, 0.0, "paint", "rider's disc rim"),
-    "unit":        ((116, 52, 58), None, 0.75, 0.0, "paint", "maroon wall unit (ours, between posts and discs)"),
+    "post":        ((90, 59, 63), "#4b353c", 0.7, 0.0, "paint", "case posts (S 0.34: the two samples are 0.29 and 0.37)"),
+    "case_disc":   ((89, 60, 62), "#452e30", 0.7, 0.0, "paint", "case and rider discs (S 0.33 as sampled)"),
+    "disc_rim":    ((82, 51, 54), "#0d141b", 0.7, 0.0, "paint", "rider's disc rim (sample graded blue; S 0.38, between the discs and the rails)"),
+    "unit":        ((94, 58, 63), None, 0.75, 0.0, "paint", "maroon wall unit (ours; S 0.38, with the posts)"),
     "plinth":      ((76, 80, 86), None, 0.7, 0.0, "paint", "case plinth and pedestal, dark steel (ours)"),
-    "walkway":     ((74, 80, 88), None, 0.7, 0.0, "paint", "gallery walkway deck (ours, dark blue-grey steel)"),
+    "walkway":     ((54, 59, 66), None, 0.7, 0.0, "paint", "gallery walkway deck (ours, dark blue-grey steel; review fix: luma 79 -> 58, the bottom of the built band, as the film's floor is dark: no light could dim the floor without also dimming the hall wall beyond)"),
     "shell_case":  ((54, 64, 78), "#123a4f", 0.85, 0.0, "paint", "glass-hall shell: screens, gantry"),
     # 3 pole hall
     "shell":       ((58, 66, 78), "#143040", 0.85, 0.0, "paint", "pole-hall shell: wall, roof deck"),
     "truss":       ((96, 104, 114), "#0d2132", 0.6, 0.0, "paint", "spoked ring and truss"),
     "floor":       ((70, 76, 84), None, 0.7, 0.0, "paint", "hall floor plates (ours, darker than the walkway)"),
-    "wedge_red":   ((124, 54, 54), "#5d403e", 0.85, 0.0, "paint", "floor wedges, oxblood"),
+    "wedge_red":   ((92, 63, 62), "#5d403e", 0.85, 0.0, "paint", "floor wedges, oxblood (S 0.33 as sampled)"),
     "wedge_pale":  ((176, 178, 176), "#8c9498", 0.85, 0.0, "paint", "floor wedges, pale; also the kerb"),
-    "steel":       ((164, 166, 168), None, 0.4, 1.0, "paint", "poles, bare steel (metal)"),
+    "steel":       ((164, 166, 168), None, 0.4, 1.0, "paint", "the disc's collar, bare steel (metal)"),
+    "pole":        ((112, 116, 122), None, 0.45, 0.7, "paint", "poles: plain steel rods (pass 2: no light on them; they read as thin dark lines against the lit hall)"),
     "copper":      ((176, 112, 70), "#c8833c", 0.4, 1.0, "paint", "copper bands (metal)"),
     "housing":     ((64, 68, 74), None, 0.7, 0.0, "paint", "LED bar housings, spot cans (ours)"),
     # emitters and glass (flat, never jittered)
     "light":       ((236, 240, 244), "#dfe6ed", 0.5, 0.0, "neon", "light bars and panels (the only Neon parts)"),
     "lens":        ((245, 240, 232), None, 0.5, 0.0, "neon", "lamp lenses and spot lenses"),
-    "strip":       ((236, 240, 244), "#e2e6e9", 0.5, 0.0, "neon", "the poles' segmented edge-lit strips (dimmer)"),
     "spot":        ((240, 242, 246), None, 0.5, 0.0, "neon", "hub spotlight lenses (the brightest emitters)"),
     "glass":       ((196, 210, 214), "#062a3d", 0.1, 0.0, "glass", "case glass, Transparency 0.65"),
 }
+# the reds of TwoArenas 8.2: tone saturation against the frame sample's (pass 1 in brackets)
+REDS = ("oxblood", "oxblood_dk", "rail", "lamp", "redmesh", "post", "case_disc", "unit", "wedge_red", "rose")
+RED_SAMPLE_SAT = {"post": 0.33}           # posts: mean of #4b353c (0.29) and #442b2e (T2 @133.3 s, 0.37)
 # preview-only figures (never exported): white launch capes with dark trim (brief 2.8), white armour
 FIG = {
     "cape": (216, 216, 212), "trim": (52, 62, 82), "skin": (198, 156, 124), "hair": (190, 160, 104),
@@ -305,10 +353,23 @@ def M_basis(u, w, origin):
 # =============================================================================================== room 1: red room
 RW, RD, RH = 30.0, 24.0, 20.0                  # interior 30 x 24, net at 20 (brief 2.3)
 HX_IN, HX_OUT = 7.0, 7.9                       # hex frame apothems: 14 across the flats inside, 0.9 tube
-NET_PITCH, NET_BAR = 1.45, 0.25                # cells 1.2 + bars 0.25
+NET_CELL, NET_BAR = 1.2, 0.25                  # the brief's net: 1.2-stud cells, 0.25-stud bars
+NET_PITCH = NET_CELL + NET_BAR
+NET_ANGLE = 45.0                               # degrees to the hex frame (critic #5b; the film's diamond read)
+NET_RIDGE = 0.09                               # half height of the bars' diamond section (two faces built)
+NET_SAG, NET_SAG_SPAN = 0.4, 4.0               # a slight sag: 0.4 stud at mid-span, full depth 4 studs from a fixing
+NET_B_FIX = 21.45                              # the top net's fixings (walls and under the hex tube)
+NET_A_FIX = 19.95                              # the room net's fixings (the walls' top channel)
 DISC_R = 3.6                                   # 7.2 across: the arena's plate tube
 ROOF_Z = (20.4, 20.9)                          # red roof panels between the two nets
-RED_PITS = []                                  # (width, depth) of each grate pit, in GrateGlow order
+RED_PITS = []                                  # (width, depth) of each red floor opening, in OpeningGlow order
+RED_PITS_GRATE = []                            # (width, depth) of each grate lane, in GrateGlow order
+DECK_KEY_POS = tuple(float(x) for x in os.environ.get("LAUNCH_DECK_POS", "11.0,-7.0,6.4").split(","))  # |x|, y, y
+DECK_KEY_AIM = float(os.environ.get("LAUNCH_DECK_AIM", "8.0"))  # |x| each deck key aims at on the floor
+DECK_KEY_DEG = float(os.environ.get("LAUNCH_DECK_DEG", "54"))   # the deck keys' cone angle (pass 2 review: 70 -> 54, so their blue stays off the apron)
+HOOD_OUT = HX_IN + 0.3                         # the hood under the frame: 0.3 thick, flush with the frame's inner face
+HOOD_Z0 = float(os.environ.get("LAUNCH_HOOD_Z0", "8.0"))    # its foot, 2.3 studs over the stand-in's head (the
+#                                                frame's underside is at 21.6); frame B's deck camera never sees it
 
 
 def hex_poly(apothem, n_extra=False):
@@ -366,8 +427,96 @@ def hex_half_y(x, apothem):
     return R - ax * (R / 2) / apothem
 
 
+_HEX_N = [(1.0, 0.0), (0.5, math.sqrt(3) / 2), (-0.5, math.sqrt(3) / 2)]   # the pointy-top hex's three edge normals
+
+
+def hex_excess(x, y, apothem):
+    """How far (x, y) lies outside the pointy-top hex of this apothem, measured to its edge lines (< 0 inside)."""
+    return max(abs(nx * x + ny * y) for nx, ny in _HEX_N) - apothem
+
+
+def net_sag(x, y, hw, hd):
+    """0 at a fixing (the walls, the hex frame) rising to 1 a span NET_SAG_SPAN away: the net's sag shape."""
+    d = min(hw - abs(x), hd - abs(y), hex_excess(x, y, HX_OUT))
+    u = min(1.0, max(0.0, d / NET_SAG_SPAN))
+    return 1.0 - (1.0 - u) * (1.0 - u)
+
+
+def line_interval_in_rect(p0, d, hw, hd):
+    """Parameter interval of the line p0 + s d inside |x| <= hw, |y| <= hd (None if it misses)."""
+    lo, hi = -1e9, 1e9
+    for k, h in ((0, hw), (1, hd)):
+        if abs(d[k]) < 1e-12:
+            if abs(p0[k]) > h:
+                return None
+            continue
+        a, b = (-h - p0[k]) / d[k], (h - p0[k]) / d[k]
+        lo, hi = max(lo, min(a, b)), min(hi, max(a, b))
+    return (lo, hi) if hi > lo else None
+
+
+def line_interval_in_hex(p0, d, apothem):
+    lo, hi = -1e9, 1e9
+    for nx, ny in _HEX_N:
+        nd = nx * d[0] + ny * d[1]
+        npp = nx * p0[0] + ny * p0[1]
+        if abs(nd) < 1e-12:
+            if abs(npp) > apothem:
+                return None
+            continue
+        a, b = (-apothem - npp) / nd, (apothem - npp) / nd
+        lo, hi = max(lo, min(a, b)), min(hi, max(a, b))
+    return (lo, hi) if hi > lo else None
+
+
+def build_net45(mb, key, z_fix, sag, cut, hw, hd, ridge_up, every=1):
+    """The brief's net: two families of bars at +-NET_ANGLE to the hex frame (pitch NET_PITCH, width NET_BAR), clear
+    of the hex opening (apothem `cut`), following a sagging surface z = z_fix - sag * net_sag(x, y). Each bar is the
+    two faces of a diamond section facing the viewer (ridge up for the net seen from above, down for the net seen
+    from the room), with a vertex at every `every`-th crossing so the bars bend with the sag."""
+    a = math.radians(NET_ANGLE)
+    fam = [((math.cos(a), math.sin(a)), (-math.sin(a), math.cos(a))),       # (along, across), along x across = +z
+           ((-math.sin(a), math.cos(a)), (-math.cos(a), -math.sin(a)))]
+    n = int(math.hypot(hw, hd) / NET_PITCH) + 2
+    offs = [(k + 0.5) * NET_PITCH for k in range(-n, n)]
+    hb = NET_BAR / 2.0
+    ridge = NET_RIDGE if ridge_up else -NET_RIDGE
+
+    def z_at(x, y):
+        return z_fix - sag * net_sag(x, y, hw, hd)
+    for (ux, uy), (vx, vy) in fam:
+        v = mb.vol()
+        for c in offs:
+            p0 = (c * vx, c * vy)
+            iv = line_interval_in_rect(p0, (ux, uy), hw, hd)
+            if iv is None:
+                continue
+            spans = [iv]
+            hx_iv = line_interval_in_hex(p0, (ux, uy), cut)
+            if hx_iv is not None:
+                spans = [(s0, min(s1, hx_iv[0])) for s0, s1 in spans if s0 < hx_iv[0]] + \
+                        [(max(s0, hx_iv[1]), s1) for s0, s1 in spans if s1 > hx_iv[1]]
+            for s0, s1 in spans:
+                if s1 - s0 < 0.3:
+                    continue
+                cross = [s for s in offs if s0 + 0.05 < s < s1 - 0.05][::every]
+                ss = [s0] + cross + [s1]
+                V, F = [], []
+                for s in ss:
+                    x, y = p0[0] + s * ux, p0[1] + s * uy
+                    z = z_at(x, y)
+                    V += [(x - hb * vx, y - hb * vy, z), (x, y, z + ridge), (x + hb * vx, y + hb * vy, z)]
+                for i in range(len(ss) - 1):
+                    b0, b1 = 3 * i, 3 * (i + 1)
+                    if ridge_up:      # faces point up
+                        F += [(b0, b1, b1 + 1, b0 + 1), (b0 + 1, b1 + 1, b1 + 2, b0 + 2)]
+                    else:             # faces point down
+                        F += [(b0, b0 + 1, b1 + 1, b1), (b0 + 1, b0 + 2, b1 + 2, b1 + 1)]
+                mb.add((V, F), key, None, v)
+
+
 def build_red_room(rng):
-    P = {k: MB(k) for k in ("Shell", "Roof", "NetA", "NetB", "HexFrame", "Deck", "Grates", "Rails", "Lamps",
+    P = {k: MB(k) for k in ("Shell", "Roof", "NetA", "NetB", "HexFrame", "Hood", "Deck", "Grates", "Rails", "Lamps",
                             "Stairs", "Lift")}
     P["LampLights"] = MB("LampLights", "neon")
     shell, roof, deck, grates, rails = P["Shell"], P["Roof"], P["Deck"], P["Grates"], P["Rails"]
@@ -452,43 +601,14 @@ def build_red_room(rng):
         poly += [p for _, p in sorted(cs)]
         poly += [ray_rect(a1), hp[(k + 1) % 6]]
         roof.add(g_prism(poly, ROOF_Z[0], ROOF_Z[1]), "oxblood")
-    # panel seams: shallow dark battens on both faces (the roof reads as cassettes behind the net)
-    for i in range(-3, 4):
-        x = i * 3.75
-        hy_ = hex_half_y(x, HX_OUT)
-        spans = [(-hd, -hy_), (hy_, hd)] if hy_ else [(-hd, hd)]
-        for zf in ((ROOF_Z[0] - 0.12, ROOF_Z[0]), (ROOF_Z[1], ROOF_Z[1] + 0.12)):
-            for y0, y1 in spans:
-                if y1 - y0 > 0.5:
-                    roof.add(g_box(x - 0.12, y0, zf[0], x + 0.12, y1, zf[1]), "oxblood_dk")
-    for j in range(-3, 4):
-        y = j * 3.4
-        hx_ = hex_half_x(y, HX_OUT)
-        for zf in ((ROOF_Z[0] - 0.12, ROOF_Z[0]), (ROOF_Z[1], ROOF_Z[1] + 0.12)):
-            for x0, x1 in (((-hw, -hx_), (hx_, hw)) if hx_ else ((-hw, hw),)):
-                if x1 - x0 > 0.5:
-                    roof.add(g_box(x0, y - 0.12, zf[0], x1, y + 0.12, zf[1]), "oxblood_dk")
+    # (pass 1's batten grid is gone: under the fine 45-degree net it fought the net's lines)
 
-    def net_layer(mb, z_x, z_y, cut):
-        b = NET_BAR
-        nx = int((RD - 0.8) / NET_PITCH) + 1
-        for j in range(nx):
-            y = -((nx - 1) * NET_PITCH) / 2 + j * NET_PITCH
-            hx_ = hex_half_x(y, cut)
-            spans = [(-hw, -hx_), (hx_, hw)] if hx_ else [(-hw, hw)]
-            for x0, x1 in spans:
-                mb.add(g_box(x0, y - b / 2, z_x, x1, y + b / 2, z_x + b), "net")
-        ny = int((RW - 0.8) / NET_PITCH) + 1
-        for i in range(ny):
-            x = -((ny - 1) * NET_PITCH) / 2 + i * NET_PITCH
-            hy_ = hex_half_y(x, cut)
-            spans = [(-hd, -hy_), (hy_, hd)] if hy_ else [(-hd, hd)]
-            for y0, y1 in spans:
-                mb.add(g_box(x - b / 2, y0, z_y, x + b / 2, y1, z_y + b), "net")
-    # under the roof: the room's net ceiling, cut clear of the opening (seen from above through the frame)
-    net_layer(P["NetA"], 19.75, 19.5, HX_OUT + 0.05)
-    # on top of the roof (frame A): it runs in under the frame
-    net_layer(P["NetB"], ROOF_Z[1] + 0.12, ROOF_Z[1] + 0.37, HX_OUT - 0.2)
+    # the net, to the brief's spec (critic #5b): 1.2-stud cells, 0.25-stud bars, 45 degrees to the hex frame, with a
+    # slight sag between its fixings. NetA hangs under the roof (seen from the room, ridges down); NetB is stretched
+    # over the roof panels on supports at the walls and under the hex tube (frame A, ridges up) and runs in under
+    # the tube.
+    build_net45(P["NetA"], "net", NET_A_FIX, NET_SAG, HX_OUT + 0.05, hw, hd, ridge_up=False, every=2)
+    build_net45(P["NetB"], "net", NET_B_FIX, NET_SAG, HX_OUT - 0.2, hw, hd, ridge_up=True, every=2)
 
     # ---- hexagonal frame of square teal tube (mouth of the lift), gussets and bolts on top
     hexf = P["HexFrame"]
@@ -508,6 +628,18 @@ def build_red_room(rng):
                              HX_OUT / math.cos(math.radians(30)) * math.sin(math.radians(ang)), HZ0)), ang - 90.0)
         hexf.add(g_box(-0.7, -0.05, 0.05, 0.7, 0.12, 0.85), "bolt", Mo, v)
     # (no sleeve: the roof prisms close the opening's edge themselves, and a sleeve read as a teal band from above)
+    # ---- the drop under the frame (pass 2 review fix, frame A): the film looks down through the hexagon into a
+    # narrow oxblood shaft with thin red vertical rails (T1 @120.2 s), not onto the steel deck, so an oxblood hood lines
+    # the drop from the frame down to HOOD_Z0, with a thin rail on each corner and down the middle of each panel. Its
+    # foot stays above the deck camera of frame B (y 10.6) and the walkway's rail; the lift rises up through it.
+    hood = P["Hood"]
+    hood.add(g_annulus(hex_poly(HOOD_OUT), hex_poly(HX_IN), HOOD_Z0, HZ0), "oxblood")
+    vr = hood.vol()
+    for k in range(6):                     # one rail down the middle of each panel (the film's thin vertical rails)
+        c, s = math.cos(math.radians(60.0 * k)), math.sin(math.radians(60.0 * k))
+        rr = HX_IN - 0.14
+        hood.add(g_beam((rr * c, rr * s, HOOD_Z0 + 0.3), (rr * c, rr * s, HZ0 - 0.1), sec_rect(0.25, 0.25),
+                        up=(c, s, 0.0)), "rail", None, vr)
     atts["KeyLight"] = (Vector((0, 0, 34.0)), Vector((0, 0, -1)))
     atts["CamTopDown"] = (Vector((0, -2.5, 25.5)), Vector((0, 0.35, -1)).normalized())
 
@@ -553,46 +685,62 @@ def build_red_room(rng):
     for y0, y1 in ((-9.6, -5.0), (5.0, 9.6)):                                # stripes round the grate lanes
         for yy in (y0 - 0.05, y1 + 0.05):
             deck.add(g_box(-7.6, yy - 0.18, -0.38, 7.6, yy + 0.18, 0.02), "stripe")
-    # floor pits lined with red mesh (a red panel under a dark square net, lit from inside). The two lanes ahead of
-    # and behind the lift carry black square-mesh grates flush with the deck (frame B, ahead of the player); the two
-    # pits beside the lift are open red mesh under a dark rim (frame B, either side of the player). The Deck part's
-    # Box collider spans the pits, so all of them are walkable.
+    # floor pits (critic #5b, frame B). The four lanes ahead of and behind the lift carry black square-mesh grates
+    # flush with the deck over a dark pit: they read black, with no red under them. The two openings beside the lift
+    # are the only red: a dark pit with a red mesh stretched across it at 45 degrees, lit from inside. The Deck
+    # part's Box collider spans the pits, so all of them are walkable.
     gi = 0
-    pits = [(-7.6, -9.6, -0.25, -5.0, True), (0.25, -9.6, 7.6, -5.0, True), (-7.6, 5.0, -0.25, 9.6, True),
-            (0.25, 5.0, 7.6, 9.6, True), (-10.0, -4.2, -7.5, 4.2, False), (7.5, -4.2, 10.0, 4.2, False)]
-    RED_PITS[:] = [(x1 - x0, y1 - y0) for x0, y0, x1, y1, _ in pits]
-    for x0, y0, x1, y1, black_top in pits:
-        gi += 1
+    pits = [(-7.6, -9.6, -0.25, -5.0, "grate"), (0.25, -9.6, 7.6, -5.0, "grate"), (-7.6, 5.0, -0.25, 9.6, "grate"),
+            (0.25, 5.0, 7.6, 9.6, "grate"), (-10.0, -4.2, -7.5, 4.2, "opening"), (7.5, -4.2, 10.0, 4.2, "opening")]
+    RED_PITS[:] = [(x1 - x0, y1 - y0) for x0, y0, x1, y1, kind in pits if kind == "opening"]
+    RED_PITS_GRATE.clear()
+    for x0, y0, x1, y1, kind in pits:
         v = grates.vol()
-        grates.add(g_box(x0, y0, -1.3, x1, y1, -1.1), "redmesh", None, v)          # red mesh panel
-        nxg = int((x1 - x0) / 1.2)
-        for k in range(1, nxg + 1):                                                  # its dark net
-            xx = x0 + k * (x1 - x0) / (nxg + 1)
-            grates.add(g_box(xx - 0.13, y0, -1.1, xx + 0.13, y1, -0.98), "grate", None, v)
-        nyg = int((y1 - y0) / 1.2)
-        for k in range(1, nyg + 1):
-            yy = y0 + k * (y1 - y0) / (nyg + 1)
-            grates.add(g_box(x0, yy - 0.13, -1.1, x1, yy + 0.13, -0.98), "grate", None, v)
+        z_floor = -2.6 if kind == "grate" else -1.7          # the grate lanes are deep dark pits: they read black
+        grates.add(g_prism([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], z_floor - 0.1, z_floor), "grate", None, v)
         for wx0, wy0, wx1, wy1 in ((x0, y0, x1, y0 + 0.12), (x0, y1 - 0.12, x1, y1),
                                    (x0, y0, x0 + 0.12, y1), (x1 - 0.12, y0, x1, y1)):
-            grates.add(g_box(wx0, wy0, -1.3, wx1, wy1, -0.4), "grate", None, v)       # pit walls
+            grates.add(g_box(wx0, wy0, z_floor, wx1, wy1, -0.35), "grate", None, v)       # pit walls
         vb = grates.vol()
         rim = 0.35
         grates.add(g_box(x0, y0, -0.35, x1, y0 + rim, 0.0), "grate", None, vb)          # rim
         grates.add(g_box(x0, y1 - rim, -0.35, x1, y1, 0.0), "grate", None, vb)
         grates.add(g_box(x0, y0 + rim, -0.35, x0 + rim, y1 - rim, 0.0), "grate", None, vb)
         grates.add(g_box(x1 - rim, y0 + rim, -0.35, x1, y1 - rim, 0.0), "grate", None, vb)
-        if black_top:                                                                 # square mesh 0.75
-            nb = int(round((y1 - y0 - 2 * rim) / 0.75)) - 1
+        if kind == "grate":                                     # black square mesh: 0.25 bars at 0.9, mostly open
+            # (review fix) a dim navy light under each lane's mesh, facing the pit floor, so the void reads navy-black
+            # through the bars as in the film's frame B, with no red under any grate
+            gl_n = sum(1 for k_ in atts if k_.startswith("GrateGlow_")) + 1
+            atts["GrateGlow_%d" % gl_n] = (Vector(((x0 + x1) / 2, (y0 + y1) / 2, -0.45)), Vector((0, 0, -1)))
+            RED_PITS_GRATE.append((x1 - x0, y1 - y0))
+            nb = int(round((y1 - y0 - 2 * rim) / 0.9)) - 1
             for k in range(1, nb + 1):
                 yy = y0 + rim + k * (y1 - y0 - 2 * rim) / (nb + 1)
-                grates.add(g_box(x0 + rim, yy - 0.13, -0.3, x1 - rim, yy + 0.13, -0.02), "grate", None, vb)
-            nc = int(round((x1 - x0 - 2 * rim) / 0.75)) - 1
+                grates.add(g_box(x0 + rim, yy - 0.125, -0.3, x1 - rim, yy + 0.125, -0.02), "grate", None, vb)
+            nc = int(round((x1 - x0 - 2 * rim) / 0.9)) - 1
             for k in range(1, nc + 1):
                 xx = x0 + rim + k * (x1 - x0 - 2 * rim) / (nc + 1)
-                grates.add(g_box(xx - 0.13, y0 + rim, -0.32, xx + 0.13, y1 - rim, -0.04), "grate", None, vb)
-        # the glow: a red light inside the pit, aimed down at the mesh so the mesh reads lit from within
-        atts["GrateGlow_%d" % gi] = (Vector(((x0 + x1) / 2, (y0 + y1) / 2, -0.55)), Vector((0, 0, -1)))
+                grates.add(g_box(xx - 0.125, y0 + rim, -0.32, xx + 0.125, y1 - rim, -0.04), "grate", None, vb)
+            continue
+        # the opening's red mesh: square bars at 45 degrees, pitch NET_PITCH, 0.6 under the deck, clipped to the pit
+        gi += 1
+        vm = grates.vol()
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        hx_, hy_ = (x1 - x0) / 2 - 0.12, (y1 - y0) / 2 - 0.12
+        a = math.radians(NET_ANGLE)
+        n = int(math.hypot(hx_, hy_) / NET_PITCH) + 2
+        for (ux, uy), (vx, vy) in (((math.cos(a), math.sin(a)), (-math.sin(a), math.cos(a))),
+                                   ((-math.sin(a), math.cos(a)), (-math.cos(a), -math.sin(a)))):
+            for k in range(-n, n):
+                c = (k + 0.5) * NET_PITCH
+                iv = line_interval_in_rect((c * vx, c * vy), (ux, uy), hx_, hy_)
+                if iv is None or iv[1] - iv[0] < 0.3:
+                    continue
+                pa = Vector((cx + c * vx + iv[0] * ux, cy + c * vy + iv[0] * uy, -0.62))
+                pb = Vector((cx + c * vx + iv[1] * ux, cy + c * vy + iv[1] * uy, -0.62))
+                grates.add(g_beam(pa, pb, sec_rect(NET_BAR, 0.22)), "redmesh", None, vm)
+        # the glow: a dim red light low in the opening, aimed up through the mesh (the only red light in the room)
+        atts["OpeningGlow_%d" % gi] = (Vector((cx, cy, z_floor + 0.25)), Vector((0, 0, 1)))
 
     # ---- rails: a U round the lift (open at the back), the far rail with the lamp post, walkway and stairs
     def rail_run(pts, top=3.6, mid=1.8, posts=None, r=0.22):
@@ -641,8 +789,16 @@ def build_red_room(rng):
         rails.add(g_tube((11.85, y, z), (11.85, y, z + 3.8), 0.22, 8), "rail", None, v)
     atts["GuardWalkway"] = (Vector((-6.0, 10.5, WZ)), Vector((0, -1, 0)))
     atts["EscortWalkway"] = (Vector((0.0, 10.4, WZ)), Vector((0, -1, 0)))
-    atts["GuardFloor"] = (Vector((5.2, 7.3, 0.0)), Vector((0, -1, 0)))
-    atts["WalkwaySpot"] = (Vector((0.0, 1.0, 19.2)), (Vector((0.0, 10.4, WZ + 3.5)) - Vector((0.0, 1.0, 19.2))).normalized())
+    atts["GuardFloor"] = (Vector((5.0, 10.9, 0.0)), Vector((0, -1, 0)))     # beyond the far rail, as in frame B
+    # the walkway's spot hangs over the walkway, outside the hood (pass 1 hung it in the tube mouth)
+    atts["WalkwaySpot"] = (Vector((-4.0, 10.6, 19.4)), (Vector((-5.0, 11.2, WZ)) - Vector((-4.0, 10.6, 19.4))).normalized())
+    # the cool blue-white keys over the deck (pass 2, TwoArenas 2.8): four spots under the net ceiling, one over each
+    # grate lane's outer half, so the steel reads blue and its shadows go blue (frame B)
+    # (review fix) each key leans in toward the middle of its grate lane, so the blue light reaches the grate bars
+    dkx, dky0, dky1 = DECK_KEY_POS
+    for k, (kx, ky) in enumerate(((-dkx, dky0), (dkx, dky0), (-dkx, dky1), (dkx, dky1))):
+        aim = Vector((math.copysign(DECK_KEY_AIM, kx), ky, 0.0))
+        atts["DeckKey_%d" % (k + 1)] = (Vector((kx, ky, 18.9)), (aim - Vector((kx, ky, 18.9))).normalized())
 
     # ---- lamp housings (red, round fronts) with white lenses: a pair on the far rail's centre post (frame B)
     lamps, lens = P["Lamps"], P["LampLights"]
@@ -679,6 +835,7 @@ DISC_Y = 0.3                      # disc centre in the bay frame (toward the hal
 DISC_TOP = 1.6
 POLE_Y = -1.7                     # pole axis in the bay frame (behind the disc)
 GANTRY_Z = 16.0
+UNIT_SETBACK = 1.8                # the maroon wall unit stands this far behind the case line (pass 2)
 GANTRY_ROWS = (97.4, 99.7, 117.8)  # strip-light rows: two over the inner walkway, one behind the cases; the case
                                    # fronts (r 100.8-115.6) stay clear for the rise and the orbiting camera
 
@@ -716,7 +873,9 @@ def build_case_bay():
     # maroon wall unit in the gap to the left (bearing -3.75 deg from the bay), facing the walkway
     a = math.radians(BAY_STEP / 2)
     ux, uy = -CASE_R * math.sin(a), CASE_R - CASE_R * math.cos(a)
-    M = M_place((ux, uy, 0.0), -BAY_STEP / 2)
+    # pass 2: set back 1.8 studs behind the case line, so the row of cases reads as cases with posts between them
+    # (T1 @125.9 s) and a view along the row from inside a case passes in front of the units
+    M = M_place((ux, uy, 0.0), -BAY_STEP / 2) @ Matrix.Translation((0.0, -UNIT_SETBACK, 0.0))
     v = un.vol()
     un.add(g_prism(p_crect(0, -0.4, 3.4, 1.6, 0.3), 0.0, 0.5), "plinth", M, v)
     for sx in (-1, 1):
@@ -762,6 +921,12 @@ def build_case_gallery():
         w.add(g_sector(98.6, front, b0 + 0.04, b1 - 0.04, 2, -0.3, -0.3, 0.4, 0.4), "walkway")
         w.add(g_sector(97.8, 98.6, b0 + 0.04, b1 - 0.04, 2, -0.3, -0.3, 0.42, 0.42), "wedge_pale")   # kerb
         w.add(g_sector(CASE_R + CDp / 2 + 0.2, 119.6, b0 + 0.04, b1 - 0.04, 2, -0.3, -0.3, 0.4, 0.4), "plinth")
+    # the floor between the cases (pass 2: the wall units now stand set back in these gaps)
+    half_case = math.degrees((CW / 2 + 0.2) / CASE_R)
+    for k in range(7):
+        g0, g1 = max(0.0, k * BAY_STEP - (BAY_STEP / 2 - half_case)), min(seg, k * BAY_STEP + (BAY_STEP / 2 - half_case))
+        if g1 - g0 > 0.1:
+            w.add(g_sector(front, CASE_R + CDp / 2 + 0.2, g0 + 0.02, g1 - 0.02, 1, -0.3, -0.3, 0.4, 0.4), "walkway")
     w.add(g_sector(119.6, 120.4, 0, seg, 6, -0.3, -0.3, 3.2, 3.2), "shell_case")                    # back screen
     # gantry: rows of strip lights over the inner walkway and behind the cases (the case fronts stay clear for
     # the rise and the orbiting camera), radial ties at the bay seams, columns every 15 degrees
@@ -811,9 +976,37 @@ def dome_bot(r):
 
 
 POLE_TOP = dome_top(POLE_R) + 0.6            # the aperture collar
-STRIP_FROM = 38.0                            # the strips light the upper two thirds of each pole (T1 @124.7 s)
-# LED rings (r, count, bearing offset): radial bars, none on a 7.5-degree seam (where the trusses run) or a pole
-LED_RINGS = ((104.0, 32, 5.625), (128.0, 48, 3.75), (152.0, 64, 2.8125), (174.0, 80, 2.25))
+# The ceiling ring's LED bars (pass 2): a polar grid of radial bars, one radial row on every 7.5-degree seam (48 in
+# all, hung under the trusses) and 6 rings, so that bars on one bearing line up. From the floor the far half of the
+# ceiling then shows the film's dotted rows fanning out under the hub (T1 @124.7 s); from the rise, the rows either
+# side of a rider (3.75 degrees off its bearing) read as the pair of tubes behind the rider (T1 @127.2 s). The rows
+# keep 7 studs clear of every pole's aperture.
+LED_ROW_BEARINGS = tuple(BAY_STEP * k for k in range(6))
+LED_RING_R = (104.0, 117.0, 130.0, 143.0, 156.0, 169.0)
+LED_HALF = 3.0                               # each bar is 6 studs long (radially)
+LED_SPARSE_R = 140.0                         # review fix: the rings beyond this keep every second row only, so the
+#                                              near ceiling reads as the film's sparse dashes, not a white grid
+LED_RINGS = tuple((r, 24 if r > LED_SPARSE_R else 48, LED_ROW_BEARINGS[0]) for r in LED_RING_R)  # (r, bars, first)
+# the wall bars (pass 2): two vertical light bars, one above the other, on the inner face of every wall column (the
+# columns stand on the bay seams, so from the rise a pair flanks each rider, as the tubes do in T1 @127.2 s)
+WALL_BAR_Z = ((82.0, 96.0),)                 # review fix: one bar per column, at the top of the wall, so the wall
+#                                              below reads dark behind the riders as in T1 @124.7 s (pass 2 had two, a grid)
+WALL_BAR_BEARINGS = tuple(BAY_STEP * k for k in range(6))
+WALL_BAR_R = HALL_R - 2.25                   # just proud of the columns' inner faces (r 177.9)
+
+
+def led_bar_ends(seg=0, dz=-1.6):
+    """End points of the ceiling ring's LED bars in segment seg (0-7, world frame of the hall); dz below the truss
+    bottom chords (-1.6: the bar's axis; -1.85: its emitting face)."""
+    out = []
+    for k, b in enumerate(LED_ROW_BEARINGS):
+        for r in LED_RING_R:
+            if r > LED_SPARSE_R and k % 2 == 1:
+                continue
+            ra, rb = r - LED_HALF, r + LED_HALF
+            bb = b + 45.0 * seg
+            out.append((bearing(bb, ra, dome_bot(ra) + dz), bearing(bb, rb, dome_bot(rb) + dz)))
+    return out
 
 
 def build_hall_segment():
@@ -879,21 +1072,18 @@ def build_hall_segment():
             b0, b1 = k * BAY_STEP, (k + 1) * BAY_STEP
             z = dome_top(r) + 0.2
             tr.add(g_beam(bearing(b0, r, z), bearing(b1, r, z), sec_rect(0.9, 0.9)), "truss")
-    # LED bars: radial, in rings outside the crown, each under a dark housing (the film shows none inside the wheel)
-    for r, count, off in LED_RINGS:
-        step = 360.0 / count
-        for k in range(count):
-            b = off + k * step
-            if b >= seg:
-                break
-            L = min(4.0 if r < 110 else 3.4 + r / 60.0, 179.0 - r)
-            ra, rb = r - L, r + L
-            za, zb = dome_bot(ra) - 1.6, dome_bot(rb) - 1.6
-            pa, pb = bearing(b, ra, za), bearing(b, rb, zb)
-            tr.add(g_beam(pa + Vector((0, 0, 0.35)), pb + Vector((0, 0, 0.35)), sec_rect(0.9, 0.45)), "housing")
-            led.add(g_beam(pa, pb, sec_rect(0.5, 0.3)), "light")
-            # hanger to the roof
-            tr.add(g_beam(bearing(b, r, dome_bot(r) - 1.2), bearing(b, r, dome_top(r) + 0.9), sec_rect(0.25, 0.25)), "housing")
+    # the ceiling ring's LED bars: radial bars in a polar grid outside the crown, each under a dark housing hung
+    # just below the truss bottom chords (the film shows none inside the wheel)
+    for pa, pb in led_bar_ends(0):
+        tr.add(g_beam(pa + Vector((0, 0, 0.35)), pb + Vector((0, 0, 0.35)), sec_rect(0.9, 0.45)), "housing")
+        led.add(g_beam(pa, pb, sec_rect(0.5, 0.3)), "light")
+    # the wall bars: two vertical bars on the inner face of each column, each in a dark channel
+    for b in WALL_BAR_BEARINGS:
+        for z0, z1 in WALL_BAR_Z:
+            tr.add(g_beam(bearing(b, WALL_BAR_R + 0.35, z0 - 0.4), bearing(b, WALL_BAR_R + 0.35, z1 + 0.4),
+                          sec_rect(0.9, 0.5), up=tuple(bearing(b, 1.0) - bearing(b, 0.0))), "housing")
+            led.add(g_beam(bearing(b, WALL_BAR_R, z0), bearing(b, WALL_BAR_R, z1), sec_rect(0.5, 0.3),
+                           up=tuple(bearing(b, 1.0) - bearing(b, 0.0))), "light")
     # apertures over the poles: collar rings in the roof deck with a closed dark iris
     for k in range(6):
         b = bay_bearing(k)
@@ -917,48 +1107,60 @@ def build_crown():
     hub.add(g_prism(p_ngon(20.0, 24, rot=0), zc - 6.0, zc + 2.8), "truss")
     hub.add(g_prism(p_ngon(16.5, 24, rot=0), zc - 7.2, zc - 6.0), "housing")
     hub.add(g_prism(p_ngon(6.0, 12), zc + 2.8, zc + 4.5), "shell")
+    # the roof deck over the wheel (pass 2): seen through the spokes, as in T1 @124.7 s (pass 1 left it open)
+    ring.add(g_prism(p_ngon(CROWN_R + 3.5, 24, rot=0), zc + 5.6, zc + 6.2), "shell")
     atts = {}
-    for k in range(12):
-        b = k * 30.0 + 15.0
-        base = bearing(b, 12.5, zc - 7.2)
-        tip = bearing(b, 13.5, zc - 10.4)
+    # the 12 hub spots hang below the hub in two tiers, as the film's bright hanging cluster (review fix; T1 @124.7 s,
+    # T2 @133.9 s): 8 on drop rods round a ring of r 11, 4 lower on a ring of r 5, each a big can with a 5.2-stud lens
+    # tilted a little outward (pass 2 had a flat ring of small dots against the hub's underside)
+    for k, (b, r_, drop) in enumerate([(k * 45.0 + 22.5, 11.0, 6.5) for k in range(8)] +
+                                      [(k * 90.0, 5.0, 13.0) for k in range(4)]):
+        base = bearing(b, r_, zc - 7.2)
+        top = base + Vector((0, 0, -drop))
+        tip = bearing(b, r_ + 0.9, zc - 7.2 - drop - 2.4)
         v = hub.vol()
-        hub.add(g_beam(base, base + Vector((0, 0, -1.4)), sec_rect(0.45, 0.45)), "housing", None, v)
-        hub.add(g_beam(base + Vector((0, 0, -1.2)), tip, p_ngon(1.15, 10)), "housing", None, v)
-        d = (tip - (base + Vector((0, 0, -1.2)))).normalized()
-        spots.add(g_beam(tip, tip + d * 0.12, p_ngon(0.95, 10)), "spot")
-        atts["HubSpot_%d" % (k + 1)] = (tip + d * 0.2, Vector((0.08 * math.sin(math.radians(b)),
-                                                                0.08 * math.cos(math.radians(b)), -1)).normalized())
+        hub.add(g_beam(base, top, sec_rect(0.35, 0.35)), "housing", None, v)                    # drop rod
+        hub.add(g_beam(top + Vector((0, 0, 0.3)), tip, p_ngon(3.0, 10)), "housing", None, v)    # the can
+        d = (tip - top).normalized()
+        spots.add(g_beam(tip, tip + d * 0.14, p_ngon(2.6, 10)), "spot")
+        atts["HubSpot_%d" % (k + 1)] = (tip + d * 0.25, Vector((0.12 * math.sin(math.radians(b)),
+                                                                 0.12 * math.cos(math.radians(b)), -1)).normalized())
     return P, atts
 
 
 def build_pole():
-    P = {"Steel": MB("Steel"), "Copper": MB("Copper"), "Strip": MB("Strip", "neon")}
-    st, cu, sp = P["Steel"], P["Copper"], P["Strip"]
+    """A dark steel rod with copper bands (pass 2: no light strips; the film's poles are dark rods, critic #5c)."""
+    P = {"Steel": MB("Steel"), "Copper": MB("Copper")}
+    st, cu = P["Steel"], P["Copper"]
     H = POLE_TOP - POLE_BASE
-    st.add(g_prism(p_ngon(0.5, 12, rot=0), 0.0, H), "steel")
+    st.add(g_prism(p_ngon(0.5, 12, rot=0), 0.0, H), "pole")
     for z in [1.6] + [16.0 + 15.0 * k for k in range(8)]:
         if z + 0.6 < H:
             cu.add(g_prism(p_ngon(0.62, 12, rot=0), z, z + 0.6), "copper")
-    # two segmented edge-lit strips on the front-left / front-right facets (toward the hall centre); from far they
-    # read as the dotted lines converging on the hub, from close as vertical light tubes (T1 @124.7 / @127.2 s)
-    for ang in (60.0, 120.0):
-        a = math.radians(ang)
-        c, s = math.cos(a), math.sin(a)
-        z = STRIP_FROM
-        while z + 4.2 < H - 1.0:
-            p0 = Vector((0.52 * c, 0.52 * s, z))
-            p1 = Vector((0.52 * c, 0.52 * s, z + 4.2))
-            sp.add(g_beam(p0, p1, sec_rect(0.26, 0.2), up=(c, s, 0)), "strip")
-            z += 6.3
     atts = {"Base": (Vector((0, 0, 0)), Vector((0, 0, 1))), "Top": (Vector((0, 0, H)), Vector((0, 0, 1)))}
     return P, atts
 
 
 # =============================================================================================== preview figures
-def figure_parts(kind="tribute", district=None):
-    """A blocky R15-proportioned figure (5.5 tall) for previews only. Front = +Y."""
+def figure_parts(kind="tribute", district=None, look_up=0.0):
+    """A blocky R15-proportioned figure (5.5 tall) for previews only. Front = +Y. A "tribute" is the player's own
+    stand-in (or a neighbour) in the white launch cape; look_up tilts the head back by that many degrees."""
     mb = MB("Figure")
+    if kind == "suit":
+        # a neighbour in the cases (review fix): the white launch suit with the district colour on the sleeves and no
+        # flared cape, so the raised disc shows round the feet and catches the case's top light (T1 @125.9 s)
+        for sx in (-1, 1):
+            mb.add(g_prism(p_crect(sx * 0.47, 0, 0.86, 0.86, 0.1), 0.0, 0.35), "shoe")
+            mb.add(g_prism(p_crect(sx * 0.47, 0, 0.84, 0.84, 0.1), 0.35, 2.3), "trousers")
+        mb.add(g_prism(p_crect(0, 0, 1.9, 0.95, 0.12), 2.3, 4.3), "cape")
+        for sx in (-1, 1):
+            mb.add(g_prism(p_crect(sx * 1.38, 0, 0.8, 0.8, 0.1), 2.35, 4.25), district or "cape")
+        mb.add(g_prism(p_crect(0, 0, 1.15, 1.1, 0.18), 4.32, 5.42), "skin")
+        mb.add(g_box(-0.42, 0.5, 4.95, 0.42, 0.57, 5.08), "hair_dk")
+        mb.add(g_prism(p_crect(0, -0.05, 1.3, 1.25, 0.3), 5.1, 5.75), "hair")
+        mb.add(g_prism(p_crect(0, -0.55, 1.3, 0.3, 0.1), 4.4, 5.6), "hair")
+        mb.add(g_prism(p_crect(0, -0.62, 1.6, 0.4, 0.15), 3.2, 4.4), "cape")              # the hood, down
+        return mb
     if kind == "tribute":
         for sx in (-1, 1):
             mb.add(g_prism(p_crect(sx * 0.47, 0, 0.86, 0.86, 0.1), 0.0, 0.35), "shoe")
@@ -966,11 +1168,14 @@ def figure_parts(kind="tribute", district=None):
         mb.add(g_prism(p_crect(0, 0, 1.9, 0.95, 0.12), 2.3, 4.3), district or "trousers")
         for sx in (-1, 1):
             mb.add(g_prism(p_crect(sx * 1.38, 0, 0.8, 0.8, 0.1), 2.35, 4.25), "cape")
-        mb.add(g_prism(p_crect(0, 0, 1.15, 1.1, 0.18), 4.32, 5.42), "skin")
-        mb.add(g_prism(p_crect(0, -0.05, 1.3, 1.25, 0.3), 5.1, 5.75), "hair")
-        mb.add(g_prism(p_crect(0, -0.55, 1.3, 0.3, 0.1), 4.4, 5.6), "hair")
+        Mh = (Matrix.Translation((0, 0, 4.32)) @ Matrix.Rotation(math.radians(look_up), 4, "X")
+              @ Matrix.Translation((0, 0, -4.32)))
+        mb.add(g_prism(p_crect(0, 0, 1.15, 1.1, 0.18), 4.32, 5.42), "skin", Mh)
+        mb.add(g_box(-0.42, 0.5, 4.95, 0.42, 0.57, 5.08), "hair_dk", Mh)          # brows, so the face reads
+        mb.add(g_prism(p_crect(0, -0.05, 1.3, 1.25, 0.3), 5.1, 5.75), "hair", Mh)
+        mb.add(g_prism(p_crect(0, -0.55, 1.3, 0.3, 0.1), 4.4, 5.6), "hair", Mh)
         # cape: faceted poncho, open front edges trimmed dark, hood behind the head
-        cape = [(r, z) for r, z in ((1.12, 4.42), (1.7, 3.3), (2.05, 1.7))]
+        cape = [(r, z) for r, z in ((0.86, 4.3), (1.7, 3.3), (2.05, 1.7))]     # a narrow collar: the head shows from below
         n = 12
         ring_pts = []
         for r, z in cape:
@@ -991,17 +1196,7 @@ def figure_parts(kind="tribute", district=None):
         for sx in (-1, 1):
             mb.add(g_beam((sx * 0.35, 0.78, 4.35), (sx * 0.62, 1.45, 1.7), sec_rect(0.22, 0.16), up=(0, 1, 0.3)), "trim")
         mb.add(g_beam((0, -0.55, 4.3), (0, -0.8, 5.5), p_ngon(0.62, 8)), "cape")
-    elif kind == "escort":   # an escort in a dark patterned suit, looking up (frame A)
-        for sx in (-1, 1):
-            mb.add(g_prism(p_crect(sx * 0.47, 0, 0.86, 0.86, 0.1), 0.0, 0.35), "shoe")
-            mb.add(g_prism(p_crect(sx * 0.47, 0, 0.84, 0.84, 0.1), 0.35, 2.3), "trim")
-        mb.add(g_prism(p_crect(0, 0, 1.9, 0.95, 0.12), 2.3, 4.3), "trim")
-        mb.add(g_prism(p_crect(0, 0.2, 1.2, 0.6, 0.1), 2.6, 4.1), "yellow")
-        for sx in (-1, 1):
-            mb.add(g_beam((sx * 1.3, 0.0, 4.15), (sx * 2.35, 0.55, 3.0), sec_rect(0.75, 0.75), up=(0, 1, 0)), "trim")
-        mb.add(g_prism(p_crect(0, 0, 1.15, 1.1, 0.18), 4.32, 5.42), "skin")
-        mb.add(g_prism(p_crect(0, -0.05, 1.45, 1.35, 0.35), 5.0, 5.95), "trousers")
-    else:   # guard in white armour with a dark visor and a rifle
+    else:   # guard in white armour with a dark visor and a rifle (our own design; pass 2 drops pass 1's escort)
         for sx in (-1, 1):
             mb.add(g_prism(p_crect(sx * 0.48, 0, 0.9, 0.9, 0.12), 0.0, 0.4), "black")
             mb.add(g_prism(p_crect(sx * 0.48, 0, 0.88, 0.88, 0.12), 0.4, 2.3), "armour")
@@ -1198,11 +1393,12 @@ PART_META = {
     # (asset, part) -> (role, robloxMaterial, collide, collision, castShadow, tags, notes)
     ("LaunchRedRoom", "Shell"): ("Paint", "Concrete", True, "PreciseConvexDecomposition", True, ["Floor"], "walls, base course, door, intercom, parapet"),
     ("LaunchRedRoom", "Roof"): ("Paint", "Metal", False, "Box", True, [], "red roof panels between the nets"),
-    ("LaunchRedRoom", "NetA"): ("Paint", "Metal", False, "Box", True, [], "the net seen from the room"),
-    ("LaunchRedRoom", "NetB"): ("Paint", "Metal", False, "Box", True, [], "the net on top of the roof (establishing shot)"),
+    ("LaunchRedRoom", "NetA"): ("Paint", "Metal", False, "Box", True, [], "the net seen from the room: 1.2 cells, 0.25 bars, 45 deg, sagging"),
+    ("LaunchRedRoom", "NetB"): ("Paint", "Metal", False, "Box", True, [], "the net over the roof (establishing shot): 1.2 cells, 0.25 bars, 45 deg, sagging"),
     ("LaunchRedRoom", "HexFrame"): ("Paint", "Metal", False, "Box", True, [], "teal hexagonal frame, gussets and bolts"),
+    ("LaunchRedRoom", "Hood"): ("Paint", "Metal", False, "Box", True, [], "the drop under the hex frame: an oxblood hood with thin red rails (frame A's shaft); the lift rises through it"),
     ("LaunchRedRoom", "Deck"): ("Paint", "DiamondPlate", True, "Box", True, ["Floor"], "deck plates, stripes, lift apron"),
-    ("LaunchRedRoom", "Grates"): ("Paint", "Metal", False, "Box", True, [], "grates and the red mesh pits (walk on the Deck collider)"),
+    ("LaunchRedRoom", "Grates"): ("Paint", "Metal", False, "Box", True, [], "black grates over dark pits, and the red mesh in the two floor openings (walk on the Deck collider)"),
     ("LaunchRedRoom", "Rails"): ("Paint", "Metal", True, "PreciseConvexDecomposition", True, [], "red rails, posts, wall pipes"),
     ("LaunchRedRoom", "Lamps"): ("Paint", "Metal", False, "Box", True, [], "lamp housings"),
     ("LaunchRedRoom", "LampLights"): ("Light", "Neon", False, "Box", False, [], "lamp lenses (Neon)"),
@@ -1221,14 +1417,13 @@ PART_META = {
     ("LaunchPoleHallSegment", "Floor"): ("Paint", "DiamondPlate", True, "PreciseConvexDecomposition", True, ["Floor"], "floor plates"),
     ("LaunchPoleHallSegment", "Bank"): ("Paint", "Concrete", True, "PreciseConvexDecomposition", True, [], "banked wedge ring"),
     ("LaunchPoleHallSegment", "Shell"): ("Paint", "Concrete", False, "Box", True, [], "wall, roof deck, apertures"),
-    ("LaunchPoleHallSegment", "Truss"): ("Paint", "Metal", False, "Box", True, [], "trusses, purlins, columns, LED housings"),
-    ("LaunchPoleHallSegment", "LED"): ("Light", "Neon", False, "Box", False, [], "LED bars (Neon)"),
+    ("LaunchPoleHallSegment", "Truss"): ("Paint", "Metal", False, "Box", True, [], "trusses, purlins, columns, LED housings, wall-bar channels"),
+    ("LaunchPoleHallSegment", "LED"): ("Light", "Neon", False, "Box", False, [], "the ceiling ring's LED bars and the wall bars (Neon)"),
     ("LaunchPoleHallCrown", "Ring"): ("Paint", "Metal", False, "Box", True, [], "spoked ring"),
     ("LaunchPoleHallCrown", "Hub"): ("Paint", "Metal", False, "Box", True, [], "hub and spot cans"),
     ("LaunchPoleHallCrown", "Spots"): ("Light", "Neon", False, "Box", False, [], "spot lenses (Neon)"),
-    ("LaunchPole", "Steel"): ("Paint", "Metal", False, "Box", True, [], "12-sided steel pole"),
+    ("LaunchPole", "Steel"): ("Paint", "Metal", False, "Box", True, [], "12-sided dark steel rod (no light on it)"),
     ("LaunchPole", "Copper"): ("Paint", "Metal", False, "Box", True, [], "copper bands"),
-    ("LaunchPole", "Strip"): ("Light", "Neon", False, "Box", False, [], "segmented edge-lit strips"),
 }
 
 ROOM_OF = {"LaunchRedRoom": "LaunchRedRoom", "LaunchCaseBay": "LaunchCaseHall", "LaunchCaseGallery": "LaunchCaseHall",
@@ -1352,8 +1547,35 @@ def paint_and_ao(assets, inst):
 
 
 # =============================================================================================== preview materials
-AMBIENT = {"red": (30, 18, 20), "case": (24, 34, 48), "hall": (12, 16, 24)}
+# Lighting.Ambient per space (sRGB 0-255; the preview adds paint x ambient, as Roblox does). Pass 2: navy in both
+# halls and a dim cool ambient in the red room, so that unlit faces read blue, not charcoal (TwoArenas 2.8).
+AMBIENT = {"red": (26, 21, 28), "case": (14, 30, 44), "hall": (56, 76, 94), "rise": (36, 40, 48)}
+# "rise": the pole hall's profile once the camera settles into the low-angle end frame: a darker, greyer navy, so the
+# lit rider stands out against a hall that falls away (T1 @127.2 s); it blends in with the exposure ramp
+for _kv in filter(None, os.environ.get("LAUNCH_AMB", "").split(";")):          # look-dev: "hall:20,30,50;case:..."
+    _k, _v = _kv.split(":")
+    AMBIENT[_k] = tuple(int(x) for x in _v.split(","))
+VIEW_TRANSFORM = os.environ.get("LAUNCH_VIEW", "AgX")
 _mats = {}
+_amb_nodes = []
+
+
+def _ambient_emission(nt, bsdf, base_socket):
+    """Emission = base colour x the space's ambient (the preview's stand-in for Roblox's Lighting.Ambient)."""
+    amb = nt.nodes.new("ShaderNodeRGB")
+    amb.name = "Ambient"
+    mul = nt.nodes.new("ShaderNodeMix")
+    mul.data_type = "RGBA"
+    mul.blend_type = "MULTIPLY"
+    mul.inputs[0].default_value = 1.0
+    if base_socket is not None:
+        nt.links.new(base_socket, mul.inputs[6])
+    else:
+        mul.inputs[6].default_value = bsdf.inputs["Base Color"].default_value[:]
+    nt.links.new(amb.outputs["Color"], mul.inputs[7])
+    nt.links.new(mul.outputs[2], bsdf.inputs["Emission Color"])
+    bsdf.inputs["Emission Strength"].default_value = 1.0
+    _amb_nodes.append(amb)
 
 
 def mat_paint(name="M_Paint"):
@@ -1372,16 +1594,7 @@ def mat_paint(name="M_Paint"):
     nt.links.new(at.outputs["Color"], bsdf.inputs["Base Color"])
     nt.links.new(ar.outputs["Fac"], bsdf.inputs["Roughness"])
     nt.links.new(am.outputs["Fac"], bsdf.inputs["Metallic"])
-    amb = nt.nodes.new("ShaderNodeRGB")
-    amb.name = "Ambient"
-    mul = nt.nodes.new("ShaderNodeMix")
-    mul.data_type = "RGBA"
-    mul.blend_type = "MULTIPLY"
-    mul.inputs[0].default_value = 1.0
-    nt.links.new(at.outputs["Color"], mul.inputs[6])
-    nt.links.new(amb.outputs["Color"], mul.inputs[7])
-    nt.links.new(mul.outputs[2], bsdf.inputs["Emission Color"])
-    bsdf.inputs["Emission Strength"].default_value = 1.0
+    _ambient_emission(nt, bsdf, at.outputs["Color"])
     _mats[name] = m
     return m
 
@@ -1413,12 +1626,14 @@ def mat_glass():
     for n in list(nt.nodes):
         nt.nodes.remove(n)
     tr = nt.nodes.new("ShaderNodeBsdfTransparent")
-    tr.inputs["Color"].default_value = (0.86, 0.9, 0.92, 1.0)
-    gl = nt.nodes.new("ShaderNodeBsdfPrincipled")
-    gl.inputs["Base Color"].default_value = lin(PAL["glass"][0]) + (1.0,)
+    tr.inputs["Color"].default_value = (0.94, 0.96, 0.97, 1.0)
+    # (review fix) a pure glossy layer, no diffuse: pass 2's Principled layer gave the panes a faint grey diffuse that
+    # caught the case lights as grainy grey patches beside each top light
+    gl = nt.nodes.new("ShaderNodeBsdfGlossy")
+    gl.inputs["Color"].default_value = lin(PAL["glass"][0]) + (1.0,)
     gl.inputs["Roughness"].default_value = 0.08
     mix = nt.nodes.new("ShaderNodeMixShader")
-    mix.inputs[0].default_value = 0.08
+    mix.inputs[0].default_value = 0.04           # clear glass with light reflections (T1 @125.9 s), not a grey haze
     out = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(tr.outputs[0], mix.inputs[1])
     nt.links.new(gl.outputs[0], mix.inputs[2])
@@ -1440,11 +1655,12 @@ def mat_flat(rgb):
     b = m.node_tree.nodes.get("Principled BSDF")
     b.inputs["Base Color"].default_value = lin(rgb) + (1.0,)
     b.inputs["Roughness"].default_value = 0.85
+    _ambient_emission(m.node_tree, b, None)
     _mats[key] = m
     return m
 
 
-NEON_STRENGTH = {"light": 9.0, "lens": 14.0, "strip": 3.5, "spot": 45.0}
+NEON_STRENGTH = {"light": 9.0, "lens": 14.0, "spot": 45.0}
 
 
 def assign_preview_materials(assets):
@@ -1464,13 +1680,13 @@ def assign_preview_materials(assets):
 
 
 def set_ambient(room):
-    m = _mats.get("M_Paint")
-    if m:
-        m.node_tree.nodes["Ambient"].outputs[0].default_value = lin(AMBIENT[room]) + (1.0,)
+    rgb = room if isinstance(room, tuple) else AMBIENT[room]
+    for node in _amb_nodes:
+        node.outputs[0].default_value = lin(rgb) + (1.0,)
 
 
-def figure_object(kind, name, M, coll, district=None):
-    mb = figure_parts(kind, district)
+def figure_object(kind, name, M, coll, district=None, look_up=0.0):
+    mb = figure_parts(kind, district, look_up)
     ob = mb_to_object(mb, name, coll)
     ob.matrix_world = M
     keys = meta(ob)["keys"]
@@ -1598,20 +1814,26 @@ def colour_stats(img):
     }
 
 
-def compare_sheet(render_path, frame_path, out_path, title, ref_label):
+def compare_sheet(render_path, frames, out_path, title):
+    """Our render beside the film frames [(path, caption)], all at one height, captioned, with the iteration label.
+    The sheet shows film frames, so it is written only as compare_*.png into a folder whose .gitignore drops them."""
     ren = load_rgb(render_path)
-    fr = load_rgb(frame_path)
     H = ren.shape[0]
-    fr = resize(fr, H, int(round(fr.shape[1] * H / fr.shape[0])))
-    gap, strip = 12, 34
-    W = ren.shape[1] + gap + fr.shape[1]
+    panels = [(ren, "OURS: " + title)]
+    for path, caption in frames:
+        fr = load_rgb(path)
+        panels.append((resize(fr, H, int(round(fr.shape[1] * H / fr.shape[0]))), "FILM, STUDY ONLY: " + caption))
+    gap, strip = 12, 58
+    W = sum(p.shape[1] for p, _ in panels) + gap * (len(panels) - 1)
     sheet = np.full((H + strip, W, 3), 0.07)
-    sheet[:H, :ren.shape[1]] = ren
-    sheet[:H, ren.shape[1] + gap:] = fr
-    draw_text(sheet, 10, H + 10, "OURS: " + title, 2)
-    draw_text(sheet, ren.shape[1] + gap + 10, H + 10, "FILM, STUDY ONLY: " + ref_label, 2)
+    x = 0
+    for img, caption in panels:
+        sheet[:H, x:x + img.shape[1]] = img
+        draw_text(sheet, x + 10, H + 10, caption[:max(8, img.shape[1] // 12 - 1)], 2)
+        x += img.shape[1] + gap
+    draw_text(sheet, 10, H + 34, SHEET_LABEL, 2, (0.95, 0.78, 0.35))
     save_rgb(out_path, sheet)
-    return colour_stats(ren), colour_stats(fr)
+    return colour_stats(ren), [colour_stats(load_rgb(p)) for p, _ in frames]
 
 
 # =============================================================================================== render setup
@@ -1633,6 +1855,11 @@ def render_settings(scene, res, samples, exposure):
     c.transmission_bounces = 6
     c.transparent_max_bounces = 12
     c.sample_clamp_indirect = 4.0
+    # (review fix) no caustics: Roblox has none, and the case glass's faint reflection of each case's top light
+    # scattered a speckle of white dots over the dark surfaces behind it
+    c.caustics_reflective = False
+    c.caustics_refractive = False
+    c.blur_glossy = 1.0
     try:
         c.use_light_tree = True
     except AttributeError:
@@ -1646,7 +1873,7 @@ def render_settings(scene, res, samples, exposure):
     r.image_settings.color_depth = "8"
     vs = scene.view_settings
     try:
-        vs.view_transform = "AgX"
+        vs.view_transform = VIEW_TRANSFORM
     except TypeError:
         vs.view_transform = "Filmic"
     try:
@@ -1660,6 +1887,68 @@ def render_settings(scene, res, samples, exposure):
     bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1.0)
     bg.inputs["Strength"].default_value = 0.0
     scene.world = world
+
+
+_GLARE_TYPES = {"FOG_GLOW": "Fog Glow", "BLOOM": "Bloom", "STREAKS": "Streaks"}
+
+
+def set_glare(scene, spec, exposure, fog=None):
+    """Preview stand-ins for two Roblox post effects, in the compositor on the scene-linear render (before the view
+    transform): the bloom, as a glare, and the Atmosphere's haze, as a distance fog.
+    spec = (type, threshold after exposure, strength, size) or None (no glare). The threshold is in the units the
+    exposure leaves (Roblox's bloom threshold), so it is divided by 2^exposure for the pre-exposure render.
+    fog = (start, depth, amount, sRGB colour) or None: the picture blends toward the colour with distance (the mist
+    pass, linear from start over depth), at most by amount."""
+    if not spec and not fog:
+        scene.render.use_compositing = False
+        return
+    for vl in scene.view_layers:               # the mist pass first: the Render Layers node shows it only once enabled
+        vl.use_pass_mist = True
+    ng = bpy.data.node_groups.get("LaunchPost")
+    if ng is None:
+        ng = bpy.data.node_groups.new("LaunchPost", "CompositorNodeTree")
+        ng.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+        rl = ng.nodes.new("CompositorNodeRLayers")
+        rl.name = "RL"
+        amt = ng.nodes.new("ShaderNodeMath")
+        amt.name = "FogAmount"
+        amt.operation = "MULTIPLY"
+        mix = ng.nodes.new("ShaderNodeMix")
+        mix.name = "Fog"
+        mix.data_type = "RGBA"
+        col = ng.nodes.new("CompositorNodeRGB")
+        col.name = "FogColour"
+        gl = ng.nodes.new("CompositorNodeGlare")
+        gl.name = "Glare"
+        out = ng.nodes.new("NodeGroupOutput")
+        ng.links.new(rl.outputs["Mist"], amt.inputs[0])
+        ng.links.new(amt.outputs[0], mix.inputs[0])
+        ng.links.new(rl.outputs["Image"], mix.inputs[6])
+        ng.links.new(col.outputs["Color"], mix.inputs[7])
+        ng.links.new(mix.outputs[2], gl.inputs["Image"])
+        ng.links.new(gl.outputs["Image"], out.inputs[0])
+    for vl in scene.view_layers:
+        vl.use_pass_mist = True
+    fog_amount = 0.0
+    if fog:
+        start, depth, fog_amount, rgb = fog
+        ms = scene.world.mist_settings
+        ms.start, ms.depth, ms.falloff = start, depth, "LINEAR"
+        ng.nodes["FogColour"].outputs[0].default_value = tuple(v / (2.0 ** exposure) for v in lin(rgb)) + (1.0,)
+    ng.nodes["FogAmount"].inputs[1].default_value = fog_amount
+    gl = ng.nodes["Glare"]
+    if spec:
+        kind, thr, strength, size = spec
+        gl.mute = False
+        gl.inputs["Type"].default_value = _GLARE_TYPES.get(kind, kind)
+        gl.inputs["Quality"].default_value = "High"
+        gl.inputs["Threshold"].default_value = thr / (2.0 ** exposure)
+        gl.inputs["Strength"].default_value = strength
+        gl.inputs["Size"].default_value = size
+    else:
+        gl.mute = True
+    scene.compositing_node_group = ng
+    scene.render.use_compositing = True
 
 
 def orient(ob, direction, xaxis=None):
@@ -1714,25 +2003,113 @@ def camera(scene, loc, target, lens=24.0):
 
 
 # =============================================================================================== lights per space
-COOL = (0.86, 0.92, 1.0)
-WARM_WHITE = (1.0, 0.95, 0.88)
-LIGHT_GAIN = {"red_key": 24000.0, "grate": 520.0, "lamp": 70.0, "red_top": 1200.0, "walkway": 5000.0,
-              "hub": 160000.0, "led": 450.0, "case": 200.0, "unit": 14.0, "gantry": 30.0, "rider": 9000.0}
+# Pass 2 (TwoArenas 2.8, critic #5a): the hue rides on the light. Cool blue-white keys and a navy ambient in the
+# case hall, the pole hall and over the deck turn the shadows blue while the steel paint stays neutral; the red
+# room keeps one cool white key down the tube and red light only in its two floor openings.
+COOL = (0.86, 0.92, 1.0)                     # cool white: the key down the tube, the case top-lights
+COOL_KEY = (0.55, 0.75, 1.0)                 # cool blue-white: the halls' and the deck's keys and light bars
+DECK_KEY = (0.34, 0.57, 1.0)                 # the deck keys: the film's blue steel deck (frame B) from neutral paint
+RED_KEY_DEG = 13.0                           # the key down the tube pools on the lift disc (pass 2 review: 20 -> 13, the apron stays dark)
+# the cases stage (TwoArenas 2.3, 11-15 s): the pole hall's hub spots and wall bars are dimmed until the rise, so the
+# ring of cases sits in the dim navy of its own profile (T1 @125.9 s); the ceiling ring's bars stay on at half
+CASE_STAGE_DIM = {"Hall_HubSpot": 0.05, "Wall_": 2.0, "LED_": 2.6}
+for _kv in filter(None, os.environ.get("LAUNCH_CASE_DIM", "").split(";")):      # look-dev: "LED_:0.6;Wall_:0.5"
+    _k, _v = _kv.split(":")
+    CASE_STAGE_DIM[_k] = float(_v)
+CASE_STAGE_COL = (0.26, 0.65, 1.0)           # the case stage's deeper teal-navy on the hall's bars (review fix)
+CASE_GANTRY_COL = (0.86, 0.92, 1.0)          # the gantry strips light the cases white in the case stage
+if os.environ.get("LAUNCH_CASE_COL"):
+    CASE_STAGE_COL = tuple(float(x) for x in os.environ["LAUNCH_CASE_COL"].split(","))
+if os.environ.get("LAUNCH_GANTRY_COL"):
+    CASE_GANTRY_COL = tuple(float(x) for x in os.environ["LAUNCH_GANTRY_COL"].split(","))
+WARM_WHITE = (1.0, 0.95, 0.88)               # the lamp lenses
+LAMP_LIGHT = (0.9, 0.94, 1.0)                # (review fix) the lamps' PointLights: white, so they light the rail pink, not the grates warm
+if os.environ.get("LAUNCH_LAMP_COL"):
+    LAMP_LIGHT = tuple(float(x) for x in os.environ["LAUNCH_LAMP_COL"].split(","))
+RED_GLOW = (1.0, 0.36, 0.34)                 # the floor openings
+GRATE_GLOW = (0.08, 0.26, 1.0)               # the dim navy light under each grate lane (review fix)
+if os.environ.get("LAUNCH_GRATE_GLOW"):
+    GRATE_GLOW = tuple(float(x) for x in os.environ["LAUNCH_GRATE_GLOW"].split(","))
+LIGHT_GAIN = {"red_key": 24000.0, "opening": 60.0, "lamp": 220.0, "red_top": 3200.0, "walkway": 1200.0,
+              "deck_key": 10000.0, "grate_glow": 280.0, "hub": 160000.0, "led": 450.0, "wall": 1200.0,
+              "case": 1800.0, "unit": 60.0, "gantry": 3.0, "rider": 9000.0}
+for _kv in filter(None, os.environ.get("LAUNCH_GAIN", "").split(";")):         # look-dev: "led:450;deck_key:9000"
+    _k, _v = _kv.split(":")
+    LIGHT_GAIN[_k] = float(_v)
+if os.environ.get("LAUNCH_COOL_KEY"):
+    COOL_KEY = tuple(float(x) for x in os.environ["LAUNCH_COOL_KEY"].split(","))
+if os.environ.get("LAUNCH_DECK_KEY"):
+    DECK_KEY = tuple(float(x) for x in os.environ["LAUNCH_DECK_KEY"].split(","))
+if os.environ.get("LAUNCH_RED_KEY_DEG"):
+    RED_KEY_DEG = float(os.environ["LAUNCH_RED_KEY_DEG"])
+RED_KEY_BLEND = float(os.environ.get("LAUNCH_RED_KEY_BLEND", "0.45"))
+RED_TOP_FILL = (-2.0, -3.0, 34.0, 0.0, 0.12, -1.0, 28.0, 24.0)   # position, direction, size of the light over the roof
+RED_TOP_COL = (0.72, 0.84, 1.0)
+if os.environ.get("LAUNCH_REDTOP_FILL"):
+    RED_TOP_FILL = tuple(float(x) for x in os.environ["LAUNCH_REDTOP_FILL"].split(","))
+if os.environ.get("LAUNCH_REDTOP_COL"):
+    RED_TOP_COL = tuple(float(x) for x in os.environ["LAUNCH_REDTOP_COL"].split(","))
+# exposure per shot (Lighting.ExposureCompensation, TwoArenas 2.8). The rise darkens the hall as the camera settles
+# into the low-angle frame: the rider key keeps the rider readable while the hall falls away (T1 @127.2 s).
+VIEW_EXPOSURE = {"red_a": 0.2, "red_b": 0.2, "red_interior": 0.2, "cases": 0.75, "case_bay": 0.75, "wide": 0.3,
+                 "hall": 0.3, "rise": -0.2, "rise_end": 0.3}
+# diffuse bounces per view (default 1). The red room renders with none (review fix): Roblox's local lights do not
+# bounce, and the preview's one bounce carried the red rails' and apron's light into the grate pits (mauve, not navy)
+VIEW_BOUNCES = {"red_a": 0, "red_b": 0, "red_interior": 0}
+for _kv in filter(None, os.environ.get("LAUNCH_BOUNCES", "").split(";")):      # look-dev: "red_b:1"
+    _k, _v = _kv.split(":")
+    VIEW_BOUNCES[_k] = int(_v)
+# the case hall's fireflies (review fix): the white speckle on the dark maroon posts and units came from indirect
+# paths that find the small, bright light bars; the case views clamp indirect light harder and take more samples
+VIEW_CLAMP = {"cases": 0.4, "case_bay": 0.4}
+VIEW_SAMPLES = {"cases": 2.0, "case_bay": 1.5}
+# a glare pass on the pole-hall views stands in for Roblox's bloom (TwoArenas 2.8: threshold 1.4): (type, threshold
+# in Lighting units after exposure, strength, size). The film's hub spots read as one bright hanging cluster through it.
+VIEW_GLARE = {"wide": ("FOG_GLOW", 1.4, 0.6, 0.8), "hall": ("FOG_GLOW", 1.4, 0.6, 0.8),
+              "rise": ("FOG_GLOW", 1.4, 0.4, 0.6), "rise_end": ("FOG_GLOW", 1.4, 0.4, 0.6),
+              "risepath": ("FOG_GLOW", 1.4, 0.4, 0.6)}
+if os.environ.get("LAUNCH_GLARE_WIDE"):                                          # look-dev: "FOG_GLOW,1.4,0.5,0.7"
+    _g = os.environ["LAUNCH_GLARE_WIDE"].split(",")
+    VIEW_GLARE["wide"] = (_g[0], float(_g[1]), float(_g[2]), float(_g[3]))
+# a thin navy haze in the pole hall (review fix, item 1d: the far wall and the ceiling ring were 14-22% too dark): the
+# preview's stand-in for an Atmosphere in the pole hall's profile (start, depth, at most this much, sRGB colour)
+VIEW_FOG = {"wide": (40.0, 300.0, 0.3, (30, 56, 84)), "hall": (40.0, 300.0, 0.3, (30, 56, 84))}
+# the pole hall's own profile colours its hub spots and bars a little deeper than the shared cool key (review fix); the
+# rise's profile a little greyer, as the film's rise frame is (T1 @127.2 s: dark quarter blue minus red only +6 to +9)
+VIEW_HALL_COL = {"wide": (0.45, 0.7, 1.0), "hall": (0.45, 0.7, 1.0), "rise": (0.76, 0.84, 1.0),
+                 "rise_end": (0.76, 0.84, 1.0), "risepath": (0.76, 0.84, 1.0)}
+if os.environ.get("LAUNCH_RISE_COL"):
+    for _k in ("rise", "rise_end", "risepath"):
+        VIEW_HALL_COL[_k] = tuple(float(x) for x in os.environ["LAUNCH_RISE_COL"].split(","))
+# per-view light dimming {view: {light prefix: factor}} (tried on the rise's end frame: dimming the ceiling ring's bars
+# darkened the whole hall, not just the roof, so none is used)
+VIEW_DIM = {}
+if os.environ.get("LAUNCH_FOG_WIDE"):                                            # look-dev: "40,300,0.35,34,58,86"
+    _g = [float(x) for x in os.environ["LAUNCH_FOG_WIDE"].split(",")]
+    VIEW_FOG["wide"] = (_g[0], _g[1], _g[2], (_g[3], _g[4], _g[5]))
+# (review fix) the rise's exposure ramps from the pole hall's to the end frame's: with the bars' Neon no longer lighting
+# the hall in the preview, the hall needs less darkening than pass 2's -0.35
+RISE_EXPOSURE = [(0.0, 0.45), (4.5, 0.45), (6.8, 0.3), (9.0, 0.3)]        # full cut, by t (s)
+SHORT_EXPOSURE = [(0.0, 0.45), (2.0, 0.45), (3.4, 0.3), (5.0, 0.3)]       # short cut
+for _kv in filter(None, os.environ.get("LAUNCH_EXPO", "").split(";")):         # look-dev: "rise:-0.5;wide:0.3"
+    _k, _v = _kv.split(":")
+    VIEW_EXPOSURE[_k] = float(_v)
 
 
 def led_bars():
-    """World endpoints of every LED bar in the hall (all 8 segments)."""
+    """World endpoints of every light bar's emitting face in the hall: the ceiling ring (all 8 segments)."""
+    return [e for seg in range(8) for e in led_bar_ends(seg, -1.85)]
+
+
+def wall_bars():
+    """(centre, inward normal, length) of every wall bar's emitting face (all 8 segments)."""
     out = []
     for seg in range(8):
-        for r, count, off in LED_RINGS:
-            step = 360.0 / count
-            for k in range(count):
-                b = off + k * step
-                if b >= 45.0:
-                    break
-                bb = b + 45.0 * seg
-                Lh = min(4.0 if r < 110 else 3.4 + r / 60.0, 179.0 - r)
-                out.append((bearing(bb, r - Lh, dome_bot(r - Lh) - 1.85), bearing(bb, r + Lh, dome_bot(r + Lh) - 1.85)))
+        for b in WALL_BAR_BEARINGS:
+            bb = b + 45.0 * seg
+            n_in = (bearing(bb, 0.0) - bearing(bb, 1.0)).normalized()
+            for z0, z1 in WALL_BAR_Z:
+                out.append((bearing(bb, WALL_BAR_R - 0.2, (z0 + z1) / 2), n_in, z1 - z0))
     return out
 
 
@@ -1741,43 +2118,59 @@ def build_lights(assets):
     G = LIGHT_GAIN
     L = {}
     c = L["red"] = new_collection("L_Red")
-    # the key falls through the hex opening only (cone 50: it clears the frame), the walkway spot lights the
-    # escort or guard who looks up from the walkway (frame A)
-    add_light(c, "Red_Key", "SPOT", red_atts["KeyLight"][0], (0, 0, -1), G["red_key"], COOL, spot_deg=50, blend=0.45,
-              radius=2.0)
+    # the key falls through the hex opening onto the lift and its apron only (a 20-degree cone); the walkway spot and
+    # the four deck keys are cool and blue, so the steel deck reads blue under them (frame B)
+    add_light(c, "Red_Key", "SPOT", red_atts["KeyLight"][0], (0, 0, -1), G["red_key"], COOL, spot_deg=RED_KEY_DEG,
+              blend=RED_KEY_BLEND, radius=1.2)
     add_light(c, "Red_Walkway", "SPOT", red_atts["WalkwaySpot"][0], red_atts["WalkwaySpot"][1], G["walkway"],
-              (0.95, 0.96, 1.0), spot_deg=34, blend=0.5, radius=0.6)
+              COOL_KEY, spot_deg=26, blend=0.5, radius=0.6)          # (review fix) narrower: it stays on the walkway
     for k, (p, d) in red_atts.items():
-        if k.startswith("GrateGlow"):
+        if k.startswith("OpeningGlow"):
             w, dp = RED_PITS[int(k.split("_")[1]) - 1]
-            add_light(c, "Red_" + k, "AREA", p, d, G["grate"] * (w * dp) / 30.0, (1.0, 0.42, 0.36),
-                      size=(w - 0.5, dp - 0.5))
-        elif k.startswith("Lamp_"):
-            add_light(c, "Red_" + k, "POINT", p, None, G["lamp"], WARM_WHITE, radius=0.35)
+            add_light(c, "Red_" + k, "AREA", p, d, G["opening"] * (w * dp) / 20.0, RED_GLOW,
+                      size=(w - 0.4, dp - 0.4))
+        elif k.startswith("GrateGlow"):
+            w, dp = RED_PITS_GRATE[int(k.split("_")[1]) - 1]
+            add_light(c, "Red_" + k, "AREA", p, d, G["grate_glow"], GRATE_GLOW, size=(w - 0.5, dp - 0.5))
+        elif k.startswith("DeckKey"):
+            add_light(c, "Red_" + k, "SPOT", p, d, G["deck_key"], DECK_KEY, spot_deg=DECK_KEY_DEG, blend=0.7, radius=1.5)
+        elif k.startswith("Lamp_") and G["lamp"] > 0:
+            # (review fix) each lamp throws a white cone the way it faces, tipped 10 degrees down: the pair on the far
+            # rail's post light the rail round the lift pink-red, as in frame B, and stay off the grates below them
+            dd = (Vector(d).normalized() + Vector((0, 0, -0.18))).normalized()
+            add_light(c, "Red_" + k, "SPOT", p, dd, G["lamp"], LAMP_LIGHT, spot_deg=50.0, blend=0.5, radius=0.3)
     c = L["redtop"] = new_collection("L_RedTop")
-    add_light(c, "RedTop_Fill", "AREA", (0, -4, 34), (0, 0.15, -1), G["red_top"], (1.0, 0.93, 0.9), size=(30, 24))
-    # the hall: hub spots, a SurfaceLight on every LED bar, case lights, gantry rows, unit panels
+    # the dim cool light over the roof, seen only in frame A (pass 2 review: 4200 -> 3000, so the net, the frame and
+    # the hood's oxblood sit in the band of T1 @120.2 s)
+    fx, fy, fz, fdx, fdy, fdz, fsx, fsy = RED_TOP_FILL
+    add_light(c, "RedTop_Fill", "AREA", (fx, fy, fz), (fdx, fdy, fdz), G["red_top"], RED_TOP_COL, size=(fsx, fsy))
+    # the hall: hub spots, a SurfaceLight on every light bar (ceiling ring and walls); case lights, gantry rows, units
     c = L["hall"] = new_collection("L_Hall")
     for k, (p, d) in assets["LaunchPoleHallCrown"].atts.items():
-        add_light(c, "Hall_" + k, "SPOT", p, d, G["hub"], COOL, spot_deg=34, blend=0.5, radius=0.9)
+        add_light(c, "Hall_" + k, "SPOT", p, d, G["hub"], COOL_KEY, spot_deg=34, blend=0.5, radius=0.9)
     for n, (pa, pb) in enumerate(led_bars()):
-        add_light(c, "LED_%03d" % n, "AREA", (pa + pb) / 2, (0, 0, -1), G["led"], COOL, size=((pb - pa).length, 0.5),
-                  xaxis=pb - pa)
+        add_light(c, "LED_%03d" % n, "AREA", (pa + pb) / 2, (0, 0, -1), G["led"], COOL_KEY,
+                  size=((pb - pa).length, 0.5), xaxis=pb - pa)
+    for n, (p, nrm, ln) in enumerate(wall_bars()):
+        add_light(c, "Wall_%03d" % n, "AREA", p, nrm, G["wall"], COOL_KEY, size=(0.5, ln), xaxis=nrm.cross(Vector((0, 0, 1))))
     c = L["case"] = new_collection("L_Case")
     for i in range(N_BAYS):
         Mb = M_facing_centre(bay_bearing(i), CASE_R)
         R3 = Mb.to_3x3()
         p, d = assets["LaunchCaseBay"].atts["CaseLight"]
-        add_light(c, "Case_%02d" % i, "AREA", Mb @ p, R3 @ d, G["case"], (0.95, 0.97, 1.0), size=(2.3, 0.4),
-                  xaxis=R3 @ Vector((1, 0, 0)))
+        # (review fix) the case's top light is a cone aimed down at the disc, so each raised dark-red disc catches it
+        # as in T1 @125.9 s (a SurfaceLight, Face Bottom, Angle 50, in game); pass 2's flat panel left them near black.
+        # The cone stays inside the case, off the walkway.
+        add_light(c, "Case_%02d" % i, "SPOT", Mb @ (p + Vector((0, 0, -0.3))), R3 @ d, G["case"], COOL, spot_deg=50.0,
+                  blend=0.5, radius=0.15)
         p, d = assets["LaunchCaseBay"].atts["UnitLight"]
-        add_light(c, "Unit_%02d" % i, "AREA", Mb @ p, R3 @ d, G["unit"], (0.95, 0.97, 1.0), size=(2.0, 0.5),
+        add_light(c, "Unit_%02d" % i, "AREA", Mb @ p, R3 @ d, G["unit"], COOL, size=(2.0, 0.5),
                   xaxis=R3 @ Vector((1, 0, 0)))
         for r in GANTRY_ROWS:
             b0, b1 = i * BAY_STEP + 0.6, (i + 1) * BAY_STEP - 0.6
             pa, pb = bearing(b0, r, GANTRY_Z - 0.15), bearing(b1, r, GANTRY_Z - 0.15)
-            add_light(c, "Gantry_%02d_%d" % (i, int(r * 10)), "AREA", (pa + pb) / 2, (0, 0, -1), G["gantry"], COOL,
-                      size=((pb - pa).length, 0.45), xaxis=pb - pa)
+            add_light(c, "Gantry_%02d_%d" % (i, int(r * 10)), "AREA", (pa + pb) / 2, (0, 0, -1), G["gantry"],
+                      COOL_KEY, size=((pb - pa).length, 0.45), xaxis=pb - pa)
     L["rider"] = new_collection("L_Rider")
     for coll in L.values():
         coll.hide_render = True
@@ -1785,24 +2178,59 @@ def build_lights(assets):
 
 
 # =============================================================================================== the rise plan
-RISE_T = 9.0
-RISE_ACC, RISE_DEC = 2.0, 2.0
-RISE_VMAX = RISE / (RISE_ACC / 2 + (RISE_T - RISE_ACC - RISE_DEC) + RISE_DEC / 2)
+# Both cuts of TwoArenas 2.3 ride the same 120 studs of pole and end on the same frame: the film's low-angle,
+# whole-body shot from in front of the rider (T1 @127.2 s: the disc's rim at the foot of the frame, the pole rising
+# behind the head, a light bar either side), held while the opening above floods white. Pass 1 ended on the rider's
+# side, in a close-up of the cloak and the pole under the roof (critic #5d); the film's frame is from the front, so the
+# full cut now circles a whole turn (360 degrees, anticlockwise from above) and the short cut 155 degrees.
+#   full   9 s (TwoArenas 2.3: 15.0-24.0 s from the call): starts in front of the case where the cases stage leaves
+#          the camera, swings round at knee height once the disc is above the case gantry, and is back in front,
+#          low, by t 6.8, while the rider is still in the open hall (disc y ~100); it holds that frame as the rider
+#          climbs toward the opening, which floods white from t 7.4 (white by 9.0).
+#   short  5 s (3.0-8.0 s from the call): a cut straight to the disc leaving the case, seen from behind and to the
+#          right (clear of the case gantry behind the row), then 155 degrees round to the same end frame by t 3.4;
+#          the opening floods from t 4.2.
+END_FRAME = {"distance": 7.0, "below": 1.6, "pitchDeg": 35.0, "fovV": 42.0}   # camera from the rider's axis, below
+#           the disc top; the look pitch and the vertical field of view of the end frame (T1 @127.2 s)
+CUTS = {
+    "full": {"T": 9.0, "acc": 2.0, "dec": 2.0, "phi0": 90.0, "orbit": 360.0, "orbitEnd": 6.8, "settle": (5.4, 6.8),
+             "whiteout": (7.4, 9.0),
+             "radius": [(0.0, 6.5), (3.0, 8.5), (5.0, 8.2), (6.8, END_FRAME["distance"]), (9.0, END_FRAME["distance"])],
+             "height": [(0.0, 4.4), (2.5, -3.0), (5.0, -2.4), (6.8, -END_FRAME["below"]), (9.0, -END_FRAME["below"])],
+             "fov": [(0.0, 50.0), (4.5, 54.0), (6.8, END_FRAME["fovV"]), (9.0, END_FRAME["fovV"])],
+             "sheet": (0.0, 1.5, 3.0, 4.5, 6.0, 7.0, 8.2, 9.0)},
+    "short": {"T": 5.0, "acc": 1.6, "dec": 1.4, "phi0": 295.0, "orbit": 155.0, "orbitEnd": 3.4, "settle": (2.4, 3.4),
+              "whiteout": (4.2, 5.0),
+              "radius": [(0.0, 6.8), (1.6, 7.8), (3.4, END_FRAME["distance"]), (5.0, END_FRAME["distance"])],
+              "height": [(0.0, 3.0), (1.4, -2.4), (3.4, -END_FRAME["below"]), (5.0, -END_FRAME["below"])],
+              "fov": [(0.0, 52.0), (2.0, 54.0), (3.4, END_FRAME["fovV"]), (5.0, END_FRAME["fovV"])],
+              "sheet": (0.0, 1.2, 2.4, 3.6, 4.4, 5.0)},
+}
+RISE_T = CUTS["full"]["T"]
 
 
-def rise_s(t):
-    a = RISE_VMAX / RISE_ACC
-    t2 = RISE_T - RISE_DEC
+def rise_vmax(cut):
+    c = CUTS[cut]
+    return RISE / (c["acc"] / 2 + (c["T"] - c["acc"] - c["dec"]) + c["dec"] / 2)
+
+
+def rise_s(t, cut="full"):
+    """Studs climbed at t: accelerate, cruise, brake (one profile per cut)."""
+    c = CUTS[cut]
+    T, acc, dec = c["T"], c["acc"], c["dec"]
+    vmax = rise_vmax(cut)
+    a = vmax / acc
+    t2 = T - dec
     if t <= 0:
         return 0.0
-    if t < RISE_ACC:
+    if t < acc:
         return 0.5 * a * t * t
-    s1 = 0.5 * a * RISE_ACC ** 2
+    s1 = 0.5 * a * acc ** 2
     if t < t2:
-        return s1 + RISE_VMAX * (t - RISE_ACC)
-    if t < RISE_T:
+        return s1 + vmax * (t - acc)
+    if t < T:
         dt = t - t2
-        return s1 + RISE_VMAX * (t2 - RISE_ACC) + RISE_VMAX * dt - 0.5 * (RISE_VMAX / RISE_DEC) * dt * dt
+        return s1 + vmax * (t2 - acc) + vmax * dt - 0.5 * (vmax / dec) * dt * dt
     return RISE
 
 
@@ -1823,25 +2251,45 @@ def keyed(t, keys):
     return keys[-1][1]
 
 
-ORBIT_DEG = 270.0
-# radius from the rider's axis; the orbit ends on the side of the bay, so it tightens at the top to pass inside the
-# roof truss on the bay seam (7.2 studs out)
-CAM_RADIUS = [(0.0, 6.5), (4.0, 8.5), (6.5, 8.0), (8.0, 5.2), (9.0, 4.8)]
-CAM_HEIGHT = [(0.0, 4.4), (3.0, -3.0), (6.0, -1.0), (7.5, -1.6), (9.0, -2.4)]    # relative to the disc top
-CAM_FOV = [(0.0, 50.0), (7.0, 52.0), (9.0, 62.0)]                                # vertical, degrees
-
-
-def rise_camera_local(t):
-    """Camera in the BAY frame (origin = bay floor centre, +Y toward the hall centre, Blender axes)."""
-    z_disc = DISC_TOP + rise_s(t)
-    phi = math.radians(90.0 + ORBIT_DEG * smooth(t / RISE_T))
-    rho = keyed(t, CAM_RADIUS)
-    pos = Vector((rho * math.cos(phi), DISC_Y + rho * math.sin(phi), z_disc + keyed(t, CAM_HEIGHT)))
+def rise_camera_local(t, cut="full"):
+    """Camera in the BAY frame (origin = bay floor centre, +Y toward the hall centre, Blender axes): position, look
+    target, vertical field of view, disc top."""
+    c = CUTS[cut]
+    z_disc = DISC_TOP + rise_s(t, cut)
+    phi = math.radians(c["phi0"] + c["orbit"] * smooth(t / c["orbitEnd"]))
+    rho = keyed(t, c["radius"])
+    pos = Vector((rho * math.cos(phi), DISC_Y + rho * math.sin(phi), z_disc + keyed(t, c["height"])))
     chest = Vector((0.0, DISC_Y, z_disc + 3.4))
-    aperture = Vector((0.0, POLE_Y, POLE_TOP + 6.0))
-    w = smooth((t - 6.5) / 2.5)
-    look = chest.lerp(aperture, w)
-    return pos, look, keyed(t, CAM_FOV), z_disc
+    # the end frame's look: from the camera toward the rider's axis, pitched up END_FRAME pitchDeg
+    hor = Vector((0.0, DISC_Y, pos.z)) - pos
+    hor = hor.normalized() if hor.length > 1e-6 else Vector((0.0, -1.0, 0.0))
+    pitch = math.radians(END_FRAME["pitchDeg"])
+    end_look = pos + (hor * math.cos(pitch) + Vector((0.0, 0.0, math.sin(pitch)))) * 8.0
+    to_chest = (chest - pos).normalized() * 8.0
+    w = smooth((t - c["settle"][0]) / (c["settle"][1] - c["settle"][0]))
+    look = pos + to_chest.lerp(end_look - pos, w)
+    return pos, look, keyed(t, c["fov"]), z_disc
+
+
+def rise_exposure(t, cut="full"):
+    return keyed(t, RISE_EXPOSURE if cut == "full" else SHORT_EXPOSURE)
+
+
+def rise_profile_weight(t, cut="full"):
+    """0 = the pole hall's lighting profile, 1 = the rise profile: it follows the exposure ramp."""
+    keys = RISE_EXPOSURE if cut == "full" else SHORT_EXPOSURE
+    e0, e1 = keys[0][1], keys[-1][1]
+    return min(1.0, max(0.0, (e0 - rise_exposure(t, cut)) / (e0 - e1))) if e0 != e1 else 0.0
+
+
+def rise_ambient(t, cut="full"):
+    w = rise_profile_weight(t, cut)
+    return tuple(int(round(a + (b - a) * w)) for a, b in zip(AMBIENT["hall"], AMBIENT["rise"]))
+
+
+def whiteout_weight(t, cut="full"):
+    w0, w1 = CUTS[cut]["whiteout"]
+    return smooth((t - w0) / (w1 - w0))
 
 
 def to_rbx(v):
@@ -1849,7 +2297,8 @@ def to_rbx(v):
 
 
 def rise_plan(assets, inst, bay=0):
-    """Samples the one-shot rise at 10 Hz, checks camera clearance against the set, returns the plan."""
+    """Samples both cuts at 10 Hz, checks the camera's clearance against the set and its line of sight to the rider,
+    returns the plan (the manifest's rise.keys for the full cut, rise.cuts for both)."""
     excl = set(o.name for o in inst["discs"][bay])
     obs = [o for o in inst["hall"] if not o.hide_render and o.name not in excl]
     bpy.context.view_layer.update()
@@ -1859,59 +2308,121 @@ def rise_plan(assets, inst, bay=0):
     bvh_see = bvh_from_objects(see)
     bvh_np = bvh_from_objects([o for o in see if o.name not in own_pole])
     Mb = M_facing_centre(bay_bearing(bay), CASE_R)
-    keys, worst = [], (1e9, 0.0)
-    occluded = 0
-    occluded_not_pole = []
-    for i in range(int(RISE_T * 10) + 1):
-        t = i / 10.0
-        p, look, fov, zd = rise_camera_local(t)
-        pw = Mb @ p
-        near = bvh.find_nearest(pw)
-        dist = near[3] if near[0] is not None else 1e9
-        if dist < worst[0]:
-            worst = (dist, t)
-        chest_w = Mb @ Vector((0.0, DISC_Y, zd + 3.4))
-        d = chest_w - pw
-        hit = bvh_see.ray_cast(pw, d.normalized(), d.length - 0.5)
-        if hit[0] is not None:
-            occluded += 1
-            if bvh_np.ray_cast(pw, d.normalized(), d.length - 0.5)[0] is not None:
-                occluded_not_pole.append(round(t, 1))
-        keys.append({"t": round(t, 2), "discTopY": round(zd, 3),
-                     "cameraBay": [round(v, 3) for v in to_rbx(p)], "lookAtBay": [round(v, 3) for v in to_rbx(look)],
-                     "fovV": round(fov, 2)})
+    cuts = {}
+    for cut, c in CUTS.items():
+        keys, worst = [], (1e9, 0.0)
+        occluded, occluded_not_pole = [], []
+        for i in range(int(round(c["T"] * 10)) + 1):
+            t = i / 10.0
+            p, look, fov, zd = rise_camera_local(t, cut)
+            pw = Mb @ p
+            near = bvh.find_nearest(pw)
+            dist = near[3] if near[0] is not None else 1e9
+            if dist < worst[0]:
+                worst = (dist, t)
+            chest_w = Mb @ Vector((0.0, DISC_Y, zd + 3.4))
+            d = chest_w - pw
+            if bvh_see.ray_cast(pw, d.normalized(), d.length - 0.5)[0] is not None:
+                occluded.append(round(t, 1))
+                if bvh_np.ray_cast(pw, d.normalized(), d.length - 0.5)[0] is not None:
+                    occluded_not_pole.append(round(t, 1))
+            keys.append({"t": round(t, 2), "discTopY": round(zd, 3),
+                         "cameraBay": [round(v, 3) for v in to_rbx(p)],
+                         "lookAtBay": [round(v, 3) for v in to_rbx(look)],
+                         "fovV": round(fov, 2), "exposure": round(rise_exposure(t, cut), 3),
+                         "riseProfile": round(rise_profile_weight(t, cut), 3),
+                         "whiteout": round(whiteout_weight(t, cut), 3)})
+        vmax = rise_vmax(cut)
+        cuts[cut] = {
+            "duration": c["T"], "riseStuds": RISE,
+            "profile": "accelerate %.1f s, cruise %.1f s at %.2f studs/s, brake %.1f s" % (
+                c["acc"], c["T"] - c["acc"] - c["dec"], vmax, c["dec"]),
+            "peakSpeed": round(vmax, 3), "accel": round(vmax / c["acc"], 3),
+            "orbitDeg": c["orbit"], "orbitStartDeg": c["phi0"],
+            "orbitDirection": "anticlockwise seen from above; 90 = in front of the rider (toward the hall centre), "
+                              "180 = the rider's left, 270 = behind",
+            "orbitEndsAt": c["orbitEnd"], "settle": list(c["settle"]), "whiteout": list(c["whiteout"]),
+            "radiusKeys": c["radius"], "heightKeys": c["height"], "fovKeys": c["fov"],
+            "exposureKeys": RISE_EXPOSURE if cut == "full" else SHORT_EXPOSURE,
+            "minClearance": round(worst[0], 3), "minClearanceAt": worst[1],
+            "lineOfSightBlockedAt": occluded, "blockedByOtherThanOwnPoleAt": occluded_not_pole,
+            "samples": len(keys), "keys": keys,
+        }
+        log("RISE %-5s %.0f studs in %.1f s, peak %.1f studs/s, orbit %.0f deg, camera min clearance %.2f at t=%.1f s, "
+            "sight to the chest blocked at t=%s (by something other than the rider's own pole at t=%s)" % (
+                cut, RISE, c["T"], vmax, c["orbit"], worst[0], worst[1], occluded, occluded_not_pole))
+    full = cuts["full"]
     plan = {
         "bayFrame": "relative to the case bay's CFrame (origin = bay floor centre, LookVector = toward the hall "
                     "centre); multiply by the bay's CFrame for world positions",
         "poleBaseY": POLE_BASE, "poleTopY": round(POLE_TOP, 3), "poleLength": round(POLE_TOP - POLE_BASE, 3),
-        "discStartY": DISC_TOP, "discEndY": DISC_TOP + RISE, "riseStuds": RISE, "duration": RISE_T,
-        "profile": "accelerate %.1f s, cruise %.1f s at %.2f studs/s, brake %.1f s" % (
-            RISE_ACC, RISE_T - RISE_ACC - RISE_DEC, RISE_VMAX, RISE_DEC),
-        "peakSpeed": round(RISE_VMAX, 3), "accel": round(RISE_VMAX / RISE_ACC, 3),
-        "orbitDeg": ORBIT_DEG, "orbitDirection": "counter-clockwise seen from above, starting in front of the "
-                                                 "case (toward the hall centre)",
-        "radiusKeys": CAM_RADIUS, "heightKeys": CAM_HEIGHT, "fovKeys": CAM_FOV,
-        "minClearance": round(worst[0], 3), "minClearanceAt": worst[1],
-        "lineOfSightBlockedSamples": occluded, "blockedByOtherThanOwnPoleAt": occluded_not_pole,
-        "samples": len(keys),
-        "keys": keys,
+        "discStartY": DISC_TOP, "discEndY": DISC_TOP + RISE, "riseStuds": RISE,
+        "endFrame": dict(END_FRAME, reference="the film's low-angle, whole-body frame (T1 @127.2 s): in front of "
+                                              "the rider, just below the disc, looking up past the body to the pole"),
+        "cuts": cuts,
+        # pass 1's field names, kept for the full cut so a LaunchController reading rise.keys keeps working
+        "duration": full["duration"], "profile": full["profile"], "peakSpeed": full["peakSpeed"],
+        "accel": full["accel"], "orbitDeg": full["orbitDeg"], "orbitDirection": full["orbitDirection"],
+        "radiusKeys": full["radiusKeys"], "heightKeys": full["heightKeys"], "fovKeys": full["fovKeys"],
+        "minClearance": full["minClearance"], "minClearanceAt": full["minClearanceAt"],
+        "samples": full["samples"], "keys": full["keys"],
     }
-    log("RISE plan: %.0f studs in %.1f s, peak %.1f studs/s, camera min clearance %.2f at t=%.1f s, sight blocked "
-        "in %d/%d samples (by something other than the rider's own pole at t=%s)" % (
-            RISE, RISE_T, RISE_VMAX, worst[0], worst[1], occluded, len(keys), occluded_not_pole))
     return plan
 
 
 # =============================================================================================== previews
+# Each compare view is set beside the owner's frame and the clean trailer frame of the same shot (the owner's copies
+# of the wide, case and rise shots carry video-player icons). Film frames are study-only: the sheets are written as
+# compare_*.png into the preview folder, whose .gitignore keeps them out of the repo.
 FRAMES = {
-    "red_a": ("launch_1_red_room_net_a.png", "T1 @120.2 S"),
-    "red_b": ("launch_1_red_room_net_b.png", "T1 @122.7 S"),
-    "cases": ("launch_2_glass_cases.png", "T1 @125.9 S"),
-    "wide": ("launch_3_pole_hall_wide.png", "T1 @124.7 S"),
-    "rise": ("launch_3_pole_rise.png", "T1 @127.2 S"),
+    "red_a": [("launch_1_red_room_net_a.png", "OWNER, T1 @120.2 S"), ("trailer1_120.7s.png", "T1 @120.7 S")],
+    "red_b": [("launch_1_red_room_net_b.png", "OWNER, T1 @122.7 S"), ("trailer1_122.7s.png", "T1 @122.7 S")],
+    "cases": [("launch_2_glass_cases.png", "OWNER, T1 @125.9 S"), ("trailer1_125.9s.png", "T1 @125.9 S")],
+    "wide": [("launch_3_pole_hall_wide.png", "OWNER, T1 @124.7 S"), ("trailer1_124.7s.png", "T1 @124.7 S")],
+    "rise": [("launch_3_pole_rise.png", "OWNER, T1 @127.2 S"), ("trailer1_127.2s.png", "T1 @127.2 S")],
+    "rise_end": [("trailer1_127.2s.png", "T1 @127.2 S, THE END FRAME")],
 }
 TITLES = {"red_a": "RED ROOM, LOOKING DOWN THROUGH THE HEX FRAME", "red_b": "RED ROOM, THE STEEL DECK",
-          "cases": "THE GLASS-CASE HALL", "wide": "THE POLE HALL", "rise": "THE RISE, LOW ANGLE"}
+          "cases": "THE GLASS-CASE HALL", "wide": "THE POLE HALL", "rise": "THE RISE, LOW ANGLE (DISC Y 62)",
+          "rise_end": "THE END FRAME OF THE RISE, FULL CUT T = 7.0 S"}
+
+
+def frame_path(fname):
+    """Owner frames live in REF; trailer frames (trailer*.png) in TRAILER."""
+    return os.path.join(TRAILER if fname.startswith("trailer") else REF, fname)
+
+
+def _cam_env(name, default):
+    """(position, target, lens) for a compare view; env LAUNCH_CAM_<NAME> = "x,y,z,tx,ty,tz,lens" overrides it while
+    a view is being framed."""
+    v = os.environ.get("LAUNCH_CAM_" + name)
+    if not v:
+        return default
+    f = [float(x) for x in v.split(",")]
+    return (tuple(f[0:3]), tuple(f[3:6]), f[6])
+
+
+# frame A (pass 2 review fix): the in-game shot of TwoArenas 2.4. The camera is just above the tube mouth (7.5 studs
+# over the frame) and looks down 75 degrees with the design's opening field of view (50 vertical), so the far half of
+# the hexagon frames the picture as in T1 @120.2 s: its apex at the top, its side corners half way down at the edges.
+# The player's own stand-in stands on the lift disc (Spawn) far below, looking up; from this angle it sits low in the
+# frame, where the film shows the rose disc. (Pass 2's first try put the stand-in on the escort's walkway behind a
+# rail, seen at 47 degrees: not a shot the game can take.) The last value is the vertical field of view.
+RED_A_CAM = _cam_env("RED_A", ((0.0, 2.0, 30.0), (0.0, 10.0, 0.15), 50.0))       # red room frame (world)
+RED_A_YAW = 0.0                    # the stand-in faces +Y, toward the camera's side of the tube, and looks up
+# the case frame (T1 @125.9 s; TwoArenas 2.4 "at face height just outside your glass, looking past you along the
+# row"): just outside the player's front glass at face height (the disc top is at 1.6), looking past the player's head
+# along the row toward bay 1: the next case's posts, the maroon unit with its light panel, the neighbours, the strip
+# lights overhead and the navy hall beyond. Our cases stand 14.4 studs apart with the pole behind each disc, so the
+# film's over-the-shoulder from inside the case is not possible here.
+CASES_CAM = _cam_env("CASES", ((8.0, 4.4, 6.6), (-24.0, 0.0, 5.3), 35.0))        # in bay 0's frame
+CASES_YAW = float(os.environ.get("LAUNCH_CASES_YAW", "60"))   # the player turns 60 degrees toward the row
+# the wide frame (T1 @124.7 s; T2 @133.9 s), review fix: from the far side of the hall, on the banked ring by the
+# wall at about the riders' height, with an 18 mm lens pitched up 20 degrees: the spoked ring reads as an ellipse across
+# the top with the hub's hanging cluster under it, the poles stand nearly vertical and the far riders sit in a line in
+# the lower third. (Pass 2's first try was an 8.8 mm lens tilted 39 degrees up from the case ring: a look up a dome.)
+WIDE_CAM = _cam_env("WIDE", ((-6.0, -176.0, 45.0), (14.0, 0.0, 108.0), 18.0))     # the pole hall (world)
+WIDE_RIDER_Z = float(os.environ.get("LAUNCH_WIDE_RIDER_Z", "45"))
 
 
 class Previewer:
@@ -1923,6 +2434,17 @@ class Previewer:
         self.stats = {}
         self.figs = new_collection("Figures")
         os.makedirs(PREV, exist_ok=True)
+        # (review fix) a Neon part glows in Roblox but lights nothing and nothing reflects it: the SurfaceLights on the
+        # bars do the lighting. So the preview's neon meshes are seen by the camera only. That ends the white speckle
+        # the dark maroon posts caught from the small bright bars, and the lights' gains are now the ones the game
+        # needs (pass 2 had the bars' white glow lighting the halls as well, which greyed the navy).
+        neon_lights = os.environ.get("LAUNCH_NEON_LIGHT", "0") != "0"
+        for o in bpy.data.objects:
+            if o.get("cls") == "neon":
+                o.visible_glossy = False
+                o.visible_transmission = False
+                o.visible_shadow = False
+                o.visible_diffuse = neon_lights
 
     def show(self, colls):
         for c in self.scene.collection.children:
@@ -1936,8 +2458,8 @@ class Previewer:
         for o in list(self.L["rider"].objects):
             bpy.data.objects.remove(o, do_unlink=True)
 
-    def fig(self, kind, M, district=None):
-        return figure_object(kind, "Fig_%d" % len(self.figs.objects), M, self.figs, district)
+    def fig(self, kind, M, district=None, look_up=0.0):
+        return figure_object(kind, "Fig_%d" % len(self.figs.objects), M, self.figs, district, look_up)
 
     def bay_M(self, i):
         return M_facing_centre(bay_bearing(i), CASE_R)
@@ -1951,57 +2473,111 @@ class Previewer:
         for i in range(N_BAYS):
             self.set_disc(i, DISC_TOP)
 
-    def rider(self, i, z_top, yaw_extra=0.0, district=None):
+    def rider(self, i, z_top, yaw_extra=0.0, district=None, look_up=0.0, kind="tribute"):
         Mb = self.bay_M(i)
-        return self.fig("tribute", Mb @ Matrix.Translation((0, DISC_Y, z_top)) @ Matrix.Rotation(
-            math.radians(yaw_extra), 4, "Z"), district)
+        return self.fig(kind, Mb @ Matrix.Translation((0, DISC_Y, z_top)) @ Matrix.Rotation(
+            math.radians(yaw_extra), 4, "Z"), district, look_up)
 
     def rider_key(self, i, z_top):
+        """The key that rides up with the rider (TwoArenas 2.8): cool white, in front of and above the rider."""
         Mb = self.bay_M(i)
         D = Mb @ Vector((0, DISC_Y, z_top))
         n_in = (Mb.to_3x3() @ Vector((0, 1, 0))).normalized()
         src = D + n_in * 7.0 + Vector((0, 0, 10.0))
         add_light(self.L["rider"], "Rider_Key", "SPOT", src, (D + Vector((0, 0, 3.0))) - src, LIGHT_GAIN["rider"],
-                  (1.0, 0.97, 0.94), spot_deg=36, blend=0.6, radius=0.8)
+                  COOL, spot_deg=36, blend=0.6, radius=0.8)
         return D, n_in
 
     def render(self, name, aspect, exposure, ambient):
+        exposure = VIEW_EXPOSURE.get(name, exposure)
         set_ambient(ambient)
         w = self.width
         h = int(round(w * aspect[1] / aspect[0]))
-        render_settings(self.scene, (w, h), self.samples, exposure)
+        render_settings(self.scene, (w, h), int(self.samples * VIEW_SAMPLES.get(name, 1.0)), exposure)
+        b = VIEW_BOUNCES.get(name)
+        if b is not None:
+            self.scene.cycles.diffuse_bounces = b
+        if name in VIEW_CLAMP:
+            self.scene.cycles.sample_clamp_indirect = VIEW_CLAMP[name]
+        key = "risepath" if name.startswith("risepath") else name
+        set_glare(self.scene, VIEW_GLARE.get(key), exposure, VIEW_FOG.get(key))
+        saved = []                       # the pole hall's own profile colours its bars and spots (VIEW_HALL_COL)
+        if VIEW_HALL_COL.get(key):
+            for o in self.L["hall"].objects:
+                if o.name.startswith(("Hall_", "LED_", "Wall_")):
+                    saved.append((o, tuple(o.data.color)))
+                    o.data.color = VIEW_HALL_COL[key]
+        saved_e = []                     # and dims some of them (VIEW_DIM: the rise's end frame keeps its roof dark)
+        for o in self.L["hall"].objects:
+            for prefix, f in VIEW_DIM.get(key, {}).items():
+                if o.name.startswith(prefix):
+                    saved_e.append((o, o.data.energy))
+                    o.data.energy *= f
         path = os.path.join(PREV, "render_%s.png" % name)
         self.scene.render.filepath = path
         t = time.time()
         bpy.ops.render.render(write_still=True)
+        for o, col in saved:
+            o.data.color = col
+        for o, e in saved_e:
+            o.data.energy = e
         log("PREVIEW %s (%.0fs)" % (path, time.time() - t))
         return path
 
+    def case_stage(self, on):
+        """The case hall's lighting profile (TwoArenas 2.3, 11-15 s), on or off: the pole hall's hub spots off, its bars
+        at CASE_STAGE_DIM in a deeper teal-navy (CASE_STAGE_COL), the gantry strips white (review fix)."""
+        if on:
+            self._case_saved = {}
+            for prefix, f in CASE_STAGE_DIM.items():
+                self.scale_lights("hall", prefix, f)
+            for ck in ("hall", "case"):
+                for o in self.L[ck].objects:
+                    if o.name.startswith(("Hall_", "LED_", "Wall_", "Gantry_")):
+                        self._case_saved[o.name] = tuple(o.data.color)
+                        o.data.color = ((CASE_GANTRY_COL or CASE_STAGE_COL) if o.name.startswith("Gantry_")
+                                        else CASE_STAGE_COL)
+        else:
+            for ck in ("hall", "case"):
+                for o in self.L[ck].objects:
+                    if o.name in self._case_saved:
+                        o.data.color = self._case_saved[o.name]
+            for prefix, f in CASE_STAGE_DIM.items():
+                self.scale_lights("hall", prefix, 1.0 / f)
+
     def compare(self, name, path):
-        fname, label = FRAMES[name]
-        fpath = os.path.join(REF, fname)
-        out = os.path.join(PREV, "compare_%s.png" % name)
-        if not os.path.exists(fpath):
-            log("NOTE no reference frame for %s (%s); render only" % (name, fpath))
-            self.stats[name] = {"ours": colour_stats(load_rgb(path)), "frame": None}
+        frames = [(frame_path(f), cap) for f, cap in FRAMES[name] if os.path.exists(frame_path(f))]
+        if not frames:
+            log("NOTE no reference frame for %s; render only" % name)
+            self.stats[name] = {"ours": colour_stats(load_rgb(path)), "frames": None}
             return
-        ours, frame = compare_sheet(path, fpath, out, TITLES[name], label)
-        self.stats[name] = {"ours": ours, "frame": frame}
+        out = os.path.join(PREV, "compare_%s.png" % name)
+        ours, film = compare_sheet(path, frames, out, TITLES[name])
+        self.stats[name] = {"ours": ours, "frames": {cap: s for (_, cap), s in zip(frames, film)}}
         log("PREVIEW %s" % out)
 
-    # -- the five compare views (owner frames)
+    def scale_lights(self, coll_key, prefix, factor):
+        for o in self.L[coll_key].objects:
+            if o.name.startswith(prefix):
+                o.data.energy *= factor
+
+    # -- the compare views
     def v_red_a(self):
-        """Frame A: the view of the rising player, steeply down through the top half of the hex frame, to the
-        escort on the walkway looking up (a long lens: the frame large, the room compressed behind it)."""
+        """Frame A, the in-game red-room shot (TwoArenas 2.4; the manifest's sequence stage 1): from just above the
+        tube mouth, looking steeply down through the far half of the hexagon at the player's own stand-in in the white
+        launch cape on the lift disc (Spawn), far below, looking up into the tube (T1 @120.2 s). See RED_A_CAM."""
         self.show({"RedRoom", "L_Red", "L_RedTop", "Figures"})
-        self.fig("escort", M_place(self.assets["LaunchRedRoom"].atts["EscortWalkway"][0], 180.0))
-        d = Vector((0.0, 0.682, -0.731))
-        cam_p = Vector((0.0, -13.7, 42.5))
-        camera(self.scene, cam_p, cam_p + d * 30.0, lens=62.0)
-        return self.render("red_a", (656, 277), 0.2, "red")
+        self.fig("tribute", M_place(self.assets["LaunchRedRoom"].atts["Spawn"][0], RED_A_YAW), look_up=38.0)
+        cam = camera(self.scene, Vector(RED_A_CAM[0]), Vector(RED_A_CAM[1]))
+        cam.data.sensor_fit = "VERTICAL"
+        cam.data.angle = math.radians(RED_A_CAM[2])
+        path = self.render("red_a", (656, 277), 0.2, "red")
+        cam.data.sensor_fit = "HORIZONTAL"
+        return path
 
     def v_red_b(self):
-        """Frame B: from just above and behind the player on the lift, over the near rail to the grates."""
+        """Frame B: from just above and behind the player on the lift, over the near rail to the black grates; red
+        only in the two floor openings beside the lift."""
         self.show({"RedRoom", "L_Red", "Figures"})
         self.fig("tribute", M_place((0, 0, 0.15), -14.0))
         self.fig("guard", M_place(self.assets["LaunchRedRoom"].atts["GuardFloor"][0], 200.0))
@@ -2009,53 +2585,91 @@ class Previewer:
         camera(self.scene, (0.45, -2.9, 10.6), (0.2, 6.0, 0.0), lens=18.0)
         return self.render("red_b", (635, 284), 0.2, "red")
 
-    def scale_lights(self, coll_key, prefix, factor):
-        for o in self.L[coll_key].objects:
-            if o.name.startswith(prefix):
-                o.data.energy *= factor
-
     def v_cases(self):
-        """The case row from the walkway: the near cases on the left, the row curving away to the right, a
-        contender on each disc, rows of strip lights overhead. The walkway stays dark; the cases glow."""
+        """The film's frame (T1 @125.9 s): past the player's head along the row at the neighbours in their cases, the
+        navy hall beyond (see CASES_CAM)."""
         self.show({"Hall", "L_Hall", "L_Case", "Figures"})
-        for i in range(0, 9):
-            self.rider(i, DISC_TOP, 0.0, "yellow" if i == 1 else None)
-        camera(self.scene, bearing(0.0, 102.6, 6.1), bearing(30.0, 112.0, 4.6), lens=22.0)
-        self.scale_lights("hall", "LED_", 0.45)
-        self.scale_lights("case", "Gantry_", 0.5)
-        self.scale_lights("case", "Case_", 1.6)
+        for i in (47, 0, 1, 2, 3, 4, 5, 6, 7, 8):          # every case along the view is filled, as in the film
+            # the player (in the launch cape) turns to look along the row at the neighbour, as the film's tribute does
+            # (CASES_YAW); the neighbours stand in their suits, so their discs show (review fix)
+            self.rider(i, DISC_TOP, CASES_YAW if i == 0 else 0.0, "yellow" if i == 1 else None,
+                       kind="tribute" if i == 0 else "suit")
+        Mb = self.bay_M(0)
+        cam_p, look, lens = CASES_CAM
+        camera(self.scene, Mb @ Vector(cam_p), Mb @ Vector(look), lens=lens)
+        # the case-hall profile (case_stage): the pole hall's hub spots stay off until the rise, and (review fix) its
+        # bars take a deeper teal-navy while the cases are on screen; the gantry strips light the cases white
+        self.case_stage(True)
         p = self.render("cases", (664, 314), 0.2, "case")
-        self.scale_lights("hall", "LED_", 1 / 0.45)
-        self.scale_lights("case", "Gantry_", 1 / 0.5)
-        self.scale_lights("case", "Case_", 1 / 1.6)
+        self.case_stage(False)
         return p
 
     def v_wide(self):
-        """From the walkway across the hall: the far ring of poles, riders part-way up, the spoked ring above."""
+        """From the floor near the case ring across the hall: the far ring of poles with riders part-way up, the
+        spoked ring above with the hub's spots, the ceiling ring's light bars fanning out beyond the hub."""
         self.show({"Hall", "L_Hall", "L_Case", "Figures"})
         rng = random.Random(7)
+        cam_b = (math.degrees(math.atan2(WIDE_CAM[0][0], WIDE_CAM[0][1])) + 360.0) % 360.0
         for i in sorted(IN_USE):
-            z = 44.0 + rng.uniform(-5, 5)
+            z = WIDE_RIDER_Z + rng.uniform(-5, 5)        # staggered heights (TwoArenas 2.6)
+            if abs((bay_bearing(i) - cam_b + 180.0) % 360.0 - 180.0) < 25.0:
+                z = 20.0 + rng.uniform(-2, 2)            # the riders beside the camera have only just left their cases
             self.set_disc(i, z)
             self.rider(i, z)
-        camera(self.scene, (0.0, -102.0, 6.0), (0.0, 0.0, 55.7), lens=13.0)
+        cam_p, look, lens = WIDE_CAM
+        camera(self.scene, cam_p, look, lens=lens)
         p = self.render("wide", (662, 323), 0.3, "hall")
         self.reset_discs()
         return p
 
+    def end_frame_camera(self, i, z_disc):
+        """The end frame (END_FRAME) for rider i with its disc top at z_disc: in front, just below the disc."""
+        Mb = self.bay_M(i)
+        pos = Mb @ Vector((0.0, DISC_Y + END_FRAME["distance"], z_disc - END_FRAME["below"]))
+        n_out = (Mb.to_3x3() @ Vector((0, -1, 0))).normalized()
+        pitch = math.radians(END_FRAME["pitchDeg"])
+        look = pos + (n_out * math.cos(pitch) + Vector((0, 0, math.sin(pitch)))) * 8.0
+        cam = camera(self.scene, pos, look, lens=24.0)
+        cam.data.sensor_fit = "VERTICAL"
+        cam.data.angle = math.radians(END_FRAME["fovV"])
+        return cam
+
     def v_rise(self):
-        """Low angle in front of a rider mid-rise, the pole above the head, neighbours' strips to the sides."""
+        """The film's low-angle, whole-body frame (T1 @127.2 s) mid-hall: in front of and just below a rider at disc
+        y 62, the pole rising behind the head, the dark rods of the neighbours, the light bars of the walls and the
+        ceiling ring beyond."""
         self.show({"Hall", "L_Hall", "L_Case", "Figures", "L_Rider"})
         rng = random.Random(11)
         for i in sorted(IN_USE):
             z = 62.0 if i == 0 else 56.0 + rng.uniform(-5, 7)
             self.set_disc(i, z)
-            self.rider(i, z)
-        D, n_in = self.rider_key(0, 62.0)
-        camera(self.scene, D + n_in * 7.8 + Vector((0, 0, -3.2)), D + Vector((0, 0, 6.2)) - n_in * 0.3, lens=17.0)
-        p = self.render("rise", (657, 306), 0.3, "hall")
+            self.rider(i, z, look_up=30.0 if i == 0 else 0.0)
+        self.rider_key(0, 62.0)
+        cam = self.end_frame_camera(0, 62.0)
+        p = self.render("rise", (657, 306), 0.3, "rise")
+        cam.data.sensor_fit = "HORIZONTAL"
         self.reset_discs()
         return p
+
+    def v_rise_end(self):
+        """The rise's own camera keys at t 7.0 s of the full cut: the end frame, held until the opening floods."""
+        self.show({"Hall", "L_Hall", "L_Case", "Figures", "L_Rider"})
+        t = 7.0
+        rng = random.Random(11)
+        p, look, fov, zd = rise_camera_local(t, "full")
+        for i in sorted(IN_USE):
+            z = zd if i == 0 else zd + rng.uniform(-14, 10)
+            self.set_disc(i, z)
+            self.rider(i, z, look_up=30.0 if i == 0 else 0.0)
+        self.rider_key(0, zd)
+        Mb = self.bay_M(0)
+        cam = camera(self.scene, Mb @ p, Mb @ look, lens=24.0)
+        cam.data.sensor_fit = "VERTICAL"
+        cam.data.angle = math.radians(fov)
+        path = self.render("rise_end", (657, 306), 0.3, "rise")
+        cam.data.sensor_fit = "HORIZONTAL"
+        self.reset_discs()
+        return path
 
     # -- overviews (ours only)
     def v_red_interior(self):
@@ -2069,10 +2683,13 @@ class Previewer:
     def v_case_bay(self):
         self.show({"Hall", "L_Hall", "L_Case", "Figures"})
         for i in (47, 0, 1):
-            self.rider(i, DISC_TOP)
+            self.rider(i, DISC_TOP, kind="tribute" if i == 0 else "suit")
         Mb = self.bay_M(0)
         camera(self.scene, Mb @ Vector((3.2, 9.5, 5.6)), Mb @ Vector((-0.6, 0.3, 4.6)), lens=24.0)
-        return self.render("overview_case_bay", (16, 9), 0.3, "case")
+        self.case_stage(True)
+        p = self.render("overview_case_bay", (16, 9), 0.3, "case")
+        self.case_stage(False)
+        return p
 
     def v_hall(self):
         self.show({"Hall", "L_Hall", "L_Case", "Figures"})
@@ -2081,85 +2698,112 @@ class Previewer:
         camera(self.scene, (0.0, -166.0, 64.0), (0.0, 40.0, 34.0), lens=13.5)
         return self.render("overview_pole_hall", (16, 9), 0.3, "hall")
 
-    def rise_sheet(self):
-        """Frames along the suggested one-shot camera path (fewer samples), tiled with their times."""
-        self.show({"Hall", "L_Hall", "L_Case", "Figures", "L_Rider"})
+    def rise_tiles(self, cut, width, samples, others):
+        """Frames along one cut's camera keys, with the opening's flood and the whiteout. others: {bay: (figure,
+        height offset)}: the neighbours ride at staggered heights, 6-16 studs above or below (TwoArenas 2.6)."""
+        c = CUTS[cut]
         Mb = self.bay_M(0)
-        times = (0.0, 1.5, 3.0, 4.5, 6.0, 7.5, 8.4, 9.0)
         tiles = []
-        old_w, old_s = self.width, self.samples
-        self.width, self.samples = 520, max(24, self.samples // 4)
-        for i in sorted(IN_USE):
-            if i:
-                self.rider(i, DISC_TOP)
         cam = None
-        for t in times:
+        for t in c["sheet"]:
             for o in list(self.L["rider"].objects):
                 bpy.data.objects.remove(o, do_unlink=True)
-            p, look, fov, zd = rise_camera_local(t)
+            p, look, fov, zd = rise_camera_local(t, cut)
             self.set_disc(0, zd)
-            rid = self.rider(0, zd)
+            for i, (fig, dz) in others.items():
+                z = min(DISC_TOP + RISE, max(DISC_TOP, zd + dz))
+                self.set_disc(i, z)
+                fig.matrix_world = self.bay_M(i) @ Matrix.Translation((0, DISC_Y, z))
+            rid = self.rider(0, zd, look_up=30.0 * smooth(t / c["orbitEnd"]))
             self.rider_key(0, zd)
-            if t >= 6.5:                            # the aperture starts to flood with light
+            w0 = c["whiteout"][0]
+            if t >= w0 - 0.8:                        # the opening above starts to flood with light
                 ap = Mb @ Vector((0.0, POLE_Y, POLE_TOP - 1.2))
                 add_light(self.L["rider"], "Aperture_Flood", "SPOT", ap, (0, 0, -1),
-                          60000.0 * smooth((t - 6.5) / 2.5), (1.0, 0.99, 0.97), spot_deg=70, blend=0.8, radius=1.6)
+                          60000.0 * smooth((t - (w0 - 0.8)) / 1.6), (1.0, 0.99, 0.97), spot_deg=70, blend=0.8,
+                          radius=1.6)
             cam = camera(self.scene, Mb @ p, Mb @ look, lens=24.0)
             cam.data.sensor_fit = "VERTICAL"
             cam.data.angle = math.radians(fov)
-            path = self.render("risepath_t%04.1f" % t, (16, 9), 0.3, "hall")
+            old_w, old_s = self.width, self.samples
+            self.width, self.samples = width, samples
+            path = self.render("risepath_%s_t%04.1f" % (cut, t), (16, 9), rise_exposure(t, cut), rise_ambient(t, cut))
+            self.width, self.samples = old_w, old_s
             img = load_rgb(path)
-            if t >= RISE_T - 0.6:                   # the whiteout: light floods the aperture
-                wgt = min(1.0, (t - (RISE_T - 0.6)) / 0.6)
+            wgt = whiteout_weight(t, cut)
+            if wgt > 0:
                 img = img * (1 - wgt) + np.ones_like(img) * wgt * 0.97
-            draw_text(img, 10, 10, "T = %.1f S   DISC Y %.0f" % (t, zd), 2,
-                      (0.1, 0.1, 0.12) if t >= RISE_T - 0.1 else (0.93, 0.93, 0.9))
+            draw_text(img, 10, 10, "%s CUT  T = %.1f S   DISC Y %.0f" % (cut.upper(), t, zd), 2,
+                      (0.1, 0.1, 0.12) if wgt > 0.6 else (0.93, 0.93, 0.9))
             tiles.append(img)
             bpy.data.objects.remove(rid, do_unlink=True)
             os.remove(path)
         if cam is not None:
             cam.data.sensor_fit = "HORIZONTAL"
-        self.width, self.samples = old_w, old_s
-        h, w = tiles[0].shape[:2]
+        return tiles
+
+    def rise_sheet(self):
+        """Two rows for the full cut (9 s, a whole turn), one for the short cut (5 s, about half a turn)."""
+        self.show({"Hall", "L_Hall", "L_Case", "Figures", "L_Rider"})
+        rng = random.Random(5)
+        others = {}
+        for i in sorted(IN_USE):
+            if i:
+                dz = rng.uniform(6.0, 16.0) * (1 if rng.random() < 0.5 else -1)
+                others[i] = (self.rider(i, DISC_TOP), dz)
+        width, samples = 520, max(24, self.samples // 4)
+        lines = []
+        for cut in ("full", "short"):
+            tiles = self.rise_tiles(cut, width, samples, others)
+            for k in range(0, len(tiles), 4):
+                lines.append(tiles[k:k + 4])
+        h, w = lines[0][0].shape[:2]
         cols = 4
-        rows = (len(tiles) + cols - 1) // cols
-        sheet = np.full((rows * (h + 8) + 40, cols * (w + 8), 3), 0.07)
-        for k, img in enumerate(tiles):
-            r_, c_ = divmod(k, cols)
-            sheet[r_ * (h + 8):r_ * (h + 8) + h, c_ * (w + 8):c_ * (w + 8) + w] = img
-        draw_text(sheet, 10, rows * (h + 8) + 12, "THE RISE, ONE SHOT: %.0f STUDS IN %.0f S, THE CAMERA ORBITS %.0f "
-                  "DEG ROUND THE RIDER, THEN THE WHITEOUT" % (RISE, RISE_T, ORBIT_DEG), 2)
+        sheet = np.full((len(lines) * (h + 8) + 66, cols * (w + 8), 3), 0.07)
+        for r_, line in enumerate(lines):
+            for c_, img in enumerate(line):
+                sheet[r_ * (h + 8):r_ * (h + 8) + h, c_ * (w + 8):c_ * (w + 8) + w] = img
+        y = len(lines) * (h + 8) + 10
+        f, s = CUTS["full"], CUTS["short"]
+        draw_text(sheet, 10, y, "THE RISE, ONE SHOT, %.0f STUDS. FULL CUT %.0f S: A WHOLE TURN FROM THE FRONT. SHORT "
+                  "CUT %.0f S: %.0f DEG FROM BEHIND RIGHT. BOTH END ON THE LOW-ANGLE FRAME, THEN WHITE OUT"
+                  % (RISE, f["T"], s["T"], s["orbit"]), 2)
+        draw_text(sheet, 10, y + 24, SHEET_LABEL, 2, (0.95, 0.78, 0.35))
         out = os.path.join(PREV, "rise_path_sheet.png")
         save_rgb(out, sheet)
         self.reset_discs()
         log("PREVIEW %s" % out)
 
     def palette_sheet(self):
-        """Swatches: sampled frame colour -> semi-real tone, with luma (our numbers only)."""
+        """Swatches: sampled frame colour -> semi-real tone, with RGB, luma and HSV saturation (the reds' check)."""
         keys = [k for k in PAL if PAL[k][4] != "neon"]
         sw, sh_, pad = 64, 40, 8
         cols = 3
         rows = (len(keys) + cols - 1) // cols
-        cw = sw * 2 + 300
-        img = np.full((rows * (sh_ + pad) + 50, cols * cw, 3), 0.1)
-        draw_text(img, 10, 10, "LAUNCH PALETTE: SAMPLED (LEFT) -> SEMI-REAL TONE (RIGHT), RGB AND LUMA", 2)
+        cw = sw * 2 + 400
+        img = np.full((rows * (sh_ + pad) + 74, cols * cw, 3), 0.1)
+        draw_text(img, 10, 10, "LAUNCH PALETTE, PASS 2: SAMPLED -> TONE. RGB, LUMA, SATURATION (REDS: THE "
+                               "SAMPLE'S, WITHIN 0.05)", 2)
         for n, k in enumerate(keys):
             r_, c_ = divmod(n, cols)
             x0, y0 = c_ * cw + 10, 40 + r_ * (sh_ + pad)
             tone, sampled = PAL[k][0], PAL[k][1]
+            line2 = "%d %d %d  L%.0f  S%.2f" % (tone[0], tone[1], tone[2], luma(tone), hsv_sat(tone))
             if sampled:
                 s = tuple(int(sampled[i:i + 2], 16) for i in (1, 3, 5))
                 img[y0:y0 + sh_, x0:x0 + sw] = np.array(s) / 255.0
+                if k in REDS:
+                    line2 += " (%.2f)" % RED_SAMPLE_SAT.get(k, hsv_sat(s))
             img[y0:y0 + sh_, x0 + sw + 4:x0 + 2 * sw + 4] = np.array(tone) / 255.0
             draw_text(img, x0 + 2 * sw + 12, y0 + 6, k.replace("_", " "), 2)
-            draw_text(img, x0 + 2 * sw + 12, y0 + 24, "%d %d %d  L%.0f" % (tone[0], tone[1], tone[2], luma(tone)), 2)
+            draw_text(img, x0 + 2 * sw + 12, y0 + 24, line2, 2)
         out = os.path.join(PREV, "palette_swatches.png")
         save_rgb(out, img)
         log("PREVIEW %s" % out)
 
     def run(self):
         views = [("red_a", self.v_red_a, True), ("red_b", self.v_red_b, True), ("cases", self.v_cases, True),
-                 ("wide", self.v_wide, True), ("rise", self.v_rise, True),
+                 ("wide", self.v_wide, True), ("rise", self.v_rise, True), ("rise_end", self.v_rise_end, True),
                  ("red_interior", self.v_red_interior, False), ("case_bay", self.v_case_bay, False),
                  ("hall", self.v_hall, False)]
         for name, fn, cmp in views:
@@ -2170,7 +2814,7 @@ class Previewer:
             if cmp:
                 self.compare(name, path)
             else:
-                self.stats[name] = {"ours": colour_stats(load_rgb(path)), "frame": None}
+                self.stats[name] = {"ours": colour_stats(load_rgb(path)), "frames": None}
         self.clear_figs()
         if not ONLY or "risepath" in ONLY:
             self.rise_sheet()
@@ -2186,12 +2830,40 @@ class Previewer:
             except Exception:
                 old = {}
         old.update(self.stats)
+        old["reds"] = red_check()
+        old["note"] = ("pass 2: whole-frame numbers (pass 1's measure, kept for comparison). The pass/fail band is "
+                       "tools/art/colour_band.py on tools/art/specs/launch.json, region by region.")
         with open(cc, "w", encoding="utf-8") as f:
             json.dump(old, f, indent=1)
         for k, v in self.stats.items():
             log("COLOUR %-14s ours %s" % (k, v["ours"]))
-            if v.get("frame"):
-                log("COLOUR %-14s film %s" % (k, v["frame"]))
+            for cap, s in (v.get("frames") or {}).items():
+                log("COLOUR %-14s film %s %s" % (k, cap, s))
+
+
+def hsv_sat(c):
+    mx, mn = max(c[:3]), min(c[:3])
+    return (mx - mn) / mx if mx > 0 else 0.0
+
+
+def red_check():
+    """TwoArenas 8.2: each held red tone's saturation within 0.05 of its frame sample's. Under the 'band' oxblood
+    ruling (OXBLOOD_RULING) the oxblood room surfaces are checked against the band instead: 0.65-0.85x the sample."""
+    out = {}
+    for k in REDS:
+        tone, sampled = PAL[k][0], PAL[k][1]
+        if not sampled and k not in RED_SAMPLE_SAT:
+            continue
+        s_samp = RED_SAMPLE_SAT.get(k) or hsv_sat(tuple(int(sampled[i:i + 2], 16) for i in (1, 3, 5)))
+        s_tone = hsv_sat(tone)
+        row = {"sampled": sampled, "sampledSat": round(s_samp, 3), "tone": list(tone), "toneSat": round(s_tone, 3),
+               "diff": round(s_tone - s_samp, 3), "pass": abs(s_tone - s_samp) <= 0.05}
+        if OXBLOOD_RULING == "band" and k in ("oxblood", "oxblood_dk"):
+            ratio = s_tone / s_samp
+            row.update({"rule": "room surface under the band: 0.65-0.85x the sample (ruling pending)",
+                        "ratio": round(ratio, 3), "pass": 0.65 <= round(ratio, 2) <= 0.85})
+        out[k] = row
+    return out
 
 
 # =============================================================================================== budgets
@@ -2569,7 +3241,7 @@ def build_manifest(assets_json, glbs, uploads, glb_only, report, budgets, rise):
             row["normaliseFactor"] = round(f, 3)
         palette.append(row)
     return {
-        "schema": "LS-Launch-1 (faceted style A, palette atlas)",
+        "schema": "LS-Launch-2 (faceted style A, palette atlas; pass 2)",
         "category": CATEGORY,
         "generator": "art/blender/launch_rooms.py (seed %d)" % SEED,
         "glbs": glbs,
@@ -2580,6 +3252,7 @@ def build_manifest(assets_json, glbs, uploads, glb_only, report, budgets, rise):
         "uploadTextures": uploads,
         "glbOnlyTextures": glb_only,
         "palette": palette,
+        "redCheck": red_check(),
         "budgets": budgets,
         "set": {
             "frame": "the pole hall: origin at its floor centre (y 0); bearings clockwise from north (Roblox -Z). "
@@ -2587,7 +3260,12 @@ def build_manifest(assets_json, glbs, uploads, glb_only, report, budgets, rise):
             "dimensions": {"hallDiameter": 2 * HALL_R, "wallTop": WALL_TOP, "crownDiameter": 2 * CROWN_R,
                            "crownY": 127.0, "caseRingRadius": CASE_R, "poleRingRadius": POLE_R,
                            "bankedRing": [120.4, HALL_R], "walkway": [98.6, CASE_R - CDp / 2 - 0.2],
-                           "gantryY": GANTRY_Z, "ledRings": [r for r, _, _ in LED_RINGS]},
+                           "gantryY": GANTRY_Z, "ledRings": list(LED_RING_R),
+                           "ledRowBearingsPerSegment": list(LED_ROW_BEARINGS), "ledBarLength": 2 * LED_HALF,
+                           "wallBars": {"bearingsPerSegment": list(WALL_BAR_BEARINGS), "radius": WALL_BAR_R,
+                                        "heights": [list(z) for z in WALL_BAR_Z]},
+                           "redRoomNet": {"cell": NET_CELL, "bar": NET_BAR, "angleToHexDeg": NET_ANGLE,
+                                          "sag": NET_SAG, "fixingsY": {"NetA": NET_A_FIX, "NetB": NET_B_FIX}}},
             "instances": set_inst,
             "redRoom": {"asset": "LaunchRedRoom", "placement": "client-local, one per player: under the player's "
                         "own bay, origin = bay origin + (0, -40, 0), same yaw (its roof top then sits 18 studs "
@@ -2596,40 +3274,102 @@ def build_manifest(assets_json, glbs, uploads, glb_only, report, budgets, rise):
                                       "the dark above the roof; the cut to the case hides there"},
         },
         "rise": rise,
-        "sequence": [
-            {"stage": "1 Red room (transition, loops while the map loads)", "seconds": ">= 4, loops",
-             "camera": "first person while waiting (the room is walkable). When the map is ready: a chime, the "
-                       "player is set on the lift disc (Spawn) and the cinematic starts on CamTopDown: straight "
-                       "down through the hex frame, pushing in from y 33 to 27 over 2.5 s (the film's framing)."},
-            {"stage": "2 Up the lift", "seconds": 3.0,
-             "camera": "the disc lifts; the camera rises ahead of the player through the hex frame into the dark "
-                       "above the roof (hidden cut 1)."},
-            {"stage": "3 The glass case", "seconds": 4.0,
-             "camera": "open on the player in their case (CamCase); pull back out through the front glass to the "
-                       "walkway and sweep 20 degrees along the curving row of cases (others stand in theirs)."},
-            {"stage": "4 The rise (one shot)", "seconds": RISE_T,
-             "camera": "rise.keys: the disc rides the pole %.0f studs while the camera orbits %.0f degrees round "
-                       "the rider, low first (looking up the pole, T1 @127.2 s), then level, then up at the "
-                       "aperture." % (RISE, ORBIT_DEG)},
-            {"stage": "5 Whiteout", "seconds": 1.0,
-             "camera": "overlaps the last 0.6 s of the rise: the aperture floods white (hidden cut 2 into the arena)."},
-            {"stage": "6 Arrival", "seconds": 3.0,
-             "camera": "Map 1: up the brass-rimmed tube in the turf; Map 2: the plate surfaces in the lagoon. The "
-                       "camera finishes the circle (the last 90 degrees) and settles behind the head facing the "
-                       "horn; then first person."},
-        ],
+        "sequence": {
+            "rule": "TwoArenas 2.3: the full cut if any contender in the round has not launched yet this session, "
+                    "else the short cut; everyone in a round sees the same cut on the same clock",
+            "full": [
+                {"stage": "Fade to black on the training floor", "from": 0.0, "to": 0.4},
+                {"stage": "1 The red room (loops while the arena streams in)", "from": 0.4, "to": 8.0,
+                 "camera": "just above the hex frame's mouth (Blender (0, 2, 30), 7.5 studs over the frame), looking "
+                           "75 deg down past the far half of the hexagon at the player's own stand-in on the lift disc "
+                           "(Spawn) far below, in the oxblood hood; a slow zoom, fov 50 -> 42 over 6 s, then a 4 deg/s "
+                           "drift if the wait runs on. At 6 s the player looks up into the tube.",
+                 "cameraStart": {"position": to_rbx(Vector(RED_A_CAM[0])), "lookAt": to_rbx(Vector(RED_A_CAM[1])),
+                                 "fovV": RED_A_CAM[2]}},
+                {"stage": "2 Up the teal tube", "from": 8.0, "to": 11.0,
+                 "camera": "rises ahead of the player through the hex frame into the dark above the roof (hidden "
+                           "cut 1)"},
+                {"stage": "3 The cases", "from": 11.0, "to": 15.0,
+                 "camera": "at face height just outside the glass, beside the player, looking past the player (who "
+                           "turns toward the row) along the tightly packed row of cases with a long lens (35 mm on "
+                           "36 mm film, about 54 deg across; cameraStart, in the bay frame); then pulls back and arcs "
+                           "40 deg round the hall, ending in front of the case at rise.cuts.full.keys[0]",
+                 "cameraStart": {"positionBay": to_rbx(Vector(CASES_CAM[0])), "lookAtBay": to_rbx(Vector(CASES_CAM[1])),
+                                 "fovV": round(math.degrees(2 * math.atan(18.0 / CASES_CAM[2] * 314.0 / 664.0)), 1)}},
+                {"stage": "4 The rise", "from": 15.0, "to": 24.0, "keys": "rise.cuts.full",
+                 "camera": "a whole turn anticlockwise from the front while climbing with the rider; from t 5.4 it "
+                           "settles into the film's low-angle, whole-body frame (rise.endFrame, T1 @127.2 s), held "
+                           "from t 6.8 while the rider is still in the open hall; the opening floods white from t 7.4"},
+                {"stage": "5 White-out (the cut into the arena hides here)", "from": 24.0, "to": 25.0},
+                {"stage": "6 The arrival", "from": 25.0, "to": 28.0,
+                 "camera": "out of the white 14 studs above the plinth, looking down (T1 @129.2 s); drops behind the "
+                           "head facing the horn, then into first person at 28.0. The rise now ends in front of the "
+                           "rider, so reaching 'behind the head' is a further half turn, not pass 1's quarter."},
+                {"stage": "On the plinth: 10 to 1", "from": 28.0, "to": 38.0},
+            ],
+            "short": [
+                {"stage": "Fade", "from": 0.0, "to": 0.4},
+                {"stage": "1 The red room, only as long as loading needs", "from": 0.4, "to": 3.0},
+                {"stage": "4 The rise", "from": 3.0, "to": 8.0, "keys": "rise.cuts.short",
+                 "camera": "a cut straight to the disc leaving the case, seen from behind and to the right (clear "
+                           "of the gantry behind the cases); 155 deg anticlockwise to the same low-angle end frame by "
+                           "t 3.4, held; floods white from t 4.2"},
+                {"stage": "5 White-out", "from": 8.0, "to": 9.0},
+                {"stage": "6 The arrival", "from": 9.0, "to": 12.0},
+                {"stage": "On the plinth: 6 to 1", "from": 12.0, "to": 18.0},
+            ],
+        },
         "lighting": {
-            "LaunchRedRoom": {"ambient": list(AMBIENT["red"]), "exposure": 0.2,
-                              "lights": "SpotLight at KeyLight (cool white, angle 78, aimed down); a red "
-                                        "SurfaceLight (Face Top) in each grate pit at GrateGlow_n; PointLights "
-                                        "(warm white, range 10) at Lamp_n"},
-            "LaunchCaseHall": {"ambient": list(AMBIENT["case"]), "exposure": 0.3,
-                               "lights": "SurfaceLight (Face Bottom) on each case top-light and each gantry strip; "
-                                         "a small SurfaceLight on each unit panel"},
-            "LaunchPoleHall": {"ambient": list(AMBIENT["hall"]), "exposure": 0.3, "bloomThreshold": 1.4,
-                               "lights": "SpotLights (angle 34) at the 12 HubSpot_n; a SurfaceLight (Face Bottom) "
-                                         "on every LED bar; the poles' strips are Neon only; a SpotLight that rides "
-                                         "7 studs in front of and 10 above each rider (the rider key)"},
+            "note": "pass 2 (TwoArenas 2.8) with the review's fixes: the hue rides on the light, not the paint. Cool "
+                    "keys and a navy ambient in both halls and blue keys over the deck turn the shadows blue; the red "
+                    "room keeps one cool white key down the tube and red light only in its two floor openings. Neon "
+                    "parts light nothing (as in Roblox): every light below is a real Light. Light colours are 0-1 RGB "
+                    "(Light.Color), gains are the Blender watts of the previews (relative only), ambients and exposures "
+                    "as Lighting.Ambient and ExposureCompensation. The values were set on the Blender previews (paint x "
+                    "ambient, AgX, the bloom and atmosphere stand-ins below) and measured with tools/art/colour_band.py "
+                    "(tools/art/specs/launch.json); confirm them in Studio (ArtStyle rule 10) before shipping.",
+            "colours": {"coolWhite": list(COOL), "coolKey": list(COOL_KEY), "deckKey": list(DECK_KEY),
+                        "lampLight": list(LAMP_LIGHT), "openingGlow": list(RED_GLOW), "grateGlow": list(GRATE_GLOW),
+                        "caseStageBars": list(CASE_STAGE_COL), "caseStageGantry": list(CASE_GANTRY_COL),
+                        "poleHallBars": list(VIEW_HALL_COL["wide"]), "riseBars": list(VIEW_HALL_COL["rise_end"])},
+            "previewGains": dict(LIGHT_GAIN),
+            "LaunchRedRoom": {"ambient": list(AMBIENT["red"]), "exposure": VIEW_EXPOSURE["red_a"],
+                              "lights": "SpotLight at KeyLight (coolWhite, angle %d, aimed down the tube onto the "
+                                        "lift disc only); SpotLights at DeckKey_1-4 (deckKey, angle %d, leaning in "
+                                        "toward the grate lanes: they make the neutral steel deck read blue); a "
+                                        "coolKey SpotLight (angle 26) at WalkwaySpot, over the walkway; a dim navy "
+                                        "SurfaceLight (Face Bottom, grateGlow) under each grate lane's mesh at "
+                                        "GrateGlow_1-4, so the voids read navy-black; a red SurfaceLight (Face Top) "
+                                        "low in each floor opening at OpeningGlow_1-2, the only red light; white "
+                                        "SpotLights (lampLight, angle 50, tipped 10 deg down) at Lamp_n, the way "
+                                        "each lamp faces" % (int(RED_KEY_DEG), int(DECK_KEY_DEG))},
+            "LaunchCaseHall": {"ambient": list(AMBIENT["case"]), "exposure": VIEW_EXPOSURE["cases"],
+                               "lights": "a SurfaceLight (Face Bottom, Angle 50, coolWhite) on each case top-light, "
+                                         "aimed at the disc; SurfaceLights (Face Bottom, caseStageGantry) on the "
+                                         "gantry strips; a small SurfaceLight on each unit panel. While the cases "
+                                         "stage runs, the pole hall's hub spots are off and its bars take "
+                                         "caseStageBars at caseStageDim of their gains",
+                               "caseStageDim": {"HubSpot": CASE_STAGE_DIM["Hall_HubSpot"],
+                                                "wallBars": CASE_STAGE_DIM["Wall_"],
+                                                "ceilingRingBars": CASE_STAGE_DIM["LED_"]}},
+            "LaunchPoleHall": {"ambient": list(AMBIENT["hall"]), "exposure": VIEW_EXPOSURE["wide"],
+                               "bloom": {"threshold": 1.4, "previewStandIn": list(VIEW_GLARE["wide"])},
+                               "atmosphere": {"note": "a thin navy haze (Lighting.Atmosphere in this profile): the "
+                                                      "preview blends toward the colour with distance",
+                                              "start": VIEW_FOG["wide"][0], "depth": VIEW_FOG["wide"][1],
+                                              "amount": VIEW_FOG["wide"][2], "color": list(VIEW_FOG["wide"][3])},
+                               "lights": "SpotLights (angle 34, poleHallBars) at the 12 HubSpot_n, which hang in two "
+                                         "tiers under the hub; a SurfaceLight (Face Bottom) on every ceiling-ring LED "
+                                         "bar and one (Face Front, toward the hall centre) on every wall bar; no light "
+                                         "on the poles; a SpotLight that rides 7 studs in front of and 10 above each "
+                                         "rider (the rider key, coolWhite). Phones: only the own rider's key and the 4 "
+                                         "nearest; Low graphics drops the wall bars' lights"},
+            "LaunchPoleHallRise": {"ambient": list(AMBIENT["rise"]), "exposure": VIEW_EXPOSURE["rise_end"],
+                                   "note": "the rise's own profile: as the camera settles into the low-angle end "
+                                           "frame the pole hall's ambient blends to this greyer navy, the bars take "
+                                           "riseBars and the exposure eases (rise.cuts.*.keys[].riseProfile and "
+                                           ".exposure), so the lit rider stands out against a hall that falls away "
+                                           "(T1 @127.2 s)"},
         },
         "import": [
             "Import each GLB (3D Importer). Each asset root arrives as a Model of MeshParts named <Asset>_<Part>.",
@@ -2650,7 +3390,8 @@ def build_manifest(assets_json, glbs, uploads, glb_only, report, budgets, rise):
             "0.25 stud except bolts and trim.",
             "Colour: the brief's semi-real tones (UpcomingFilm_Brief section 2.8), +-6% per volume, +-3% per "
             "facet, warm tops and cool undersides, AO >= 0.5; each surface's mean after AO is normalised to the "
-            "tone. Saturated colour only on the red rails and lamps and the light sources.",
+            "tone. The reds sit at their frame sample's saturation (within 0.05; palette.redCheck); "
+            "saturated colour only on the light sources.",
             "Darkness comes from the lighting, never the paint: no painted value below luma 40 (grates); built "
             "surfaces 55-215.",
         ],
@@ -2671,6 +3412,9 @@ def main():
     report = paint_and_ao(assets, inst)
     for k, (tgt, before, after, f) in sorted(report.items()):
         log("TONE %-11s target luma %5.1f  painted*AO %5.1f -> %5.1f (x%.2f)" % (k, tgt, before, after, f))
+    for k, v in red_check().items():
+        log("RED  %-11s sampled S %.2f, tone S %.2f (%+.2f) %s" % (k, v["sampledSat"], v["toneSat"], v["diff"],
+                                                                  "PASS" if v["pass"] else "FAIL"))
     assign_preview_materials(assets)
     rise = rise_plan(assets, inst)
     if "preview" in STAGES:

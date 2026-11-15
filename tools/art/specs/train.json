@@ -1,0 +1,546 @@
+{
+ "pairs": [
+  {
+   "name": "train_station_owner",
+   "ours": "art/previews/Train/station_owner_match.png",
+   "film": "refs:owner/train_station_owner_frame.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Pass 2 (train_sotr.py): one camera serves both station views. The owner's frame is a later moment of the Trailer 1 @35.7 s shot, framed as T1 cropped 1.50x (T1 x 0.1525-0.819, y 0.353-1.0); our owner's view is the same crop of station_frame (STATION_CAM's position and pitch, a 35.3-degree lens shifted onto it). The film rectangles keep clear of the three player icons drawn over the frame and of people. The gold boxes lie on blade surface only (the film's right-hand fan, which the sun lights, and our right-hand blades).",
+   "regions": [
+    {
+     "class": "built",
+     "label": "shed glazing, west, high",
+     "ours": [
+      0.3,
+      0.245,
+      0.4,
+      0.31
+     ],
+     "film": [
+      0.285,
+      0.03,
+      0.335,
+      0.37
+     ],
+     "note": "The west wall of the shed above the beam: white fins and glazing."
+    },
+    {
+     "class": "built",
+     "label": "shed glazing, east, high",
+     "ours": [
+      0.7,
+      0.245,
+      0.8,
+      0.31
+     ],
+     "film": [
+      0.67,
+      0.02,
+      0.78,
+      0.35
+     ]
+    },
+    {
+     "class": "built",
+     "label": "shed wall, west, low",
+     "ours": [
+      0.35,
+      0.46,
+      0.42,
+      0.66
+     ],
+     "film": [
+      0.3,
+      0.46,
+      0.37,
+      0.66
+     ],
+     "note": "Between the departure board and the beam's inner column, above the train."
+    },
+    {
+     "class": "built",
+     "label": "shed wall, east, low",
+     "ours": [
+      0.62,
+      0.46,
+      0.69,
+      0.66
+     ],
+     "film": [
+      0.63,
+      0.46,
+      0.74,
+      0.67
+     ]
+    },
+    {
+     "class": "built",
+     "label": "west nose, body and band",
+     "ours": [
+      0.34,
+      0.72,
+      0.41,
+      0.8
+     ],
+     "film": [
+      0.335,
+      0.67,
+      0.4,
+      0.75
+     ]
+    },
+    {
+     "class": "built",
+     "label": "east nose, body",
+     "ours": [
+      0.7,
+      0.72,
+      0.76,
+      0.8
+     ],
+     "film": [
+      0.68,
+      0.69,
+      0.76,
+      0.75
+     ],
+     "note": "On the body below the roof line in both."
+    },
+    {
+     "class": "built",
+     "label": "gold blade, surface only",
+     "ours": [
+      0.636,
+      0.054,
+      0.658,
+      0.104
+     ],
+     "film": [
+      0.673,
+      0.075,
+      0.695,
+      0.125
+     ],
+     "note": "Every pixel of both boxes is blade (checked with the work folder's tools/goldbox.py). Our sculpture is our own single radial fan; the film's (two fans on a pendant) is not copied."
+    },
+    {
+     "class": "signal",
+     "label": "nose lamp, west",
+     "ours": [
+      0.27,
+      0.76,
+      0.33,
+      0.9
+     ],
+     "film": [
+      0.24,
+      0.6,
+      0.32,
+      0.86
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "nose lamp, east",
+     "ours": [
+      0.71,
+      0.76,
+      0.78,
+      0.9
+     ],
+     "film": [
+      0.76,
+      0.58,
+      0.84,
+      0.86
+     ]
+    }
+   ]
+  },
+  {
+   "name": "train_station_wide",
+   "ours": "art/previews/Train/station_frame.png",
+   "film": "refs:trailer/trailer1_35.7s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Pass 2: our wide view fitted to Trailer 1 @35.7 s. The film rectangles keep clear of the lettering on the beam, the posters and the guards.",
+   "regions": [
+    {
+     "class": "built",
+     "label": "coffers, west",
+     "ours": [
+      0.15,
+      0.0,
+      0.32,
+      0.12
+     ],
+     "film": [
+      0.18,
+      0.0,
+      0.32,
+      0.12
+     ]
+    },
+    {
+     "class": "built",
+     "label": "coffers, east",
+     "ours": [
+      0.68,
+      0.0,
+      0.85,
+      0.12
+     ],
+     "film": [
+      0.68,
+      0.0,
+      0.82,
+      0.12
+     ]
+    },
+    {
+     "class": "built",
+     "label": "gold blade, surface only",
+     "ours": [
+      0.404,
+      0.292,
+      0.422,
+      0.342
+     ],
+     "film": [
+      0.407,
+      0.163,
+      0.425,
+      0.213
+     ],
+     "note": "The second blade from the left at mid-length in both; every pixel is blade (tools/goldbox.py)."
+    },
+    {
+     "class": "built",
+     "label": "shed wall, west, low",
+     "ours": [
+      0.39,
+      0.67,
+      0.43,
+      0.77
+     ],
+     "film": [
+      0.375,
+      0.66,
+      0.425,
+      0.76
+     ],
+     "note": "The shed's west wall inside the portal, between its middle and inner columns, in both. Pass 2a's film box [0.29, 0.66, 0.34, 0.74] lay on the dark lattice outside the film's portal, which we do not model."
+    },
+    {
+     "class": "built",
+     "label": "shed wall, east, low",
+     "ours": [
+      0.575,
+      0.67,
+      0.61,
+      0.77
+     ],
+     "film": [
+      0.575,
+      0.66,
+      0.625,
+      0.76
+     ],
+     "note": "The shed's east wall inside the portal, in both (pass 2a's film box was on the lattice outside it)."
+    },
+    {
+     "class": "built",
+     "label": "west nose",
+     "ours": [
+      0.375,
+      0.835,
+      0.415,
+      0.875
+     ],
+     "film": [
+      0.37,
+      0.82,
+      0.42,
+      0.875
+     ],
+     "note": "Right of the lamp, where the film's train shows its maroon panel and ours its band."
+    },
+    {
+     "class": "built",
+     "label": "east nose",
+     "ours": [
+      0.6,
+      0.83,
+      0.64,
+      0.87
+     ],
+     "film": [
+      0.6,
+      0.84,
+      0.645,
+      0.875
+     ],
+     "note": "The east train's body below its roof line in both (pass 2a's film box took in the shed wall above it)."
+    },
+    {
+     "class": "signal",
+     "label": "nose lamp, west",
+     "ours": [
+      0.33,
+      0.84,
+      0.37,
+      0.92
+     ],
+     "film": [
+      0.31,
+      0.83,
+      0.37,
+      0.96
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "nose lamp, east",
+     "ours": [
+      0.63,
+      0.84,
+      0.67,
+      0.92
+     ],
+     "film": [
+      0.65,
+      0.81,
+      0.72,
+      0.95
+     ]
+    }
+   ]
+  },
+  {
+   "name": "train_nose_detail",
+   "ours": "art/previews/Train/exterior_nose.png",
+   "film": "refs:trailer/trailer1_35.7s_detail_trains.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Pass 2: our nose car from the platform against the film's detail of both trains. The fin regions pair surfaces under the same light (fins in shade, fins in sun), not the same wall.",
+   "regions": [
+    {
+     "class": "built",
+     "label": "nose, black lacquer",
+     "ours": [
+      0.47,
+      0.36,
+      0.56,
+      0.46
+     ],
+     "film": [
+      0.74,
+      0.48,
+      0.83,
+      0.55
+     ],
+     "note": "The capsule beside the lamp on the side facing the camera, in both."
+    },
+    {
+     "class": "built",
+     "label": "maroon band (the flank panel)",
+     "ours": [
+      0.63,
+      0.36,
+      0.68,
+      0.48
+     ],
+     "film": [
+      0.155,
+      0.52,
+      0.215,
+      0.61
+     ]
+    },
+    {
+     "class": "built",
+     "label": "shed fins in shade",
+     "ours": [
+      0.65,
+      0.0,
+      0.78,
+      0.3
+     ],
+     "film": [
+      0.0,
+      0.03,
+      0.12,
+      0.25
+     ],
+     "note": "Ours: the far east wall high, which the low sun leaves in shade (the cooler of our two walls); the film's: its left wall high."
+    },
+    {
+     "class": "built",
+     "label": "shed fins in sun, high",
+     "ours": [
+      0.0,
+      0.0,
+      0.28,
+      0.5
+     ],
+     "film": [
+      0.88,
+      0.0,
+      1.0,
+      0.22
+     ],
+     "note": "Ours: the near east wall, in the late sun (the warmer of our two); the film's: its right wall high."
+    },
+    {
+     "class": "built",
+     "label": "banner",
+     "ours": [
+      0.84,
+      0.02,
+      0.9,
+      0.18
+     ],
+     "film": [
+      0.335,
+      0.06,
+      0.4,
+      0.33
+     ],
+     "note": "Both carry their gold motif; ours is our own (a rising half-sun and a chevron), the film's is not copied."
+    },
+    {
+     "class": "signal",
+     "label": "nose lamp core",
+     "ours": [
+      0.3,
+      0.4,
+      0.44,
+      0.68
+     ],
+     "film": [
+      0.86,
+      0.55,
+      0.93,
+      0.68
+     ]
+    }
+   ]
+  },
+  {
+   "name": "train_car1_saloon",
+   "ours": "art/previews/Train/interior_car1_vestibule.png",
+   "film": "refs:trailer/fanedit_1.4s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "The film side is a fan-edit frame (trust it less than the studio's trailers); it is the only clear frame of the cars' materials. The rectangles keep clear of the two people.",
+   "regions": [
+    {
+     "class": "interior",
+     "label": "upholstery, bench back",
+     "ours": [
+      0.71,
+      0.6,
+      0.84,
+      0.7
+     ],
+     "film": [
+      0.3,
+      0.45,
+      0.52,
+      0.8
+     ]
+    },
+    {
+     "class": "interior",
+     "label": "brass window frame",
+     "ours": [
+      0.82,
+      0.235,
+      0.85,
+      0.265
+     ],
+     "film": [
+      0.4,
+      0.355,
+      0.8,
+      0.395
+     ],
+     "note": "Lit brass face of the near window's frame in both (the film's polished sill, ours the frame's face under the cove); every pixel of ours is brass (work folder tools/boxfind.py)."
+    },
+    {
+     "class": "interior",
+     "label": "window at night",
+     "ours": [
+      0.15,
+      0.3,
+      0.22,
+      0.4
+     ],
+     "film": [
+      0.45,
+      0.05,
+      0.75,
+      0.3
+     ],
+     "note": "The upper glass of a near window, clear of its frame, in both."
+    }
+   ]
+  },
+  {
+   "name": "train_car2_dining",
+   "ours": "art/previews/Train/interior_car2_dining.png",
+   "film": "refs:trailer/fanedit_3.8s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "The film side is a fan-edit frame (trust it less). The rectangles keep clear of the two people.",
+   "regions": [
+    {
+     "class": "interior",
+     "label": "hammered vault",
+     "ours": [
+      0.36,
+      0.045,
+      0.46,
+      0.095
+     ],
+     "film": [
+      0.38,
+      0.02,
+      0.7,
+      0.18
+     ],
+     "note": "The upper vault overhead, away from the lamps, in both (every pixel of ours is vault)."
+    },
+    {
+     "class": "interior",
+     "label": "hammered vault, lamp-lit",
+     "ours": [
+      0.44,
+      0.1,
+      0.56,
+      0.16
+     ],
+     "film": [
+      0.55,
+      0.4,
+      0.72,
+      0.6
+     ],
+     "note": "The vault where the lamps and coves light it, in both."
+    },
+    {
+     "class": "interior",
+     "label": "wood arch",
+     "ours": [
+      0.315,
+      0.3,
+      0.335,
+      0.55
+     ],
+     "film": [
+      0.5,
+      0.5,
+      0.53,
+      0.62
+     ]
+    }
+   ]
+  }
+ ]
+}

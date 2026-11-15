@@ -1526,3 +1526,27 @@ film is copied: every sign, emblem, poster, board row, plate and upholstery moti
   keeps them out of the repo.
 - **Not done here:** no Studio import, no upload; the District 12 platform and railcar; the guard is a static statue.
   Check the set in Studio at 14:00 and 17:30 and under the car light rigs before it ships (ArtStyle rule 10).
+
+## 14. Colour-band checker (tools/art, 2026-11-15)
+
+`tools/art/colour_band.py` measures our renders against film frames region by region, for the colour band in
+`docs/design/TwoArenas.md` section 7. It runs in Blender's own Python (numpy, no Pillow); `python tools/art/colour_band.py`
+with the same arguments starts Blender for you (`$env:BLENDER` overrides where it looks).
+
+```powershell
+& $blender --background --factory-startup --python tools/art/colour_band.py -- tools/art/specs/map1.json --out <work folder>/map1.report.json [--sheet <work folder>] [--refs <References folder>] [--size 800]
+```
+
+- **Specs** (`tools/art/specs/*.json`; `pass1_*.json` hold the pass 1 measurements): pairs of our render (`ours`) and a
+  film frame (`film`), each with rectangles per region as fractions of the image, and a class: ground, foliage, stone,
+  water, built, sky, haze, interior or signal. `refs:` paths resolve against `--refs` (default `$env:LS_REFS`, else
+  `~/OneDrive/Documents/LastStanding/References`); other relative paths resolve against the repo root. Keep committed
+  specs free of absolute paths. Optional per-region checks: `b_minus_r`, `b_minus_r_dark`, `sat_within`.
+- **Bands** (ours against the film): ground, foliage, stone, water and built at 0.65-0.85x saturation and -10% to +20%
+  brightness; sky and haze at 0.45-0.65x and -10% to +25%; interior at 0.65-0.85x and -10% to +20%. Signal regions are
+  reported, not banded. Vivid pixels (S > 0.6 and V > 0.35) outside the signal boxes must stay at 1% or less.
+- **Region sheets:** `--sheet` writes `compare_<pair>_regions.png` (ours, the film, our vivid pixels, with numbered
+  boxes). They hold film frames, so the tool refuses any repo folder whose `.gitignore` doesn't exclude
+  `compare_*.png`. Keep them in a work folder.
+- It always exits 0. Spec errors, missing files and bad options are reported in the table and the JSON.
+- Pass 2's results and the calls still open are in `docs/design/TwoArenas.md` section 8.2.

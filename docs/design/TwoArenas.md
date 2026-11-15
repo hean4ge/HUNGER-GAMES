@@ -2394,6 +2394,27 @@ Every asset is modelled by us in Blender, by a seeded generator in `art/blender/
 | **Map 2** (T36, after decision 1) | <ul><li>Game 2's changes 3–7 (§4.3).</li><li>The varied jungle, the sector silhouettes and tints, the hour markers, the dark lava island, one horn design, and varied relief (§4.16).</li><li>The style A bakes, far meshes for the spokes, 12 canopy shells and the horizon ring.</li><li>TimberPond's water level snapped.</li></ul> | <ul><li>A tester names 10 of 12 sectors from the island, from renders.</li><li>Every part is under 5k triangles.</li><li>The band passes.</li><li>The data validator passes.</li></ul> |
 | **The train and the station** (T44) | <ul><li>The tall, narrow hall, the radial fan of blades, and cool daylight.</li><li>The bullet nose and the black lacquer body; the finer upholstery (§5.2).</li><li>Palette or atlas textures instead of 33 sets.</li><li>A rigged guard.</li></ul> | <ul><li>The re-render matches the film's proportions.</li><li>The band passes.</li><li>The textures fit within 80 MB.</li></ul> |
 
+**Pass 2 result (15 November).** All three sets came out closer to the film, but none passes §7's band yet, so no pass 2 render goes to you. Each set had a fix, an independent review and a follow-up fix. The band is measured by `tools/art/colour_band.py` against the specs in `tools/art/specs/` (art/README.md §14).
+- **Map 1:**
+  - **What changed:** the crater is gone, and the valley sides now climb 113–122 studs. The heart has its lens beds, pale petals and a flared horn with a modelled interior. The whole map uses one sunlit Day look instead of lights tuned per shot.
+  - **Band:** 0 of 6 matches pass, and 5 of 33 regions.
+  - **Still unlike the film:** the far forest and the mountains read grey, the cloud bank is a row of puffs, the peak is striped and single, and the stream reads as a canal. Every plant is a placeholder. Game 1's sites, anchors and kit ids aren't started.
+- **The launch:**
+  - **What changed:** frame A looks steeply down the red shaft at your stand-in on the rose disc. The wide shot is level, with the ring as an ellipse overhead. The case hall is a tight row of booths with lit discs.
+  - **Band:** 2 of 6 matches pass, and 16 of 26 regions.
+- **The train and the station:**
+  - **What changed:** the gold fan is now broad blades. The ceiling has 6-stud coffers with visible downlights. The lacquer is semi-gloss, the cars are lamp-lit again and the upholstery rings interlock. On the night bridge the windows show as a line of amber lights.
+  - **Band:** 0 of 5 matches pass, and 13 of 25 regions.
+  - **Still to fix:** the textures are still about 634 MB, against the 80 MB target.
+- **Calls still to make (the art lead's, not yours):**
+  - the blue-minus-red floor on the rise frames, which is set aside for now, as the film does;
+  - the oxblood, which is held at the band;
+  - a hall blue-minus-red window measured relative to the film's own value;
+  - the case hall's reference frame;
+  - Map 1's brief grass tints, which measure 0.92–1.29× the film;
+  - the station, where your frame and T1 disagree.
+- **Not checked in Studio.** Nothing from pass 2 has been looked at in Studio yet.
+
 ### 8.3 New art still to make
 
 | Kit | Pieces | Budget (triangles) |

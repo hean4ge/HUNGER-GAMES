@@ -1,0 +1,709 @@
+{
+ "pairs": [
+  {
+   "name": "map1_owner_t1_1.7s",
+   "ours": "art/previews/Map1/match_owner_t1_1.7s.png",
+   "film": "refs:owner/map1_green_land_owner_frame.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Pass 2b against the owner's frame of T1 @1.7 s, pass 1's camera, under the one Day look (exposure only per shot). Film rectangles avoid the three player icons (x 0.23-0.78, y 0.38-0.61) and the darkest vignetted corners. The horn is left out: it sits under the pause icon, and its colour is decision 2.",
+   "regions": [
+    {
+     "class": "sky",
+     "label": "sky, top right",
+     "ours": [
+      0.88,
+      0.005,
+      0.99,
+      0.06
+     ],
+     "film": [
+      0.72,
+      0.01,
+      0.92,
+      0.1
+     ]
+    },
+    {
+     "class": "haze",
+     "label": "cloud bank",
+     "ours": [
+      0.37,
+      0.205,
+      0.47,
+      0.255
+     ],
+     "film": [
+      0.38,
+      0.12,
+      0.56,
+      0.19
+     ],
+     "note": "Ours: the body of the middle cloud mass (pass 2b's masses moved; pass 2's box now sits in a gap)."
+    },
+    {
+     "class": "haze",
+     "label": "cloud bank, right",
+     "ours": [
+      0.55,
+      0.21,
+      0.72,
+      0.25
+     ],
+     "film": [
+      0.6,
+      0.17,
+      0.95,
+      0.27
+     ],
+     "note": "The reviewer's region: the film's bank's right half against our right-hand mass."
+    },
+    {
+     "class": "haze",
+     "label": "far mountain flanks",
+     "ours": [
+      0.58,
+      0.02,
+      0.72,
+      0.1
+     ],
+     "film": [
+      0.03,
+      0.08,
+      0.2,
+      0.25
+     ]
+    },
+    {
+     "class": "foliage",
+     "label": "forest on the slopes, left",
+     "ours": [
+      0.0,
+      0.28,
+      0.16,
+      0.4
+     ],
+     "film": [
+      0.01,
+      0.33,
+      0.17,
+      0.48
+     ],
+     "note": "Lead's ruling pending (tool note 5): this film region is shade under the trailer's teal grade, which the brief's de-grade step removes, so it is not a fair foliage target. Until the lead rules, a FAIL here is the band's, not the art's; the forest is also checked against the brief's de-graded conifer tone #384c34 (saturation 0.32), which it should reach."
+    },
+    {
+     "class": "foliage",
+     "label": "tree clumps",
+     "ours": [
+      0.08,
+      0.45,
+      0.2,
+      0.52
+     ],
+     "film": [
+      0.82,
+      0.38,
+      0.95,
+      0.47
+     ],
+     "note": "Ours: the broadleaf clumps left of the ring (the film's sit on the right hillside)."
+    },
+    {
+     "class": "ground",
+     "label": "valley floor, mid-distance",
+     "ours": [
+      0.32,
+      0.42,
+      0.45,
+      0.58
+     ],
+     "film": [
+      0.32,
+      0.42,
+      0.45,
+      0.58
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "hillside, right",
+     "ours": [
+      0.79,
+      0.5,
+      0.99,
+      0.64
+     ],
+     "film": [
+      0.79,
+      0.5,
+      0.99,
+      0.64
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "meadow beside the ring, left",
+     "ours": [
+      0.03,
+      0.62,
+      0.15,
+      0.71
+     ],
+     "film": [
+      0.08,
+      0.62,
+      0.18,
+      0.71
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "meadow, front left",
+     "ours": [
+      0.1,
+      0.72,
+      0.18,
+      0.84
+     ],
+     "film": [
+      0.1,
+      0.72,
+      0.18,
+      0.84
+     ],
+     "note": "Moved in from pass 1's box to keep clear of the film's vignetted corner."
+    },
+    {
+     "class": "ground",
+     "label": "meadow, front right",
+     "ours": [
+      0.86,
+      0.7,
+      0.95,
+      0.9
+     ],
+     "film": [
+      0.85,
+      0.72,
+      0.94,
+      0.9
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "flower beds, front left",
+     "ours": [
+      0.3,
+      0.72,
+      0.46,
+      0.86
+     ],
+     "film": [
+      0.24,
+      0.7,
+      0.4,
+      0.84
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "the heart: beds and plinths",
+     "ours": [
+      0.16,
+      0.56,
+      0.85,
+      1.0
+     ],
+     "film": [
+      0.16,
+      0.61,
+      0.84,
+      0.99
+     ]
+    }
+   ]
+  },
+  {
+   "name": "map1_t1_40.2s",
+   "ours": "art/previews/Map1/match_t1_40.2s.png",
+   "film": "refs:trailer/trailer1_40.2s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Low on the meadow at the NE mouth, looking at the horn (pass 1's camera; the film's horn sits right of centre). The horn's sails are left out of the band: the film grades them teal, ours are white (decision 2). Pass 2b adds the slope behind the horn and the sunlit grass between the beds (the reviewer's regions): the old 'meadow, foreground' film box sat on a shaded patch at the mountain's foot.",
+   "regions": [
+    {
+     "class": "sky",
+     "label": "sky between the clouds",
+     "ours": [
+      0.6,
+      0.04,
+      0.72,
+      0.15
+     ],
+     "film": [
+      0.3,
+      0.05,
+      0.4,
+      0.13
+     ]
+    },
+    {
+     "class": "haze",
+     "label": "distant mountains under the sun",
+     "ours": [
+      0.24,
+      0.42,
+      0.34,
+      0.5
+     ],
+     "film": [
+      0.44,
+      0.44,
+      0.52,
+      0.52
+     ]
+    },
+    {
+     "class": "haze",
+     "label": "cloud bank, right",
+     "ours": [
+      0.7,
+      0.43,
+      0.84,
+      0.52
+     ],
+     "film": [
+      0.82,
+      0.48,
+      0.97,
+      0.56
+     ]
+    },
+    {
+     "class": "foliage",
+     "label": "slope behind the horn",
+     "ours": [
+      0.12,
+      0.56,
+      0.33,
+      0.67
+     ],
+     "film": [
+      0.05,
+      0.48,
+      0.3,
+      0.62
+     ],
+     "note": "The forested mountainside left of the horn, the surface 8.2's done-when names. Lead's ruling pending (tool note 5): this film region is shade under the trailer's teal grade, which the brief's de-grade step removes, so it is not a fair foliage target. Until the lead rules, a FAIL here is the band's, not the art's; the forest is also checked against the brief's de-graded conifer tone #384c34 (saturation 0.32), which it should reach."
+    },
+    {
+     "class": "ground",
+     "label": "sunlit foreground grass",
+     "ours": [
+      0.05,
+      0.84,
+      0.3,
+      0.97
+     ],
+     "film": [
+      0.49,
+      0.83,
+      0.58,
+      0.95
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "meadow, foreground (shaded film patch)",
+     "ours": [
+      0.05,
+      0.84,
+      0.3,
+      0.97
+     ],
+     "film": [
+      0.04,
+      0.66,
+      0.14,
+      0.74
+     ],
+     "note": "Pass 2's box, kept for comparison: its film box sits on a shaded patch at the mountain's foot."
+    },
+    {
+     "class": "signal",
+     "label": "flower beds",
+     "ours": [
+      0.0,
+      0.76,
+      0.35,
+      0.82
+     ],
+     "film": [
+      0.0,
+      0.8,
+      0.45,
+      1.0
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "the horn",
+     "ours": [
+      0.38,
+      0.35,
+      0.62,
+      0.78
+     ],
+     "film": [
+      0.48,
+      0.1,
+      0.86,
+      0.85
+     ]
+    }
+   ]
+  },
+  {
+   "name": "map1_t2_49.9s",
+   "ours": "art/previews/Map1/match_t2_49.9s.png",
+   "film": "refs:trailer/trailer2_49.9s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "From inside the horn, out of the south mouth at the peak. The walls are the horn's cobalt interior (decision 2 a). Pass 2b adds the mountainside left of the peak (the reviewer's region).",
+   "regions": [
+    {
+     "class": "interior",
+     "label": "cobalt wall, left",
+     "ours": [
+      0.02,
+      0.12,
+      0.12,
+      0.45
+     ],
+     "film": [
+      0.03,
+      0.15,
+      0.1,
+      0.45
+     ]
+    },
+    {
+     "class": "interior",
+     "label": "cobalt wall, right",
+     "ours": [
+      0.88,
+      0.12,
+      0.98,
+      0.45
+     ],
+     "film": [
+      0.9,
+      0.3,
+      0.97,
+      0.6
+     ]
+    },
+    {
+     "class": "haze",
+     "label": "the peak",
+     "ours": [
+      0.44,
+      0.14,
+      0.56,
+      0.42
+     ],
+     "film": [
+      0.45,
+      0.25,
+      0.57,
+      0.5
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "mountainside left of the peak",
+     "ours": [
+      0.36,
+      0.36,
+      0.46,
+      0.52
+     ],
+     "film": [
+      0.27,
+      0.38,
+      0.37,
+      0.52
+     ]
+    },
+    {
+     "class": "sky",
+     "label": "sky",
+     "ours": [
+      0.4,
+      0.1,
+      0.45,
+      0.17
+     ],
+     "film": [
+      0.52,
+      0.02,
+      0.6,
+      0.08
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "meadow beyond the mouth",
+     "ours": [
+      0.3,
+      0.68,
+      0.42,
+      0.76
+     ],
+     "film": [
+      0.3,
+      0.68,
+      0.4,
+      0.78
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "the petals",
+     "ours": [
+      0.22,
+      0.76,
+      0.78,
+      0.86
+     ],
+     "film": [
+      0.4,
+      0.76,
+      0.7,
+      0.88
+     ]
+    }
+   ]
+  },
+  {
+   "name": "map1_t1_77.7s",
+   "ours": "art/previews/Map1/match_t1_77.7s.png",
+   "film": "refs:trailer/trailer1_77.7s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Backlit, looking south at the horn and the mountain, under the one Day look with the sun low behind the peak.",
+   "regions": [
+    {
+     "class": "sky",
+     "label": "sky, away from the sun",
+     "ours": [
+      0.62,
+      0.005,
+      0.7,
+      0.07
+     ],
+     "film": [
+      0.62,
+      0.05,
+      0.72,
+      0.12
+     ],
+     "note": "Ours moved off the cumulus that pass 2b's clouds put in pass 2's box."
+    },
+    {
+     "class": "haze",
+     "label": "the mountain behind, backlit",
+     "ours": [
+      0.68,
+      0.15,
+      0.8,
+      0.3
+     ],
+     "film": [
+      0.1,
+      0.3,
+      0.3,
+      0.55
+     ],
+     "note": "The film's massif is a near-black teal silhouette (luma ~41) under the grade. Lead's ruling pending (tool note 5) on whether a backlit, de-graded massif should be measured against it."
+    },
+    {
+     "class": "ground",
+     "label": "meadow, foreground",
+     "ours": [
+      0.0,
+      0.86,
+      0.14,
+      0.97
+     ],
+     "film": [
+      0.06,
+      0.86,
+      0.2,
+      0.95
+     ]
+    },
+    {
+     "class": "signal",
+     "label": "flower beds",
+     "ours": [
+      0.0,
+      0.55,
+      1.0,
+      1.0
+     ],
+     "film": [
+      0.0,
+      0.7,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "name": "map1_fe_26.9s",
+   "ours": "art/previews/Map1/match_fe_26.9s.png",
+   "film": "refs:trailer/fanedit_26.9s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "The fan edit's high aerial (a fan edit, so trusted less), under the morning-mist look. The top rows of the film frame are another clip and are avoided.",
+   "regions": [
+    {
+     "class": "ground",
+     "label": "grass slopes round the ring",
+     "ours": [
+      0.62,
+      0.52,
+      0.8,
+      0.66
+     ],
+     "film": [
+      0.36,
+      0.56,
+      0.58,
+      0.68
+     ]
+    },
+    {
+     "class": "haze",
+     "label": "mist over the far slopes",
+     "ours": [
+      0.3,
+      0.02,
+      0.7,
+      0.1
+     ],
+     "film": [
+      0.2,
+      0.25,
+      0.6,
+      0.38
+     ]
+    },
+    {
+     "class": "foliage",
+     "label": "dark tree clumps",
+     "ours": [
+      0.285,
+      0.6,
+      0.355,
+      0.68
+     ],
+     "film": [
+      0.6,
+      0.7,
+      0.68,
+      0.8
+     ],
+     "note": "Ours: the beech clump by the stream (the film's clump sits on its sunny slope)."
+    },
+    {
+     "class": "signal",
+     "label": "the heart",
+     "ours": [
+      0.4,
+      0.44,
+      0.66,
+      0.66
+     ],
+     "film": [
+      0.4,
+      0.58,
+      0.52,
+      0.66
+     ]
+    }
+   ]
+  },
+  {
+   "name": "map1_t2_128.7s",
+   "ours": "art/previews/Map1/match_t2_128.7s.png",
+   "film": "refs:trailer/trailer2_128.7s.png",
+   "sheet_label": "Blender iteration, placeholder plants",
+   "note": "Along the stream's dip. The film's foreground is motion-blurred wildflowers and is left out.",
+   "regions": [
+    {
+     "class": "sky",
+     "label": "sky",
+     "ours": [
+      0.4,
+      0.01,
+      0.5,
+      0.09
+     ],
+     "film": [
+      0.62,
+      0.05,
+      0.72,
+      0.12
+     ],
+     "note": "Ours moved off the cumulus that pass 2b's clouds put in pass 2's box."
+    },
+    {
+     "class": "haze",
+     "label": "the mountain ahead",
+     "ours": [
+      0.14,
+      0.12,
+      0.26,
+      0.24
+     ],
+     "film": [
+      0.25,
+      0.08,
+      0.45,
+      0.25
+     ]
+    },
+    {
+     "class": "ground",
+     "label": "grass bank, sunlit",
+     "ours": [
+      0.04,
+      0.48,
+      0.2,
+      0.58
+     ],
+     "film": [
+      0.7,
+      0.3,
+      0.9,
+      0.45
+     ]
+    },
+    {
+     "class": "foliage",
+     "label": "trees by the stream",
+     "ours": [
+      0.58,
+      0.2,
+      0.74,
+      0.44
+     ],
+     "film": [
+      0.68,
+      0.18,
+      0.74,
+      0.3
+     ]
+    }
+   ]
+  }
+ ]
+}
