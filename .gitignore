@@ -53,3 +53,6 @@ art/previews/Train/*
 !art/previews/Train/exterior_night_bridge.png
 !art/previews/Train/tones_palette.png
 !art/previews/*/.gitignore
+
+# studio_sync local state (fingerprints of what Studio last had)
+.studio_sync/
