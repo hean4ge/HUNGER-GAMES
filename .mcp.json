@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "blender": {
+      "type": "stdio",
+      "command": "C:\\Users\\USER\\AppData\\Local\\Programs\\Blender\\blender-5.3.0-windows-x64\\5.3\\python\\bin\\python.exe",
+      "args": [
+        "-I",
+        "C:\\Users\\USER\\AppData\\Roaming\\Claude\\scratch-workspaces\\95db3e38-01ac-4d0f-ac93-422aaa79e881\\ff352eee-2ffa-4057-9a83-281a53837e0f\\scratch-2026-11-11-9c7784\\HUNGER-GAMES\\tools\\blender_mcp\\server.py"
+      ],
+      "env": {}
+    }
+  }
+}

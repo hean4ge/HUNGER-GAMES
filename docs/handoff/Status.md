@@ -80,6 +80,12 @@ You can change any of these.
   - practice rounds on live servers: on
 - **Arrow drop.** Arrows land exactly on the crosshair (aim-on-target on). Set `Config.Combat.BowAimOnTarget = false` for realistic drop.
 - **Roadmap.** The 8 decisions in `docs/Roadmap.md` section 8 are still open, including the combat-physics defaults.
+- **Beta launch (your call, 14 November).**
+  - **Title:** "HUNGER GAMES (BETA)". You chose it knowing it's a registered trademark: if its owner complains, Roblox can take the game down. Everything inside the game stays original to keep that risk low.
+  - **Timing:** after your next two requests.
+  - **Steps:** you press File → Publish in Studio. Then either rename it and make it Public in Game Settings, or grant the assistant the `universe:write` permission and it does that part.
+  - **On 14 November** the experience was still "Untitled Experience", Private, rated 13+.
+- **First-person hands: being remade.** You turned down the block fists, the realistic gloves and the R15 avatar arms. You asked for "blockish realistic ish" hands: bare hands built from chunky flat facets with real fingers, in the same style as the world. A preview comes to you before they go in the game.
 - **Art style for the remake: waiting on your pick.** The style test (`docs/design/ArtStyle.md`, sheet in `art/previews/StyleTest/`) recommends A, "faceted realism", with C's pebble path, leaf litter, oak branching and porch railing. B (cubes) only if "blockish" meant literal cubes. The test diorama stays in `Workspace.StyleTest` (x 7000, far outside the arena) until you've picked.
 
 ## Not verified yet: needs you or a published test
@@ -127,6 +133,15 @@ After the current work (avatar arms, arrows, the art-style remake, the arena v3 
 - **Done when:** in-game captures and frame-by-frame checks show no pops or snaps.
 
 ## Reminders for the owner
+- **After the beta release (you asked, 14 November):**
+  - a loading-screen animation;
+  - advertising on Twitter, YouTube and TikTok;
+  - a showcase video made with Seedance and Blender, with game footage. Seedance runs through Higgsfield, which needs signing in with `/mcp` first.
+- **Your design documents (14 November)** are kept word for word in `docs/design/owner/`:
+  - the TRIBUTE blood, severing and movement spec;
+  - the game design direction.
+
+  Still open: how much gore (severing pushes the Roblox age rating up), and whether to use the films' own names. Also queued: the movie-style training room before the arena, where you try kits and abilities and the chests stock items to match.
 - **Attacks and battle manoeuvring** (wind-ups, light and heavy attacks, block): you asked to be reminded. See `docs/design/WeaponsAndObjectives.md`, W2, and `docs/research/CombatPhysicsPlan.md`.
 - **The weapon roster and bow tuning:** later, at your call. Your notes: make the bow's distance and drawing more accurate; 3–4 bows a round; a 90-damage headshot.
 
