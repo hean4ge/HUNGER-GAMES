@@ -2,7 +2,12 @@
 	ViewmodelController - first-person arms and the held item. Client only.
 
 	Visible only in first person, in the arena, alive and not spectating. The arms (Config.Viewmodel.ArmStyle) are the
-	faceted Blender arms ("Faceted", the default: bare skin in the avatar's arm colours, a charcoal sleeve; one hand mesh
+	block arms ("Blocky", the default: a Roblox character's arms, square blocks built from Parts by the child module
+	Blocky, the hands in the avatar's own arm colours, a plain sleeve; matte and lit by the engine alone: no lamp, no
+	Highlight, no Shade. Config.Viewmodel.Blocky picks the hand, one block or a palm with a finger block and a thumb,
+	and the sleeve. They stand on the faceted arms' skeleton and take their poses, with their own rest, guard and
+	open-hand frames, Blocky.poses), the
+	faceted Blender arms ("Faceted": bare skin in the avatar's arm colours, a charcoal sleeve; one hand mesh
 	per side at a time, Rig:setHands: relaxed when the hands are empty, a fist only while punching (raised on Attack,
 	held as a guard Config.Viewmodel.GuardHold seconds after the last punch, then lowered out of view and relaxed),
 	closed round handles and the bow string, open for food and bottles), the player's own avatar arms ("Avatar": R15
@@ -30,9 +35,15 @@
 	chest at the bottom of the view), recoil, a tuck when the camera
 	is against a wall (the bow is pulled in upright and the string let down, Poses.bowTuck), and lowered hands while
 	climbing, mantling or swimming. The spear rests in a low guard across the body with the left hand on the shaft.
-	Empty hands: relaxed and low (Faceted; the other styles keep the fists).
+	Empty hands: relaxed and low; the fists come up only for a punch and the short guard after it (Blocky, Faceted; the
+	older styles keep the fists up).
+	V zoom (ClientState.zoomAlpha, written by CameraController): free hands and whatever they hold sink out of the
+	bottom of the view early in the zoom and come back as it lets go (a zoomed view would draw them several times
+	larger); a hand that is busy stays up.
 
 	API
+	  ViewmodelController.setArms(style?, options?) -> string   rebuilds the arms: another style, or (Blocky) other
+	                                      values than Config.Viewmodel.Blocky's, e.g. { Variant = "B" } (previews, tests)
 	  ViewmodelController.isVisible() -> boolean
 	  ViewmodelController.visibilityChanged: Signal(visible)   (also LocalPlayer attribute "ViewmodelVisible")
 	  ViewmodelController.getMuzzle() -> Vector3?   where a shot leaves the weapon (used for predicted projectiles)
@@ -64,12 +75,22 @@ local SPEAR_REACH = Poses.SPEAR_REACH or 1.16 -- the supporting hand's distance 
 -- Bow: how far the string is pulled at full draw in first person (studs). Longer than the mesh bow's own MaxDraw, so the
 -- nock reaches an under-chin anchor with the bow arm extended (Poses.HOLD.BowDrawn is built for this length).
 local BOW_DRAW = Config.Combat.ViewBowDraw or 1.35
--- Config.Viewmodel.ArmStyle: "Faceted" (the Blender arms, default), "Avatar" (the player's own R15 arms) or "Classic"
--- (the part-built arms)
+-- Config.Viewmodel.ArmStyle: "Blocky" (Roblox block arms built from Parts, the default), "Faceted" (the Blender arms),
+-- "Avatar" (the player's own R15 arms) or "Classic" (the first part-built arms)
 local VIEWMODEL = Config.Viewmodel or {}
-local ARM_STYLE = if VIEWMODEL.ArmStyle == "Classic" or VIEWMODEL.ArmStyle == "Avatar" then VIEWMODEL.ArmStyle else "Faceted"
--- (Faceted) empty hands: the guard is held this long after the last punch, then the hands are lowered and relax
+local ARM_STYLES: { [string]: boolean } = { Blocky = true, Faceted = true, Avatar = true, Classic = true }
+local ARM_STYLE = if ARM_STYLES[VIEWMODEL.ArmStyle] then VIEWMODEL.ArmStyle else "Blocky"
+-- (Blocky, Faceted) empty hands: the guard is held this long after the last punch, then the hands are lowered and relax
 local GUARD_HOLD = tonumber(VIEWMODEL.GuardHold) or 1.5
+-- V zoom (CameraController narrows the field of view as ClientState.zoomAlpha goes 0..1): the viewmodel is world
+-- geometry at the eye, so the zoomed view draws it as many times larger as everything else. So free hands and
+-- whatever they hold sink out of the bottom of the view early in the zoom, from zoomAlpha ZOOM_SINK_FROM and gone by
+-- ZOOM_SINK_BY (before the view is half as large again), and come back the same way as the zoom lets go. A hand that
+-- is busy (a swing, a throw, a use, a drawn or aimed weapon) stays up.
+local ZOOM_SINK_FROM = 0.04
+local ZOOM_SINK_BY = 0.3
+local ZOOM_SINK_RATE = 20 -- 1/s: how fast the hands go down ...
+local ZOOM_RISE_RATE = 12 -- ... and come back
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
 local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
 local USE_STYLE: { [string]: string } = {
@@ -97,8 +118,8 @@ local springs = {
 	kick = Spring.new(0, 18, 0.55), -- push back along the view
 	string = Spring.new(0, 42, 0.3), -- bow string snap with a little overshoot
 }
-local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0 }
-local lastPunchAt = -10 -- (Faceted) when the last punch started (the guard is held GUARD_HOLD after it)
+local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0, zoom = 0 }
+local lastPunchAt = -10 -- (Blocky, Faceted) when the last punch started (the guard is held GUARD_HOLD after it)
 
 local equipStart = -10
 local equipDuration = 0.32
@@ -288,9 +309,9 @@ local function setVisible(on: boolean)
 		equipStart = os.clock()
 		equipDuration = 0.4 -- the arms rise into view
 		rig.model.Parent = camera
-		if shade then
+		if shade and not rig.blocky then
 			rig:setKeyParent(workspace) -- (the arms' key light: in the workspace, a light in the camera gives none)
-		end
+		end -- (the block arms have no lamp: the engine's light only)
 	else
 		rig.model.Parent = nil
 		rig:setKeyParent(nil)
@@ -475,6 +496,12 @@ local function update(dt: number)
 	wasUsing = using
 
 	local busy = anim ~= nil or draw > 0 or aim > 0.1 or using
+	-- V zoom: free hands sink out of view as the zoom comes on and come back as it goes (ZOOM_SINK_*), and whatever
+	-- still shows moves less (the zoomed view draws every movement larger)
+	local zoom = math.clamp(tonumber(ClientState.zoomAlpha) or 0, 0, 1)
+	local sink = if busy then 0 else Poses.smooth(math.clamp((zoom - ZOOM_SINK_FROM) / (ZOOM_SINK_BY - ZOOM_SINK_FROM), 0, 1))
+	approach("zoom", sink, if sink > alpha.zoom then ZOOM_SINK_RATE else ZOOM_RISE_RATE, dt)
+	local zoomCalm = 1 - 0.7 * zoom
 	approach("sprint", if moveState == "Sprint" and grounded and not busy then 1 else 0, 9, dt)
 	approach("slide", if moveState == "Slide" then 1 else 0, 10, dt)
 	approach("lower", if LOWER_MOVES[moveState] then 1 else 0, 8, dt)
@@ -482,7 +509,7 @@ local function update(dt: number)
 	approach("air", if grounded then 0 else 1, 6, dt)
 	local moving = grounded and speed > 0.5 and not LOWER_MOVES[moveState] and moveState ~= "Slide"
 	local bobTarget = if moving then math.clamp(speed / math.max(Config.Movement.WalkSpeed, 1), 0, 1.7) else 0
-	approach("bob", bobTarget * headBob * (1 - 0.65 * aim), 8, dt)
+	approach("bob", bobTarget * headBob * (1 - 0.65 * aim) * zoomCalm, 8, dt)
 
 	-- Wall tuck: pull the weapon in when the camera is right against something
 	local list = { cam }
@@ -665,6 +692,11 @@ local function update(dt: number)
 		local a = alpha.lower
 		state *= CFrame.new(0, -1.5 * a, 0.35 * a) * about(PIVOT, CFrame.Angles(-0.7 * a, 0, 0))
 	end
+	if alpha.zoom > 0 then
+		-- zoomed: down and tipped forward, out of the bottom of the view (a 3-stud blade and the bow leave it too)
+		local a = alpha.zoom
+		state *= CFrame.new(0, -1.5 * a, 0.35 * a) * about(PIVOT, CFrame.Angles(-1.1 * a, 0, 0))
+	end
 	if alpha.sprint > 0 then
 		local a = alpha.sprint
 		if heldKind == "Bow" then
@@ -688,7 +720,7 @@ local function update(dt: number)
 
 	-- Motion: look sway, bob, lean, landing, breathing, recoil
 	local look: Vector2 = if typeof(ClientState.lookDelta) == "Vector2" then ClientState.lookDelta else Vector2.zero
-	local swayGain = 3.4 * (1 - 0.7 * aim)
+	local swayGain = 3.4 * (1 - 0.7 * aim) * zoomCalm
 	springs.sway.velocity += Vector3.new(-look.Y, -look.X, 0) * swayGain
 	local sway: Vector3 = springs.sway:update(dt)
 	-- a raised bow sways less, so a fast turn can't swing it into the crosshair
@@ -711,7 +743,7 @@ local function update(dt: number)
 		-(math.cos(phase * 2) + 1) * 0.5 * 0.034 * amp * (1 + 0.7 * run),
 		math.sin(phase * 2) * 0.02 * amp * run
 	)
-	local calm = (1 - 0.7 * aim) * (1 - run)
+	local calm = (1 - 0.7 * aim) * (1 - run) * zoomCalm
 	local breath = Vector3.new(math.sin(now * 0.9) * 0.004, math.sin(now * 1.8) * 0.009, 0) * calm
 	local airY = math.clamp(-velocity.Y * 0.004, -0.07, 0.07) * alpha.air
 	local tremble = 0
@@ -733,7 +765,7 @@ local function update(dt: number)
 	local lock: { [string]: any }? = nil
 	if heldKind == "Bow" then
 		lock = { Left = "hand", Right = if alpha.tuck < 0.5 then true else nil }
-	elseif heldKind == "Spear" and (Rig.STYLE == "Avatar" or Rig.STYLE == "Faceted") then
+	elseif heldKind == "Spear" and Rig.STYLE ~= "Classic" then
 		lock = { Right = "hand" } -- (the spear's line comes from the right hand: it is never turned by the wrist limit)
 	elseif alpha.use > 0.05 and (style == "Drink" or style == "Wrap") then
 		lock = { Right = "hand", Left = if style == "Wrap" then true else nil }
@@ -804,14 +836,54 @@ function ViewmodelController.Init(registry)
 	Controllers = registry
 end
 
-function ViewmodelController.Start()
+-- Builds the arms (a Rig of that style) with their poses and their light. The avatar and faceted arms keep Shade. The
+-- block arms are lit by the engine alone: no Shade and no lamp. Only if Config.Viewmodel.Blocky.Shade is given does
+-- Shade run for them, with those values and KeyBrightness forced to 0, darkening them by colour (Rig:setExposure).
+local function makeRig(style: string, armOptions: { [string]: any }?)
 	local skin, skinLeft = skinColor()
-	rig = Rig.new(skin, ARM_STYLE)
+	rig = Rig.new(skin, style, armOptions)
 	if skin then
 		rig:setSkin(skin, skinLeft)
 	end
+	if rig.blocky and Rig.Blocky then
+		Poses.useStyle("Classic") -- (arms built again: the old Blocky values come out before the new ones go in)
+		Poses.STYLES.Blocky = Rig.Blocky.poses(Poses, rig.blocky) -- (Poses.FACETED with the block arms' changes)
+	end
 	Poses.useStyle(Rig.STYLE)
-	shade = if rig.style == "Avatar" or rig.style == "Faceted" then Shade.new(rig) else nil
+	local blockyShade = if rig.blocky then (armOptions and armOptions.Shade) or (VIEWMODEL.Blocky or {}).Shade else nil
+	if rig.style == "Avatar" or rig.style == "Faceted" then
+		Shade.Options = VIEWMODEL.Shade or {}
+		shade = Shade.new(rig)
+	elseif type(blockyShade) == "table" then
+		local options = table.clone(blockyShade)
+		options.KeyBrightness = 0
+		Shade.Options = options
+		shade = Shade.new(rig)
+	else
+		shade = nil
+	end
+end
+
+function ViewmodelController.setArms(style: string?, options: { [string]: any }?): string
+	if not rig then
+		return "not started"
+	end
+	local newStyle = if style and ARM_STYLES[style] then style else rig.style
+	if visible then
+		setVisible(false) -- (shown again, with the new arms, on the next frame)
+	end
+	rig:destroy()
+	makeRig(newStyle, options)
+	avatarSignature = nil
+	avatarCheckAt = 0
+	pendingArms = nil
+	initialized = false -- (the held item is built again for the new arms)
+	heldKey = ""
+	return rig.style
+end
+
+function ViewmodelController.Start()
+	makeRig(ARM_STYLE, nil)
 	player:SetAttribute("ViewmodelVisible", false)
 	RunService.Heartbeat:Connect(onHeartbeat)
 

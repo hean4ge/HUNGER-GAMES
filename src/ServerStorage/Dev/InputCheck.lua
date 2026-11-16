@@ -20,8 +20,11 @@
 	while the launch intro plays (LaunchIntroController).
 	An action may name a stand-in for one device: "gui:<path under PlayerGui>" (a button the UI draws, e.g. the touch
 	menu button or the hotbar slots), "via:<Action>" (another action covers it, e.g. LB / RB pick items on a gamepad),
-	"wheel" (the mouse wheel, InventoryController), "auto" (touch sprint on Auto needs no button), and "optional" (only
-	bound in some moments, e.g. Drink near water).
+	"wheel" (the mouse wheel, InventoryController), "auto" (touch sprint on Auto needs no button), "none" (this device has
+	no such control, by design: the zoom's level is the mouse wheel's only), and "optional" (only bound in some moments,
+	e.g. Drink near water, ZoomLevel while the zoom is on).
+	An action marked absent = true must NOT be bound in that state (the zoom in the lobby, during the launch intro and
+	while spectating); it fails the check if it is.
 	Movement and jumping come from Roblox's own controls (PlayerModule), so they are in the publish checklist
 	(docs/handoff/PublishChecklist.md) instead.
 ]]
@@ -32,6 +35,11 @@ local InputCheck = {}
 
 local SLOT_TOUCH = "gui:HUD.Root.Hotbar.Slots" -- the touch hotbar: tap a slot
 local SLOT = { gamepad = "via:NextSlot", touch = SLOT_TOUCH }
+-- The zoom (CameraController). Zoom: V held, R3, touch ZOOM (in AIM's slot while AIM is hidden). ZoomLevel: the mouse
+-- wheel, bound only while the zoom is on (then the hotbar doesn't get the wheel); a controller and a phone have no
+-- level control. Neither may be bound outside the arena and the plate.
+local ZOOM_LEVEL = { optional = true, gamepad = "none", touch = "none" }
+local NO_ZOOM = { absent = true }
 
 InputCheck.EXPECTED = {
 	Lobby = {
@@ -39,12 +47,13 @@ InputCheck.EXPECTED = {
 		LobbySpectate = { optional = true, keyboard = "gui:Lobby.Root.Status.Pill.Spectate", touch = "gui:Lobby.Root.Status.Pill.Spectate" },
 		Sprint = { touch = "auto" },
 		Crouch = {},
+		Zoom = NO_ZOOM, ZoomLevel = NO_ZOOM,
 	},
 	Plate = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
 		Attack = {},
 		Aim = { optional = true }, -- bound with the weapon; its touch button shows for the bow and spear only
-		Zoom = {}, -- the slight zoom (CameraController): V held, R3, touch ZOOM (in AIM's slot while AIM is hidden)
+		Zoom = {}, ZoomLevel = ZOOM_LEVEL,
 		Slot1 = SLOT, Slot2 = SLOT, Slot3 = SLOT, Slot4 = SLOT, Slot5 = SLOT, Slot6 = SLOT,
 		NextSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
 		PrevSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
@@ -58,12 +67,13 @@ InputCheck.EXPECTED = {
 	Launch = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
 		LaunchSkip = { touch = "gui:LaunchShot.Root.Skip" }, -- hold Space / A; touch: the HOLD TO SKIP button
+		Zoom = NO_ZOOM, ZoomLevel = NO_ZOOM, -- the launch shot has the camera
 	},
 	Arena = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
 		Attack = {},
 		Aim = {},
-		Zoom = {},
+		Zoom = {}, ZoomLevel = ZOOM_LEVEL,
 		Slot1 = SLOT, Slot2 = SLOT, Slot3 = SLOT, Slot4 = SLOT, Slot5 = SLOT, Slot6 = SLOT,
 		NextSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
 		PrevSlot = { keyboard = "wheel", touch = SLOT_TOUCH },
@@ -77,6 +87,7 @@ InputCheck.EXPECTED = {
 		SpectatePrev = { touch = "gui:Spectate.Root.Card.Prev" },
 		SpectateNext = { touch = "gui:Spectate.Root.Card.Next" },
 		SpectateExit = { touch = "gui:Spectate.Root.Exit" },
+		Zoom = NO_ZOOM, ZoomLevel = NO_ZOOM,
 	},
 }
 
@@ -142,6 +153,8 @@ local function standIn(rule: string?, device: string, settingsMode: number?): (b
 		return true, "mouse wheel"
 	elseif rule == "auto" then
 		return settingsMode == 2, "Auto (no button needed)"
+	elseif rule == "none" then
+		return true, "none on this device, by design"
 	elseif string.sub(rule, 1, 4) == "gui:" then
 		local path = string.sub(rule, 5)
 		return guiExists(path), "GUI " .. path
@@ -195,10 +208,19 @@ function InputCheck.run(opts: { [string]: any }?): string
 	table.sort(names)
 	local lines = {}
 	local failures = 0
+	local unbound, wrong = 0, 0 -- actions that must not be bound here: those that aren't, those that are
 	for _, name in ipairs(names) do
 		local rule = expected[name]
 		local info = if pretendUnbound[name] then nil else describe(name)
-		if info == nil and rule.optional then
+		if rule.absent then
+			if info == nil then
+				unbound += 1
+				table.insert(lines, string.format("  %-13s (not bound here: as it must be)", name))
+			else
+				wrong += 1
+				table.insert(lines, string.format("x %-13s is bound here and must not be", name))
+			end
+		elseif info == nil and rule.optional then
 			table.insert(lines, string.format("  %-13s (not bound right now: allowed)", name))
 		else
 			local cells = {}
@@ -231,9 +253,19 @@ function InputCheck.run(opts: { [string]: any }?): string
 			table.insert(lines, string.format("%s %-13s %s", if missing then "x" else " ", name, table.concat(cells, " · ")))
 		end
 	end
-	local verdict = if failures == 0
-		then string.format("PASS %s: %d actions have keyboard, gamepad and touch input", state, #names)
-		else string.format("FAIL %s: %d of %d actions are missing an input", state, failures, #names)
+	local required = #names - unbound - wrong -- the actions that need all three devices here
+	local verdict
+	if failures == 0 and wrong == 0 then
+		verdict = string.format("PASS %s: %d actions have keyboard, gamepad and touch input", state, required)
+		if unbound > 0 then
+			verdict ..= string.format("; %d that must not be bound here aren't", unbound)
+		end
+	else
+		verdict = string.format("FAIL %s: %d of %d actions are missing an input", state, failures, required)
+		if wrong > 0 then
+			verdict ..= string.format("; %d bound here must not be", wrong)
+		end
+	end
 	return verdict .. "\n" .. table.concat(lines, "\n")
 end
 

@@ -114,8 +114,8 @@ Theme.Tween = {
 Theme.TouchLayout = {
 	Attack = { position = UDim2.new(1, -185, 1, -95), size = 84, label = "ATTACK" },
 	Aim = { position = UDim2.new(1, -268, 1, -152), size = 60, label = "AIM" },
-	-- ZOOM (the slight zoom) shares AIM's slot: CameraController shows it only while AIM is hidden (no bow or spear in
-	-- hand; with one, AIM zooms further), so it adds no button and covers nothing AIM doesn't
+	-- ZOOM (the zoom, a toggle) shares AIM's slot: CameraController shows it only while AIM is hidden (no bow or spear
+	-- in hand; with one, AIM has the slot), so it adds no button and covers nothing AIM doesn't
 	Zoom = { position = UDim2.new(1, -268, 1, -152), size = 60, label = "ZOOM" },
 	Sprint = { position = UDim2.new(1, -60, 1, -172), size = 60, label = "RUN" },
 	Crouch = { position = UDim2.new(1, -150, 1, -185), size = 60, label = "CROUCH" },

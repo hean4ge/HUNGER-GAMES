@@ -144,7 +144,7 @@ local function controlsFor(device: string): { { string } }
 			{ "Let go of a climb", g(K.ButtonB) },
 			{ "Previous / next item", g(K.ButtonL1) .. " / " .. g(K.ButtonR1) },
 			{ "Drop: tap for one, hold for the stack", g(K.DPadDown) },
-			{ "Zoom in a little (toggle)", g(K.ButtonR3) },
+			{ "Zoom (toggle)", g(K.ButtonR3) },
 			{ "Spectate: previous / next · leave", g(K.ButtonL1) .. " / " .. g(K.ButtonR1) .. " · " .. g(K.ButtonB) },
 			{ "Menu", g(K.DPadUp) },
 		}
@@ -163,7 +163,7 @@ local function controlsFor(device: string): { { string } }
 			{ "Let go of a climb", "CROUCH" },
 			{ "Select item", "Tap a slot" },
 			{ "Drop: tap for one, hold for the stack", "DROP" },
-			{ "Zoom in a little (toggle) · AIM with a bow or spear", "ZOOM" },
+			{ "Zoom (toggle) · AIM with a bow or spear", "ZOOM" },
 			{ "Spectate: previous / next", "‹  ›" },
 			{ "Menu", "Menu button" },
 		}
@@ -183,7 +183,7 @@ local function controlsFor(device: string): { { string } }
 		{ "Let go of a climb", "C" },
 		{ "Select item", "1 – 6 · Wheel" },
 		{ "Drop: tap for one, hold for the stack", "G" },
-		{ "Zoom in a little (hold)", "V" },
+		{ "Zoom (hold) · wheel = closer / further", "V" },
 		{ "Spectate: previous / next", "Q / E" },
 		{ "Menu", "M" },
 	}

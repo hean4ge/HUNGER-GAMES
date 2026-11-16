@@ -30,12 +30,25 @@
 	    exhaustion (MovementController.getMotion().exertion).
 	  - unsteady footing (sprinting down steep ground) wobbles slightly before a stumble.
 	FOV = settings.fov + a subtle sprint/slide add, times the stronger of two multipliers: the aim's (ClientState.aimAlpha)
-	and the zoom's. Zoom, the action "Zoom" (V held; R3 or the touch ZOOM button toggled), eases the view in to
-	Config.Camera.ZoomFovMultiplier (ZoomInTime / ZoomOutTime), a slight look closer, and turns the sprint widening off.
-	It is bound only while you are alive in the arena or on your plate: not while spectating, not during the launch shot
-	(and while a cutscene holds the camera, step leaves the FOV alone). While a menu is open its input passes through and
-	the zoom lets go. ZOOM shares AIM's touch slot and shows only while AIM is hidden (a bow or a spear aims instead,
-	which zooms further).
+	and the zoom's.
+	Zoom, the action "Zoom" (V held; R3 or the touch ZOOM button toggled), is a real look closer. The view magnifies 2.5
+	times by default (Config.Camera.ZoomFovMultiplier is that level at BaseFov; the magnification, tan(fov / 2) against
+	tan(zoomed / 2), is the same at every Field of view setting). It eases in and out on a critically damped spring
+	(ZoomInTime / ZoomOutTime: no overshoot, no snap) and the magnification moves by even ratios on the way.
+	  - Level: while the zoom is on, the mouse wheel is the zoom's (the action "ZoomLevel", bound only then and sunk, so
+	    the hotbar doesn't also change). Forward is closer. Each notch multiplies or divides the magnification by
+	    ZoomWheelStep, from ZoomWheelStepsOut notches wider than the default to ZoomWheelStepsIn closer (1.68x to 4.1x),
+	    easing over ZoomStepTime. The level is kept for the session. A controller and a phone have no level control (D-pad
+	    up is the Menu and D-pad down drops): their toggle uses the level last set, the default if none was.
+	  - What ends it, and what a press is ignored during: a melee swing, a throw, a bow draw (and the moment after the
+	    shot), the aim of a bow or a spear (the aim keeps its own, smaller zoom: V adds nothing to it), eating, drinking,
+	    bandaging or putting armor on, and an open menu. After any of these V (or R3, or ZOOM) is pressed again.
+	  - It is bound only while you are alive in the arena or on your plate: not in the lobby, not while spectating, not
+	    during the launch shot (and while a cutscene holds the camera, step leaves the FOV alone).
+	  - It turns the sprint widening off, and the view's own small rotations (bob nod, breathing, landing pitch, kicks,
+	    shake) are divided by the magnification, so they sweep the same share of the screen as without the zoom.
+	  - Nothing is drawn over the view. ZOOM shares AIM's touch slot and shows only while AIM is hidden (a bow or a spear
+	    aims instead).
 	settings.headBob scales bob, sway, roll, tilt, turn lean and breathing (0 = off); settings.cameraShake scales
 	shakes, kicks and landing impacts. settings.sensitivity scales the default camera's IAS mouse binding
 	(Shared.Input.setLookSpeed) with MouseDeltaSensitivity at 1, or MouseDeltaSensitivity itself when those bindings
@@ -43,8 +56,13 @@
 	aim or the zoom by the ratio of the view's tangents, so a turn sweeps the same share of the screen.
 	The look direction is never delayed or smoothed: aiming stays 1:1 with the mouse.
 	Writes ClientState.lookDelta (base camera rotation this frame, X = yaw, Y = pitch, radians),
-	ClientState.cameraBob (procedural offset in camera space, without the static eye offset), ClientState.fov and
-	ClientState.zoomAlpha.
+	ClientState.cameraBob (procedural offset in camera space, without the static eye offset), ClientState.fov, and the
+	zoom's state for the first-person arms and anyone else:
+	  ClientState.zoomAlpha    0 = not zoomed .. 1 = at the current level (eased)
+	  ClientState.zoomFovMult  this frame's field-of-view multiplier from the zoom alone, eased: 1 = none, 0.45 at the
+	                           default level, 0.28 at the closest (at a Field of view setting of 72)
+	  ClientState.zoomMag      the same as a magnification: 1 = none, 2.5 at the default level, 4.1 at the closest
+	(zoomFovMult and zoomMag are set here at load: read them as `ClientState.zoomMag or 1` from code that may run first.)
 
 	Public API (through the Controllers registry):
 	  CameraController.getBaseCFrame() -> CFrame   the default camera's CFrame this frame, before our offsets
@@ -59,6 +77,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -88,9 +107,13 @@ local K = {
 	SprintFov = num(CAM, "SprintFovAdd", 3.5),
 	SlideFov = num(CAM, "SlideFovAdd", 6),
 	AimFovMult = num(CAM, "AimFovMultiplier", 0.82),
-	ZoomFovMult = num(CAM, "ZoomFovMultiplier", 0.88),
-	ZoomIn = math.max(num(CAM, "ZoomInTime", 0.15), 0.02), -- seconds
-	ZoomOut = math.max(num(CAM, "ZoomOutTime", 0.18), 0.02),
+	ZoomFovMult = math.clamp(num(CAM, "ZoomFovMultiplier", 0.45), 0.05, 1), -- the default level, at BaseFov
+	ZoomStep = math.clamp(num(CAM, "ZoomWheelStep", 1.104), 1.01, 2), -- magnification ratio of one wheel notch
+	ZoomStepsOut = math.clamp(math.floor(num(CAM, "ZoomWheelStepsOut", 4)), 0, 40),
+	ZoomStepsIn = math.clamp(math.floor(num(CAM, "ZoomWheelStepsIn", 5)), 0, 40),
+	ZoomIn = math.max(num(CAM, "ZoomInTime", 0.18), 0.02), -- seconds
+	ZoomOut = math.max(num(CAM, "ZoomOutTime", 0.14), 0.02),
+	ZoomStepTime = math.max(num(CAM, "ZoomStepTime", 0.1), 0.02),
 	BobWalk = num(CAM, "BobWalkAmplitude", 0.085), -- studs of vertical head travel at jogging pace
 	BobSprint = num(CAM, "BobSprintAmplitude", 0.14),
 	BobCrouch = num(CAM, "BobCrouchScale", 0.55),
@@ -123,6 +146,13 @@ local K = {
 
 local EYE_MARGIN = 0.3 -- keep the near plane this far from walls
 local FACE_FRAMES = 3 -- a faceToward turn is written on this many frames in a row, so it holds whatever else runs
+-- A critically damped spring is 98 % of the way to its target when speed x time = 5.83: the zoom's times are that point.
+local ZOOM_EASE = 5.83
+-- How many times bigger things look at the zoom's default level (2.5 for FOV x0.45 at 72).
+local ZOOM_MAG = math.max(1,
+	math.tan(math.rad(K.BaseFov) / 2) / math.tan(math.rad(K.BaseFov * K.ZoomFovMult) / 2))
+-- The wheel is the zoom's while the zoom is on (action "ZoomLevel").
+local ZOOM_LEVEL_KEYS = { Enum.UserInputType.MouseWheel }
 
 -- Initial velocity that makes a spring at rest peak at `peak` (so kicks are specified as peak displacements).
 local function impulseForPeak(speed: number, damping: number, peak: number): number
@@ -172,13 +202,18 @@ local jumpAt = -math.huge -- os.clock() of the last take-off (ClientState.jumped
 local prepCur = 0 -- 0..1 the eye's share of the knee dip before a take-off
 local faceLook: Vector3? = nil -- the look direction of a requested turn (faceToward)
 local faceFrames = 0 -- frames left to write it
--- the zoom (action "Zoom")
+-- the zoom (actions "Zoom" and "ZoomLevel")
 local zoomBound = false
-local zoomKey = false -- V held
+local zoomKey = false -- V held, and the press was taken (one made while something blocks the zoom doesn't count)
 local zoomPad = false -- R3 toggled on
 local zoomTouch = false -- the touch ZOOM button toggled on
 local zoomButtonShown: boolean? = nil
-local zoomSpring = Spring.new(0, 4.5 / K.ZoomIn, 1) -- critically damped: about 94 % of the way after ZoomInTime
+local zoomNotch = 0 -- the level, in wheel notches from the default (-ZoomStepsOut .. ZoomStepsIn); kept for the session
+local zoomLevelBound = false -- the wheel is bound to "ZoomLevel" (only while the zoom is on)
+local wheelCarry = 0 -- part of a notch left over (a high-resolution wheel or a trackpad sends fractions)
+local wheelAt = -math.huge -- os.clock() of the last wheel input
+local zoomSpring = Spring.new(0, ZOOM_EASE / K.ZoomIn, 1) -- 0..1, critically damped
+local notchSpring = Spring.new(0, ZOOM_EASE / K.ZoomStepTime, 1) -- the level on its way from notch to notch
 local lastPadLook: number? = nil
 local lastTouchLook: number? = nil
 
@@ -292,8 +327,24 @@ local function resetFeel()
 end
 
 -- Zoom ----------------------------------------------------------------------------------------------------------------
--- A slight look closer. V holds it (like Sprint and Crouch on a keyboard); R3 and the touch ZOOM button toggle it (like
--- Sprint on a pad and AIM on touch). step's FOV block takes the stronger of it and the aim, so the two never add up.
+-- A real look closer (see the header). V holds it (like Sprint and Crouch on a keyboard); R3 and the touch ZOOM button
+-- toggle it (like Sprint on a pad and AIM on touch). step's FOV block takes the stronger of it and the aim, and the aim
+-- ends it, so the two never add up.
+
+-- The field of view (vertical degrees) that shows things `mag` times as big as `fov` does.
+local function fovAtMagnification(fov: number, mag: number): number
+	return 2 * math.deg(math.atan(math.tan(math.rad(fov) / 2) / mag))
+end
+
+-- What other code reads (the header says what each is). zoomFovMult and zoomMag aren't in ClientState's own table, so
+-- they go through a cast; they are set once at load, below.
+local function publishZoom(alpha: number, fovMult: number, mag: number)
+	local state = ClientState :: any
+	state.zoomAlpha = alpha
+	state.zoomFovMult = fovMult
+	state.zoomMag = mag
+end
+publishZoom(0, 1, 1)
 
 -- The launch shot (the round's intro) has the camera: no zoom while it plays.
 local function inLaunchShot(): boolean
@@ -304,6 +355,29 @@ end
 local function zoomAllowed(): boolean
 	return ClientState.inArena == true and ClientState.alive == true and ClientState.spectating == nil
 		and not inLaunchShot()
+end
+
+-- What the zoom gives way to: a swing, a throw or a bow draw under way (and the moment after a shot), the aim of a bow
+-- or a spear (it has its own, smaller zoom), and eating, drinking, bandaging or putting armor on. The hands are busy and
+-- would show magnified. Any of these ends the zoom, and a press made during one is ignored.
+local function zoomBlocked(): boolean
+	if ClientState.aiming == true or ClientState.useProgress ~= nil then
+		return true
+	end
+	local combat = Controllers and Controllers.CombatController
+	return combat ~= nil and combat.current ~= nil
+end
+
+local function zoomOn(): boolean
+	return zoomBound and (zoomKey or zoomPad or zoomTouch)
+end
+
+-- Let go of the zoom. Nothing but a new press brings it back.
+local function dropZoom()
+	if zoomKey or zoomPad or zoomTouch then
+		zoomKey, zoomPad, zoomTouch = false, false, false
+		Input.setToggle("Zoom", false)
+	end
 end
 
 local function onZoom(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
@@ -318,6 +392,13 @@ local function onZoom(state: Enum.UserInputState, io: InputObject?): Enum.Contex
 		return Enum.ContextActionResult.Pass
 	end
 	if state == Enum.UserInputState.Begin then
+		if zoomBlocked() then
+			-- busy hands or the aim: not now, and not later from this press
+			if touch then
+				Input.setToggle("Zoom", false)
+			end
+			return nil
+		end
 		if touch then
 			zoomTouch = true
 		elseif pad then
@@ -333,7 +414,31 @@ local function onZoom(state: Enum.UserInputState, io: InputObject?): Enum.Contex
 	return nil
 end
 
--- Every frame: bind or unbind with the state, keep the touch button out of AIM's way, let go while a menu is open.
+-- The wheel while the zoom is on: one level per notch, forward = closer. It is sunk here, so the hotbar (which takes
+-- the wheel input nobody else processed) doesn't also change.
+local function onZoomLevel(_state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
+	if not zoomOn() or ClientState.menuOpen then
+		return Enum.ContextActionResult.Pass
+	end
+	local z = if io and io.UserInputType == Enum.UserInputType.MouseWheel then io.Position.Z else 0
+	if z == z and z ~= 0 then
+		local now = os.clock()
+		if now - wheelAt > 0.3 then
+			wheelCarry = 0
+		end
+		wheelAt = now
+		wheelCarry += math.clamp(z, -4, 4)
+		local notches = math.modf(wheelCarry) -- whole notches, toward zero
+		if notches ~= 0 then
+			wheelCarry -= notches
+			zoomNotch = math.clamp(zoomNotch + notches, -K.ZoomStepsOut, K.ZoomStepsIn)
+		end
+	end
+	return nil
+end
+
+-- Every frame: bind or unbind with the state, keep the touch button out of AIM's way, let go while a menu is open or
+-- the hands are busy, and take or give back the wheel.
 local function refreshZoom()
 	local allowed = zoomAllowed()
 	if allowed ~= zoomBound then
@@ -346,48 +451,72 @@ local function refreshZoom()
 				touch = { toggle = true, visible = false }, -- shown below; Theme.TouchLayout.Zoom is AIM's slot
 			})
 		else
-			Input.unbind("Zoom")
-			zoomSpring:reset(0)
-			ClientState.zoomAlpha = 0
+			Input.unbind("Zoom") -- (the view eases back out in step; where step stands down, resetZoom clears it)
 		end
 	end
-	if not zoomBound then
-		return
-	end
-	-- ZOOM shows only while AIM is hidden: with a bow or a spear in hand AIM has the slot (and zooms further)
-	local combat = Controllers and Controllers.CombatController
-	local aimShown = false
-	if combat and type(combat.getEquipped) == "function" and type(combat.canAimWith) == "function" then
-		local _, def = combat.getEquipped()
-		aimShown = combat.canAimWith(def) == true
-	end
-	if zoomButtonShown ~= (not aimShown) then
-		zoomButtonShown = not aimShown
-		Input.setTouchVisible("Zoom", not aimShown)
-		if aimShown and zoomTouch then
-			zoomTouch = false
-			Input.setToggle("Zoom", false)
+	if zoomBound then
+		-- ZOOM shows only while AIM is hidden: with a bow or a spear in hand AIM has the slot
+		local combat = Controllers and Controllers.CombatController
+		local aimShown = false
+		if combat and type(combat.getEquipped) == "function" and type(combat.canAimWith) == "function" then
+			local _, def = combat.getEquipped()
+			aimShown = combat.canAimWith(def) == true
+		end
+		if zoomButtonShown ~= (not aimShown) then
+			zoomButtonShown = not aimShown
+			Input.setTouchVisible("Zoom", not aimShown)
+			if aimShown and zoomTouch then
+				zoomTouch = false
+				Input.setToggle("Zoom", false)
+			end
+		end
+		-- a menu, busy hands and the aim let go of the zoom; it doesn't come back by itself afterwards
+		if ClientState.menuOpen or zoomBlocked() then
+			dropZoom()
 		end
 	end
-	-- a menu lets go of the zoom; a toggle doesn't come back on by itself when the menu closes
-	if ClientState.menuOpen and (zoomKey or zoomPad or zoomTouch) then
-		zoomKey, zoomPad, zoomTouch = false, false, false
-		Input.setToggle("Zoom", false)
+	-- the wheel is the zoom's only while the zoom is on; the rest of the time it isn't bound here at all
+	local on = zoomOn()
+	if on ~= zoomLevelBound then
+		zoomLevelBound = on
+		wheelCarry = 0
+		if on then
+			Input.bind("ZoomLevel", onZoomLevel, { keys = ZOOM_LEVEL_KEYS })
+		else
+			Input.unbind("ZoomLevel")
+		end
 	end
 end
 
--- The zoom's share this frame, 0..1, eased (step's FOV block).
-local function easeZoom(dt: number): number
-	local on = zoomBound and (zoomKey or zoomPad or zoomTouch)
+-- The zoom this frame: its share 0..1 (eased) and the magnification it gives (1 = none).
+local function easeZoom(dt: number): (number, number)
+	local on = zoomOn()
 	zoomSpring.target = if on then 1 else 0
-	zoomSpring.speed = 4.5 / (if on then K.ZoomIn else K.ZoomOut)
+	zoomSpring.speed = ZOOM_EASE / (if on then K.ZoomIn else K.ZoomOut)
 	local z = math.clamp(zoomSpring:update(dt), 0, 1)
 	if not on and z < 1e-3 then
 		zoomSpring:reset(0)
 		z = 0
+	elseif on and z > 1 - 1e-3 then
+		z = 1 -- (the spring keeps closing the last thousandth; readers get a clean 1)
 	end
-	ClientState.zoomAlpha = z
-	return z
+	if z <= 0 then
+		notchSpring:reset(zoomNotch) -- not zoomed: nothing to ease, the next press goes straight to the level
+		return 0, 1
+	end
+	-- the level eases from notch to notch, and the way in and out is a power of it: the magnification moves by even
+	-- ratios, so the zoom's speed looks the same from start to end
+	notchSpring.target = zoomNotch
+	local notch = math.clamp(notchSpring:update(dt), -K.ZoomStepsOut, K.ZoomStepsIn)
+	local level = math.max(1, ZOOM_MAG * K.ZoomStep ^ notch)
+	return z, level ^ z
+end
+
+-- Nothing of the zoom is left in the view: step isn't writing the FOV (a spectate, the launch shot, a cutscene).
+local function resetZoom()
+	zoomSpring:reset(0)
+	notchSpring:reset(zoomNotch)
+	publishZoom(0, 1, 1)
 end
 
 -- Render steps --------------------------------------------------------------------------------------------------------
@@ -526,6 +655,7 @@ local function step(dt: number)
 		end
 		wasSpectating = true
 		ClientState.cameraBob = CFrame.identity
+		resetZoom()
 		return
 	end
 	if wasSpectating then
@@ -536,6 +666,11 @@ local function step(dt: number)
 	local headBob = settingNumber("headBob", 1, 0, 1)
 	local shakeScale = settingNumber("cameraShake", 1, 0, 1)
 	local baseFov = settingNumber("fov", K.BaseFov, 40, 110)
+
+	-- The zoom this frame (worked out first: the feel layer below is calmed by it, the FOV block at the end applies it)
+	local zoom, zoomMag = easeZoom(dt)
+	local zoomMul = if zoomMag > 1 then fovAtMagnification(baseFov, zoomMag) / baseFov else 1
+	publishZoom(zoom, zoomMul, zoomMag)
 
 	local state = ClientState.moveState
 	local speed = tonumber(ClientState.speed) or 0
@@ -683,7 +818,11 @@ local function step(dt: number)
 		local pitchTotal = bobPitch + breathPitch + landP * shakeScale + mantlePitch + k.X + shakePitch
 		local yawTotal = k.Y + shakeYaw
 		local rollTotal = bobRoll + tiltRoll + turnRoll + slideRoll + wobbleRoll + k.Z + shakeRoll
-		local rot = CFrame.Angles(pitchTotal, yawTotal, 0) * CFrame.Angles(0, 0, rollTotal)
+		-- Under the zoom these small pitches and yaws would show magnified (at 4x a 0.45 degree nod moves the picture as
+		-- far as 1.8 degrees does unzoomed). Divided by the magnification they sweep the same share of the screen as
+		-- without it. Roll isn't magnified, so it stays.
+		local calm = 1 / zoomMag
+		local rot = CFrame.Angles(pitchTotal * calm, yawTotal * calm, 0) * CFrame.Angles(0, 0, rollTotal)
 		procedural = CFrame.new(base.Rotation:VectorToObjectSpace(transWorld)) * rot
 		final = CFrame.new(desired + transWorld) * base.Rotation * rot
 	else
@@ -713,13 +852,14 @@ local function step(dt: number)
 		sprintAmt = math.clamp((speed - K.Walk) / math.max(K.Sprint - K.Walk, 1), 0, 1)
 	end
 	local aim = math.clamp(tonumber(ClientState.aimAlpha) or 0, 0, 1)
-	local zoom = easeZoom(dt) -- no sprint widening under the zoom, and the stronger of it and the aim wins (never both)
+	-- no sprint widening under the zoom, and the stronger of it and the aim wins (never both: the aim ends the zoom, and
+	-- while one eases out as the other eases in, the narrower of the two is the view)
 	local adds = K.SprintFov * sprintAmt * (1 - math.max(aim, zoom)) + K.SlideFov * slideAmt
 	if not firstPerson then
 		adds *= 0.5
 	end
 	fovSpring.target = baseFov + adds
-	local aimMul = math.min(1 + (K.AimFovMult - 1) * aim, 1 + (K.ZoomFovMult - 1) * zoom)
+	local aimMul = math.min(1 + (K.AimFovMult - 1) * aim, zoomMul)
 	local fov = math.clamp(fovSpring:update(dt) * aimMul, 1, 120)
 	cam.FieldOfView = fov
 	ClientState.fov = fov
@@ -838,6 +978,8 @@ function CameraController.Start()
 	UserInputService.TextBoxFocused:Connect(function()
 		zoomKey = false
 	end)
+	-- Roblox's own menu (Esc, or Start on a controller) takes the input: let go, as for the game's menu
+	GuiService.MenuOpened:Connect(dropZoom)
 	applyMode()
 end
 

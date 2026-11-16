@@ -272,11 +272,20 @@ Config.Camera = {
 	SprintFovAdd = 3.5, -- subtle widening at a full sprint
 	SlideFovAdd = 6,
 	AimFovMultiplier = 0.76, -- aiming a bow or spear zooms in a little
-	-- Zoom (V held, R3 or the touch ZOOM button toggled; CameraController): a slight look closer, gentler than the aim.
-	-- It never adds to the aim zoom (the stronger of the two wins) and it turns the sprint widening off.
-	ZoomFovMultiplier = 0.88, -- 72 -> 63.4 vertical (about 1.18x; the bow's aim is about 1.4x)
-	ZoomInTime = 0.15, -- seconds to ease in...
-	ZoomOutTime = 0.18, -- ...and back out
+	-- Zoom (V held; R3 or the touch ZOOM button toggles; CameraController): a real look closer, much stronger than the
+	-- aim. "x" is how many times bigger things look: tan(72 / 2) / tan(fov / 2). The multiplier is given at BaseFov; a
+	-- player with another Field of view setting gets the same magnification. A swing, a throw, a bow draw, the aim of a
+	-- bow or spear (which keeps its own zoom: the two never add up), eating, drinking, bandaging and a menu end it; it
+	-- turns the sprint widening off and slows the look by the same ratio.
+	ZoomFovMultiplier = 0.45, -- the default level: 72 -> 32.4 vertical, 2.5x (the bow's aim is 1.4x)
+	-- While the zoom is on, the mouse wheel changes its level. Each notch multiplies (or divides) the magnification by
+	-- ZoomWheelStep, so a notch feels the same at every level. The level is kept until the player leaves.
+	ZoomWheelStep = 1.104,
+	ZoomWheelStepsOut = 4, -- notches the wheel can pull back from the default: to 1.68x (FOV x0.65 at 72)...
+	ZoomWheelStepsIn = 5, -- ...and push in: to 4.1x (FOV x0.28 at 72)
+	ZoomInTime = 0.18, -- seconds for the view to ease in (98 % of the way; no overshoot)...
+	ZoomOutTime = 0.14, -- ...back out...
+	ZoomStepTime = 0.1, -- ...and from one wheel level to the next
 	-- First-person head motion from the gait (mostly translation: real eyes stabilise the gaze)
 	BobWalkAmplitude = 0.085, -- studs of vertical head travel at a jog (peak to peak)...
 	BobSprintAmplitude = 0.14, -- ...and at a full sprint

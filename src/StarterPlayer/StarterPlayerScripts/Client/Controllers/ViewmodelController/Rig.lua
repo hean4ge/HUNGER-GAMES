@@ -3,8 +3,13 @@
 	can be previewed in Edit mode. Every part is Anchored, CanCollide / CanQuery / CanTouch = false, CastShadow = false
 	(avatar arms: Config.Viewmodel.ArmShadows), and all of them are moved together with one workspace:BulkMoveTo per frame.
 
-	Three arm styles (Config.Viewmodel.ArmStyle), posed with the same two-bone IK on the same hand frames:
-	- "Faceted" (default): bare hands and forearms built from chunky flat facets with a charcoal sleeve, the Blender kit
+	Four arm styles (Config.Viewmodel.ArmStyle), posed with the same two-bone IK on the same hand frames:
+	- "Blocky" (default): Roblox block arms built from Parts by the sibling module Blocky (Rig.Blocky; no meshes, no
+	  uploads) on the Faceted skeleton and frames, so they are driven by the Faceted code below (rig.faceted holds their
+	  pieces, rig.blocky their settings) and take every Faceted pose. One block per hand (variant A) or a palm, a
+	  four-finger block and a thumb (variant B, swapped per shape by rig:setHands). Matte, lit by the engine only: no
+	  key light, no Highlight (rig:setExposure works on their colours), no shade layer.
+	- "Faceted": bare hands and forearms built from chunky flat facets with a charcoal sleeve, the Blender kit
 	  in ReplicatedStorage.Assets.Viewmodel.ArmsFaceted (ServerStorage.WorldGen.ArmsFacetedAssets; art/README.md section
 	  12) at world scale. Per side an UpperArm (shoulder pivot), a Forearm (elbow pivot) and four hands (wrist pivot), one
 	  shown at a time (rig:setHands): Relaxed (empty hands at rest), Fist (only while punching), Grip (closed round a
@@ -42,11 +47,12 @@
 	A bow sits in the left hand on Rig.BOW_GRIP: top limb along the thumb, shooting toward the knuckles.
 	Rig.ITEM_HOLD[itemId] moves an item within the fist (things wider than the fist sit in it on the palm side).
 
-	Rig.new(skinColor?, style?) -> rig    rig.model: parent it to the camera to show it; style "Faceted" | "Avatar" |
-	                                      "Classic" (rig.style: the style it got; Faceted falls back to Avatar without
-	                                      its templates)
-	rig:setSkin(color, leftColor?)                  the Classic fists, the Faceted skin (each side its arm colour)
-	rig:setHands(right?, left?)                     (Faceted) the hand meshes: "Relaxed" | "Fist" | "Grip" | "Open"
+	Rig.new(skinColor?, style?, armOptions?) -> rig    rig.model: parent it to the camera to show it; style "Blocky" |
+	                                      "Faceted" | "Avatar" | "Classic" (rig.style: the style it got; Faceted falls
+	                                      back to Avatar without its templates); armOptions: (Blocky) values that replace
+	                                      Config.Viewmodel.Blocky's (Variant, Sleeve, ...)
+	rig:setSkin(color, leftColor?)                  the Classic fists, the Faceted and Blocky skin (each side its arm colour)
+	rig:setHands(right?, left?)                     (Faceted, Blocky) the hand shapes: "Relaxed" | "Fist" | "Grip" | "Open"
 	rig:itemHand() -> "Grip" | "Open" | nil         (Faceted) the hand mesh the held item wants
 	rig:setAvatar(character?) -> "Avatar" | "Standard" | "Classic"   (Avatar style) the arms from that character
 	Rig.avatarSignature(character?) -> string       changes when its arms, shirt or arm colours change
@@ -72,8 +78,14 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Config = require(Shared:WaitForChild("Config"))
 
+-- The "Blocky" arms' builder, colours and pose style: the sibling module ViewmodelController.Blocky (a Rig cloned on its
+-- own, without its parent, has none: it then builds the older arms)
+local blockyModule = if script.Parent then script.Parent:WaitForChild("Blocky", 10) else nil
+local Blocky = if blockyModule then require(blockyModule) else nil
+
 local Rig = {}
 Rig.__index = Rig
+Rig.Blocky = Blocky
 Rig.ItemModels = ItemModels -- swappable for Edit-mode previews
 Rig.Options = Config.Viewmodel or {} -- (Config.Viewmodel; swappable for Edit-mode previews)
 
@@ -169,8 +181,8 @@ function Rig.useStyle(style: string, spec: { [string]: any }?)
 	Rig.GRIP_POINT.Right, Rig.GRIP_POINT.Left = CLASSIC.GRIP_POINT.Right, CLASSIC.GRIP_POINT.Left
 	Rig.BOW_GRIP = CLASSIC.BOW_GRIP
 	Rig.MAX_WRIST = CLASSIC.MAX_WRIST
-	if style == "Faceted" and spec then
-		Rig.STYLE = "Faceted"
+	if (style == "Faceted" or style == "Blocky") and spec then
+		Rig.STYLE = style -- ("Blocky": block arms on the Faceted skeleton and frames)
 		Rig.UPPER_ARM, Rig.FOREARM = spec.upper, spec.fore
 		Rig.SHOULDER.Right, Rig.SHOULDER.Left = Rig.FACETED_SHOULDER.Right, Rig.FACETED_SHOULDER.Left
 		Rig.WRIST = Vector3.zero
@@ -780,12 +792,16 @@ local function buildFaceted(parent: Instance): ({ [string]: any }?, { [string]: 
 	return arms, spec
 end
 
-function Rig.new(skin: Color3?, style: string?)
+function Rig.new(skin: Color3?, style: string?, armOptions: { [string]: any }?)
 	local self = setmetatable({}, Rig)
 	self.model = Instance.new("Model")
 	self.model.Name = "Viewmodel"
 	self.skin = skin or DEFAULT_SKIN
-	self.style = if style == "Avatar" or style == "Faceted" then style else "Classic"
+	if style == "Blocky" and not Blocky then
+		style = "Faceted" -- (a Rig cloned without its sibling module Blocky)
+	end
+	self.style = if style == "Avatar" or style == "Faceted" or style == "Blocky" then style else "Classic"
+	self.blocky = nil -- (Blocky) the block arms' settings (Blocky.build's info); their pieces are in self.faceted
 	self.avatar = nil
 	self.faceted = nil -- (Faceted) per side: upper, fore, hands[shape], hand (the shape shown)
 	self.arms = {}
@@ -837,6 +853,13 @@ function Rig.new(skin: Color3?, style: string?)
 	-- (Avatar arms) the bandage wound onto the left forearm while bandaging (Rig:setWrap)
 	self.wrapBand = newPart(self.model, "WrapBand", Enum.PartType.Block, Vector3.new(0.5, 0.05, 0.5), Color3.fromRGB(236, 232, 222), Enum.Material.Fabric)
 	self.wrapLength = 0
+	if self.style == "Blocky" and Blocky then
+		-- block arms built from Parts, in the shape buildFaceted returns: the Faceted code below drives them. Nothing is
+		-- laid over them and no lamp is lit for them: the Highlight is taken out of the viewmodel, the key light's part
+		-- never enters the workspace (ViewmodelController) and rig:setExposure works on their colours.
+		self.faceted, self.facetedSpec, self.blocky = Blocky.build(self.model, armOptions or Rig.Options.Blocky)
+		exposure.Parent = nil
+	end
 	if self.style == "Faceted" then
 		local arms, spec = buildFaceted(self.model)
 		if arms then
@@ -847,7 +870,7 @@ function Rig.new(skin: Color3?, style: string?)
 			self.style = "Avatar"
 		end
 	end
-	if self.style == "Faceted" then
+	if self.style == "Faceted" or self.style == "Blocky" then
 		self:_useFaceted()
 	elseif self.style == "Avatar" then
 		self:setAvatar(nil) -- the standard arms in the skin colour until the character's own arms are measured
@@ -857,7 +880,7 @@ function Rig.new(skin: Color3?, style: string?)
 	return self
 end
 
--- (Faceted) shows the faceted arms: the part-built arms are hidden and the style's constants swapped in.
+-- (Faceted, Blocky) shows the faceted or block arms: the part-built arms are hidden and the style's constants swapped in.
 function Rig:_useFaceted()
 	for _, arm in pairs(self.arms) do
 		for _, p in ipairs({ arm.upper, arm.elbow, arm.fore, arm.cuff }) do
@@ -869,7 +892,7 @@ function Rig:_useFaceted()
 			entry.part.CFrame = PARKED
 		end
 	end
-	Rig.useStyle("Faceted", self.facetedSpec)
+	Rig.useStyle(self.style, self.facetedSpec)
 	self:setSkin(self.skin, self.skinLeft)
 	self:_rebuild()
 end
@@ -885,11 +908,13 @@ function Rig:setHands(right: string?, left: string?)
 		local shape = if side == "Right" then right else left
 		local arm = fac[side]
 		if shape and arm.hands[shape] and arm.hand ~= shape then
-			for _, p in ipairs(arm.hands[arm.hand].parts) do
-				p.CFrame = PARKED
+			if arm.hands[shape] ~= arm.hands[arm.hand] then -- (Blocky variant A: one block is every shape)
+				for _, p in ipairs(arm.hands[arm.hand].parts) do
+					p.CFrame = PARKED
+				end
+				changed = true
 			end
 			arm.hand = shape
-			changed = true
 		end
 	end
 	if changed then
@@ -917,6 +942,10 @@ function Rig:setExposure(level: number)
 		return
 	end
 	self.exposureLevel = level
+	if self.blocky and Blocky then
+		Blocky.setExposure(self.faceted, self.blocky, level) -- (by colour alone: nothing is laid over the block arms)
+		return
+	end
 	self.exposure.Enabled = level < 0.995
 	self.exposure.FillTransparency = level
 end
@@ -930,7 +959,7 @@ function Rig:setWrap(length: number)
 	end
 	self.wrapLength = length
 	local arms = self.avatar
-	local width = if arms then arms.parts.Left.LowerArm.Size.X elseif self.faceted then 0.24 else 0.46
+	local width = if arms then arms.parts.Left.LowerArm.Size.X elseif self.blocky then self.blocky.sleeveWidth elseif self.faceted then 0.24 else 0.46
 	if length > 0.01 then
 		self.wrapBand.Size = Vector3.new(width + 0.035, length, width + 0.035)
 	end
@@ -985,7 +1014,9 @@ function Rig:setSkin(color: Color3, left: Color3?)
 		end
 	end
 	local fac = self.faceted
-	if fac then
+	if fac and self.blocky and Blocky then
+		Blocky.setSkin(fac, self.blocky, color, self.skinLeft) -- (the block arms colour themselves: plain matte Parts)
+	elseif fac then
 		for side, arm in pairs(fac) do
 			local c = if side == "Left" then self.skinLeft else color
 			for _, piece in ipairs({ arm.upper, arm.fore, arm.hands.Relaxed, arm.hands.Fist, arm.hands.Grip, arm.hands.Open }) do
@@ -1457,7 +1488,11 @@ function Rig:pose(frame: { [string]: any })
 			local upperCF = CFrame.fromMatrix(from, upper:Cross(zU), upper, zU)
 			local foreCF = CFrame.fromMatrix(elbow, fore:Cross(zF), fore, zF)
 			if not right then
-				wrapAt = if self.wrapLength > 0.01 then foreCF.Rotation + (wrist - fore * (Rig.WRAP_FROM + self.wrapLength / 2)) else nil
+				local centre = wrist - fore * (Rig.WRAP_FROM + self.wrapLength / 2)
+				if self.blocky then
+					centre += zF * self.blocky.palmShift -- (the sleeve block's centre line)
+				end
+				wrapAt = if self.wrapLength > 0.01 then foreCF.Rotation + centre else nil
 			end
 			i = placePiece(cframes, i, fa.upper, upperCF)
 			i = placePiece(cframes, i, fa.fore, foreCF)
@@ -1601,6 +1636,7 @@ end
 function Rig:destroy()
 	self.model:Destroy()
 	self.keyAnchor:Destroy()
+	self.exposure:Destroy() -- (the block arms keep it outside the model)
 end
 
 return Rig
