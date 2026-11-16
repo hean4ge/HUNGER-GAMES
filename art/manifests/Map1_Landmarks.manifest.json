@@ -13,39 +13,40 @@
    "kind": "Landmark",
    "tags": [
     "Horn",
-    "Cornucopia"
+    "Cornucopia",
+    "Colouring_B"
    ],
-   "notes": "6 sails in 3 pairs round a hollow walk-in core; mouths (A-frames 16 x 14) at 60/180/300; inner sails 50 above the deck, outer 36 with skirts flared to 22 at the hem; colouring (a): white sails, muted plum mouth faces, dull gold edges, a cobalt interior with gold fans, weapon racks and supply bags (decision 2). Pivot: deck centre (world y 52).",
+   "notes": "3 pairs of sails round a hollow walk-in core (base corners 21 from the axis, apex 44 over the deck); mouths (A-frames 16 tall, 14 wide) at 60/180/300 in dark frames 19 wide at the deck; at each star point (0/120/240) one broad folded sail (tip 48 up and 14 out, ridge sweeping down to the deck 38 out, sealed to the walls up to 16) and behind it a thin fin 53 tall. Colouring (b): the trailer's: pale blue-teal sails, navy mouth frames, cobalt inside, gold trim. Inside: cobalt panels, gold fans, weapon racks and supply bags (props, not loot). Pivot: deck centre (world y 52).",
    "origin": [
-    34.511,
+    34.909,
     0.0,
     -0.0
    ],
    "size": [
-    65.023,
-    50.314,
-    56.311
+    65.818,
+    53.314,
+    57.513
    ],
    "boundsMin": [
-    -32.511,
+    -32.909,
     -0.314,
-    -31.132
+    -38.0
    ],
    "boundsMax": [
-    32.511,
-    50.0,
-    25.179
+    32.909,
+    53.0,
+    19.513
    ],
-   "tris": 4962,
+   "tris": 4518,
    "parts": [
     {
      "name": "M1_Horn_HornSail",
      "role": "HornSail",
      "robloxMaterial": "Plaster",
      "rgb": [
-      208,
-      210,
-      206
+      164,
+      196,
+      212
      ],
      "collide": true,
      "collision": "PreciseConvexDecomposition",
@@ -53,66 +54,78 @@
      "canQuery": true,
      "canTouch": true,
      "tags": [],
-     "tris": 852,
+     "tris": 516,
      "metalness": 0.0,
-     "roughness": 0.8
+     "roughness": 0.8,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Horn_HornInner",
      "role": "HornInner",
      "robloxMaterial": "Plaster",
      "rgb": [
-      74,
-      60,
-      92
+      44,
+      68,
+      96
      ],
-     "collide": true,
-     "collision": "PreciseConvexDecomposition",
+     "collide": false,
+     "collision": "Box",
      "castShadow": true,
-     "canQuery": true,
-     "canTouch": true,
+     "canQuery": false,
+     "canTouch": false,
      "tags": [],
      "tris": 66,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "out"
     },
     {
      "name": "M1_Horn_HornJamb",
      "role": "HornJamb",
      "robloxMaterial": "Plaster",
      "rgb": [
-      57,
-      68,
-      89
+      53,
+      67,
+      91
      ],
-     "collide": true,
-     "collision": "PreciseConvexDecomposition",
+     "collide": false,
+     "collision": "Box",
      "castShadow": true,
-     "canQuery": true,
-     "canTouch": true,
+     "canQuery": false,
+     "canTouch": false,
      "tags": [],
      "tris": 18,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "in"
     },
     {
      "name": "M1_Horn_HornCobalt",
      "role": "HornCobalt",
      "robloxMaterial": "Plaster",
      "rgb": [
-      89,
-      106,
-      139
+      86,
+      108,
+      146
      ],
-     "collide": true,
-     "collision": "PreciseConvexDecomposition",
+     "collide": false,
+     "collision": "Box",
      "castShadow": true,
-     "canQuery": true,
-     "canTouch": true,
+     "canQuery": false,
+     "canTouch": false,
      "tags": [],
      "tris": 1200,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "in"
     },
     {
      "name": "M1_Horn_HornGold",
@@ -129,9 +142,12 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 1116,
+     "tris": 936,
      "metalness": 0.7,
-     "roughness": 0.45
+     "roughness": 0.45,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Horn_HornFloor",
@@ -150,7 +166,10 @@
      "tags": [],
      "tris": 8,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Horn_HornRack",
@@ -161,15 +180,40 @@
       96,
       64
      ],
-     "collide": true,
+     "collide": false,
      "collision": "Box",
      "castShadow": true,
-     "canQuery": true,
-     "canTouch": true,
+     "canQuery": false,
+     "canTouch": false,
      "tags": [],
-     "tris": 960,
+     "tris": 756,
      "metalness": 0.6,
-     "roughness": 0.5
+     "roughness": 0.5,
+     "colourGroup": 1,
+     "colourGroups": 2,
+     "faces": "closed or as modelled"
+    },
+    {
+     "name": "M1_Horn_HornRack_2",
+     "role": "HornRack",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      178,
+      146,
+      88
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 204,
+     "metalness": 0.6,
+     "roughness": 0.5,
+     "colourGroup": 2,
+     "colourGroups": 2,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Horn_HornBlades",
@@ -188,7 +232,10 @@
      "tags": [],
      "tris": 408,
      "metalness": 0.8,
-     "roughness": 0.4
+     "roughness": 0.4,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Horn_HornBags",
@@ -207,7 +254,32 @@
      "tags": [],
      "tris": 334,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
+    },
+    {
+     "name": "M1_Horn_HornCollide",
+     "role": "HornCollide",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      53,
+      67,
+      91
+     ],
+     "collide": true,
+     "collision": "PreciseConvexDecomposition",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 72,
+     "metalness": 0.0,
+     "roughness": 1.0,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {
@@ -263,7 +335,69 @@
      ]
     }
    },
-   "pivot": "base centre on the ground (see notes)"
+   "pivot": "base centre on the ground (see notes)",
+   "collisionNote": "the walls collide through M1_Horn_HornCollide: six closed convex slabs inside the walls (invisible: set Transparency 1, CastShadow false). The wall faces, the panels, the racks and the trim do not collide. The sails and fins collide as modelled (closed shells). The floor is HornFloor (a slab, Box).",
+   "invisibleParts": [
+    "M1_Horn_HornCollide"
+   ],
+   "colouring": "b",
+   "colourings": {
+    "a": {
+     "HornSail": [
+      208,
+      210,
+      206
+     ],
+     "HornInner": [
+      74,
+      60,
+      92
+     ],
+     "HornCobalt": [
+      92,
+      110,
+      144
+     ],
+     "HornJamb": [
+      57,
+      68,
+      89
+     ],
+     "HornGold": [
+      178,
+      146,
+      88
+     ]
+    },
+    "b": {
+     "HornSail": [
+      164,
+      196,
+      212
+     ],
+     "HornInner": [
+      44,
+      68,
+      96
+     ],
+     "HornCobalt": [
+      86,
+      108,
+      146
+     ],
+     "HornJamb": [
+      53,
+      67,
+      91
+     ],
+     "HornGold": [
+      178,
+      146,
+      88
+     ]
+    }
+   },
+   "colouringsNote": "both colourings share this mesh: to switch, set these parts' colours (the HornRack's second colour group is the gold too)"
   },
   {
    "name": "M1_Platform",
@@ -273,7 +407,7 @@
    ],
    "notes": "three-pointed star (triangle, points r 50 at 0/120/240, clipped), 6 high above the knoll (y 46 -> deck 52), embedded 1 stud; bronze steps (18 wide, 4 x 1.5) at the mouths. Pivot: knoll level.",
    "origin": [
-    112.047,
+    112.842,
     0.0,
     -0.0
    ],
@@ -309,9 +443,34 @@
      "canQuery": true,
      "canTouch": true,
      "tags": [],
-     "tris": 664,
+     "tris": 640,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 2,
+     "faces": "out"
+    },
+    {
+     "name": "M1_Platform_Cladding_2",
+     "role": "Cladding",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      160,
+      150,
+      124
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 24,
+     "metalness": 0.0,
+     "roughness": 0.85,
+     "colourGroup": 2,
+     "colourGroups": 2,
+     "faces": "out"
     },
     {
      "name": "M1_Platform_GlassBand",
@@ -330,7 +489,10 @@
      "tags": [],
      "tris": 12,
      "metalness": 0.0,
-     "roughness": 0.2
+     "roughness": 0.2,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "out"
     },
     {
      "name": "M1_Platform_Bronze",
@@ -349,7 +511,10 @@
      "tags": [],
      "tris": 120,
      "metalness": 0.6,
-     "roughness": 0.5
+     "roughness": 0.5,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {
@@ -381,7 +546,7 @@
    ],
    "notes": "brushed steel drum 4.3 x 1.6 with a 0.25 copper top plate; hidden 0.8 below the turf. Pivot: turf.",
    "origin": [
-    159.221,
+    160.017,
     0.0,
     -0.0
    ],
@@ -419,7 +584,10 @@
      "tags": [],
      "tris": 32,
      "metalness": 0.8,
-     "roughness": 0.45
+     "roughness": 0.45,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "out"
     },
     {
      "name": "M1_Plinth_Copper",
@@ -438,7 +606,10 @@
      "tags": [],
      "tris": 46,
      "metalness": 0.8,
-     "roughness": 0.35
+     "roughness": 0.35,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {
@@ -468,9 +639,9 @@
    "tags": [
     "PlateCollar"
    ],
-   "notes": "brass rim 8.4 across (PlateTube r 3.6), flush with the turf, plus the dark tube wall to -2.5.",
+   "notes": "brass rim 8.4 across (PlateTube r 3.6), flush with the turf, plus the dark tube wall to -2.5 (the bore faces inward: you look down into it).",
    "origin": [
-    169.571,
+    170.367,
     0.0,
     -0.0
    ],
@@ -508,7 +679,10 @@
      "tags": [],
      "tris": 144,
      "metalness": 0.8,
-     "roughness": 0.4
+     "roughness": 0.4,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_PlateTubeRim_TubeDark",
@@ -527,7 +701,10 @@
      "tags": [],
      "tris": 48,
      "metalness": 0.5,
-     "roughness": 0.6
+     "roughness": 0.6,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "in"
     }
    ],
    "attachments": {},
@@ -541,28 +718,28 @@
     "Hazard",
     "yellow"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (yellow, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (yellow, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    187.31,
+    185.31,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.868,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.845,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_00_BedFlowers",
@@ -579,9 +756,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1574,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_00_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_00_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 746,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -595,22 +819,22 @@
    ],
    "notes": "far mesh of M1_Spoke_00 (no flower heads)",
    "origin": [
-    210.397,
+    202.804,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.57,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.547,
     45.467
    ],
@@ -631,9 +855,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 179,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_00_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_00_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 49,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -647,28 +918,28 @@
     "Hazard",
     "red"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (red, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (red, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    233.815,
+    220.304,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.943,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.08,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.863,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_01_BedFlowers",
@@ -685,9 +956,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1697,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_01_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_01_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 695,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -701,22 +1019,22 @@
    ],
    "notes": "far mesh of M1_Spoke_01 (no flower heads)",
    "origin": [
-    257.555,
+    237.804,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.594,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.545,
     47.0
    ],
@@ -737,9 +1055,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 187,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_01_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_01_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 41,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -753,28 +1118,28 @@
     "Hazard",
     "pink"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (pink, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (pink, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    279.925,
+    254.554,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.564,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.835,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.729,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_02_BedFlowers",
@@ -791,9 +1156,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1080,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_02_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_02_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 468,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -807,22 +1219,22 @@
    ],
    "notes": "far mesh of M1_Spoke_02 (no flower heads)",
    "origin": [
-    300.925,
+    270.554,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.234,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.415,
     33.5
    ],
@@ -843,9 +1255,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 135,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_02_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_02_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 21,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -859,28 +1318,28 @@
     "Hazard",
     "lavender"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (lavender, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (lavender, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    321.925,
+    286.554,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.555,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.839,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.716,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_03_BedFlowers",
@@ -897,9 +1356,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1016,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_03_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_03_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 532,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -913,22 +1419,22 @@
    ],
    "notes": "far mesh of M1_Spoke_03 (no flower heads)",
    "origin": [
-    342.925,
+    302.554,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.197,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.377,
     33.5
    ],
@@ -949,9 +1455,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 138,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_03_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_03_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 18,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -965,28 +1518,28 @@
     "Hazard",
     "magenta"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (magenta, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (magenta, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    365.295,
+    319.304,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.918,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.057,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.861,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_04_BedFlowers",
@@ -1003,9 +1556,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1604,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_04_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_04_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 788,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1019,22 +1619,22 @@
    ],
    "notes": "far mesh of M1_Spoke_04 (no flower heads)",
    "origin": [
-    389.035,
+    336.804,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.595,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.546,
     47.0
    ],
@@ -1055,9 +1655,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 160,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_04_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_04_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 68,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1071,28 +1718,28 @@
     "Hazard",
     "yellow"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (yellow, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (yellow, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    412.444,
+    354.298,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.883,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.86,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_05_BedFlowers",
@@ -1109,9 +1756,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1558,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_05_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_05_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 762,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1125,22 +1819,22 @@
    ],
    "notes": "far mesh of M1_Spoke_05 (no flower heads)",
    "origin": [
-    435.531,
+    371.791,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.543,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.52,
     45.467
    ],
@@ -1161,9 +1855,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 184,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_05_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_05_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 44,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1177,28 +1918,28 @@
     "Hazard",
     "red"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (red, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (red, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    458.618,
+    389.285,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.836,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.813,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_06_BedFlowers",
@@ -1215,9 +1956,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1603,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_06_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_06_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 717,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1231,22 +2019,22 @@
    ],
    "notes": "far mesh of M1_Spoke_06 (no flower heads)",
    "origin": [
-    481.705,
+    406.779,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.549,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.526,
     45.467
    ],
@@ -1267,9 +2055,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 175,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_06_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_06_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 53,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1283,28 +2118,28 @@
     "Hazard",
     "pink"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (pink, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (pink, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    505.123,
+    424.279,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.928,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.076,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.852,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_07_BedFlowers",
@@ -1321,9 +2156,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1629,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_07_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_07_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 763,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1337,22 +2219,22 @@
    ],
    "notes": "far mesh of M1_Spoke_07 (no flower heads)",
    "origin": [
-    528.863,
+    441.779,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.617,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.568,
     47.0
    ],
@@ -1373,9 +2255,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 184,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_07_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_07_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 44,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1389,28 +2318,28 @@
     "Hazard",
     "lavender"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (lavender, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (lavender, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    551.233,
+    458.529,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
-    2.551,
+    12.0,
+    2.538,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.848,
     -33.5
    ],
    "boundsMax": [
-    8.5,
-    1.703,
+    6.0,
+    1.69,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_08_BedFlowers",
@@ -1427,9 +2356,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1116,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_08_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_08_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 432,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1443,22 +2419,22 @@
    ],
    "notes": "far mesh of M1_Spoke_08 (no flower heads)",
    "origin": [
-    572.233,
+    474.529,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.223,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.404,
     33.5
    ],
@@ -1479,9 +2455,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 123,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_08_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_08_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 33,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1495,28 +2518,28 @@
     "Hazard",
     "magenta"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (magenta, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (magenta, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    593.233,
+    490.529,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.532,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.712,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_09_BedFlowers",
@@ -1533,9 +2556,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1039,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_09_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_09_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 509,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1549,22 +2619,22 @@
    ],
    "notes": "far mesh of M1_Spoke_09 (no flower heads)",
    "origin": [
-    614.233,
+    506.529,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.224,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.404,
     33.5
    ],
@@ -1585,9 +2655,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 125,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_09_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_09_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 31,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1601,28 +2718,28 @@
     "Hazard",
     "yellow"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (yellow, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (yellow, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    636.603,
+    523.279,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.925,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.876,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_10_BedFlowers",
@@ -1639,9 +2756,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1565,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_10_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_10_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 827,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1655,22 +2819,22 @@
    ],
    "notes": "far mesh of M1_Spoke_10 (no flower heads)",
    "origin": [
-    660.343,
+    540.779,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.571,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.522,
     47.0
    ],
@@ -1691,9 +2855,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 180,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_10_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_10_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 48,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1707,28 +2918,28 @@
     "Hazard",
     "red"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (red, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (red, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    683.752,
+    558.272,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.851,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.828,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_11_BedFlowers",
@@ -1745,9 +2956,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1592,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_11_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_11_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 728,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1761,22 +3019,22 @@
    ],
    "notes": "far mesh of M1_Spoke_11 (no flower heads)",
    "origin": [
-    706.839,
+    575.766,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.578,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.555,
     45.467
    ],
@@ -1797,9 +3055,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 166,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_11_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_11_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 62,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1813,28 +3118,28 @@
     "Hazard",
     "pink"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (pink, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (pink, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    729.926,
+    593.26,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.893,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.063,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.829,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_12_BedFlowers",
@@ -1851,9 +3156,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1636,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_12_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_12_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 684,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1867,22 +3219,22 @@
    ],
    "notes": "far mesh of M1_Spoke_12 (no flower heads)",
    "origin": [
-    753.013,
+    610.753,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.548,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.525,
     45.467
    ],
@@ -1903,9 +3255,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 185,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_12_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_12_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 43,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1919,28 +3318,28 @@
     "Hazard",
     "lavender"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (lavender, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (lavender, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    776.431,
+    628.253,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.93,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.881,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_13_BedFlowers",
@@ -1957,9 +3356,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1654,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_13_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_13_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 738,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -1973,22 +3419,22 @@
    ],
    "notes": "far mesh of M1_Spoke_13 (no flower heads)",
    "origin": [
-    800.171,
+    645.753,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.565,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.516,
     47.0
    ],
@@ -2009,9 +3455,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 186,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_13_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_13_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      160,
+      162,
+      204
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 42,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2025,28 +3518,28 @@
     "Hazard",
     "magenta"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (magenta, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (magenta, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    822.541,
+    662.503,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
-    2.543,
+    12.0,
+    2.529,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
-    1.724,
+    6.0,
+    1.709,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_14_BedFlowers",
@@ -2063,9 +3556,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1075,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_14_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_14_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 473,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2079,22 +3619,22 @@
    ],
    "notes": "far mesh of M1_Spoke_14 (no flower heads)",
    "origin": [
-    843.541,
+    678.503,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.224,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.404,
     33.5
    ],
@@ -2115,9 +3655,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 128,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_14_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_14_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      178,
+      112,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 28,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2131,28 +3718,28 @@
     "Hazard",
     "yellow"
    ],
-   "notes": "lens-shaped flower bed 67.0 x 17.0 x 1.35 (yellow, 1:3.9), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 67.0 x 12.0 x 1.35 (yellow, 1:5.6), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    864.541,
+    694.503,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.497,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.678,
     33.5
    ],
-   "tris": 2164,
+   "tris": 1664,
    "parts": [
     {
      "name": "M1_Spoke_15_BedFlowers",
@@ -2169,9 +3756,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2164,
+     "tris": 1081,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_15_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_15_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 467,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2185,22 +3819,22 @@
    ],
    "notes": "far mesh of M1_Spoke_15 (no flower heads)",
    "origin": [
-    885.541,
+    710.503,
     0.0,
     -0.0
    ],
    "size": [
-    17.0,
+    12.0,
     2.214,
     67.0
    ],
    "boundsMin": [
-    -8.5,
+    -6.0,
     -0.82,
     -33.5
    ],
    "boundsMax": [
-    8.5,
+    6.0,
     1.395,
     33.5
    ],
@@ -2221,9 +3855,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 208,
+     "tris": 120,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_15_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_15_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      216,
+      198,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 36,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2237,28 +3918,28 @@
     "Hazard",
     "red"
    ],
-   "notes": "lens-shaped flower bed 94.0 x 19.7 x 1.35 (red, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 94.0 x 13.5 x 1.35 (red, 1:7.0), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    907.911,
+    727.253,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.909,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.051,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.859,
     47.0
    ],
-   "tris": 3436,
+   "tris": 2556,
    "parts": [
     {
      "name": "M1_Spoke_16_BedFlowers",
@@ -2275,9 +3956,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3436,
+     "tris": 1669,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_16_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 164,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_16_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 723,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2291,22 +4019,22 @@
    ],
    "notes": "far mesh of M1_Spoke_16 (no flower heads)",
    "origin": [
-    931.651,
+    744.753,
     0.0,
     -0.0
    ],
    "size": [
-    19.74,
+    13.5,
     2.581,
     94.0
    ],
    "boundsMin": [
-    -9.87,
+    -6.75,
     -1.049,
     -47.0
    ],
    "boundsMax": [
-    9.87,
+    6.75,
     1.532,
     47.0
    ],
@@ -2327,9 +4055,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 176,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_16_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_16_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      194,
+      98,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 52,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2343,28 +4118,28 @@
     "Hazard",
     "pink"
    ],
-   "notes": "lens-shaped flower bed 90.9 x 19.1 x 1.35 (pink, 1:4.8), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
+   "notes": "lens-shaped flower bed 90.9 x 13.5 x 1.35 (pink, 1:6.7), long axis along Roblox -Z (north, i.e. outward when yawed to its bearing)",
    "origin": [
-    955.06,
+    762.247,
     0.0,
     -0.0
    ],
    "size": [
-    19.078,
+    13.487,
     2.89,
     90.933
    ],
    "boundsMin": [
-    -9.539,
+    -6.744,
     -1.039,
     -45.467
    ],
    "boundsMax": [
-    9.539,
+    6.744,
     1.851,
     45.467
    ],
-   "tris": 3240,
+   "tris": 2480,
    "parts": [
     {
      "name": "M1_Spoke_17_BedFlowers",
@@ -2381,9 +4156,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 3240,
+     "tris": 1584,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_17_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 160,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_17_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 736,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2397,22 +4219,22 @@
    ],
    "notes": "far mesh of M1_Spoke_17 (no flower heads)",
    "origin": [
-    978.147,
+    779.741,
     0.0,
     -0.0
    ],
    "size": [
-    19.096,
+    13.5,
     2.544,
     90.933
    ],
    "boundsMin": [
-    -9.548,
+    -6.75,
     -1.023,
     -45.467
    ],
    "boundsMax": [
-    9.548,
+    6.75,
     1.521,
     45.467
    ],
@@ -2433,9 +4255,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 304,
+     "tris": 181,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_17_Far_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 76,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Spoke_17_Far_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      214,
+      168,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 47,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2450,7 +4319,7 @@
    ],
    "notes": "the big pale petal, periwinkle and white, 68 x 16 (the owner's 'pale radial pattern'), laid along the mouth lane on its left; round end toward Roblox +Z (inward)",
    "origin": [
-    999.669,
+    798.464,
     0.0,
     -0.0
    ],
@@ -2476,6 +4345,28 @@
      "role": "BedFlowers",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
+      124,
+      152,
+      198
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1110,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_TeardropPeriwinkle_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
       218,
       216,
       204
@@ -2486,9 +4377,34 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2458,
+     "tris": 1216,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_TeardropPeriwinkle_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 132,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2503,7 +4419,7 @@
    ],
    "notes": "marigold petal 60 x 15, laid along the mouth lane on its right",
    "origin": [
-    1019.128,
+    817.923,
     0.0,
     -0.0
    ],
@@ -2539,9 +4455,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2064,
+     "tris": 1286,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_TeardropMarigold_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 116,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_TeardropMarigold_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      222,
+      176,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 662,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2556,7 +4519,7 @@
    ],
    "notes": "round berm 8.4 x 1.5 of one poisonous flower with a brass plaque (may hide a Sub-A hatch)",
    "origin": [
-    1034.823,
+    833.619,
     0.0,
     -0.0
    ],
@@ -2592,9 +4555,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 812,
+     "tris": 584,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Berm_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      150,
+      120,
+      168
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 220,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Berm_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 8,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     },
     {
      "name": "M1_Berm_Brass",
@@ -2613,7 +4623,10 @@
      "tags": [],
      "tris": 24,
      "metalness": 0.8,
-     "roughness": 0.4
+     "roughness": 0.4,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -2628,7 +4641,7 @@
    ],
    "notes": "the exploding-bed tell: a 1.2-stud metal daisy with a copper fuse centre",
    "origin": [
-    1043.683,
+    842.479,
     0.0,
     -0.0
    ],
@@ -2664,9 +4677,34 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 46,
+     "tris": 30,
      "metalness": 0.0,
-     "roughness": 0.8
+     "roughness": 0.8,
+     "colourGroup": 1,
+     "colourGroups": 2,
+     "faces": "up"
+    },
+    {
+     "name": "M1_FuseDaisy_Petals_2",
+     "role": "Petals",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 16,
+     "metalness": 0.0,
+     "roughness": 0.8,
+     "colourGroup": 2,
+     "colourGroups": 2,
+     "faces": "up"
     },
     {
      "name": "M1_FuseDaisy_Copper",
@@ -2685,7 +4723,10 @@
      "tags": [],
      "tris": 22,
      "metalness": 0.8,
-     "roughness": 0.35
+     "roughness": 0.35,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2700,7 +4741,7 @@
    ],
    "notes": "PLACEHOLDER: one of the three lone round trees on the mouth bearings at r 300",
    "origin": [
-    1064.691,
+    863.487,
     0.0,
     -0.0
    ],
@@ -2738,16 +4779,19 @@
      "tags": [],
      "tris": 126,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_LoneTree_Leaves",
      "role": "Leaves",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      69,
-      90,
-      48
+      73,
+      95,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -2757,7 +4801,10 @@
      "tags": [],
      "tris": 382,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -2772,7 +4819,7 @@
    ],
    "notes": "3-turn mounded spiral of red and magenta flower hedge, ~50 across, hedges 4 x 2.5, paths ~4",
    "origin": [
-    1106.09,
+    904.886,
     0.0,
     -0.0
    ],
@@ -2808,9 +4855,56 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 2314,
+     "tris": 1268,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "closed or as modelled"
+    },
+    {
+     "name": "M1_CrimsonSpiral_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      170,
+      62,
+      92
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 576,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "closed or as modelled"
+    },
+    {
+     "name": "M1_CrimsonSpiral_BedFlowers_3",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 470,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -2825,7 +4919,7 @@
    ],
    "notes": "holly hedge module 12 long, 16 tall, 5 thick; red berries are the ladybug-mutt tell",
    "origin": [
-    1140.853,
+    939.648,
     0.0,
     -0.0
    ],
@@ -2863,7 +4957,10 @@
      "tags": [],
      "tris": 128,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_HollyHedge_Berries",
@@ -2882,7 +4979,10 @@
      "tags": [],
      "tris": 180,
      "metalness": 0.0,
-     "roughness": 0.6
+     "roughness": 0.6,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -2897,7 +4997,7 @@
    ],
    "notes": "24-stud golden grass circle ringed by peach pompoms with 16 flower spokes 12-20 long",
    "origin": [
-    1182.265,
+    981.06,
     0.0,
     -0.0
    ],
@@ -2935,10 +5035,57 @@
      "tags": [],
      "tris": 24,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_SunGlade_BedFlowers",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      66,
+      88,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 588,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 4,
+     "faces": "up"
+    },
+    {
+     "name": "M1_SunGlade_BedFlowers_2",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      205,
+      152,
+      154
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1247,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 2,
+     "colourGroups": 4,
+     "faces": "up"
+    },
+    {
+     "name": "M1_SunGlade_BedFlowers_3",
      "role": "BedFlowers",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
@@ -2952,9 +5099,34 @@
      "canQuery": false,
      "canTouch": false,
      "tags": [],
-     "tris": 4096,
+     "tris": 1405,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 3,
+     "colourGroups": 4,
+     "faces": "up"
+    },
+    {
+     "name": "M1_SunGlade_BedFlowers_4",
+     "role": "BedFlowers",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      136,
+      138,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 856,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 4,
+     "colourGroups": 4,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -2967,48 +5139,29 @@
     "Peak",
     "Volcano"
    ],
-   "notes": "the sharp limestone horn-peak (the volcano): base buried at y ~190, ~350 of bare rock with cliff strata from mid-height over a low shoulder; heather and grass on its lower slopes; summit ~y 640",
+   "notes": "the sharp limestone horn-peak (the volcano): base buried at y ~190, ~350 of bare ribbed rock with a dark north couloir over a low shoulder; heather and grass in patches on its lower slopes; summit ~y 640. Parts: Limestone in its tone groups, PeakHeath, PeakGrass.",
    "origin": [
-    1519.863,
+    1313.611,
     0.0,
     -0.0
    ],
    "size": [
-    599.76,
+    642.647,
     450.0,
-    594.274
+    643.632
    ],
    "boundsMin": [
-    -305.882,
+    -300.834,
     0.0,
-    -301.8
+    -350.821
    ],
    "boundsMax": [
-    293.878,
+    341.813,
     450.0,
-    292.474
+    292.811
    ],
    "tris": 2442,
    "parts": [
-    {
-     "name": "M1_Peak_PeakHeath",
-     "role": "PeakHeath",
-     "robloxMaterial": "LeafyGrass",
-     "rgb": [
-      112,
-      86,
-      95
-     ],
-     "collide": true,
-     "collision": "Default",
-     "castShadow": true,
-     "canQuery": true,
-     "canTouch": true,
-     "tags": [],
-     "tris": 304,
-     "metalness": 0.0,
-     "roughness": 0.95
-    },
     {
      "name": "M1_Peak_PeakGrass",
      "role": "PeakGrass",
@@ -3024,18 +5177,21 @@
      "canQuery": true,
      "canTouch": true,
      "tags": [],
-     "tris": 490,
+     "tris": 640,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
-     "name": "M1_Peak_Limestone",
-     "role": "Limestone",
-     "robloxMaterial": "Limestone",
+     "name": "M1_Peak_PeakHeath",
+     "role": "PeakHeath",
+     "robloxMaterial": "LeafyGrass",
      "rgb": [
-      161,
-      157,
-      144
+      112,
+      86,
+      95
      ],
      "collide": true,
      "collision": "Default",
@@ -3043,9 +5199,78 @@
      "canQuery": true,
      "canTouch": true,
      "tags": [],
-     "tris": 1648,
+     "tris": 332,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Peak_Limestone",
+     "role": "Limestone",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      153,
+      149,
+      137
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 774,
+     "metalness": 0.0,
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Peak_Limestone_2",
+     "role": "Limestone",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      142,
+      138,
+      127
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 654,
+     "metalness": 0.0,
+     "roughness": 0.85,
+     "colourGroup": 2,
+     "colourGroups": 3,
+     "faces": "up"
+    },
+    {
+     "name": "M1_Peak_Limestone_3",
+     "role": "Limestone",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      103,
+      101,
+      95
+     ],
+     "collide": true,
+     "collision": "Default",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 42,
+     "metalness": 0.0,
+     "roughness": 0.85,
+     "colourGroup": 3,
+     "colourGroups": 3,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -3060,7 +5285,7 @@
    ],
    "notes": "jointed limestone crag module, 46 wide x 34 tall",
    "origin": [
-    1837.442,
+    1679.125,
     0.0,
     -0.0
    ],
@@ -3086,9 +5311,9 @@
      "role": "Limestone",
      "robloxMaterial": "Limestone",
      "rgb": [
-      164,
-      159,
-      147
+      153,
+      149,
+      133
      ],
      "collide": true,
      "collision": "Default",
@@ -3098,7 +5323,10 @@
      "tags": [],
      "tris": 376,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -3113,7 +5341,7 @@
    ],
    "notes": "jointed limestone crag module, 74 wide x 52 tall",
    "origin": [
-    1892.542,
+    1734.225,
     0.0,
     -0.0
    ],
@@ -3139,9 +5367,9 @@
      "role": "Limestone",
      "robloxMaterial": "Limestone",
      "rgb": [
-      153,
-      149,
-      138
+      151,
+      148,
+      132
      ],
      "collide": true,
      "collision": "Default",
@@ -3151,7 +5379,10 @@
      "tags": [],
      "tris": 1236,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -3166,7 +5397,7 @@
    ],
    "notes": "jointed limestone crag module, 30 wide x 62 tall",
    "origin": [
-    1940.964,
+    1782.647,
     0.0,
     -0.0
    ],
@@ -3192,9 +5423,9 @@
      "role": "Limestone",
      "robloxMaterial": "Limestone",
      "rgb": [
-      152,
-      148,
-      136
+      150,
+      146,
+      130
      ],
      "collide": true,
      "collision": "Default",
@@ -3204,7 +5435,10 @@
      "tags": [],
      "tris": 284,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -3218,7 +5452,7 @@
    ],
    "notes": "white limestone boulder ~3 across",
    "origin": [
-    1959.867,
+    1801.55,
     0.0,
     -0.0
    ],
@@ -3256,7 +5490,10 @@
      "tags": [],
      "tris": 184,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -3270,7 +5507,7 @@
    ],
    "notes": "white limestone boulder ~5 across",
    "origin": [
-    1968.217,
+    1809.9,
     0.0,
     -0.0
    ],
@@ -3308,7 +5545,10 @@
      "tags": [],
      "tris": 176,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -3322,7 +5562,7 @@
    ],
    "notes": "white limestone boulder ~8 across",
    "origin": [
-    1979.196,
+    1820.879,
     0.0,
     -0.0
    ],
@@ -3360,12 +5600,16 @@
      "tags": [],
      "tris": 162,
      "metalness": 0.0,
-     "roughness": 0.85
+     "roughness": 0.85,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
    "pivot": "base centre on the ground (see notes)"
   }
  ],
- "notes": "Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; the Blender previews add +-3-6% facet value jitter and top/underside shading that a later baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."
+ "hornColouring": "b",
+ "notes": "One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) and is also the base colour of the part's material in the GLB (one material per role and colour). A part painted in several colours is exported as its colour groups: <asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the role's Roblox material and collision. The GLB carries no vertex colours and no textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries them). Every part is single-sided; 'faces' says which way an open sheet was turned (up, out from or in toward the asset's vertical axis)."
 }

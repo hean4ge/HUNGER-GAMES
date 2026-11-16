@@ -45,9 +45,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
-      121,
-      103,
-      95
+      124,
+      122,
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -57,16 +57,19 @@
      "tags": [],
      "tris": 3113,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_N_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      71,
+      85,
+      59
      ],
      "collide": false,
      "collision": "Box",
@@ -76,16 +79,19 @@
      "tags": [],
      "tris": 494,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_N_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -95,7 +101,10 @@
      "tags": [],
      "tris": 1893,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -138,9 +147,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
+      124,
       121,
-      103,
-      95
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -150,16 +159,19 @@
      "tags": [],
      "tris": 2984,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_NE_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      50,
-      75,
-      48
+      73,
+      85,
+      60
      ],
      "collide": false,
      "collision": "Box",
@@ -169,16 +181,19 @@
      "tags": [],
      "tris": 511,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_NE_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -188,7 +203,10 @@
      "tags": [],
      "tris": 2005,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -231,9 +249,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
+      124,
       121,
-      103,
-      95
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -243,16 +261,19 @@
      "tags": [],
      "tris": 3125,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_E_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      65,
+      82,
+      56
      ],
      "collide": false,
      "collision": "Box",
@@ -262,16 +283,19 @@
      "tags": [],
      "tris": 606,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_E_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -281,7 +305,10 @@
      "tags": [],
      "tris": 1769,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -325,8 +352,8 @@
      "robloxMaterial": "Grass",
      "rgb": [
       121,
-      103,
-      95
+      116,
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -336,16 +363,19 @@
      "tags": [],
      "tris": 3758,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_SE_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      74,
+      86,
+      60
      ],
      "collide": false,
      "collision": "Box",
@@ -355,16 +385,19 @@
      "tags": [],
      "tris": 893,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_SE_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      154,
+      150,
+      137
      ],
      "collide": false,
      "collision": "Box",
@@ -374,7 +407,10 @@
      "tags": [],
      "tris": 849,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -417,9 +453,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
-      121,
-      103,
-      95
+      118,
+      115,
+      84
      ],
      "collide": false,
      "collision": "Box",
@@ -429,16 +465,19 @@
      "tags": [],
      "tris": 3981,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_S_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      78,
+      88,
+      63
      ],
      "collide": false,
      "collision": "Box",
@@ -448,16 +487,19 @@
      "tags": [],
      "tris": 822,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_S_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      154,
+      150,
+      137
      ],
      "collide": false,
      "collision": "Box",
@@ -467,7 +509,10 @@
      "tags": [],
      "tris": 697,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -510,9 +555,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
-      121,
-      103,
-      95
+      120,
+      116,
+      86
      ],
      "collide": false,
      "collision": "Box",
@@ -522,16 +567,19 @@
      "tags": [],
      "tris": 3393,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_SW_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      75,
+      86,
+      61
      ],
      "collide": false,
      "collision": "Box",
@@ -541,16 +589,19 @@
      "tags": [],
      "tris": 510,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_SW_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -560,7 +611,10 @@
      "tags": [],
      "tris": 1597,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -603,9 +657,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
-      125,
-      127,
-      78
+      124,
+      122,
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -615,16 +669,19 @@
      "tags": [],
      "tris": 3027,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_W_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      76,
-      49
+      70,
+      84,
+      58
      ],
      "collide": false,
      "collision": "Box",
@@ -634,16 +691,19 @@
      "tags": [],
      "tris": 657,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_W_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -653,7 +713,10 @@
      "tags": [],
      "tris": 1816,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
@@ -696,9 +759,9 @@
      "role": "SkylineGrass",
      "robloxMaterial": "Grass",
      "rgb": [
+      124,
       121,
-      103,
-      95
+      87
      ],
      "collide": false,
      "collision": "Box",
@@ -708,16 +771,19 @@
      "tags": [],
      "tris": 3262,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_NW_SkylineForest",
      "role": "SkylineForest",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      50,
-      75,
-      48
+      68,
+      84,
+      56
      ],
      "collide": false,
      "collision": "Box",
@@ -727,16 +793,19 @@
      "tags": [],
      "tris": 568,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     },
     {
      "name": "M1_Skyline_NW_SkylineRock",
      "role": "SkylineRock",
      "robloxMaterial": "Limestone",
      "rgb": [
-      156,
-      152,
-      140
+      155,
+      151,
+      138
      ],
      "collide": false,
      "collision": "Box",
@@ -746,12 +815,16 @@
      "tags": [],
      "tris": 1670,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up"
     }
    ],
    "attachments": {},
    "pivot": "base centre on the ground (see notes)"
   }
  ],
- "notes": "Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; the Blender previews add +-3-6% facet value jitter and top/underside shading that a later baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."
+ "hornColouring": "b",
+ "notes": "One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) and is also the base colour of the part's material in the GLB (one material per role and colour). A part painted in several colours is exported as its colour groups: <asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the role's Roblox material and collision. The GLB carries no vertex colours and no textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries them). Every part is single-sided; 'faces' says which way an open sheet was turned (up, out from or in toward the asset's vertical axis)."
 }

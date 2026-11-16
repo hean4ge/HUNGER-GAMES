@@ -16,6 +16,21 @@ Pass 2b (the review's must-fix items): one Day look lights every sunny match (LO
   cumulus are billowed; the meadow is painted in the brief's own three tints in full-weight patches; the peak is a
   limestone horn over a low shoulder between two heather spurs; the horn's mouths have navy jambs, cobalt panels,
   sunburst fans, hung weapons and bags in the view out of the south mouth.
+Pass 3 (15 Nov 2026, before the map goes into the game for the beta; the owner: "recreate the map of the trailers i
+  sent and images"): only what a player would plainly see as not the trailer's arena, and what the exports got wrong.
+  - The horn is exported in colouring (b), the trailer's blue-teal, navy and gold, as the owner's own frames show it
+    (HORN_COLOURS; MAP1_HORN=a gives the built set's white, plum and gold). Its outside is rebuilt (build_horn):
+    broad folded sails beside narrow dark mouth frames, thin taller fins behind; pass 2's read as a pale cone with
+    thin tusks from every plinth.
+  - The peak is no longer a striped cone (build_peak): no level rows of facets, no hoops, no banded paint.
+  - The flower beds are 12-13.5 wide (pass 2: 17-20), nearer the film's narrow rays (SPOKE_W).
+  - The exports now say what the renders show. Every exported part has ONE colour and its GLB material carries it
+    (pass 2 gave all 18 beds the yellow material and painted two colours into one part); parts painted in several
+    colours are split into colour groups; open sheets are turned the right way (fix_normals: pass 2's far range
+    faced down in places, the horn's inner wall backing and the launch tubes' bores faced out, which Cycles hid).
+  - Map1_Layout.json gains the heart's measured geometry ("heart"), each bed's size, each plinth's stand point and
+    the designed sites on the ground ("sites"), so the game is built from numbers, not from measuring meshes.
+  - New player's-eye shots: fp_plinth_to_horn, fp_plinth_star_side, fp_forest_edge_to_heart.
 
 Size: play radius r 1,800 studs (504 m, the arena is ~1 km across), held in by a force field at r 1,800 (no wall) and
   the invisible Boundary at r 1,900; terrain to r 2,750 (heightmap +-2,752); past that the far range is eight
@@ -23,23 +38,23 @@ Size: play radius r 1,800 studs (504 m, the arena is ~1 km across), held in by a
   all built for this radius.
 Heart (TwoArenas 3.5): knoll y 46 (flat to r 50), star platform deck y 52, 48 plinths at r 150 (y ~44.3, 7.5 deg
   apart, offset 3.75), turf to r 180, protected disc r 0-200 fading out by r 255.
-  - 18 lens-shaped flower beds at 15 deg, from the platform's foot (r 34-69) to r 136, 17-20 wide at the widest
-    (about 1:4-1:5; pass 1 built 9-wide needles), mounded 1.35, in the five-colour cycle. The narrowest turf gap
-    between neighbours and the open lane (half-width 9, the bronze stair's) are logged.
+  - 18 lens-shaped flower beds at 15 deg, from the platform's foot (r 34-69) to r 136, 12-13.5 wide at the widest
+    (about 1:5.5-1:7.5; pass 1 built 9-wide needles, pass 2 17-20), mounded 1.35, in the five-colour cycle. The
+    narrowest turf gap between neighbours and the open lane (half-width 9, the bronze stair's) are logged.
   - Six big pale petals laid along the three mouth lanes: periwinkle-and-white (68 x 16) on the left of each lane
     facing out, marigold (60 x 15) on the right, as T2 @49.9 s shows them.
-  - The horn: inner sails 50 above the deck (narrow blades), outer sails 36 with skirts flared to 22 at the hem (they
-    stand on the star's narrow points), a narrow dark A-frame round each mouth. Colouring (a), the default and the
-    recommendation (decision 2): white sails, muted plum mouth faces, dull gold edges; inside, cobalt walls with gold
-    fans, weapon racks and white supply bags. Colouring (b), blue-grey and teal all over, is a render-only asset
-    (M1_Horn_B) for the owner's question.
+  - The horn (pass 3): a dark walk-in core (apex 44 over the deck) with three A-frame mouths; at each star point a
+    broad folded sail (tip 48 up, ridge sweeping to the deck 38 out) and a thin fin 53 tall behind it. Colouring (b),
+    the default: pale blue-teal sails, navy mouth frames, cobalt inside, gold trim. Colouring (a): white sails, muted
+    plum frames, cobalt inside, dull gold. The one not exported is a render-only asset (M1_Horn_A or M1_Horn_B) for
+    the side-by-side shot. Inside: cobalt panels with gold fans, weapon racks and white supply bags.
 
 Landforms (TwoArenas 3.3): an open valley, not a crater. The bowl round the heart (folds of 15-40 in the Iris) climbs
   100-150 studs between r 500 and r 900 on the North Wood and both shoulders; the lids (a concave climb, 180-430 by
   the field) carry on outside the field into separate summits (640-1,000, at r 2,000-2,600, never one radius) with
   soft, rounded crests. Two passes (SE 129 deg, SW 246 deg) drop the rim to cols and carry the valley on outward into
   lower outer valleys. The volcano (pass 2b): a low, steep-sided shoulder (165 studs) beyond the lake, from which the
-  limestone horn (the peak mesh, base buried at y 190, summit 640) rises with cliff strata from mid-height, between two
+  limestone horn (the peak mesh, base buried at y 190, summit 640) rises, ribbed and couloired, between two
   heather-covered spurs (SPURS) that run in from the lake's sides and converge at its foot, crags on their crests. The
   North Wood rises to the flat Edge (y 240) and its 107-stud cliff over an east-west canyon. Crag bands are patchy
   tilted strata on steep high ground only. No ring wall, no terraces, no plateau ring.
@@ -70,8 +85,13 @@ Run (from the repo root):
   env MAP1_COMPARE  compare-sheet folder (default <MAP1_REF>/compare/Map1). Compare sheets contain film frames, so
                     by default they live beside the references, out of the repo and out of the game (study only).
   env MAP1_REF      reference folder (default %USERPROFILE%/OneDrive/Documents/LastStanding/References)
-  env MAP1_PASS1    a folder of pass 1's renders: also writes compare_passes_<frame>.png (film | pass 1 | pass 2)
+  env MAP1_PASS1    a folder of an earlier pass's renders: also writes compare_passes_<frame>.png (film | that pass
+                    | this one); MAP1_PASS1_LABEL names it on the sheet
   env MAP1_SAMPLES  Cycles samples (default 96); env MAP1_RES = resolution scale (default 1.0)
+  env MAP1_HORN     the horn's exported colouring: b (default) or a
+  env MAP1_BED_W    force one flower-bed width in studs (default: 12-13.5 by length)
+  A run with its own export dir does not touch art/manifests: only a run that exports to the default folder copies
+  the manifests into the repo.
 
 Outputs
   <export dir>/Map1_Height.png         16-bit grey, 1,376 x 1,376, 4 studs/px, y = value / 32 studs
@@ -83,13 +103,18 @@ Outputs
                                        TallGrass, Wildflowers, Crags), 688 x 688 at 8 studs/px (TwoArenas 8.2)
   <export dir>/Map1_BiomeGrid16.json   240 x 240 region ids, 16-stud cells over +-1,920 (Shared.BiomeGrid layout)
   <export dir>/Map1_Terrain.json       grid metadata, legends, palette, stream polyline, lake, trails, slope budget
-  <export dir>/Map1_Layout.json        every landmark placement in Roblox space (the skyline meshes at the centre)
-  <export dir>/Map1_Landmarks.glb + .manifest.json   landmark meshes (pivots, sizes, triangle counts)
+  <export dir>/Map1_Layout.json        "items": every landmark placement in Roblox space (the skyline meshes at the
+                                       centre), with each bed's size and each plinth's stand point; "heart": the
+                                       deck, the mouths, the stairs, the lanes, the horn's measures; "sites": the
+                                       designed sites, runner's flags and berms on the ground (design anchors)
+  <export dir>/Map1_Landmarks.glb + .manifest.json   landmark meshes (pivots, sizes, triangle counts); one colour per
+                                       part, the same in the GLB's material and the manifest's rgb
   <export dir>/Map1_Plants.glb + .manifest.json      faceted PLACEHOLDER plants (layout tests only)
   <export dir>/Map1_Skyline.glb + .manifest.json     the far range: 8 Persistent low-poly sector meshes
   art/manifests/Map1_*.manifest.json   copies of the manifests
   <preview dir>/*.png                  our renders only (no film frames): overview_aerial, birdseye_34, match_<frame>,
-                                       horn_b_t1_40.2s, data_maps (hillshade + slots + layout dots); tones.json
+                                       fp_<view> (a player's eye), horn_a_t1_40.2s (the other colouring), data_maps
+                                       (hillshade + slots + layout dots); tones.json
   <MAP1_COMPARE>/compare_<frame>.png   the film frame (study only) beside our matching render; never in the repo;
                                        compare_passes_<frame>.png, compare_horn_colours_t1_40.2s.png
 """
@@ -136,6 +161,16 @@ COMPARE = os.environ.get("MAP1_COMPARE") or os.path.join(REF, "compare", "Map1")
 SAMPLES = int(os.environ.get("MAP1_SAMPLES", "96"))
 RES_SCALE = float(os.environ.get("MAP1_RES", "1.0"))
 MANIFEST_COPY = os.path.join(REPO, "art", "manifests")
+# the horn's exported colouring (pass 3, the owner's call of 15 Nov 2026): "b", the trailer's blue-grey and teal, is
+# the default; MAP1_HORN=a exports the built set's white, plum and gold instead. The other one is always built too,
+# render-only (M1_Horn_A or M1_Horn_B), for the side-by-side shot.
+HORN = (os.environ.get("MAP1_HORN") or "b").strip().lower()
+if HORN not in ("a", "b"):
+    raise SystemExit("MAP1_HORN must be a or b, not %r" % HORN)
+HORN_ALT = "a" if HORN == "b" else "b"
+# a manifest copy is only written into the repo by a run that exports to the usual folder (a dev run with its own
+# export folder must not overwrite art/manifests)
+DEFAULT_OUT = os.path.abspath(os.path.join(DOCS, "BlenderExports", "Map1"))
 for _d in (OUT, PREV, WORK):
     os.makedirs(_d, exist_ok=True)
 
@@ -177,14 +212,36 @@ PAL = {
     "limestone": (156, 152, 140), "white_boulder": (164, 162, 152), "scree": (140, 124, 104),
     "dark_rock": (108, 106, 100), "pebbles": (124, 118, 104), "mud": (92, 80, 64),
     "water": (40, 94, 100),
-    "sail": (208, 210, 206), "inner": (74, 60, 92), "inner_navy": (64, 60, 88), "gold": (178, 146, 88),
-    "cobalt": (92, 110, 144), "jamb": (57, 68, 89),
+    # "sail", "inner", "cobalt", "jamb" and "horn_gold" are set just below from the chosen colouring (HORN_COLOURS)
+    "gold": (178, 146, 88),
     "cladding": (190, 178, 146), "joint": (160, 150, 124), "glass_band": (70, 120, 128), "bronze": (120, 96, 64),
     "horn_floor": (184, 174, 148), "steel": (150, 152, 150), "copper": (176, 112, 70), "brass": (150, 120, 78),
     "tube_dark": (44, 46, 48), "cape": (214, 212, 206), "skin": (196, 156, 128),
     "golden_grass": (164, 150, 92), "peach": (222, 170, 138), "coral": (210, 120, 104), "violet": (122, 92, 142),
     "tall_grass": (138, 140, 96), "wf_blue": (120, 130, 156), "wf_yellow": (178, 170, 110), "lupin": (120, 104, 168),
 }
+
+# The horn's two colourings (TwoArenas decision 2). sRGB 0-255, in the light band (built surfaces: luma 55-215).
+#   (a) the built set's colours, softened (brief 1.10): white sails, muted plum mouth faces, dull gold, cobalt inside.
+#   (b) the trailer's colouring, as the owner's own frames show it, and the default since 15 Nov 2026 (pass 3). The
+#       values are the frames' own hues with the grade's saturation taken down (brief rule 2-3): the lit sails measure
+#       #578699 (T1 @40.2 s) to #7c91a3 (T2 @43.9 s), hue 195-200 deg, and their shaded sides #215c70 to #1c657d, only
+#       a quarter darker (they are white panels under a bright sky, graded). They are painted #a4c4d4: the same hue
+#       (200 deg), about 0.7x the film's saturation, and lighter than the film's lit side (luma 190, under the 215
+#       cap), because a mid blue goes to dark slate on its shaded side under a hard sun (the first try, #7ea0b2,
+#       did: every backlit view, the owner's frame among them, showed a dark tent) while the film's sails stay pale
+#       from every side; the dark mouth frame measures #17283f (hue 214) and is painted #2c4460
+#       (hue 212, lifted to luma 65 so it never goes black in Roblox); the interior walls measure #435976 / #35597e
+#       (T2 @49.9 s) and keep the brief's cobalt; the trim stays gold, as both trailers show it (the orange line at
+#       the mouth frame's edge in T1 @40.2 s, the gold battens and frame in T2 @49.9 s). Pass 2's (b) had greyed the
+#       gold to teal ("teal all over"), which no frame shows.
+#   jamb = cobalt x 0.62 (the navy jambs and the walls' backing inside).
+HORN_COLOURS = {
+    "a": dict(sail=(208, 210, 206), inner=(74, 60, 92), cobalt=(92, 110, 144), jamb=(57, 68, 89), gold=(178, 146, 88)),
+    "b": dict(sail=(164, 196, 212), inner=(44, 68, 96), cobalt=(86, 108, 146), jamb=(53, 67, 91), gold=(178, 146, 88)),
+}
+for _k, _v in HORN_COLOURS[HORN].items():
+    PAL["horn_gold" if _k == "gold" else _k] = _v
 
 
 def lin(c):
@@ -202,8 +259,10 @@ ROLES = {
     "HornRack": ("Metal", "bronze", 0.6, 0.5, "metal"),
     "HornBlades": ("Metal", "steel", 0.8, 0.4, "metal"),
     "HornBags": ("Fabric", "cape", 0.0, 0.9, "paint"),
-    "HornGold": ("Metal", "gold", 0.7, 0.45, "metal"),
+    "HornGold": ("Metal", "horn_gold", 0.7, 0.45, "metal"),
     "HornFloor": ("Limestone", "horn_floor", 0.0, 0.85, "paint"),
+    # the horn's collision: solid slabs inside the three walls (invisible in game, never drawn in the previews)
+    "HornCollide": ("SmoothPlastic", "jamb", 0.0, 1.0, "none"),
     "Cladding": ("Limestone", "cladding", 0.0, 0.85, "paint"),
     "GlassBand": ("Glass", "glass_band", 0.0, 0.2, "glass"),
     "Bronze": ("Metal", "bronze", 0.6, 0.5, "metal"),
@@ -410,7 +469,13 @@ DOME_Y = [46, 46, 44.3, 43.6, 43.2]
 BED_POSITIONS = [7.5 + 15.0 * k for k in range(24)]
 SPOKE_BEARINGS = [b for b in BED_POSITIONS if min(angd(b, m) for m in (60.0, 180.0, 300.0)) > 10.0]
 SPOKE_OUT = 136.0              # beds end short of the plinths' tube rims (r 146) and the supply bags (r 125-142)
-SPOKE_W = 18.0                 # lens beds 16-20 wide at the widest, about 1:4-1:5 (TwoArenas 3.5; pass 1 was 9 wide)
+# The beds' width at the widest (pass 3). Measured on T1 @1.7 s and T2 @43.9 s against the plinth drums (4.3 studs)
+# and the ring (r 150), the film's long beds are 8-13 studs wide and about 75 long, 1:6 to 1:8: narrow rays with more
+# turf than flowers between them. Pass 1 built 9-wide needles with thin tips; pass 2 over-corrected to 17-20 (1:4 to
+# 1:5, TwoArenas 3.5), which from the owner's frame angle reads as a daisy of fat petals filling the disc. Now 12 to
+# 13.5 (1:5.5 to 1:7.5). MAP1_BED_W=<studs> forces one width (18 gives pass 2's back). The six petals beside the
+# mouth lanes keep their 16 and 15: in the film those are the fat ones.
+SPOKE_W = float(os.environ.get("MAP1_BED_W") or 0.0)
 LANE_HW = 9.0                  # each mouth lane stays open turf as wide as the bronze stair (18)
 # the big pale petals flank each mouth lane, laid along it (lane frame: x out from the centre, y to the right facing
 # out): periwinkle-and-white on the left, marigold on the right, as T2 @49.9 s shows them from inside the south mouth
@@ -773,7 +838,9 @@ def compute_field():
     Fb = np.minimum(Fb, Wst + 0.35)
     d, tpar, Ltot = polyline_dist(X, Y, sp)
     Fg = np.interp(tpar, sL, Fb)
-    Wg = np.interp(tpar, sL, Wst)
+    # each cell takes the level of the nearest point on the stream, never a value between two pools: interpolating
+    # across a step gave nine cells of pass 2b's water raster in-between levels that broke the voxel rule (pass 3)
+    Wg = Wst[np.clip(np.rint(np.interp(tpar, sL, np.arange(len(sL)))), 0, len(sL) - 1).astype(int)]
     hw = 44.0 + 12.0 * nz3(X / 160.0, Y / 160.0)
     cw = 4.6
     start = sstep(0.0, 70.0, tpar)
@@ -944,16 +1011,19 @@ def layout(F):
         b = 3.75 + 7.5 * k
         p = P2(b, RING_R)
         g = ground_at(F, p.x, p.y)
-        L.append(dict(asset="M1_Plinth", pos=(p.x, p.y, g), yaw=-b, index=k, bearing=b))
+        L.append(dict(asset="M1_Plinth", pos=(p.x, p.y, g), yaw=-b, index=k, bearing=b, stand=(p.x, p.y, g + 1.6)))
         L.append(dict(asset="M1_PlateTubeRim", pos=(p.x, p.y, g), yaw=-b, index=k, bearing=b))
     for k, b in enumerate(SPOKE_BEARINGS):
         L.append(dict(asset="M1_Spoke_%02d" % k, pos=tuple(spoke_anchor(b)) + (0.0,), yaw=-b, bearing=b,
-                      colour=SPOKE_COLOURS[k % 5]))
+                      colour=SPOKE_COLOURS[k % 5], shape="lens", length=round(spoke_len(b), 2),
+                      width=round(spoke_width(spoke_len(b)), 2), innerR=round(spoke_rin(b), 2), outerR=SPOKE_OUT))
     for m in MOUTHS:
         for kind in ("periwinkle", "marigold"):
             c, yaw = tear_place(kind, m)
             L.append(dict(asset="M1_Teardrop" + kind.capitalize(), pos=(c.x, c.y, 0.0), yaw=yaw, bearing=m,
-                          note="laid along the %d mouth lane" % m))
+                          colour=kind, shape="tear", length=TEAR[kind]["L"], width=TEAR[kind]["W"],
+                          note="laid along the %d mouth lane, %s facing out; round end toward the horn"
+                               % (m, "left" if TEAR[kind]["y"] < 0 else "right")))
         p = P2(m, LONE_TREE_R)
         L.append(dict(asset="M1_LoneTree", pos=(p.x, p.y, 0.0), yaw=float(m * 1.7 % 360), bearing=m))
     p = P2(*SPIRAL)
@@ -1057,7 +1127,7 @@ def data_stage():
     with open(os.path.join(OUT, "Map1_Terrain.json"), "w") as f:
         json.dump(meta, f, indent=1)
     with open(os.path.join(OUT, "Map1_Layout.json"), "w") as f:
-        json.dump(layout_json(L), f, indent=1)
+        json.dump(layout_json(L, F), f, indent=1)
     np.savez_compressed(os.path.join(WORK, "field.npz"), H=H.astype(np.float32), slot=F["slot"], reg=F["reg"],
                         water=F["water"], water_lv=F["water_lv"].astype(np.float32),
                         slope=F["slope"].astype(np.float32), q=F["q"].astype(np.float32),
@@ -1098,7 +1168,9 @@ def terrain_meta(F):
                    protectedDisc=[200, 255], plinthRing=RING_R),
         plaza=dict(knollY=PLAZA_Y, flatTo=50, deckY=DECK_Y, plinths=N_PLINTH, plinthStep=7.5, plinthOffset=3.75,
                    plinthRingY=round(dome_y(RING_R), 3), plateTubeRadius=3.6,
-                   bedBearings=SPOKE_BEARINGS, mouths=list(MOUTHS)),
+                   bedBearings=SPOKE_BEARINGS, mouths=list(MOUTHS), starPoints=list(STAR_POINTS),
+                   hornColouring=HORN,
+                   bedWidths=sorted({round(spoke_width(spoke_len(b)), 2) for b in SPOKE_BEARINGS})),
         regions=REGIONS, materialSlots={str(k): dict(base=v[0], tint=list(PAL[v[1]]), note=v[2])
                                         for k, v in SLOTS.items()},
         lake=dict(level=LAKE_Y, centre=to_roblox(P2(LAKE["bearing"], LAKE["r"])), semiAxesStuds=[LAKE["ax"],
@@ -1112,17 +1184,104 @@ def terrain_meta(F):
     )
 
 
-def layout_json(L):
+# Game 1's sites as TwoArenas 3.6 and 3.9 place them (bearing, r). They are DESIGN ANCHORS: the generator shapes
+# terrain or places a mesh for only a few of them ("built"); every other one is a point on the ground as it is.
+SITES = [
+    ("B1", "The NW lone tree", 300, 300, "M1_LoneTree"), ("B2", "The NE lone tree", 60, 300, "M1_LoneTree"),
+    ("B3", "The S lone tree", 180, 300, "M1_LoneTree"),
+    ("B4", "The Stepping Stones", 255, 340, "the stream passes here; no stones or ford are modelled"),
+    ("B5", "The Stream Bend", 215, 470, "the stream passes here; no pool or gorse bank is shaped"),
+    ("B6a", "The Gorse Banks", 110, 430, None), ("B6b", "The Daisy Spring", 122, 440, None),
+    ("B7", "The South Fold", 180, 480, None),
+    ("B8a", "The Butterfly Lane (south end)", 5, 560, None), ("B8b", "The Butterfly Lane (north end)", 5, 760, None),
+    ("B9", "The Cress Spring", 20, 520, None),
+    ("B10a", "The West Berms (5)", 320, 450, None), ("B10b", "The East Berms (4)", 75, 480, None),
+    ("C1", "The Crimson Spiral", 330, 900, "M1_CrimsonSpiral"), ("C2", "The Flower-Sun Glade", 60, 1000, "M1_SunGlade"),
+    ("C3", "The wreck", 20, 1250, None), ("C4", "The Fern Pools", 345, 1150, None),
+    ("C5", "The Apple Knoll", 35, 700, None), ("C6", "The North Beach", 180, 800, "the lake's north shore"),
+    ("C7", "The Delta", 197, 790, "the stream's mouth"), ("C8", "The Lake Cave", 150, 980, None),
+    ("C9", "The Flock Scree", 215, 1150, None), ("C10", "The Grotto", 95, 1200, None),
+    ("C11", "The Overhang", 265, 1200, None), ("C12", "The West Gully Pines", 250, 800, None),
+    ("C13", "The East Brook Ford", 100, 700, None), ("C14", "The Burnt Pines", 195, 1280, None),
+    ("D1", "The Hollow Spring", 10, 1480, None), ("D2", "The Hedge Hollow", 0, 1600, "M1_HollyHedge (22 modules)"),
+    ("D3", "The Edge", 0, 1750, "the cliff lip and the canyon are in the terrain"),
+    ("D4", "The Shoulder Cairn", 180, 1250, None), ("D5", "The East Crest", 80, 1600, None),
+    ("D6", "The West Crest", 280, 1600, None),
+] + [("F%d" % (k + 1), "Runner's flag %d" % (k + 1), 22.5 + 45.0 * k, 340, None) for k in range(8)] + [
+    ("S%d" % (k + 1), "Single berm %d" % (k + 1), b, r, None)
+    for k, (b, r) in enumerate(((350, 640), (40, 680), (100, 820), (260, 760), (150, 560), (315, 820), (70, 930)))]
+
+
+def heart_json(F):
+    """the heart's measured geometry for the game, in Roblox space: what stands where, what can be walked on, and
+    the horn's own measures (so nobody has to measure the mesh)"""
+    deck_y = PLAZA_Y + PLATFORM_TOP
+    mouths = []
+    for m in MOUTHS:
+        mouths.append(dict(
+            bearing=m, threshold=to_roblox(P3(m, HORN_RC * 0.5, DECK_Y + 0.06)),
+            openingWidth=HORN_MOUTH_W, openingHeight=HORN_MOUTH_H, frameWidthAtDeck=2.0 * HORN_A_EDGE,
+            stairTop=to_roblox(P3(m, STAIR_R0, deck_y)),
+            stairFoot=to_roblox(P3(m, STAIR_R1, ground_at(F, *P2(m, STAIR_R1)[:2]))), stairWidth=STAIR_W,
+            stairRisers=4, stairRise=1.5,
+            lane=dict(halfWidth=LANE_HW, fromR=STAIR_R1, toR=SPOKE_OUT,
+                      note="open turf from the stair to the ring: no bed lies within halfWidth of this bearing "
+                           "beyond r 20")))
+    sails = [dict(bearing=b, hemTip=to_roblox(P3(b, FOLD_HEM_R, DECK_Y)),
+                  tip=to_roblox(P3(b, FOLD_TIP_R, DECK_Y + FOLD_TIP_Z)),
+                  finTip=to_roblox(P3(b, FIN_TIP_R, DECK_Y + FIN_TIP_Z)),
+                  note="solid: the sail is sealed to the walls up to %d over the deck; nobody gets behind it" % SEAL_Z)
+             for b in STAR_POINTS]
+    return dict(
+        note="measured from the generator's own numbers; Y values are world heights",
+        knollY=PLAZA_Y, deckY=round(deck_y, 3), hornPivotY=DECK_Y, turfRadius=TURF_R, plinthRingRadius=RING_R,
+        heightsNote="deckY is the deck's walkable top; hornPivotY is where the horn asset's pivot stands (its hems "
+                    "sink 0.05 into the deck; Map1_Terrain.json calls this plaza.deckY)",
+        plinth=dict(count=N_PLINTH, standHeight=1.6, drumRadius=2.15, tubeRadius=3.6, rimOuterRadius=4.2,
+                    facing="each tribute faces the centre: CFrame.lookAt(stand, Vector3.new(0, stand.Y, 0))"),
+        deckPolygon=[to_roblox((v.x, v.y, deck_y)) for v in platform_outline()],
+        deckNote="the deck is walkable everywhere outside the horn; it is %.2f above the knoll (a mantle, under the "
+                 "6.5 limit) and the stairs at the mouths are the only steps" % PLATFORM_TOP,
+        horn=dict(colouring=HORN, floorY=round(DECK_Y + 0.06, 3),
+                  floorTriangle=[to_roblox(P3(b, HORN_RC - 0.4, DECK_Y + 0.06)) for b in STAR_POINTS],
+                  floorInradius=round(0.5 * HORN_RC, 2), coreCornerRadius=HORN_RC,
+                  apexY=DECK_Y + HORN_APEX, topY=DECK_Y + FIN_TIP_Z,
+                  rackSpots=[to_roblox(P3(b, 12.5, DECK_Y + 0.06) + P2(b + 90.0, 3.0 * sg)) for b in STAR_POINTS
+                             for sg in (-1, 1)],
+                  rackNote="six weapon racks are modelled on the floor (props in the mesh, not loot); loot for "
+                           "TwoArenas 3.5's interior ring goes at or beside them",
+                  light="the inside needs its own light in game: the Blender previews use a render-only fill"),
+        mouths=mouths, sails=sails)
+
+
+def layout_json(L, F):
     out = []
     for it in L:
         x, y, z = it["pos"]
         e = dict(asset=it["asset"], position=to_roblox((x, y, z)), yawDegrees=round(float(it["yaw"]), 3))
-        for k in ("index", "bearing", "colour", "note"):
+        for k in ("index", "bearing", "colour", "shape", "length", "width", "innerR", "outerR", "note"):
             if k in it:
                 e[k] = it[k]
+        if "stand" in it:
+            e["stand"] = to_roblox(it["stand"])
         out.append(e)
+    sites = []
+    for sid, name, b, r, built in SITES:
+        q = P2(b, r)
+        i = int(np.clip((q.x + HALF) / SPP - 0.5, 0, NF - 1))
+        j = int(np.clip((HALF - q.y) / SPP - 0.5, 0, NF - 1))
+        w = F["water"][max(0, j - 8):j + 9, max(0, i - 8):i + 9]
+        sites.append(dict(id=sid, name=name, bearing=b, r=r, position=to_roblox((q.x, q.y, ground_at(F, q.x, q.y))),
+                          region=REGIONS.get(int(F["reg"][j, i]), "?"), slopeDegrees=round(float(F["slope"][j, i]), 1),
+                          waterWithin32=bool(w.any()), built=built or "nothing: a design anchor only"))
     return dict(space="Roblox (X east, Y up, Z south); yaw about +Y, degrees, applied to the manifest pivot",
-                items=out)
+                hornColouring=HORN, items=out, heart=heart_json(F),
+                sites=dict(note="TwoArenas 3.6 and 3.9's sites, runner's flags and single berms as bearings and "
+                                "radii put on the ground. 'built' says what the generator made there; everything "
+                                "else (springs, pools, the East Brook, fords, caves, the wreck, the kits) is NOT "
+                                "in the terrain or the meshes yet. The eight M1_Berm items above stand at the "
+                                "generator's own positions, not at TwoArenas 3.6's sixteen.",
+                           items=sites))
 
 
 def report_field(F):
@@ -1185,13 +1344,14 @@ def data_preview(F, L):
 class MB:
     """Accumulates polygons with a per-face base colour (sRGB), volume id and paint settings."""
 
-    def __init__(self):
+    def __init__(self, orient=None):
         self.v = []
         self.f = []
         self.base = []
         self.vol = []
         self.paint = []
         self.cur_vol = 0
+        self.orient = orient           # which way an open sheet faces when exported: see fix_normals
 
     def new_vol(self):
         self.cur_vol += 1
@@ -1224,7 +1384,7 @@ class MB:
         return n
 
     def transformed(self, mat):
-        o = MB()
+        o = MB(self.orient)
         o.v = [tuple(mat @ Vector(p)) for p in self.v]
         o.f, o.base, o.vol, o.paint, o.cur_vol = list(self.f), list(self.base), list(self.vol), list(self.paint), \
             self.cur_vol
@@ -1289,11 +1449,55 @@ def box_uv(me, studs_per_tile=8.0):
     me.update()
 
 
-def fix_normals(me):
-    """orient every island's faces consistently outward (face order is preserved)."""
+def fix_normals(me, orient=None):
+    """orient every island's faces consistently outward (face order is preserved).
+
+    A closed island has an outside and Blender finds it. An OPEN island (a ground sheet, a wall face, a tube's bore)
+    has none, and Blender's guess can turn it inside out. Cycles draws both sides, so no render ever shows that, but
+    the exported parts are single-sided and Roblox draws only the front: pass 2's exports had far-range sheets facing
+    down, the horn's inner wall backing facing out and the launch tube's bore facing out. So a part made of open
+    sheets says which way it faces (MB.orient), and each island that disagrees is turned over here:
+      "up"   it faces up on balance (ground sheets, mounds, the peak's slopes);
+      "out"  away from the asset's vertical axis through its origin (walls, drums, bands);
+      "in"   toward that axis (the inside of a wall, a tube's bore)."""
     bm = bmesh.new()
     bm.from_mesh(me)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    if orient:
+        bm.normal_update()
+        bm.faces.index_update()
+        seen = set()
+        flip = []
+        for f0 in bm.faces:
+            if f0.index in seen:
+                continue
+            seen.add(f0.index)
+            stack, island = [f0], []
+            while stack:
+                f = stack.pop()
+                island.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g.index not in seen:
+                            seen.add(g.index)
+                            stack.append(g)
+            score = total = 0.0
+            for f in island:
+                a = f.calc_area()
+                total += a
+                if orient == "up":
+                    score += f.normal.z * a
+                else:
+                    c = f.calc_center_median()
+                    r = Vector((c.x, c.y, 0.0))
+                    if r.length > 1e-6:
+                        score += f.normal.dot(r.normalized()) * a
+            if orient == "in":
+                score = -score
+            if score < -1e-4 * total:                 # a closed island scores 0 and is left alone
+                flip.extend(island)
+        if flip:
+            bmesh.ops.reverse_faces(bm, faces=flip)
     bm.to_mesh(me)
     bm.free()
     me.update()
@@ -1466,12 +1670,29 @@ def lens_bed(mb, L, W, Hh, colour, alt, rng, shape="lens", heads=True, head_scal
 
 
 # ------------------------------------------------------------------------------------------------ the horn
-# the horn's colourings (TwoArenas decision 2): (a) white sails with muted plum and dull gold, a cobalt interior with
-# gold fans (recommended, the default); (b) blue-grey and teal all over, as the trailer's grade shows it
-HORN_COLOURS = {
-    "a": dict(sail=PAL["sail"], inner=PAL["inner"], cobalt=PAL["cobalt"], gold=PAL["gold"]),
-    "b": dict(sail=(150, 170, 180), inner=(46, 84, 98), cobalt=(54, 98, 112), gold=(118, 134, 126)),
-}
+# (the horn's two colourings, HORN_COLOURS, are defined with the palette at the top of the file)
+# The horn's measures, in studs from the deck's centre (Map1_Layout.json "heart" repeats them for the game):
+HORN_RC, HORN_APEX = 21.0, 44.0        # the core: its three base corners (on the star bearings) and its apex
+HORN_A_EDGE = 9.5                      # the dark mouth frame's half-width at the deck
+HORN_MOUTH_W, HORN_MOUTH_H = 14.0, 16.0
+FOLD_TIP_R, FOLD_TIP_Z, FOLD_HEM_R, SEAL_Z = 14.0, 48.0, 38.0, 16.0      # the broad folded sails
+FOLD_SWEEP = 2.6                       # how hollow the ridge's sweep is (1 = a straight ridge)
+FIN_TIP_R, FIN_TIP_Z = 7.5, 53.0                                         # the thin fins behind them
+PLATFORM_R, PLATFORM_CLIP, PLATFORM_TOP = 50.0, 5.0, 6.05               # the star platform over the knoll
+STAIR_R0, STAIR_R1, STAIR_W = 24.6, 33.0, 18.0                          # the bronze stairs at the mouths
+
+
+def platform_outline():
+    """the star platform's six corners in plan (a triangle with its points at the star bearings, clipped), sorted
+    round the centre"""
+    V = [P2(b, PLATFORM_R) for b in STAR_POINTS]
+    out = []
+    for k in range(3):
+        vk, vprev, vnext = V[k], V[k - 1], V[(k + 1) % 3]
+        out.append(vk + (vprev - vk).normalized() * PLATFORM_CLIP)
+        out.append(vk + (vnext - vk).normalized() * PLATFORM_CLIP)
+    out.sort(key=lambda v: math.atan2(v.y, v.x))
+    return out
 
 
 def quarter_plate(mb, c, u, v, r, out_n, t, col, n=6):
@@ -1520,19 +1741,6 @@ def sail_surface(mb, rows, apex, thick, col, paint):
     return outer, a_o
 
 
-def sail_rows(rad, tang, spec, nseg, pleat):
-    """spec: list of (z, centre r, half-width, corner sweep): concave rows that flare out at the hem."""
-    rows = []
-    for z, rc, hw, sweep in spec:
-        row = []
-        for i in range(nseg + 1):
-            s_ = -1 + 2 * i / nseg
-            rr = rc + sweep * s_ ** 4 + (pleat if (i % 2 and z < 1.0) else 0.0)
-            row.append(rad * rr + tang * (hw * s_) + Vector((0.0, 0.0, z)))
-        rows.append(row)
-    return rows
-
-
 def build_rack(mb_frame, mb_blade, origin, face_dir, side_dir, rng):
     """a weapon rack: two posts and two rails, with swords, a spear and an axe resting on it (props, not loot)."""
     o = Vector(origin)
@@ -1577,17 +1785,30 @@ def wall_hooks(mb_frame, mb_blade, base, side, up, out, rise, rng):
     strip(mb_blade, a0 + up * 0.35 - side * 0.1, a0 + up * 0.35 + side * 1.0, out, 0.75, 0.1, PAL["steel"])   # head
 
 
-def build_horn(colours="a"):
-    """The horn (TwoArenas 3.5, decision 2): six sails in three pairs round a hollow walk-in core. The inner sails
-    stand 50 above the deck; the outer sails (36) flare at the foot like tent skirts, 22 wide at the hem, their
-    edges bowing in at mid-height (pass 1's narrow A-frame read as a closed cone). The three A-frame mouths (16 x 14)
-    face 60/180/300; their outer faces are muted plum, the inside is cobalt with gold fans rising from quarter-circle
-    plates, with weapon racks and white supply bags on the cream floor."""
-    C = HORN_COLOURS[colours]
+def build_horn(colours=None):
+    """The horn (TwoArenas 3.5, decision 2): three pairs of sails round a hollow walk-in core, our own design in the
+    film's shape.
+
+    Pass 3 (15 Nov 2026) rebuilt the outside, because pass 2's read the wrong way round from the plinths: a wide pale
+    cone in the middle (the core's walls were painted white beside each mouth) with thin tusks standing clear of it
+    (the outer sails faced the star points, so every mouth view saw them edge-on). The trailer's horn (T1 @40.2 s,
+    T2 @43.9 s) reads as two BROAD pale sails sweeping down and out from high tips, a narrow dark mouth frame between
+    them, and two thinner, taller blades behind. So now:
+      - the core's three walls are dark outside from corner to corner (the mouth frame's colour): one colour per part;
+      - at each star point stands one broad folded sail: its ridge runs along the star's bearing from a tip 48 over
+        the deck (14 out) in a hollow sweep down to the deck 38 out (a slender blade that flares near the deck), and
+        its two faces run back to the mouth frames of the walls on either side, sealed to them up to 16 studs and
+        standing free above, flaring at the hem like
+        a tent's skirt. From a mouth lane you see one face of each neighbour, broad, right beside the dark frame;
+      - behind each sail a thin fin 53 tall rises from the core's edge: the taller, thinner blade of the pair;
+      - the dark core's apex (44) shows between them: five separate points against the sky, as in the trailer.
+    The inside is unchanged: three A-frame mouths (16 tall, 14 wide) at 60/180/300, cobalt panels, gold fans rising
+    from quarter-circle plates, weapon racks and white supply bags on the cream floor."""
+    C = HORN_COLOURS[colours or HORN]
     rng = random.Random(SEED + 101)
     parts = {"HornSail": MB(), "HornInner": MB(), "HornJamb": MB(), "HornCobalt": MB(), "HornGold": MB(),
-             "HornFloor": MB(), "HornRack": MB(), "HornBlades": MB(), "HornBags": MB()}
-    RC, APEX = 21.0, 44.0
+             "HornFloor": MB(), "HornRack": MB(), "HornBlades": MB(), "HornBags": MB(), "HornCollide": MB()}
+    RC, APEX, A_EDGE = HORN_RC, HORN_APEX, HORN_A_EDGE
     apex = Vector((0.0, 0.0, APEX))
     sail_paint = (0.02, 0.025, 0.05, 0.12)
     G = parts["HornGold"]
@@ -1597,18 +1818,20 @@ def build_horn(colours="a"):
         mid = (a + b) * 0.5
         ab = (b - a)
         lab = ab.length
-        h = 7.0 / lab
+        h = 0.5 * HORN_MOUTH_W / lab
         o1 = a + ab * (0.5 - h)
         o2 = a + ab * (0.5 + h)
-        ot = mid + (apex - mid) * (16.0 / APEX)
+        ot = mid + (apex - mid) * (HORN_MOUTH_H / APEX)
         nrm = (b - a).cross(apex - a).normalized()
         if nrm.dot(mid) < 0:
             nrm = -nrm
         th = 0.6
-        # the outer face: a narrow dark A-frame (plum) round the mouth, white either side of it, so from outside the
-        # mouth reads as the film's tall narrow dark spike between white sails; the inside is all cobalt
-        s1 = a + ab * (0.5 - 9.5 / lab)
-        s2 = a + ab * (0.5 + 9.5 / lab)
+        # the outer face is dark from corner to corner (pass 3): the mouth frame's colour. The broad sails (below)
+        # start at s1 and s2, A_EDGE either side of the wall's middle, so what shows between them is the film's tall
+        # narrow dark frame; pass 2 painted the wall white outside s1..s2, which made the core a wide pale cone.
+        # The inside is all cobalt.
+        s1 = a + ab * (0.5 - A_EDGE / lab)
+        s2 = a + ab * (0.5 + A_EDGE / lab)
         outer = [a, s1, o1, ot, o2, s2, b, apex]
         inner = [p - nrm * th for p in outer]
         P_o, P_i = parts["HornInner"], parts["HornJamb"]          # the wall's inside: navy jambs and the backing
@@ -1616,14 +1839,25 @@ def build_horn(colours="a"):
         ii = P_i.add_verts(inner)
         P_o.new_vol()
         P_i.new_vol()
-        for tri, colk in (((1, 2, 3), "inner"), ((1, 3, 7), "inner"), ((3, 4, 5), "inner"), ((3, 5, 7), "inner"),
-                          ((0, 1, 7), "sail"), ((5, 6, 7), "sail")):
-            P_o.face([io[k] for k in tri[::-1]], C[colk], sail_paint)
+        for tri in ((1, 2, 3), (1, 3, 7), (3, 4, 5), (3, 5, 7), (0, 1, 7), (5, 6, 7)):
+            P_o.face([io[k] for k in tri[::-1]], C["inner"], sail_paint)
             # the inside of the wall: the navy jambs beside the opening and the backing the cobalt panels sit on
-            P_i.face([ii[k] for k in tri], tuple(np.array(C["cobalt"]) * 0.62), (0.02, 0.03, 0.05, 0.1))   # = jamb
+            P_i.face([ii[k] for k in tri], C["jamb"], (0.02, 0.03, 0.05, 0.1))
         io2 = P_o.add_verts(inner)
         for k0, k1 in ((2, 3), (3, 4), (0, 1), (1, 2), (4, 5), (5, 6), (6, 7), (7, 0)):
             P_o.face([io[k0], io2[k0], io2[k1], io[k1]], C["inner"], sail_paint)
+        # the wall's collision (pass 3): two closed convex slabs, one each side of the opening and meeting above
+        # it (a-o1-ot-apex and o2-b-apex-ot), sunk 0.05 inside both faces of the wall so they never show
+        Pc = parts["HornCollide"]
+        for ring in ((a, o1, ot, apex), (o2, b, apex, ot)):
+            Pc.new_vol()
+            front = Pc.add_verts([q - nrm * 0.05 for q in ring])
+            back = Pc.add_verts([q - nrm * (th - 0.05) for q in ring])
+            Pc.face(front, C["jamb"])
+            Pc.face(back[::-1], C["jamb"])
+            for k0 in range(4):
+                k1 = (k0 + 1) % 4
+                Pc.face([front[k0], back[k0], back[k1], front[k1]], C["jamb"])
         # gold strips round the opening and up the A-frame edges (0.4 wide, proud 0.12)
         for p0, p1 in ((o1, ot), (ot, o2), (s1 + (apex - s1) * 0.02, apex), (s2 + (apex - s2) * 0.02, apex)):
             strip(G, p0, p1, nrm, 0.4, 0.12, C["gold"])
@@ -1721,24 +1955,63 @@ def build_horn(colours="a"):
     for i in range(3):
         j = (i + 1) % 3
         parts["HornFloor"].face([lo_[i], lo_[j], hi_[j], hi_[i]], PAL["horn_floor"])
-    # sails: one tall inner sail and one flared outer sail at each star point
+    # ---- the sails (pass 3; see the docstring). In each star point's own frame, u runs out along the star's bearing
+    # and v along its tangent. The mouth frames' feet nearest the star sit on the two walls that meet at the star's
+    # corner (u = RC): d_c back along each wall, at (foot_u, -/+ foot_v); a frame's edge runs from there to the apex.
     S = parts["HornSail"]
+    lab = 2.0 * RC * math.sin(math.radians(60.0))
+    d_c = 0.5 * lab - A_EDGE
+    foot_u = RC - d_c * math.cos(math.radians(30.0))
+    foot_v = d_c * math.sin(math.radians(30.0))
+    # (height, how far the hem's skirt billows out from the flat face): a tent skirt at the deck, a taut blade above
+    FOLD_ROWS = ((0.0, 5.5), (3.0, 4.4), (7.0, 3.2), (11.0, 2.2), (SEAL_Z, 1.4), (24.0, 0.8), (33.0, 0.35),
+                 (41.0, 0.1))
+
+    def fold_inner(z, sgn):
+        """the fold's inner edge: on the mouth frame's edge up to SEAL_Z, then straight to the tip"""
+        k = 1.0 - min(z, SEAL_Z) / APEX
+        u, v = foot_u * k, sgn * foot_v * k
+        if z > SEAL_Z:
+            t = (z - SEAL_Z) / (FOLD_TIP_Z - SEAL_Z)
+            u, v = u + (FOLD_TIP_R - u) * t, v * (1.0 - t)
+        return u, v
+
     for p in STAR_POINTS:
-        tang = P2(p + 90.0, 1.0)
         rad = P2(p, 1.0)
-        # the inner sail: a tall narrow blade, its tip (54 over the deck... 50 + a 4-stud point) leaning in
-        rows = sail_rows(rad, tang, [(0.0, 23.5, 11.5, 0.5), (16.0, 19.0, 7.6, 0.0), (34.0, 13.6, 4.0, 0.0)], 8, 1.0)
-        sail_surface(S, rows, rad * 8.0 + Vector((0, 0, 50.0)), 0.5, C["sail"], sail_paint)
-        # the outer sail: shorter, standing clear of the inner one, its skirt flaring to 22 at the hem
-        # (the hem stays on the star's point: 22 wide at r 29-31, where the point is 22 wide)
-        spec = [(0.0, 29.0, 11.0, 2.0), (3.0, 27.4, 9.6, 1.0), (10.0, 25.2, 6.6, 0.4), (20.0, 22.6, 3.8, 0.0)]
-        rows = sail_rows(rad, tang, spec, 10, 0.8)
-        apex_o = rad * 19.5 + Vector((0, 0, 36.0))
-        sail_surface(S, rows, apex_o, 0.45, C["sail"], sail_paint)
-        for side in (0, -1):                                         # gold edge strips up both skirts
-            pts = [r[side] + Vector((0, 0, 0.1)) for r in rows] + [apex_o]
-            for k in range(len(pts) - 1):
-                strip(G, pts[k], pts[k + 1], tang * (1 if side else -1), 0.35, 0.1, C["gold"])
+        tang = P2(p + 90.0, 1.0)
+
+        def at(u, v, z):
+            return rad * u + tang * v + Vector((0.0, 0.0, z))
+
+        rows = []
+        for z, billow in FOLD_ROWS:
+            # the ridge's sweep: a slender blade for most of its height, flaring out only near the deck (the
+            # first try, a nearly straight ridge, made the two sails beside a mouth read as one blunt tent)
+            ur = FOLD_TIP_R + (FOLD_HEM_R - FOLD_TIP_R) * (1.0 - z / FOLD_TIP_Z) ** FOLD_SWEEP
+            row = []
+            for sgn in (-1.0, 1.0):
+                u, v = fold_inner(z, sgn)
+                um = u + 0.5 * (ur - u)
+                vm = 0.5 * v + sgn * billow
+                row.append([at(u, v, z), at(um, vm, z)])
+            rows.append(row[0] + [at(ur, 0.0, z)] + row[1][::-1])
+        sail_surface(S, rows, at(FOLD_TIP_R, 0.0, FOLD_TIP_Z), 0.45, C["sail"], sail_paint)
+        # the fin: a thin blade in the star's radial plane, its foot buried in the core's edge (which runs from the
+        # star corner, u = RC at the deck, to the apex) from 14 to 41 up, its tip the highest point of the horn
+        fin = [(RC * (1.0 - 41.0 / APEX) - 0.4, 41.0), (RC * (1.0 - 14.0 / APEX) - 0.4, 14.0), (9.6, 32.0),
+               (FIN_TIP_R, FIN_TIP_Z)]
+        S.new_vol()
+        ht = 0.3
+        fa = S.add_verts([at(u, -ht, z) for u, z in fin])
+        fb = S.add_verts([at(u, ht, z) for u, z in fin])
+        for i in (1, 2):
+            S.face([fa[0], fa[i], fa[i + 1]], C["sail"], sail_paint)
+            S.face([fb[0], fb[i + 1], fb[i]], C["sail"], sail_paint)
+        for i in range(len(fin)):
+            j = (i + 1) % len(fin)
+            S.face([fa[i], fb[i], fb[j], fa[j]], C["sail"], sail_paint)
+        for (u0, z0), (u1, z1) in ((fin[1], fin[2]), (fin[2], fin[3])):          # a gold cap up the fin's outer edge
+            strip(G, at(u0, 0.0, z0), at(u1, 0.0, z1), rad, 0.9, 0.15, C["gold"])
     return parts
 
 
@@ -1824,17 +2097,8 @@ def fan(mb, base, upper, thick, col, paint, rows=False):
 def build_platform():
     parts = {"Cladding": MB(), "GlassBand": MB(), "Bronze": MB()}
     Cl, Gl, Br = parts["Cladding"], parts["GlassBand"], parts["Bronze"]
-    V = [P2(p, 50.0) for p in STAR_POINTS]
-    out = []
-    for k in range(3):
-        vk = V[k]
-        vprev = V[k - 1]
-        vnext = V[(k + 1) % 3]
-        out.append(vk + (vprev - vk).normalized() * 5.0)
-        out.append(vk + (vnext - vk).normalized() * 5.0)
-    # out: 6 points CCW? order them by angle
-    out.sort(key=lambda v: math.atan2(v.y, v.x))
-    Z0, Z1, ZB0, ZB1, ZC = -1.0, 6.0, 4.6, 5.8, 6.05
+    out = platform_outline()
+    Z0, Z1, ZB0, ZB1, ZC = -1.0, 6.0, 4.6, 5.8, PLATFORM_TOP
     pp = (0.03, 0.03, 0.05, 0.1)
     # backing prism (joints show as the darker backing)
     n = len(out)
@@ -1888,8 +2152,9 @@ def build_platform():
     for m in MOUTHS:
         Br.new_vol()
         for i in range(4):
-            r1 = 25.0 + 2.0 * (4 - i)
-            box(Br, (-9.0, 24.6, Z0), (9.0, r1, 1.5 * (i + 1)), PAL["bronze"], mat=frame_at((0, 0, 0), m),
+            r1 = STAIR_R1 - 2.0 * i
+            box(Br, (-0.5 * STAIR_W, STAIR_R0, Z0), (0.5 * STAIR_W, r1, 1.5 * (i + 1)), PAL["bronze"],
+                mat=frame_at((0, 0, 0), m),
                 paint=(0.02, 0.03, 0.06, 0.15), skip_bottom=True)
     return parts
 
@@ -1956,12 +2221,15 @@ def spoke_rc(b):
 
 
 def spoke_width(L):
-    return float(np.clip(0.21 * L, 17.0, 20.0))
+    if SPOKE_W > 0.0:
+        return SPOKE_W
+    return float(np.clip(0.15 * L, 12.0, 13.5))
 
 
 def build_spoke(k, heads=True):
-    """a lens-shaped flower bed (TwoArenas 3.5): from the platform's foot to r 136, 16-20 wide at the widest, mounded
-    about 1.35, packed with faceted flower heads in its colour (a signal: the beds are the hazards)."""
+    """a lens-shaped flower bed (TwoArenas 3.5): from the platform's foot to r 136, 12-13.5 wide at the widest (see
+    SPOKE_W), mounded about 1.35, packed with faceted flower heads in its colour (a signal: the beds are the
+    hazards)."""
     b = SPOKE_BEARINGS[k]
     L = spoke_len(b)
     W = spoke_width(L)
@@ -2331,72 +2599,108 @@ def build_crag(seed, W, Hh, D):
 
 def build_peak():
     """the volcano: a sharp limestone horn-peak (too thin for terrain, ArenaV3 7.1), like the Pico of T2 @49.9 s.
-    A ring-and-segment shell (not a convex hull, so gullies and ledges stay concave): a four-arete section that
-    narrows and leans south-east to a hooked summit, stepped strata every ~20 studs, cliff facets of 8-20 studs,
-    painted in tilted bedding bands with grassy ledges and a dark gully down the north face (the throat).
-    Two lower shoulder towers sit either side. The base is buried in the terrain shoulder."""
+    A ring-and-segment shell (not a convex hull, so couloirs and ledges stay concave): a ribbed section that narrows
+    and leans south-east to a hooked summit, with a dark couloir down the north face (the throat), a north
+    fore-summit and two lower shoulder towers. The base is buried in the terrain shoulder.
+
+    Pass 3 (15 Nov 2026): pass 2b's peak read as a striped cone from the heart and through the south mouth. Every
+    ring of facets was level, every other ring stepped out as a ledge all the way round, and the paint ran in level
+    bands of grey, green and heather. Now the rings are staggered and their heights wander (no level rows of
+    facets), the ledges are three broken ones, the ribs and couloirs run UP the face (one angular profile on every
+    ring, with a slow twist), and the paint follows the rock: paler where a facet faces the sky, darker in the
+    couloirs, in a few quiet tones; grass and heather only on the gentle ground low down, in patches."""
     rng = random.Random(SEED + 500)
     nzp = Noise(SEED + 501)
     lime, core = MB(), MB()
     TOP = 640.0
-    heath = np.array(PAL["heath"])
-    green = np.array(PAL["dry"]) * 0.55 + np.array(PAL["meadow"]) * 0.4
+    heath_t = tuple(np.array(PAL["heath"]) * 0.95)
+    green_t = tuple(np.array(PAL["dry"]) * 0.55 + np.array(PAL["meadow"]) * 0.4)
+    ledge_t = tuple(np.array(PAL["dry"]) * 0.9)
+    throat_t = tuple(np.array(PAL["dark_rock"]) * 0.95)
+    paint = (0.03, 0.035, 0.05, 0.12)
 
     def tower(cx, cy, base_r, height, lean, rot, rings, segs, aretes=4, gully=None, salt=0, strata_from=0.4,
               power=1.3):
-        """a faceted rock tower: concave (a horn, not a cone), aretes, and from strata_from of its height up,
-        stepped cliff strata (a ledge every other ring) painted in alternating bedding bands; below that, steep
-        slopes with heather and grass on the ledges"""
+        """a faceted rock tower: concave (a horn, not a cone), ribbed, with broken ledges from strata_from of its
+        height up; below that, steep slopes with heather and grass in patches"""
+        dz = height / rings
+        ledges = [rng.uniform(0.46, 0.56), rng.uniform(0.63, 0.72), rng.uniform(0.79, 0.86)]
+
+        def ribs(tw):
+            return (0.26 * abs(math.cos(aretes / 2.0 * tw)) ** 3 + 0.10 * math.cos(5.0 * tw + 1.3 * salt)
+                    + 0.05 * math.cos(9.0 * tw + 2.1 * salt) + 0.10 * math.cos(tw - 0.8 - 1.1 * salt))
+
         ring_ids = []
         for i in range(rings + 1):
             f = i / rings
-            z = height * f
-            step = 1.0 + (0.075 if i % 2 else -0.045) * (strata_from < f < 0.93)     # cliff strata, mid-height up
-            env = base_r * (1.0 - f) ** power * step + 2.5
+            env = base_r * (1.0 - f) ** power + 2.5
             ox, oy = cx + lean[0] * f ** 1.4, cy + lean[1] * f ** 1.4
             ids = []
             for j in range(segs):
-                th = TAU * j / segs + rot
-                ar = 1.0 + 0.24 * abs(math.cos(aretes / 2.0 * (th - rot))) ** 3       # aretes
-                n = float(nzp(math.cos(th) * 2.0 + salt, z / 60.0 + math.sin(th) * 2.0))
-                r = env * ar * (1.0 + 0.1 * n)
+                th = TAU * (j + 0.5 * (i % 2)) / segs + rot              # staggered: no level rows of facets
+                n = float(nzp(math.cos(th) * 2.0 + salt, height * f / 60.0 + math.sin(th) * 2.0))
+                r = env * (1.0 + ribs(th - rot + 0.5 * f)) * (1.0 + 0.09 * n)
+                if f > strata_from:
+                    for lf in ledges:                                    # a ledge only part of the way round
+                        w = float(nzp(math.cos(th) * 1.3 + salt * 7.0 + lf * 31.0, math.sin(th) * 1.3))
+                        d = (f - lf) * rings
+                        if w > 0.0 and -0.5 <= d < 0.5:
+                            r *= 1.0 + 0.08 * min(1.0, 3.0 * w)          # its lip
+                        elif w > 0.0 and 0.5 <= d < 1.5:
+                            r *= 1.0 - 0.06 * min(1.0, 3.0 * w)          # the wall set back above it
                 if gully is not None:
                     d = abs(((th - gully + math.pi) % TAU) - math.pi)
                     r *= 1.0 - 0.16 * max(0.0, 1.0 - d / 0.45) * (0.15 < f < 0.85)
+                z = height * f
+                if 0 < i < rings:
+                    z += 0.36 * dz * float(nzp(th * 1.9 + salt * 5.0 + 11.0, i * 0.83))
                 ids.append(len(lime.v))
                 lime.v.append((ox + r * math.cos(th), oy + r * math.sin(th), z))
             ring_ids.append(ids)
         lime.new_vol()
+        lime_c = np.array(PAL["limestone"])
         for i in range(rings):
             a, b = ring_ids[i], ring_ids[i + 1]
             for j in range(segs):
                 k = (j + 1) % segs
-                for tri in ((a[j], a[k], b[k]), (a[j], b[k], b[j])):
-                    p0, p1, p2 = (Vector(lime.v[t]) for t in tri)
-                    nrm = (p1 - p0).cross(p2 - p0)
-                    nz_ = nrm.normalized().z if nrm.length > 0 else 0.0
-                    c = (p0 + p1 + p2) / 3.0
-                    f = c.z / height
-                    band = int((c.z + 0.18 * c.x - 0.1 * c.y) // 23.0)
-                    tone = np.array(PAL["limestone"]) * (1.03 if (band + salt) % 2 else 0.92)   # quiet bedding
-                    # patchy cover from a smooth noise round the tower (blobs of ~40-60 studs, never stripes)
-                    th_p = math.atan2(c.y - cy, c.x - cx)
-                    cover = float(nzp(math.cos(th_p) * 2.6 + salt * 3.1, c.z / 55.0 + math.sin(th_p) * 2.6))
-                    if f < strata_from:                     # the steep lower slopes: heather and grass over rock
-                        if cover > -0.25 + 0.5 * f / strata_from or nz_ > 0.6:
-                            tone = heath * 0.95 if cover > 0.15 else green
-                    elif f < 0.6 and nz_ > 0.55:
-                        tone = np.array(PAL["dry"]) * 0.9                                     # grassy ledges
-                    if gully is not None:
-                        th_c = math.atan2(c.y - cy, c.x - cx)
-                        if abs(((th_c - gully + math.pi) % TAU) - math.pi) < 0.3 and c.z > height * 0.3:
-                            tone = np.array(PAL["dark_rock"]) * 0.95       # the throat
-                    lime.face(list(tri), tuple(tone), (0.03, 0.035, 0.05, 0.12))
+                if i % 2 == 0:
+                    tris = ((a[j], a[k], b[j]), (a[k], b[k], b[j]))
+                else:
+                    tris = ((a[j], a[k], b[k]), (a[j], b[k], b[j]))
+                # one tone for the cell (both of its triangles), from where the cell is and how it lies, so the
+                # paint makes patches of facets and never a checker of single triangles
+                quad = [Vector(lime.v[t]) for t in (a[j], a[k], b[k], b[j])]
+                c = sum(quad, Vector((0.0, 0.0, 0.0))) / 4.0
+                nrm = (quad[1] - quad[0]).cross(quad[3] - quad[0]) + (quad[2] - quad[1]).cross(quad[3] - quad[1])
+                nz_ = abs(nrm.normalized().z) if nrm.length > 0 else 0.0
+                f = c.z / height
+                th_p = math.atan2(c.y - cy, c.x - cx)
+                # the rock: broad soft patches (never level bands), paler toward the sky, darker in the couloirs;
+                # kept to a few steps so the exported colour groups stay few
+                patch = float(nzp(math.cos(th_p) * 1.7 + salt * 3.1 + 5.0, c.z / 85.0 + math.sin(th_p) * 1.7))
+                couloir = max(0.0, -math.cos(5.0 * (th_p - rot + 0.5 * f) + 1.3 * salt))
+                k_tone = 0.93 + 0.11 * nz_ + 0.06 * patch - 0.09 * couloir
+                tone = tuple(lime_c * (round(k_tone / 0.07) * 0.07))
+                # the lower slopes wear grass, then heather, then bare rock, each line wandering round the tower
+                # (higher in the couloirs' lee, lower on the ribs): zones, as on a real mountain, not a checker
+                wob = float(nzp(math.cos(th_p) * 1.1 + salt * 3.1, math.sin(th_p) * 1.1 + 9.0))
+                wob2 = float(nzp(math.cos(th_p) * 1.6 + salt * 5.3 + 4.0, math.sin(th_p) * 1.6))
+                if f < strata_from * (0.62 + 0.16 * wob):
+                    tone = green_t
+                elif f < strata_from * (1.0 + 0.2 * wob2):
+                    tone = heath_t
+                elif f < 0.6 and nz_ > 0.6:
+                    tone = ledge_t                                                            # grassy ledges
+                if gully is not None:
+                    if abs(((th_p - gully + math.pi) % TAU) - math.pi) < 0.3 and c.z > height * 0.3:
+                        tone = throat_t                                                       # the throat
+                for tri in tris:
+                    lime.face(list(tri), tone, paint)
         top = ring_ids[-1]
         apex = len(lime.v)
         lime.v.append((cx + lean[0] + 2.0, cy + lean[1] - 3.0, height + 9.0))
         for j in range(segs):
-            lime.face([top[j], top[(j + 1) % segs], apex], PAL["limestone"], (0.03, 0.035, 0.05, 0.12))
+            lime.face([top[j], top[(j + 1) % segs], apex], tuple(lime_c), paint)
 
     # main horn (PEAK_H tall above its buried base, ~350 of bare rock over the shoulder), leaning south-east; the
     # throat gully faces north (+y), toward the horn's south mouth
@@ -2404,11 +2708,10 @@ def build_peak():
     tower(-158.0, 30.0, 120.0, 250.0, (-12.0, -8.0), 0.9, 12, 16, salt=1, strata_from=0.35)    # west shoulder tower
     tower(160.0, -8.0, 110.0, 220.0, (14.0, -6.0), 0.2, 11, 16, salt=2, strata_from=0.35)      # east shoulder
     tower(-30.0, 118.0, 100.0, 255.0, (12.0, -24.0), 1.3, 12, 16, salt=3, strata_from=0.35)    # north fore-summit
-    # the heather and grass faces become their own parts, so the game's flat per-part colours keep them
-    heath_t, green_t = tuple(heath * 0.95), tuple(green)
-    parts = split_parts(lime, lambda c: "PeakHeath" if abs(c[0] - heath_t[0]) < 9 and abs(c[2] - heath_t[2]) < 9
-                        and c[0] > c[1] else ("PeakGrass" if (c[1] >= c[0] - 2 and c[0] - c[2] > 30)
-                                              or tuple(c) == green_t else "Limestone"))
+    # the heather and grass faces become their own parts, so the game's flat per-part colours keep them; the rock's
+    # few tones (and the dark throat) become the Limestone part's colour groups at export
+    kinds = {heath_t: "PeakHeath", green_t: "PeakGrass", ledge_t: "PeakGrass"}
+    parts = split_parts(lime, lambda c: kinds.get(tuple(c), "Limestone"))
     parts["DarkRock"] = core
     return parts, TOP
 
@@ -2419,7 +2722,7 @@ def split_parts(mb, classify):
     remap = {}
     for k, fc in enumerate(mb.f):
         role = classify(mb.base[k])
-        p = out.setdefault(role, MB())
+        p = out.setdefault(role, MB(mb.orient))
         rm = remap.setdefault(role, {})
         ids = []
         for i in fc:
@@ -2557,18 +2860,30 @@ def build_tribute(seed):
 # ================================================================================================ assets registry
 class Asset:
     def __init__(self, name, kind, parts, tags=(), notes="", collide=None, export=True, glb="Map1_Landmarks",
-                 attachments=None):
+                 attachments=None, split=None, orient=None, tol=34.0, extra=None):
         self.name, self.kind, self.parts = name, kind, parts
         self.tags, self.notes, self.export, self.glb = list(tags), notes, export, glb
         self.collide = collide or {}
         self.attachments = attachments or {}
         self.render_obj = None
+        # one-off pieces are exported one colour per part (export_glbs); scattered kinds keep one part per role, so
+        # a boulder or a tree stays as few instances as it was
+        self.split = (kind in ("Landmark", "FlowerBed", "FlowerBedFar", "Hazard")) if split is None else split
+        self.tol = tol                 # how far apart two painted colours must be to become two parts
+        self.extra = extra or {}       # more fields for the asset's manifest entry
+        for role, way in (orient or {}).items():      # which way this asset's open sheets face (fix_normals)
+            if role in parts:
+                parts[role].orient = way
 
 
 COLLIDE = {   # role -> (collide, CollisionFidelity, castShadow)
-    "HornSail": (True, "PreciseConvexDecomposition", True), "HornInner": (True, "PreciseConvexDecomposition", True),
-    "HornCobalt": (True, "PreciseConvexDecomposition", True), "HornRack": (True, "Box", True),
-    "HornJamb": (True, "PreciseConvexDecomposition", True),
+    # The horn's walls collide through HornCollide (six closed convex slabs inside the walls' thickness), not through
+    # their own faces: HornInner, HornJamb and HornCobalt are open sheets and small panels, which make poor or heavy
+    # colliders. HornRack must NOT be a Box: the part holds every rack and hook in the horn, so its bounding box is
+    # the whole interior (pass 2 said Box: the horn would have been a solid block nobody could enter).
+    "HornSail": (True, "PreciseConvexDecomposition", True), "HornInner": (False, "Box", True),
+    "HornCobalt": (False, "Box", True), "HornRack": (False, "Box", True),
+    "HornJamb": (False, "Box", True), "HornCollide": (True, "PreciseConvexDecomposition", False),
     "HornBlades": (False, "Box", False), "HornBags": (False, "Box", True),
     "HornGold": (False, "Box", False), "HornFloor": (True, "Box", True), "Cladding": (True, "Hull", True),
     "GlassBand": (False, "Box", False), "Bronze": (True, "PreciseConvexDecomposition", True),
@@ -2591,43 +2906,70 @@ def build_assets():
         A[a.name] = a
 
     log("assets: heart")
-    add(Asset("M1_Horn_B", "RenderOnly", build_horn("b"), export=False))     # decision 2 (b), for the owner's question
-    add(Asset("M1_Horn", "Landmark", build_horn("a"), tags=["Horn", "Cornucopia"],
-              notes="6 sails in 3 pairs round a hollow walk-in core; mouths (A-frames 16 x 14) at 60/180/300; inner "
-                    "sails 50 above the deck, outer 36 with skirts flared to 22 at the hem; colouring (a): white sails, "
-                    "muted plum mouth faces, dull gold edges, a cobalt interior with gold fans, weapon racks and "
-                    "supply bags (decision 2). Pivot: deck centre (world y 52).",
+    # the other colouring, render-only, for the side-by-side shot (decision 2)
+    horn_faces = {"HornInner": "out", "HornJamb": "in", "HornCobalt": "in"}
+    horn_extra = dict(collisionNote="the walls collide through M1_Horn_HornCollide: six closed convex slabs inside "
+                                    "the walls (invisible: set Transparency 1, CastShadow false). The wall faces, "
+                                    "the panels, the racks and the trim do not collide. The sails and fins collide "
+                                    "as modelled (closed shells). The floor is HornFloor (a slab, Box).",
+                      invisibleParts=["M1_Horn_HornCollide"])
+    add(Asset("M1_Horn_" + HORN_ALT.upper(), "RenderOnly", build_horn(HORN_ALT), export=False, orient=horn_faces))
+    add(Asset("M1_Horn", "Landmark", build_horn(HORN), tags=["Horn", "Cornucopia", "Colouring_" + HORN.upper()],
+              notes="3 pairs of sails round a hollow walk-in core (base corners 21 from the axis, apex 44 over the "
+                    "deck); mouths (A-frames 16 tall, 14 wide) at 60/180/300 in dark frames 19 wide at the deck; at "
+                    "each star point (0/120/240) one broad folded sail (tip 48 up and 14 out, ridge sweeping down to "
+                    "the deck 38 out, sealed to the walls up to 16) and behind it a thin fin 53 tall. Colouring (%s): "
+                    "%s. Inside: cobalt panels, gold fans, weapon racks and supply bags (props, not loot). "
+                    "Pivot: deck centre (world y 52)."
+                    % (HORN, "the trailer's: pale blue-teal sails, navy mouth frames, cobalt inside, gold trim"
+                       if HORN == "b" else "the built set's: white sails, muted plum mouth frames, cobalt inside, "
+                                           "dull gold trim"),
+              orient=horn_faces,
+              extra=dict(horn_extra, colouring=HORN, colourings={
+                  k: {"HornSail": list(v["sail"]), "HornInner": list(v["inner"]), "HornCobalt": list(v["cobalt"]),
+                      "HornJamb": list(v["jamb"]), "HornGold": list(v["gold"])} for k, v in HORN_COLOURS.items()},
+                  colouringsNote="both colourings share this mesh: to switch, set these parts' colours (the "
+                                 "HornRack's second colour group is the gold too)"),
               attachments={"Mouth_%d" % m: dict(position=to_roblox(P3(m, 11.0, 0.0)),
                                                  look=to_roblox(P2(m, 1.0)), up=[0, 1, 0]) for m in MOUTHS}))
     add(Asset("M1_Platform", "Landmark", build_platform(), tags=["HornPlatform"],
               notes="three-pointed star (triangle, points r 50 at 0/120/240, clipped), 6 high above the knoll (y 46 "
                     "-> deck 52), embedded 1 stud; bronze steps (18 wide, 4 x 1.5) at the mouths. Pivot: knoll level.",
+              orient={"Cladding": "out", "GlassBand": "out"},
               attachments={"Deck": dict(position=[0, 6.05, 0], look=[0, 0, -1], up=[0, 1, 0])}))
     add(Asset("M1_Plinth", "Landmark", build_plinth(), tags=["Plinth"],
               notes="brushed steel drum 4.3 x 1.6 with a 0.25 copper top plate; hidden 0.8 below the turf. Pivot: turf.",
+              orient={"Steel": "out", "Copper": "up"},
               attachments={"Stand": dict(position=[0, 1.6, 0], look=[0, 0, -1], up=[0, 1, 0])}))
     add(Asset("M1_PlateTubeRim", "Landmark", build_rim(), tags=["PlateCollar"],
-              notes="brass rim 8.4 across (PlateTube r 3.6), flush with the turf, plus the dark tube wall to -2.5."))
+              orient={"Brass": "up", "TubeDark": "in"},
+              notes="brass rim 8.4 across (PlateTube r 3.6), flush with the turf, plus the dark tube wall to -2.5 "
+                    "(the bore faces inward: you look down into it)."))
     add(Asset("M1_TubeShadow", "RenderOnly", build_tube_shadow(), export=False))
     log("assets: beds")
     for k in range(len(SPOKE_BEARINGS)):
         parts, L, col, W = build_spoke(k)
         add(Asset("M1_Spoke_%02d" % k, "FlowerBed", parts, tags=["FlowerBed", "Hazard", col],
+                  orient={"BedFlowers": "up"},
                   notes="lens-shaped flower bed %.1f x %.1f x 1.35 (%s, 1:%.1f), long axis along Roblox -Z (north, i.e. "
                         "outward when yawed to its bearing)" % (L, W, col, L / W)))
         add(Asset("M1_Spoke_%02d_Far" % k, "FlowerBedFar", build_spoke_far(k), tags=["FarMesh"],
+                  orient={"BedFlowers": "up"},
                   notes="far mesh of M1_Spoke_%02d (no flower heads)" % k))
     bed_overlap_report()
     add(Asset("M1_TeardropPeriwinkle", "FlowerBed", build_teardrop("periwinkle"), tags=["FlowerBed", "Hazard"],
+              orient={"BedFlowers": "up"},
               notes="the big pale petal, periwinkle and white, %d x %d (the owner's 'pale radial pattern'), laid along "
                     "the mouth lane on its left; round end toward Roblox +Z (inward)" % (TEAR["periwinkle"]["L"],
                                                                                            TEAR["periwinkle"]["W"])))
     add(Asset("M1_TeardropMarigold", "FlowerBed", build_teardrop("marigold"), tags=["FlowerBed", "Hazard"],
+              orient={"BedFlowers": "up"},
               notes="marigold petal %d x %d, laid along the mouth lane on its right" % (TEAR["marigold"]["L"],
                                                                                        TEAR["marigold"]["W"])))
-    add(Asset("M1_Berm", "FlowerBed", build_berm(), tags=["Berm", "Hatch"],
+    add(Asset("M1_Berm", "FlowerBed", build_berm(), tags=["Berm", "Hatch"], orient={"BedFlowers": "up"},
               notes="round berm 8.4 x 1.5 of one poisonous flower with a brass plaque (may hide a Sub-A hatch)"))
     add(Asset("M1_FuseDaisy", "Hazard", build_fuse_daisy(), tags=["Hazard", "FuseDaisy"],
+              orient={"Petals": "up", "Copper": "up"},
               notes="the exploding-bed tell: a 1.2-stud metal daisy with a copper fuse centre"))
     log("assets: set pieces")
     add(Asset("M1_LoneTree", "Tree", build_broadleaf(SEED + 900, 30.0, lobes=(8, 9), pts=26, roundish=True),
@@ -2638,11 +2980,13 @@ def build_assets():
     add(Asset("M1_HollyHedge", "Landmark", build_holly(), tags=["HollyHedge", "Maze"],
               notes="holly hedge module 12 long, 16 tall, 5 thick; red berries are the ladybug-mutt tell"))
     add(Asset("M1_SunGlade", "Landmark", build_sunglade(), tags=["SunGlade", "Lure"],
+              orient={"Grass": "up", "BedFlowers": "up"},
               notes="24-stud golden grass circle ringed by peach pompoms with 16 flower spokes 12-20 long"))
     peak, top = build_peak()
-    add(Asset("M1_Peak", "Landmark", peak, tags=["Peak", "Volcano"],
-              notes="the sharp limestone horn-peak (the volcano): base buried at y ~190, ~350 of bare rock with cliff "
-                    "strata from mid-height over a low shoulder; heather and grass on its lower slopes; summit ~y 640"))
+    add(Asset("M1_Peak", "Landmark", peak, tags=["Peak", "Volcano"], orient={r: "up" for r in peak}, tol=18.0,
+              notes="the sharp limestone horn-peak (the volcano): base buried at y ~190, ~350 of bare ribbed rock "
+                    "with a dark north couloir over a low shoulder; heather and grass in patches on its lower "
+                    "slopes; summit ~y 640. Parts: Limestone in its tone groups, PeakHeath, PeakGrass."))
     for i, (w, h, d) in enumerate(((46.0, 34.0, 26.0), (74.0, 52.0, 34.0), (30.0, 62.0, 26.0))):
         add(Asset("M1_Crag_%s" % "ABC"[i], "Rock", build_crag(SEED + 520 + i, w, h, d), tags=["Crag", "Limestone"],
                   notes="jointed limestone crag module, %d wide x %d tall" % (w, h)))
@@ -2673,7 +3017,7 @@ def build_assets():
     log("assets: skyline (the far range)")
     for nm, parts in build_skyline().items():
         add(Asset("M1_Skyline_" + nm, "Skyline", parts, tags=["Skyline", "Persistent", "NoCollision", "NoShadow"],
-                  glb="Map1_Skyline",
+                  glb="Map1_Skyline", orient={r: "up" for r in parts},
                   notes="far range sector %s (45 deg), r 2,600-7,600, in world space: place at the map centre, "
                         "ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false" % nm))
     for a in A.values():
@@ -2831,7 +3175,7 @@ def render_object(asset, coll):
     mats = []
     for role, part in asset.parts.items():
         kind = ROLES[role][4]
-        if not part.f:
+        if not part.f or kind == "none":          # "none": a collision proxy, exported but never drawn
             continue
         mb.extend(part)
         mats.extend([KIND_INDEX[kind]] * len(part.f))
@@ -2871,32 +3215,36 @@ def export_glbs(A):
             emp.location = (x, 0.0, 0.0)
             parts = []
             tris_total = 0
-            for i, (role, part) in enumerate(a.parts.items()):
-                if not part.f:
+            for role, whole in a.parts.items():
+                if not whole.f:
                     continue
-                me = bpy.data.meshes.new("%s_%s" % (a.name, role))
-                me.from_pydata(part.v, [], part.f)
-                me.update()
-                fix_normals(me)
-                box_uv(me)
-                try:
-                    me.shade_flat()
-                except AttributeError:
-                    pass
-                mat = flat_material(role)
-                me.materials.append(mat)
-                ob = bpy.data.objects.new("%s_%s" % (a.name, role), me)
-                root_col.objects.link(ob)
-                ob.parent = emp
-                objs.append(ob)
-                tri = part.tris()
-                tris_total += tri
-                rmat, pkey, metal, rough, _ = ROLES[role]
-                col, colfid, shadow = COLLIDE.get(role, (False, "Box", True))
-                parts.append(dict(name="%s_%s" % (a.name, role), role=role, robloxMaterial=rmat,
-                                  rgb=list(part_rgb(part)), collide=col, collision=colfid, castShadow=shadow,
-                                  canQuery=col, canTouch=col, tags=[], tris=tri,
-                                  metalness=metal, roughness=rough))
+                # one colour per exported part (pass 3): a part painted in several colours is split into its colour
+                # groups, the largest keeping the part's name, so the flat per-part colour the game gets is the paint
+                groups = colour_groups(whole, tol=a.tol) if a.split else [(whole, part_rgb(whole))]
+                for gi, (part, rgb) in enumerate(groups):
+                    pname = "%s_%s" % (a.name, role) + ("" if gi == 0 else "_%d" % (gi + 1))
+                    me = bpy.data.meshes.new(pname)
+                    me.from_pydata(part.v, [], part.f)
+                    me.update()
+                    fix_normals(me, part.orient)
+                    box_uv(me)
+                    try:
+                        me.shade_flat()
+                    except AttributeError:
+                        pass
+                    me.materials.append(flat_material(role, rgb))
+                    ob = bpy.data.objects.new(pname, me)
+                    root_col.objects.link(ob)
+                    ob.parent = emp
+                    objs.append(ob)
+                    tri = part.tris()
+                    tris_total += tri
+                    rmat, pkey, metal, rough, _ = ROLES[role]
+                    col, colfid, shadow = COLLIDE.get(role, (False, "Box", True))
+                    parts.append(dict(name=pname, role=role, robloxMaterial=rmat, rgb=list(rgb), collide=col,
+                                      collision=colfid, castShadow=shadow, canQuery=col, canTouch=col, tags=[],
+                                      tris=tri, metalness=metal, roughness=rough, colourGroup=gi + 1,
+                                      colourGroups=len(groups), faces=part.orient or "closed or as modelled"))
             objs.append(emp)
             manifest_assets.append(dict(
                 name=a.name, kind=a.kind, tags=a.tags, notes=a.notes, origin=to_roblox((x, 0.0, 0.0)),
@@ -2904,7 +3252,7 @@ def export_glbs(A):
                 boundsMin=[round(float(lo[0]), 3), round(float(lo[2]), 3), round(float(-hi[1]), 3)],
                 boundsMax=[round(float(hi[0]), 3), round(float(hi[2]), 3), round(float(-lo[1]), 3)],
                 tris=tris_total, parts=parts, attachments=a.attachments,
-                pivot="base centre on the ground (see notes)"))
+                pivot="base centre on the ground (see notes)", **a.extra))
             x += hi[0] + 2.0
         path = os.path.join(OUT, glb + ".glb")
         bpy.context.view_layer.update()
@@ -2917,9 +3265,16 @@ def export_glbs(A):
                    axes="Roblox: X east, Y up, Z south (glTF +Y up; Blender (x,y,z) -> Roblox (x,z,-y))",
                    generator="art/blender/map1_green_land.py", seed=SEED, warnings=[],
                    placeholder=(glb == "Map1_Plants"), assets=manifest_assets,
-                   notes=("Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; "
-                          "the Blender previews add +-3-6% facet value jitter and top/underside shading that a later "
-                          "baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."))
+                   hornColouring=HORN,
+                   notes=("One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) "
+                          "and is also the base colour of the part's material in the GLB (one material per role and "
+                          "colour). A part painted in several colours is exported as its colour groups: "
+                          "<asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the "
+                          "role's Roblox material and collision. The GLB carries no vertex colours and no "
+                          "textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender "
+                          "previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries "
+                          "them). Every part is single-sided; 'faces' says which way an open sheet was turned "
+                          "(up, out from or in toward the asset's vertical axis)."))
         for a in manifest_assets:
             if a["tris"] > 20000:
                 man["warnings"].append("%s over 20k triangles" % a["name"])
@@ -2929,7 +3284,7 @@ def export_glbs(A):
         mpath = os.path.join(OUT, glb + ".manifest.json")
         with open(mpath, "w") as f:
             json.dump(man, f, indent=1)
-        if os.path.isdir(MANIFEST_COPY):
+        if os.path.isdir(MANIFEST_COPY) and os.path.normcase(OUT) == os.path.normcase(DEFAULT_OUT):
             shutil.copy2(mpath, os.path.join(MANIFEST_COPY, os.path.basename(mpath)))
         log("EXPORTED %s (%.2f MB), %d assets, %d warnings" % (path, os.path.getsize(path) / 1e6,
                                                                  len(manifest_assets), len(man["warnings"])))
@@ -2943,30 +3298,82 @@ def export_glbs(A):
 _flat_cache = {}
 
 
-def flat_material(role):
-    if role in _flat_cache:
-        return _flat_cache[role]
+def flat_material(role, rgb=None):
+    """one flat material per role and colour, so the GLB itself shows each part in its painted colour (pass 2 gave
+    every part of a role the role's palette colour: all 18 flower beds were yellow in the file)."""
     rmat, pkey, metal, rough, _ = ROLES[role]
-    m = bpy.data.materials.new("Map1_" + role)
+    rgb = tuple(int(c) for c in (rgb if rgb is not None else PAL[pkey]))
+    key = (role, rgb)
+    if key in _flat_cache:
+        return _flat_cache[key]
+    m = bpy.data.materials.new("Map1_%s_%02x%02x%02x" % ((role,) + rgb))
     try:
         m.use_nodes = True
     except Exception:
         pass
     m.use_backface_culling = True          # glTF doubleSided false: single-sided, as the pipeline requires
     b = m.node_tree.nodes.get("Principled BSDF")
-    b.inputs["Base Color"].default_value = (*lin(PAL[pkey]), 1.0)
+    b.inputs["Base Color"].default_value = (*lin(rgb), 1.0)
     b.inputs["Metallic"].default_value = metal
     b.inputs["Roughness"].default_value = rough
-    _flat_cache[role] = m
+    _flat_cache[key] = m
     return m
 
 
+def face_areas(mb):
+    V = np.asarray(mb.v, np.float64)
+    out = np.zeros(len(mb.f))
+    for k, fc in enumerate(mb.f):
+        p = V[list(fc)]
+        n = np.zeros(3)
+        for i in range(1, len(fc) - 1):
+            n = n + np.cross(p[i] - p[0], p[i + 1] - p[0])
+        out[k] = 0.5 * np.linalg.norm(n)
+    return out
+
+
 def part_rgb(part):
-    """the dominant base colour of a part (sRGB)."""
+    """a part's one flat colour (sRGB): the base colour that covers most of its area, or, for a part painted in many
+    tones (the far range, the peak, a crag), the area-weighted mean of them (taken in linear light)."""
     if not part.base:
         return (128, 128, 128)
-    cols, counts = np.unique(np.round(np.asarray(part.base)).astype(int), axis=0, return_counts=True)
-    return tuple(int(c) for c in cols[np.argmax(counts)])
+    cols, inv = np.unique(np.round(np.asarray(part.base)).astype(int), axis=0, return_inverse=True)
+    area = np.bincount(np.asarray(inv).ravel(), weights=face_areas(part), minlength=len(cols))
+    if len(cols) <= 3:
+        return tuple(int(c) for c in cols[np.argmax(area)])
+    mean = (lin(cols) * area[:, None]).sum(0) / max(float(area.sum()), 1e-9)
+    srgb = np.where(mean <= 0.0031308, mean * 12.92, 1.055 * np.clip(mean, 0, None) ** (1 / 2.4) - 0.055) * 255.0
+    return tuple(int(round(float(c))) for c in srgb)
+
+
+def colour_groups(mb, tol=34.0, max_groups=4, min_share=0.04):
+    """a part's faces grouped by painted colour: [(MB, rgb)], the largest area first. Colours within tol (RGB
+    distance) of a group's own colour join it; so does any colour covering under min_share of the area, and
+    everything once there are max_groups. Each group's rgb is the colour covering most of its area."""
+    if not mb.f:
+        return []
+    base = np.round(np.asarray(mb.base, np.float64)).astype(int)
+    cols, inv = np.unique(base, axis=0, return_inverse=True)
+    inv = np.asarray(inv).ravel()
+    area = np.bincount(inv, weights=face_areas(mb), minlength=len(cols))
+    total = float(area.sum()) or 1.0
+    centres, assign = [], np.zeros(len(cols), int)
+    for ci in np.argsort(-area):
+        c = cols[ci].astype(float)
+        if centres:
+            d = [float(np.linalg.norm(c - cc)) for cc in centres]
+            k = int(np.argmin(d))
+            if d[k] <= tol or len(centres) >= max_groups or area[ci] < min_share * total:
+                assign[ci] = k
+                continue
+        centres.append(c)
+        assign[ci] = len(centres) - 1
+    if len(centres) == 1:
+        return [(mb, part_rgb(mb))]
+    lut = {tuple(int(v) for v in c): int(assign[i]) for i, c in enumerate(cols)}
+    groups = split_parts(mb, lambda c: lut[tuple(int(round(float(v))) for v in c)])
+    garea = {g: float(face_areas(p).sum()) for g, p in groups.items()}
+    return [(groups[g], part_rgb(groups[g])) for g in sorted(groups, key=lambda g: -garea[g])]
 
 
 # ================================================================================================ STAGE: scene
@@ -3697,8 +4104,10 @@ def scene_stage(A):
             x, y, z = it["pos"]
             place(fig, (x, y, z + 1.6), it["yaw"] + 180.0 + random.Random(it["index"]).uniform(-25, 25),
                   cols["M1_Figures"])
-    hb = place(A["M1_Horn_B"], (0.0, 0.0, DECK_Y), 0.0, cols["M1_Heart"], name="M1_Horn_B")
+    alt_name = "M1_Horn_" + HORN_ALT.upper()
+    hb = place(A[alt_name], (0.0, 0.0, DECK_Y), 0.0, cols["M1_Heart"], name=alt_name)
     hb.hide_render = True
+    sc["m1_horn"] = HORN                 # which colouring the object "M1_Horn" carries (apply_shot reads it)
     # the horn's interior is lit on set (T2 @49.9 s shows navy walls and gold battens, not a black hole): a soft
     # warm fill under the apex, render-only (the game needs its own light inside the horn)
     li = bpy.data.lights.new("M1_HornFill", "POINT")
@@ -4015,6 +4424,16 @@ SHOTS = {
     "match_t2_128.7s": dict(cam=None, along_stream=0.36, height=2.6, side=9.0, pitch=1.0, vfov=44.0, res=(1600, 684),
                             sun=(215.0, 40.0), exposure=0.1, ref="trailer/trailer2_128.7s.png",
                             label="OFFICIAL TRAILER 2 @128.7 S"),
+    # pass 3: what a player sees (no film frame behind these). The eye is EYE_H over the feet and the lens is the
+    # game's own (Config.Camera.BaseFov = 72 degrees vertical, 16:9). "plinth" stands the camera on that plinth's
+    # copper plate, facing the horn; "edge" walks out from the heart along that bearing to the first trees and
+    # turns round.
+    "fp_plinth_to_horn": dict(plinth=24, pitch=7.0, vfov=72.0, res=(1920, 1080), sun=(135.0, 48.0), exposure=0.0,
+                              ref=None),
+    "fp_plinth_star_side": dict(plinth=16, pitch=7.0, vfov=72.0, res=(1920, 1080), sun=(135.0, 48.0), exposure=0.0,
+                                ref=None),
+    "fp_forest_edge_to_heart": dict(edge=352.0, pitch=-1.5, vfov=72.0, res=(1920, 1080), sun=(135.0, 48.0),
+                                    exposure=0.0, ref=None),
     # review shots (rendered only when named): the heart close up and from above
     "review_heart_close": dict(cam=tuple(P3(60.0, 105.0, 62.0)), yaw=240.0, pitch=4.0, vfov=50.0, res=(1600, 900),
                                sun=(150.0, 45.0), exposure=0.0, ref=None, review=True),
@@ -4023,11 +4442,27 @@ SHOTS = {
 }
 
 
-# the horn's other colouring (decision 2 b: blue-grey and teal all over) is lit exactly as the T1 @40.2 s match, so
-# only the horn differs between the two
-SHOTS["horn_b_t1_40.2s"] = dict(SHOTS["match_t1_40.2s"], horn="b", ref=None)
+# the horn's other colouring (decision 2) is lit exactly as the T1 @40.2 s match, so only the horn differs between
+# the two: horn_a_t1_40.2s when the default is (b), horn_b_t1_40.2s when it is (a)
+ALT_SHOT = "horn_%s_t1_40.2s" % HORN_ALT
+SHOTS[ALT_SHOT] = dict(SHOTS["match_t1_40.2s"], horn=HORN_ALT, ref=None)
 SHOT_KEYS = {"cam", "yaw", "pitch", "vfov", "res", "sun", "exposure", "look", "ref", "label", "review", "horn",
-             "along_stream", "height", "side"}
+             "along_stream", "height", "side", "plinth", "edge", "eye"}
+EYE_H = 4.8                    # the first-person eye over the feet of a 5.5-stud player
+
+
+def forest_edge(D, bearing, r0=330.0, r1=1500.0, dens=0.3, back=24.0):
+    """walk out from the heart along a bearing to where the conifers begin, and step back onto the open ground"""
+    m = D["m_Conifer"]
+    r = r0
+    while r < r1:
+        p = P2(bearing, r)
+        i = int(np.clip((p.x + HALF) / SPP - 0.5, 0, NF - 1))
+        j = int(np.clip((HALF - p.y) / SPP - 0.5, 0, NF - 1))
+        if float(m[max(0, j - 2):j + 3, max(0, i - 2):i + 3].mean()) > dens:
+            break
+        r += 8.0
+    return max(r0, r - back)
 
 
 def apply_shot(sc, name, S, D=None):
@@ -4040,7 +4475,18 @@ def apply_shot(sc, name, S, D=None):
     cam.data.angle = math.radians(S["vfov"])
     cam.data.clip_start = 0.3
     cam.data.clip_end = 40000.0
-    if S.get("cam") is None:
+    if "plinth" in S:                                                    # standing on a plinth, facing the horn
+        b = 3.75 + 7.5 * S["plinth"]
+        p = P2(b, RING_R)
+        loc = Vector((p.x, p.y, ground_from(D, p.x, p.y) + 1.6 + S.get("eye", EYE_H)))
+        yaw = (b + 180.0 + S.get("yaw", 0.0)) % 360.0
+    elif "edge" in S:                                                    # at the forest's edge, looking back
+        r = forest_edge(D, S["edge"])
+        p = P2(S["edge"], r)
+        loc = Vector((p.x, p.y, ground_from(D, p.x, p.y) + S.get("eye", EYE_H)))
+        yaw = (S["edge"] + 180.0 + S.get("yaw", 0.0)) % 360.0
+        log("shot %s: the forest's edge on bearing %.0f is at r %.0f (y %.1f)" % (name, S["edge"], r, loc.z))
+    elif S.get("cam") is None:
         sp, sL = D["st_path"], D["st_sL"]
         t = S["along_stream"] * sL[-1]
         k = int(np.searchsorted(sL, t))
@@ -4095,11 +4541,17 @@ def apply_shot(sc, name, S, D=None):
         if m is not None:
             m.node_tree.nodes["EmissionScale"].inputs[1].default_value = LK[key + "_em"]
             m.node_tree.nodes["DensityScale"].inputs[1].default_value = LK[key + "_dens"]
-    alt = S.get("horn") == "b"
-    for nm, show in (("M1_Horn", not alt), ("M1_Horn_B", alt)):
+    # which horn shows: the shot's colouring, else the scene's default ("M1_Horn"; a pass 2 scene's default was a)
+    default = sc.get("m1_horn", "a")
+    want = S.get("horn") or default
+    for nm, colouring in (("M1_Horn", default), ("M1_Horn_A", "a"), ("M1_Horn_B", "b")):
         ob = bpy.data.objects.get(nm)
         if ob is not None:
-            ob.hide_render = not show
+            ob.hide_render = colouring != want
+    figs = bpy.data.collections.get("M1_Figures")
+    if figs is not None:                 # a first-person shot from a plinth: the camera is that plinth's tribute
+        for ob in figs.objects:
+            ob.hide_render = "plinth" in S and math.hypot(ob.location.x - loc.x, ob.location.y - loc.y) < 1.0
     for ob in bpy.data.objects:
         if ob.name.startswith("M1_CloudMist"):
             ob.hide_render = not LK.get("mist", False)
@@ -4275,7 +4727,7 @@ def resize(a, h_new):
     return np.clip(top * (1 - fy) + bot * fy, 0, 255).astype(np.uint8)
 
 
-OURS_LABEL = "OURS, PASS 2B: BLENDER ITERATION, PLACEHOLDER PLANTS"     # critic #16: every sheet says so
+OURS_LABEL = "OURS, PASS 3: BLENDER ITERATION, PLACEHOLDER PLANTS"      # critic #16: every sheet says so
 
 
 def sheet(panels, labels, colours, Hh=600):
@@ -4316,19 +4768,20 @@ def compare_stage():
         log("COMPARE", out)
         p1 = os.path.join(pass1, name + ".png") if pass1 else ""
         if p1 and os.path.exists(p1):
-            img = sheet([ref, load_rgb(p1), ours], ["FILM (STUDY ONLY)", "PASS 1 (14 NOV 17:35)", OURS_LABEL],
+            img = sheet([ref, load_rgb(p1), ours],
+                        ["FILM (STUDY ONLY)", os.environ.get("MAP1_PASS1_LABEL", "PASS 1 (14 NOV 17:35)"), OURS_LABEL],
                         [(236, 210, 150), (200, 200, 200), (190, 230, 190)], Hh=480)
             out = os.path.join(COMPARE, "compare_passes_" + name.replace("match_", "") + ".png")
             png_write(out, img)
             made.append(out)
             log("COMPARE", out)
-    # the horn's two colourings (decision 2), beside the film's horn
-    pa, pb = os.path.join(PREV, "match_t1_40.2s.png"), os.path.join(PREV, "horn_b_t1_40.2s.png")
+    # the horn's two colourings (decision 2), beside the film's horn: the exported one first
+    pa, pb = os.path.join(PREV, "match_t1_40.2s.png"), os.path.join(PREV, ALT_SHOT + ".png")
     ref_p = os.path.join(REF, SHOTS["match_t1_40.2s"]["ref"])
-    if (not SHOT_FILTER or "horn_b_t1_40.2s" in SHOT_FILTER) and all(os.path.exists(x) for x in (pa, pb, ref_p)):
+    names = {"a": "HORN (A): WHITE, PLUM, GOLD, COBALT INSIDE", "b": "HORN (B): THE TRAILER'S BLUE-TEAL, NAVY, GOLD"}
+    if (not SHOT_FILTER or ALT_SHOT in SHOT_FILTER) and all(os.path.exists(x) for x in (pa, pb, ref_p)):
         img = sheet([load_rgb(ref_p), load_rgb(pa), load_rgb(pb)],
-                    ["FILM T1 @40.2 S (STUDY ONLY)", "HORN (A): WHITE, PLUM, GOLD, COBALT INSIDE",
-                     "HORN (B): BLUE-GREY AND TEAL ALL OVER"],
+                    ["FILM T1 @40.2 S (STUDY ONLY)", names[HORN] + " - EXPORTED", names[HORN_ALT]],
                     [(236, 210, 150), (190, 230, 190), (190, 230, 190)], Hh=480)
         draw_text(img, 16, img.shape[0] - 14, OURS_LABEL, 2, (190, 230, 190))
         out = os.path.join(COMPARE, "compare_horn_colours_t1_40.2s.png")

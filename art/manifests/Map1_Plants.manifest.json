@@ -55,16 +55,19 @@
      "tags": [],
      "tris": 19,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Fir_A_Needles",
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      51,
-      77,
-      50
+      50,
+      74,
+      48
      ],
      "collide": false,
      "collision": "Box",
@@ -74,7 +77,10 @@
      "tags": [],
      "tris": 262,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -127,16 +133,19 @@
      "tags": [],
      "tris": 19,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Fir_B_Needles",
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      48,
-      72,
-      46
+      50,
+      74,
+      48
      ],
      "collide": false,
      "collision": "Box",
@@ -146,7 +155,10 @@
      "tags": [],
      "tris": 254,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -199,16 +211,19 @@
      "tags": [],
      "tris": 19,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Fir_C_Needles",
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      48,
-      72,
-      46
+      50,
+      74,
+      48
      ],
      "collide": false,
      "collision": "Box",
@@ -218,7 +233,10 @@
      "tags": [],
      "tris": 262,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -259,9 +277,9 @@
      "role": "Bark",
      "robloxMaterial": "Wood",
      "rgb": [
-      112,
-      98,
-      86
+      124,
+      96,
+      80
      ],
      "collide": true,
      "collision": "Hull",
@@ -271,16 +289,19 @@
      "tags": [],
      "tris": 49,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Pine_A_Needles",
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      62,
-      83,
-      54
+      58,
+      77,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -290,7 +311,10 @@
      "tags": [],
      "tris": 124,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -331,9 +355,9 @@
      "role": "Bark",
      "robloxMaterial": "Wood",
      "rgb": [
-      112,
-      98,
-      86
+      124,
+      96,
+      80
      ],
      "collide": true,
      "collision": "Hull",
@@ -343,16 +367,19 @@
      "tags": [],
      "tris": 49,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Pine_B_Needles",
      "role": "Needles",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      55,
-      74,
-      48
+      58,
+      77,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -362,7 +389,10 @@
      "tags": [],
      "tris": 112,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -415,16 +445,19 @@
      "tags": [],
      "tris": 100,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Beech_A_Leaves",
      "role": "Leaves",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      70,
-      91,
-      49
+      72,
+      94,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -434,7 +467,10 @@
      "tags": [],
      "tris": 188,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -487,16 +523,19 @@
      "tags": [],
      "tris": 126,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     },
     {
      "name": "M1_Beech_B_Leaves",
      "role": "Leaves",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      69,
-      90,
-      48
+      71,
+      93,
+      50
      ],
      "collide": false,
      "collision": "Box",
@@ -506,7 +545,10 @@
      "tags": [],
      "tris": 188,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -559,7 +601,10 @@
      "tags": [],
      "tris": 96,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -612,7 +657,10 @@
      "tags": [],
      "tris": 20,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -665,7 +713,10 @@
      "tags": [],
      "tris": 72,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -718,7 +769,10 @@
      "tags": [],
      "tris": 20,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -759,9 +813,9 @@
      "role": "BedFlowers",
      "robloxMaterial": "LeafyGrass",
      "rgb": [
-      120,
-      130,
-      156
+      66,
+      88,
+      46
      ],
      "collide": false,
      "collision": "Box",
@@ -771,7 +825,10 @@
      "tags": [],
      "tris": 130,
      "metalness": 0.0,
-     "roughness": 0.9
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
@@ -824,12 +881,16 @@
      "tags": [],
      "tris": 21,
      "metalness": 0.0,
-     "roughness": 0.95
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "closed or as modelled"
     }
    ],
    "attachments": {},
    "pivot": "base centre on the ground (see notes)"
   }
  ],
- "notes": "Flat per-part colours (rgb, sRGB) are the semi-real tones of UpcomingFilm_Brief 1.10; the Blender previews add +-3-6% facet value jitter and top/underside shading that a later baked colour map (ArtStyle rule 4-5) carries. Every part is single-sided."
+ "hornColouring": "b",
+ "notes": "One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) and is also the base colour of the part's material in the GLB (one material per role and colour). A part painted in several colours is exported as its colour groups: <asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the role's Roblox material and collision. The GLB carries no vertex colours and no textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries them). Every part is single-sided; 'faces' says which way an open sheet was turned (up, out from or in toward the asset's vertical axis)."
 }
