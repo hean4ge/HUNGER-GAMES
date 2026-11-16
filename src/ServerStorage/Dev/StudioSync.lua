@@ -241,6 +241,28 @@ function StudioSync.apply(packName: string, opts: { force: boolean?, dry: boolea
 	return table.concat(lines, "\n")
 end
 
+-- Compile-check a pack's scripts WITHOUT installing them (sync.py check ...). Nothing in the place changes.
+function StudioSync.check(packName: string): string
+	local root, index = loadPack(packName)
+	local SyntaxCheck = require((game:GetService("ServerStorage") :: any).Dev.SyntaxCheck:Clone())
+	local bad, count = {}, 0
+	for _, e in ipairs(index.entries) do
+		if e.kind == "script" then
+			count += 1
+			local src = buffer.tostring(entryBytes(root, e.i, e.chunks))
+			local ok, message = SyntaxCheck.checkSource(src, e.path)
+			if not ok then
+				table.insert(bad, tostring(message))
+			end
+		end
+	end
+	root:Destroy()
+	if #bad == 0 then
+		return string.format("StudioSync check %s: %d scripts compile cleanly (nothing was installed)", packName, count)
+	end
+	return string.format("StudioSync check %s: %d of %d have errors:\n%s", packName, #bad, count, table.concat(bad, "\n"))
+end
+
 local function scripts(prefixes: { string }?): { { inst: any, path: string } }
 	local list = {}
 	for _, serviceName in ipairs(SERVICES) do

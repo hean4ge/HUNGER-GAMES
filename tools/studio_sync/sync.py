@@ -4,6 +4,7 @@ See README.md beside this file. The Studio side is ServerStorage.Dev.StudioSync 
 
   python tools/studio_sync/sync.py status
   python tools/studio_sync/sync.py push [--force] <file or Studio path> ...     (or: push --changed)
+  python tools/studio_sync/sync.py check <file or Studio path> ...
   python tools/studio_sync/sync.py confirm <pack>
   python tools/studio_sync/sync.py pull <runId> [--write] [--state-only]
   python tools/studio_sync/sync.py blob <packName> <name>=<file> ...
@@ -280,6 +281,24 @@ def cmd_push(args):
     print("then:  python tools/studio_sync/sync.py confirm %s" % name)
 
 
+def cmd_check(args):
+    """Compile-check files in Studio without installing them (works for files that are not ready to push)."""
+    scripts = all_scripts()
+    targets = resolve_targets([a for a in args if not a.startswith("--")], scripts)
+    entries, blobs = [], []
+    for i, sp in enumerate(targets, 1):
+        info = scripts[sp]
+        data = read_bytes(os.path.join(REPO, info["file"]))
+        entries.append({"i": i, "kind": "script", "path": sp, "class": info["cls"], "runContext": info["runContext"],
+                        "bytes": len(data), "fnv": fnv(data), "before": None})
+        blobs.append(data)
+    name = "c" + pack_name()[1:]
+    write_pack(name, entries, blobs)
+    print("check pack %s: %d scripts" % (name, len(entries)))
+    print("Run in Studio (Edit mode, execute_luau); nothing is installed:")
+    print('  return require(game.ServerStorage.Dev.StudioSync:Clone()).check("%s")' % name)
+
+
 def cmd_confirm(args):
     name = args[0]
     tag = "LSS|%s|" % name
@@ -449,8 +468,8 @@ def cmd_clean(_args):
     print("removed %d old packs from %s" % (n, d))
 
 
-COMMANDS = {"status": cmd_status, "push": cmd_push, "confirm": cmd_confirm, "pull": cmd_pull, "blob": cmd_blob,
-            "bootstrap": cmd_bootstrap, "clean": cmd_clean}
+COMMANDS = {"status": cmd_status, "push": cmd_push, "check": cmd_check, "confirm": cmd_confirm, "pull": cmd_pull,
+            "blob": cmd_blob, "bootstrap": cmd_bootstrap, "clean": cmd_clean}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:

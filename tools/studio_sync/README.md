@@ -51,6 +51,16 @@ python tools/studio_sync/sync.py confirm p101500_ab12
 not seen. Pull that script, merge by hand, and push again. Use `push --force` (then `apply(pack, { force = true })`)
 only when you have looked at what it overwrites.
 
+**Compile-check files without installing them** (for work that is not ready to go into the game)
+
+```bash
+python tools/studio_sync/sync.py check src/ServerStorage/WorldGen/Map1/Terrain.lua
+```
+
+```lua
+return require(game.ServerStorage.Dev.StudioSync:Clone()).check("c101500_ab12")
+```
+
 **Pull scripts out of Studio**
 
 ```lua
