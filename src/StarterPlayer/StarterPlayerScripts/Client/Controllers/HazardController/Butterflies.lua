@@ -198,6 +198,7 @@ local function ensureCloud(ctx, view: { [string]: any })
 	ctx.Look.still(cloud)
 	cloud.CFrame = CFrame.new(view.part.Position)
 	view.wings = ctx.Look.wingEmitter(cloud, ctx.tier.wingRate * (view.n or 1))
+	view.haze = ctx.Look.hazeEmitter(cloud, (ctx.tier.hazeRate or 4) * (view.n or 1))
 	if ctx.tier.shimmer then
 		view.shimmer = ctx.Look.shimmerEmitter(cloud, 9)
 	end
@@ -267,7 +268,8 @@ local function forget(part: Instance)
 end
 
 local function adopt(part: Instance)
-	if views[part] or not part:IsA("BasePart") then
+	-- the folder also holds a rockfall's leftover rocks: only parts with a roost state are roosts
+	if views[part] or not part:IsA("BasePart") or part:GetAttribute("S") == nil then
 		return
 	end
 	local view = { part = part, state = part:GetAttribute("S") or 0, n = part:GetAttribute("N") or 1, kind = part:GetAttribute("K") }
@@ -385,7 +387,7 @@ function Butterflies.update(ctx, dt: number, _now: number)
 			view.centre = view.centre:Lerp(position, math.min(1, dt * 9))
 			view.cloud.CFrame = CFrame.new(view.centre)
 			ctx.moving += 1
-			ctx.emitters += if view.shimmer then 2 else 1
+			ctx.emitters += if view.shimmer then 3 else 2
 			stats.swarms += 1
 			local rate = ctx.tier.wingRate * (view.n or 1) * (if state == Roost.Return then 0.5 else 1)
 			if view.wings.Rate ~= rate then

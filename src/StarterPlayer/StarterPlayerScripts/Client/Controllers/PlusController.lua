@@ -3,14 +3,17 @@
 
 	Everything it draws lives inside the Lobby screen (PlayerGui.Lobby, LobbyController's), so it is on show only when
 	the lobby is: never in the arena, on the death or result card, or while spectating.
-	  * "ROBLOX PLUS": one quiet text button at the end of the lobby's button row (SETTINGS, HOW TO PLAY). Dim text
-	    on a soft backing, no outline, no motion, no sound, no counter. Shown only when the server says so
+	The look is "Quiet" (docs/design/ui/StyleA_Quiet/lobby.html): no boxes, text on the picture with a dark stroke.
+	  * "ROBLOX PLUS": one quiet text button at the end of the lobby's button row (SETTINGS, HOW TO PLAY). Dimmer
+	    text than its neighbours (QuietUI.button Quiet), no backing, no motion, no sound, no counter. Shown only when the server says so
 	    (PlusService: not a member, allowed to buy subscriptions, the API exists). Nothing opens by itself. It is
 	    not offered in the Countdown or the last 12 seconds before the lobby's players are picked (roundNear).
-	  * Pressing it opens a small panel of the game's own words saying exactly what a member gets here, with SUBSCRIBE
+	  * Pressing it opens a small sheet of the game's own words saying exactly what a member gets here, with SUBSCRIBE
 	    and CLOSE. SUBSCRIBE asks the server to open Roblox's own window (no price in our text; theirs shows it).
+	    The sheet has no box: one soft shade with no edge on screen lies behind it (a tall band whose sides fade out,
+	    PlusShade), and the lobby's own text steps aside while it is open (LobbyController.setCover("Plus")).
 	  * A member sees "PLUS MEMBER" in the button's place.
-	  * The member perk, cosmetic and lobby-only: a small gold "PLUS" tag floats over a member's character (their
+	  * The member perk, cosmetic and lobby-only: a small amber "PLUS" word (no pill) floats over a member's character (their
 	    own included; on other players it rides above Roblox's name tag) while that character stands in the lobby. It is a BillboardGui this client makes and keeps in
 	    PlayerGui (PlusMark_<UserId>), switched off the moment its player is InArena, and off altogether while this
 	    client is in the arena or spectating: nothing shows in a round.
@@ -28,9 +31,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GuiService = game:GetService("GuiService")
 local TextService = game:GetService("TextService")
+local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Input = require(Shared:WaitForChild("Input"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
@@ -53,7 +58,11 @@ local CLOSE_ACTION = "PlusClose"
 local PANEL_WIDTH = 360
 local PANEL_WIDTH_SHORT = 560 -- on a short (phone) screen: fewer lines, so the panel stays clear of the status line
 local PANEL_PAD_X, PANEL_PAD_TOP, PANEL_PAD_BOTTOM, PANEL_GAP = 16, 14, 16, 10
-local TITLE_HEIGHT, ACTIONS_HEIGHT = 22, 34
+local TITLE_HEIGHT = 22
+-- a finger needs 44 px (QuietUI.bindButton grows the buttons to it on a touch screen)
+local ACTIONS_HEIGHT = if UserInputService.TouchEnabled then 44 else 34
+-- The one soft shade behind the sheet: a band taller than the screen (no top or bottom edge), its sides faded out.
+local SHADE_TRANSPARENCY, SHADE_FEATHER, SHADE_BLEED = 0.45, 120, 300
 
 local PANEL_TEXT = table.concat({
 	"Roblox Plus is Roblox's own membership. It is optional, and it changes nothing about how a round plays: "
@@ -88,25 +97,28 @@ local function buildMark(other: Player): BillboardGui
 	gui.StudsOffsetWorldSpace = if other == player then MARK_OFFSET_OWN else MARK_OFFSET_OTHER
 	-- studs plus a few pixels: it shrinks with distance like the character, and stays readable a little longer
 	gui.Size = UDim2.new(1.5, 14, 0.42, 6)
+	-- Quiet: the word alone in amber with the dark stroke, no pill behind it ("Pill" stays as its clear holder)
 	local pill = Instance.new("Frame")
 	pill.Name = "Pill"
 	pill.Size = UDim2.fromScale(1, 1)
-	pill.BackgroundColor3 = C.Panel
-	pill.BackgroundTransparency = 0.25
+	pill.BackgroundTransparency = 1
 	pill.BorderSizePixel = 0
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0.5, 0)
-	corner.Parent = pill
 	local text = Instance.new("TextLabel")
 	text.Name = "Text"
 	text.BackgroundTransparency = 1
 	text.AnchorPoint = Vector2.new(0.5, 0.5)
 	text.Position = UDim2.fromScale(0.5, 0.5)
-	text.Size = UDim2.fromScale(0.78, 0.72)
-	text.FontFace = Theme.Fonts.Heading or Theme.Fonts.Body
+	text.Size = UDim2.fromScale(0.86, 0.8)
+	text.FontFace = Theme.Fonts.SemiBold or Theme.Fonts.Heading or Theme.Fonts.Body
 	text.TextScaled = true
-	text.TextColor3 = C.Gold
+	text.TextColor3 = C.Sun
 	text.Text = "PLUS"
+	local stroke = Instance.new("UIStroke")
+	stroke.Name = "Shadow"
+	stroke.Color = C.Shade
+	stroke.Transparency = 0.3 -- a little stronger than the screen's text: it stands over a bright plaza and sky
+	stroke.Thickness = 1.5
+	stroke.Parent = text
 	text.Parent = pill
 	pill.Parent = gui
 	return gui
@@ -184,56 +196,43 @@ end
 -- Lobby parts
 
 local function newLabel(name: string, text: string, fontKey: string, size: number, color: Color3): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	Theme.text(label, fontKey, size)
-	label.TextColor3 = color
-	label.Text = text
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.BorderSizePixel = 0
-	return label
+	return QuietUI.label({ Name = name, Text = text, Font = fontKey, TextSize = size, TextColor3 = color })
 end
 
-local function newButton(name: string, text: string): TextButton
-	local button = Instance.new("TextButton")
-	button.Name = name
-	Theme.text(button, "Heading", Theme.TextSize.Label)
-	button.Text = text
-	button.AutoButtonColor = false
-	button.BorderSizePixel = 0
-	button.AutomaticSize = Enum.AutomaticSize.X
-	button.Size = UDim2.fromOffset(0, 34)
-	local pad = Instance.new("UIPadding")
-	pad.Name = "Pad"
-	pad.PaddingLeft = UDim.new(0, 16)
-	pad.PaddingRight = UDim.new(0, 16)
-	pad.Parent = button
-	return button
+-- A plain Quiet text button (no box): brighter text and a thin underline on hover and on a gamepad's focus.
+local function newButton(name: string, text: string, quiet: boolean?): TextButton
+	return QuietUI.button({ Name = name, Text = text, Quiet = quiet == true })
 end
 
-local function fillButton(button: TextButton)
-	button.BackgroundColor3 = C.Panel
-	button.BackgroundTransparency = Theme.Transparency.Panel
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = Theme.CornerPill
-	corner.Parent = button
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = C.Stroke
-	stroke.Transparency = 0.8
-	stroke.Thickness = 1
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	stroke.Parent = button
-	button.MouseEnter:Connect(function()
-		button.BackgroundTransparency = 0.15
-	end)
-	button.MouseLeave:Connect(function()
-		button.BackgroundTransparency = Theme.Transparency.Panel
-	end)
+-- the lobby's text steps aside while the sheet is open (a sheet with no box cannot lie over other text)
+local function cover(on: boolean)
+	local lobbyController = Controllers and Controllers.LobbyController
+	if lobbyController and lobbyController.setCover then
+		pcall(lobbyController.setCover, "Plus", on)
+	end
 end
 
-local function overlaps(a: GuiObject, b: GuiObject): boolean
-	local ap, as, bp, bs = a.AbsolutePosition, a.AbsoluteSize, b.AbsolutePosition, b.AbsoluteSize
-	return ap.X < bp.X + bs.X and bp.X < ap.X + as.X and ap.Y < bp.Y + bs.Y and bp.Y < ap.Y + as.Y
+-- The soft shade behind the open sheet: as wide as the sheet as it is drawn (its Fit scale included) plus a fade on
+-- each side, and taller than the screen, so it shows no edge.
+local function placeShade()
+	local shade, fade, panel, fit = R.shade, R.shadeFade, R.panel, R.fit
+	if not shade or not fade or not panel or not fit then
+		return
+	end
+	local width = math.floor(panel.Size.X.Offset * (if fit.Scale > 0 then fit.Scale else 1) + 2 * SHADE_FEATHER + 0.5)
+	if width <= 2 * SHADE_FEATHER then
+		return
+	end
+	if R.shadeWidth ~= width then
+		R.shadeWidth = width -- (the gradient is set here the first time too: until then the band would be solid)
+		shade.Size = UDim2.new(0, width, 1, 2 * SHADE_BLEED)
+		local f = SHADE_FEATHER / width
+		local k = NumberSequenceKeypoint.new
+		fade.Transparency = NumberSequence.new({
+			k(0, 1), k(f * 0.4, 0.7), k(f * 0.75, 0.2), k(f, 0),
+			k(1 - f, 0), k(1 - f * 0.75, 0.2), k(1 - f * 0.4, 0.7), k(1, 1),
+		})
+	end
 end
 
 -- The body text's height at a panel width, measured with the label's own font (the call can wait a moment, so it is
@@ -298,6 +297,7 @@ local function fitPanel(mayWait: boolean?)
 	if math.abs(target - fit.Scale) > 0.005 then
 		fit.Scale = target
 	end
+	placeShade()
 end
 
 local function padActive(): boolean
@@ -326,7 +326,21 @@ setPanel = function(open: boolean)
 	end
 	panelOpen = open
 	fitPanel(false)
+	placeShade() -- (also when fitPanel has no text measure yet)
+	-- the lobby's own text (title, status lines, buttons, HOW TO PLAY, the list) steps aside first, so on closing the
+	-- ROBLOX PLUS button is back on screen before the selection returns to it
+	cover(open)
 	panel.Visible = open
+	local shade = R.shade
+	if shade then
+		if open then
+			shade.Visible = true
+			shade.BackgroundTransparency = 1
+			QuietUI.tween(shade, Theme.Tween.Normal, { BackgroundTransparency = SHADE_TRANSPARENCY })
+		else
+			shade.Visible = false
+		end
+	end
 	bindClose(open)
 	if open then
 		if padActive() and R.close then
@@ -338,17 +352,6 @@ setPanel = function(open: boolean)
 			local button = R.button
 			GuiService.SelectedObject = if button and button.Visible and lobby and lobby.Enabled then button else nil
 		end
-	end
-	if open then
-		-- HOW TO PLAY sits in the middle on phones: it steps aside rather than share the place
-		task.defer(function()
-			local howTo = R.howTo
-			local lobbyController = Controllers and Controllers.LobbyController
-			if panelOpen and howTo and howTo.Visible and overlaps(panel, howTo) and lobbyController
-				and lobbyController.setHowToVisible then
-				pcall(lobbyController.setHowToVisible, false)
-			end
-		end)
 	end
 end
 
@@ -419,15 +422,10 @@ local function buildPrivateLabel(brand: Instance)
 	if not GameState then
 		return
 	end
-	local label = newLabel("PrivateServer", "PRIVATE SERVER", "Heading", Theme.TextSize.Label, C.Text)
+	-- a small dim line over the title (QuietUI.label carries the dark stroke "Shadow")
+	local label = newLabel("PrivateServer", "PRIVATE SERVER", "SemiBold", Theme.TextSize.Small, C.Ink2)
 	label.LayoutOrder = 0
 	label.Size = UDim2.new(1, 0, 0, 18)
-	local shadow = Instance.new("UIStroke")
-	shadow.Name = "Shadow"
-	shadow.Color = C.Shadow
-	shadow.Transparency = 0.45
-	shadow.Thickness = 1
-	shadow.Parent = label
 	local function apply()
 		label.Visible = GameState:GetAttribute("PrivateServer") == true
 	end
@@ -446,7 +444,28 @@ local function buildPanel(root: Instance, remote: RemoteEvent)
 	panel.Active = true -- clicks on it do not reach the world
 	panel.Visible = false
 	panel.ZIndex = 5
-	Theme.panel(panel, Theme.Transparency.PanelStrong)
+	panel.BackgroundTransparency = 1 -- Quiet: no box (the shade behind it is PlusShade)
+	panel.BorderSizePixel = 0
+
+	-- the one soft shade, behind the sheet and every other part of the lobby
+	local shade = Instance.new("Frame")
+	shade.Name = "PlusShade"
+	shade.AnchorPoint = Vector2.new(0.5, 0.5)
+	shade.Position = UDim2.fromScale(0.5, 0.5)
+	shade.Size = UDim2.new(0, PANEL_WIDTH + 2 * SHADE_FEATHER, 1, 2 * SHADE_BLEED)
+	shade.BackgroundColor3 = C.Shade
+	shade.BackgroundTransparency = 1
+	shade.BorderSizePixel = 0
+	shade.Active = true -- (clicks beside the sheet, on the shade, do not reach the world either)
+	shade.ZIndex = 4
+	shade.Visible = false
+	local shadeFade = Instance.new("UIGradient")
+	shadeFade.Name = "Fade"
+	shadeFade.Parent = shade
+	shade.Parent = root
+	R.shade = shade
+	R.shadeFade = shadeFade
+
 	local fit = Instance.new("UIScale")
 	fit.Name = "Fit"
 	fit.Parent = panel
@@ -488,20 +507,21 @@ local function buildPanel(root: Instance, remote: RemoteEvent)
 	row.FillDirection = Enum.FillDirection.Horizontal
 	row.SortOrder = Enum.SortOrder.LayoutOrder
 	row.VerticalAlignment = Enum.VerticalAlignment.Center
-	row.Padding = UDim.new(0, 8)
+	row.Padding = UDim.new(0, 28) -- (plain text buttons: the air between them is what tells them apart)
 	row.Parent = actions
 	actions.Parent = panel
 
+	-- SUBSCRIBE in ink, CLOSE quieter; both plain text with the hover and focus underline
 	local subscribe = newButton("Subscribe", "SUBSCRIBE")
 	subscribe.LayoutOrder = 1
 	subscribe.ZIndex = 5
-	fillButton(subscribe)
 	subscribe.Parent = actions
-	local close = newButton("Close", "CLOSE")
+	QuietUI.bindButton(subscribe)
+	local close = newButton("Close", "CLOSE", true)
 	close.LayoutOrder = 2
 	close.ZIndex = 5
-	fillButton(close)
 	close.Parent = actions
+	QuietUI.bindButton(close)
 
 	subscribe.Activated:Connect(function()
 		local now = os.clock()
@@ -528,30 +548,13 @@ local function buildPanel(root: Instance, remote: RemoteEvent)
 end
 
 local function buildButton(buttons: Instance)
-	local button = newButton("Plus", "ROBLOX PLUS")
+	-- quieter than SETTINGS and HOW TO PLAY (the mock-up: Medium, 70%): dimmer text at rest, no backing, no sound
+	local button = newButton("Plus", "ROBLOX PLUS", true)
+	button.FontFace = Theme.Fonts.Medium
 	button.LayoutOrder = 3
-	button.TextColor3 = C.TextDim
 	button.Visible = false
-	-- a soft dark backing and no outline: readable over bright ground, quieter than SETTINGS and HOW TO PLAY
-	button.BackgroundColor3 = C.Panel
-	button.BackgroundTransparency = Theme.Transparency.PanelSoft
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = Theme.CornerPill
-	corner.Parent = button
-	button:FindFirstChild("Pad").PaddingLeft = UDim.new(0, 12)
-	button:FindFirstChild("Pad").PaddingRight = UDim.new(0, 12)
-	button.MouseEnter:Connect(function()
-		button.TextColor3 = C.Text
-	end)
-	button.MouseLeave:Connect(function()
-		button.TextColor3 = C.TextDim
-	end)
-	button.SelectionGained:Connect(function()
-		button.TextColor3 = C.Text
-	end)
-	button.SelectionLost:Connect(function()
-		button.TextColor3 = C.TextDim
-	end)
+	button.Parent = buttons
+	QuietUI.bindButton(button, { quiet = true })
 	button.Activated:Connect(function()
 		if panelOpen then
 			setPanel(false)
@@ -560,24 +563,15 @@ local function buildButton(buttons: Instance)
 		end
 	end)
 	R.button = button
-	button.Parent = buttons
 
-	local tag = newLabel("PlusMember", "PLUS MEMBER", "Heading", Theme.TextSize.Label, C.Gold)
+	-- a member's word in the button's place: amber like the PLUS tag in the list of who is here, held readable over
+	-- the bright plaza by the dark stroke (QuietUI.label), no backing
+	local tag = newLabel("PlusMember", "PLUS MEMBER", "SemiBold", Theme.TextSize.Label, C.Sun)
 	tag.LayoutOrder = 4
 	tag.AutomaticSize = Enum.AutomaticSize.X
 	tag.Size = UDim2.fromOffset(0, 34)
 	tag.Visible = false
-	-- the button's soft dark backing: gold text alone was lost over the lobby's bright ground
-	tag.BackgroundColor3 = C.Panel
-	tag.BackgroundTransparency = Theme.Transparency.PanelSoft
-	local tagCorner = Instance.new("UICorner")
-	tagCorner.CornerRadius = Theme.CornerPill
-	tagCorner.Parent = tag
 	tag.TextXAlignment = Enum.TextXAlignment.Center
-	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft = UDim.new(0, 12)
-	pad.PaddingRight = UDim.new(0, 12)
-	pad.Parent = tag
 	R.memberTag = tag
 	tag.Parent = buttons
 end

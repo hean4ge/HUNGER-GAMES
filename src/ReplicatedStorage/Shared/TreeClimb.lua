@@ -28,8 +28,10 @@
 	    - crown parts ("Needles", "Leaves", "Crown") never collide, as today
 	  The mesh must stand on its pivot at the same scale as the plain asset (the scatter scales both alike), and
 	  its top perch is the top of the climb. Nothing else changes: the climbing, the prompts and the seats read
-	  only the tags and the attachments. Then rebuild the tree kinds:
-	    S.build({ kinds = { "Conifer", "Broadleaf" } })
+	  only the tags and the attachments. Then rebuild the planting (Edit mode; a whole build, because a build with
+	  only some kinds and no window empties every cell first; it is deterministic, so all else lands where it was):
+	    local S = require(game.ServerStorage.WorldGen.Map1.Scatter:Clone())
+	    S.build({ loot = game.ServerStorage.ArenaData.LootSpawns })
 
 	WHICH TREES (TreeClimb.SPECS): every pine and every beech inside the play radius, whatever its size. Pines are
 	the bare trunks with two limbs under the crown; beeches the broadleaf trees. Firs are not climbed. share and
@@ -61,21 +63,24 @@ TreeClimb.LIMB_DEFAULT = {
 	limbs      the stand-ins: y = the limb's top above the pivot at scale 1, bearing in degrees about the trunk
 	           (0 = the model's -Z, clockwise from above). Low limb first, the top perch last. ]]
 TreeClimb.SPECS = {
+	-- mesh: the Blender "TreesClimb" set (LS_TreesClimb_v1, 74649547382213), built by
+	-- WorldGen.BlenderTemplates.buildTrees(); trunk and limbs from art/manifests/TreesClimb.manifest.json ("climb")
 	M1_Pine_A = {
-		share = 1, minScale = 0, mesh = nil, trunk = 0.8,
-		limbs = { { y = 9.5, bearing = 30 }, { y = 20.5, bearing = 210 } },
+		share = 1, minScale = 0, mesh = "TC_Pine_A", trunkPart = "TC_Pine_A_Trunk_Col", trunk = 0.82,
+		limbs = { { y = 10, bearing = 30, length = 5.15, width = 1.52 }, { y = 20.5, bearing = 210, length = 5.7, width = 1.52 } },
 	},
 	M1_Pine_B = {
-		share = 1, minScale = 0, mesh = nil, trunk = 0.9,
-		limbs = { { y = 9.5, bearing = 140 }, { y = 23.5, bearing = 320 } },
+		share = 1, minScale = 0, mesh = "TC_Pine_B", trunkPart = "TC_Pine_B_Trunk_Col", trunk = 0.94,
+		limbs = { { y = 10.5, bearing = 140, length = 5.15, width = 1.52 }, { y = 23.5, bearing = 320, length = 5.7, width = 1.52 } },
 	},
 	M1_Beech_A = {
-		share = 1, minScale = 0, mesh = nil, trunk = 0.95,
-		limbs = { { y = 6.5, bearing = 250, length = 6.2, width = 1.7 }, { y = 10.5, bearing = 70, length = 6.2, width = 1.7 } },
+		share = 1, minScale = 0, mesh = "TC_Beech_A", trunkPart = "TC_Beech_A_Trunk_Col", trunk = 0.92,
+		limbs = { { y = 6.5, bearing = 250, length = 5.7, width = 1.71 }, { y = 10.8, bearing = 70, length = 6.16, width = 1.71 } },
 	},
 	M1_Beech_B = {
-		share = 1, minScale = 0, mesh = nil, trunk = 1.1,
-		limbs = { { y = 8, bearing = 100, length = 7, width = 1.8 }, { y = 12.5, bearing = 280, length = 7, width = 1.8 } },
+		share = 1, minScale = 0, mesh = "TC_Beech_B", trunkPart = "TC_Beech_B_Trunk_Col", trunk = 1.06,
+		limbs = { { y = 8, bearing = 100, length = 5.7, width = 1.71 }, { y = 12.6, bearing = 280, length = 6.16, width = 1.71 },
+			{ y = 16.8, bearing = 190, length = 6.62, width = 1.71 } },
 	},
 }
 

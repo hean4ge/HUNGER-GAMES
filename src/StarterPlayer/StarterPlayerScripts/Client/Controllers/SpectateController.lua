@@ -4,14 +4,19 @@
 	  * SpectateTarget(target) tells the server to stream around them; ClientState.spectating is set and
 	    ClientState.spectateChanged fires (other controllers stand down: combat, first-person camera, HUD vitals).
 	  * Camera: Custom with CameraSubject = the target's Humanoid (third-person orbit).
-	  * Cycle with Q / E or Left / Right, ButtonL1 / ButtonR1, or the on-screen arrows; exit with the EXIT button,
-	    Backspace or ButtonB. A name card shows DisplayName, @name, kills and health.
+	  * Cycle with Q / E or Left / Right, ButtonL1 / ButtonR1, or the on-screen arrows; exit with Backspace or
+	    ButtonB, or the "Back to lobby" words. Style A "Quiet": the card is the middle of the slim bottom strip
+	    (fallen.html): "Spectating Rowan", "@rowan · 2 defeats" and a slim health line, with the arrows and their key
+	    squares either side; no box. After a defeat the strip itself is NotificationController's (Overlay.Root.Strip,
+	    with its own "Back to lobby"): this screen's Exit and hairline then stay hidden (onStripChanged). Spectating
+	    from the lobby, this screen draws the hairline (Root.Line) and the Exit at the strip's right end itself.
 	  * Switches automatically when the target falls or leaves: to their killer (the KilledBy attribute, a UserId) while
 	    that contender is alive, else to the next name. Stops when the round is over (SpectateTarget(nil)).
 	  * The death screen's SPECTATE starts on your own killer (NotificationController passes them to start).
 	Public API (Controllers.SpectateController):
 	  start(target: Player?) -> boolean    stop()    next()    prev()
 	  canSpectate() -> boolean             getTarget() -> Player?    isSpectating() -> boolean
+	  onStripChanged(up: boolean)          NotificationController: its defeat strip came or went
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,6 +25,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Input = require(Shared:WaitForChild("Input"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
@@ -43,6 +49,8 @@ local emptyToken = 0
 local saved: { [string]: any }? = nil
 local lastAssert = 0
 local cardToken = 0
+local stripUp = false -- NotificationController's defeat strip is on screen (its "Back to lobby" is the way out)
+local CARD_HEIGHT = 58 -- under the strip's hairline (Theme.Strip.Height 62)
 
 local function candidates(): { Player }
 	local list = {}
@@ -153,12 +161,11 @@ local function updateCard()
 	if not p or not R.card then
 		return
 	end
-	R.eyebrow.Text = "SPECTATING"
-	R.eyebrow.TextColor3 = C.AccentSoft
-	R.name.Text = p.DisplayName
+	R.eyebrow.Visible = false -- Quiet: the word sits in the name line ("Spectating Rowan")
+	R.name.Text = "Spectating <b>" .. Theme.escape(p.DisplayName) .. "</b>"
 	local kills = math.floor(tonumber(p:GetAttribute("Kills")) or 0)
-	local finding = if targetHumanoid(p) then "" else "   ·   finding them…"
-	R.sub.Text = string.format("@%s   ·   <b>%d</b> %s%s", Theme.escape(p.Name), kills, if kills == 1 then "KILL" else "KILLS", finding)
+	local finding = if targetHumanoid(p) then "" else "  ·  finding them…"
+	R.sub.Text = string.format("@%s  ·  %d %s%s", Theme.escape(p.Name), kills, if kills == 1 then "defeat" else "defeats", finding)
 end
 
 local function refreshHints()
@@ -170,8 +177,20 @@ local function refreshHints()
 	R.nextHint.Text = if gamepad then "RB" else "E"
 	R.prevHint.Visible = not touch
 	R.nextHint.Visible = not touch
-	local key = if gamepad then "B" elseif touch then nil else "BACKSPACE"
-	R.exit.Text = if key then string.format("EXIT SPECTATING   <font transparency=\"0.45\">%s</font>", key) else "EXIT SPECTATING"
+	local key = if gamepad then "B" elseif touch then nil else "Backspace"
+	R.exit.Text = if key then string.format("Back to lobby   <font transparency=\"0.45\">%s</font>", key) else "Back to lobby"
+end
+
+-- this screen's own hairline and Exit show only when NotificationController's defeat strip is not up
+local function refreshExit()
+	if not R.card then
+		return
+	end
+	local own = active and not stripUp
+	R.exit.Visible = own
+	if R.line then
+		R.line.Visible = own
+	end
 end
 
 local function applyLayout()
@@ -179,7 +198,24 @@ local function applyLayout()
 		return
 	end
 	local narrow = UserInputService.TouchEnabled or Theme.isSmallScreen()
-	R.card.Size = UDim2.fromOffset(if narrow then 360 else 460, 90)
+	R.card.Size = UDim2.fromOffset(if narrow then 360 else 460, CARD_HEIGHT)
+	-- the card's lines (UIBuilder built them for a 66 px card with an eyebrow): one name line, one small line, the
+	-- health line, all under the strip's hairline
+	R.name.RichText = true
+	R.name.FontFace = Theme.Fonts.Medium or R.name.FontFace
+	R.name.TextSize = 18
+	R.name.Position = UDim2.fromOffset(0, 5)
+	R.name.Size = UDim2.new(1, 0, 0, 24)
+	R.sub.Position = UDim2.fromOffset(0, 29)
+	R.sub.Size = UDim2.new(1, 0, 0, 16)
+	R.health.Position = UDim2.new(0.5, 0, 0, 50)
+	for _, arrow in ipairs({ R.prev, R.next }) do
+		arrow.Position = UDim2.new(arrow.Position.X.Scale, arrow.Position.X.Offset, 0, math.floor((CARD_HEIGHT - arrow.Size.Y.Offset) / 2))
+	end
+	-- the Exit at the strip's right end, on the strip's middle line
+	local stripHeight = tonumber(Theme.Strip and Theme.Strip.Height) or 62
+	R.exit.AnchorPoint = Vector2.new(1, 0.5)
+	R.exit.Position = UDim2.new(1, 0, 1, -math.floor(stripHeight / 2))
 end
 
 local function flashEmpty(text: string)
@@ -189,18 +225,24 @@ local function flashEmpty(text: string)
 	emptyToken += 1
 	local token = emptyToken
 	R.empty.Text = text
-	R.empty.TextTransparency = 0
+	QuietUI.textTransparency(R.empty, 0)
 	R.empty.Visible = true
 	task.delay(2.6, function()
 		if token ~= emptyToken then
 			return
 		end
-		local t = Theme.tween(R.empty, Theme.Tween.FadeOut, { TextTransparency = 1 })
-		t.Completed:Once(function()
+		-- the words and their dark outline fade together
+		local t = QuietUI.fadeText(R.empty, false, Theme.Tween.FadeOut)
+		local function done()
 			if token == emptyToken then
 				R.empty.Visible = false
 			end
-		end)
+		end
+		if t then
+			t.Completed:Once(done)
+		else
+			done()
+		end
 	end)
 end
 
@@ -214,17 +256,21 @@ local function showCard(on: boolean)
 		applyLayout()
 		refreshHints()
 		R.card.Visible = true
-		R.exit.Visible = true
-		R.card.Position = UDim2.new(0.5, 0, 1, 10)
-		Theme.tween(R.card, Theme.Tween.Slow, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 1) })
+		refreshExit()
+		R.card.Position = UDim2.new(0.5, 0, 1, 8)
+		QuietUI.tween(R.card, Theme.Tween.Slow, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 1) })
 	else
-		R.exit.Visible = false
-		local t = Theme.tween(R.card, Theme.Tween.Normal, { GroupTransparency = 1 })
-		t.Completed:Once(function()
-			if token == cardToken then
-				R.card.Visible = false
-			end
-		end)
+		refreshExit()
+		local t = QuietUI.tween(R.card, Theme.Tween.Normal, { GroupTransparency = 1 })
+		if t then
+			t.Completed:Once(function()
+				if token == cardToken then
+					R.card.Visible = false
+				end
+			end)
+		else
+			R.card.Visible = false
+		end
 	end
 end
 
@@ -246,9 +292,8 @@ local function onTargetLost(p: Player, delay: number)
 	end
 	switchToken += 1
 	local token = switchToken
-	if R.eyebrow then
-		R.eyebrow.Text = "ELIMINATED"
-		R.eyebrow.TextColor3 = C.Danger
+	if R.sub then
+		R.sub.Text = "Out of the round  ·  finding the next contender…"
 	end
 	task.delay(delay, function()
 		if token ~= switchToken or not active or target ~= p then
@@ -410,6 +455,11 @@ function SpectateController.stop(message: string?)
 	end
 end
 
+function SpectateController.onStripChanged(up: boolean)
+	stripUp = up == true
+	refreshExit()
+end
+
 --------------------------------------------------------------------------------------------------------------------
 -- Lifecycle
 --------------------------------------------------------------------------------------------------------------------
@@ -421,7 +471,8 @@ local function frame()
 	if hum and R.healthFill then
 		local a = math.clamp(hum.Health / math.max(1, hum.MaxHealth), 0, 1)
 		R.healthFill.Size = UDim2.fromScale(a, 1)
-		R.healthFill.BackgroundColor3 = if a <= 0.3 then C.HealthLow else C.Health
+		-- Quiet: ink, Red only for the danger state (low health); never a hit effect
+		R.healthFill.BackgroundColor3 = if a <= 0.3 then (C.Red or C.HealthLow) else (C.Ink or C.Health)
 	end
 	local t = os.clock()
 	if t - lastAssert > 0.25 then
@@ -449,32 +500,33 @@ function SpectateController.Start()
 	R.eyebrow = info:WaitForChild("Eyebrow")
 	R.name = info:WaitForChild("PlayerName")
 	R.sub = info:WaitForChild("Sub")
-	R.healthFill = info:WaitForChild("Health"):WaitForChild("Fill")
+	R.health = info:WaitForChild("Health")
+	R.healthFill = R.health:WaitForChild("Fill")
 	R.prev = R.card:WaitForChild("Prev")
 	R.next = R.card:WaitForChild("Next")
 	R.prevHint = R.prev:WaitForChild("Hint")
 	R.nextHint = R.next:WaitForChild("Hint")
 	R.exit = root:WaitForChild("Exit")
 	R.empty = root:WaitForChild("Empty")
+	R.line = root:FindFirstChild("Line") -- the strip's hairline when there is no defeat strip (UIBuilder, Quiet)
 	local bg = R.card:FindFirstChild("Bg")
 	if bg then
 		bg.Active = true
 	end
 
-	local function hoverable(button: GuiButton, normal: number, hover: number)
-		button.MouseEnter:Connect(function()
-			Theme.tween(button, Theme.Tween.Fast, { BackgroundTransparency = hover })
-			if not Input.isTouch() then
-				Sfx.play("UIHover")
-			end
-		end)
-		button.MouseLeave:Connect(function()
-			Theme.tween(button, Theme.Tween.Fast, { BackgroundTransparency = normal })
-		end)
+	-- Quiet buttons: no box; hover, pressed and gamepad focus come from QuietUI (an underline under the words)
+	local function onHover()
+		if not Input.isTouch() then
+			Sfx.play("UIHover")
+		end
 	end
-	hoverable(R.prev, 0.5, 0.2)
-	hoverable(R.next, 0.5, 0.2)
-	hoverable(R.exit, Theme.Transparency.Panel, 0.12)
+	for _, button in ipairs({ R.prev, R.next, R.exit }) do
+		if button:FindFirstChild("Under") then
+			QuietUI.bindButton(button, { onHover = onHover })
+		else
+			button.MouseEnter:Connect(onHover)
+		end
+	end
 	R.prev.Activated:Connect(function()
 		cycle(-1)
 	end)

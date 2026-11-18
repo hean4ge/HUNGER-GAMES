@@ -204,6 +204,16 @@ function ctx.nearFire(position: Vector3, radius: number): boolean
 				end
 			end
 		end
+		-- the players' own campfires (CookingService): one Configuration each under ReplicatedStorage.Campfires
+		local camp = game:GetService("ReplicatedStorage"):FindFirstChild("Campfires")
+		if camp then
+			for _, c in ipairs(camp:GetChildren()) do
+				local at = c:GetAttribute("Position")
+				if c:GetAttribute("State") == "Lit" and typeof(at) == "Vector3" then
+					table.insert(fires, at)
+				end
+			end
+		end
 	end
 	for _, p in ipairs(fires) do
 		if (p - position).Magnitude <= radius then

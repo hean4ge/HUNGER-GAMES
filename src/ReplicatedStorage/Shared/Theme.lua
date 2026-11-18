@@ -123,7 +123,7 @@ Theme.Colors = {
 	Armor = INK2,
 	Track = INK,
 	-- world, not UI: the border wall's own colour (ArenaController). UI that warns about the border uses Red.
-	Border = Color3.fromRGB(232, 92, 50),
+	Border = Color3.fromRGB(120, 170, 255), -- the hollow blue border (was orange 232,92,50; matches Config.Border.WallLineColor, lighter for UI)
 }
 
 -- World colours that must not follow the UI palette.

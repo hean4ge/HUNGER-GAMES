@@ -1,0 +1,6287 @@
+{
+ "category": "TrainLobby",
+ "glb": "TrainLobby.glb",
+ "generator": "train_lobby.py",
+ "seed": 88,
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y). The train's front (the nose) is Roblox -Z.",
+ "lobbyOrigin": "the lounge car's centre at floor level; 'placement' of each car is relative to it",
+ "dimensions": {
+  "interiorWidth": 19.0,
+  "outerWidth": 21.0,
+  "ceiling": 10.5,
+  "roofTop": 13.6,
+  "skirtBottom": -3.4,
+  "doorBetweenCars": [
+   6.0,
+   8.0
+  ],
+  "gangwayLength": 2.4,
+  "windowSill": 3.0,
+  "windowHead": 7.8,
+  "eyeHeight": 4.6,
+  "trainLengthStuds": 267.8
+ },
+ "lobbyTriangles": 10040,
+ "markers": {
+  "NoseLamp": {
+   "position": [
+    0.0,
+    5.0,
+    -97.75
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Nose"
+  },
+  "Nose_Door_Back": {
+   "position": [
+    0.0,
+    0.0,
+    -40.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Nose"
+  },
+  "Lounge_Door_Front": {
+   "position": [
+    0.0,
+    0.0,
+    -37.5
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_6": {
+   "position": [
+    0.0,
+    8.4,
+    -30.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_01": {
+   "position": [
+    -4.5,
+    0.0,
+    -27.0
+   ],
+   "look": [
+    -0.182,
+    0.0,
+    0.983
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_02": {
+   "position": [
+    -1.5,
+    0.0,
+    -27.0
+   ],
+   "look": [
+    -0.284,
+    0.0,
+    0.959
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_03": {
+   "position": [
+    1.5,
+    0.0,
+    -27.0
+   ],
+   "look": [
+    -0.377,
+    0.0,
+    0.926
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_04": {
+   "position": [
+    4.5,
+    0.0,
+    -27.0
+   ],
+   "look": [
+    -0.46,
+    0.0,
+    0.888
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_05": {
+   "position": [
+    -4.5,
+    0.0,
+    -21.0
+   ],
+   "look": [
+    -0.232,
+    0.0,
+    0.973
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_06": {
+   "position": [
+    -1.5,
+    0.0,
+    -21.0
+   ],
+   "look": [
+    -0.356,
+    0.0,
+    0.934
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_07": {
+   "position": [
+    1.5,
+    0.0,
+    -21.0
+   ],
+   "look": [
+    -0.464,
+    0.0,
+    0.886
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_08": {
+   "position": [
+    4.5,
+    0.0,
+    -21.0
+   ],
+   "look": [
+    -0.555,
+    0.0,
+    0.832
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_5": {
+   "position": [
+    0.0,
+    8.4,
+    -18.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_09": {
+   "position": [
+    -4.5,
+    0.0,
+    -15.0
+   ],
+   "look": [
+    -0.316,
+    0.0,
+    0.949
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_10": {
+   "position": [
+    -1.5,
+    0.0,
+    -15.0
+   ],
+   "look": [
+    -0.471,
+    0.0,
+    0.882
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_11": {
+   "position": [
+    1.5,
+    0.0,
+    -15.0
+   ],
+   "look": [
+    -0.591,
+    0.0,
+    0.806
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_12": {
+   "position": [
+    4.5,
+    0.0,
+    -15.0
+   ],
+   "look": [
+    -0.682,
+    0.0,
+    0.731
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_4": {
+   "position": [
+    0.0,
+    8.4,
+    -6.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "ResultsBoard": {
+   "position": [
+    -9.17,
+    5.875,
+    -0.0
+   ],
+   "look": [
+    1.0,
+    0.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "HowToPlayBoard": {
+   "position": [
+    9.17,
+    5.5,
+    -0.0
+   ],
+   "look": [
+    -1.0,
+    0.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_3": {
+   "position": [
+    0.0,
+    8.4,
+    6.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_13": {
+   "position": [
+    -4.5,
+    0.0,
+    15.0
+   ],
+   "look": [
+    -0.316,
+    0.0,
+    -0.949
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_14": {
+   "position": [
+    -1.5,
+    0.0,
+    15.0
+   ],
+   "look": [
+    -0.471,
+    0.0,
+    -0.882
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_15": {
+   "position": [
+    1.5,
+    0.0,
+    15.0
+   ],
+   "look": [
+    -0.591,
+    0.0,
+    -0.806
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_16": {
+   "position": [
+    4.5,
+    0.0,
+    15.0
+   ],
+   "look": [
+    -0.682,
+    0.0,
+    -0.731
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_2": {
+   "position": [
+    0.0,
+    8.4,
+    18.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_17": {
+   "position": [
+    -4.5,
+    0.0,
+    21.0
+   ],
+   "look": [
+    -0.232,
+    0.0,
+    -0.973
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_18": {
+   "position": [
+    -1.5,
+    0.0,
+    21.0
+   ],
+   "look": [
+    -0.356,
+    0.0,
+    -0.934
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_19": {
+   "position": [
+    1.5,
+    0.0,
+    21.0
+   ],
+   "look": [
+    -0.464,
+    0.0,
+    -0.886
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_20": {
+   "position": [
+    4.5,
+    0.0,
+    21.0
+   ],
+   "look": [
+    -0.555,
+    0.0,
+    -0.832
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_21": {
+   "position": [
+    -4.5,
+    0.0,
+    27.0
+   ],
+   "look": [
+    -0.182,
+    0.0,
+    -0.983
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_22": {
+   "position": [
+    -1.5,
+    0.0,
+    27.0
+   ],
+   "look": [
+    -0.284,
+    0.0,
+    -0.959
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_23": {
+   "position": [
+    1.5,
+    0.0,
+    27.0
+   ],
+   "look": [
+    -0.377,
+    0.0,
+    -0.926
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Spawn_24": {
+   "position": [
+    4.5,
+    0.0,
+    27.0
+   ],
+   "look": [
+    -0.46,
+    0.0,
+    -0.888
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Lamp_1": {
+   "position": [
+    0.0,
+    8.4,
+    30.0
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Lounge_Door_Back": {
+   "position": [
+    0.0,
+    0.0,
+    37.5
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Lounge"
+  },
+  "Dining_Door_Front": {
+   "position": [
+    0.0,
+    0.0,
+    40.9
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_25": {
+   "position": [
+    -6.5,
+    0.0,
+    52.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_26": {
+   "position": [
+    6.5,
+    0.0,
+    52.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Dining_Lamp_3": {
+   "position": [
+    0.0,
+    8.4,
+    58.4
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_27": {
+   "position": [
+    -6.5,
+    0.0,
+    60.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_28": {
+   "position": [
+    6.5,
+    0.0,
+    60.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_29": {
+   "position": [
+    -6.5,
+    0.0,
+    68.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_30": {
+   "position": [
+    6.5,
+    0.0,
+    68.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Dining_Lamp_2": {
+   "position": [
+    0.0,
+    8.4,
+    72.4
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_31": {
+   "position": [
+    -6.5,
+    0.0,
+    76.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_32": {
+   "position": [
+    6.5,
+    0.0,
+    76.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_33": {
+   "position": [
+    -6.5,
+    0.0,
+    84.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_34": {
+   "position": [
+    6.5,
+    0.0,
+    84.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Dining_Lamp_1": {
+   "position": [
+    0.0,
+    8.4,
+    86.4
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_35": {
+   "position": [
+    -6.5,
+    0.0,
+    92.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Spawn_36": {
+   "position": [
+    6.5,
+    0.0,
+    92.4
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Dining_Door_Back": {
+   "position": [
+    0.0,
+    0.0,
+    103.9
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Dining"
+  },
+  "Observation_Door_Front": {
+   "position": [
+    0.0,
+    0.0,
+    107.3
+   ],
+   "look": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_37": {
+   "position": [
+    -4.0,
+    0.0,
+    111.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_38": {
+   "position": [
+    4.0,
+    0.0,
+    111.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_39": {
+   "position": [
+    -4.0,
+    0.0,
+    116.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_40": {
+   "position": [
+    4.0,
+    0.0,
+    116.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Observation_Lamp_1": {
+   "position": [
+    0.0,
+    8.4,
+    118.8
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_41": {
+   "position": [
+    -4.0,
+    0.0,
+    122.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_42": {
+   "position": [
+    4.0,
+    0.0,
+    122.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_43": {
+   "position": [
+    -4.0,
+    0.0,
+    128.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_44": {
+   "position": [
+    4.0,
+    0.0,
+    128.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Observation_Lamp_2": {
+   "position": [
+    0.0,
+    8.4,
+    132.8
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_45": {
+   "position": [
+    -4.0,
+    0.0,
+    134.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_46": {
+   "position": [
+    4.0,
+    0.0,
+    134.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_47": {
+   "position": [
+    -4.0,
+    0.0,
+    140.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Spawn_48": {
+   "position": [
+    4.0,
+    0.0,
+    140.8
+   ],
+   "look": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Observation_Lamp_3": {
+   "position": [
+    0.0,
+    8.4,
+    146.8
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Observation"
+  },
+  "Observation_Lamp_4": {
+   "position": [
+    0.0,
+    8.4,
+    160.8
+   ],
+   "look": [
+    0.0,
+    -1.0,
+    -0.0
+   ],
+   "car": "TrainLobby_Observation"
+  }
+ },
+ "spawnCount": 48,
+ "lampColour": [
+  255,
+  196,
+  140
+ ],
+ "lampNote": "PointLight at every Lamp marker: Range 16, Brightness 1.2, Shadows off except the 3 dining chandeliers; the ceiling cove strips (Glow parts) carry SurfaceLights or nothing.",
+ "import": [
+  "Each car is its own Model (ModelStreamingMode Persistent while the lobby is in use). Place it at lobbyCFrame * CFrame.new(placement.position). The gangway is placed 3 times.",
+  "Visual parts: Anchored, CanCollide/CanQuery/CanTouch off; Glass Transparency 0.55; Neon on Glow and Lamp.",
+  "Colliders: every *_Col mesh is a box. Make them invisible (Transparency 1), CanCollide on, CastShadow off, CollisionFidelity Box; or build plain Parts from 'colliders' (centre, size, yawDeg about Y).",
+  "Markers are manifest-only: create Attachments (or read the numbers) at 'markers'. Spawn_01..48 run front to back; each look is the way the player faces on arrival."
+ ],
+ "glbCheck": {
+  "file": "TrainLobby.glb",
+  "bytes": 821484,
+  "meshes": 171,
+  "triangles": 13428,
+  "images": 0
+ },
+ "assets": [
+  {
+   "name": "TrainLobby_Nose",
+   "kind": "TrainCar",
+   "notes": "The lead car, seen from outside only: body like the others for 40 studs, then a bullet nose tapering over 16 studs to a dark eye with a glowing red lamp (TrainLobby_Nose_Lamp, Neon: add a red PointLight at NoseLamp). Its back door faces the lounge's closed front door.",
+   "pivot": "floor top at the centre",
+   "origin": [
+    160.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    21.16,
+    17.04,
+    57.2
+   ],
+   "boundsMin": [
+    -10.58,
+    -3.42,
+    -29.1
+   ],
+   "boundsMax": [
+    10.58,
+    13.62,
+    28.1
+   ],
+   "tris": 408,
+   "parts": [
+    {
+     "name": "TrainLobby_Nose_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      134,
+      30,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 158,
+     "center": [
+      0.0,
+      5.1,
+      0.411
+     ],
+     "size": [
+      21.0,
+      17.0,
+      55.178
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Roof",
+     "role": "Roof",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      36,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 44,
+     "center": [
+      0.0,
+      7.487,
+      -0.3
+     ],
+     "size": [
+      21.04,
+      12.265,
+      56.6
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Skirt",
+     "role": "Skirt",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      36,
+      34,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 20,
+     "center": [
+      0.0,
+      -2.01,
+      8.0
+     ],
+     "size": [
+      21.04,
+      2.82,
+      40.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      52,
+      66,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.55,
+     "tris": 72,
+     "center": [
+      0.0,
+      5.4,
+      6.0
+     ],
+     "size": [
+      21.16,
+      4.8,
+      31.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Gold",
+     "role": "Gold",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      148,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 84,
+     "center": [
+      0.0,
+      5.975,
+      -0.225
+     ],
+     "size": [
+      21.14,
+      9.65,
+      56.45
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Lamp",
+     "role": "Lamp",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      84,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 18,
+     "center": [
+      0.0,
+      5.0,
+      -28.625
+     ],
+     "size": [
+      2.2,
+      2.092,
+      0.95
+     ]
+    },
+    {
+     "name": "TrainLobby_Nose_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      52,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      4.0,
+      28.0
+     ],
+     "size": [
+      6.0,
+      8.0,
+      0.2
+     ]
+    }
+   ],
+   "colliders": [
+    {
+     "name": "TrainLobby_Nose_Body_Col",
+     "center": [
+      0.0,
+      4.4,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      15.6,
+      56.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    }
+   ],
+   "attachments": {
+    "Door_Back": {
+     "position": [
+      0.0,
+      0.0,
+      28.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "NoseLamp": {
+     "position": [
+      0.0,
+      5.0,
+      -29.35
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     -68.4
+    ],
+    "yawDeg": 0
+   }
+  },
+  {
+   "name": "TrainLobby_Lounge",
+   "kind": "TrainCar",
+   "notes": "Arrival car: players join here. Club chairs in pairs with a lamp table under each wide window; a clear aisle 13 wide; the RESULTS BOARD on the left wall and the HOW TO PLAY board on the right wall face each other across the middle of the car. Front door (towards the nose) is closed; back door leads to the dining car.",
+   "pivot": "floor top at the centre",
+   "origin": [
+    480.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    21.12,
+    17.0,
+    76.0
+   ],
+   "boundsMin": [
+    -10.56,
+    -3.4,
+    -38.0
+   ],
+   "boundsMax": [
+    10.56,
+    13.6,
+    38.0
+   ],
+   "tris": 4052,
+   "parts": [
+    {
+     "name": "TrainLobby_Lounge_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      134,
+      30,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 540,
+     "center": [
+      0.0,
+      5.3,
+      0.0
+     ],
+     "size": [
+      21.0,
+      11.8,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Panel",
+     "role": "Panel",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      62,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 312,
+     "center": [
+      0.0,
+      1.5,
+      0.0
+     ],
+     "size": [
+      20.2,
+      3.0,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Upper",
+     "role": "Upper",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      212,
+      194,
+      166
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 312,
+     "center": [
+      0.0,
+      6.75,
+      0.0
+     ],
+     "size": [
+      20.2,
+      7.5,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      52,
+      66,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.55,
+     "tris": 156,
+     "center": [
+      0.0,
+      5.4,
+      -1.225
+     ],
+     "size": [
+      20.1,
+      4.8,
+      72.95
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Gold",
+     "role": "Gold",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      148,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 216,
+     "center": [
+      0.0,
+      5.975,
+      0.0
+     ],
+     "size": [
+      21.12,
+      9.65,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      52,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 588,
+     "center": [
+      0.0,
+      4.0,
+      -1.1
+     ],
+     "size": [
+      20.4,
+      8.0,
+      73.1
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      178,
+      140,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 432,
+     "center": [
+      0.0,
+      5.25,
+      0.0
+     ],
+     "size": [
+      19.0,
+      10.5,
+      74.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Skirt",
+     "role": "Skirt",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      36,
+      34,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 20,
+     "center": [
+      0.0,
+      -2.0,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.8,
+      75.2
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Roof",
+     "role": "Roof",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      36,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 24,
+     "center": [
+      0.0,
+      12.4,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.4,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Ceiling",
+     "role": "Ceiling",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      212,
+      188
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      10.85,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.7,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Floor",
+     "role": "Floor",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      54,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      -0.01,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.02,
+      76.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Carpet",
+     "role": "Carpet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      112,
+      36,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      0.02,
+      0.0
+     ],
+     "size": [
+      13.0,
+      0.04,
+      73.6
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Glow",
+     "role": "Glow",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      214,
+      160
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 240,
+     "center": [
+      0.0,
+      5.925,
+      0.0
+     ],
+     "size": [
+      17.5,
+      9.15,
+      72.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Velvet",
+     "role": "Velvet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      124,
+      40,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 1152,
+     "center": [
+      0.0,
+      1.85,
+      0.0
+     ],
+     "size": [
+      18.8,
+      3.7,
+      70.8
+     ]
+    },
+    {
+     "name": "TrainLobby_Lounge_Screen",
+     "role": "Screen",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      26,
+      28,
+      32
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 24,
+     "center": [
+      0.0,
+      5.875,
+      0.0
+     ],
+     "size": [
+      18.5,
+      6.75,
+      12.0
+     ]
+    }
+   ],
+   "colliders": [
+    {
+     "name": "TrainLobby_Lounge_WallL_Col",
+     "center": [
+      -10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      76.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallR_Col",
+     "center": [
+      10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      76.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Floor_Col",
+     "center": [
+      0.0,
+      -0.3,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      0.6,
+      76.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Roof_Col",
+     "center": [
+      0.0,
+      11.35,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      1.7,
+      76.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallFrontL_Col",
+     "center": [
+      -6.75,
+      5.25,
+      -37.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallFrontR_Col",
+     "center": [
+      6.75,
+      5.25,
+      -37.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallFrontTop_Col",
+     "center": [
+      0.0,
+      9.25,
+      -37.5
+     ],
+     "size": [
+      6.0,
+      2.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_DoorFrontClosed_Col",
+     "center": [
+      0.0,
+      4.0,
+      -37.5
+     ],
+     "size": [
+      6.0,
+      8.0,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallBackL_Col",
+     "center": [
+      -6.75,
+      5.25,
+      37.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallBackR_Col",
+     "center": [
+      6.75,
+      5.25,
+      37.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_WallBackTop_Col",
+     "center": [
+      0.0,
+      9.25,
+      37.5
+     ],
+     "size": [
+      6.0,
+      2.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair1_Col",
+     "center": [
+      -8.0,
+      0.8,
+      28.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair2_Col",
+     "center": [
+      -8.0,
+      0.8,
+      34.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table1_Col",
+     "center": [
+      -8.0,
+      0.675,
+      31.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair3_Col",
+     "center": [
+      -8.0,
+      0.8,
+      19.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair4_Col",
+     "center": [
+      -8.0,
+      0.8,
+      25.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table2_Col",
+     "center": [
+      -8.0,
+      0.675,
+      22.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair5_Col",
+     "center": [
+      -8.0,
+      0.8,
+      10.4
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair6_Col",
+     "center": [
+      -8.0,
+      0.8,
+      15.6
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table3_Col",
+     "center": [
+      -8.0,
+      0.675,
+      13.0
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair7_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -15.6
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair8_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -10.4
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table4_Col",
+     "center": [
+      -8.0,
+      0.675,
+      -13.0
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair9_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -25.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair10_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -19.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table5_Col",
+     "center": [
+      -8.0,
+      0.675,
+      -22.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair11_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -34.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair12_Col",
+     "center": [
+      -8.0,
+      0.8,
+      -28.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table6_Col",
+     "center": [
+      -8.0,
+      0.675,
+      -31.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair13_Col",
+     "center": [
+      8.0,
+      0.8,
+      28.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair14_Col",
+     "center": [
+      8.0,
+      0.8,
+      34.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table7_Col",
+     "center": [
+      8.0,
+      0.675,
+      31.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair15_Col",
+     "center": [
+      8.0,
+      0.8,
+      19.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair16_Col",
+     "center": [
+      8.0,
+      0.8,
+      25.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table8_Col",
+     "center": [
+      8.0,
+      0.675,
+      22.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair17_Col",
+     "center": [
+      8.0,
+      0.8,
+      10.4
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair18_Col",
+     "center": [
+      8.0,
+      0.8,
+      15.6
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table9_Col",
+     "center": [
+      8.0,
+      0.675,
+      13.0
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair19_Col",
+     "center": [
+      8.0,
+      0.8,
+      -15.6
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair20_Col",
+     "center": [
+      8.0,
+      0.8,
+      -10.4
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table10_Col",
+     "center": [
+      8.0,
+      0.675,
+      -13.0
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair21_Col",
+     "center": [
+      8.0,
+      0.8,
+      -25.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair22_Col",
+     "center": [
+      8.0,
+      0.8,
+      -19.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table11_Col",
+     "center": [
+      8.0,
+      0.675,
+      -22.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair23_Col",
+     "center": [
+      8.0,
+      0.8,
+      -34.1
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Chair24_Col",
+     "center": [
+      8.0,
+      0.8,
+      -28.9
+     ],
+     "size": [
+      2.6,
+      1.6,
+      2.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Lounge_Table12_Col",
+     "center": [
+      8.0,
+      0.675,
+      -31.5
+     ],
+     "size": [
+      1.6,
+      1.35,
+      1.6
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    }
+   ],
+   "attachments": {
+    "Door_Back": {
+     "position": [
+      0.0,
+      0.0,
+      37.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Door_Front": {
+     "position": [
+      0.0,
+      0.0,
+      -37.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "HowToPlayBoard": {
+     "position": [
+      9.17,
+      5.5,
+      -0.0
+     ],
+     "look": [
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Lamp_1": {
+     "position": [
+      0.0,
+      8.4,
+      30.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_2": {
+     "position": [
+      0.0,
+      8.4,
+      18.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_3": {
+     "position": [
+      0.0,
+      8.4,
+      6.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_4": {
+     "position": [
+      0.0,
+      8.4,
+      -6.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_5": {
+     "position": [
+      0.0,
+      8.4,
+      -18.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_6": {
+     "position": [
+      0.0,
+      8.4,
+      -30.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "ResultsBoard": {
+     "position": [
+      -9.17,
+      5.875,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_01": {
+     "position": [
+      -4.5,
+      0.0,
+      27.0
+     ],
+     "look": [
+      -0.182,
+      0.0,
+      -0.983
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_02": {
+     "position": [
+      -1.5,
+      0.0,
+      27.0
+     ],
+     "look": [
+      -0.284,
+      0.0,
+      -0.959
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_03": {
+     "position": [
+      1.5,
+      0.0,
+      27.0
+     ],
+     "look": [
+      -0.377,
+      0.0,
+      -0.926
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_04": {
+     "position": [
+      4.5,
+      0.0,
+      27.0
+     ],
+     "look": [
+      -0.46,
+      0.0,
+      -0.888
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_05": {
+     "position": [
+      -4.5,
+      0.0,
+      21.0
+     ],
+     "look": [
+      -0.232,
+      0.0,
+      -0.973
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_06": {
+     "position": [
+      -1.5,
+      0.0,
+      21.0
+     ],
+     "look": [
+      -0.356,
+      0.0,
+      -0.934
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_07": {
+     "position": [
+      1.5,
+      0.0,
+      21.0
+     ],
+     "look": [
+      -0.464,
+      0.0,
+      -0.886
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_08": {
+     "position": [
+      4.5,
+      0.0,
+      21.0
+     ],
+     "look": [
+      -0.555,
+      0.0,
+      -0.832
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_09": {
+     "position": [
+      -4.5,
+      0.0,
+      15.0
+     ],
+     "look": [
+      -0.316,
+      0.0,
+      -0.949
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_10": {
+     "position": [
+      -1.5,
+      0.0,
+      15.0
+     ],
+     "look": [
+      -0.471,
+      0.0,
+      -0.882
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_11": {
+     "position": [
+      1.5,
+      0.0,
+      15.0
+     ],
+     "look": [
+      -0.591,
+      0.0,
+      -0.806
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_12": {
+     "position": [
+      4.5,
+      0.0,
+      15.0
+     ],
+     "look": [
+      -0.682,
+      0.0,
+      -0.731
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_13": {
+     "position": [
+      -4.5,
+      0.0,
+      -15.0
+     ],
+     "look": [
+      -0.316,
+      0.0,
+      0.949
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_14": {
+     "position": [
+      -1.5,
+      0.0,
+      -15.0
+     ],
+     "look": [
+      -0.471,
+      0.0,
+      0.882
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_15": {
+     "position": [
+      1.5,
+      0.0,
+      -15.0
+     ],
+     "look": [
+      -0.591,
+      0.0,
+      0.806
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_16": {
+     "position": [
+      4.5,
+      0.0,
+      -15.0
+     ],
+     "look": [
+      -0.682,
+      0.0,
+      0.731
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_17": {
+     "position": [
+      -4.5,
+      0.0,
+      -21.0
+     ],
+     "look": [
+      -0.232,
+      0.0,
+      0.973
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_18": {
+     "position": [
+      -1.5,
+      0.0,
+      -21.0
+     ],
+     "look": [
+      -0.356,
+      0.0,
+      0.934
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_19": {
+     "position": [
+      1.5,
+      0.0,
+      -21.0
+     ],
+     "look": [
+      -0.464,
+      0.0,
+      0.886
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_20": {
+     "position": [
+      4.5,
+      0.0,
+      -21.0
+     ],
+     "look": [
+      -0.555,
+      0.0,
+      0.832
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_21": {
+     "position": [
+      -4.5,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      -0.182,
+      0.0,
+      0.983
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_22": {
+     "position": [
+      -1.5,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      -0.284,
+      0.0,
+      0.959
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_23": {
+     "position": [
+      1.5,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      -0.377,
+      0.0,
+      0.926
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_24": {
+     "position": [
+      4.5,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      -0.46,
+      0.0,
+      0.888
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "boards": {
+    "ResultsBoard": {
+     "size": [
+      12.0,
+      6.75
+     ],
+     "part": "TrainLobby_Lounge_Screen (left one)",
+     "note": "face = the attachment's LookVector (+X Roblox, into the car); put a SurfaceGui on a 12 x 6.75 x 0.05 Part at the attachment"
+    },
+    "HowToPlayBoard": {
+     "size": [
+      10.0,
+      5.6
+     ],
+     "note": "LookVector -X Roblox (into the car)"
+    }
+   },
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     -0.0
+    ],
+    "yawDeg": 0
+   }
+  },
+  {
+   "name": "TrainLobby_Dining",
+   "kind": "TrainCar",
+   "notes": "One long table (3.4 x 44, top at 2.6) laid in linen with chairs both sides; aisles of 6.1 on both sides; three chandeliers; sideboards in the corners. Doors at both ends.",
+   "pivot": "floor top at the centre",
+   "origin": [
+    800.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    21.12,
+    17.0,
+    64.0
+   ],
+   "boundsMin": [
+    -10.56,
+    -3.4,
+    -32.0
+   ],
+   "boundsMax": [
+    10.56,
+    13.6,
+    32.0
+   ],
+   "tris": 3236,
+   "parts": [
+    {
+     "name": "TrainLobby_Dining_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      134,
+      30,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 468,
+     "center": [
+      0.0,
+      5.3,
+      0.0
+     ],
+     "size": [
+      21.0,
+      11.8,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Panel",
+     "role": "Panel",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      62,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 264,
+     "center": [
+      0.0,
+      1.5,
+      0.0
+     ],
+     "size": [
+      20.2,
+      3.0,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Upper",
+     "role": "Upper",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      212,
+      194,
+      166
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 264,
+     "center": [
+      0.0,
+      6.75,
+      0.0
+     ],
+     "size": [
+      20.2,
+      7.5,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      52,
+      66,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.55,
+     "tris": 120,
+     "center": [
+      0.0,
+      5.4,
+      0.0
+     ],
+     "size": [
+      20.1,
+      4.8,
+      55.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Gold",
+     "role": "Gold",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      148,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 168,
+     "center": [
+      0.0,
+      5.975,
+      0.0
+     ],
+     "size": [
+      21.12,
+      9.65,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      52,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 864,
+     "center": [
+      0.0,
+      1.7,
+      0.0
+     ],
+     "size": [
+      20.4,
+      3.4,
+      62.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      178,
+      140,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 432,
+     "center": [
+      0.0,
+      5.25,
+      0.0
+     ],
+     "size": [
+      19.0,
+      10.5,
+      62.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Skirt",
+     "role": "Skirt",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      36,
+      34,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 20,
+     "center": [
+      0.0,
+      -2.0,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.8,
+      63.2
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Roof",
+     "role": "Roof",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      36,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 24,
+     "center": [
+      0.0,
+      12.4,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.4,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Ceiling",
+     "role": "Ceiling",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      212,
+      188
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      10.85,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.7,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Floor",
+     "role": "Floor",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      54,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      -0.01,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.02,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Carpet",
+     "role": "Carpet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      112,
+      36,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      0.02,
+      0.0
+     ],
+     "size": [
+      13.0,
+      0.04,
+      61.6
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Glow",
+     "role": "Glow",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      214,
+      160
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 240,
+     "center": [
+      0.0,
+      9.537,
+      0.0
+     ],
+     "size": [
+      17.5,
+      1.925,
+      60.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Linen",
+     "role": "Linen",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      232,
+      228,
+      214
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 24,
+     "center": [
+      0.0,
+      2.65,
+      0.0
+     ],
+     "size": [
+      3.5,
+      0.1,
+      44.1
+     ]
+    },
+    {
+     "name": "TrainLobby_Dining_Velvet",
+     "role": "Velvet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      124,
+      40,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 312,
+     "center": [
+      0.0,
+      1.2,
+      0.2
+     ],
+     "size": [
+      6.6,
+      0.35,
+      41.1
+     ]
+    }
+   ],
+   "colliders": [
+    {
+     "name": "TrainLobby_Dining_WallL_Col",
+     "center": [
+      -10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallR_Col",
+     "center": [
+      10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Floor_Col",
+     "center": [
+      0.0,
+      -0.3,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      0.6,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Roof_Col",
+     "center": [
+      0.0,
+      11.35,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      1.7,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallFrontL_Col",
+     "center": [
+      -6.75,
+      5.25,
+      -31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallFrontR_Col",
+     "center": [
+      6.75,
+      5.25,
+      -31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallFrontTop_Col",
+     "center": [
+      0.0,
+      9.25,
+      -31.5
+     ],
+     "size": [
+      6.0,
+      2.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallBackL_Col",
+     "center": [
+      -6.75,
+      5.25,
+      31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallBackR_Col",
+     "center": [
+      6.75,
+      5.25,
+      31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_WallBackTop_Col",
+     "center": [
+      0.0,
+      9.25,
+      31.5
+     ],
+     "size": [
+      6.0,
+      2.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_TableTop_Col",
+     "center": [
+      0.0,
+      1.33,
+      -0.0
+     ],
+     "size": [
+      3.4,
+      2.66,
+      44
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair1L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      20.0
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair1R_Col",
+     "center": [
+      2.6,
+      0.7,
+      20.0
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair2L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      16.7
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair2R_Col",
+     "center": [
+      2.6,
+      0.7,
+      16.7
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair3L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      13.4
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair3R_Col",
+     "center": [
+      2.6,
+      0.7,
+      13.4
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair4L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      10.1
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair4R_Col",
+     "center": [
+      2.6,
+      0.7,
+      10.1
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair5L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      6.8
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair5R_Col",
+     "center": [
+      2.6,
+      0.7,
+      6.8
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair6L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      3.5
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair6R_Col",
+     "center": [
+      2.6,
+      0.7,
+      3.5
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair7L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      0.2
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair7R_Col",
+     "center": [
+      2.6,
+      0.7,
+      0.2
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair8L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -3.1
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair8R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -3.1
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair9L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -6.4
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair9R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -6.4
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair10L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -9.7
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair10R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -9.7
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair11L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -13.0
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair11R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -13.0
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair12L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -16.3
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair12R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -16.3
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair13L_Col",
+     "center": [
+      -2.6,
+      0.7,
+      -19.6
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_Chair13R_Col",
+     "center": [
+      2.6,
+      0.7,
+      -19.6
+     ],
+     "size": [
+      1.6,
+      1.4,
+      1.5
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_SideboardBL_Col",
+     "center": [
+      -8.7,
+      1.65,
+      28.5
+     ],
+     "size": [
+      1.6,
+      3.3,
+      5.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_SideboardBR_Col",
+     "center": [
+      8.7,
+      1.65,
+      28.5
+     ],
+     "size": [
+      1.6,
+      3.3,
+      5.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_SideboardFL_Col",
+     "center": [
+      -8.7,
+      1.65,
+      -28.5
+     ],
+     "size": [
+      1.6,
+      3.3,
+      5.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Dining_SideboardFR_Col",
+     "center": [
+      8.7,
+      1.65,
+      -28.5
+     ],
+     "size": [
+      1.6,
+      3.3,
+      5.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    }
+   ],
+   "attachments": {
+    "Door_Back": {
+     "position": [
+      0.0,
+      0.0,
+      31.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Door_Front": {
+     "position": [
+      0.0,
+      0.0,
+      -31.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Lamp_1": {
+     "position": [
+      0.0,
+      8.4,
+      14.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_2": {
+     "position": [
+      0.0,
+      8.4,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_3": {
+     "position": [
+      0.0,
+      8.4,
+      -14.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Spawn_01": {
+     "position": [
+      -6.5,
+      0.0,
+      20.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_02": {
+     "position": [
+      -6.5,
+      0.0,
+      12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_03": {
+     "position": [
+      -6.5,
+      0.0,
+      4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_04": {
+     "position": [
+      -6.5,
+      0.0,
+      -4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_05": {
+     "position": [
+      -6.5,
+      0.0,
+      -12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_06": {
+     "position": [
+      -6.5,
+      0.0,
+      -20.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_07": {
+     "position": [
+      6.5,
+      0.0,
+      20.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_08": {
+     "position": [
+      6.5,
+      0.0,
+      12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_09": {
+     "position": [
+      6.5,
+      0.0,
+      4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_10": {
+     "position": [
+      6.5,
+      0.0,
+      -4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_11": {
+     "position": [
+      6.5,
+      0.0,
+      -12.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_12": {
+     "position": [
+      6.5,
+      0.0,
+      -20.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     72.4
+    ],
+    "yawDeg": 0
+   }
+  },
+  {
+   "name": "TrainLobby_Observation",
+   "kind": "TrainCar",
+   "notes": "The tail car: tall side glass over the back half, a curved bench facing the big rear window (15 x 8.2), side benches. Door at the front only.",
+   "pivot": "floor top at the centre",
+   "origin": [
+    1120.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    21.12,
+    17.0,
+    64.0
+   ],
+   "boundsMin": [
+    -10.56,
+    -3.4,
+    -32.0
+   ],
+   "boundsMax": [
+    10.56,
+    13.6,
+    32.0
+   ],
+   "tris": 1876,
+   "parts": [
+    {
+     "name": "TrainLobby_Observation_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      134,
+      30,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 408,
+     "center": [
+      0.0,
+      5.3,
+      0.0
+     ],
+     "size": [
+      21.0,
+      11.8,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Panel",
+     "role": "Panel",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      104,
+      62,
+      42
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 216,
+     "center": [
+      0.0,
+      1.5,
+      0.0
+     ],
+     "size": [
+      20.2,
+      3.0,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Upper",
+     "role": "Upper",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      212,
+      194,
+      166
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 264,
+     "center": [
+      0.0,
+      6.75,
+      0.0
+     ],
+     "size": [
+      20.2,
+      7.5,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Glass",
+     "role": "Glass",
+     "robloxMaterial": "Glass",
+     "rgb": [
+      52,
+      66,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.55,
+     "tris": 108,
+     "center": [
+      0.0,
+      5.5,
+      3.025
+     ],
+     "size": [
+      20.1,
+      8.2,
+      57.05
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Gold",
+     "role": "Gold",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      148,
+      82
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 180,
+     "center": [
+      0.0,
+      5.975,
+      0.0
+     ],
+     "size": [
+      21.12,
+      9.65,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      88,
+      52,
+      34
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 96,
+     "center": [
+      0.0,
+      2.975,
+      0.0
+     ],
+     "size": [
+      20.4,
+      0.45,
+      51.4
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Brass",
+     "role": "Brass",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      178,
+      140,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 188,
+     "center": [
+      0.0,
+      5.25,
+      0.0
+     ],
+     "size": [
+      19.0,
+      10.5,
+      62.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Skirt",
+     "role": "Skirt",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      36,
+      34,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 20,
+     "center": [
+      0.0,
+      -2.0,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.8,
+      63.2
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Roof",
+     "role": "Roof",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      36,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 24,
+     "center": [
+      0.0,
+      12.4,
+      0.0
+     ],
+     "size": [
+      21.0,
+      2.4,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Ceiling",
+     "role": "Ceiling",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      212,
+      188
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      10.85,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.7,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Floor",
+     "role": "Floor",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      54,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      -0.01,
+      0.0
+     ],
+     "size": [
+      19.0,
+      0.02,
+      64.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Carpet",
+     "role": "Carpet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      112,
+      36,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      0.02,
+      0.0
+     ],
+     "size": [
+      13.0,
+      0.04,
+      61.6
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Glow",
+     "role": "Glow",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      214,
+      160
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 72,
+     "center": [
+      0.0,
+      9.425,
+      0.0
+     ],
+     "size": [
+      17.5,
+      2.15,
+      60.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Observation_Velvet",
+     "role": "Velvet",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      124,
+      40,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 264,
+     "center": [
+      0.0,
+      1.6,
+      13.0
+     ],
+     "size": [
+      19.0,
+      3.2,
+      25.0
+     ]
+    }
+   ],
+   "colliders": [
+    {
+     "name": "TrainLobby_Observation_WallL_Col",
+     "center": [
+      -10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_WallR_Col",
+     "center": [
+      10.0,
+      5.25,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      10.5,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_Floor_Col",
+     "center": [
+      0.0,
+      -0.3,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      0.6,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_Roof_Col",
+     "center": [
+      0.0,
+      11.35,
+      -0.0
+     ],
+     "size": [
+      21.0,
+      1.7,
+      64.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_WallFrontL_Col",
+     "center": [
+      -6.75,
+      5.25,
+      -31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_WallFrontR_Col",
+     "center": [
+      6.75,
+      5.25,
+      -31.5
+     ],
+     "size": [
+      7.5,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_WallFrontTop_Col",
+     "center": [
+      0.0,
+      9.25,
+      -31.5
+     ],
+     "size": [
+      6.0,
+      2.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_WallBack_Col",
+     "center": [
+      0.0,
+      5.25,
+      31.5
+     ],
+     "size": [
+      21.0,
+      10.5,
+      1.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_BenchL1_Col",
+     "center": [
+      -8.4,
+      0.8,
+      6.0
+     ],
+     "size": [
+      2.2,
+      1.6,
+      11.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_BenchL2_Col",
+     "center": [
+      -8.4,
+      0.8,
+      19.5
+     ],
+     "size": [
+      2.2,
+      1.6,
+      11.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_BenchR1_Col",
+     "center": [
+      8.4,
+      0.8,
+      6.0
+     ],
+     "size": [
+      2.2,
+      1.6,
+      11.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_BenchR2_Col",
+     "center": [
+      8.4,
+      0.8,
+      19.5
+     ],
+     "size": [
+      2.2,
+      1.6,
+      11.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench1_Col",
+     "center": [
+      -7.308,
+      0.8,
+      19.754
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": 114.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench2_Col",
+     "center": [
+      -5.557,
+      0.8,
+      22.255
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": 136.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench3_Col",
+     "center": [
+      -2.997,
+      0.8,
+      23.917
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": 158.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench4_Col",
+     "center": [
+      0.0,
+      0.8,
+      24.5
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": -180.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench5_Col",
+     "center": [
+      2.997,
+      0.8,
+      23.917
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": -158.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench6_Col",
+     "center": [
+      5.557,
+      0.8,
+      22.255
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": -136.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Observation_CurveBench7_Col",
+     "center": [
+      7.308,
+      0.8,
+      19.754
+     ],
+     "size": [
+      3.353,
+      1.6,
+      2.0
+     ],
+     "yawDeg": -114.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    }
+   ],
+   "attachments": {
+    "Door_Front": {
+     "position": [
+      0.0,
+      0.0,
+      -31.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Lamp_1": {
+     "position": [
+      0.0,
+      8.4,
+      -20.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_2": {
+     "position": [
+      0.0,
+      8.4,
+      -6.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_3": {
+     "position": [
+      0.0,
+      8.4,
+      8.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Lamp_4": {
+     "position": [
+      0.0,
+      8.4,
+      22.0
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    },
+    "Spawn_01": {
+     "position": [
+      -4.0,
+      0.0,
+      2.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_02": {
+     "position": [
+      -4.0,
+      0.0,
+      -4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_03": {
+     "position": [
+      -4.0,
+      0.0,
+      -10.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_04": {
+     "position": [
+      -4.0,
+      0.0,
+      -16.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_05": {
+     "position": [
+      -4.0,
+      0.0,
+      -22.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_06": {
+     "position": [
+      -4.0,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_07": {
+     "position": [
+      4.0,
+      0.0,
+      2.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_08": {
+     "position": [
+      4.0,
+      0.0,
+      -4.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_09": {
+     "position": [
+      4.0,
+      0.0,
+      -10.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_10": {
+     "position": [
+      4.0,
+      0.0,
+      -16.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_11": {
+     "position": [
+      4.0,
+      0.0,
+      -22.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Spawn_12": {
+     "position": [
+      4.0,
+      0.0,
+      -27.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     138.8
+    ],
+    "yawDeg": 0
+   }
+  },
+  {
+   "name": "TrainLobby_Gangway",
+   "kind": "Gangway",
+   "notes": "Bellows between two cars: floor, walls and roof round a 6.6 x 8.4 passage, 2.4 long. Pivot = floor top at the middle of the gap.",
+   "pivot": "floor top at the centre",
+   "origin": [
+    1440.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    7.8,
+    9.6,
+    3.0
+   ],
+   "boundsMin": [
+    -3.9,
+    -0.6,
+    -1.5
+   ],
+   "boundsMax": [
+    3.9,
+    9.0,
+    1.5
+   ],
+   "tris": 156,
+   "parts": [
+    {
+     "name": "TrainLobby_Gangway_Floor",
+     "role": "Floor",
+     "robloxMaterial": "WoodPlanks",
+     "rgb": [
+      84,
+      54,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      0.0,
+      -0.3,
+      0.0
+     ],
+     "size": [
+      6.6,
+      0.6,
+      3.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Gangway_Bellows",
+     "role": "Bellows",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      40,
+      38,
+      40
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 144,
+     "center": [
+      0.0,
+      4.5,
+      0.04
+     ],
+     "size": [
+      7.8,
+      9.0,
+      2.92
+     ]
+    }
+   ],
+   "colliders": [
+    {
+     "name": "TrainLobby_Gangway_Floor_Col",
+     "center": [
+      0.0,
+      -0.3,
+      -0.0
+     ],
+     "size": [
+      6.6,
+      0.6,
+      3.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Gangway_WallL_Col",
+     "center": [
+      -3.6,
+      4.2,
+      -0.0
+     ],
+     "size": [
+      0.6,
+      8.4,
+      3.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Gangway_WallR_Col",
+     "center": [
+      3.6,
+      4.2,
+      -0.0
+     ],
+     "size": [
+      0.6,
+      8.4,
+      3.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    },
+    {
+     "name": "TrainLobby_Gangway_Roof_Col",
+     "center": [
+      0.0,
+      8.7,
+      -0.0
+     ],
+     "size": [
+      6.6,
+      0.6,
+      3.0
+     ],
+     "yawDeg": 0.0,
+     "collision": "Box",
+     "transparency": 1.0,
+     "canCollide": true,
+     "canQuery": true,
+     "canTouch": false,
+     "castShadow": false
+    }
+   ],
+   "attachments": {},
+   "placements": [
+    {
+     "position": [
+      0.0,
+      0.0,
+      -39.2
+     ],
+     "yawDeg": 0
+    },
+    {
+     "position": [
+      0.0,
+      0.0,
+      39.2
+     ],
+     "yawDeg": 0
+    },
+    {
+     "position": [
+      0.0,
+      0.0,
+      105.6
+     ],
+     "yawDeg": 0
+    }
+   ]
+  },
+  {
+   "name": "TrainLobby_Scenery",
+   "kind": "Scenery",
+   "notes": "A tileable strip of land 400 studs long (along the train), for the +X side of the train (Roblox +X); mirror a copy (rotate 180 degrees about the train's axis) for the other side. Flat layered cut-outs facing the train: Poles (x 24), Trees (x 40-70), Hills (x 110-160), HillFar (x 260), Ground. Pivot = the strip's middle, at the train's floor level; the ground is 4 below the floor. Every layer is periodic: copies at +-400 join seamlessly.",
+   "pivot": "strip middle at the train's floor level",
+   "origin": [
+    1960.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    288.0,
+    60.13,
+    401.78
+   ],
+   "boundsMin": [
+    12.0,
+    -4.4,
+    -200.0
+   ],
+   "boundsMax": [
+    300.0,
+    55.733,
+    201.779
+   ],
+   "tris": 2356,
+   "parts": [
+    {
+     "name": "TrainLobby_Scenery_Ground",
+     "role": "Ground",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      104,
+      124,
+      78
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 12,
+     "center": [
+      156.0,
+      -4.185,
+      0.0
+     ],
+     "size": [
+      288.0,
+      0.43,
+      400.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Scenery_HillFar",
+     "role": "HillFar",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      128,
+      146,
+      150
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 200,
+     "center": [
+      270.0,
+      25.866,
+      0.0
+     ],
+     "size": [
+      40.0,
+      59.733,
+      400.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Scenery_Hill",
+     "role": "Hill",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      98,
+      124,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 320,
+     "center": [
+      137.5,
+      11.089,
+      0.0
+     ],
+     "size": [
+      45.0,
+      30.178,
+      400.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Scenery_TreeDark",
+     "role": "TreeDark",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      48,
+      72,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 696,
+     "center": [
+      54.999,
+      7.316,
+      14.192
+     ],
+     "size": [
+      29.869,
+      18.622,
+      375.175
+     ]
+    },
+    {
+     "name": "TrainLobby_Scenery_Pole",
+     "role": "Pole",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      72,
+      58,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 744,
+     "center": [
+      46.716,
+      4.0,
+      0.0
+     ],
+     "size": [
+      46.233,
+      16.0,
+      400.0
+     ]
+    },
+    {
+     "name": "TrainLobby_Scenery_TreeLight",
+     "role": "TreeLight",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      70,
+      96,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tris": 384,
+     "center": [
+      55.03,
+      7.316,
+      -10.116
+     ],
+     "size": [
+      27.657,
+      18.596,
+      377.667
+     ]
+    }
+   ],
+   "colliders": [],
+   "attachments": {},
+   "scenery": {
+    "length": 400.0,
+    "side": "+X (Roblox +X); mirror for -X",
+    "groundBelowFloor": 4.0,
+    "suggestedSpeedStudsPerSecond": {
+     "TrainLobby_Scenery_Pole": 60,
+     "TrainLobby_Scenery_TreeDark": 60,
+     "TrainLobby_Scenery_TreeLight": 60,
+     "TrainLobby_Scenery_Hill": 18,
+     "TrainLobby_Scenery_HillFar": 6,
+     "TrainLobby_Scenery_Ground": 0
+    },
+    "speedNote": "60 studs/s (about 60 km/h at 0.28 m a stud) for the near layers; the hills slide slower to fake their distance (parallax), so the far layers do not repeat visibly. Move every layer in the train's backward direction (Roblox +Z, the cars face -Z) and wrap it by 400 when it passes 200; keep 3 copies per layer per side (-400, 0, +400) so a window never sees an end. Client only (a lobby VFX), CFrame each copy per frame or use one TweenService loop per layer."
+   }
+  }
+ ],
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 18 Nov 2026, approved by the owner (\"Yes, upload them\"). Never re-upload this file; reuse its id. A re-export needs a new upload (new id) recorded here.",
+   "No textures, no vertex colours: one flat colour per part; the importer drops colours, so set Material/Color from this manifest. Not inserted into the place (an upload check only)."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_TrainLobby_v1",
+   "operationId": "f403c272-d391-44e2-bf15-b938f288783b",
+   "uploadedUtc": "2026-11-18T11:53:12.746Z",
+   "assetId": 118495945857547,
+   "moderationState": "Approved",
+   "bytes": 821484,
+   "sha256": "4806ee9ed1ff4d77723d05106fd3ea7f9f40b29e38a6961df0213075e047d27e",
+   "revisionId": "1",
+   "file": "TrainLobby.glb"
+  }
+ }
+}

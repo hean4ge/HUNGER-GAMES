@@ -112,7 +112,7 @@ local KICK: { [string]: Vector3 } = {
 }
 local HIT_SHAKE: { [string]: number } = { Light = 0.12, Medium = 0.2, Heavy = 0.32 }
 
-local BLOCKING_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
+local BLOCKING_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true, Sit = true } -- Sit: in a tree
 local BUFFER_WINDOW = 0.22 -- a press this close to the end of an action starts the next one when it can
 local BOW_RECOVER = 0.32
 
@@ -909,6 +909,8 @@ local function denyBlockedMove()
 		Feedback.deny("Climbing", "LET GO TO FIGHT · [" .. ActionHints.keyOf("Crouch") .. "]")
 	elseif state == "Swim" then
 		Feedback.deny("Swimming", "YOU CAN'T FIGHT WHILE SWIMMING")
+	elseif state == "Sit" then
+		Feedback.deny("Climbing", "STAND UP TO FIGHT · [E]")
 	else
 		Feedback.deny("Mantling") -- a mantle is over in under a second: the dry click is enough
 	end

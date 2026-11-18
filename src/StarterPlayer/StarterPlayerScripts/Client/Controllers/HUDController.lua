@@ -257,6 +257,18 @@ local function dimmed(text: string): string
 	return "<font color=\"" .. DIM_HEX .. "\">" .. text .. "</font>"
 end
 
+-- Quiet hints are in sentence case ("Hold to eat · +12 hunger"). A line written in capitals by its source is turned
+-- into sentence case here; one with any small letter is left as written. Key squares keep their capitals.
+local function sentence(text: string): string
+	if string.find(text, "%l") or not string.find(text, "%u") then
+		return text
+	end
+	local lower = string.lower(text)
+	return (string.gsub(lower, "^(%W*)(%a)", function(lead, first)
+		return lead .. string.upper(first)
+	end, 1))
+end
+
 -- Fades an icon made by QuietUI.icon (its Ink parts, and the shade copy under them) for a moment's transition.
 -- To keep an icon dim, tint it (QuietUI.tint): its parts overlap, and transparency would show the overlaps.
 local function iconTransparency(icon: Instance, t: number)
@@ -786,9 +798,11 @@ local function paintSlot(i: number)
 	local selected = i == equippedSlot and not empty
 	local rest = hotbarRest and not selected
 	local px = if selected then ICON_SELECTED else ICON
+	-- An empty cell hides its viewport: a ViewportFrame emptied by clearViewport keeps drawing its last picture, so
+	-- without this the next round began with faded pictures of the last round's items in empty cells.
 	QuietUI.tween(r.viewport, Theme.Tween.Fast, {
 		Size = UDim2.fromOffset(px, px),
-		ImageTransparency = if selected then 0 elseif rest then 0.32 else 0.08,
+		ImageTransparency = if empty then 1 elseif selected then 0 elseif rest then 0.32 else 0.08,
 	})
 	r.key.TextColor3 = if selected then C.Ink else C.Ink2
 	QuietUI.textTransparency(r.key, if selected then 0 elseif rest then T.TextFaint else 0.12)
@@ -845,7 +859,7 @@ local function setSlot(i: number, data: any): boolean
 		local def = ItemDefs.get(id)
 		local hasIcon = id ~= nil and frameIcon(r.viewport, id)
 		r.fallback.Visible = id ~= nil and not hasIcon
-		r.fallback.Text = if def then string.upper(def.name) elseif id then string.upper(id) else ""
+		r.fallback.Text = if def then def.name elseif id then id else ""
 	end
 	r.amount = count
 	-- (no rarity colours on the HUD: one ink. The cell's Rarity line stays hidden.)
@@ -1476,6 +1490,29 @@ local function eventLine(now: number): (string?, boolean)
 	return nil, false
 end
 
+-- The day and the time of day from GameState.Clock (Shared.DayCycle), in ten-minute steps: "Day 2 · 14:30".
+local function dayTime(now: number): string?
+	if not DayCycle or type(DayCycle.decodeClock) ~= "function" or type(DayCycle.evalClock) ~= "function" then
+		return nil
+	end
+	local raw = GameState:GetAttribute("Clock")
+	if raw ~= clockRaw then
+		clockRaw = raw
+		local ok, base = pcall(DayCycle.decodeClock, raw)
+		clockBase = if ok then base else nil
+	end
+	if not clockBase then
+		return nil
+	end
+	local ok, clock = pcall(DayCycle.evalClock, clockBase, now)
+	if not ok or type(clock) ~= "number" or clock ~= clock then
+		return nil
+	end
+	local day = math.max(1, math.floor(clock / 24) + 1)
+	local minutes = math.floor((clock % 24) * 60 / 10) * 10
+	return string.format("Day %d  ·  %s", day, mono(string.format("%02d:%02d", math.floor(minutes / 60), minutes % 60)))
+end
+
 local function updateInfo(now: number, phase: string)
 	local eventText: string? = nil
 	local eventDim = false
@@ -1494,52 +1531,83 @@ local function updateInfo(now: number, phase: string)
 		end
 	end
 	local showTimer = phase == "Active" and endsAt > 0 and (eventLeft == nil or remaining <= eventLeft + 0.5)
-	setVisible(R.timer, showTimer)
-	setVisible(R.dot, showTimer)
-	if showTimer then
-		local text = Util.formatTime(remaining)
-		if R.timer.Text ~= text then
-			R.timer.Text = text
-		end
-		R.timer.TextColor3 = if remaining <= 60 then C.Warning else C.Text
-	end
+	local timerText = if showTimer then Util.formatTime(remaining) else nil
+	local timerLate = showTimer and remaining <= 60
 	local alive = math.floor(tonumber(GameState:GetAttribute("AliveCount")) or 0)
-	local remainText = if phase == "Countdown"
-		then string.format("<b>%d</b> %s", alive, if alive == 1 then "CONTENDER" else "CONTENDERS")
-		else string.format("<b>%d</b> REMAIN", alive)
-	if R.remain.Text ~= remainText then
-		R.remain.Text = remainText
+	-- "17 left" (at the Countdown: "17 contenders")
+	local word = if phase == "Countdown" then (if alive == 1 then "contender" else "contenders") else "left"
+	local when = dayTime(now)
+
+	if factsOn and R.facts then
+		-- desktop: the facts top right; the line under the compass keeps PRACTICE and the border's distance
+		setVisible(R.timer, false)
+		setVisible(R.dot, false)
+		setVisible(R.remain, false)
+		local count = tostring(alive)
+		if R.factsCount.Text ~= count then
+			R.factsCount.Text = count
+		end
+		if R.factsWord.Text ~= word then
+			R.factsWord.Text = word
+		end
+		local parts = {}
+		if when then
+			table.insert(parts, when)
+		end
+		if timerText then
+			table.insert(parts, if timerLate
+				then string.format("<font color=\"%s\">%s</font>", Theme.hex(C.Sun), mono(timerText))
+				else mono(timerText))
+		end
+		local sub = table.concat(parts, "  ·  ")
+		if R.factsSub.Text ~= sub then
+			R.factsSub.Text = sub
+		end
+	else
+		-- touch screens: all of it in the one line under the compass
+		setVisible(R.timer, showTimer)
+		setVisible(R.dot, showTimer)
+		setVisible(R.remain, true)
+		if timerText then
+			if R.timer.Text ~= timerText then
+				R.timer.Text = timerText
+			end
+			R.timer.TextColor3 = if timerLate then C.Sun else C.Ink
+		end
+		local remainText = string.format("%s %s", mono(alive), word)
+		if when then
+			remainText ..= "  ·  " .. dimmed(when)
+		end
+		if R.remain.Text ~= remainText then
+			R.remain.Text = remainText
+		end
 	end
 	setVisible(R.practice, GameState:GetAttribute("Practice") == true)
 
-	-- the event line and the border alert share one slot; being outside the border wins
+	-- the event line and the border warning share one slot; being outside the border wins
 	setVisible(R.event, eventText ~= nil and not outside)
 	if eventText and R.event.Text ~= eventText then
 		R.event.Text = eventText
 	end
 	if eventText then
-		local color = if eventDim then C.TextDim else C.Warning
+		local color = if eventDim then C.Ink2 else C.Sun
 		if R.event.TextColor3 ~= color then
 			R.event.TextColor3 = color
 		end
 	end
 
+	-- outside the border: one line of text (with the Red line round the screen's edge, HUDFX.BorderLine)
 	setVisible(R.alert, outside)
 	if outside then
 		local meters = math.max(1, math.floor(outsideBy * STUD_TO_METERS + 0.5))
-		local small = Theme.isSmallScreen()
-		-- short screens get a single line so nothing crosses the crosshair
-		local title = if small then string.format("OUTSIDE THE BORDER  ·  %d m", meters) else "OUTSIDE THE BORDER"
+		local title = string.format("Outside the border  ·  %d m", meters)
 		if R.alertTitle.Text ~= title then
 			R.alertTitle.Text = title
 		end
-		setVisible(R.alertSub, not small)
-		if not small then
-			local sub = string.format("Head back toward the marker  ·  %d m", meters)
-			if R.alertSub.Text ~= sub then
-				R.alertSub.Text = sub
-			end
+		if R.alertTitle.TextColor3 ~= C.Red then
+			R.alertTitle.TextColor3 = C.Red
 		end
+		setVisible(R.alertSub, false)
 	end
 end
 
@@ -1560,6 +1628,10 @@ local function updateCrosshair(show: boolean)
 	local showLines = ranged and not using
 	for _, line in pairs(R.lines) do
 		setVisible(line, showLines)
+	end
+	-- the thin ring around the dot for a hand or a blade (the spread lines take its place with a bow or a throw)
+	if R.crossRing then
+		setVisible(R.crossRing, not ranged and not using)
 	end
 	if showLines then
 		-- the lines bracket the real spread cone: crosshairSpread is degrees / 7 (CombatController), drawn at the camera's FOV
@@ -1584,7 +1656,7 @@ local function showHit(info: any)
 	local token = hitToken
 	local killed = info.killed == true
 	local headshot = info.headshot == true
-	local color = if killed then C.Gold elseif headshot then C.AccentSoft else C.Text -- (a kill was red: no red hit effects)
+	local color = if killed or headshot then C.Sun else C.Ink -- (a kill was red: no red hit effects)
 	local length = if killed then 13 elseif headshot then 10 else 8
 	local from = if killed then 7 else 6
 	local to = if killed then 13 else 9
@@ -1683,7 +1755,7 @@ local function updateUse(show: boolean)
 				seg.BackgroundTransparency = if i <= lit then 0 else 0.75
 			end
 		end
-		local text = string.upper(tostring(up.label or ""))
+		local text = sentence(tostring(up.label or ""))
 		if R.ringLabel.Text ~= text then
 			R.ringLabel.Text = text
 		end
@@ -1699,7 +1771,7 @@ local function updateDraw(show: boolean)
 	setVisible(R.draw, on)
 	if on then
 		R.drawFill.Size = UDim2.fromScale(1, a) -- upright: it fills from the bottom
-		R.drawFill.BackgroundColor3 = if a >= 0.999 then C.Accent else C.Text
+		R.drawFill.BackgroundColor3 = if a >= 0.999 then C.Sun else C.Ink -- Sun: fully drawn
 		-- below the minimum charge a release lets the string down instead of shooting: the fill stays faint until then
 		R.drawFill.BackgroundTransparency = if a < (Config.Combat.MinBowCharge or 0.2) then 0.6 else 0
 	end
@@ -1718,25 +1790,157 @@ local function hintKeyFor(key: string?): string?
 	return "E"
 end
 
--- The interaction hint (water: [E] Drink). It holds HINT_HOLD after the look ray leaves the water, and while it shows
--- it has the slot (returns true).
+-- Prompts in the Custom style (crates, ground items, loose arrows, Take all). Roblox draws nothing for them; this
+-- client draws the newest one shown in the interaction hint's place. The engine still reads the prompt's key and
+-- button itself (E / ButtonX) and fires the hold events; a touch screen holds it through the tap button.
+local function dropPrompt(prompt: ProximityPrompt)
+	for i = #prompts, 1, -1 do
+		local entry = prompts[i]
+		if entry.prompt == prompt then
+			for _, connection in ipairs(entry.connections) do
+				connection:Disconnect()
+			end
+			table.remove(prompts, i)
+		end
+	end
+	if promptHold and promptHold.prompt == prompt then
+		promptHold = nil
+	end
+	if tapPrompt == prompt then
+		tapPrompt = nil
+		pcall(function()
+			prompt:InputHoldEnd()
+		end)
+	end
+end
+
+local function onPromptShown(prompt: ProximityPrompt, inputType: Enum.ProximityPromptInputType)
+	if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
+		return -- Roblox draws it
+	end
+	dropPrompt(prompt)
+	local entry = { prompt = prompt, input = inputType, connections = {} :: { RBXScriptConnection } }
+	local function endHold()
+		if promptHold and promptHold.prompt == prompt then
+			promptHold = nil
+		end
+	end
+	table.insert(entry.connections, prompt.PromptButtonHoldBegan:Connect(function()
+		promptHold = { prompt = prompt, t0 = os.clock(), duration = prompt.HoldDuration }
+	end))
+	table.insert(entry.connections, prompt.PromptButtonHoldEnded:Connect(endHold))
+	table.insert(entry.connections, prompt.Triggered:Connect(endHold))
+	table.insert(entry.connections, prompt.AncestryChanged:Connect(function()
+		if not prompt:IsDescendantOf(workspace) then
+			dropPrompt(prompt)
+		end
+	end))
+	table.insert(prompts, entry)
+end
+
+-- The newest Custom prompt that is still on screen, or nil.
+local function currentPrompt(): any
+	for i = #prompts, 1, -1 do
+		local entry = prompts[i]
+		local p = entry.prompt
+		if p.Parent and p.Enabled and p.Style == Enum.ProximityPromptStyle.Custom then
+			return entry
+		end
+	end
+	return nil
+end
+
+-- Its words: the attribute PromptLine ("Open crate", "Take all"), else ActionText and ObjectText ("Take Bandage ×2").
+local function promptLine(prompt: ProximityPrompt): string
+	local c = promptLineCache
+	local attribute = prompt:GetAttribute("PromptLine")
+	if c.prompt == prompt and c.action == prompt.ActionText and c.object == prompt.ObjectText and c.attribute == attribute then
+		return c.line
+	end
+	local line: string
+	if type(attribute) == "string" and attribute ~= "" then
+		line = attribute
+	else
+		local a, o = prompt.ActionText, prompt.ObjectText
+		line = if a ~= "" and o ~= "" then a .. " " .. o elseif a ~= "" then a else o
+	end
+	c.prompt, c.action, c.object, c.attribute, c.line = prompt, prompt.ActionText, prompt.ObjectText, attribute, line
+	return line
+end
+
+local function promptKey(prompt: ProximityPrompt, inputType: Enum.ProximityPromptInputType): string
+	if inputType == Enum.ProximityPromptInputType.Touch then
+		return "TAP"
+	elseif inputType == Enum.ProximityPromptInputType.Gamepad then
+		local code = prompt.GamepadKeyCode
+		return glyphFor(code, (string.gsub(code.Name, "^Button", "")))
+	end
+	local code = prompt.KeyboardKeyCode
+	if code == Enum.KeyCode.Unknown then
+		return "E"
+	end
+	local name = UserInputService:GetStringForKeyCode(code)
+	return string.upper(if name ~= "" then name else code.Name)
+end
+
+-- The interaction slot under the crosshair: a Custom prompt first ([E] Open crate), else the interaction hint
+-- (water: [E] Drink). The water hint holds HINT_HOLD after the look ray leaves the water. Returns true while the slot
+-- is in use (the action hint waits meanwhile).
 local function updateInteract(show: boolean): boolean
-	local hint = ClientState.interactHint
-	local text = if show and type(hint) == "table" and type(hint.text) == "string" and hint.text ~= "" then hint.text else nil
-	local full = false
-	if text == "Drink" and (tonumber(player:GetAttribute("Thirst")) or 0) >= DRINK_HINT_MAX then
-		-- nothing to gain from a drink (a swimmer at thirst 97 had "E Drink" over the whole lake): no hint. The key
-		-- itself still drinks (InventoryController); "Fill bottle" is unaffected.
-		text, full = nil, true
-	end
-	local rawKey = if text then hint.key else nil
 	local now = os.clock()
-	if text then
-		interactSeen = { text = text, key = rawKey, at = now }
-	elseif show and not full and interactSeen and now - interactSeen.at < HINT_HOLD then
-		text, rawKey = interactSeen.text, interactSeen.key
+	local entry = if show then currentPrompt() else nil
+	local text: string? = nil
+	local key: string? = nil
+	if entry then
+		text = promptLine(entry.prompt)
+		key = promptKey(entry.prompt, entry.input)
+		if text == "" then
+			text = nil
+		end
 	end
-	local key = if text then hintKeyFor(rawKey) else nil
+	if not text then
+		entry = nil
+		local hint = ClientState.interactHint
+		text = if show and type(hint) == "table" and type(hint.text) == "string" and hint.text ~= "" then hint.text else nil
+		local full = false
+		if text == "Drink" and (tonumber(player:GetAttribute("Thirst")) or 0) >= DRINK_HINT_MAX then
+			-- nothing to gain from a drink (a swimmer at thirst 97 had "E Drink" over the whole lake): no hint. The key
+			-- itself still drinks (InventoryController); "Fill bottle" is unaffected.
+			text, full = nil, true
+		end
+		local rawKey = if text then hint.key else nil
+		if text then
+			interactSeen = { text = text, key = rawKey, at = now }
+		elseif show and not full and interactSeen and now - interactSeen.at < HINT_HOLD then
+			text, rawKey = interactSeen.text, interactSeen.key
+		end
+		key = if text then hintKeyFor(rawKey) else nil
+	end
+
+	-- a hold (the crate's 0.6 s) fills a short line under the words
+	local holdAlpha: number? = nil
+	if entry and promptHold and promptHold.prompt == entry.prompt and promptHold.duration > 0 then
+		holdAlpha = math.clamp((now - promptHold.t0) / promptHold.duration, 0, 1)
+	end
+	if R.promptHold then
+		setVisible(R.promptHold, holdAlpha ~= nil)
+		if holdAlpha then
+			R.promptHoldFill.Size = UDim2.fromScale(holdAlpha, 1)
+		end
+	end
+	-- on a touch screen the line is a button
+	local tap = entry ~= nil and entry.input == Enum.ProximityPromptInputType.Touch
+	if R.promptTap then
+		setVisible(R.promptTap, tap)
+		if not tap and tapPrompt then
+			local held = tapPrompt
+			tapPrompt = nil
+			pcall(function()
+				held:InputHoldEnd()
+			end)
+		end
+	end
+
 	if text == hintState.text and key == hintState.key then
 		return text ~= nil
 	end
@@ -1747,7 +1951,7 @@ local function updateInteract(show: boolean): boolean
 	if text then
 		R.interactText.Text = text
 		R.interactKey.Visible = key ~= nil
-		R.interactKeyLabel.Text = key or ""
+		QuietUI.setKey(R.interactKey, key or "")
 		group.Visible = true
 		Theme.tween(group, Theme.Tween.Fast, { GroupTransparency = 0 })
 	else
@@ -1843,7 +2047,7 @@ local function renderAction(segments: { any })
 				inst.Parent = R.action
 				actionPool.texts[nTexts] = inst
 			end
-			inst.Text = seg.text
+			inst.Text = sentence(seg.text)
 		end
 		inst.Name = "Seg" .. order
 		inst.LayoutOrder = order
@@ -1910,16 +2114,87 @@ local function updateVignettes(dt: number, t: number, combat: boolean)
 		local f = health / math.max(1, maxHealth)
 		if f < LOW_HEALTH then
 			local k = math.clamp((LOW_HEALTH - f) / math.max(0.05, LOW_HEALTH - 0.1), 0, 1)
-			local beat = 0.72 + 0.28 * math.sin(t * 2 * math.pi * (0.85 + 0.6 * k))
+			local beat = if reducedMotion then 0.86 else 0.72 + 0.28 * math.sin(t * 2 * math.pi * (0.85 + 0.6 * k))
 			lowAlpha = (0.22 + 0.55 * k) * beat
 		end
 	end
 	setVignette(R.vLow, lowAlpha)
-	local borderTarget = if outside and combat then 0.34 + 0.08 * math.sin(t * 2.2) else 0
+	-- outside the border: the thin Red line round the screen's edge, and under it a soft Red edge (no flashing: a
+	-- slow swell, still with reduced motion)
+	if R.borderLine then
+		setVisible(R.borderLine, outside and combat)
+	end
+	local borderTarget = if not (outside and combat) then 0 elseif reducedMotion then 0.22 else 0.22 + 0.05 * math.sin(t * 2.2)
 	borderAlpha += (borderTarget - borderAlpha) * Util.damp(5, dt)
 	setVignette(R.vBorder, borderAlpha)
 	hurtAlpha = math.max(0, hurtAlpha - dt * 1.4)
 	setVignette(R.vHurt, if combat then hurtAlpha else 0)
+end
+
+-- The practice dummies' name and health line (BillboardGui "HealthBar" in a TrainingDummy's head; DummyBuilder builds
+-- it, CombatService sizes it and sets Fill's Size and colour on every hit). On this client: the name in sentence case
+-- with the Quiet stroke, the track a faint ink line, and a "Quiet" ink line that mirrors Fill's size (Fill itself is
+-- hidden here: the server tints it toward Red as it empties, and a hit is not a danger state).
+local function restyleDummyBar(bar: Instance)
+	if dummyBars[bar] or not bar:IsA("BillboardGui") then
+		return
+	end
+	local track = bar:FindFirstChild("Track")
+	local fill = track and track:FindFirstChild("Fill")
+	if not (track and track:IsA("Frame") and fill and fill:IsA("GuiObject")) then
+		return
+	end
+	dummyBars[bar] = true
+	local label = bar:FindFirstChild("Label")
+	if label and label:IsA("TextLabel") then
+		label.Text = sentence(label.Text)
+		label.FontFace = Theme.Fonts.Medium
+		label.TextColor3 = C.Ink
+		label.TextStrokeTransparency = 1
+		label.Size = UDim2.new(1, 0, 0.5, 0)
+		Theme.shadow(label, false)
+	end
+	track.BackgroundColor3 = C.Ink
+	track.BackgroundTransparency = T.BarTrack
+	track.ClipsDescendants = false
+	track.AnchorPoint = Vector2.new(0.5, 1)
+	track.Position = UDim2.new(0.5, 0, 1, -2)
+	track.Size = UDim2.new(0.8, 0, 0, 3)
+	local corner = track:FindFirstChildOfClass("UICorner")
+	if corner then
+		corner:Destroy()
+	end
+	QuietUI.stroke(track)
+	fill.BackgroundTransparency = 1
+	local line = Instance.new("Frame")
+	line.Name = "Quiet"
+	line.BorderSizePixel = 0
+	line.BackgroundColor3 = C.Ink
+	line.BackgroundTransparency = 0
+	line.Size = UDim2.fromScale(math.clamp(fill.Size.X.Scale, 0, 1), 1)
+	line.ZIndex = fill.ZIndex + 1
+	line.Parent = track
+	local function mirror()
+		line.Size = UDim2.fromScale(math.clamp(fill.Size.X.Scale, 0, 1), 1)
+		if fill.BackgroundTransparency ~= 1 then
+			fill.BackgroundTransparency = 1
+		end
+	end
+	fill:GetPropertyChangedSignal("Size"):Connect(mirror)
+	fill:GetPropertyChangedSignal("BackgroundTransparency"):Connect(mirror)
+end
+
+local function watchDummy(model: Instance)
+	if not model:IsA("Model") then
+		return
+	end
+	task.spawn(function()
+		local head = model:WaitForChild("Head", 10)
+		local bar = head and head:WaitForChild("HealthBar", 10)
+		if bar and model.Parent then
+			restyleDummyBar(bar)
+		end
+	end)
 end
 
 local function updateCore(combat: boolean)
@@ -1985,6 +2260,12 @@ local function applyLayout()
 	killFeed.Position = layout.KillFeed.position
 	killFeed.Size = layout.KillFeed.size
 	R.feedLayout.HorizontalAlignment = (Enum.HorizontalAlignment :: any)[layout.KillFeed.align] or Enum.HorizontalAlignment.Right
+	-- the round's facts: top right on a desktop (HUD.Root.Facts), in the line under the compass on a touch screen
+	factsOn = layout.Facts == true and R.facts ~= nil
+	if R.facts and not factsOn then
+		setVisible(R.facts, false)
+	end
+	infoClock = 0 -- rewrite the facts in their new place at once
 	setSlotSize(layout.SlotSize or 56)
 	refreshDeviceHints()
 	placeHotbar()
@@ -2023,6 +2304,9 @@ local function update(dt: number)
 
 	updateBorderState(phase)
 	setVisible(R.top, showTop)
+	if R.facts then
+		setVisible(R.facts, showTop and factsOn)
+	end
 	setVisible(R.vitals, showHud)
 	setVisible(R.hotbar, showHud)
 	-- on touch layouts the kill feed sits at the left, where the cards are: it waits for them (a PC's is in the corner)
@@ -2035,12 +2319,21 @@ local function update(dt: number)
 			updateInfo(now, phase)
 		end
 	end
+	if t - reducedAt > 1 then
+		reducedAt = t
+		reducedMotion = QuietUI.reducedMotion()
+	end
 	if combat then
 		updateStamina(dt, t)
 	end
-	updatePulses(t)
+	updateVitalStates(t, combat)
+	updateArmorNote(t)
 	updateReason(combat)
 	updateShimmer(dt, combat)
+	if showHud then
+		updateHotbarRest(t)
+	end
+	updateFeed()
 
 	local showCenter = showHud and not ClientState.menuOpen
 	updateCrosshair(showCenter)
@@ -2142,6 +2435,7 @@ function HUDController.Start()
 	local top = root:WaitForChild("Top")
 	R.top = top
 	R.ticks = top.Compass.Ticks
+	R.baseline = top.Compass:FindFirstChild("Baseline") -- turns Red while you are outside the border
 	R.spire = top.Compass.Markers.Spire
 	R.spireDiamond = top.Compass.Markers.Spire.Diamond
 	R.spireDist = top.Compass.Markers.Spire.Dist
@@ -2166,6 +2460,13 @@ function HUDController.Start()
 	R.alert = top.Alert
 	R.alertTitle = top.Alert.Title
 	R.alertSub = top.Alert.Sub
+	-- the round's facts, top right on a desktop ("17 left", the day and the time, the round clock)
+	R.facts = root:FindFirstChild("Facts")
+	if R.facts then
+		R.factsCount = R.facts:WaitForChild("Row"):WaitForChild("Count")
+		R.factsWord = R.facts.Row:WaitForChild("Word")
+		R.factsSub = R.facts:WaitForChild("Sub")
+	end
 	R.killFeed = root:WaitForChild("KillFeed")
 	R.feedLayout = R.killFeed:WaitForChild("Layout")
 	R.vitals = root:WaitForChild("Vitals")
@@ -2186,18 +2487,13 @@ function HUDController.Start()
 	R.vLow = vignette:WaitForChild("LowHealth")
 	R.vBorder = vignette:WaitForChild("Border")
 	R.vHurt = vignette:WaitForChild("Hurt")
-	-- No red hit effects (the age rating's "Mild" condition): the hurt flash and the low-health edge are built dark
-	-- red (UIBuilder); here they become a neutral dark edge. The Border vignette keeps the wall's own colour.
-	for _, holder in ipairs({ R.vLow, R.vHurt }) do
-		for _, edge in ipairs(holder:GetChildren()) do
-			if edge:IsA("GuiObject") then
-				edge.BackgroundColor3 = NEUTRAL_EDGE
-			end
-		end
-	end
+	-- (no red hit effects, the age rating's "Mild" condition: UIBuilder builds the hurt flash and the low-health edge
+	-- as a neutral dark edge; only the border's edge is Red)
+	R.borderLine = fxGui:FindFirstChild("BorderLine")
 	R.cross = center:WaitForChild("Crosshair")
 	R.crossDot = R.cross:WaitForChild("Dot")
 	R.lines = { Up = R.cross.Up, Down = R.cross.Down, Left = R.cross.Left, Right = R.cross.Right }
+	R.crossRing = R.cross:FindFirstChild("Ring")
 	-- the centre dot has to read on any background (bright sky, foliage, night): a near-solid dark outline
 	local dotStroke = R.crossDot:FindFirstChildOfClass("UIStroke")
 	if dotStroke then
@@ -2245,6 +2541,67 @@ function HUDController.Start()
 		R.actionKey.Visible = false -- templates under a Folder would still draw
 		R.actionText.Visible = false
 	end
+	-- prompts (Custom style): a short line under the words fills during a hold; on a touch screen a clear button over
+	-- the words holds the prompt (48 px tall, never under 44)
+	local hold = Instance.new("Frame")
+	hold.Name = "PromptHold"
+	hold.AnchorPoint = Vector2.new(0.5, 0)
+	hold.Position = UDim2.fromOffset(0, PROMPT_Y + 38)
+	hold.Size = UDim2.fromOffset(72, 2)
+	hold.BorderSizePixel = 0
+	hold.BackgroundColor3 = C.Ink
+	hold.BackgroundTransparency = T.BarTrack
+	hold.Visible = false
+	QuietUI.stroke(hold)
+	local holdFill = Instance.new("Frame")
+	holdFill.Name = "Fill"
+	holdFill.BorderSizePixel = 0
+	holdFill.BackgroundColor3 = C.Ink
+	holdFill.BackgroundTransparency = 0
+	holdFill.Size = UDim2.fromScale(0, 1)
+	holdFill.Parent = hold
+	hold.Parent = center
+	R.promptHold, R.promptHoldFill = hold, holdFill
+	local tap = Instance.new("TextButton")
+	tap.Name = "PromptTap"
+	tap.Text = ""
+	tap.AutoButtonColor = false
+	tap.BackgroundTransparency = 1
+	tap.Selectable = false
+	tap.AnchorPoint = Vector2.new(0.5, 0)
+	tap.Position = UDim2.fromOffset(0, PROMPT_Y + 17 - PROMPT_TAP.Y / 2)
+	tap.Size = UDim2.fromOffset(PROMPT_TAP.X, PROMPT_TAP.Y)
+	tap.Visible = false
+	tap.ZIndex = 5
+	tap.Parent = center
+	R.promptTap = tap
+	tap.InputBegan:Connect(function(io: InputObject)
+		if io.UserInputType ~= Enum.UserInputType.Touch and io.UserInputType ~= Enum.UserInputType.MouseButton1 then
+			return
+		end
+		local entry = currentPrompt()
+		if entry and not tapPrompt then
+			tapPrompt = entry.prompt
+			pcall(function()
+				entry.prompt:InputHoldBegin()
+			end)
+		end
+	end)
+	tap.InputEnded:Connect(function(io: InputObject)
+		if io.UserInputType ~= Enum.UserInputType.Touch and io.UserInputType ~= Enum.UserInputType.MouseButton1 then
+			return
+		end
+		local held = tapPrompt
+		tapPrompt = nil
+		if held then
+			pcall(function()
+				held:InputHoldEnd()
+			end)
+		end
+	end)
+	ProximityPromptService.PromptShown:Connect(onPromptShown)
+	ProximityPromptService.PromptHidden:Connect(dropPrompt)
+
 	local damage = center:WaitForChild("Damage")
 	for n = 1, 4 do
 		local holder = damage:FindFirstChild("Dir" .. n)
@@ -2253,7 +2610,7 @@ function HUDController.Start()
 			for _, seg in ipairs(holder:GetChildren()) do
 				local bar = seg:FindFirstChild("Bar")
 				if bar then
-					bar.BackgroundColor3 = C.Warning -- amber, not the built red (no red hit effects)
+					bar.BackgroundColor3 = C.Sun -- "look that way", never red (no red hit effects)
 					table.insert(bars, { bar = bar, weight = tonumber(bar:GetAttribute("Weight")) or 1 })
 				end
 			end
@@ -2293,8 +2650,14 @@ function HUDController.Start()
 			key = card:WaitForChild("Key"),
 			count = card:WaitForChild("Count"),
 			rarity = card:WaitForChild("Rarity"),
+			under = card:FindFirstChild("Under"), -- the line under the cell in hand
+			ring = card:FindFirstChild("Ring"), -- the small ring of an empty cell
+			ringInk = nil :: UIStroke?,
 			itemId = nil,
 		}
+		local ring = slotRefs[n].ring
+		local ink = ring and ring:FindFirstChild("Ink")
+		slotRefs[n].ringInk = if ink and ink:IsA("UIStroke") then ink else nil
 		button.Activated:Connect(function()
 			if not (ClientState.inArena and ClientState.alive) or ClientState.spectating then
 				return
@@ -2348,16 +2711,16 @@ function HUDController.Start()
 			end
 			return fallback
 		end
-		local auto = { { kind = "text", text = "PUSH THE STICK ALL THE WAY TO SPRINT" } }
+		local auto = { { kind = "text", text = "Push the stick all the way to sprint" } }
 		local segments = nil
 		if Input.isTouch() then
 			segments = if tonumber(settings.sprintModeTouch) == 2 then auto
-				else { { kind = "key", text = sprintKey("RUN") }, { kind = "text", text = "SPRINT" } }
+				else { { kind = "key", text = sprintKey("RUN") }, { kind = "text", text = "Sprint" } }
 		elseif Input.isGamepad() then
 			segments = if tonumber(settings.sprintModePad) == 2 then auto
-				else { { kind = "key", text = sprintKey(glyphFor(Enum.KeyCode.ButtonL3, "L3")) }, { kind = "text", text = "SPRINT" } }
+				else { { kind = "key", text = sprintKey(glyphFor(Enum.KeyCode.ButtonL3, "L3")) }, { kind = "text", text = "Sprint" } }
 		elseif tonumber(settings.sprintMode) ~= 2 then
-			segments = { { kind = "key", text = sprintKey("SHIFT") }, { kind = "text", text = "SPRINT" } }
+			segments = { { kind = "key", text = sprintKey("SHIFT") }, { kind = "text", text = "Sprint" } }
 		end
 		if segments then
 			flashHint = { segments = segments, untilT = os.clock() + 3 }
@@ -2404,6 +2767,11 @@ function HUDController.Start()
 		updateSurvival(true)
 	end)
 	Net.event("KillFeed").OnClientEvent:Connect(addKill)
+	-- the practice dummies' health line, restyled on this client
+	for _, model in ipairs(CollectionService:GetTagged(DUMMY_TAG)) do
+		watchDummy(model)
+	end
+	CollectionService:GetInstanceAddedSignal(DUMMY_TAG):Connect(watchDummy)
 
 	-- (the device kind, not every switch between keys and mouse: that one fires many times a second in a fight and
 	-- each time made the interaction hint tween again)

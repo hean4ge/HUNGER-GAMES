@@ -5,8 +5,9 @@
 	Loose items (tag LooseProjectile, as they stream in and out) go into an 8-stud grid. Every 0.1 s - never per frame -
 	the item nearest the crosshair within reach (WorldItems.inReach: Config.Loot.ItemPromptDistance from your root and
 	no higher than a raised hand, so one high up a tree or a wall needs a climb) and in line of sight gets the one local
-	ProximityPrompt, set up like a ground item's Take prompt (Default style, "Take" + the item's name, E / ButtonX / a
-	tap: Roblox draws this device's own button). Alive contenders in the arena only; never while spectating or in a menu.
+	ProximityPrompt, set up like a ground item's Take prompt (Custom style, "Take" + the item's name, E / ButtonX / a
+	tap: HUDController draws it under the crosshair as a key square and words, "[E] Take Arrow", and its tap button on
+	a touch screen). Alive contenders in the arena only; never while spectating or in a menu.
 	Triggered -> TakeWorldItem(worldId); the server checks reach again and adds it to your stack ("+1 ARROW" comes with
 	the InventoryUpdate) or says INVENTORY FULL. Walking over arrows and throwing knives picks them up on the server.
 	API (tests): WorldItemController.stats() -> { tracked, cells, target (worldId or 0) }
@@ -115,7 +116,7 @@ local function ensurePrompt(): ProximityPrompt
 	p.HoldDuration = 0
 	p.MaxActivationDistance = (tonumber(LootCfg.ItemPromptDistance) or 7) + 3 -- our own reach check decides
 	p.RequiresLineOfSight = false
-	p.Style = Enum.ProximityPromptStyle.Default
+	p.Style = Enum.ProximityPromptStyle.Custom -- the Quiet look, drawn by HUDController
 	p.KeyboardKeyCode = Enum.KeyCode.E
 	p.GamepadKeyCode = Enum.KeyCode.ButtonX
 	p.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton

@@ -931,6 +931,55 @@ local function safeStep(dt: number)
 	end
 end
 
+-- The train lobby (mp-retest2, 18 Nov): Roblox's camera stops at opaque walls but passes through the cars' window
+-- glass, so a player standing by a window with the view turned inward had the camera outside the train, looking in
+-- through the glass. In the lobby's third person the camera stops just inside the car instead: one ray a frame from
+-- the camera's focus to the camera against the cars only (workspace.Lobby's Models: not its scenery, lamps or
+-- spawns), and the camera moves forward along its own look line (the zoom and the turn are untouched).
+local LOBBY_NEAR = 450 -- studs from the lobby's pivot inside which the stop runs
+local LOBBY_GAP = 0.6 -- studs the camera keeps from a wall or a pane
+local lobbyParams = RaycastParams.new()
+lobbyParams.FilterType = Enum.RaycastFilterType.Include
+lobbyParams.IgnoreWater = true
+local lobbyCars: Instance? = nil
+local lobbyCount = -1
+local function lobbyStop()
+	if firstPerson or ClientState.spectating ~= nil or ClientState.launchShot or ClientState.inArena then
+		return
+	end
+	local cam = workspace.CurrentCamera
+	local lobby = workspace:FindFirstChild("Lobby")
+	if not (cam and lobby and lobby:IsA("Model")) or cam.CameraType ~= Enum.CameraType.Custom then
+		return
+	end
+	local focus = cam.Focus.Position
+	if (focus - lobby:GetPivot().Position).Magnitude > LOBBY_NEAR then
+		return
+	end
+	if lobbyCars ~= lobby or lobbyCount ~= #lobby:GetChildren() then
+		lobbyCars = lobby
+		lobbyCount = #lobby:GetChildren()
+		local list = {}
+		for _, child in ipairs(lobby:GetChildren()) do
+			if child:IsA("Model") then
+				table.insert(list, child)
+			end
+		end
+		lobbyParams.FilterDescendantsInstances = list
+	end
+	local position = cam.CFrame.Position
+	local offset = position - focus
+	local distance = offset.Magnitude
+	if distance < 0.5 then
+		return
+	end
+	local hit = workspace:Raycast(focus, offset, lobbyParams)
+	if hit and hit.Distance < distance then
+		local keep = math.max(hit.Distance - LOBBY_GAP, 0.5)
+		cam.CFrame = cam.CFrame + offset.Unit * (keep - distance)
+	end
+end
+
 -- Public API ------------------------------------------------------------------------------------------------------------
 
 function CameraController.getBaseCFrame(): CFrame
@@ -976,6 +1025,13 @@ function CameraController.Start()
 
 	RunService:BindToRenderStep("LS_CameraRestore", Enum.RenderPriority.First.Value, restoreBase)
 	RunService:BindToRenderStep("LS_CameraFeel", Enum.RenderPriority.Camera.Value + 1, safeStep)
+	RunService:BindToRenderStep("LS_CameraLobbyStop", Enum.RenderPriority.Camera.Value + 2, function()
+		local ok, err = pcall(lobbyStop)
+		if not ok and os.clock() - errorAt > 5 then
+			errorAt = os.clock()
+			warn("[CameraController] lobby stop: " .. tostring(err))
+		end
+	end)
 
 	ClientState.landed:Connect(function(impact)
 		if type(impact) ~= "number" or impact ~= impact then
@@ -1027,6 +1083,13 @@ function CameraController.Start()
 	player.CharacterAdded:Connect(function()
 		resetFeel()
 		prevYaw = nil
+		-- the first character: Roblox's camera sets its own default zoom (10 here, the lobby's limit) when it takes up
+		-- the new character, after applyMode's lobby zoom at start-up: set the lobby zoom again once it has
+		task.delay(0.2, function()
+			if currentMode == "Third" and ClientState.spectating == nil and not ClientState.inArena then
+				setThirdPersonZoom(K.LobbyZoom)
+			end
+		end)
 	end)
 	-- a held V the game never hears released: the window lost focus, or a text box took the keyboard
 	UserInputService.WindowFocusReleased:Connect(function()

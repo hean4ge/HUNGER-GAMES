@@ -204,6 +204,15 @@ Sounds.Emit_Fire = def("Ambience", 0.7, { looped = true, rollMin = 6, rollMax = 
 Sounds.Emit_Wind = def("Ambience", 0.35, { looped = true, rollMin = 30, rollMax = 200, ids = { rbx(9114057128) } }) -- "Desert Wind Whistley Light Gusts 2" (PSE)
 Sounds.Emit_Frogs = def("Ambience", 1.4, { looped = true, rollMin = 15, rollMax = 120, ids = { rbx(9112762863) } }) -- (PSE, measured)
 
+-- Arena challenges (HazardController; integrate 18 Nov, public ProSoundEffects library audio, nothing uploaded)
+Sounds.Hazard_Flutter = def("SFX", 0.5, { looped = true, ids = { rbx(9113992932) } }) -- "Creature Wings 3": bat or flying insect flaps
+Sounds.Hazard_Sting = def("SFX", 0.35, { ids = { rbx(9113977177) } }) -- "Creature Mix Big Flying Insects 1": a soft buzz-tap
+Sounds.Hazard_ColdWind = def("Ambience", 0.6, { looped = true, ids = { rbx(9113203785) } }) -- "Attic Wind Whistley Cold Hollow 1"
+Sounds.Hazard_Thunder = def("SFX", 0.9, { rollMin = 60, rollMax = 1600, ids = { rbx(9120020225), rbx(9120019063) } }) -- "Thunder Lightning 3 / 4": crack + rumble tail
+Sounds.Hazard_Rain = def("Ambience", 0.7, { looped = true, ids = { rbx(9112854469) } }) -- "Rain On Water 1" (loop)
+Sounds.Hazard_StormWind = def("Ambience", 0.9, { looped = true, ids = { rbx(9116258282) } }) -- same take as Amb_Wind (leaves and wind)
+Sounds.Hazard_Rumble = def("SFX", 0.8, { looped = true, rollMin = 20, rollMax = 400, ids = { rbx(9125875511) } }) -- "Rock Rumble Constant Scraping Movement Rolling"
+
 -- Music (looped; the AudioController picks the track by game state and keeps it subtle)
 Sounds.Music_Lobby = def("Music", 0.63, { looped = true, ids = { rbx(1842361805) } })
 Sounds.Music_Tension = def("Music", 0.4, { looped = true, ids = { rbx(1843822275), rbx(1843866957) } })

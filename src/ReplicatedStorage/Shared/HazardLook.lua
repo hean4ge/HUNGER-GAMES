@@ -19,8 +19,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HazardLook = {}
 
 HazardLook.Templates = {
-	ButterflyWingL = nil :: string?,
-	ButterflyWingR = nil :: string?,
+	-- the Blender wing (LS_Creatures_v1, its blue face at 1.4x), built by WorldGen.BlenderTemplates.buildCreatures()
+	ButterflyWingL = "ButterflyWingL" :: string?,
+	ButterflyWingR = "ButterflyWingR" :: string?,
 	Boulder = nil :: string?,
 }
 
@@ -55,7 +56,8 @@ HazardLook.Tiers = {
 		butterflies = 34, -- real two-winged butterflies in the nearest swarm
 		restButterflies = 7, -- sitting on a roost
 		swarmsDrawn = 3, -- swarms with real butterflies (the others are particles only)
-		wingRate = 70, -- particle wings a second in a swarm
+		wingRate = 130, -- particle wings a second in a swarm
+		hazeRate = 7,
 		shimmer = true,
 		roostRange = 150, -- studs: resting butterflies are built inside this
 		fogShells = 3,
@@ -70,7 +72,8 @@ HazardLook.Tiers = {
 		butterflies = 22,
 		restButterflies = 5,
 		swarmsDrawn = 2,
-		wingRate = 44,
+		wingRate = 85,
+		hazeRate = 5,
 		shimmer = true,
 		roostRange = 110,
 		fogShells = 3,
@@ -85,7 +88,8 @@ HazardLook.Tiers = {
 		butterflies = 12,
 		restButterflies = 3,
 		swarmsDrawn = 1,
-		wingRate = 22,
+		wingRate = 45,
+		hazeRate = 3,
 		shimmer = false,
 		roostRange = 80,
 		fogShells = 2,
@@ -141,6 +145,14 @@ do
 	local half = HazardLook.Butterfly.Span / 2
 	HazardLook.WingL = CFrame.fromMatrix(Vector3.new(-half, 0, 0), Vector3.new(0, 1, 0), Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1))
 	HazardLook.WingR = CFrame.fromMatrix(Vector3.new(half, 0, 0), Vector3.new(0, -1, 0), Vector3.new(1, 0, 0), Vector3.new(0, 0, 1))
+	-- the Blender wings lie flat in the body's frame already (span along X, chord along Z), turned 180 degrees about
+	-- Y by the importer: placed at their manifest centre (x 1.4 like their size), hinge on the body's Z axis
+	local folder = ReplicatedStorage:FindFirstChild("HazardAssets")
+	if HazardLook.Templates.ButterflyWingL and folder and folder:FindFirstChild(HazardLook.Templates.ButterflyWingL) then
+		local turn = CFrame.Angles(0, math.pi, 0)
+		HazardLook.WingL = CFrame.new(-0.1613 * 1.4, 0.006 * 1.4, 0.014 * 1.4) * turn
+		HazardLook.WingR = CFrame.new(0.1613 * 1.4, 0.006 * 1.4, 0.014 * 1.4) * turn
+	end
 end
 
 -- One butterfly: two wing parts (not parented; the caller parents them). scale 0.8..1.25.
@@ -194,7 +206,7 @@ function HazardLook.wingEmitter(parent: Instance, rate: number): ParticleEmitter
 	e.Acceleration = Vector3.new(0, 1.2, 0)
 	e.Rotation = NumberRange.new(-35, 35)
 	e.RotSpeed = NumberRange.new(-160, 160)
-	e.Size = sequence({ { 0, 0.34, 0.08 }, { 1, 0.3, 0.08 } })
+	e.Size = sequence({ { 0, 0.26, 0.06 }, { 1, 0.24, 0.06 } })
 	local squash, colors = {}, {}
 	local beats = 9
 	local blues = HazardLook.Colors.WingBlue
@@ -215,6 +227,29 @@ function HazardLook.wingEmitter(parent: Instance, rate: number): ParticleEmitter
 	e.LightInfluence = 0.85
 	e.Brightness = 1.25
 	e.Orientation = Enum.ParticleOrientation.FacingCamera
+	e.Parent = parent
+	return e
+end
+
+-- The cloud's mass: a few big, faint blue puffs so the swarm reads as one living body from 30 studs and more, not
+-- as loose flecks (first test, 18 Nov).
+function HazardLook.hazeEmitter(parent: Instance, rate: number): ParticleEmitter
+	local e = Instance.new("ParticleEmitter")
+	e.Name = "Haze"
+	e.Texture = HazardLook.Textures.Smoke
+	e.Rate = rate
+	e.Lifetime = NumberRange.new(1.6, 2.4)
+	e.Speed = NumberRange.new(0.3, 1.2)
+	e.SpreadAngle = Vector2.new(180, 180)
+	e.Shape = Enum.ParticleEmitterShape.Sphere
+	e.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	e.Size = sequence({ { 0, 3 }, { 0.5, 6, 1 }, { 1, 7 } })
+	e.Transparency = sequence({ { 0, 1 }, { 0.3, 0.8 }, { 0.7, 0.84 }, { 1, 1 } })
+	e.Color = ColorSequence.new(HazardLook.Colors.WingBlue[2])
+	e.LightEmission = 0.15
+	e.LightInfluence = 0.7
+	e.Rotation = NumberRange.new(0, 360)
+	e.RotSpeed = NumberRange.new(-30, 30)
 	e.Parent = parent
 	return e
 end
@@ -269,22 +304,60 @@ function HazardLook.fogSheetEmitter(parent: Instance): ParticleEmitter
 	return e
 end
 
--- One shell of the fog a contender stands in: a sphere seen from inside (a mesh with negative scale shows its inner
--- face). Three of them at growing distances hide the world by distance, for three draw calls and no particles.
-function HazardLook.fogShell(radius: number): (Part, SpecialMesh)
-	local part = Instance.new("Part")
-	part.Name = "FogShell"
-	part.Shape = Enum.PartType.Block
-	part.Size = Vector3.new(2, 2, 2)
-	part.Material = Enum.Material.SmoothPlastic
-	part.Color = HazardLook.Colors.Fog
-	part.Transparency = 1
-	still(part)
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(-radius, -radius, -radius)
-	mesh.Parent = part
-	return part, mesh
+-- One shell of the fog a contender stands in: a ring of flat pale veils and a roof round the camera, made of Beams
+-- that face the camera (an inside-out sphere mesh does not render, tested 18 Nov; a ring of Parts would show its
+-- unlit, dark side to the camera). LightInfluence is partial, so the veils dim at night with the world.
+-- Shells at growing distances hide the world by distance. Returns the anchor Part (put it at the camera's position
+-- each frame) and its beams (HazardLook.setFogShell sets how thick they are).
+HazardLook.FogShellSides = { High = 8, Medium = 6, Low = 6 }
+function HazardLook.fogShell(radius: number, sides: number): (Part, { Beam })
+	local anchor = Instance.new("Part")
+	anchor.Name = "FogShell"
+	anchor.Size = Vector3.new(0.2, 0.2, 0.2)
+	anchor.Transparency = 1
+	still(anchor)
+	local beams = {}
+	local function veil(from: Vector3, to: Vector3, width: number, fadeTop: boolean)
+		local a0 = Instance.new("Attachment")
+		a0.Position = from
+		a0.Parent = anchor
+		local a1 = Instance.new("Attachment")
+		a1.Position = to
+		a1.Parent = anchor
+		local beam = Instance.new("Beam")
+		beam.Attachment0 = a0
+		beam.Attachment1 = a1
+		beam.FaceCamera = true
+		beam.Segments = 1
+		beam.Width0 = width
+		beam.Width1 = width
+		beam.Color = ColorSequence.new(HazardLook.Colors.Fog)
+		beam.LightEmission = 0
+		beam.LightInfluence = 0.35
+		beam.Transparency = NumberSequence.new(1)
+		beam:SetAttribute("FadeTop", fadeTop)
+		beam.Parent = anchor
+		table.insert(beams, beam)
+	end
+	local width = 2 * radius * math.tan(math.pi / sides) * 1.08
+	for i = 0, sides - 1 do
+		local angle = (i + 0.5) * math.pi * 2 / sides
+		local x, z = math.sin(angle) * radius, math.cos(angle) * radius
+		veil(Vector3.new(x, -radius * 0.3, z), Vector3.new(x, radius * 0.9, z), width, true)
+	end
+	veil(Vector3.new(-radius * 1.1, radius * 0.75, 0), Vector3.new(radius * 1.1, radius * 0.75, 0), radius * 2.2, false)
+	return anchor, beams
+end
+
+-- How thick a shell's veils are: transparency 0..1 (the walls thin toward their tops, so the sky glows through).
+function HazardLook.setFogShell(beams: { Beam }, transparency: number)
+	local top = math.min(1, transparency + (1 - transparency) * 0.45)
+	local walls = NumberSequence.new({ NumberSequenceKeypoint.new(0, transparency), NumberSequenceKeypoint.new(0.6, transparency),
+		NumberSequenceKeypoint.new(1, top) })
+	local roof = NumberSequence.new(math.min(1, transparency + (1 - transparency) * 0.3))
+	for _, beam in ipairs(beams) do
+		beam.Transparency = if beam:GetAttribute("FadeTop") then walls else roof
+	end
 end
 HazardLook.FogShells = { { radius = 22, alpha = 0.3 }, { radius = 42, alpha = 0.5 }, { radius = 70, alpha = 0.72 } }
 

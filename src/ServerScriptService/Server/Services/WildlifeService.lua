@@ -196,12 +196,21 @@ local function treeKind(name: string): number?
 end
 
 local function barkOf(model: Instance): BasePart?
+	local climbable: BasePart? = nil
 	for _, child in ipairs(model:GetChildren()) do
-		if child:IsA("BasePart") and (string.sub(child.Name, -5) == "_Bark" or child.Name == "Trunk") then
-			return child
+		if child:IsA("BasePart") then
+			if string.sub(child.Name, -5) == "_Bark" or child.Name == "Trunk" then
+				return child
+			end
+			-- the climbable trees (Shared.TreeClimb): the Blender TC meshes have no "_Bark" part; their trunk is the
+			-- collision part tagged "Climbable" (TC_<asset>_Trunk_Col). Without this every TC pine and beech (7,653 on
+			-- Map 1, 18 Nov) was left out of the index and no squirrel lived on or fled up one.
+			if not climbable and CollectionService:HasTag(child, "Climbable") then
+				climbable = child
+			end
 		end
 	end
-	return nil
+	return climbable
 end
 
 local function addTree(model: Model, kind: number)

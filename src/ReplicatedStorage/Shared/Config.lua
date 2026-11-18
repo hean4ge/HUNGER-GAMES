@@ -345,9 +345,11 @@ Config.Camera = {
 	LookDownForward = 0.55, -- extra forward eye offset when looking straight down (you see your legs, not your chest)
 	LookDownDrop = 0.3,
 	LookUpBack = 0.25,
-	LobbyZoom = 12,
-	LobbyMinZoom = 6,
-	LobbyMaxZoom = 20,
+	-- the lobby is the red train since 18 Nov (10.5 studs to the ceiling, 19 wide): a closer third person keeps the
+	-- camera inside the car (was 12, 6..20: it rose above the roof and looked down through it)
+	LobbyZoom = 7,
+	LobbyMinZoom = 3,
+	LobbyMaxZoom = 10,
 }
 
 Config.Combat = {

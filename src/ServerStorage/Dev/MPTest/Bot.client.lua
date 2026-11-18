@@ -747,6 +747,7 @@ local function chatInfo(open: boolean?): { [string]: any }
 		out.windowEnabled = w.Enabled
 		pcall(function()
 			out.winX, out.winW, out.widthScale = w.AbsolutePosition.X, w.AbsoluteSize.X, w.WidthScale
+			out.winY, out.winH = w.AbsolutePosition.Y, w.AbsoluteSize.Y
 		end)
 	end
 	local bar = TCS:FindFirstChildOfClass("ChatInputBarConfiguration")
@@ -758,7 +759,15 @@ local function chatInfo(open: boolean?): { [string]: any }
 	if pill and pill:IsA("GuiObject") then
 		out.lineShown = shown(pill)
 		out.lineX, out.lineW = pill.AbsolutePosition.X, pill.AbsoluteSize.X
-		out.overLine = out.active == true and out.lineShown == true and type(out.winX) == "number" and (out.winW or 0) > 0 and out.winX + out.winW > out.lineX
+		-- (the window is placed by Roblox's chat: AbsolutePosition is in the screen's inset-free frame; the pill in its
+		-- ScreenGui's, so the pill's Y gets the top inset added)
+		local inset = game:GetService("GuiService"):GetGuiInset()
+		local layer = pill:FindFirstAncestorWhichIsA("ScreenGui")
+		out.lineY = pill.AbsolutePosition.Y + (if layer and not layer.IgnoreGuiInset then inset.Y else 0)
+		out.lineH = pill.AbsoluteSize.Y
+		local xOver = type(out.winX) == "number" and (out.winW or 0) > 0 and out.winX + out.winW > out.lineX and out.lineX + out.lineW > out.winX
+		local yOver = type(out.winY) == "number" and (out.winH or 0) > 0 and out.winY + out.winH > out.lineY and out.lineY + out.lineH > out.winY
+		out.overLine = out.active == true and out.lineShown == true and xOver and yOver
 	end
 	local cam = workspace.CurrentCamera
 	out.view = if cam then cam.ViewportSize.X else -1
@@ -1187,6 +1196,408 @@ local function worldItems(arg: any): { string }
 	return out
 end
 
+-- the evening build (18 Nov, mp-retest2): squirrels, campfires, trees, the swarm, the border, the train lobby, the
+-- results board ------------------------------------------------------------------------------------------------------
+local CollectionService = game:GetService("CollectionService")
+local wild: { [number]: { state: number, pos: Vector3, to: Vector3, t: number } } = {}
+do
+	local ev = Remotes:FindFirstChild("WildlifeState") or Remotes:WaitForChild("WildlifeState", 10)
+	if ev and ev:IsA("RemoteEvent") then
+		ev.OnClientEvent:Connect(function(arr: any)
+			if type(arr) ~= "table" then
+				return
+			end
+			local changes = {}
+			for i = 1, #arr - 10, 11 do
+				local id, st = arr[i], arr[i + 1]
+				if type(id) == "number" and type(st) == "number" then
+					local before = wild[id]
+					local pos = Vector3.new(arr[i + 2], arr[i + 3], arr[i + 4])
+					local to = Vector3.new(arr[i + 5], arr[i + 6], arr[i + 7])
+					wild[id] = { state = st, pos = pos, to = to, t = now() }
+					if not before or before.state ~= st then
+						table.insert(changes, string.format("%d:%d@%.0f,%.0f,%.0f>%.0f,%.0f,%.0f", id, st, pos.X, pos.Y, pos.Z, to.X, to.Y, to.Z))
+					end
+				end
+			end
+			if #changes > 0 then
+				L("WILD " .. table.concat(changes, " "))
+			end
+		end)
+	else
+		L("no remote WildlifeState")
+	end
+end
+-- the winner's "You won" line (a few seconds): logged when it shows and when it goes
+task.spawn(function()
+	local was = false
+	while true do
+		task.wait(0.25)
+		local list = guiTexts("you won")
+		local on = #list > 0
+		if on ~= was then
+			was = on
+			L("YOUWON " .. (if on then "shown " .. table.concat(list, " ; ") else "gone"))
+		end
+	end
+end)
+local Movement = req(Controllers, "MovementController")
+local Hazards = req(Controllers, "HazardController")
+
+local function partPos(d: Instance): Vector3?
+	if d:IsA("BasePart") then
+		return d.Position
+	elseif d:IsA("Model") then
+		return d:GetPivot().Position
+	elseif d:IsA("Attachment") then
+		return d.WorldPosition
+	end
+	return nil
+end
+
+-- the campfire's and the trees' prompts (CookingController's folder, TreeSeatController's tag)
+local function gamePrompts(): { ProximityPrompt }
+	local out = {}
+	local folder = workspace:FindFirstChild("ClientCampfires")
+	if folder then
+		for _, d in ipairs(folder:GetDescendants()) do
+			if d:IsA("ProximityPrompt") then
+				table.insert(out, d)
+			end
+		end
+	end
+	for _, d in ipairs(CollectionService:GetTagged("TreePrompt")) do
+		if d:IsA("ProximityPrompt") then
+			table.insert(out, d)
+		end
+	end
+	return out
+end
+
+-- every playing sound this client has, with where it is (the Sfx remote covers only the server's)
+local function playingSounds(): { string }
+	local out = {}
+	local _, root = myParts()
+	for _, container in ipairs({ workspace, game:GetService("SoundService"), lp:FindFirstChildOfClass("PlayerGui") } :: { any }) do
+		if container then
+			for _, d in ipairs(container:GetDescendants()) do
+				if d:IsA("Sound") and d.IsPlaying and d.Volume > 0.01 then
+					local holder = d.Parent
+					local pos = holder and partPos(holder)
+					table.insert(out, string.format("%s<%s vol=%.2f%s", d.Name, if holder then holder.Name else "?", d.Volume,
+						if pos and root then string.format(" %.0fst", (pos - root.Position).Magnitude) else ""))
+					if #out >= 40 then
+						return out
+					end
+				end
+			end
+		end
+	end
+	table.sort(out)
+	return out
+end
+
+local function probe(arg: any): any
+	local kind = type(arg) == "table" and arg.kind or arg
+	local hum, root = myParts()
+	local cam = workspace.CurrentCamera
+	if kind == "lobby" then
+		-- where the camera and the character are against the train's cars; the scenery's motion over 0.5 s
+		local lobby = workspace:FindFirstChild("Lobby")
+		local out: { [string]: any } = { root = root and root.Position, cam = cam.CFrame.Position, zoom = root and (cam.CFrame.Position - root.Position).Magnitude }
+		if lobby then
+			local function inside(p: Vector3): string?
+				for _, car in ipairs(lobby:GetChildren()) do
+					if car:IsA("Model") and (string.find(car.Name, "Gangway", 1, true) or car.Name == "Nose" or car.Name == "Lounge" or car.Name == "Dining"
+						or car.Name == "Observation") then
+						local cf, size = car:GetBoundingBox()
+						local lp3 = cf:PointToObjectSpace(p)
+						if math.abs(lp3.X) <= size.X / 2 - 0.4 and math.abs(lp3.Y) <= size.Y / 2 - 0.2 and math.abs(lp3.Z) <= size.Z / 2 then
+							return car.Name
+						end
+					end
+				end
+				return nil
+			end
+			out.rootCar = root and inside(root.Position)
+			out.camCar = inside(cam.CFrame.Position)
+			local params = RaycastParams.new()
+			params.FilterType = Enum.RaycastFilterType.Include
+			params.FilterDescendantsInstances = { lobby }
+			local up = workspace:Raycast(cam.CFrame.Position, Vector3.new(0, 30, 0), params)
+			out.ceilingAboveCam = if up then string.format("%s at %.1f", up.Instance.Name, up.Distance) else "none"
+			local scen = lobby:FindFirstChild("Scenery")
+			if scen then
+				local before = {}
+				for _, p in ipairs(scen:GetChildren()) do
+					if p:IsA("BasePart") then
+						before[p] = p.Position
+					end
+				end
+				task.wait(0.5)
+				local moved, n = 0, 0
+				for p, at in pairs(before) do
+					n += 1
+					moved = math.max(moved, (p.Position - at).Magnitude)
+				end
+				out.sceneryParts = n
+				out.sceneryMovedIn05s = moved
+			end
+			local best, bestD = nil, math.huge
+			for _, d in ipairs(lobby:GetDescendants()) do
+				if d:IsA("SpawnLocation") and root then
+					local dd = (d.Position - root.Position).Magnitude
+					if dd < bestD then
+						best, bestD = d, dd
+					end
+				end
+			end
+			out.nearestSpawn = best and (best.Parent.Name .. "/" .. best.Name .. string.format(" %.1f", bestD))
+		end
+		return out
+	elseif kind == "board" then
+		local out = {}
+		for _, part in ipairs(CollectionService:GetTagged("ResultsBoard")) do
+			local gui = part:FindFirstChild("Results")
+			local paper = gui and gui:FindFirstChild("Paper")
+			local b: { [string]: any } = { at = part:GetFullName(), streamed = part:IsDescendantOf(workspace), gui = gui ~= nil }
+			if paper then
+				b.empty = paper.Empty.Visible
+				b.meta = paper.Top.Meta.Text
+				b.winner = paper.Winner.Visible and (paper.Winner.Label.Text .. ": " .. paper.Winner.Who.Text .. " / " .. paper.Winner.Sub.Text) or nil
+				local rows = {}
+				for i = 1, 5 do
+					local r = paper.Table:FindFirstChild("Row" .. i)
+					if r and r.Visible then
+						table.insert(rows, string.format("%s|%s|%s|%s mine=%s", r.Place.Text, (string.gsub(r.Who.Text, "<[^>]+>", "")), r.Defeats.Text,
+							r.Survived.Text, tostring(r.Band.Visible and r.Bar.Visible)))
+					end
+				end
+				b.rows = table.concat(rows, " ; ")
+				local you = paper.Table:FindFirstChild("You")
+				b.youRow = you and you.Visible
+				local facts = {}
+				for i = 1, 4 do
+					local f = paper.Facts:FindFirstChild("Fact" .. i)
+					if f then
+						table.insert(facts, f.Label.Text .. "=" .. f.Value.Text)
+					end
+				end
+				b.facts = table.concat(facts, " ; ")
+			end
+			if root and part:IsA("BasePart") then
+				b.dist = math.floor((part.Position - root.Position).Magnitude * 10) / 10
+				local v, on = cam:WorldToViewportPoint(part.Position)
+				b.onScreen = on and v.Z > 0
+			end
+			table.insert(out, b)
+		end
+		return out
+	elseif kind == "wild" then
+		local list = {}
+		for id, w in pairs(wild) do
+			table.insert(list, { id = id, state = w.state, pos = w.pos, to = w.to, t = w.t, dist = if root then (w.pos - root.Position).Magnitude else -1 })
+		end
+		local folder = workspace:FindFirstChild("ClientWildlife")
+		local drawn, meshes, sample = 0, 0, ""
+		if folder then
+			for _, m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") then
+					local vis = false
+					for _, d in ipairs(m:GetDescendants()) do
+						if d:IsA("BasePart") and d.Transparency < 0.95 then
+							vis = true
+						end
+						if d:IsA("MeshPart") and d.MeshId ~= "" then
+							meshes += 1
+							if sample == "" then
+								sample = d.Name .. " " .. d.MeshId .. string.format(" size %.2f,%.2f,%.2f", d.Size.X, d.Size.Y, d.Size.Z)
+							end
+						end
+					end
+					if vis then
+						drawn += 1
+					end
+				end
+			end
+		end
+		return { list = list, drawn = drawn, meshParts = meshes, sample = sample, attr = lp:GetAttribute("WildlifeDrawn") }
+	elseif kind == "fires" then
+		local out = {}
+		local cf = RS:FindFirstChild("Campfires")
+		if cf then
+			for _, c in ipairs(cf:GetChildren()) do
+				table.insert(out, string.format("fire %s state=%s spit=%s owner=%s at %s", c.Name, tostring(c:GetAttribute("State")), tostring(c:GetAttribute("Spit")),
+					tostring(c:GetAttribute("Owner")), fmt(c:GetAttribute("Position"))))
+			end
+		end
+		local folder = workspace:FindFirstChild("ClientCampfires")
+		if folder then
+			for _, m in ipairs(folder:GetChildren()) do
+				local em, emOn, snd, light, meshes = {}, 0, {}, "none", 0
+				for _, d in ipairs(m:GetDescendants()) do
+					if d:IsA("ParticleEmitter") then
+						table.insert(em, d.Name .. "=" .. tostring(d.Enabled) .. string.format("@%.1f", d.Rate))
+						if d.Enabled then
+							emOn += 1
+						end
+					elseif d:IsA("Sound") then
+						table.insert(snd, d.Name .. "=" .. tostring(d.IsPlaying) .. string.format("@%.2f", d.Volume))
+					elseif d:IsA("PointLight") then
+						light = string.format("%s b=%.1f r=%.0f", tostring(d.Enabled), d.Brightness, d.Range)
+					elseif d:IsA("MeshPart") and d.MeshId ~= "" then
+						meshes += 1
+					end
+				end
+				local pos = partPos(m)
+				table.insert(out, string.format("drawn %s at %s dist=%s emitters on %d [%s] sounds [%s] light %s meshParts=%d", m.Name, fmt(pos),
+					if pos and root then string.format("%.1f", (pos - root.Position).Magnitude) else "?", emOn, table.concat(em, ","), table.concat(snd, ","), light, meshes))
+			end
+		end
+		return out
+	elseif kind == "prompts" then
+		-- the game's own prompts near this character (the campfire's, the trees')
+		local out = {}
+		for _, d in ipairs(gamePrompts()) do
+			if d.Enabled then
+				local pos = d.Parent and partPos(d.Parent)
+				if pos and root and (pos - root.Position).Magnitude < 20 then
+					table.insert(out, string.format("%s '%s' '%s' key=%s hold=%.1f style=%s dist=%.1f", d.Name, d.ActionText, d.ObjectText, d.KeyboardKeyCode.Name,
+						d.HoldDuration, d.Style.Name, (pos - root.Position).Magnitude))
+				end
+			end
+		end
+		return out
+	elseif kind == "hold" then
+		-- holds the game's prompt named arg.name (as its key would)
+		for _, d in ipairs(gamePrompts()) do
+			if d.Enabled and d.Name == arg.name then
+				L("HOLD " .. d:GetFullName() .. " '" .. d.ActionText .. "'")
+				d:InputHoldBegin()
+				task.wait(d.HoldDuration + 0.2)
+				d:InputHoldEnd()
+				return d.ActionText
+			end
+		end
+		return "no enabled prompt " .. tostring(arg.name)
+	elseif kind == "climb" then
+		-- MovementController.tryClimb on the nearest Climbable trunk (the CLIMB prompt's own call)
+		local best, bestD = nil, 9
+		for _, t in ipairs(CollectionService:GetTagged("Climbable")) do
+			if t:IsA("BasePart") and root then
+				local dd = Vector3.new(t.Position.X - root.Position.X, 0, t.Position.Z - root.Position.Z).Magnitude
+				if dd < bestD then
+					best, bestD = t, dd
+				end
+			end
+		end
+		if not best or not Movement then
+			return "no trunk in reach"
+		end
+		local ok, res = pcall(Movement.tryClimb, best)
+		return string.format("tryClimb(%s %s %.1f) = %s %s", best:GetFullName(), best.ClassName, bestD, tostring(ok), tostring(res))
+	elseif kind == "hazard" then
+		local out: { [string]: any } = {}
+		if Hazards and Hazards.debug then
+			local ok, d = pcall(Hazards.debug)
+			out.debug = if ok then fmt(d) else tostring(d)
+		end
+		-- the swarm's wings near arg.near (a player name): how many, how big, flapping
+		local centre = arg.near and pointOf(arg.near)
+		local wings, sizes, moved = {}, {}, 0
+		local fxFolder = workspace:FindFirstChild("HazardFxLocal")
+		if centre and fxFolder then
+			for _, d in ipairs(fxFolder:GetDescendants()) do
+				if d:IsA("BasePart") and string.find(string.lower(d.Name), "wing", 1, true) and d.Transparency < 0.95 and (d.Position - centre).Magnitude < 30 then
+					table.insert(wings, d)
+					if #sizes < 3 then
+						table.insert(sizes, string.format("%s %s %.2fx%.2fx%.2f", d.Name, d.ClassName, d.Size.X, d.Size.Y, d.Size.Z))
+					end
+				end
+			end
+			local before = {}
+			for _, w in ipairs(wings) do
+				before[w] = w.CFrame
+			end
+			task.wait(0.15)
+			for w, cf0 in pairs(before) do
+				local _, ang = (cf0:Inverse() * w.CFrame):ToAxisAngle()
+				moved = math.max(moved, math.deg(ang))
+			end
+		end
+		out.wings = #wings
+		out.wingSizes = table.concat(sizes, " ; ")
+		out.wingTurnIn015s = moved
+		local pg = lp:FindFirstChildOfClass("PlayerGui")
+		local lines = {}
+		if pg then
+			for _, d in ipairs(pg:GetDescendants()) do
+				if (d:IsA("TextLabel") or d:IsA("TextButton")) and d.Text ~= "" and d.TextTransparency < 0.85 and shown(d) then
+					local layer = d:FindFirstAncestorWhichIsA("LayerCollector")
+					if layer and layer.Name ~= "MPT" and (layer.Name == "HazardScreen" or layer.Name == "Overlay" or layer.Name == "HUD") and d.AbsolutePosition.Y < 400 then
+						table.insert(lines, string.format("%s/%s y=%d..%d '%s'", layer.Name, d.Name, d.AbsolutePosition.Y, d.AbsolutePosition.Y + d.AbsoluteSize.Y,
+							string.sub((string.gsub(d.Text, "<[^>]+>", "")), 1, 60)))
+					end
+				end
+			end
+		end
+		out.topLines = table.concat(lines, " ; ")
+		out.stung = lp:GetAttribute("HazardStung")
+		return out
+	elseif kind == "border" then
+		local out: { [string]: any } = { radius = GS:GetAttribute("BorderRadius"), target = GS:GetAttribute("BorderTargetRadius"), stage = GS:GetAttribute("BorderStage"),
+			stages = GS:GetAttribute("BorderStageCount"), nextMoveAt = GS:GetAttribute("BorderNextMoveAt"), moving = GS:GetAttribute("BorderMoving") }
+		local arena = workspace:FindFirstChild("Arena")
+		local border = arena and arena:FindFirstChild("Border")
+		local centre = GS:GetAttribute("BorderCenter")
+		if border then
+			local n, colours, far, near = 0, {}, 0, math.huge
+			for _, d in ipairs(border:GetDescendants()) do
+				if d:IsA("BasePart") then
+					n += 1
+					if d.Name == "BorderLine" and typeof(centre) == "Vector3" then
+						local r = Vector3.new(d.Position.X - centre.X, 0, d.Position.Z - centre.Z).Magnitude
+						far, near = math.max(far, r), math.min(near, r)
+					end
+					local key = d.Name .. " " .. rgb(d.Color) .. " " .. d.Material.Name
+					colours[key] = (colours[key] or 0) + 1
+				end
+			end
+			local list = {}
+			for k, c in pairs(colours) do
+				table.insert(list, k .. " x" .. c)
+			end
+			table.sort(list)
+			out.parts = n
+			out.looks = table.concat(list, " ; ")
+			out.lineRadius = if near < math.huge then string.format("%.0f..%.0f", near, far) else "none"
+			out.shown = border.Parent ~= nil
+		else
+			out.parts = 0
+		end
+		return out
+	elseif kind == "sounds" then
+		return playingSounds()
+	elseif kind == "skip" then
+		-- the launch shot's screen: the skip prompt and button
+		local pg = lp:FindFirstChildOfClass("PlayerGui")
+		local out = {}
+		if pg then
+			for _, d in ipairs(pg:GetDescendants()) do
+				if (d:IsA("TextLabel") or d:IsA("TextButton")) and shown(d) and d.TextTransparency < 0.9 and string.find(string.lower(d.Text), "skip", 1, true) then
+					table.insert(out, string.format("%s %s '%s' %dx%d", (d:FindFirstAncestorWhichIsA("LayerCollector") or d).Name, d.Name, d.Text, d.AbsoluteSize.X, d.AbsoluteSize.Y))
+				end
+			end
+		end
+		return { shown = out, launchShot = ClientState and ClientState.launchShot, cam = cam.CFrame.Position, camType = cam.CameraType.Name,
+			root = root and root.Position, stats = lp:GetAttribute("LS_LaunchStats") }
+	elseif kind == "seat" then
+		return { moveState = ClientState and ClientState.moveState, sit = hum and hum.Sit, seat = hum and hum.SeatPart and hum.SeatPart:GetFullName(),
+			attackBound = Input and Input.isBound and Input.isBound("Attack") }
+	end
+	return "unknown probe " .. tostring(kind)
+end
+
 callFn.OnClientInvoke = function(cmd: string, arg: any): any
 	local ok, res = pcall(function(): any
 		if cmd == "ping" then
@@ -1289,6 +1700,8 @@ callFn.OnClientInvoke = function(cmd: string, arg: any): any
 			return recapInfo(arg)
 		elseif cmd == "bow" then
 			return bowInfo(arg)
+		elseif cmd == "probe" then
+			return probe(arg)
 		elseif cmd == "leave" then
 			local sts = game:GetService("StudioTestService")
 			L("LEAVE CanLeaveTest=" .. tostring(sts:CanLeaveTest()))

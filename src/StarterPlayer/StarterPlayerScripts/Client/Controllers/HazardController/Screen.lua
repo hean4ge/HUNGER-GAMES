@@ -67,10 +67,10 @@ local function build(ctx)
 	local label = Instance.new("TextLabel")
 	label.Name = "Line"
 	label.AnchorPoint = Vector2.new(0.5, 0)
-	label.Position = UDim2.fromScale(0.5, 0.17)
+	label.Position = UDim2.fromScale(0.5, 0.3) -- under the compass and its event line (Quiet HUD, integrate 18 Nov: was 0.235, overlapped)
 	label.Size = UDim2.fromScale(0.9, 0.04)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamMedium
+	label.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Medium) -- the Quiet type
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextStrokeColor3 = Color3.new(0, 0, 0)
 	label.TextStrokeTransparency = 0.55
@@ -78,7 +78,7 @@ local function build(ctx)
 	label.Text = ""
 	label.Visible = false
 	local limit = Instance.new("UITextSizeConstraint")
-	limit.MaxTextSize = 20
+	limit.MaxTextSize = 18
 	limit.MinTextSize = 10
 	limit.Parent = label
 	label.Parent = made

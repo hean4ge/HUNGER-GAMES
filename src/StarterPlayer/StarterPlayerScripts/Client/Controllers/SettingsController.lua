@@ -32,6 +32,13 @@
 	  fillControls(container, rowTemplate, device)   fills a list with ControlRow clones (used by the lobby too)
 	  set(key, value)                         set and save one setting from code (e.g. hintsSeen)
 	  DEFS                                    the settings definitions (key, label, min, max, step, format, device?, hidden?)
+
+	The look ("Quiet", docs/design/ui/StyleA_Quiet): a modal sheet with no box. The picture dims behind it (Menu.Dim)
+	and the lobby's own text steps aside while it is up (LobbyController reads ClientState.menuOpen). Buttons are plain
+	text (QuietUI.bindButton: brighter text and a thin underline on hover and gamepad focus). A slider row has no
+	backing: on hover or focus its name and value brighten and the knob grows a little; a gamepad's focus also gets
+	the Sun outline (Templates.Selection). The device in view on the Controls page is the bright one with a line under
+	it; the others are dim.
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -42,6 +49,7 @@ local HttpService = game:GetService("HttpService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Input = require(Shared:WaitForChild("Input"))
 local Glyphs = require(Shared:WaitForChild("Glyphs"))
 local Net = require(Shared:WaitForChild("Net"))
@@ -485,19 +493,58 @@ local function styleButton(button: GuiButton, onHover: (boolean) -> ())
 	end)
 end
 
+local function hoverSound()
+	if not Input.isTouch() then
+		Sfx.play("UIHover")
+	end
+end
+
+-- A plain text button in the Quiet look (QuietUI.bindButton), with the hover tick this menu has always had.
+local function quietButton(button: any, quiet: boolean?)
+	QuietUI.bindButton(button, { quiet = quiet, onHover = hoverSound })
+end
+
+-- A choice among plain text buttons (the tabs, the devices): the current one is ink with a line under it, the others
+-- dim. The rest transparency comes from the button's "Quiet" attribute (QuietUI.bindButton reads it on hover).
+local function markChoice(button: any, active: boolean)
+	-- (dimmed by transparency alone: Ink2 on top of the quiet transparency was too faint over a bright sky)
+	button.TextColor3 = C.Ink
+	button:SetAttribute("Quiet", not active)
+	if button:GetAttribute("Disabled") ~= true then
+		button.TextTransparency = if active then 0.1 else 0.32 -- (QuietUI's rest values; a hover repaints it)
+	end
+	local line = button:FindFirstChild("Underline")
+	if line and line:IsA("GuiObject") then
+		line.Visible = active
+	end
+end
+
 local function styleTab(tab: any, active: boolean)
-	tab.TextColor3 = if active then C.Text else C.TextDim
-	tab.Underline.Visible = active
+	markChoice(tab, active)
+end
+
+-- The device buttons have no line of their own in the built screen: one is added, like a tab's Underline.
+local function deviceLine(button: any)
+	if button:FindFirstChild("Underline") then
+		return
+	end
+	local line = Instance.new("Frame")
+	line.Name = "Underline"
+	line.AnchorPoint = Vector2.new(0, 1)
+	line.Position = UDim2.new(0, 0, 1, -1)
+	line.Size = UDim2.new(1, 0, 0, 2)
+	line.BorderSizePixel = 0
+	line.BackgroundColor3 = C.Ink
+	line.BackgroundTransparency = 0
+	line.Visible = false
+	line.Parent = button
 end
 
 local function showDevice(device: string)
 	controlsDevice = device
 	for _, b in ipairs(refs.devices:GetChildren()) do
 		if b:IsA("TextButton") then
-			local on = b.Name == device
-			b.BackgroundColor3 = if on then C.Text else C.PanelLight
-			b.BackgroundTransparency = if on then 0.04 else 0.6
-			b.TextColor3 = if on then C.TextDark else C.Text
+			markChoice(b, b.Name == device)
 		end
 	end
 	SettingsController.fillControls(refs.controlsList, refs.templates.ControlRow, device)
@@ -579,8 +626,9 @@ local function setOpen(on: boolean, page: string?)
 		panel.Visible = true
 		panel.GroupTransparency = 1
 		panel.Position = UDim2.new(0.5, 0, 0.5, 14)
-		Theme.tween(panel, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 0.5) })
-		Theme.tween(dim, Theme.Tween.Normal, { BackgroundTransparency = Theme.Transparency.Dim })
+		-- (QuietUI.tween: set at once when the player has Reduce Motion on)
+		QuietUI.tween(panel, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 0.5) })
+		QuietUI.tween(dim, Theme.Tween.Normal, { BackgroundTransparency = Theme.Transparency.Dim })
 		if Input.isGamepad() then
 			GuiService.SelectedObject = firstSelectable()
 		end
@@ -589,14 +637,19 @@ local function setOpen(on: boolean, page: string?)
 		dragging = nil
 		repeatToken += 1
 		local token = closeToken
-		local t = Theme.tween(panel, Theme.Tween.Fast, { GroupTransparency = 1, Position = UDim2.new(0.5, 0, 0.5, 10) })
-		Theme.tween(dim, Theme.Tween.Fast, { BackgroundTransparency = 1 })
-		t.Completed:Once(function()
+		local t = QuietUI.tween(panel, Theme.Tween.Fast, { GroupTransparency = 1, Position = UDim2.new(0.5, 0, 0.5, 10) })
+		QuietUI.tween(dim, Theme.Tween.Fast, { BackgroundTransparency = 1 })
+		local function hide()
 			if token == closeToken and not isOpen then
 				panel.Visible = false
 				dim.Visible = false
 			end
-		end)
+		end
+		if t then
+			t.Completed:Once(hide)
+		else
+			hide() -- (reduced motion: no tween)
+		end
 		local selected = GuiService.SelectedObject
 		if selected and gui and selected:IsDescendantOf(gui) then
 			GuiService.SelectedObject = nil
@@ -678,9 +731,14 @@ local function buildRows()
 			local entry = { row = row, def = def, fill = row.Track.Fill, knob = row.Track.Knob, value = row.Value }
 			rows[def.key] = entry
 			table.insert(rowOrder, entry)
+			-- no backing on hover or focus (Quiet): the name and value brighten and the knob grows a little
+			row.BackgroundTransparency = 1
+			local name, knob = row.Label, row.Track.Knob
+			name.TextTransparency = 0.12
 			styleButton(row, function(on)
-				Theme.tween(row, Theme.Tween.Fast, { BackgroundTransparency = if on then 0.62 else 1 })
-				entry.value.TextColor3 = if on then C.Text else C.TextDim
+				QuietUI.tween(name, Theme.Tween.Fast, { TextTransparency = if on then 0 else 0.12 })
+				QuietUI.tween(knob, Theme.Tween.Fast, { Size = if on then UDim2.fromOffset(14, 14) else UDim2.fromOffset(11, 11) })
+				entry.value.TextColor3 = if on then C.Ink else C.Ink2
 			end)
 			row.InputBegan:Connect(function(io: InputObject)
 				if io.UserInputType == Enum.UserInputType.MouseButton1 or io.UserInputType == Enum.UserInputType.Touch then
@@ -784,19 +842,25 @@ local function wire()
 	click(refs.controlsTab, function()
 		showPage("Controls")
 	end)
+	-- the tabs and the device buttons: their own Underline marks the current one, so the hover line goes and a hover
+	-- only brightens the text
+	local function dropHoverLine(button: Instance)
+		local under = button:FindFirstChild("Under")
+		if under then
+			under:Destroy()
+		end
+	end
 	for _, tab in ipairs({ refs.settingsTab, refs.controlsTab }) do
-		styleButton(tab, function(on)
-			if not tab.Underline.Visible then
-				tab.TextColor3 = if on then C.Text else C.TextDim
-			end
-		end)
+		dropHoverLine(tab)
+		quietButton(tab)
 	end
 	click(refs.close, function()
 		SettingsController.close()
 	end)
-	styleButton(refs.close, function(on)
-		Theme.tween(refs.close, Theme.Tween.Fast, { BackgroundTransparency = if on then 0.5 else 1 })
-	end)
+	-- the × has no box and no line: brighter on hover and focus
+	refs.close.BackgroundTransparency = 1
+	dropHoverLine(refs.close)
+	quietButton(refs.close)
 	click(refs.reset, function()
 		local values = {}
 		for _, def in ipairs(DEFS) do
@@ -810,12 +874,15 @@ local function wire()
 		end
 		refreshRows()
 	end)
-	styleButton(refs.reset, function(on)
-		Theme.tween(refs.reset, Theme.Tween.Fast, { BackgroundTransparency = if on then 0.3 else 0.6 })
-	end)
+	refs.reset.BackgroundTransparency = 1
+	quietButton(refs.reset, true) -- (a dimmer rest state: it is not the thing you came for)
 	for _, b in ipairs(refs.devices:GetChildren()) do
 		if b:IsA("TextButton") then
 			b.SelectionImageObject = selection
+			b.BackgroundTransparency = 1
+			deviceLine(b)
+			dropHoverLine(b)
+			quietButton(b)
 			click(b, function()
 				showDevice(b.Name)
 			end)
@@ -828,8 +895,17 @@ local function wire()
 	click(refs.launcher, function()
 		SettingsController.open()
 	end)
+	-- the touch menu button: three ink lines, no backing (a finger has no hover; a mouse or pad brightens the lines)
+	refs.launcher.BackgroundTransparency = 1
+	local launcherIcon = refs.launcher:FindFirstChild("Icon")
 	styleButton(refs.launcher, function(on)
-		Theme.tween(refs.launcher, Theme.Tween.Fast, { BackgroundTransparency = if on then 0.15 else Theme.Transparency.Panel })
+		if launcherIcon then
+			for _, line in ipairs(launcherIcon:GetChildren()) do
+				if line:IsA("GuiObject") then
+					QuietUI.tween(line, Theme.Tween.Fast, { BackgroundTransparency = if on then 0 else 0.1 })
+				end
+			end
+		end
 	end)
 end
 

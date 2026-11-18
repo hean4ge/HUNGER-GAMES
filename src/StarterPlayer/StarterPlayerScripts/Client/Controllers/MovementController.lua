@@ -37,7 +37,12 @@
 	  - Safety: if our update errors or stops running, the humanoid is handed back to the default controls
 	    (WalkSpeed restored, PlatformStand cleared, jumping re-enabled) so nobody is ever left stuck.
 
-	States (ClientState.moveState): Idle | Walk | Sprint | Crouch | Slide | Air | Climb | Mantle | Swim | Frozen
+	States (ClientState.moveState): Idle | Walk | Sprint | Crouch | Slide | Air | Climb | Mantle | Swim | Frozen | Sit
+	  (Sit: seated on a tree seat, TreeSeatService; any other Seat stays Idle)
+	Climbable trees (Shared.TreeClimb): climbing a trunk with perches steps out onto a limb when the head reaches its
+	  underside on that side of the trunk (move round with A/D to reach the other one), and stops just over the top limb.
+	  Climbing down onto a limb of the tree goes round it instead of landing on it (from a limb: face the trunk, push
+	  into it, hold S).
 	  ("Slide" also covers sliding involuntarily down ground that is too steep to stand on.)
 	Writes ClientState: moveState, speed, velocity, grounded, stamina, exhausted, crouchAlpha, strideAlpha
 	Fires ClientState: moveStateChanged(new, old), jumped(), landed(impactSpeed),
@@ -62,6 +67,7 @@ press while out of breath answers with Feedback.deny ("OUT OF BREATH").
 	  MovementController.stopSprint()                 cancel the current sprint (e.g. when attacking)
 	  MovementController.addImpulse(velocity: Vector3) add horizontal velocity (local knockback, lunges)
 	  MovementController.spendStamina(amount: number)  spend 0..1 stamina (melee swings)
+	  MovementController.tryClimb(trunk) -> boolean    start climbing that Climbable part if it is in reach (Climb prompt)
 	  MovementController.getMotion() -> { accel: Vector3, exertion: 0..1, surface: string, slope: number,
 	      stumble: 0..1, wade: number, land: number }   live locomotion readings for the camera and body (shared table)
 	  MovementController.getDebug() -> table           internal readings for tuning; set the local player's
@@ -80,6 +86,7 @@ local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
 local Input = require(Shared:WaitForChild("Input"))
 local Feedback = require(Shared:WaitForChild("Feedback"))
+local TreeClimb = require(Shared:WaitForChild("TreeClimb"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
@@ -438,6 +445,35 @@ local function hasTagUp(inst: Instance?, tag: string): boolean
 		depth += 1
 	end
 	return false
+end
+
+-- The perches of a climbable tree's trunk (TreeClimb), lowest first, or nil when the part has none. Remembered per
+-- trunk (the trees are streamed atomically, so a trunk arrives with its perches).
+local perchCache: { [Instance]: { Attachment } | false } = setmetatable({}, { __mode = "k" }) :: any
+local function treePerches(part: Instance?): { Attachment }?
+	if not part or not part:IsA("BasePart") then
+		return nil
+	end
+	local known = perchCache[part]
+	if known == nil then
+		local list = TreeClimb.perchesOf(part)
+		known = if #list > 0 then list else false
+		perchCache[part] = known
+	end
+	return known or nil
+end
+
+-- The axis of a tree (its model's pivot), else the part's centre.
+local function treeAxis(part: BasePart): Vector3
+	local model = part.Parent
+	if model and model:IsA("Model") then
+		return model:GetPivot().Position
+	end
+	return part.Position
+end
+
+local function isTreeSeat(seat: Instance?): boolean
+	return seat ~= nil and seat.Name == "TreeSeat"
 end
 
 -- Trusses are left to the native Humanoid ladder climb.
@@ -1454,6 +1490,44 @@ local function stepClimb(c, dt: number)
 	if math.abs(side) < 0.15 then
 		side = 0
 	end
+	-- A climbable tree (TreeClimb): step out onto a limb whose top the head has reached on this side of the trunk,
+	-- and climb no higher than just over the top limb (the trunk above it is the crown's)
+	local perches = treePerches(hit.Instance)
+	if perches then
+		local feetY = pos.Y - (humanoid.HipHeight + rig.rootHalf)
+		if up > 0 or side ~= 0 then
+			local axis = treeAxis(hit.Instance :: BasePart)
+			local mine = Vector3.new(pos.X - axis.X, 0, pos.Z - axis.Z)
+			if mine.Magnitude > 0.1 then
+				mine = mine.Unit
+				for _, perch in ipairs(perches) do
+					local pp = perch.WorldPosition
+					local out = Vector3.new(pp.X - axis.X, 0, pp.Z - axis.Z)
+					if out.Magnitude > 0.1 and feetY < pp.Y - 0.2 and pos.Y + rig.headTop >= pp.Y - 1.2
+						and mine:Dot(out.Unit) > 0.25 then
+						local toPerch = Vector3.new(pp.X - pos.X, 0, pp.Z - pos.Z)
+						local dist = toPerch.Magnitude
+						climb = nil
+						startMantle(c, {
+							kind = "Mantle",
+							topY = pp.Y,
+							floorY = pp.Y,
+							height = math.max(0.5, pp.Y - feetY),
+							inward = if dist > 0.2 then toPerch.Unit else out.Unit,
+							perp = 0,
+							distance = dist,
+							crouch = false,
+							material = Enum.Material.Wood,
+						}, os.clock(), 0)
+						return
+					end
+				end
+			end
+		end
+		if up > 0 and feetY > perches[#perches].WorldPosition.Y - 2.5 then
+			up = 0
+		end
+	end
 	if up > 0 then
 		-- out of trunk above the head: pull up onto whatever is there, or stop climbing higher
 		local headHit = workspace:Raycast(Vector3.new(pos.X, pos.Y + rig.headTop + 0.1, pos.Z), -cl.normal * reach, worldParams)
@@ -1468,9 +1542,19 @@ local function stepClimb(c, dt: number)
 			up = 0
 		end
 	elseif up < 0 then
-		if workspace:Raycast(pos, Vector3.new(0, -(humanoid.HipHeight + rig.rootHalf + 0.3), 0), worldParams) then
-			exitClimb(c, "Land")
-			return
+		local below = workspace:Raycast(pos, Vector3.new(0, -(humanoid.HipHeight + rig.rootHalf + 0.3), 0), worldParams)
+		if below then
+			local limb = below.Instance
+			if perches and limb.Parent == hit.Instance.Parent and TreeClimb.isLimbName(limb.Name) then
+				-- a limb of this tree under the feet: go round it (the way the stick already leans, else right)
+				up = 0
+				if side == 0 then
+					side = 1
+				end
+			else
+				exitClimb(c, "Land")
+				return
+			end
 		end
 	end
 
@@ -2084,7 +2168,8 @@ local function update(dt: number)
 		c.gravityMode = nil
 		setJumpEnabled(humanoid, true) -- the jump key stands you up out of a seat
 		cancelJumpPrep()
-		setState("Idle")
+		-- a tree seat (TreeSeatService) is "Sit": the view is steady and the weapon may be lowered
+		setState(if isTreeSeat(humanoid.SeatPart) then "Sit" else "Idle")
 		regenStamina(dt, t, true)
 		updateExhaustion()
 		updateStance(c, dt, t, false)
@@ -2995,6 +3080,30 @@ end
 
 function MovementController.getMotion()
 	return motion
+end
+
+-- Start climbing the given trunk (a Climbable part) if it is in reach: the Climb prompt (TreeSeatController) on
+-- touch and gamepad. Returns whether the climb began. Holding forward into the trunk does the same.
+function MovementController.tryClimb(trunk: Instance?): boolean
+	local c = ctx
+	if not c or c.dead or climb or mantle or not c.root or not c.humanoid or c.root.Anchored then
+		return false
+	end
+	if stamina <= 0.05 or c.humanoid.Sit or not (trunk and trunk:IsA("BasePart")) then
+		return false
+	end
+	local root = c.root
+	local axis = treeAxis(trunk)
+	local d = Vector3.new(axis.X - root.Position.X, 0, axis.Z - root.Position.Z)
+	if d.Magnitude < 0.1 then
+		return false
+	end
+	local hit, n = probeClimbable(c, d.Unit)
+	if hit and n then
+		startClimb(c, hit, n)
+		return true
+	end
+	return false
 end
 
 function MovementController.getDebug()

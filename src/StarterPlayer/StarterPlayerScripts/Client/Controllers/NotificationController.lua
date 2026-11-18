@@ -1,16 +1,22 @@
 --[[
-	NotificationController - announcements and full-screen moments (StarterGui.Overlay, built by UIBuilder).
-	Owned by the UI system.
-	  * Announce remote: Banner and Warning (one headline at a time, queued), Toast (stacked pills),
+	NotificationController - announcements and the defeat strip (StarterGui.Overlay, built by UIBuilder).
+	Owned by the UI system. Style A "Quiet" (docs/design/ui/StyleA_Quiet): no boxes and no pop-ups; text on the picture
+	with its dark stroke (faded with QuietUI.fadeText so the outline goes with the text).
+	  * Announce remote: Banner and Warning (one headline at a time, queued), Toast (stacked lines),
 	    Countdown (big numbers from GameState.PhaseEndsAt, a BEGIN flash on "GO"), RollCall (a small list beside the sky show; owned by the day/night system),
 	    Victory (see below). Unknown styles fall back to a toast.
-	  * YouDied: the death screen ("#7 OF 24", killer or cause, weapon) with SPECTATE / CONTINUE, a muted grade.
-	    QW4: "OUTLASTED 15 OF 24 · 6:12", and one tip for the cause and weapon class (a more specific one the second
-	    time the same thing kills you; the border's first tip follows the border as it was: still on day 1, closer in for few). SPECTATE opens on your killer (payload killerUserId, else the killer's name).
+	  * YouDied: the defeat strip along the bottom (Overlay.Root.Strip; fallen.html): "Defeated by Kestrel" (or the
+	    cause in plain words) | "You placed 9th of 24" ... "Back to lobby [Backspace]", a muted grade, and one line above
+	    it with a tip for the cause and weapon class (QW4: a more specific one the second time the same thing defeats
+	    you; the border's first tip follows the border as it was). The middle of the strip is the Spectate screen's card:
+	    a few seconds after the strip appears (AUTO_SPECTATE) spectating starts on your killer (payload killerUserId,
+	    else the killer's name) when there is anyone to watch. The strip stays while you spectate; "Back to lobby"
+	    (Backspace, B, or the button) stops spectating and takes the strip away. Without anyone to watch it goes after
+	    STRIP_DWELL s. There is no full-screen card and no dim any more.
 	    Whether YOU won is decided by UserId (payload winnerUserId), never by the display name alone (iWon).
-	    When your death ends the round (a lone practice contender, the runner-up), the death card stays up for
-	    DEATH_DWELL s (or until CONTINUE) with the result in its note, and the result card follows. Practice deaths read
-	    "FALLEN" (not "#1 OF 1"); a death before the horn (payload phase "Countdown") reads "OUT" with no tip.
+	    When your death ends the round (a lone practice contender, the runner-up), the strip stays DEATH_DWELL s with
+	    the result on the line above it, and the result's notice follows. A practice death has no placing; a death
+	    before the horn (payload phase "Countdown") says you left your plate, with no tip.
 	  * QW5: one-time cards for new players (Guidance, through HUDController.guidanceOn): THIRSTY below 60 thirst (it
 	    also shows the water marker), HUNGRY below 60 hunger. Cards never show during a Roll Call; they wait for it.
 	    They sit at the left (Overlay Cards), clear of the item toast and the held item; toasts sit above the item toast.
@@ -18,8 +24,11 @@
 	    round, "PRACTICE ROUND · NO RIVALS, JUST TRAINING DUMMIES") and the choice once it locks ("RUSH THE SPIRE FOR WEAPONS · OR RUN FOR THE TREES";
 	    both names are the arena's, from Shared.Lore: "RUSH THE HORN FOR WEAPONS · OR RUN FOR THE HILLS" on Map 1), with a
 	    line about the runner's caches for new players; trying to step off the plate brings back "STAY ON YOUR PLATE".
-	  * Victory: Phase Ending + WinnerName (or the Victory announce); a special version when you won; then the
-	    RoundSummary table. Players who didn't take part in the round get a headline instead.
+	  * Victory: Phase Ending + WinnerName (or the Victory announce). The owner: the result "shouldnt pop up after the
+	    game it can appear on one of the physical boards". The winner gets one quiet line for a few seconds ("You won",
+	    and "Outlasted 23 · 5 defeats · 9:41" under it), everyone else a one-line notice ("Kestrel is the last one
+	    standing" / "The full result is on the board in the lobby"). The full result is on the lobby's results board
+	    (ResultsBoardService / ResultsBoardController); the RoundSummary table is no longer drawn here.
 	Public API (Controllers.NotificationController):
 	  announce(payload)                     same shape as the Announce remote
 	  toast(text: string, sub: string?, duration: number?)
@@ -27,8 +36,10 @@
 	  warning(text: string, sub: string?, duration: number?)
 	  card(title: string, text: string | () -> string, opts?)   a card with the toasts; opts: { color: Color3?,
 	                                        duration: number?, when: (() -> boolean)?, onShow: (() -> ())? }
-	  hideDeathScreen()
-	  isCardUp() -> boolean                the death card or the round's result card is up (the lobby waits for it)
+	  hideDeathScreen()                     ends the "just defeated" moment; the strip stays while you spectate
+	  isStripUp() -> boolean                the defeat strip is on screen (SpectateController hides its own Exit then)
+	  isCardUp() -> boolean                the defeat moment (the strip, before spectating) or the winner's line is
+	                                        up (the lobby and the HUD wait for it)
 	  isBannerUp() -> (boolean, boolean)    a headline is showing, the Roll Call list is showing (the lobby's status pill
 	                                        and HOW TO PLAY step aside for them)
 ]]
@@ -44,6 +55,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Lore = require(Shared:WaitForChild("Lore"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Input = require(Shared:WaitForChild("Input"))
 local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
@@ -73,22 +85,26 @@ local headlineCurrent: { [string]: any }? = nil
 local toasts: { any } = {}
 local toastCounter = 0
 local countdown = { active = false, last = nil :: number?, caption = "GET READY", flashing = false, flashedRound = nil :: any }
-local dimLevels: { [string]: number } = {}
 local deathVisible = false
 local deathToken = 0
 local deathGrade: ColorCorrectionEffect? = nil
 local victoryVisible = false
 local victoryToken = 0
 local victoryRound: any = nil
-local summary: { [string]: any }? = nil
 local participatedRound: any = nil
+local stripUp = false -- the defeat strip is on screen (deathVisible, or spectating after a defeat)
+local stripToken = 0
+local stripLeft = false -- the player pressed Back to lobby during this defeat: no auto-spectate
+local AUTO_SPECTATE = 2.5 -- seconds of the strip alone before spectating starts on its own
+local STRIP_DWELL = 12 -- seconds the strip stays when there is nobody to watch
+local WIN_LINE = 5 -- seconds the winner's quiet line stays
 local rollToken = 0
 local lastDeath: { [string]: any }? = nil
 local deathCounts: { [string]: number } = {} -- this session's deaths per tip class
 local cardQueue: { any } = {}
 local cardsShown: { [string]: boolean } = {}
 local pendingVictory: { [string]: any }? = nil -- QW4: your death ended the round; its result waits behind the death card
-local DEATH_DWELL = 8 -- seconds a round-ending death card (and its tip) stays before the round's result replaces it
+local DEATH_DWELL = 8 -- seconds a round-ending defeat strip (and its tip) stays before the round's result notice
 local flushVictory: () -> () = function() end -- shows a pending result (assigned once showVictory exists)
 
 local STUD_TO_METERS = 0.28 -- the same scale as the HUD's distances
@@ -169,19 +185,7 @@ local function suppressTop(reason: string, on: boolean)
 	end
 end
 
---------------------------------------------------------------------------------------------------------------------
--- Dim
---------------------------------------------------------------------------------------------------------------------
-local function setDim(reason: string, alpha: number?)
-	dimLevels[reason] = alpha
-	local top = 0
-	for _, a in pairs(dimLevels) do
-		top = math.max(top, a)
-	end
-	if R.dim then
-		Theme.tween(R.dim, Theme.Tween.Slow, { BackgroundTransparency = 1 - top })
-	end
-end
+-- (Quiet: nothing dims the whole picture any more; Overlay.Dim stays clear)
 
 --------------------------------------------------------------------------------------------------------------------
 -- Headlines (Banner / Warning)
@@ -200,12 +204,14 @@ local function playHeadline(item: { [string]: any })
 	R.hEyebrow.Visible = type(eyebrow) == "string" and eyebrow ~= ""
 	R.hEyebrow.Text = eyebrow or ""
 	R.hEyebrow.TextColor3 = item.eyebrowColor or C.Accent
-	R.hTitle.Text = string.upper(item.text)
-	R.hTitle.TextSize = if compact then 28 else 40
-	R.hTitle.Size = UDim2.new(1, 0, 0, if compact then 34 else 48)
+	-- a quiet item (the round's result notice) is one line in sentence case, smaller, with no rule
+	local quiet = item.quiet == true
+	R.hTitle.Text = if quiet then item.text else string.upper(item.text)
+	R.hTitle.TextSize = if quiet then (if compact then 24 else 30) elseif compact then 28 else 40
+	R.hTitle.Size = UDim2.new(1, 0, 0, if quiet then (if compact then 30 else 38) elseif compact then 34 else 48)
 	R.hSub.Visible = type(item.sub) == "string" and item.sub ~= ""
 	R.hSub.Text = if type(item.sub) == "string" then Theme.escape(item.sub) else ""
-	R.hRule.Visible = not compact
+	R.hRule.Visible = not compact and not quiet
 	R.hRule.BackgroundColor3 = item.ruleColor or C.Accent
 	R.hRule.Size = UDim2.fromOffset(0, 2)
 	h.Visible = true
@@ -243,17 +249,8 @@ local function playHeadline(item: { [string]: any })
 end
 
 nextHeadline = function()
-	if deathVisible then
-		-- the death card has the middle of the screen and a headline's sub line reached its top line (a 720-high
-		-- screen): headlines wait for the card to go (hideDeath lets them in)
-		suppressTop("Headline", false)
-		return
-	end
+	-- (the defeat strip sits along the bottom, so headlines no longer wait for it as they waited for the old card)
 	local item = table.remove(headlineQueue, 1)
-	-- one that waited behind the death card for longer than it would have shown is old news ("chosen in 6 seconds")
-	while item and item.heldAt and os.clock() - item.heldAt > math.clamp(tonumber(item.duration) or 3.5, 1.5, 12) do
-		item = table.remove(headlineQueue, 1)
-	end
 	if item then
 		playHeadline(item)
 	else
@@ -275,16 +272,13 @@ local function pushHeadline(item: { [string]: any })
 		return
 	end
 	if victoryVisible then
-		return -- the victory screen owns the stage
-	end
-	if deathVisible then
-		item.heldAt = os.clock() -- it waits for the death card (nextHeadline)
+		return -- the winner's line owns the stage for its few seconds
 	end
 	table.insert(headlineQueue, item)
 	while #headlineQueue > 3 do
 		table.remove(headlineQueue, 1)
 	end
-	if not headlineCurrent and not deathVisible then
+	if not headlineCurrent then
 		nextHeadline()
 	end
 end
@@ -318,14 +312,33 @@ local function removeToast(entry: any, fast: boolean?)
 	end
 	local info = if fast then Theme.Tween.Fast else Theme.Tween.FadeOut
 	local f = entry.frame
-	Theme.tween(f, info, { BackgroundTransparency = 1 })
-	Theme.tween(entry.stroke, info, { Transparency = 1 })
-	Theme.tween(entry.mark, info, { BackgroundTransparency = 1 })
-	Theme.tween(entry.sub, info, { TextTransparency = 1 })
-	local t = Theme.tween(entry.text, info, { TextTransparency = 1 })
-	t.Completed:Once(function()
-		f:Destroy()
-	end)
+	-- no box: the dot and the words (with their dark strokes) fade; then the line goes
+	QuietUI.tween(entry.mark, info, { BackgroundTransparency = 1 })
+	QuietUI.fadeText(entry.sub, false, info)
+	local t = QuietUI.fadeText(entry.text, false, info)
+	if t then
+		t.Completed:Once(function()
+			f:Destroy()
+		end)
+	else
+		f:Destroy() -- reduced motion: set at once
+	end
+end
+
+-- a toast's or card's words start clear, with their strokes, and fade in
+local function fadeInLabels(labels: { any }, mark: GuiObject?)
+	for _, label in ipairs(labels) do
+		QuietUI.textTransparency(label, 1)
+	end
+	if mark then
+		mark.BackgroundTransparency = 1
+	end
+	for _, label in ipairs(labels) do
+		QuietUI.fadeText(label, true, Theme.Tween.Normal)
+	end
+	if mark then
+		QuietUI.tween(mark, Theme.Tween.Normal, { BackgroundTransparency = 0 })
+	end
 end
 
 -- Touch screens: one toast at a time, centred over the hotbar (which sits left of the touch buttons), above the
@@ -376,7 +389,6 @@ function NotificationController.toast(text: string, sub: string?, duration: numb
 	local textLabel = frame:FindFirstChild("Text")
 	local subLabel = frame:FindFirstChild("Sub")
 	local mark = frame:FindFirstChild("Mark")
-	local stroke = frame:FindFirstChildOfClass("UIStroke")
 	textLabel.Text = Theme.escape(text)
 	subLabel.Text = if type(sub) == "string" then sub else ""
 	subLabel.Visible = subLabel.Text ~= "" and not compact
@@ -384,23 +396,11 @@ function NotificationController.toast(text: string, sub: string?, duration: numb
 	if textLimit and compact then
 		textLimit.MaxSize = Vector2.new(290, 36)
 	end
-	frame.BackgroundTransparency = 1
-	textLabel.TextTransparency = 1
-	subLabel.TextTransparency = 1
-	mark.BackgroundTransparency = 1
-	if stroke then
-		stroke.Transparency = 1
-	end
+	frame.BackgroundTransparency = 1 -- Quiet: no box behind a toast
 	frame.Visible = true
 	frame.Parent = R.toasts
-	Theme.tween(frame, Theme.Tween.Normal, { BackgroundTransparency = 0.2 })
-	Theme.tween(textLabel, Theme.Tween.Normal, { TextTransparency = 0 })
-	Theme.tween(subLabel, Theme.Tween.Normal, { TextTransparency = 0 })
-	Theme.tween(mark, Theme.Tween.Normal, { BackgroundTransparency = 0 })
-	if stroke then
-		Theme.tween(stroke, Theme.Tween.Normal, { Transparency = 0.85 })
-	end
-	local entry = { frame = frame, text = textLabel, sub = subLabel, mark = mark, stroke = stroke or Instance.new("UIStroke") }
+	fadeInLabels({ textLabel, subLabel }, mark)
+	local entry = { frame = frame, text = textLabel, sub = subLabel, mark = mark }
 	table.insert(toasts, entry)
 	local limit = if compact then 1 elseif isPhone() then 2 else 3
 	-- cards (below) keep their place; the oldest plain toast makes room
@@ -458,7 +458,6 @@ local function showCard(item: { [string]: any })
 	local textLabel = body and body:FindFirstChild("Text")
 	local holder = frame:FindFirstChild("MarkHolder")
 	local mark = holder and holder:FindFirstChild("Mark")
-	local stroke = frame:FindFirstChildOfClass("UIStroke")
 	if not (title and textLabel and mark) then
 		frame:Destroy()
 		return
@@ -471,25 +470,13 @@ local function showCard(item: { [string]: any })
 	title.Text = Theme.escape(tostring(item.title))
 	textLabel.Text = tostring(text or "")
 	mark.BackgroundColor3 = item.opts.color or C.Accent
-	frame.BackgroundTransparency = 1
-	title.TextTransparency = 1
-	textLabel.TextTransparency = 1
-	mark.BackgroundTransparency = 1
-	if stroke then
-		stroke.Transparency = 1
-	end
+	frame.BackgroundTransparency = 1 -- Quiet: no box behind a card
 	layoutToasts()
 	frame.Visible = true
 	-- cards have their own place at the left (Overlay Cards), so they never cover the item toast or the held item
 	frame.Parent = R.cards or R.toasts
-	Theme.tween(frame, Theme.Tween.Normal, { BackgroundTransparency = 0.2 })
-	Theme.tween(title, Theme.Tween.Normal, { TextTransparency = 0 })
-	Theme.tween(textLabel, Theme.Tween.Normal, { TextTransparency = 0 })
-	Theme.tween(mark, Theme.Tween.Normal, { BackgroundTransparency = 0 })
-	if stroke then
-		Theme.tween(stroke, Theme.Tween.Normal, { Transparency = 0.85 })
-	end
-	local entry = { frame = frame, text = title, sub = textLabel, mark = mark, stroke = stroke or Instance.new("UIStroke"), card = true }
+	fadeInLabels({ title, textLabel }, mark)
+	local entry = { frame = frame, text = title, sub = textLabel, mark = mark, card = true }
 	table.insert(toasts, entry)
 	Sfx.play("Notify")
 	if item.opts.onShow then
@@ -663,12 +650,12 @@ local function showCountdownNumber(n: number)
 	R.countdown.Visible = true
 	R.cdNumber.Text = tostring(n)
 	R.cdNumber.TextColor3 = C.Text
-	R.cdNumber.TextTransparency = 0.4
+	QuietUI.textTransparency(R.cdNumber, 0.4)
 	R.cdPop.Scale = 1.3
-	Theme.tween(R.cdPop, Theme.Tween.Pop, { Scale = 1 })
-	Theme.tween(R.cdNumber, Theme.Tween.Pop, { TextTransparency = 0 })
+	QuietUI.tween(R.cdPop, Theme.Tween.Pop, { Scale = 1 })
+	QuietUI.fadeText(R.cdNumber, true, Theme.Tween.Pop)
 	setCaption(n)
-	R.cdCaption.TextTransparency = 0
+	QuietUI.textTransparency(R.cdCaption, 0)
 	Sfx.play("CountdownTick")
 end
 
@@ -683,17 +670,20 @@ local function beginFlash()
 	R.countdown.Visible = true
 	R.cdNumber.Text = "BEGIN"
 	R.cdNumber.TextColor3 = C.Accent
-	R.cdNumber.TextTransparency = 0
+	QuietUI.textTransparency(R.cdNumber, 0)
 	R.cdCaption.Text = ""
 	R.cdCaption.Visible = false
 	if R.cdSub then
 		R.cdSub.Visible = false
 	end
 	R.cdPop.Scale = 0.86
-	Theme.tween(R.cdPop, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.06 })
+	QuietUI.tween(R.cdPop, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.06 })
 	task.delay(0.8, function()
-		local t = Theme.tween(R.cdNumber, Theme.Tween.FadeOut, { TextTransparency = 1 })
-		t.Completed:Wait()
+		-- the word and its dark outline fade together (a stroke left behind would read as a ghost "BEGIN")
+		local t = QuietUI.fadeText(R.cdNumber, false, Theme.Tween.FadeOut)
+		if t then
+			t.Completed:Wait()
+		end
 		countdown.flashing = false
 		if not countdown.active then
 			R.countdown.Visible = false
@@ -801,26 +791,6 @@ local function killerOf(data: any): Player?
 		return found
 	end
 	return nil
-end
-
-local function refreshDeathButtons()
-	local can = canSpectate()
-	if R.dSpectate.Visible ~= can then
-		R.dSpectate.Visible = can
-		if Input.isGamepad() and deathVisible then
-			GuiService.SelectedObject = if can then R.dSpectate else R.dContinue
-		end
-	end
-	if pendingVictory then
-		R.dNote.Text = pendingVictory.note or "" -- the round is over: its result, until the card gives way to it
-	elseif ClientState.inArena then
-		R.dNote.Text = "Returning to the lobby"
-	else
-		local killer = if can then killerOf(lastDeath) else nil
-		R.dNote.Text = if killer then "SPECTATE follows <b>" .. Theme.escape(killer.DisplayName) .. "</b>"
-			elseif can then "Watch the contenders who remain"
-			else ""
-	end
 end
 
 -- QW4: one tip per cause and weapon class. The second time the same thing kills you, a more specific one. Every tip is
@@ -979,24 +949,28 @@ local function tipFor(data: { [string]: any }): string?
 	return if ok and type(text) == "string" and text ~= "" then text else nil
 end
 
--- "OUTLASTED 15 OF 24  ·  6:12" (practice, or the first to fall: "SURVIVED  6:12")
-local function progressLine(data: { [string]: any }): string?
-	local placement = math.floor(tonumber(data.placement) or 0)
-	local total = math.max(placement, math.floor(tonumber(data.total) or 0))
-	local startedAt = tonumber(GameState:GetAttribute("RoundStartedAt")) or 0
-	local timeText = if startedAt > 0 then Util.formatTime(math.max(0, workspace:GetServerTimeNow() - startedAt)) else nil
-	local outlasted = total - placement
-	if placement <= 0 or total <= 1 or outlasted <= 0 or GameState:GetAttribute("Practice") == true then
-		return if timeText then "SURVIVED  " .. timeText else nil
+-- "1st", "2nd", "9th", "11th", "22nd"
+local function ordinal(n: number): string
+	local suffix = "th"
+	local tens = n % 100
+	if tens < 11 or tens > 13 then
+		local ones = n % 10
+		suffix = if ones == 1 then "st" elseif ones == 2 then "nd" elseif ones == 3 then "rd" else "th"
 	end
-	local text = string.format("OUTLASTED %d OF %d", outlasted, total)
-	if timeText then
-		text ..= "  ·  " .. timeText
-	end
-	return text
+	return tostring(n) .. suffix
 end
 
-local function causeLine(data: { [string]: any }): string
+-- How long this round has run ("6:12"), for "survived" lines
+local function roundTime(): string?
+	local startedAt = tonumber(GameState:GetAttribute("RoundStartedAt")) or 0
+	if startedAt <= 0 then
+		return nil
+	end
+	return Util.formatTime(math.max(0, workspace:GetServerTimeNow() - startedAt))
+end
+
+-- The strip's left words: who or what ended your round, in plain, neutral words (rated Mild: no talk of death).
+local function causeLine(data: { [string]: any }, short: boolean): string
 	local killer = if type(data.killer) == "string" and data.killer ~= "" then "<b>" .. Theme.escape(data.killer) .. "</b>" else nil
 	local weapon = if type(data.weaponName) == "string" and data.weaponName ~= "" then data.weaponName else nil
 	if not weapon and type(data.weapon) == "string" then
@@ -1005,60 +979,207 @@ local function causeLine(data: { [string]: any }): string
 	end
 	local cause = data.cause
 	if cause == "Combat" then
-		if killer and weapon then
-			return string.format("Eliminated by %s   ·   %s", killer, Theme.escape(weapon))
-		elseif killer then
-			return "Eliminated by " .. killer
+		if killer and weapon and not short then
+			return string.format("Defeated by %s  <font transparency=\"0.35\">·  %s</font>", killer, Theme.escape(weapon))
 		end
-		return "Eliminated in combat"
+		return if killer then "Defeated by " .. killer else "Defeated in a fight"
 	elseif cause == "Fall" then
-		return if killer then "You fell to your death   ·   chased by " .. killer else "You fell to your death"
+		return if killer and not short then "A long fall  ·  chased by " .. killer else "A long fall"
 	elseif cause == "Border" then
-		return if killer then "Caught outside the border   ·   after a fight with " .. killer else "Caught outside the border"
+		local border = if type(Lore.Border) == "string" then Lore.Border else "the border"
+		return if killer and not short then "Caught outside " .. border .. "  ·  after a fight with " .. killer else "Caught outside " .. border
 	elseif cause == "Starvation" then
-		return "You starved"
+		return "Ran out of food"
 	elseif cause == "Dehydration" then
-		return "You died of thirst"
+		return "Ran out of water"
 	elseif cause == "Reset" then
-		return if killer then "You reset   ·   after a fight with " .. killer else "You reset"
+		return "You reset"
 	end
-	return if killer then "Eliminated by " .. killer else "You were eliminated"
+	return if killer then "Defeated by " .. killer else "Out of the round"
 end
 
-local function hideDeath()
-	if not deathVisible then
+-- The strip's placing: "You placed 9th of 24" (nil when there is none to give)
+local function placeLine(data: { [string]: any }, practice: boolean, beforeHorn: boolean): string?
+	if beforeHorn then
+		return if practice then "Practice cancelled"
+			else "You left your plate before " .. (if type(Lore.StartSignal) == "string" then Lore.StartSignal else "the horn")
+	end
+	if practice then
+		local t = roundTime()
+		return if t then "Practice round  ·  " .. t else "Practice round"
+	end
+	local placement = math.floor(tonumber(data.placement) or 0)
+	local total = math.max(placement, math.floor(tonumber(data.total) or 0))
+	if placement <= 0 or total <= 1 then
+		return nil
+	end
+	return string.format("You placed <b>%s</b> of %d", ordinal(placement), total)
+end
+
+--------------------------------------------------------------------------------------------------------------------
+-- The defeat strip (Overlay.Root.Strip): Left > Mark, Cause, Sep, Place; Right > Leave, LeaveKey. The Spectate
+-- screen's card sits in its middle. One line above it (StripTip, made here) carries the tip, or the round's result.
+--------------------------------------------------------------------------------------------------------------------
+local stripInfo: { [string]: any } = {} -- what the current strip says: tip, place (for the phone's line)
+local stripBound = false
+local leaveStrip: () -> ()
+
+local function spectateController()
+	return Controllers and Controllers.SpectateController
+end
+
+local function isSpectating(): boolean
+	local spectate = spectateController()
+	if spectate and spectate.isSpectating then
+		local ok, on = pcall(spectate.isSpectating)
+		return ok and on == true
+	end
+	return false
+end
+
+-- SpectateController hides its own Exit while the strip's "Back to lobby" is on screen
+local function tellSpectate()
+	local spectate = spectateController()
+	if spectate and spectate.onStripChanged then
+		pcall(spectate.onStripChanged, stripUp)
+	end
+end
+
+local function setStripBinding(on: boolean)
+	if on == stripBound then
 		return
 	end
-	deathVisible = false
-	deathToken += 1
-	local token = deathToken
-	setModal("Death", false)
-	setDim("Death", nil)
-	setGrade(false)
+	stripBound = on
+	if on then
+		-- Backspace / B leaves, as the spectate screen's own exit does (that one has the higher priority while you
+		-- spectate, and SpectateController.stop then takes the strip away)
+		Input.bind("StripLeave", function(state)
+			local sc = settingsController()
+			local menu = sc and sc.isOpen and sc.isOpen()
+			if state == Enum.UserInputState.Begin and not menu then
+				leaveStrip()
+			end
+			return Enum.ContextActionResult.Sink
+		end, { keys = { Enum.KeyCode.Backspace, Enum.KeyCode.ButtonB }, priority = 2400 })
+	else
+		Input.unbind("StripLeave")
+	end
+end
+
+local function stripKeyText(): string?
+	if Input.isTouch() then
+		return nil -- a finger presses the words
+	elseif Input.isGamepad() then
+		return "B"
+	end
+	return "Backspace"
+end
+
+-- the key square and the line above the strip, kept current while the strip is up
+local function refreshStrip()
+	if not R.strip then
+		return
+	end
+	local keyText = stripKeyText()
+	if R.stripKey then
+		R.stripKey.Visible = keyText ~= nil
+		if keyText then
+			QuietUI.setKey(R.stripKey, keyText)
+		end
+	end
+	if R.stripTip then
+		local lines = {}
+		if pendingVictory and type(pendingVictory.note) == "string" and pendingVictory.note ~= "" then
+			table.insert(lines, pendingVictory.note) -- the round is over: its result, until the strip goes
+		end
+		if stripInfo.phonePlace then
+			table.insert(lines, stripInfo.phonePlace)
+		end
+		if stripInfo.tip and not pendingVictory then
+			table.insert(lines, stripInfo.tip)
+		end
+		local text = table.concat(lines, "\n")
+		if R.stripTip.Text ~= text then
+			R.stripTip.Text = text
+		end
+	end
+end
+
+local function hideStrip()
+	if not stripUp then
+		return
+	end
+	stripUp = false
+	stripToken += 1
+	setStripBinding(false)
 	local selected = GuiService.SelectedObject
-	if selected and selected:IsDescendantOf(R.death) then
+	if selected and R.strip and selected:IsDescendantOf(R.strip) then
 		GuiService.SelectedObject = nil
 	end
-	local t = Theme.tween(R.dPanel, Theme.Tween.Normal, { GroupTransparency = 1 })
-	t.Completed:Once(function()
-		if token == deathToken and not deathVisible then
-			R.death.Visible = false
-		end
-	end)
-	if pendingVictory then
-		task.defer(flushVictory) -- the round's result, now that the death card has had its say
+	if R.strip then
+		QuietUI.fadeOut(R.strip, Theme.Time.Out)
 	end
-	-- headlines that waited behind the card (nextHeadline) come in now, unless the result card took the stage
-	task.defer(function()
-		if not deathVisible and not victoryVisible and not headlineCurrent then
-			nextHeadline()
-		end
-	end)
+	if R.stripTip then
+		QuietUI.fadeText(R.stripTip, false)
+	end
+	tellSpectate()
 end
-NotificationController.hideDeathScreen = hideDeath
 
--- The death card or the round's result card is up: LobbyController keeps the lobby screen back until it goes, so the
--- two never draw text over text (round-flow QA pt2/pt3, survival P2).
+local function showStrip()
+	if not R.strip then
+		return
+	end
+	stripUp = true
+	stripToken += 1
+	setStripBinding(true)
+	refreshStrip()
+	QuietUI.fadeIn(R.strip, 0.5)
+	if R.stripTip then
+		R.stripTip.Visible = true
+		QuietUI.fadeText(R.stripTip, true, 0.6)
+	end
+	tellSpectate()
+end
+
+-- keepStrip: spectating has started, so the strip stays (its middle is the spectate card)
+local function hideDeath(keepStrip: boolean?)
+	if deathVisible then
+		deathVisible = false
+		deathToken += 1
+		setModal("Death", false)
+		setGrade(false)
+		if R.stripTip then
+			QuietUI.fadeText(R.stripTip, false) -- the tip was for the moment of defeat
+		end
+		if pendingVictory then
+			task.defer(flushVictory) -- the round's result, now that the strip has had its say
+		end
+	end
+	if not keepStrip then
+		hideStrip()
+	end
+end
+NotificationController.hideDeathScreen = function()
+	-- SpectateController.start calls this once it is spectating: the strip stays, only the moment ends
+	hideDeath(isSpectating())
+end
+
+leaveStrip = function()
+	stripLeft = true
+	Sfx.play("UIClick")
+	if isSpectating() then
+		local spectate = spectateController()
+		pcall(spectate.stop) -- spectateChanged(nil) takes the strip away too
+	end
+	hideDeath(false)
+end
+
+function NotificationController.isStripUp(): boolean
+	return stripUp
+end
+
+-- The defeat moment (the strip before spectating) or the winner's line is up: LobbyController keeps the lobby screen
+-- back until it goes, and the HUD stays down, so the two never draw text over text (round-flow QA pt2/pt3).
 function NotificationController.isCardUp(): boolean
 	return deathVisible or victoryVisible
 end
@@ -1077,155 +1198,115 @@ local function showDeath(data: any)
 	participatedRound = GameState:GetAttribute("RoundId")
 	deathToken += 1
 	local token = deathToken
-	-- a help card still up (THIRSTY on the way to dying of thirst) gives way to the death card and its tip
+	-- a help card still up (THIRSTY on the way to running out of water) gives way to the strip and its tip
 	for _, entry in ipairs(table.clone(toasts)) do
 		if entry.card then
 			removeToast(entry, true)
 		end
 	end
-	local placement = math.floor(tonumber(data.placement) or 0)
-	local total = math.max(placement, math.floor(tonumber(data.total) or 0))
-	-- a practice death is not "#1 OF 1"; a death before the horn (a reset on the plate) is not an elimination
 	local practice = data.practice == true or (data.practice == nil and GameState:GetAttribute("Practice") == true)
 	local beforeHorn = data.phase == "Countdown"
-	if R.dEyebrow then
-		R.dEyebrow.Text = if beforeHorn then (if practice then "PRACTICE CANCELLED" else "OUT OF THE ROUND")
-			elseif practice then "PRACTICE ROUND"
-			else "ELIMINATED"
-		R.dEyebrow.TextColor3 = if practice and not beforeHorn then C.AccentSoft else C.Danger
-	end
-	if beforeHorn then
-		R.dTitle.Text = "OUT"
-	elseif placement > 0 and not practice then
-		R.dTitle.Text = string.format("#%d<font size=\"30\" color=\"%s\">   OF %d</font>", placement, Theme.hex(C.TextDim), total)
-	else
-		R.dTitle.Text = "FALLEN"
-	end
-	R.dCause.Text = if beforeHorn then "You left your plate before " .. (if type(Lore.StartSignal) == "string" then Lore.StartSignal else "the horn") else causeLine(data)
+	local compact = isPhone()
 	lastDeath = data
-	if R.dProgress then
-		local progress = if beforeHorn then nil else progressLine(data)
-		R.dProgress.Visible = progress ~= nil
-		R.dProgress.Text = progress or ""
+	stripLeft = false
+
+	-- the strip's words
+	local place = placeLine(data, practice, beforeHorn)
+	if R.stripCause then
+		R.stripCause.Text = causeLine(data, compact)
 	end
-	if R.dTip then
-		local tip = if beforeHorn then nil else tipFor(data)
-		R.dTip.Visible = tip ~= nil
-		R.dTip.Text = if tip then string.format("<font color=\"%s\">TIP</font>   %s", Theme.hex(C.TextDim), tip) else ""
+	if R.stripMark then
+		QuietUI.tint(R.stripMark, if practice and not beforeHorn then C.Sun else C.Red)
 	end
+	-- a phone has no room for the placing on the strip: it goes on the line above it
+	local placeOnStrip = place ~= nil and not compact
+	if R.stripPlace then
+		R.stripPlace.Text = place or ""
+		R.stripPlace.Visible = placeOnStrip
+	end
+	if R.stripSep then
+		R.stripSep.Visible = placeOnStrip
+	end
+	stripInfo = {
+		phonePlace = if compact then place else nil,
+		tip = nil,
+	}
+	local tip = if beforeHorn then nil else tipFor(data)
+	if tip then
+		stripInfo.tip = string.format("<font color=\"%s\">TIP</font>   %s", Theme.hex(C.TextDim), tip)
+	end
+	if R.stripTip then
+		R.stripTip.Size = UDim2.new(if compact then 1 else 0.5, 0, 0, 0)
+	end
+
 	deathVisible = true
-	clearHeadlines() -- a headline on show would sit on the card's top line; later ones wait for the card (nextHeadline)
-	R.dSpectate.Visible = false
-	refreshDeathButtons()
-	R.death.Visible = true
-	R.dPanel.GroupTransparency = 1
-	R.dPanel.Position = UDim2.new(0.5, 0, 0.5, 14)
-	Theme.tween(R.dPanel, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		GroupTransparency = 0,
-		Position = UDim2.fromScale(0.5, 0.5),
-	})
-	setDim("Death", 0.55)
-	setModal("Death", true)
+	showStrip()
+	-- On a window narrower than a full-HD screen (a 1,214-wide Studio test window, 18 Nov) the full left end ("Defeated
+	-- by <name> · <weapon>  |  You placed 3rd of 3") ran under the Spectate card's Prev arrow and its key in the
+	-- strip's middle. Once it is laid out: if its words reach the card's place, the strip takes the phone's short form
+	-- (no weapon; the placing on the line above it).
+	if not compact and placeOnStrip then
+		task.delay(0.1, function()
+			if token ~= deathToken or not deathVisible or not (R.stripPlace and R.stripPlace.Visible) then
+				return
+			end
+			local screen = R.strip:FindFirstAncestorWhichIsA("LayerCollector")
+			local width = if screen and screen:IsA("ScreenGui") then screen.AbsoluteSize.X else 0
+			local half = if UserInputService.TouchEnabled or Theme.isSmallScreen() then 180 else 230 -- (SpectateController's card)
+			local label = R.stripPlace :: TextLabel
+			local reach = label.AbsolutePosition.X + math.min(label.TextBounds.X, label.AbsoluteSize.X)
+			if width > 0 and reach > width / 2 - half - 16 then
+				if R.stripCause then
+					R.stripCause.Text = causeLine(data, true)
+				end
+				label.Visible = false
+				if R.stripSep then
+					R.stripSep.Visible = false
+				end
+				stripInfo.phonePlace = place
+				refreshStrip()
+			end
+		end)
+	end
+	setModal("Death", true) -- the mouse is free for "Back to lobby"
 	setGrade(true)
-	if Input.isGamepad() then
-		GuiService.SelectedObject = if R.dSpectate.Visible then R.dSpectate else R.dContinue
+	if Input.isGamepad() and R.stripLeave then
+		GuiService.SelectedObject = R.stripLeave
 	end
 	task.spawn(function()
 		local t0 = os.clock()
 		while token == deathToken and deathVisible do
 			local age = os.clock() - t0
-			-- QW4: when this death ended the round, its card (and tip) stays DEATH_DWELL s, then the result follows
-			if age > 15 or (pendingVictory ~= nil and age >= DEATH_DWELL) then
-				hideDeath()
+			-- QW4: when this fall ended the round, the strip (and the result above it) stays DEATH_DWELL s
+			if pendingVictory ~= nil then
+				if age >= DEATH_DWELL then
+					hideDeath(false)
+					break
+				end
+			elseif not stripLeft and age >= AUTO_SPECTATE and canSpectate() then
+				-- watch the one who did it (or whoever remains): the strip stays, its middle becomes the card
+				local spectate = spectateController()
+				if spectate and spectate.start then
+					local ok, started = pcall(spectate.start, killerOf(lastDeath))
+					if ok and started then
+						break -- start() called hideDeathScreen: the moment is over, the strip stays
+					end
+				end
+			end
+			if age > STRIP_DWELL and not isSpectating() then
+				hideDeath(false)
 				break
 			end
-			refreshDeathButtons()
+			refreshStrip()
 			task.wait(0.25)
 		end
 	end)
 end
 
 --------------------------------------------------------------------------------------------------------------------
--- Victory + round summary
+-- The round's result: a quiet line for the winner, a one-line notice for everyone else. The full result is on the
+-- results board in the lobby (ResultsBoardController).
 --------------------------------------------------------------------------------------------------------------------
-local function populateSummary(data: { [string]: any })
-	local rowsFrame = R.vRows
-	for _, child in ipairs(rowsFrame:GetChildren()) do
-		if child:IsA("GuiObject") then
-			child:Destroy()
-		end
-	end
-	local placements = if type(data.placements) == "table" then data.placements else {}
-	local list = {}
-	for _, entry in ipairs(placements) do
-		if type(entry) == "table" then
-			table.insert(list, entry)
-		end
-	end
-	local function isLocal(entry): boolean
-		if tonumber(entry.userId) then
-			return tonumber(entry.userId) == player.UserId
-		end
-		return isMe(entry.name)
-	end
-	local shown = {}
-	local localShown = false
-	for i, entry in ipairs(list) do
-		if i <= 10 then
-			table.insert(shown, entry)
-			localShown = localShown or isLocal(entry)
-		end
-	end
-	if not localShown then
-		for _, entry in ipairs(list) do
-			if isLocal(entry) then
-				table.insert(shown, entry)
-				break
-			end
-		end
-	end
-	for i, entry in ipairs(shown) do
-		local row = R.summaryTemplate:Clone()
-		row.Name = "Row" .. i
-		row.LayoutOrder = i
-		local placement = math.floor(tonumber(entry.placement) or 0)
-		local mine = isLocal(entry)
-		row.Rank.Text = if placement > 0 then "#" .. placement else "–"
-		row.Rank.TextColor3 = if placement == 1 then C.Gold else C.TextDim
-		row.PlayerName.Text = Theme.escape(tostring(entry.name or "?")) .. (if mine then string.format("  <font color=\"%s\">YOU</font>", Theme.hex(C.AccentSoft)) else "")
-		row.PlayerName.FontFace = if mine or placement == 1 then Theme.Fonts.BodyBold else Theme.Fonts.Body
-		row.Kills.Text = tostring(math.floor(tonumber(entry.kills) or 0))
-		row.Mark.Visible = mine
-		row.BackgroundTransparency = if mine then 0.55 else 1
-		for _, label in ipairs({ row.Rank, row.PlayerName, row.Kills }) do
-			label.TextTransparency = 1
-		end
-		row.Visible = true
-		row.Parent = rowsFrame
-		task.delay(0.05 * i, function()
-			for _, label in ipairs({ row.Rank, row.PlayerName, row.Kills }) do
-				Theme.tween(label, Theme.Tween.Normal, { TextTransparency = 0 })
-			end
-		end)
-	end
-	local duration = tonumber(data.duration) or 0
-	R.vFooter.Text = string.format("ROUND TIME  %s     ·     %d %s", Util.formatTime(duration), #list, if #list == 1 then "CONTENDER" else "CONTENDERS")
-	R.vSummary.Visible = #shown > 0
-end
-
--- Compact on phones so the summary table keeps a few readable rows.
-local function applyVictoryLayout()
-	local compact = isPhone()
-	local panel = R.vPanel
-	panel.Size = if compact then UDim2.new(1, -24, 1, -8) else UDim2.new(1, -40, 0.88, 0)
-	R.vTitle.TextSize = if compact then 44 else 64
-	R.vTitle.Position = UDim2.fromOffset(0, if compact then 18 else 20)
-	R.vTitle.Size = UDim2.new(1, 0, 0, if compact then 50 else 72)
-	R.vSub.Position = UDim2.fromOffset(0, if compact then 68 else 94)
-	R.vSummary.Position = UDim2.fromOffset(1, if compact then 96 else 132)
-	R.vSummary.Size = UDim2.new(1, -2, 1, if compact then -97 else -133)
-end
-
 local function hideVictory(immediate: boolean?)
 	if not victoryVisible then
 		return
@@ -1233,12 +1314,15 @@ local function hideVictory(immediate: boolean?)
 	victoryVisible = false
 	victoryToken += 1
 	local token = victoryToken
-	setDim("Victory", nil)
 	if immediate then
 		R.victory.Visible = false
 		return
 	end
-	local t = Theme.tween(R.vPanel, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { GroupTransparency = 1 })
+	local t = QuietUI.tween(R.vPanel, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { GroupTransparency = 1 })
+	if not t then
+		R.victory.Visible = false
+		return
+	end
 	t.Completed:Once(function()
 		if token == victoryToken and not victoryVisible then
 			R.victory.Visible = false
@@ -1246,29 +1330,35 @@ local function hideVictory(immediate: boolean?)
 	end)
 end
 
+-- "Kestrel is the last one standing" / "The full result is on the board in the lobby"
+local function noticeFor(title: string, subText: string, winnerName: string?, practice: boolean): (string, string?)
+	local line = if winnerName and subText ~= "" then winnerName .. " " .. subText
+		elseif winnerName then winnerName .. " won"
+		else title
+	-- practice rounds are not posted (ResultsBoardService keeps the last real round)
+	local sub = if practice then (if winnerName then nil elseif subText ~= "" then subText else nil)
+		else "The full result is on the board in the lobby"
+	return line, sub
+end
+
 -- winnerUserId: the winner's UserId when the server sent it. wonBefore: the answer worked out when the result first
--- arrived (a result that waited behind the death card is shown later, when Placement and Alive may have been reset).
-local function showVictory(text: string?, sub: string?, winner: any, fallback: boolean?, winnerUserId: any, wonBefore: boolean?)
+-- arrived (a result that waited behind the strip is shown later, when Placement and Alive may have been reset).
+-- practiceBefore: the same for GameState.Practice, which is already false by the time a waiting result is shown (so a
+-- practice round's notice said "The full result is on the board in the lobby", and practice rounds are not posted).
+local function showVictory(text: string?, sub: string?, winner: any, fallback: boolean?, winnerUserId: any, wonBefore: boolean?,
+	practiceBefore: boolean?)
 	local roundId = GameState:GetAttribute("RoundId")
 	local winnerName = if type(winner) == "string" and winner ~= "" then winner else nil
 	local participated = participatedRound ~= nil and participatedRound == roundId
 	local won = if wonBefore ~= nil then wonBefore else participated and iWon(winnerName, winnerUserId)
-	local practice = GameState:GetAttribute("Practice") == true
-	local title = if type(text) == "string" and text ~= "" then text elseif winnerName then winnerName else "ROUND OVER"
+	local practice = if practiceBefore ~= nil then practiceBefore else GameState:GetAttribute("Practice") == true
+	local title = if type(text) == "string" and text ~= "" then text elseif winnerName then winnerName else "Round over"
 	local subText = if type(sub) == "string" then sub elseif winnerName then "is the last one standing" else ""
-	if victoryRound == roundId and victoryVisible then
-		-- the attribute fallback already showed it; refresh the words from the announcement
-		if not won then
-			R.vTitle.Text = string.upper(title)
-			R.vSub.Text = Theme.escape(subText)
-		end
-		return
-	end
 	if victoryRound == roundId then
-		return
+		return -- shown already (the Ending attribute's fallback, then the announcement)
 	end
-	-- QW4: when your death ended the round (a lone practice contender, the runner-up), the death card and its tip stay
-	-- up first and its note gives the result; the full result follows after DEATH_DWELL s or CONTINUE (flushVictory)
+	-- QW4: when your fall ended the round (a lone practice contender, the runner-up), the strip and its tip stay up
+	-- first and the line above it gives the result; the notice follows after DEATH_DWELL s or Back to lobby
 	if participated and deathVisible then
 		if not (fallback and pendingVictory and pendingVictory.roundId == roundId) then
 			local note
@@ -1277,65 +1367,70 @@ local function showVictory(text: string?, sub: string?, winner: any, fallback: b
 			elseif winnerName then
 				note = "<b>" .. Theme.escape(winnerName) .. "</b> " .. Theme.escape(subText)
 			else
-				note = Theme.escape(string.upper(title))
+				note = Theme.escape(title)
 			end
 			pendingVictory = { roundId = roundId, text = text, sub = sub, winner = winner, note = note,
-				winnerUserId = winnerUserId, won = won }
+				winnerUserId = winnerUserId, won = won, practice = practice }
 		end
-		refreshDeathButtons()
+		refreshStrip()
 		return
 	end
 	pendingVictory = nil
 	victoryRound = roundId
-	if not participated then
-		pushHeadline({ eyebrow = "ROUND OVER", eyebrowColor = C.Gold, ruleColor = C.Gold, text = title, sub = subText, duration = 5 })
+	if not won then
+		-- everyone else: one quiet line, and where to find the rest
+		local line, noticeSub = noticeFor(title, subText, winnerName, practice)
+		pushHeadline({ quiet = true, text = line, sub = noticeSub, duration = 5 })
 		return
 	end
 
-	hideDeath()
+	-- the winner: "You won" and the round's facts, a few seconds, fading. No box, no dim, no table.
+	hideDeath(false)
 	clearHeadlines()
 	victoryVisible = true
 	victoryToken += 1
 	local token = victoryToken
 	local kills = math.floor(tonumber(player:GetAttribute("Kills")) or 0)
-	if won then
-		R.vEyebrow.Text = if practice then "PRACTICE ROUND" else "THE LAST ONE STANDING"
-		R.vTitle.Text = if practice then "SURVIVED" else "VICTORY"
-		R.vTitle.TextColor3 = C.Gold
-		local startedCount = math.floor(tonumber(GameState:GetAttribute("StartedCount")) or 0)
-		if practice or startedCount <= 1 then
-			R.vSub.Text = string.format("%d %s", kills, if kills == 1 then "elimination" else "eliminations")
-		else
-			-- (a two-player round: "1 contender", not "1 contenders")
-			R.vSub.Text = string.format("You outlasted %d %s   ·   <b>%d</b> %s", startedCount - 1, if startedCount - 1 == 1 then "contender" else "contenders",
-				kills, if kills == 1 then "elimination" else "eliminations")
-		end
-	else
-		R.vEyebrow.Text = "THE ROUND IS OVER"
-		R.vTitle.Text = string.upper(title)
-		R.vTitle.TextColor3 = C.Text
-		R.vSub.Text = Theme.escape(subText)
+	local defeats = string.format("%d %s", kills, if kills == 1 then "defeat" else "defeats")
+	local facts = {}
+	local startedCount = math.floor(tonumber(GameState:GetAttribute("StartedCount")) or 0)
+	if not practice and startedCount > 1 then
+		table.insert(facts, string.format("Outlasted %d", startedCount - 1))
 	end
-	applyVictoryLayout()
-	local topY = if isPhone() then 0 else 0.06
-	R.vSummary.Visible = false
+	table.insert(facts, defeats)
+	local t = roundTime()
+	if t then
+		table.insert(facts, t)
+	end
+	R.vEyebrow.Visible = not practice
+	R.vEyebrow.Text = "THE LAST ONE STANDING"
+	R.vEyebrow.TextColor3 = C.Sun
+	R.vTitle.Text = if practice then "Practice survived" else "You won"
+	R.vTitle.TextColor3 = C.Text
+	R.vTitle.TextSize = if isPhone() then 36 else 48
+	R.vTitle.Size = UDim2.new(1, 0, 0, if isPhone() then 44 else 58)
+	R.vSub.Text = Theme.escape(table.concat(facts, "  ·  "))
+	R.vSub.Position = UDim2.fromOffset(0, if isPhone() then 64 else 80)
+	if R.vSummary then
+		R.vSummary.Visible = false
+	end
+	local topY = if isPhone() then 0.04 else 0.2
 	R.victory.Visible = true
 	R.vPanel.GroupTransparency = 1
-	R.vPanel.Position = UDim2.new(0.5, 0, topY, 16)
-	Theme.tween(R.vPanel, TweenInfo.new(1.0, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+	R.vPanel.Position = UDim2.new(0.5, 0, topY, 12)
+	QuietUI.tween(R.vPanel, TweenInfo.new(1.0, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 		GroupTransparency = 0,
 		Position = UDim2.fromScale(0.5, topY),
 	})
-	setDim("Victory", 0.5)
 	Sfx.play("Victory")
-	task.delay(1.3, function()
-		if token == victoryToken and summary and summary.roundId == roundId then
-			populateSummary(summary.data)
+	task.delay(WIN_LINE, function()
+		if token == victoryToken then
+			hideVictory(false)
 		end
 	end)
 end
 
--- The result that waited for a round-ending death card (QW4). Already back in the lobby, it goes after a short read.
+-- The result that waited for a round-ending defeat strip (QW4).
 flushVictory = function()
 	local p = pendingVictory
 	pendingVictory = nil
@@ -1346,31 +1441,7 @@ flushVictory = function()
 	if p.roundId ~= GameState:GetAttribute("RoundId") or phase == "Countdown" or phase == "Active" then
 		return
 	end
-	showVictory(p.text, p.sub, p.winner, nil, p.winnerUserId, p.won)
-	if victoryVisible and (phase == "Lobby" or phase == "Intermission") then
-		local token = victoryToken
-		task.delay(if summary and summary.roundId == p.roundId then 7 else 4, function()
-			if token == victoryToken then
-				hideVictory(false)
-			end
-		end)
-	end
-end
-
-local function onSummary(data: any)
-	if type(data) ~= "table" then
-		return
-	end
-	local roundId = GameState:GetAttribute("RoundId")
-	summary = { roundId = roundId, data = data }
-	if victoryVisible and victoryRound == roundId then
-		local token = victoryToken
-		task.delay(1.0, function()
-			if token == victoryToken and victoryVisible then
-				populateSummary(data)
-			end
-		end)
-	end
+	showVictory(p.text, p.sub, p.winner, nil, p.winnerUserId, p.won, p.practice)
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -1479,7 +1550,7 @@ local function showRollCall(payload: { [string]: any })
 			l.TextSize = if cols == 2 then 14 else 16
 			l.TextTruncate = Enum.TextTruncate.AtEnd
 			l.LayoutOrder = i
-			l.TextTransparency = 1
+			QuietUI.textTransparency(l, 1) -- the name and its stroke start clear
 			l.Visible = true
 			l.Parent = R.rollNames
 			table.insert(labels, l)
@@ -1537,7 +1608,7 @@ local function showRollCall(payload: { [string]: any })
 				table.insert(revealed, Theme.escape(shown[i]))
 				R.rollLine.Text = table.concat(revealed, string.format("<font color=\"%s\">   ·   </font>", Theme.hex(C.TextDim)))
 			elseif labels[i] then
-				Theme.tween(labels[i], TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
+				QuietUI.fadeText(labels[i], true, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
 			end
 		end
 		local closeAt = if compact then math.min(endAt - 1.4, math.max(phoneUntil, startAt + 6)) else endAt - 1.6
@@ -1659,7 +1730,7 @@ local function onPhase()
 		countdown.caption = "GET READY"
 		pendingVictory = nil -- a new round: last round's result is old news
 		hideVictory(true)
-		hideDeath()
+		hideDeath(false)
 	elseif phase == "Ending" then
 		task.delay(0.7, function()
 			if GameState:GetAttribute("Phase") == "Ending" and victoryRound ~= GameState:GetAttribute("RoundId") then
@@ -1670,8 +1741,9 @@ local function onPhase()
 		end)
 	elseif phase == "Lobby" or phase == "Intermission" then
 		if victoryVisible then
+			-- the winner's line fades on its own (WIN_LINE); back in the lobby it goes soon in any case
 			local token = victoryToken
-			task.delay(if R.vSummary.Visible then 7 else 3, function()
+			task.delay(1.5, function()
 				if token == victoryToken then
 					hideVictory(false)
 				end
@@ -1692,7 +1764,7 @@ function NotificationController.Init(registry)
 			showDeath(data)
 		end
 	end)
-	Net.event("RoundSummary").OnClientEvent:Connect(onSummary)
+	-- (RoundSummary is no longer drawn here: the full result is on the lobby's results board)
 end
 
 function NotificationController.Start()
@@ -1721,64 +1793,76 @@ function NotificationController.Start()
 	R.rollSub = R.roll:WaitForChild("Sub")
 	R.rollNames = R.roll:WaitForChild("Names")
 	R.rollLine = R.roll:WaitForChild("Line")
-	R.death = root:WaitForChild("Death")
-	R.dPanel = R.death:WaitForChild("Panel")
-	R.dEyebrow = R.dPanel:FindFirstChild("Eyebrow")
-	R.dTitle = R.dPanel:WaitForChild("Title")
-	R.dCause = R.dPanel:WaitForChild("Cause")
-	R.dNote = R.dPanel:WaitForChild("Note")
-	R.dProgress = R.dPanel:FindFirstChild("Progress")
-	R.dTip = R.dPanel:FindFirstChild("Tip")
-	R.dSpectate = R.dPanel:WaitForChild("Buttons"):WaitForChild("Spectate")
-	R.dContinue = R.dPanel.Buttons:WaitForChild("Continue")
+	-- the defeat strip (UIBuilder: Strip > Line, Left > Mark, Cause, Sep, Place; Right > Leave, LeaveKey)
+	R.strip = root:WaitForChild("Strip", 10)
+	if R.strip then
+		local left = R.strip:WaitForChild("Left")
+		local right = R.strip:WaitForChild("Right")
+		R.stripMark = left:WaitForChild("Mark")
+		R.stripCause = left:WaitForChild("Cause")
+		R.stripSep = left:WaitForChild("Sep")
+		R.stripPlace = left:WaitForChild("Place")
+		R.stripLeave = right:WaitForChild("Leave")
+		R.stripKey = right:WaitForChild("LeaveKey")
+		-- the line above the strip (the tip, or the round's result): one wrapped line of plain text, made here
+		local tip = QuietUI.label({
+			Name = "StripTip",
+			Font = "Medium",
+			TextSize = 15,
+			AnchorPoint = Vector2.new(0, 1),
+			Position = UDim2.new(0, 0, 1, -((tonumber(Theme.Strip and Theme.Strip.Height) or 62) + 12)),
+			Size = UDim2.new(0.5, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			TextWrapped = true,
+			RichText = true,
+			TextYAlignment = Enum.TextYAlignment.Bottom,
+			Visible = false,
+			Parent = root,
+		})
+		QuietUI.textTransparency(tip, 1)
+		R.stripTip = tip
+		QuietUI.bindButton(R.stripLeave, {
+			onHover = function()
+				if not Input.isTouch() then
+					Sfx.play("UIHover")
+				end
+			end,
+		})
+		R.stripLeave.Activated:Connect(function()
+			leaveStrip()
+		end)
+	else
+		warn("[NotificationController] Overlay.Root.Strip is missing (an older UIBuilder build): no defeat strip")
+	end
+	-- the old full-screen death card stays hidden (UIBuilder still builds it)
+	local oldDeath = root:FindFirstChild("Death")
+	if oldDeath then
+		oldDeath.Visible = false
+	end
 	R.victory = root:WaitForChild("Victory")
 	R.vPanel = R.victory:WaitForChild("Panel")
 	R.vEyebrow = R.vPanel:WaitForChild("Eyebrow")
 	R.vTitle = R.vPanel:WaitForChild("Title")
 	R.vSub = R.vPanel:WaitForChild("Sub")
-	R.vSummary = R.vPanel:WaitForChild("Summary")
-	R.vRows = R.vSummary:WaitForChild("Rows")
-	R.vFooter = R.vSummary:WaitForChild("Footer")
+	R.vSummary = R.vPanel:FindFirstChild("Summary") -- (no longer used: the board has the table)
+	if R.vSummary then
+		R.vSummary.Visible = false
+	end
 	local templates = root:WaitForChild("Templates")
 	R.toastTemplate = templates:WaitForChild("Toast")
-	R.summaryTemplate = templates:WaitForChild("SummaryRow")
 	R.rollTemplate = templates:WaitForChild("RollName")
 	R.cardTemplate = templates:FindFirstChild("Card")
 
-	local function hoverable(button: GuiButton, normal: number, hover: number)
-		local function set(on: boolean)
-			Theme.tween(button, Theme.Tween.Fast, { BackgroundTransparency = if on then hover else normal })
-		end
-		button.MouseEnter:Connect(function()
-			set(true)
-			if not Input.isTouch() then
-				Sfx.play("UIHover")
-			end
-		end)
-		button.MouseLeave:Connect(function()
-			set(false)
-		end)
-		button.SelectionGained:Connect(function()
-			set(true)
-		end)
-		button.SelectionLost:Connect(function()
-			set(false)
-		end)
-	end
-	hoverable(R.dSpectate, 0.05, 0)
-	hoverable(R.dContinue, 0.25, 0.08)
-	R.dSpectate.Activated:Connect(function()
-		Sfx.play("UIClick")
-		local spectate = Controllers and Controllers.SpectateController
-		local killer = killerOf(lastDeath) -- QW4: watch the one who did it
-		hideDeath()
-		if spectate and spectate.start then
-			spectate.start(killer)
+	-- spectating stopped (Back to lobby, the round over, nobody left): the strip goes with it
+	ClientState.spectateChanged:Connect(function(target)
+		if target == nil and stripUp and not deathVisible then
+			hideStrip()
 		end
 	end)
-	R.dContinue.Activated:Connect(function()
-		Sfx.play("UIClick")
-		hideDeath()
+	UserInputService.LastInputTypeChanged:Connect(function()
+		if stripUp then
+			refreshStrip()
+		end
 	end)
 
 	GameState:GetAttributeChangedSignal("Phase"):Connect(onPhase)

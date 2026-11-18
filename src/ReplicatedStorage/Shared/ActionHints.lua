@@ -116,16 +116,21 @@ function ActionHints.isDowngrade(def: any, wornId: string?): boolean
 	return (tonumber(worn.damageMultiplier) or 1) <= (tonumber(def.damageMultiplier) or 1)
 end
 
+-- "+8 HUNGER" / "-8 THIRST" (a raw squirrel costs thirst)
+local function signed(label: string, value: number): string
+	return string.format("%s%d %s", if value < 0 then "-" else "+", math.floor(math.abs(value) + 0.5), label)
+end
+
 local function stats(def: any): string
 	local parts = {}
 	if tonumber(def.hunger) then
-		table.insert(parts, string.format("+%d HUNGER", def.hunger))
+		table.insert(parts, signed("HUNGER", def.hunger))
 	end
 	if tonumber(def.thirst) then
-		table.insert(parts, string.format("+%d THIRST", def.thirst))
+		table.insert(parts, signed("THIRST", def.thirst))
 	end
 	if tonumber(def.heal) then
-		table.insert(parts, string.format("+%d HEALTH", def.heal))
+		table.insert(parts, signed("HEALTH", def.heal))
 	end
 	return table.concat(parts, " ")
 end

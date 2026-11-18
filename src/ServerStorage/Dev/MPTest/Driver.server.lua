@@ -839,6 +839,90 @@ local function logChecks()
 	check("log.clients", nil, total .. " client warnings or errors relayed: " .. table.concat(list, " ; "))
 end
 
+-- the evening build (mp-retest2) -------------------------------------------------------------------------------------------
+local SKIP_BY: { [string]: Player } = {} -- round tag -> the contender who skips their intro in that round
+-- the border wall on each screen: blue, where the server says, fully open at the start (1,800) or past its first stage
+local function borderLook(tag: string, players: { Player }, moving: boolean)
+	local sr = tonumber(GS:GetAttribute("BorderRadius")) or -1
+	local ok = if moving then sr < 1795 and (tonumber(GS:GetAttribute("BorderStage")) or 0) >= 1
+		else sr >= 1799 and tonumber(GS:GetAttribute("BorderStartRadius")) == 1800 and (tonumber(GS:GetAttribute("BorderStage")) or 0) == 0
+	local detail = { string.format("server: radius %.1f start %s stage %s of %s, next move at round second %s, moving=%s, round clock %s", sr,
+		tostring(GS:GetAttribute("BorderStartRadius")), tostring(GS:GetAttribute("BorderStage")), tostring(GS:GetAttribute("BorderStageCount")),
+		tostring(GS:GetAttribute("BorderNextMoveAt")), tostring(GS:GetAttribute("BorderMoving")), fmt({ Arena.getClock() })) }
+	for _, p in ipairs(players) do
+		if p.Parent == Players then
+			local b = call(p, "probe", { kind = "border" }) or {}
+			local r, g, bl = string.match(tostring(b.looks), "BorderLine rgb%((%d+),(%d+),(%d+)%)")
+			local blue = r ~= nil and tonumber(bl) > 200 and tonumber(bl) > 2 * tonumber(r) and tonumber(bl) > tonumber(g)
+			local lo = tonumber(string.match(tostring(b.lineRadius), "^(%d+)")) or -1
+			local near = lo > 0 and math.abs(lo - sr) < 60
+			local cr = tonumber(b.radius) or -1
+			ok = ok and blue and near and math.abs(cr - sr) < 30
+			table.insert(detail, string.format("%s's client: radius %s stage %s next %s; wall parts %s, ground line at %s from the centre; looks: %s", p.Name, fmt(b.radius),
+				tostring(b.stage), tostring(b.nextMoveAt), tostring(b.parts), tostring(b.lineRadius), string.sub(tostring(b.looks), 1, 260)))
+		end
+	end
+	check(tag, ok, table.concat(detail, " | "))
+end
+
+-- the results board in the lobby on each screen: the round's winner and rows, each player's own row marked
+local function boardChecks(tag: string, players: { Player }, winner: Player?, notInRound: Player?)
+	local ok, detail = true, {}
+	for _, p in ipairs(players) do
+		if p.Parent == Players then
+			local wantRow = p ~= notInRound
+			local list = waitFor(function()
+				local l = call(p, "probe", { kind = "board" })
+				if type(l) == "table" then
+					for _, b in ipairs(l) do
+						if b.streamed and b.empty == false then
+							return l
+						end
+					end
+				end
+				return nil
+			end, 8) or call(p, "probe", { kind = "board" }) or {}
+			local good = false
+			local lines = {}
+			for _, b in ipairs(list) do
+				local mineRow = string.match(tostring(b.rows), "[^;]*" .. p.Name .. "[^;]*mine=true") ~= nil
+				local othersMarked = false
+				for row in string.gmatch(tostring(b.rows), "[^;]+") do
+					if string.find(row, "mine=true", 1, true) and not string.find(row, p.Name, 1, true) then
+						othersMarked = true
+					end
+				end
+				local winOk = winner == nil or string.find(tostring(b.winner), winner.Name, 1, true) ~= nil
+				if b.streamed and b.empty == false and (mineRow or not wantRow) and not othersMarked and winOk then
+					good = true
+				end
+				table.insert(lines, string.format("board %s streamed=%s empty=%s %s; winner: %s; rows: %s; facts: %s; %s studs away, on screen=%s", tostring(b.at), tostring(b.streamed),
+					tostring(b.empty), tostring(b.meta), tostring(b.winner), tostring(b.rows), tostring(b.facts), tostring(b.dist), tostring(b.onScreen)))
+			end
+			ok = ok and good
+			table.insert(detail, p.Name .. "'s client: " .. (if #lines > 0 then table.concat(lines, " / ") else "no board"))
+		end
+	end
+	check(tag, ok, table.concat(detail, " | "))
+end
+
+-- the train lobby: everyone in a car, the camera inside it, the scenery sliding past
+local function trainChecks(tag: string, players: { Player })
+	local ok, detail, spawns = true, {}, {}
+	for _, p in ipairs(players) do
+		if p.Parent == Players then
+			local t = call(p, "probe", { kind = "lobby" }) or {}
+			local good = t.rootCar ~= nil and t.camCar ~= nil and (tonumber(t.sceneryMovedIn05s) or 0) > 0.5
+			ok = ok and good
+			table.insert(spawns, tostring(t.nearestSpawn))
+			table.insert(detail, string.format("%s: character in car %s at %s, camera in car %s at %s (%.1f studs from the root; ceiling above the camera: %s); scenery %s parts moved %.1f studs in 0.5 s; nearest spawn %s",
+				p.Name, tostring(t.rootCar), fmt(t.root), tostring(t.camCar), fmt(t.cam), tonumber(t.zoom) or -1, tostring(t.ceilingAboveCam), tostring(t.sceneryParts),
+				tonumber(t.sceneryMovedIn05s) or -1, tostring(t.nearestSpawn)))
+		end
+	end
+	check(tag, ok, table.concat(detail, " | "))
+end
+
 -- batches ---------------------------------------------------------------------------------------------------------------
 local function lobbyChecks()
 	local ok = waitFor(function()
@@ -894,6 +978,8 @@ local function lobbyChecks()
 		local list = call(p, "gui") or {}
 		L("GUI[lobby,held] " .. p.Name .. ": " .. string.sub(table.concat(list, " ; "), 1, 1500))
 	end
+	trainChecks("lobby.train", list)
+	shot("train_lobby", 1.0)
 	chatCheck("lobby.chatClosed", { A, B }, true)
 	plusLobbyChecks(A, B)
 	-- the lobby countdown as each client shows it
@@ -909,8 +995,8 @@ local function lobbyChecks()
 	return true
 end
 
-local function roundStartChecks(tag: string): boolean
-	local mA0, mB0 = mark(A), mark(B)
+local function roundStartChecks(tag: string, fromA: number?, fromB: number?): boolean
+	local mA0, mB0 = fromA or mark(A), fromB or mark(B)
 	if not waitPhase("Countdown", 60) then
 		check(tag .. ".countdown", false, "no Countdown within 60 s, phase=" .. phase())
 		return false
@@ -959,9 +1045,47 @@ local function roundStartChecks(tag: string): boolean
 			L(string.format("INTRO mid-shot client %s sees %s", p.Name, fmt(see)))
 		end
 	end
+	-- the personal skip (owner, 18 Nov): one contender skips, the other's intro plays on
+	local skipper = SKIP_BY[tag]
+	local watcher = if skipper == A then B elseif skipper == B then A else nil
+	local tSkip: number? = nil
+	if skipper and watcher and shotA and shotB then
+		local before = call(skipper, "probe", { kind = "skip" }) or {}
+		check(tag .. ".skip.promptShown", before.launchShot == true and #(before.shown or {}) > 0, string.format("%s's screen before skipping: launchShot=%s, skip texts: [%s]",
+			skipper.Name, tostring(before.launchShot), table.concat(before.shown or {}, " ; ")))
+		shot(tag .. "_before_skip", 0.6)
+		local mS = mark(skipper)
+		tSkip = now()
+		call(skipper, "setattr", { name = "LS_LaunchSkipTest", value = true }) -- (Studio: acts as a completed hold of Space)
+		local ended = waitFor(function()
+			return (clientFind(skipper, "LAUNCHSHOT false", mS))
+		end, 3)
+		task.wait(0.4)
+		local s, w = call(skipper, "probe", { kind = "skip" }) or {}, call(watcher, "probe", { kind = "skip" }) or {}
+		local _, rs = parts(skipper)
+		local camOff = if typeof(s.cam) == "Vector3" and rs then (s.cam - rs.Position).Magnitude else -1
+		check(tag .. ".skip.personal", ended ~= nil and s.launchShot ~= true and #(s.shown or {}) == 0 and camOff >= 0 and camOff < 4 and w.launchShot == true
+			and #(w.shown or {}) > 0, string.format(
+			"%s skipped: shot ended on its client %s (%s s after the order); its camera now %.1f studs from its own root (%s), skip texts left: [%s] | %s's intro: launchShot=%s, skip texts: [%s]",
+			skipper.Name, tostring(ended), if ended then string.format("%.2f", (tonumber(string.match(ended, "^([%d%.]+)")) or 0) - tSkip) else "?", camOff,
+			tostring(s.camType), table.concat(s.shown or {}, " ; "), watcher.Name, tostring(w.launchShot), table.concat(w.shown or {}, " ; ")))
+		shot(tag .. "_after_skip", 0.6)
+	end
 	if not waitPhase("Active", 40) then
 		check(tag .. ".horn", false, "no Active phase within 40 s of the Countdown, phase=" .. phase())
 		return false
+	end
+	if skipper and watcher and tSkip then
+		task.wait(0.6)
+		local endW = clientFind(watcher, "LAUNCHSHOT false", mA0 and (if watcher == A then mA0 else mB0))
+		local hornS = clientFind(skipper, "REMOTE Sfx StartHorn", if skipper == A then mA0 else mB0)
+		local hornW = clientFind(watcher, "REMOTE Sfx StartHorn", if watcher == A then mA0 else mB0)
+		local tW = endW and tonumber(string.match(endW, "^([%d%.]+)"))
+		local tHS, tHW = hornS and tonumber(string.match(hornS, "^([%d%.]+)")), hornW and tonumber(string.match(hornW, "^([%d%.]+)"))
+		check(tag .. ".skip.otherPlaysOn", tW ~= nil and tW - tSkip > 3 and tHS ~= nil and tHW ~= nil and math.abs(tHS - tHW) < 0.5, string.format(
+			"%s's intro ended %s s after %s skipped (the shot's own hand-off); the horn sound reached %s at %s and %s at %s (apart %s s); phase Active at %.3f",
+			watcher.Name, if tW then string.format("%.2f", tW - tSkip) else "never", skipper.Name, skipper.Name, tostring(tHS), watcher.Name, tostring(tHW),
+			if tHS and tHW then string.format("%.2f", math.abs(tHS - tHW)) else "?", now()))
 	end
 	task.wait(1.2)
 	local stA, stB = call(A, "state") or {}, call(B, "state") or {}
@@ -990,6 +1114,9 @@ local function roundStartChecks(tag: string): boolean
 			.. " B sees A=" .. tostring(sb and sb.char))
 	end
 	check(tag .. ".roundsPlayed", nil, string.format("RoundsPlayed A=%s B=%s", tostring(A:GetAttribute("RoundsPlayed")), tostring(B:GetAttribute("RoundsPlayed"))))
+	if not ARGS.border then
+		borderLook(tag .. ".borderAtStart", { A, B }, false)
+	end
 	return true
 end
 
@@ -1627,7 +1754,16 @@ local function deathChecks(tag: string, mA: number, mB: number, expectPlacement:
 	check(tag .. ".deathCard", died ~= nil and string.find(died, idText, 1, true) ~= nil and string.find(died, "placement=" .. expectPlacement, 1, true) ~= nil
 		and B:GetAttribute("Alive") ~= true, "B's client got: " .. tostring(died))
 	local hB, hudB = hudOf(B)
-	check(tag .. ".deathCardCoversHud", hudHidden(hB), "B's screen with the death card: " .. hudB)
+	-- (with a third contender alive B watches its killer at once: the spectator's view keeps the compass block)
+	local spect = (call(B, "state") or {}).spectating
+	if spect then
+		check(tag .. ".deathCardCoversHud", hB.Hotbar == false and hB.Vitals == false, "B's screen, defeated and watching (hotbar and vitals down; the spectator keeps the compass block) " .. tostring(spect) .. ": " .. hudB)
+	else
+		check(tag .. ".deathCardCoversHud", hudHidden(hB), "B's screen with the death card: " .. hudB)
+	end
+	-- the evening UI: the defeat strip along the bottom, "Defeated by <killer> · <weapon>"
+	local stripHas, stripText = guiHas(B, "defeated by")
+	check(tag .. ".defeatStrip", stripHas and string.find(stripText, A.DisplayName, 1, true) ~= nil, "B's screen: " .. string.sub(stripText, 1, 300))
 	local function feedOk(line: string?): boolean
 		return line ~= nil and string.find(line, idText, 1, true) ~= nil and string.find(line, "victimUserId=" .. tostring(B.UserId), 1, true) ~= nil
 	end
@@ -1647,34 +1783,52 @@ local function resultChecks(tag: string, mA: number, mB: number, winner: Player,
 		return
 	end
 	task.wait(1.6)
+	local tEnd = os.clock()
+	-- the evening UI (owner, 18 Nov): no VICTORY card; the winner gets one quiet "You won" line for about 5 s, everyone
+	-- else one quiet line, and the full result is on the board in the lobby
 	local idLine = "GS WinnerUserId=" .. tostring(winner.UserId)
 	local vicW = clientFind(winner, "style=Victory", mA)
-	local hasW, textW = guiHas(winner, "victory")
-	local detail = { string.format("server: WinnerName=%s WinnerUserId=%s; winner's client: announce %s ; its WinnerUserId attribute seen=%s ; texts with VICTORY: %s",
+	-- (the bots log the line themselves: the checks here come several seconds after the round ended)
+	local shownW, tShown = clientFind(winner, "YOUWON shown", mA)
+	local hasW, textW = shownW ~= nil, tostring(shownW)
+	local goneLine, tGone = clientFind(winner, "YOUWON gone", mA)
+	local _, tVic = clientFind(winner, "style=Victory", mA)
+	L(string.format("YOUWON on %s: announce at %s, line shown at %s, gone at %s (%s s on screen)", winner.Name, tostring(tVic), tostring(tShown), tostring(tGone),
+		if tShown and tGone then string.format("%.1f", tGone - tShown) else "?"))
+	local detail = { string.format("server: WinnerName=%s WinnerUserId=%s; winner's client: announce %s ; its WinnerUserId attribute seen=%s ; texts with 'You won': %s",
 		tostring(GS:GetAttribute("WinnerName")), tostring(GS:GetAttribute("WinnerUserId")), tostring(vicW), tostring(clientFind(winner, idLine, mA) ~= nil),
 		string.sub(textW, 1, 300)) }
 	local ok = GS:GetAttribute("WinnerUserId") == winner.UserId and vicW ~= nil and string.find(vicW, "winnerUserId=" .. tostring(winner.UserId), 1, true) ~= nil and hasW
 	for _, p in ipairs(others) do
 		if p.Parent == Players then
-			local has, text = guiHas(p, "victory")
+			local line = clientFind(p, "YOUWON shown", mB)
+			local has, text = line ~= nil, tostring(line)
 			local all = call(p, "gui") or {}
 			L("GUI[" .. tag .. " result] " .. p.Name .. ": " .. string.sub(table.concat(all, " ; "), 1, 1500))
 			ok = ok and not has
-			table.insert(detail, string.format("%s's client: texts with VICTORY: [%s]", p.Name, string.sub(text, 1, 200)))
+			table.insert(detail, string.format("%s's client: texts with 'You won': [%s]; its result lines: %s", p.Name, string.sub(text, 1, 200),
+				string.sub(table.concat(call(p, "gui", "standing") or {}, " ; "), 1, 300)))
 		end
 	end
 	local allW = call(winner, "gui") or {}
 	L("GUI[" .. tag .. " result] " .. winner.Name .. ": " .. string.sub(table.concat(allW, " ; "), 1, 1500))
-	check(tag .. ".victoryById", ok, table.concat(detail, " | "))
-	local hW, hudW = hudOf(winner)
-	check(tag .. ".victoryCardCoversHud", hudHidden(hW), winner.Name .. "'s screen with the VICTORY card (alive in the arena): " .. hudW)
-	for _, p in ipairs(others) do
-		if p.Parent == Players then
-			local _, hudP = hudOf(p)
-			L("HUD[" .. tag .. " result] " .. p.Name .. ": " .. hudP)
-		end
-	end
+	check(tag .. ".youWonById", ok, table.concat(detail, " | "))
+	local _, hudW = hudOf(winner)
+	L("HUD[" .. tag .. " result] " .. winner.Name .. ": " .. hudW)
 	shot(tag .. "_result", 1.0)
+	-- the line goes after about 5 s (checked alongside whatever comes next)
+	task.spawn(function()
+		local w = 6.6 - (os.clock() - tEnd)
+		if w > 0 then
+			task.wait(w)
+		end
+		local _, tG = clientFind(winner, "YOUWON gone", mA)
+		local still, stillText = guiHas(winner, "you won")
+		local onFor = if tShown and tG then tG - tShown else nil
+		check(tag .. ".youWonFades", not still and onFor ~= nil and onFor >= 3.5 and onFor <= 7.5, string.format(
+			"%s's screen: 'You won' shown at %s, gone at %s (%s s on screen); still shown about 8 s after the end=%s %s", winner.Name, tostring(tShown), tostring(tG),
+			if onFor then string.format("%.1f", onFor) else "?", tostring(still), string.sub(stillText, 1, 200)))
+	end)
 end
 
 local function backToLobby(tag: string, players: { Player }): boolean
@@ -1748,6 +1902,7 @@ local function batchB()
 	recapShots("round1.rollCallSky", "round1_rollcall_sky", { A }, { B })
 	shot("round1_rollcall", 1.0)
 	backToLobby("round1", { A, B })
+	boardChecks("round1.board", { A, B }, A)
 	chatCheck("round1.chatClosedInLobby", { A, B }, true)
 	if PLUS then
 		local pa, pb = call(A, "plus") or {}, call(B, "plus") or {}
@@ -1798,6 +1953,14 @@ local function batchC()
 	local mA, mB = killB("round1")
 	defeatChecks("round1", B, { { "killer", A, mA }, { "victim", B, mB }, { "bystander", C, mC } })
 	deathChecks("round1", mA, mB, 3)
+	-- the evening build: a defeated contender watches the one who defeated them, by itself
+	local autoLine = waitFor(function()
+		return (clientFind(B, "SPECTATING " .. A.Name, mB))
+	end, 6)
+	local stAuto = call(B, "state") or {}
+	check("round1.autoSpectateKiller", autoLine ~= nil and stAuto.spectating == A.Name, string.format(
+		"without being asked, B's client: %s ; now spectating=%s camera subject=%s; server focus for B=%s", tostring(autoLine), tostring(stAuto.spectating),
+		tostring(stAuto.camSubject), if B.ReplicationFocus then B.ReplicationFocus:GetFullName() else "nil"))
 	task.wait(0.3)
 	check("round1.goesOnWithTwo", phase() == "Active" and GS:GetAttribute("AliveCount") == 2, "phase=" .. phase() .. " AliveCount=" .. tostring(GS:GetAttribute("AliveCount")))
 	-- B watches A, through its own respawn into the lobby
@@ -1837,6 +2000,11 @@ local function batchC()
 		shot("rollcall_dusk_running", 1.2)
 	end
 	L("clock " .. fmt({ Arena.getClock() }) .. " fallen " .. fmt(Arena.getFallen()))
+	-- the border's first stage (round second 210: 35 s after the horn at time scale 6) on every screen
+	waitFor(function()
+		return (tonumber(GS:GetAttribute("BorderRadius")) or 1800) < 1790
+	end, 40)
+	borderLook("border.stage1", { A, B, C }, true)
 	-- C leaves in the middle of the round
 	mA, mB = mark(A), mark(B)
 	local t0 = os.clock()
@@ -1850,6 +2018,7 @@ local function batchC()
 		tostring(GS:GetAttribute("WinnerUserId")), tostring(GS:GetAttribute("AliveCount")), tostring(feed)))
 	resultChecks("leave", mA, mB, A, { B })
 	backToLobby("leave", { A, B })
+	boardChecks("leave.board", { A, B }, A)
 	L(string.format("after the round: A Wins=%s RoundsPlayed=%s TotalKills=%s", tostring(A:GetAttribute("Wins")), tostring(A:GetAttribute("RoundsPlayed")),
 		tostring(A:GetAttribute("TotalKills"))))
 end
@@ -1891,8 +2060,9 @@ local function batchD()
 	task.wait(6.0) -- (for its first seconds HUDController closes the chat window again whenever it opens)
 	local c = call(J, "chat", { open = true }) or {}
 	check("late.chatOpenLeavesLine", c.active == true and c.overLine ~= true, string.format(
-		"the late joiner opens the chat window: open=%s, window x=%s width=%s (scale %s) on a screen %s wide; the lobby line shown=%s from x=%s; window over the line=%s",
-		tostring(c.active), fmt(c.winX), fmt(c.winW), fmt(c.widthScale), fmt(c.view), tostring(c.lineShown), fmt(c.lineX), tostring(c.overLine)))
+		"the late joiner opens the chat window: open=%s, window x=%s width=%s y=%s height=%s (scale %s) on a screen %s wide; the lobby line shown=%s at x=%s width=%s y=%s height=%s; window over the line=%s",
+		tostring(c.active), fmt(c.winX), fmt(c.winW), fmt(c.winY), fmt(c.winH), fmt(c.widthScale), fmt(c.view), tostring(c.lineShown), fmt(c.lineX), fmt(c.lineW),
+		fmt(c.lineY), fmt(c.lineH), tostring(c.overLine)))
 	shot("late_chat_open", 1.0)
 	call(J, "chat", { open = false })
 	local res = call(J, "spectate", { op = "start", target = A.Name })
@@ -1922,6 +2092,7 @@ local function batchD()
 	st = call(J, "state") or {}
 	L("the watcher after the round was decided: spectating=" .. tostring(st.spectating) .. " camera subject=" .. tostring(st.camSubject))
 	backToLobby("leave", { A, J })
+	boardChecks("late.board", { A, J }, A, J)
 	-- the next round takes the late joiner
 	if waitPhase("Countdown", 40) then
 		check("late.pickedNextRound", Round.isContender(J) and Round.isContender(A) and GS:GetAttribute("Practice") == false and GS:GetAttribute("StartedCount") == 2,
@@ -2040,6 +2211,533 @@ local function batchG()
 			contenderNames(), tostring(GS:GetAttribute("StartedCount")), tostring(GS:GetAttribute("Practice"))))
 end
 
+-- batch H: the evening build with two players (mp-retest2) ---------------------------------------------------------------
+local function terrainAt(x: number, z: number): Vector3?
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	params.IgnoreWater = false
+	local hit = workspace:Raycast(Vector3.new(x, 900, z), Vector3.new(0, -1800, 0), params)
+	return if hit then hit.Position else nil
+end
+-- stands p on the terrain at (x, z) (trees' crowns and limbs above are ignored), facing lookAt
+local function placeAt(p: Player, x: number, z: number, lookAt: Vector3?): Vector3?
+	local hum, root = parts(p)
+	local g = terrainAt(x, z)
+	if not (hum and root and g and p.Character) then
+		return nil
+	end
+	local pos = g + Vector3.new(0, hum.HipHeight + root.Size.Y / 2 + 0.15, 0)
+	root.AssemblyLinearVelocity = Vector3.zero
+	local target = if lookAt then Vector3.new(lookAt.X, pos.Y, lookAt.Z) else pos + Vector3.new(0, 0, -1)
+	if (target - pos).Magnitude < 0.05 then
+		target = pos + Vector3.new(0, 0, -1)
+	end
+	p.Character:PivotTo(CFrame.lookAt(pos, target))
+	return pos
+end
+local function flat(v: Vector3): Vector3
+	return Vector3.new(v.X, 0, v.Z)
+end
+local function wildOf(p: Player): { any }
+	local w = call(p, "probe", { kind = "wild" }) or {}
+	return w.list or {}, w
+end
+local function linesWith(p: Player, from: number, needle: string): { string }
+	local out = {}
+	local store = clientLines[p.Name] or {}
+	for i = from + 1, #store do
+		if string.find(store[i], needle, 1, true) then
+			table.insert(out, store[i])
+		end
+	end
+	return out
+end
+-- did p's client get squirrel `id` in one of `states` since `from`
+local function wildSaw(p: Player, from: number, id: number, states: { number }): string?
+	for _, line in ipairs(linesWith(p, from, "WILD ")) do
+		for _, st in ipairs(states) do
+			if string.find(line, " " .. id .. ":" .. st .. "@", 1, true) then
+				return string.match(line, "^([%d%.]+)") .. " " .. id .. ":" .. st
+			end
+		end
+	end
+	return nil
+end
+
+local function batchH()
+	local Wild = req(Services, "WildlifeService")
+	local Cooking = req(Services, "CookingService")
+	local Hazard = req(Services, "HazardService")
+	local TreeClimb = req(Shared, "TreeClimb")
+	workspace:SetAttribute("DevHazardOff", true) -- (the director calls nothing; the tests below call their own)
+	local huntedBy: { string } = {}
+	if Wild and Wild.hunted then
+		Wild.hunted:Connect(function(p, weaponId)
+			table.insert(huntedBy, tostring(p and p.Name) .. ":" .. tostring(weaponId))
+			L("SIGNAL hunted by " .. tostring(p and p.Name) .. " with " .. tostring(weaponId))
+		end)
+	end
+	local _, ra0 = parts(A)
+	if not ra0 then
+		return
+	end
+	-- a climbable tree of the new (Blender TC) kind, near A's plate, on fairly level ground
+	local best, bestD = nil, math.huge
+	for _, trunk in ipairs(CollectionService:GetTagged("Climbable")) do
+		if trunk:IsA("BasePart") and trunk:IsDescendantOf(workspace) and TreeClimb and #TreeClimb.perchesOf(trunk) > 0 then
+			local d = flatDist(trunk.Position, ra0.Position)
+			if d < bestD and d > 20 then
+				local model = trunk.Parent
+				local g1, g2 = terrainAt(trunk.Position.X + 7, trunk.Position.Z), terrainAt(trunk.Position.X - 7, trunk.Position.Z)
+				if model and g1 and g2 and math.abs(g1.Y - g2.Y) < 3 then
+					best, bestD = trunk, d
+				end
+			end
+		end
+	end
+	if not best then
+		check("tree.found", false, "no climbable tree with perches near A")
+		return
+	end
+	local trunk = best :: BasePart
+	local tree = trunk.Parent :: Instance
+	local axis = trunk.Position
+	local base = terrainAt(axis.X, axis.Z) or axis
+	local meshCount = 0
+	for _, d in ipairs(tree:GetDescendants()) do
+		if d:IsA("MeshPart") then
+			meshCount += 1
+		end
+	end
+	local perches = TreeClimb.perchesOf(trunk)
+	L(string.format("TREE %s (%s, trunk %s %s, %d mesh parts, %d perches, top perch %.1f above the ground) %.0f studs from A's plate", tree:GetFullName(), tree.ClassName,
+		trunk.Name, trunk.ClassName, meshCount, #perches, perches[#perches].WorldPosition.Y - base.Y, bestD))
+	-- everyone to the tree: A 5 studs from the trunk, B 14 studs on the other side
+	placeAt(A, base.X + 5, base.Z, base)
+	placeAt(B, base.X - 14, base.Z + 3, base)
+	task.wait(3.0) -- (the area streams in on both clients)
+
+	-- 1. squirrels ---------------------------------------------------------------------------------------------------
+	workspace:SetAttribute("WildlifeTest", "near:5")
+	task.wait(0.2)
+	workspace:SetAttribute("WildlifeTest", "calm")
+	task.wait(3.0)
+	local listA, wA = wildOf(A)
+	local listB, wB = wildOf(B)
+	local byB = {}
+	for _, s in ipairs(listB) do
+		byB[s.id] = s
+	end
+	local shared, near = 0, 0
+	for _, s in ipairs(listA) do
+		if s.dist < 60 and s.state ~= 0 then
+			near += 1
+			local o = byB[s.id]
+			if o and (o.pos - s.pos).Magnitude < 2 and o.state == s.state then
+				shared += 1
+			end
+		end
+	end
+	check("squirrel.sameOnBoth", near > 0 and shared == near, string.format(
+		"%d squirrels within 60 studs on A's client, %d of them at the same spot and doing the same on B's; A draws %s (%s mesh parts, e.g. %s; %s) | B draws %s (%s mesh parts; %s); stats %s",
+		near, shared, tostring(wA.drawn), tostring(wA.meshParts), tostring(wA.sample), tostring(wA.attr), tostring(wB.drawn), tostring(wB.meshParts), tostring(wB.attr),
+		fmt(Wild and Wild.stats())))
+	shot("squirrels", 1.0)
+	-- flee and climb, seen by both
+	local function groundSquirrel(except: number?): any
+		local pick, pd = nil, math.huge
+		for _, s in ipairs((wildOf(A))) do
+			if s.id ~= except and s.state >= 1 and s.state <= 4 and s.dist < pd and s.dist < 80 then
+				pick, pd = s, s.dist
+			end
+		end
+		return pick
+	end
+	local s1 = groundSquirrel(nil)
+	if s1 then
+		local mA, mB = mark(A), mark(B)
+		local from = s1.pos + (flat(s1.pos - base).Unit * 12)
+		placeAt(A, from.X, from.Z, s1.pos)
+		placeAt(B, s1.pos.X - 10, s1.pos.Z + 10, s1.pos)
+		task.wait(0.8)
+		workspace:SetAttribute("WildlifeTest", "scare")
+		local was = call(A, "setting", { name = "sprintMode", value = 2 })
+		call(A, "move", { seconds = 1.4, face = s1.pos })
+		task.wait(4.5)
+		call(A, "setting", { name = "sprintMode", value = was or 0 })
+		local fA, fB = wildSaw(A, mA, s1.id, { 5 }), wildSaw(B, mB, s1.id, { 5 })
+		local cA, cB = wildSaw(A, mA, s1.id, { 6, 7 }), wildSaw(B, mB, s1.id, { 6, 7 })
+		-- the trunk it went up
+		local upLine = nil
+		for _, line in ipairs(linesWith(A, mA, " " .. s1.id .. ":6@")) do
+			upLine = line
+		end
+		local climbedOn = "?"
+		if upLine then
+			local x, y, z = string.match(upLine, " " .. s1.id .. ":6@[%-%d]+,[%-%d]+,[%-%d]+>([%-%d]+),([%-%d]+),([%-%d]+)")
+			if x then
+				local p = Vector3.new(tonumber(x) :: number, tonumber(y) :: number, tonumber(z) :: number)
+				local nb, nd = nil, math.huge
+				for _, t in ipairs(CollectionService:GetTagged("Climbable")) do
+					if t:IsA("BasePart") then
+						local d = flatDist(t.Position, p)
+						if d < nd then
+							nb, nd = t, d
+						end
+					end
+				end
+				if nb then
+					climbedOn = string.format("%s (%s %s, %.1f studs from its axis)", nb.Parent and nb.Parent.Name or "?", nb.Name, nb.ClassName, nd)
+				end
+			end
+		end
+		check("squirrel.fleeAndClimbOnBoth", fA ~= nil and fB ~= nil and cA ~= nil and cB ~= nil, string.format(
+			"A ran at squirrel %d: A's client flee %s climb %s | B's client flee %s climb %s; it went up the trunk of %s", s1.id, tostring(fA), tostring(cA), tostring(fB),
+			tostring(cB), climbedOn))
+		shot("squirrel_fled", 0.8)
+	else
+		check("squirrel.fleeAndClimbOnBoth", nil, "no squirrel on the ground near A")
+	end
+	-- the hunt: A strikes a squirrel on the ground with the sword; it falls still for both, and is gone for B
+	workspace:SetAttribute("WildlifeTest", "calm")
+	task.wait(1.0)
+	Inv.give(A, "sword", 1)
+	local s2 = groundSquirrel(s1 and s1.id)
+	if s2 then
+		local mA, mB = mark(A), mark(B)
+		local at = s2.to or s2.pos -- (where it is now: the end of its last move)
+		local dir = flat(at - base)
+		dir = if dir.Magnitude > 0.1 then dir.Unit else Vector3.new(1, 0, 0)
+		local stand = at + dir * 3.2
+		placeAt(A, stand.X, stand.Z, at)
+		placeAt(B, at.X - dir.X * 12 + 4, at.Z - dir.Z * 12, at)
+		task.wait(0.6)
+		local sword = slotOf(A, "sword")
+		call(A, "seq", { { "select", sword }, { "wait", 0.8 }, { "face", at + Vector3.new(0, 0.45, 0) }, { "wait", 0.3 }, { "click" }, { "wait", 0.4 } }, 8)
+		task.wait(2.5)
+		local hitA, hitB = wildSaw(A, mA, s2.id, { 9, -9 }), wildSaw(B, mB, s2.id, { 9, -9 })
+		local confirm = clientFind(A, "REMOTE HitConfirm", mA)
+		local item = nil
+		for _, g in ipairs(CollectionService:GetTagged("GroundItem")) do
+			local pos = if g:IsA("Model") then g:GetPivot().Position elseif g:IsA("BasePart") then g.Position else nil
+			if pos and g:GetAttribute("ItemId") == "squirrel" and flatDist(pos, s2.pos) < 6 then
+				item = g
+			end
+		end
+		task.wait(2.0)
+		local after = nil
+		for _, s in ipairs((wildOf(B))) do
+			if s.id == s2.id then
+				after = s
+			end
+		end
+		local goneForB = after == nil or after.state == 0 or after.state == 9 or after.state == -9
+		local seenB = call(B, "items", { near = { x = s2.pos.X, y = s2.pos.Y, z = s2.pos.Z }, radius = 8 }) or {}
+		check("squirrel.huntedGoneForBoth", hitA ~= nil and hitB ~= nil and goneForB and item ~= nil and #huntedBy > 0, string.format(
+			"A struck squirrel %d (state " .. tostring(s2.state) .. " at " .. fmt(at) .. ") with the sword from 3.2 studs: server hunted signal [%s]; A's HitConfirm %s; fell still on A's client %s, on B's %s; B's client now has it %s; a Squirrel item on the ground=%s; B's client sees there: %s",
+			s2.id, table.concat(huntedBy, ","), tostring(confirm), tostring(hitA), tostring(hitB), if after then "in state " .. after.state else "forgotten", tostring(item ~= nil),
+			table.concat(seenB, " ; ")))
+		L("sounds sent since the hunt: A [" .. sfxSince(A, mA) .. "] B [" .. sfxSince(B, mB) .. "]")
+	else
+		check("squirrel.huntedGoneForBoth", nil, "no squirrel on the ground near A")
+	end
+
+	-- 2. sticks at the TC trunk, a campfire A builds and lights, B cooks on it ------------------------------------------
+	Inv.clear(A)
+	local toTrunk = flat(Vector3.new(1, 0, 0.3)).Unit
+	local gStand = base + toTrunk * 3.6
+	placeAt(A, gStand.X, gStand.Z, base)
+	task.wait(1.0)
+	call(A, "face", Vector3.new(axis.X, base.Y + 4.5, axis.Z))
+	task.wait(0.8)
+	local promptsA = call(A, "probe", { kind = "prompts" }) or {}
+	local fwBefore = Inv.count(A, "firewood")
+	local held = call(A, "probe", { kind = "hold", name = "GatherSticks" }, 6)
+	task.wait(0.6)
+	check("campfire.gatherAtTCTrunk", Inv.count(A, "firewood") == fwBefore + 1, string.format(
+		"A at the trunk of %s (%s), looking at it: prompts on A's screen [%s]; held: %s; firewood %d -> %d", tree.Name, trunk.ClassName, table.concat(promptsA, " ; "),
+		tostring(held), fwBefore, Inv.count(A, "firewood")))
+	Inv.give(A, "firewood", 2 - Inv.count(A, "firewood"))
+	local away = flat(base - Vector3.new(axis.X, 0, axis.Z) + Vector3.new(0.01, 0, 0))
+	local campStand = base + Vector3.new(14, 0, 0)
+	placeAt(A, campStand.X, campStand.Z, campStand + Vector3.new(10, 0, 0))
+	placeAt(B, campStand.X + 6, campStand.Z + 7, campStand + Vector3.new(6, 0, 0))
+	task.wait(1.0)
+	local _, raC = parts(A)
+	local spot = (if raC then raC.Position else campStand) + Vector3.new(6, 0, 0)
+	local mA, mB = mark(A), mark(B)
+	call(A, "fire", { name = "CampAction", a = "Build", b = spot })
+	task.wait(1.0)
+	local fireId, fire = nil, nil
+	for id, f in pairs(Cooking and Cooking.fires() or {}) do
+		if f.owner == A.UserId and f.state ~= "Out" then
+			fireId, fire = id, f
+		end
+	end
+	if fireId then
+		call(A, "fire", { name = "CampAction", a = "Light", b = fireId })
+		task.wait(2.5)
+		local fa, fb = call(A, "probe", { kind = "fires" }) or {}, call(B, "probe", { kind = "fires" }) or {}
+		local function litDrawn(list: { string }): boolean
+			local lit, drawn = false, false
+			for _, s in ipairs(list) do
+				if string.find(s, "fire " .. fireId .. " state=Lit", 1, true) then
+					lit = true
+				end
+				local on = tonumber(string.match(s, "emitters on (%d+)")) or 0
+				if string.find(s, "drawn ", 1, true) and on >= 2 and string.find(s, "=true@", 1, true) and string.find(s, "light true", 1, true) then
+					drawn = true
+				end
+			end
+			return lit and drawn
+		end
+		check("campfire.litSeenByBoth", fire.state == "Lit" and litDrawn(fa) and litDrawn(fb), string.format(
+			"A built fire %d and lit it (server state %s): A's client [%s] | B's client [%s]; sounds sent: A [%s] B [%s]", fireId, tostring(fire.state), table.concat(fa, " ; "),
+			table.concat(fb, " ; "), sfxSince(A, mA), sfxSince(B, mB)))
+		L("SOUNDS playing near the fire: A " .. table.concat(call(A, "probe", { kind = "sounds" }) or {}, ", ") .. " | B "
+			.. table.concat(call(B, "probe", { kind = "sounds" }) or {}, ", "))
+		shot("campfire_lit", 1.2)
+		-- B cooks a squirrel on A's fire and takes it
+		Inv.clear(B)
+		Inv.give(B, "squirrel", 1)
+		local fp = fire.position
+		placeAt(B, fp.X - 4, fp.Z + 3, fp)
+		task.wait(0.8)
+		local promptsB = call(B, "probe", { kind = "prompts" }) or {}
+		call(B, "fire", { name = "CampAction", a = "Cook", b = fireId })
+		task.wait(0.8)
+		local spit = fire.spit
+		task.wait(7.0)
+		call(B, "fire", { name = "CampAction", a = "Take", b = fireId })
+		task.wait(1.0)
+		check("campfire.usableByB", spit == "squirrel" and Inv.count(B, "cooked_squirrel") >= 1, string.format(
+			"B at A's fire: prompts on B's screen [%s]; B put its squirrel on the spit (spit=%s), 7 s later took it: B has cooked_squirrel x%d, squirrel x%d",
+			table.concat(promptsB, " ; "), tostring(spit), Inv.count(B, "cooked_squirrel"), Inv.count(B, "squirrel")))
+	else
+		check("campfire.litSeenByBoth", false, "A's Build made no fire at " .. v3(spot))
+	end
+
+	-- 3. a butterfly swarm: A runs past a resting roost; it follows A and stings A only; smoke at the fire shakes it off ----
+	-- (run after the tree below: no roost wakes in a round's first minute, HazardDefs.Butterflies.HeartQuietTime)
+	local function swarmTest()
+	local roost, rd = nil, math.huge
+	local folder = workspace:FindFirstChild("Hazards")
+	local _, raS = parts(A)
+	if folder and raS then
+		for _, part in ipairs(folder:GetChildren()) do
+			if part:IsA("BasePart") and part:GetAttribute("S") == 0 then
+				local d = flatDist(part.Position, raS.Position)
+				if d < rd and d > 25 then
+					roost, rd = part, d
+				end
+			end
+		end
+	end
+	if roost and fire then
+		local rp = roost.Position
+		local fromR = rp + Vector3.new(16, 0, 0)
+		local mA2, mB2 = mark(A), mark(B)
+		placeAt(B, rp.X - 60, rp.Z + 30, rp)
+		placeAt(A, fromR.X, fromR.Z, rp)
+		task.wait(1.5)
+		local hpA0, hpB0 = health(A), health(B)
+		local was = call(A, "setting", { name = "sprintMode", value = 2 })
+		call(A, "move", { seconds = 1.6, face = rp - Vector3.new(16, 0, 0) })
+		task.wait(1.8)
+		call(A, "setting", { name = "sprintMode", value = was or 0 })
+		local woke = waitFor(function()
+			return roost:GetAttribute("S") == 2
+		end, 6)
+		-- A waits; the swarm comes to A
+		local stung = waitFor(function()
+			return health(A) < hpA0 - 0.5
+		end, 14)
+		task.wait(1.0)
+		local hA = call(A, "probe", { kind = "hazard", near = A.Name }) or {}
+		local hB = call(B, "probe", { kind = "hazard", near = A.Name }) or {}
+		shot("swarm", 1.0)
+		local dmgA = clientFind(A, "REMOTE DamageTaken", mA2)
+		check("swarm.stingsOnlyTarget", woke ~= nil and stung ~= nil and math.abs(health(B) - hpB0) < 0.5, string.format(
+			"roost %s %.0f studs from A; A sprinted past it: swarm up=%s; A's health %.1f -> %.1f (%s), B's (60 studs off) %.1f -> %.1f; server %s",
+			roost.Name, rd, tostring(woke ~= nil), hpA0, health(A), tostring(dmgA), hpB0, health(B), fmt(Hazard and Hazard.debug().Butterflies)))
+		local function swarming(h: any): boolean
+			local n = tonumber(string.match(tostring(h.debug), "swarms=(%d+)")) or 0
+			return n >= 1
+		end
+		check("swarm.seenByBoth", swarming(hA) and swarming(hB) and (tonumber(hA.wings) or 0) > 0 and (tonumber(hB.wings) or 0) > 0
+			and (tonumber(hA.wingTurnIn015s) or 0) > 2 and (tonumber(hB.wingTurnIn015s) or 0) > 2, string.format(
+			"the swarm on A: A's client %s wings within 30 studs of A (%s), flap %.0f deg in 0.15 s; B's client %s wings (%s), flap %.0f deg; A's debug %s | B's debug %s",
+			tostring(hA.wings), tostring(hA.wingSizes), tonumber(hA.wingTurnIn015s) or -1, tostring(hB.wings), tostring(hB.wingSizes), tonumber(hB.wingTurnIn015s) or -1,
+			tostring(hA.debug), tostring(hB.debug)))
+		local hintTop = tonumber(string.match(tostring(hA.topLines), "HazardScreen/Line y=(%d+)"))
+		local eventBottom = tonumber(string.match(tostring(hA.topLines), "HUD/Event y=%d+%.%.(%d+)"))
+		check("swarm.hintUnderEventLine", if hintTop and eventBottom then hintTop >= eventBottom else nil, "A's screen, the lines at the top: " .. tostring(hA.topLines) .. " | B's: " .. tostring(hB.topLines))
+		-- smoke: A stands beside the lit fire
+		local shakenBefore = (Hazard and Hazard.debug().Butterflies or {}).shaken or 0
+		local fp = fire.position
+		placeAt(A, fp.X + 3, fp.Z + 2, fp)
+		local shook = waitFor(function()
+			local s = roost:GetAttribute("S")
+			return s == 3 or s == 4 or s == 0
+		end, 8)
+		task.wait(0.5)
+		check("swarm.smokeEscape", shook ~= nil and ((Hazard and Hazard.debug().Butterflies or {}).shaken or 0) > shakenBefore, string.format(
+			"A stood 3.6 studs from the lit fire: roost state now %s; shaken %s -> %s", tostring(roost:GetAttribute("S")), tostring(shakenBefore),
+			tostring((Hazard and Hazard.debug().Butterflies or {}).shaken)))
+		L("sounds sent during the swarm: A [" .. sfxSince(A, mA2) .. "] B [" .. sfxSince(B, mB2) .. "]")
+	else
+		check("swarm.stingsOnlyTarget", nil, "no resting roost 25+ studs from A, or no fire: roost=" .. tostring(roost) .. " fire=" .. tostring(fire))
+	end
+	end
+
+	-- 4. the tree: A climbs, B watches; A sits on a perch, B sees it seated and hits it; A cannot attack while seated -------
+	setHealth(A)
+	setHealth(B)
+	Inv.clear(A)
+	Inv.give(A, "sword", 1)
+	local mA3, mB3 = mark(A), mark(B)
+	local foot = base + Vector3.new(2.6, 0, 0)
+	placeAt(A, foot.X, foot.Z, base)
+	placeAt(B, base.X - 16, base.Z - 6, base)
+	task.wait(1.0)
+	call(B, "track", { target = A.Name, seconds = 12 })
+	call(A, "face", Vector3.new(axis.X, base.Y + 6, axis.Z))
+	local _, raT = parts(A)
+	local y0 = raT and raT.Position.Y or 0
+	local tc = call(A, "probe", { kind = "climb" })
+	call(A, "move", { seconds = 2.5, face = Vector3.new(axis.X, base.Y + 30, axis.Z) })
+	task.wait(1.4)
+	local seeClimb = seeOf(B, A)
+	shot("tree_climb", 0.6)
+	task.wait(1.4)
+	local _, raT2 = parts(A)
+	local climbSeen = clientFind(B, "SEE-ATTR " .. A.Name .. ".Stance=Climb", mB3)
+	check("tree.climbSeenByB", climbSeen ~= nil and raT2 ~= nil and raT2.Position.Y > y0 + 1, string.format(
+		"A at the foot of %s: %s; A rose %.1f studs; B's client: %s, A's pose there %s", tree.Name, tostring(tc), if raT2 then raT2.Position.Y - y0 else -1, tostring(climbSeen),
+		poseLine("climb", seeClimb)))
+	-- sit on the top perch
+	local perch = perches[#perches]
+	local hum, rootA = parts(A)
+	if hum and rootA and perch then
+		local stand = perch.WorldPosition + Vector3.new(0, hum.HipHeight + rootA.Size.Y / 2 + 0.2, 0)
+		rootA.AssemblyLinearVelocity = Vector3.zero
+		A.Character:PivotTo(CFrame.lookAt(stand, stand + perch.WorldCFrame.LookVector * Vector3.new(1, 0, 1)))
+		task.wait(1.2)
+		call(A, "fire", { name = "TreeSeat", a = "sit", b = perch })
+		task.wait(1.2)
+		local sitA = call(A, "probe", { kind = "seat" }) or {}
+		local seeSit = seeOf(B, A)
+		check("tree.sitSeenByB", hum.Sit == true and hum.SeatPart ~= nil and hum.SeatPart.Name == "TreeSeat" and seeSit.humState == "Seated", string.format(
+			"A on the top perch of %s (%.1f above the ground): server Sit=%s seat=%s; A's client %s; B's client has A in state %s at %s (server %s)", tree.Name,
+			perch.WorldPosition.Y - base.Y, tostring(hum.Sit), if hum.SeatPart then hum.SeatPart:GetFullName() else "nil", fmt(sitA), tostring(seeSit.humState), fmt(seeSit.pos),
+			v3(rootA.Position)))
+		shot("tree_sit", 0.8)
+		-- A tries to swing while seated
+		local swingsBefore = #linesWith(A, mA3, "ACT Swing")
+		local mS = seq
+		call(A, "seq", { { "select", slotOf(A, "sword") }, { "wait", 0.8 }, { "click" }, { "wait", 0.6 } }, 6)
+		task.wait(0.5)
+		local swings = #linesWith(A, mA3, "ACT Swing") - swingsBefore
+		local heldA = clientFind(B, "SEE-ATTR " .. A.Name .. ".EquippedItem", mB3)
+		check("tree.noAttackWhileSeated", swings == 0 and hum.Sit == true, string.format(
+			"A clicked with the sword while seated: A's client swings started %d; still seated=%s; B saw A's held item change: %s", swings, tostring(hum.Sit), tostring(heldA)))
+		-- B shoots the sitter
+		Inv.clear(B)
+		Inv.give(B, "bow", 1)
+		Inv.give(B, "arrow", 6)
+		local hpA = health(A)
+		local _, rbT = parts(B)
+		call(B, "track", {})
+		local dToA = if rbT then (rbT.Position - rootA.Position).Magnitude else -1
+		local shots = 0
+		for _ = 1, 3 do
+			shots += 1
+			call(B, "seq", { { "select", slotOf(B, "bow") }, { "wait", 0.9 }, { "face", A.Name .. ":UpperTorso" }, { "wait", 0.4 }, { "down" },
+				{ "track", A.Name .. ":UpperTorso", 1.3 }, { "wait", 1.2 }, { "up" }, { "wait", 0.8 } }, 10)
+			task.wait(1.0)
+			if health(A) < hpA - 0.5 then
+				break
+			end
+		end
+		L("arrows at the sitter: " .. shots)
+		check("tree.sitterCanBeHit", health(A) < hpA - 0.5, string.format("B shot the seated A from %.1f studs with the bow: A's health %.1f -> %.1f; B's client: %s",
+			dToA, hpA, health(A), tostring(clientFind(B, "REMOTE HitConfirm", mB3))))
+		-- off the tree
+		hum.Sit = false
+		local seat = hum.SeatPart
+		if seat then
+			local weld = seat:FindFirstChild("SeatWeld")
+			if weld then
+				weld:Destroy()
+			end
+		end
+		task.wait(0.5)
+	else
+		check("tree.sitSeenByB", false, "no perch or no character")
+	end
+
+	-- the swarm, once the round's first minute is over
+	local startedAt = tonumber(GS:GetAttribute("RoundStartedAt")) or 0
+	local left = 62 - (workspace:GetServerTimeNow() - startedAt)
+	L(string.format("SWARM test %.1f s after the horn (RoundStartedAt %s); waiting %.1f s", workspace:GetServerTimeNow() - startedAt, tostring(startedAt), math.max(left, 0)))
+	if left > 0 and left < 70 then
+		task.wait(left)
+	end
+	setHealth(A)
+	setHealth(B)
+	swarmTest()
+
+	-- 5. another challenge: a rockfall called on A; B far away is not hurt -------------------------------------------------
+	setHealth(A)
+	setHealth(B)
+	local _, raR = parts(A)
+	if Hazard and raR then
+		placeAt(A, raR.Position.X, raR.Position.Z + 6, raR.Position + Vector3.new(0, 0, 20))
+		placeAt(B, raR.Position.X + 220, raR.Position.Z, raR.Position)
+		task.wait(1.0)
+		local mA4, mB4 = mark(A), mark(B)
+		local hpB = health(B)
+		local _, raR2 = parts(A)
+		local ev, why = Hazard.call("Rockfall", { x = raR2.Position.X, z = raR2.Position.Z, warning = 4, force = true })
+		L("Rockfall called: " .. fmt(ev) .. " " .. tostring(why))
+		task.wait(18)
+		local annA = linesWith(A, mA4, "REMOTE Announce")
+		local annB = linesWith(B, mB4, "REMOTE Announce")
+		local dmgA = linesWith(A, mA4, "REMOTE DamageTaken")
+		check("challenge.rockfallBothSeeRightHurt", ev ~= nil and #annA > 0 and #annB > 0 and math.abs(health(B) - hpB) < 0.5, string.format(
+			"Rockfall on A: A's client announcements %s ; B's (220 studs off) %s ; A was hurt %d times %s ; B's health %.1f -> %.1f; GS ArenaEvent/HazardEvent %s",
+			string.sub(table.concat(annA, " | "), 1, 400), string.sub(table.concat(annB, " | "), 1, 400), #dmgA, string.sub(table.concat(dmgA, " | "), 1, 300), hpB, health(B),
+			tostring(GS:GetAttribute("HazardEvent"))))
+		L("sounds sent during the rockfall: A [" .. sfxSince(A, mA4) .. "] B [" .. sfxSince(B, mB4) .. "]")
+		pcall(Hazard.stop)
+	end
+
+	-- 6. the kill, the result, the board, the train again --------------------------------------------------------------
+	setHealth(A)
+	setHealth(B)
+	Inv.clear(A)
+	Inv.clear(B)
+	Inv.give(A, "sword", 1)
+	setupDuel()
+	local mA5, mB5 = killB("round1")
+	deathChecks("round1", mA5, mB5, 2)
+	resultChecks("round1", mA5, mB5, A, { B })
+	backToLobby("round1", { A, B })
+	local mA6, mB6 = mark(A), mark(B) -- (round two's Countdown starts while the board is read)
+	task.wait(2.0)
+	trainChecks("round1.respawnInTrain", { A, B })
+	boardChecks("round1.board", { A, B }, A)
+	shot("board_after_round1", 1.0)
+	-- round two: B skips its intro this time
+	SKIP_BY.round2 = B
+	if roundStartChecks("round2", mA6, mB6) then
+		snapshotAll("round2")
+	end
+	workspace:SetAttribute("DevHazardOff", nil)
+	workspace:SetAttribute("WildlifeTest", "scare")
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
@@ -2054,6 +2752,9 @@ local function run()
 		batchG()
 		return
 	end
+	if batch == "H" then
+		SKIP_BY.round1 = A
+	end
 	if not roundStartChecks("round1") then
 		return
 	end
@@ -2067,6 +2768,8 @@ local function run()
 		batchC()
 	elseif batch == "D" then
 		batchD()
+	elseif batch == "H" then
+		batchH()
 	end
 end
 

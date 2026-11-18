@@ -95,7 +95,7 @@ HazardDefs.Butterflies = {
 	Cause = "Butterflies",
 	Herald = "Something blue is waking in the flowers. Walk softly, or find water.",
 	Card = "THE BLUE SWARM",
-	Hint = "BUTTERFLIES · BREAK THEIR SIGHT, FIND WATER OR SMOKE, OR OUTRUN THEM",
+	Hint = "Butterflies · break their sight, find water or smoke, or outrun them",
 	Over = "The swarm has settled.",
 }
 
@@ -117,7 +117,7 @@ HazardDefs.Fog = {
 	Cause = "Cold",
 	Herald = "The valley is filling with cold. Climb above it, or find a fire.",
 	Card = "THE COLD FOG",
-	Hint = "COLD FOG · CLIMB ABOVE IT OR FIND A FIRE",
+	Hint = "Cold fog · climb above it or find a fire",
 	Over = "The fog is lifting.",
 }
 
@@ -143,7 +143,7 @@ HazardDefs.Storm = {
 	Cause = "Lightning",
 	Herald = "A storm is coming down off the mountain. Get low. Get under stone.",
 	Card = "THE MOUNTAIN STORM",
-	Hint = "STORM · LEAVE THE HIGH GROUND, GET UNDER COVER, STAY LOW",
+	Hint = "Storm · leave the high ground, get under cover, stay low",
 	Over = "The storm has passed.",
 }
 
@@ -170,7 +170,7 @@ HazardDefs.Rockfall = {
 	Cause = "Rockfall",
 	Herald = "The slope is letting go. Get out of the fall line.",
 	Card = "ROCKFALL",
-	Hint = "ROCKFALL · STEP OUT OF THE FALL LINE OR GET BEHIND ROCK",
+	Hint = "Rockfall · step out of the fall line or get behind rock",
 	Over = "The slope is still.",
 }
 

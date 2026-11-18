@@ -14,7 +14,10 @@
 	            a kill, the result, the Roll Call, round two | "B2" poses, eating, loot | "C" three clients: a kill,
 	            spectating, the dusk Roll Call, a contender leaves | "D" loot, a client joins mid-round, a contender
 	            leaves, the next round takes the late joiner | "E" a contender leaves during the Countdown | "G" the fill
-	            rule: a third client joins during a 45-second lobby countdown, which starts again (fill = true)
+	            rule: a third client joins during a 45-second lobby countdown, which starts again (fill = true) | "H" the
+	            evening build (18 Nov): the train lobby, the personal intro skip (A in round one, B in round two), squirrels
+	            (flee, climb, a hunt), sticks at a climbable trunk, a campfire A lights and B cooks on, a butterfly swarm
+	            and its smoke escape, a tree climb and a seat, a rockfall, the "You won" line, the results board
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
@@ -59,6 +62,9 @@ function MPTest.start(args: { [string]: any }?): string
 		a.cut = a.cut or "Short"
 		a.fill = true
 		a.intermission = a.intermission or 45
+	elseif a.batch == "H" then
+		a.cut = a.cut or "Full"
+		a.failsafe = a.failsafe or 600
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil

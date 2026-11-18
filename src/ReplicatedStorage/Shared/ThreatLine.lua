@@ -10,7 +10,7 @@
 	  action   optional, what to do: "Head for the Spire"
 	  where    optional: "at the Spire"
 	  seconds  optional, the time left (it counts down, like the HUD clock)
-	ThreatLine.line(t, short?) -> "THE BORDER MOVES  ·  HEAD FOR THE SPIRE  ·  0:30"   one upper-case line (the HUD).
+	ThreatLine.line(t, short?) -> "THE BORDER MOVES  ·  HEAD FOR THE SPIRE  ·  0:30"   one sentence-case line (the HUD).
 	                              short = true keeps only the name and the time (phones).
 	ThreatLine.headline(t) -> (title, sub)   for Announce: ("THE BORDER MOVES IN 30 SECONDS", "Head for the Spire");
 	                              without a verb the time goes in the sub: ("THE OFFERING", "The Spire restocks in 45 seconds")
@@ -73,14 +73,23 @@ function ThreatLine.spoken(seconds: number): string
 	return m .. (if m == 1 then " minute" else " minutes")
 end
 
+-- sentence case for the HUD's line (Quiet style, 18 Nov): "The border moves  ·  Head for the Spire  ·  0:42"
+local function capFirst(text: string): string
+	return (string.gsub(text, "^%l", string.upper))
+end
+
 function ThreatLine.line(t: { [string]: any }, short: boolean?): string
-	local parts = { title(t) }
+	local head = nameOf(t.name)
+	if type(t.verb) == "string" and t.verb ~= "" then
+		head ..= " " .. t.verb
+	end
+	local parts = { capFirst(head) }
 	if not short then
 		if type(t.action) == "string" and t.action ~= "" then
-			table.insert(parts, string.upper(t.action))
+			table.insert(parts, capFirst(t.action))
 		end
 		if type(t.where) == "string" and t.where ~= "" then
-			table.insert(parts, string.upper(t.where))
+			table.insert(parts, capFirst(t.where))
 		end
 	end
 	if type(t.seconds) == "number" then
@@ -167,6 +176,11 @@ end
 -- close in ShrinkDuration at MaxShrinkSpeed (ArenaService's rule, without the slide of the ring's centre).
 function ThreatLine.fullRingMovesAt(): number
 	local border = Config.Border
+	-- a staged border (Config.Border.Stages) first moves at its first stage
+	local stages = border.Stages
+	if type(stages) == "table" and type(stages[1]) == "table" and tonumber(stages[1].at) then
+		return tonumber(stages[1].at) :: number
+	end
 	local start = tonumber(border.ShrinkStartTime) or 0
 	local speed = tonumber(border.MaxShrinkSpeed)
 	if speed and speed > 0 then

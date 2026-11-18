@@ -14,15 +14,29 @@
 	  same every time.
 	  kind         lattice  gain  below y  assets and mix                                  scale       sink
 	  Crags        64       0.4   900      M1_Crag_A/B/C 45/35/20                          0.6-1.1     12
-	  Conifer      13       1.0   700      M1_Fir_A/B/C 25/25/18, M1_Pine_A/B 17/15        0.82-1.15   0.4
-	  Broadleaf    10       1.15  400      M1_Beech_A/B 55/45                              0.8-1.2     0.4
+	  Conifer      13       1.0   700      M1_Fir_A/B/C 25/25/18, M1_Pine_A/B 17/15        0.98-1.38   0.4
+	  Broadleaf    10       1.15  400      M1_Beech_A/B 55/45                              0.96-1.44   0.4
 	  Boulders     9        0.5   700      M1_Boulder_A/B/C 50/35/15                       0.7-1.4     0.1
 	  Gorse        7        0.7   450      M1_Gorse_A/B                                    0.8-1.4     0.3
 	  TallGrass    4.5      0.8   400      M1_TallGrass_A                                  0.8-1.2     0.15
 	  Heather      6        0.8   700      M1_Heather_A/B                                  0.8-1.6     0.3
 	  Wildflowers  3.6      1.0   200      M1_Wildflowers_A (none past r 1,300)            0.7-1.3     0
-	  Yaw is random. The manifests carry no ranges, so the scale ranges are the generator's; a manifest asset
-	  with "scale" or "scaleRange" = [lo, hi] overrides its rule's.
+	  Yaw is random. The manifests carry no ranges, so the scale ranges are the generator's (the trees' are the
+	  generator's x 1.2 since 18 Nov 2026: the owner asked for slightly bigger trees to climb and sit in); a manifest
+	  asset with "scale" or "scaleRange" = [lo, hi] overrides its rule's.
+
+	CLIMBABLE TREES (Shared.TreeClimb, 18 Nov 2026)
+	  Every pine and beech inside the play radius (TreeClimb.SPECS decides which assets, what share, how big) is
+	  planted from a climbable prototype: its trunk carries the tag "Climbable" (MovementController climbs it), and it
+	  has sturdy limbs (Limb1, Limb2: colliding matte Wood parts in the bark's colour) with a perch on each (Attachments
+	  Perch1, Perch2 under the trunk, tagged "TreePerch": TreeSeatController offers SIT there). A purpose-built mesh
+	  replaces the stand-in limbs by one entry in TreeClimb.SPECS (see its header). stats.climbable and stats.perches
+	  count them.
+
+	ROOM BETWEEN TRUNKS (18 Nov 2026: a contender was wedged between two firs 2.75 studs apart)
+	  Two trunks, or a trunk and a boulder or crag, are either kept TREE_GAP studs of clear ground apart or not
+	  planted. Across a cell edge the tree of the cell with the higher key (cellKey: x major, then z) yields to the
+	  trees of its lower neighbours, so a window still gives exactly what a full build puts there.
 
 	WHERE NOTHING IS PLANTED
 	  - the heart's protected disc: nothing inside r 200, thinning in to full density at r 255
@@ -122,6 +136,7 @@
 	list the names (stats.missing), and a rule with no template at all places nothing.
 ]]
 local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
@@ -132,8 +147,10 @@ local readu8, readu16, writeu8 = buffer.readu8, buffer.readu16, buffer.writeu8
 local PI, TAU, HUGE = math.pi, math.pi * 2, math.huge
 local V3 = Vector3.new
 
+local TreeClimb = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("TreeClimb"))
+
 local Scatter = {}
-Scatter.VERSION = 1
+Scatter.VERSION = 2 -- 2: bigger trees, TREE_GAP, climbable pines and beeches
 Scatter.MAP = "GreenLand"
 Scatter.FOLDER = "Scatter"
 Scatter.PACK = "map1_data"
@@ -146,6 +163,8 @@ Scatter.FLORA_PER_SUB = 60
 Scatter.PATH_HALF = 3 -- the trails are a 6-stud path
 Scatter.MAX_SLOPE = 46 -- degrees
 Scatter.SHADOW_MIN = 3 -- a boulder lower than this (after scale and sink) casts no shadow
+Scatter.TREE_GAP = 3.4 -- studs of clear ground kept between a trunk and another trunk, boulder or crag (a body is 2 wide)
+Scatter.TREE_EDGE = 8 -- a tree this close to a lower neighbour cell's edge is checked against that cell's trees
 Scatter.SNAP_TOLERANCE = 4 -- studs between the data's height and a terrain raycast that still snaps
 Scatter.SITE_CLEAR = { solid = 8, small = 4 } -- the clearing at each Layout site
 Scatter.ITEM_PAD = { solid = 3, small = 1.5 } -- the margin round a placed landmark's bounds
@@ -193,13 +212,13 @@ Scatter.RULES = {
 	{
 		kind = "Conifer", mask = "Conifer", class = "tree", grid = 13, gain = 1.0, ymax = 700,
 		assets = { { "M1_Fir_A", 0.25 }, { "M1_Fir_B", 0.25 }, { "M1_Fir_C", 0.18 }, { "M1_Pine_A", 0.17 }, { "M1_Pine_B", 0.15 } },
-		scale = { 0.82, 1.15 }, sink = 0.4, tilt = 0, normal = 0, radius = 1.1, shore = 10, cap = 26000, outer = true,
+		scale = { 0.98, 1.38 }, sink = 0.4, tilt = 0, normal = 0, radius = 1.1, shore = 10, cap = 26000, outer = true,
 		detail = "tree",
 	},
 	{
 		kind = "Broadleaf", mask = "Broadleaf", class = "tree", grid = 10, gain = 1.15, ymax = 400,
 		assets = { { "M1_Beech_A", 0.55 }, { "M1_Beech_B", 0.45 } },
-		scale = { 0.8, 1.2 }, sink = 0.4, tilt = 0, normal = 0, radius = 1.4, shore = 10, cap = 1500,
+		scale = { 0.96, 1.44 }, sink = 0.4, tilt = 0, normal = 0, radius = 1.4, shore = 10, cap = 1500,
 		detail = "tree",
 	},
 	{
@@ -748,8 +767,10 @@ end
 
 -- The model every plant of (asset, visual, shadow) is cloned from: the template with its flags already set, so
 -- a placement is a Clone, a ScaleTo and a PivotTo. Kept out of the DataModel; destroyed when the build ends.
-local function prototype(S: any, rule: any, name: string, visual: boolean, shadow: boolean): Model?
-	local key = name .. (if visual then "|v" else "|c") .. (if shadow then "1" else "0")
+-- climb: the climbable version (TreeClimb): the purpose-built mesh when its spec names one and it exists, adopted;
+-- else the plain template dressed with stand-in limbs and perches.
+local function prototype(S: any, rule: any, name: string, visual: boolean, shadow: boolean, climb: boolean?): Model?
+	local key = name .. (if visual then "|v" else "|c") .. (if shadow then "1" else "0") .. (if climb then "k" else "")
 	local known = S.protos[key]
 	if known ~= nil then
 		return known or nil
@@ -759,15 +780,27 @@ local function prototype(S: any, rule: any, name: string, visual: boolean, shado
 		S.protos[key] = false
 		return nil
 	end
+	local spec = if climb then TreeClimb.specOf(name) else nil
+	local built: Model? = nil
+	if spec and spec.mesh then
+		built = templateOf(S, rule, spec.mesh)
+		if not built then
+			table.insert(S.ctx.warnings, "climbable mesh " .. tostring(spec.mesh) .. " is missing: " .. name .. " is dressed instead")
+		end
+	end
 	local cls = CLASS[rule.class]
 	local asset = S.ctx.assets[name]
 	local partInfo = {}
 	for _, p in ipairs((asset and asset.parts) or {}) do
 		partInfo[p.name] = p
 	end
-	local m = template:Clone()
+	local m = (built or template):Clone()
 	m.Name = name
 	m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	local perches = 0
+	if spec then
+		perches = if built then TreeClimb.adopt(m, name) else TreeClimb.dress(m, name)
+	end
 	if not S.opts.keepAttributes then
 		for attr in pairs(m:GetAttributes()) do
 			m:SetAttribute(attr, nil)
@@ -807,7 +840,7 @@ local function prototype(S: any, rule: any, name: string, visual: boolean, shado
 		table.insert(S.ctx.warnings, "template " .. name .. " has no parts")
 		return nil
 	end
-	S.protoInfo[m] = { instances = 1 + #m:GetDescendants(), parts = parts, colliders = colliders, casters = casters }
+	S.protoInfo[m] = { instances = 1 + #m:GetDescendants(), parts = parts, colliders = colliders, casters = casters, perches = perches }
 	S.protos[key] = m
 	return m
 end
@@ -878,6 +911,7 @@ local function newSession(opts: any): any
 		missing = {},
 		standIns = {},
 		crags = {},
+		treeCells = {},
 		turf = {},
 		cellTrails = {},
 		cellModels = {},
@@ -1121,6 +1155,39 @@ end
 	{ rule, asset, cf, scale, visual, shadow, x, y, z, r, inWindow }; a plant outside opts.window is still decided and
 	listed (it takes its place among the solids and the counts, as in a full build) and is dropped by the caller.
 	st receives the counts. ]]
+local treesOf -- (S, cx, cz) -> the cell's trees and crags, planned once (below)
+
+-- Does a tree at (x, z) with this body stand too near a tree of a lower neighbour cell? (see ROOM BETWEEN TRUNKS)
+local function yieldsToNeighbours(S: any, cx: number, cz: number, x: number, z: number, body: number): boolean
+	local c, edge = S.cell, Scatter.TREE_EDGE
+	local x0, z0 = cx * c, cz * c
+	local nearW, nearS = x - x0 < edge, z - z0 < edge
+	if not (nearW or nearS) then
+		return false
+	end
+	local gap = Scatter.TREE_GAP
+	local function against(ncx: number, ncz: number): boolean
+		for _, o in ipairs(treesOf(S, ncx, ncz).trees) do
+			local dx, dz = x - o.x, z - o.z
+			local need = o.r + body + gap
+			if dx * dx + dz * dz < need * need then
+				return true
+			end
+		end
+		return false
+	end
+	if nearW and (against(cx - 1, cz) or (nearS and against(cx - 1, cz - 1))) then
+		return true
+	end
+	if nearW and z0 + c - z < edge and against(cx - 1, cz + 1) then
+		return true
+	end
+	if nearS and against(cx, cz - 1) then
+		return true
+	end
+	return false
+end
+
 local function evalRule(S: any, rule: any, cx: number, cz: number, env: any, out: { any }, st: any)
 	local ctx = S.ctx
 	local mask = ctx.masks[rule.mask]
@@ -1264,14 +1331,21 @@ local function evalRule(S: any, rule: any, cx: number, cz: number, env: any, out
 						elseif footHit(feet, x, z, cls.small) then
 							why = "site"
 						else
-							-- trunks, boulders and crags never stand in one another; a small plant never has its centre in one
+							-- trunks, boulders and crags never stand in one another; a small plant never has its centre in one;
+							-- a trunk keeps TREE_GAP of clear ground from any other solid (no one is wedged between two)
+							local isTree = rule.class == "tree"
 							for _, o in ipairs(solids) do
 								local dx, dz = x - o.x, z - o.z
-								local need = if cls.small then o.r * 0.9 elseif rule.class == "tree" then o.r + body + 0.4 else o.r + body
+								local need = if cls.small then o.r * 0.9
+									elseif isTree or o.tree then o.r + body + Scatter.TREE_GAP
+									else o.r + body
 								if dx * dx + dz * dz < need * need then
 									why = "overlap"
 									break
 								end
+							end
+							if not why and isTree and yieldsToNeighbours(S, cx, cz, x, z, body) then
+								why = "overlap"
 							end
 						end
 					end
@@ -1298,8 +1372,11 @@ local function evalRule(S: any, rule: any, cx: number, cz: number, env: any, out
 							env.flora[si] += 1
 						end
 						if not cls.small then
-							table.insert(solids, { x = x, z = z, r = body })
+							table.insert(solids, { x = x, z = z, r = body, tree = rule.class == "tree" or nil })
 						end
+						-- climbable: a tree TreeClimb lists, inside the play radius (its own draw from the yaw's digits)
+						local climb = rule.class == "tree" and not visual and r <= playR
+							and TreeClimb.chosen(asset :: string, scale, (uYaw * 977) % 1)
 						local inWindow = not window or (x >= window.x0 and x < window.x1 and z >= window.z0 and z < window.z1)
 						local shadow = cls.shadow
 						if rule.class == "rock" then
@@ -1307,7 +1384,7 @@ local function evalRule(S: any, rule: any, cx: number, cz: number, env: any, out
 						end
 						table.insert(out, {
 							rule = rule, asset = asset, scale = scale, visual = visual, shadow = shadow, x = x, y = y, z = z, r = r,
-							inWindow = inWindow,
+							inWindow = inWindow, climb = climb or nil,
 							cf = if inWindow then frameFor(S, rule, x, y, z, gx, gz, scale, uYaw * TAU, u1, u2, body) else nil,
 						})
 					end
@@ -1376,16 +1453,62 @@ local function buildTurf(S: any)
 	end
 end
 
+-- A cell's crags and trees (remembered): planted before everything else, and all a higher neighbour's trees need to
+-- know of it (ROOM BETWEEN TRUNKS). Asks only lower neighbours (fewer keys), so it never comes back to itself.
+-- { env = { solids, trees, flora } after the trees, out = its crags and trees in planting order,
+--   stats = { [rule] = kind stats }, trees = { { x, z, r } }, merged = false }
+treesOf = function(S: any, cx: number, cz: number): any
+	local key = cellKey(cx, cz)
+	local known = S.treeCells[key]
+	if known then
+		return known
+	end
+	local c = S.cell
+	local env: any = { solids = {}, trees = {}, flora = {} }
+	for i = 1, (c / Scatter.SUB) ^ 2 do
+		env.trees[i], env.flora[i] = 0, 0
+	end
+	local entry = { env = env, out = {}, stats = {}, trees = {}, merged = false }
+	S.treeCells[key] = entry
+	for _, rule in ipairs(S.rules) do
+		if rule.kind == "Crags" then
+			for dz = -1, 1 do
+				for dx = -1, 1 do
+					for _, p in ipairs(cragsOf(S, cx + dx, cz + dz).list) do
+						table.insert(env.solids, { x = p.x, z = p.z, r = rule.bodies[p.asset] * p.scale })
+						if dx == 0 and dz == 0 then
+							table.insert(entry.out, p)
+						end
+					end
+				end
+			end
+		elseif rule.class == "tree" then
+			local st = newKindStats()
+			entry.stats[rule] = st
+			local first = #entry.out + 1
+			evalRule(S, rule, cx, cz, env, entry.out, st)
+			for k = first, #entry.out do
+				local p = entry.out[k]
+				table.insert(entry.trees, { x = p.x, z = p.z, r = rule.bodies[p.asset] * p.scale })
+			end
+		end
+	end
+	return entry
+end
+
 -- every plant of one cell, in planting order
 local function planCell(S: any, cx: number, cz: number): { any }
 	local c = S.cell
 	local key = cellKey(cx, cz)
-	local env: any = { solids = {}, trees = {}, flora = {} }
-	local n = (c / Scatter.SUB) ^ 2
-	for i = 1, n do
-		env.trees[i], env.flora[i] = 0, 0
-	end
-	local out = {}
+	local entry = treesOf(S, cx, cz)
+	local env: any = {
+		solids = table.clone(entry.env.solids),
+		trees = table.clone(entry.env.trees),
+		flora = table.clone(entry.env.flora),
+	}
+	local out = table.clone(entry.out)
+	local merge = not entry.merged
+	entry.merged = true
 	for _, rule in ipairs(S.rules) do
 		if rule.kind == "Crags" then
 			local own = cragsOf(S, cx, cz)
@@ -1393,15 +1516,9 @@ local function planCell(S: any, cx: number, cz: number): { any }
 				own.counted = true
 				mergeStats(rule.stats, own.stats)
 			end
-			for dz = -1, 1 do
-				for dx = -1, 1 do
-					for _, p in ipairs(cragsOf(S, cx + dx, cz + dz).list) do
-						table.insert(env.solids, { x = p.x, z = p.z, r = rule.bodies[p.asset] * p.scale })
-						if dx == 0 and dz == 0 then
-							table.insert(out, p)
-						end
-					end
-				end
+		elseif rule.class == "tree" then
+			if merge and entry.stats[rule] then
+				mergeStats(rule.stats, entry.stats[rule])
 			end
 		else
 			evalRule(S, rule, cx, cz, env, out, rule.stats)
@@ -1442,7 +1559,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Makes one planned plant under `folder`. Returns the prototype's counts, or nil when there is no template.
 local function spawn(S: any, p: any, folder: Instance): any
-	local proto = prototype(S, p.rule, p.asset, p.visual, p.shadow)
+	local proto = prototype(S, p.rule, p.asset, p.visual, p.shadow, p.climb)
 	if not proto then
 		S.missing[p.asset] = (S.missing[p.asset] or 0) + 1
 		return nil
@@ -1635,10 +1752,20 @@ local function run(opts: any): any
 				casters += 1
 			end
 		end
-		return { instances = 1 + n, parts = n, colliders = colliders, casters = casters }
+		local info = { instances = 1 + n, parts = n, colliders = colliders, casters = casters, perches = 0 }
+		if p.climb then
+			local extra, solid = TreeClimb.extraInstances(p.asset)
+			local spec = TreeClimb.specOf(p.asset)
+			info.instances += extra
+			info.parts += solid
+			info.colliders += solid
+			info.perches = if spec then #spec.limbs else 0
+		end
+		return info
 	end
 
 	local models, instances, parts, colliders, casters = 0, 0, 0, 0, 0
+	local climbable, perches = 0, 0
 	local byAsset, byDetail = {}, {}
 	local collected: { any }? = if opts.collect then {} else nil -- tests: every plant as { asset, x, z, scale }
 	local built = 0
@@ -1680,6 +1807,10 @@ local function run(opts: any): any
 				end
 				cellModels += 1
 				cellInstances += info.instances
+				if p.climb then
+					climbable += 1
+					perches += info.perches or 0
+				end
 				parts += info.parts
 				colliders += info.colliders
 				casters += info.casters
@@ -1759,6 +1890,8 @@ local function run(opts: any): any
 		parts = parts,
 		colliders = colliders,
 		shadowCasters = casters,
+		climbable = climbable,
+		perches = perches,
 		byAsset = byAsset,
 		byDetail = byDetail,
 		byKind = {},
@@ -1831,7 +1964,7 @@ local function summary(stats: any): string
 	return HttpService:JSONEncode({
 		ok = stats.ok, dry = stats.dry, seed = stats.seed, seconds = math.round(stats.seconds * 10) / 10, models = stats.models,
 		instances = stats.instances, cells = stats.cells.built, byAsset = stats.byAsset, byKind = kinds, budget = budget,
-		missing = stats.missing,
+		missing = stats.missing, climbable = stats.climbable, perches = stats.perches,
 	})
 end
 
@@ -2074,7 +2207,12 @@ function Scatter.check(opts: any?): any
 				local visual = r > ctx.boundR + 10
 				local collides = 0
 				for _, d in ipairs(m:GetDescendants()) do
-					if d:IsA("BasePart") then
+					if d:IsA("BasePart") and rule.class == "tree" and TreeClimb.isLimbName(d.Name) then
+						-- a climbable tree's limb (TreeClimb): it collides by design, as its trunk does
+						if not d.Anchored or d.CanTouch or d.CanCollide ~= d.CanQuery then
+							problem("limb", where .. ": " .. d.Name .. " is not an anchored, touchless, queried limb")
+						end
+					elseif d:IsA("BasePart") then
 						if not d.Anchored then
 							problem("anchored", where .. ": " .. d.Name .. " is not anchored")
 						end

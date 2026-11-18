@@ -464,7 +464,7 @@ function QuietUI.barState(bar: Instance, state: string)
 	local value = bar:FindFirstChild("Value")
 	if value and value:IsA("TextLabel") then
 		value.TextColor3 = s.color
-		value.TextTransparency = s.text
+		QuietUI.textTransparency(value, s.text) -- its Shadow stroke fades with the digits
 	end
 	local icon = bar:FindFirstChild("Icon")
 	if icon then

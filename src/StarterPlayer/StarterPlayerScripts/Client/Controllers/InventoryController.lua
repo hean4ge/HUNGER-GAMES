@@ -999,7 +999,8 @@ local function computeActionHint(): any
 		return { text = text, keys = keysIn(text), action = "Drop", stage = "full" }
 	end
 	local climbing = ClientState.moveState == "Climb"
-	if climbing or now - climbSeenAt <= HINT_LINGER then
+	local sitting = ClientState.moveState == "Sit" -- sat in a tree: no climb line (TreeSeatController)
+	if not sitting and (climbing or now - climbSeenAt <= HINT_LINGER) then
 		local stage = hintStage("Climb")
 		if stage then
 			local h = ActionHints.build("Climb", nil, device, { climbing = climbing, keyOnly = stage == "key" })
@@ -1075,7 +1076,7 @@ local function hintLoop()
 				end
 			end
 		end
-		if bound and ClientState.moveState ~= "Climb" and climbableInReach() then
+		if bound and ClientState.moveState ~= "Climb" and ClientState.moveState ~= "Sit" and climbableInReach() then
 			climbSeenAt = now
 		end
 		refreshActionHint()
@@ -1095,6 +1096,14 @@ local function applyPrompt(prompt: Instance)
 	local range = prompt:GetAttribute("Range")
 	if type(range) == "number" then
 		prompt.MaxActivationDistance = if ClientState.alive then range else 0
+	end
+	-- the Quiet look: HUDController draws Custom prompts as a key square and a few words under the crosshair
+	-- ("[E] Open crate", "[E] Take Bandage ×2"); the engine still reads the key and fires the prompt as before
+	if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
+		prompt.Style = Enum.ProximityPromptStyle.Custom
+	end
+	if prompt.Name == "OpenPrompt" and prompt:GetAttribute("PromptLine") == nil then
+		prompt:SetAttribute("PromptLine", "Open crate")
 	end
 	-- armor on the ground says when it's worse than what you wear (survival QA P3)
 	local model = prompt:FindFirstAncestorOfClass("Model")

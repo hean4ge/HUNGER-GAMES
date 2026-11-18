@@ -9,7 +9,10 @@
 	  * Crate outlines (QW11): with Guidance on (ClientState.guidanceOn: new players on Auto, Q1), during the first
 	    Config.Loot.CrateOutlineTime seconds after the horn, an outline-only Highlight on the nearest CrateOutlineMax
 	    unopened crates (tag SupplyCrate) within CrateOutlineRange studs, in your line of sight (Occluded). It fades
-	    out over the last few seconds. Roblox draws at most 31 Highlights at once; this uses at most 8.
+	    out over the last few seconds. Roblox draws at most 31 Highlights at once; this uses at most 8. The outline is
+	    the Quiet ink (Theme.Colors.Ink).
+	  * The Take all prompt is in the Custom style with the words "Take all": HUDController draws it under the
+	    crosshair as a key square and words, like every loot prompt.
 	API: LootCueController.getOutlined() -> { Model }   (the crates outlined right now)
 ]]
 local CollectionService = game:GetService("CollectionService")
@@ -18,6 +21,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Theme = require(Shared:WaitForChild("Theme"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
@@ -29,7 +33,7 @@ local TAKE_ALL_TAG = "TakeAllPrompt"
 local ITEM_PROMPT_TAG = "LootPrompt"
 local CRATE_TAG = "SupplyCrate"
 local GROUND_TAG = "GroundItem"
-local OUTLINE_COLOR = Color3.fromRGB(238, 228, 204)
+local OUTLINE_COLOR = Theme.Colors.Ink -- the Quiet ink (#F4F1EA)
 local OUTLINE_TRANSPARENCY = 0.35
 local OUTLINE_FADE = 5 -- seconds the outlines take to fade at the end of the window
 local TICK = 0.2
@@ -87,6 +91,13 @@ local function applyTakeAll(prompt: Instance)
 	local range = tonumber(prompt:GetAttribute("Range"))
 	if range then
 		prompt.MaxActivationDistance = if ClientState.alive then range else 0
+	end
+	-- drawn by HUDController ("[E] Take all"); the engine still reads E / ButtonX
+	if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
+		prompt.Style = Enum.ProximityPromptStyle.Custom
+	end
+	if prompt:GetAttribute("PromptLine") == nil then
+		prompt:SetAttribute("PromptLine", "Take all")
 	end
 	myTakeAlls[prompt] = true
 	refreshItemPrompts()

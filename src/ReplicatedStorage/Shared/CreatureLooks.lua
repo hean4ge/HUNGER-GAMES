@@ -7,8 +7,13 @@
 
 	  Mesh contract (all optional beyond the Root):
 	    squirrel   Model, PrimaryPart "Root" (its origin at the feet, -Z = nose, +Y = up, real size about 1.3 studs).
-	               Pose parts named "Pose_Stand", "Pose_Sit", "Pose_Run", "Pose_Climb" welded to Root: one is shown at
-	               a time. A part named "Tail" joined to its parent by a Weld named "TailJoint" is flicked.
+	               Poses: Models (or single parts) named "Pose_Sit", "Pose_Run", "Pose_Climb", "Pose_Still" (and
+	               optionally "Pose_Stand"), every part welded to Root; one pose is shown at a time (a missing one falls
+	               back to Stand, then Run, then Sit). Each pose sits in the SAME frame: nose -Z, back +Y, feet at the
+	               origin; the code itself turns the model nose-up onto a trunk, so the Blender "SquirrelClimb" (built
+	               standing up) is turned 90 degrees nose-forward (-Z) and belly-down before it goes in as Pose_Climb.
+	               "Pose_Still" is the defeated one lying on its side. A part named "Tail" joined to its parent by a
+	               Weld named "TailJoint" is flicked (optional).
 	    campfire   Model, PrimaryPart "Root" at the ground centre. Parts named "Ember*" glow only while lit. The flame,
 	               smoke, light and spit are added by this module either way.
 	    item_*     an ItemModels template (PrimaryPart "Handle" with a "Grip" attachment; see Shared.ItemModels).
@@ -37,8 +42,9 @@ local CreatureLooks = {}
 -- THE ONE TABLE. false = the part-built stand-in. { folder = "Creatures", name = "Squirrel" } = that Model under
 -- ReplicatedStorage.Assets.
 CreatureLooks.Mesh = {
-	squirrel = false,
-	campfire = false,
+	-- the Blender models (LS_Creatures_v1, 119629886091854), built by WorldGen.BlenderTemplates.buildCreatures()
+	squirrel = { folder = "Creatures", name = "Squirrel" },
+	campfire = { folder = "Creatures", name = "CookFire" },
 	item_squirrel = false,
 	item_cooked_squirrel = false,
 	item_firewood = false,
@@ -89,7 +95,7 @@ local function newPart(parent: Instance, name: string, size: Vector3, cframe: CF
 	p.Size = size
 	p.CFrame = cframe
 	p.Color = color
-	p.Material = material or M.Fabric
+	p.Material = material or M.Plastic -- matte, plain: Roblox's own look (Fabric's weave read olive in shade)
 	p.Anchored = false
 	p.CanCollide = false
 	p.CanQuery = false
@@ -135,7 +141,7 @@ export type Rig = {
 	body: Joint?,
 	head: Joint?,
 	tail: Joint?,
-	poses: { [string]: BasePart }?,
+	poses: { [string]: { BasePart } }?,
 	pose: string?,
 }
 
@@ -198,14 +204,24 @@ function CreatureLooks.newSquirrel(): Rig
 	if source then
 		local model = source:Clone()
 		local root = model.PrimaryPart :: BasePart
-		local poses: { [string]: BasePart } = {}
+		local poses: { [string]: { BasePart } } = {}
 		for _, d in ipairs(model:GetDescendants()) do
 			if d:IsA("BasePart") then
 				d.Anchored = d == root
 				d.CanCollide, d.CanQuery, d.CanTouch = false, false, false
-				local poseName = string.match(d.Name, "^Pose_(%a+)$")
-				if poseName then
-					poses[poseName] = d
+			end
+			-- a pose is one part named Pose_<Name>, or a Model / Folder named so holding its parts
+			local poseName = string.match(d.Name, "^Pose_(%a+)$")
+			if poseName then
+				local list = poses[poseName] or {}
+				poses[poseName] = list
+				if d:IsA("BasePart") then
+					table.insert(list, d)
+				end
+				for _, p in ipairs(d:GetDescendants()) do
+					if p:IsA("BasePart") then
+						table.insert(list, p)
+					end
 				end
 			end
 		end
@@ -255,7 +271,7 @@ local POSES: { [string]: { number } } = {
 }
 local MESH_POSE: { [string]: string } = {
 	Stand = "Stand", Nibble = "Stand", Sit = "Sit", Alert = "Sit", Hop = "Run", Run = "Run", Climb = "Climb",
-	Perch = "Climb", Limp = "Stand",
+	Perch = "Climb", Limp = "Still",
 }
 
 function CreatureLooks.poseSquirrel(rig: Rig, pose: string, t: number, lift: number?)
@@ -284,10 +300,16 @@ function CreatureLooks.poseSquirrel(rig: Rig, pose: string, t: number, lift: num
 	local poses = rig.poses
 	if poses then
 		local want = MESH_POSE[pose] or "Stand"
+		-- a pose the mesh lacks falls back along this chain (the Blender set has Sit, Run, Climb, Still)
+		if not poses[want] then
+			want = if poses.Stand then "Stand" elseif poses.Run then "Run" elseif poses.Sit then "Sit" else want
+		end
 		if rig.pose ~= want then
 			rig.pose = want
-			for name, part in pairs(poses) do
-				part.Transparency = if name == want or (poses[want] == nil and name == "Stand") then 0 else 1
+			for name, list in pairs(poses) do
+				for _, part in ipairs(list) do
+					part.Transparency = if name == want then 0 else 1
+				end
 			end
 		end
 	end
@@ -472,15 +494,16 @@ function CreatureLooks.newCampfire(): Fire
 	})
 	smoke.LightEmission = 0.12
 	smoke.LightInfluence = 0.75
+	-- a column that reads from 300 studs by day (a real cost of a fire): wide, fairly dense low down, thinning up
 	smoke.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.9),
-		NumberSequenceKeypoint.new(0.3, 3.2),
-		NumberSequenceKeypoint.new(1, 9.5),
+		NumberSequenceKeypoint.new(0, 1.2),
+		NumberSequenceKeypoint.new(0.3, 5),
+		NumberSequenceKeypoint.new(1, 14),
 	})
 	smoke.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.82),
-		NumberSequenceKeypoint.new(0.12, 0.6),
-		NumberSequenceKeypoint.new(0.7, 0.74),
+		NumberSequenceKeypoint.new(0, 0.7),
+		NumberSequenceKeypoint.new(0.1, 0.38),
+		NumberSequenceKeypoint.new(0.65, 0.55),
 		NumberSequenceKeypoint.new(1, 1),
 	})
 	smoke.Lifetime = NumberRange.new(9, 12)

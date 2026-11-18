@@ -128,7 +128,7 @@ local NARROW_DROP = 0.10
 ViewmodelController.Fit = { Edge = FIT_EDGE, LeadEdge = FIT_LEAD_EDGE, NarrowDrop = NARROW_DROP }
 local FIT_LEAD_RATE = 14 -- 1/s: how fast an arm passes from its own offset to the leading hand's and back
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
-local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
+local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true, Sit = true } -- Sit: in a tree (TreeSeatController)
 local USE_STYLE: { [string]: string } = {
 	water_bottle = "Drink", empty_bottle = "Drink", bandage = "Wrap", medkit = "Bandage", herbs = "Eat",
 }

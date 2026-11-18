@@ -420,7 +420,7 @@ local function buildUi()
 	local fade = frame("Fade", root, { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 5 })
 	-- keyboard / gamepad: "HOLD SPACE TO SKIP" over the bottom bar, with a thin fill line
 	local prompt = frame("Prompt", root, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -28, 1, -16),
-		Size = UDim2.fromOffset(260, 26), BackgroundTransparency = 1, ZIndex = 4, Visible = false })
+		Size = UDim2.fromOffset(340, 26), BackgroundTransparency = 1, ZIndex = 4, Visible = false })
 	local text = Instance.new("TextLabel")
 	text.Name = "Text"
 	text.BackgroundTransparency = 1
@@ -430,7 +430,7 @@ local function buildUi()
 	text.TextColor3 = Theme.Colors.Text
 	text.TextTransparency = 0.3
 	text.TextXAlignment = Enum.TextXAlignment.Right
-	text.Text = "HOLD SPACE TO SKIP"
+	text.Text = "Hold Space to skip your intro"
 	text.ZIndex = 4
 	text.Parent = prompt
 	local line = frame("Line", prompt, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.fromScale(1, 1),
@@ -443,7 +443,7 @@ local function buildUi()
 	-- (this screen is drawn edge to edge, ScreenInsets None: the button stays in from a phone's rounded corner,
 	-- camera cut-out and bottom gesture strip; it was 18 and 14 px from the physical edge)
 	skip.Position = UDim2.new(1, -64, 1, -34)
-	skip.Size = UDim2.fromOffset(136, 40)
+	skip.Size = UDim2.fromOffset(210, 44)
 	skip.AutoButtonColor = false
 	skip.BackgroundColor3 = Theme.Colors.Panel
 	skip.BackgroundTransparency = 0.45
@@ -451,7 +451,7 @@ local function buildUi()
 	skip.FontFace = Theme.Fonts.Heading
 	skip.TextSize = 15
 	skip.TextColor3 = Theme.Colors.Text
-	skip.Text = "HOLD TO SKIP"
+	skip.Text = "Hold to skip your intro"
 	skip.Selectable = false
 	skip.Visible = false
 	skip.ZIndex = 4
@@ -624,7 +624,8 @@ local function skipText(): string
 		end
 		return Glyphs.forKey(Enum.KeyCode.Space)
 	end)
-	return "HOLD " .. (if ok and type(key) == "string" then key else "SPACE") .. " TO SKIP"
+	-- personal (owner, 18 Nov): the skip only cuts this player's own camera; everyone else's intro plays on
+	return "Hold " .. (if ok and type(key) == "string" then key else "Space") .. " to skip your intro"
 end
 
 -- Everything that shows the game's own UI goes dark for the shot (and comes back exactly as it was).

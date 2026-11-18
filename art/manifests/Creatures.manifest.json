@@ -1,0 +1,3807 @@
+{
+ "category": "Creatures",
+ "glb": "Creatures.glb",
+ "glbVertexColour": "Creatures_VC.glb",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); an asset's front is Roblox -Z (LookVector)",
+ "generator": "creatures.py",
+ "seed": 61,
+ "warnings": [],
+ "files": {
+  "Creatures.glb": "one MeshPart per colour: use each part's rgb and robloxMaterial (list 'parts'). No vertex colours, no textures, no UVs.",
+  "Creatures_VC.glb": "one MeshPart per moving piece (list 'partsVC'), colours in COLOR_0. vertexColors 'full' = the mesh carries its colours, set MeshPart.Color to rgb (white); 'shade' = the mesh carries a light/dark multiplier only, set MeshPart.Color to rgb (the part's colour, tintable). If the colours do not arrive in Studio, use the flat file, or set fallbackRgb."
+ },
+ "vertexColourSpace": "linear floats in the file, as the glTF spec says; the intended sRGB values are in 'palette'. If Studio shows them too dark, re-run with CREATURES_VC_SRGB=1.",
+ "import": [
+  "Assets sit in a row along X; 'origin' is each asset's pivot in the file. Part 'center' and 'size' are relative to that pivot (Roblox space), because the importer puts a MeshPart's position at its bounding box centre.",
+  "Everything is visual: CanCollide/CanQuery/CanTouch off except the CookFire parts marked collide. Squirrels get one invisible hitbox (see 'hitbox').",
+  "No part is double-sided: wings carry real back faces (the slate underside).",
+  "Neon only on CookFire_Ember."
+ ],
+ "palette": {
+  "Fur": [
+   178,
+   130,
+   66
+  ],
+  "Belly": [
+   226,
+   206,
+   164
+  ],
+  "Dark": [
+   44,
+   35,
+   30
+  ],
+  "Tail": [
+   188,
+   136,
+   64
+  ],
+  "TailTip": [
+   216,
+   178,
+   108
+  ],
+  "Meat": [
+   152,
+   94,
+   52
+  ],
+  "Twine": [
+   198,
+   180,
+   142
+  ],
+  "Bone": [
+   226,
+   216,
+   192
+  ],
+  "Wood": [
+   118,
+   90,
+   62
+  ],
+  "Log": [
+   106,
+   82,
+   60
+  ],
+  "Char": [
+   54,
+   48,
+   44
+  ],
+  "Ash": [
+   104,
+   100,
+   96
+  ],
+  "Stone": [
+   132,
+   128,
+   120
+  ],
+  "StoneDark": [
+   112,
+   110,
+   106
+  ],
+  "Ember": [
+   255,
+   128,
+   48
+  ],
+  "Blue": [
+   46,
+   126,
+   228
+  ],
+  "BlueLight": [
+   98,
+   176,
+   248
+  ],
+  "Edge": [
+   20,
+   26,
+   46
+  ],
+  "Under": [
+   44,
+   74,
+   110
+  ],
+  "Body": [
+   26,
+   26,
+   36
+  ],
+  "Charge": [
+   236,
+   244,
+   255
+  ],
+  "meatRaw": [
+   208,
+   140,
+   126
+  ],
+  "meatCooked": [
+   152,
+   94,
+   52
+  ],
+  "meatBurnt": [
+   58,
+   44,
+   38
+  ],
+  "butterflyChargeFlash": [
+   236,
+   244,
+   255
+  ],
+  "goldenPackFur": [
+   196,
+   160,
+   82
+  ],
+  "goldenPackBelly": [
+   220,
+   200,
+   150
+  ],
+  "goldenPackEye": [
+   176,
+   112,
+   70
+  ],
+  "briefButterflyTop": [
+   70,
+   126,
+   186
+  ],
+  "briefButterflyUnder": [
+   44,
+   74,
+   110
+  ]
+ },
+ "glbCheck": {
+  "flat": {
+   "file": "Creatures.glb",
+   "bytes": 200876,
+   "nodes": 60,
+   "meshes": 50,
+   "primitives": 50,
+   "triangles": 2506,
+   "primitivesWithCOLOR_0": 0,
+   "primitivesWithTEXCOORD_0": 0,
+   "images": 0,
+   "ok": true
+  },
+  "vc": {
+   "file": "Creatures_VC.glb",
+   "bytes": 273724,
+   "nodes": 31,
+   "meshes": 21,
+   "primitives": 21,
+   "triangles": 2506,
+   "primitivesWithCOLOR_0": 21,
+   "primitivesWithTEXCOORD_0": 0,
+   "images": 0,
+   "ok": true
+  }
+ },
+ "assets": [
+  {
+   "name": "SquirrelSit",
+   "kind": "Wildlife",
+   "tags": [
+    "Squirrel",
+    "Huntable",
+    "Sit"
+   ],
+   "notes": "Sitting up on its haunches, forepaws at the chest, tail in an S behind. Origin on the ground under the body; faces Roblox -Z.",
+   "pivot": "ground under the body",
+   "origin": [
+    0.94,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.686,
+    1.424,
+    1.229
+   ],
+   "boundsMin": [
+    -0.3432,
+    0.0055,
+    -0.4691
+   ],
+   "boundsMax": [
+    0.3432,
+    1.43,
+    0.76
+   ],
+   "tris": 346,
+   "attachments": {
+    "Center": {
+     "position": [
+      0.0,
+      0.53,
+      -0.005
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "TailBase": {
+     "position": [
+      0.0,
+      0.12,
+      0.17
+     ],
+     "look": [
+      -0.0,
+      -0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Head": {
+     "position": [
+      0.0,
+      1.07,
+      -0.19
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "SquirrelSit_Fur",
+     "role": "Fur",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      178,
+      130,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "center": [
+      0.0,
+      0.6764,
+      -0.0619
+     ],
+     "size": [
+      0.6864,
+      1.324,
+      0.7169
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSit_Belly",
+     "role": "Belly",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      206,
+      164
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      0.0,
+      0.5081,
+      -0.2135
+     ],
+     "size": [
+      0.3614,
+      0.9875,
+      0.4137
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSit_Dark",
+     "role": "Dark",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      35,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 88,
+     "center": [
+      0.0,
+      0.5865,
+      -0.2571
+     ],
+     "size": [
+      0.6,
+      1.162,
+      0.4241
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSit_Tail",
+     "role": "Tail",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      188,
+      136,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 52,
+     "center": [
+      0.0,
+      0.5665,
+      0.4526
+     ],
+     "size": [
+      0.46,
+      1.0332,
+      0.5957
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSit_TailTip",
+     "role": "TailTip",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      216,
+      178,
+      108
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 18,
+     "center": [
+      0.0,
+      1.2534,
+      0.5313
+     ],
+     "size": [
+      0.42,
+      0.3531,
+      0.4573
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "hitbox": {
+    "center": [
+     0.0,
+     0.718,
+     0.145
+    ],
+    "size": [
+     1.0,
+     1.57,
+     1.38
+    ],
+    "note": "mesh parts are CanQuery off; weld one invisible box this size for arrows, thrown knives and the pick-up prompt"
+   },
+   "partsVC": [
+    {
+     "name": "SquirrelSit_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 276,
+     "center": [
+      0.0,
+      0.672,
+      -0.0863
+     ],
+     "size": [
+      0.6864,
+      1.3329,
+      0.7657
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Fur",
+      "Belly",
+      "Dark"
+     ],
+     "fallbackRgb": [
+      178,
+      130,
+      66
+     ]
+    },
+    {
+     "name": "SquirrelSit_Tail",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 70,
+     "center": [
+      0.0,
+      0.7399,
+      0.4574
+     ],
+     "size": [
+      0.46,
+      1.3801,
+      0.6052
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Tail",
+      "TailTip"
+     ],
+     "fallbackRgb": [
+      188,
+      136,
+      64
+     ]
+    }
+   ],
+   "trisVC": 346
+  },
+  {
+   "name": "SquirrelRun",
+   "kind": "Wildlife",
+   "tags": [
+    "Squirrel",
+    "Huntable",
+    "Run"
+   ],
+   "notes": "Stretched mid-bound, tail streaming. Origin on the ground under the body centre; faces Roblox -Z. The paws are a little off the ground on purpose (it is in the air).",
+   "pivot": "ground under the body",
+   "origin": [
+    2.73,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.48,
+    0.826,
+    2.584
+   ],
+   "boundsMin": [
+    -0.24,
+    0.0658,
+    -0.9136
+   ],
+   "boundsMax": [
+    0.24,
+    0.8914,
+    1.67
+   ],
+   "tris": 334,
+   "attachments": {
+    "Center": {
+     "position": [
+      0.0,
+      0.54,
+      0.02
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "TailBase": {
+     "position": [
+      0.0,
+      0.52,
+      0.5
+     ],
+     "look": [
+      -0.0,
+      -0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Head": {
+     "position": [
+      0.0,
+      0.61,
+      -0.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "SquirrelRun_Fur",
+     "role": "Fur",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      178,
+      130,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "center": [
+      0.0,
+      0.5269,
+      0.0014
+     ],
+     "size": [
+      0.48,
+      0.7291,
+      1.6554
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelRun_Belly",
+     "role": "Belly",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      206,
+      164
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      0.0,
+      0.4386,
+      -0.1678
+     ],
+     "size": [
+      0.3212,
+      0.1361,
+      1.2979
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelRun_Dark",
+     "role": "Dark",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      35,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 88,
+     "center": [
+      0.0,
+      0.3814,
+      0.0649
+     ],
+     "size": [
+      0.42,
+      0.6312,
+      1.957
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelRun_Tail",
+     "role": "Tail",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      188,
+      136,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 40,
+     "center": [
+      0.0,
+      0.6638,
+      0.8856
+     ],
+     "size": [
+      0.44,
+      0.4059,
+      0.8186
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelRun_TailTip",
+     "role": "TailTip",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      216,
+      178,
+      108
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 18,
+     "center": [
+      0.0,
+      0.6993,
+      1.4675
+     ],
+     "size": [
+      0.42,
+      0.3349,
+      0.4049
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "hitbox": {
+    "center": [
+     0.0,
+     0.479,
+     0.378
+    ],
+    "size": [
+     1.0,
+     1.0,
+     2.73
+    ],
+    "note": "mesh parts are CanQuery off; weld one invisible box this size for arrows, thrown knives and the pick-up prompt"
+   },
+   "partsVC": [
+    {
+     "name": "SquirrelRun_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 276,
+     "center": [
+      0.0,
+      0.4786,
+      0.0649
+     ],
+     "size": [
+      0.48,
+      0.8256,
+      1.957
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Fur",
+      "Belly",
+      "Dark"
+     ],
+     "fallbackRgb": [
+      178,
+      130,
+      66
+     ]
+    },
+    {
+     "name": "SquirrelRun_Tail",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 58,
+     "center": [
+      0.0,
+      0.6638,
+      1.0732
+     ],
+     "size": [
+      0.44,
+      0.4059,
+      1.1937
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Tail",
+      "TailTip"
+     ],
+     "fallbackRgb": [
+      188,
+      136,
+      64
+     ]
+    }
+   ],
+   "trisVC": 334
+  },
+  {
+   "name": "SquirrelClimb",
+   "kind": "Wildlife",
+   "tags": [
+    "Squirrel",
+    "Huntable",
+    "Climb"
+   ],
+   "notes": "Clinging head-up to a trunk. Origin = the point on the bark under the belly; LookVector (Roblox -Z) points INTO the trunk and Roblox +Y is up the trunk, so place it with CFrame.lookAt(barkPoint, barkPoint - surfaceNormal). Turn it about its LookVector for head-down.",
+   "pivot": "bark point under the belly",
+   "origin": [
+    4.64,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.941,
+    2.58,
+    0.526
+   ],
+   "boundsMin": [
+    -0.4703,
+    -1.7,
+    0.0075
+   ],
+   "boundsMax": [
+    0.4703,
+    0.8805,
+    0.5331
+   ],
+   "tris": 334,
+   "attachments": {
+    "Center": {
+     "position": [
+      0.0,
+      -0.02,
+      0.2025
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "TailBase": {
+     "position": [
+      0.0,
+      -0.5,
+      0.18
+     ],
+     "look": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "Head": {
+     "position": [
+      0.0,
+      0.6,
+      0.31
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "SquirrelClimb_Fur",
+     "role": "Fur",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      178,
+      130,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "center": [
+      0.0,
+      0.1581,
+      0.2846
+     ],
+     "size": [
+      0.8462,
+      1.364,
+      0.4971
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelClimb_Belly",
+     "role": "Belly",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      206,
+      164
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      0.0,
+      0.1798,
+      0.1918
+     ],
+     "size": [
+      0.3212,
+      1.3205,
+      0.2493
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelClimb_Dark",
+     "role": "Dark",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      35,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 88,
+     "center": [
+      0.0,
+      0.2161,
+      0.2211
+     ],
+     "size": [
+      0.9406,
+      1.3287,
+      0.4272
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelClimb_Tail",
+     "role": "Tail",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      188,
+      136,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 40,
+     "center": [
+      0.0,
+      -0.9074,
+      0.2453
+     ],
+     "size": [
+      0.4,
+      0.8321,
+      0.3283
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelClimb_TailTip",
+     "role": "TailTip",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      216,
+      178,
+      108
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 18,
+     "center": [
+      0.0,
+      -1.4882,
+      0.2694
+     ],
+     "size": [
+      0.38,
+      0.4235,
+      0.3177
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "hitbox": {
+    "center": [
+     0.0,
+     -0.41,
+     0.27
+    ],
+    "size": [
+     1.09,
+     2.73,
+     1.0
+    ],
+    "note": "mesh parts are CanQuery off; weld one invisible box this size for arrows, thrown knives and the pick-up prompt"
+   },
+   "partsVC": [
+    {
+     "name": "SquirrelClimb_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 276,
+     "center": [
+      0.0,
+      0.1783,
+      0.2703
+     ],
+     "size": [
+      0.9406,
+      1.4044,
+      0.5256
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Fur",
+      "Belly",
+      "Dark"
+     ],
+     "fallbackRgb": [
+      178,
+      130,
+      66
+     ]
+    },
+    {
+     "name": "SquirrelClimb_Tail",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 58,
+     "center": [
+      0.0,
+      -1.0957,
+      0.2547
+     ],
+     "size": [
+      0.4,
+      1.2086,
+      0.347
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Tail",
+      "TailTip"
+     ],
+     "fallbackRgb": [
+      188,
+      136,
+      64
+     ]
+    }
+   ],
+   "trisVC": 334
+  },
+  {
+   "name": "SquirrelStill",
+   "kind": "Wildlife",
+   "tags": [
+    "Squirrel",
+    "Huntable",
+    "Still"
+   ],
+   "notes": "Lying on its side with closed eyes (asleep-looking, no wound). Origin on the ground under the body; the head points to Roblox -Z, the legs to Roblox -X.",
+   "pivot": "ground under the body",
+   "origin": [
+    6.63,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.742,
+    0.477,
+    2.432
+   ],
+   "boundsMin": [
+    -0.3277,
+    0.005,
+    -0.8715
+   ],
+   "boundsMax": [
+    0.4142,
+    0.4825,
+    1.56
+   ],
+   "tris": 334,
+   "attachments": {
+    "Center": {
+     "position": [
+      0.15,
+      0.245,
+      0.02
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      1.0,
+      0.0,
+      -0.0
+     ]
+    },
+    "TailBase": {
+     "position": [
+      0.14,
+      0.245,
+      0.5
+     ],
+     "look": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "up": [
+      1.0,
+      0.0,
+      -0.0
+     ]
+    },
+    "Head": {
+     "position": [
+      0.13,
+      0.195,
+      -0.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      1.0,
+      0.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "SquirrelStill_Fur",
+     "role": "Fur",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      178,
+      130,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 176,
+     "center": [
+      0.0811,
+      0.2437,
+      -0.1573
+     ],
+     "size": [
+      0.6661,
+      0.4775,
+      1.338
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelStill_Belly",
+     "role": "Belly",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      206,
+      164
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      0.02,
+      0.2434,
+      -0.1604
+     ],
+     "size": [
+      0.0616,
+      0.3244,
+      1.3015
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelStill_Dark",
+     "role": "Dark",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      35,
+      30
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 88,
+     "center": [
+      -0.0755,
+      0.1947,
+      -0.199
+     ],
+     "size": [
+      0.5044,
+      0.3195,
+      1.3451
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelStill_Tail",
+     "role": "Tail",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      188,
+      136,
+      64
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 40,
+     "center": [
+      0.0611,
+      0.245,
+      0.9044
+     ],
+     "size": [
+      0.4117,
+      0.4,
+      0.8088
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelStill_TailTip",
+     "role": "TailTip",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      216,
+      178,
+      108
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 18,
+     "center": [
+      -0.0626,
+      0.245,
+      1.3656
+     ],
+     "size": [
+      0.3748,
+      0.38,
+      0.3888
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "hitbox": {
+    "center": [
+     0.043,
+     0.244,
+     0.344
+    ],
+    "size": [
+     1.0,
+     1.0,
+     2.58
+    ],
+    "note": "mesh parts are CanQuery off; weld one invisible box this size for arrows, thrown knives and the pick-up prompt"
+   },
+   "partsVC": [
+    {
+     "name": "SquirrelStill_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 276,
+     "center": [
+      0.0433,
+      0.2437,
+      -0.1799
+     ],
+     "size": [
+      0.7419,
+      0.4775,
+      1.3832
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Fur",
+      "Belly",
+      "Dark"
+     ],
+     "fallbackRgb": [
+      178,
+      130,
+      66
+     ]
+    },
+    {
+     "name": "SquirrelStill_Tail",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "TailFlick"
+     ],
+     "tris": 58,
+     "center": [
+      0.0085,
+      0.245,
+      1.03
+     ],
+     "size": [
+      0.5169,
+      0.4,
+      1.06
+     ],
+     "group": "Tail",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Tail",
+      "TailTip"
+     ],
+     "fallbackRgb": [
+      188,
+      136,
+      64
+     ]
+    }
+   ],
+   "trisVC": 334
+  },
+  {
+   "name": "SquirrelSpit",
+   "kind": "Food",
+   "tags": [
+    "Cooking",
+    "Spit"
+   ],
+   "notes": "The turning stick with a trussed roast (no head, no face). Origin on the stick axis at its middle; the stick runs along Roblox X. Put the origin on CookFire.SpitAxis and spin it about its own X axis. SquirrelSpit_Meat is one flat colour: tint it raw -> cooked -> burnt (palette in the manifest), or hide it to show the bare stick.",
+   "pivot": "stick axis centre",
+   "origin": [
+    10.4,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.3,
+    0.471,
+    0.43
+   ],
+   "boundsMin": [
+    -2.15,
+    -0.2061,
+    -0.215
+   ],
+   "boundsMax": [
+    2.15,
+    0.2648,
+    0.215
+   ],
+   "tris": 184,
+   "attachments": {
+    "HandleEnd": {
+     "position": [
+      2.15,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "MeatCenter": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "SquirrelSpit_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      90,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 28,
+     "center": [
+      0.0,
+      0.1084,
+      0.0
+     ],
+     "size": [
+      4.3,
+      0.3128,
+      0.0914
+     ],
+     "group": "Stick",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSpit_Twine",
+     "role": "Twine",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      198,
+      180,
+      142
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 40,
+     "center": [
+      -0.03,
+      -0.02,
+      0.0
+     ],
+     "size": [
+      0.644,
+      0.3622,
+      0.41
+     ],
+     "group": "Stick",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "SquirrelSpit_Meat",
+     "role": "Meat",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      152,
+      94,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 116,
+     "center": [
+      -0.0214,
+      -0.0214,
+      0.0
+     ],
+     "size": [
+      1.1629,
+      0.3693,
+      0.43
+     ],
+     "group": "Meat",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "spin": {
+    "axis": [
+     1,
+     0,
+     0
+    ],
+    "note": "rotate the whole asset about its own Roblox X axis"
+   },
+   "tint": {
+    "part": "SquirrelSpit_Meat",
+    "raw": [
+     208,
+     140,
+     126
+    ],
+    "cooked": [
+     152,
+     94,
+     52
+    ],
+    "burnt": [
+     58,
+     44,
+     38
+    ]
+   },
+   "partsVC": [
+    {
+     "name": "SquirrelSpit_Stick",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 68,
+     "center": [
+      0.0,
+      0.0318,
+      0.0
+     ],
+     "size": [
+      4.3,
+      0.4659,
+      0.41
+     ],
+     "group": "Stick",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Wood",
+      "Twine"
+     ],
+     "fallbackRgb": [
+      118,
+      90,
+      62
+     ]
+    },
+    {
+     "name": "SquirrelSpit_Meat",
+     "role": "Meat",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      152,
+      94,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 116,
+     "center": [
+      -0.0214,
+      -0.0214,
+      0.0
+     ],
+     "size": [
+      1.1629,
+      0.3693,
+      0.43
+     ],
+     "group": "Meat",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "shade",
+     "roles": [
+      "Meat"
+     ],
+     "fallbackRgb": [
+      152,
+      94,
+      52
+     ]
+    }
+   ],
+   "trisVC": 184
+  },
+  {
+   "name": "cooked_meat",
+   "kind": "Food",
+   "tags": [
+    "Food",
+    "Held",
+    "Cooking"
+   ],
+   "notes": "A roasted haunch on the bone, held by the bone. Same contract as Items.glb: origin = hand grip, item axis = Roblox +Y, Grip look = +Y, up = -Z. cooked_meat_Meat is one flat colour (tint raw/cooked/burnt).",
+   "pivot": "hand grip on the bone",
+   "origin": [
+    13.93,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.41,
+    1.028,
+    0.32
+   ],
+   "boundsMin": [
+    -0.1799,
+    -0.2275,
+    -0.1602
+   ],
+   "boundsMax": [
+    0.2299,
+    0.8,
+    0.1602
+   ],
+   "tris": 98,
+   "attachments": {
+    "Grip": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     "up": [
+      0.0,
+      0.0,
+      -1.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "cooked_meat_Bone",
+     "role": "Bone",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      216,
+      192
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 40,
+     "center": [
+      0.0,
+      0.0362,
+      0.0
+     ],
+     "size": [
+      0.145,
+      0.5275,
+      0.075
+     ],
+     "group": "Bone",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "cooked_meat_Meat",
+     "role": "Meat",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      152,
+      94,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 58,
+     "center": [
+      0.025,
+      0.4773,
+      0.0
+     ],
+     "size": [
+      0.4098,
+      0.6455,
+      0.3204
+     ],
+     "group": "Meat",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "tint": {
+    "part": "cooked_meat_Meat",
+    "raw": [
+     208,
+     140,
+     126
+    ],
+    "cooked": [
+     152,
+     94,
+     52
+    ],
+    "burnt": [
+     58,
+     44,
+     38
+    ]
+   },
+   "partsVC": [
+    {
+     "name": "cooked_meat_Bone",
+     "role": "Bone",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      216,
+      192
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 40,
+     "center": [
+      0.0,
+      0.0362,
+      0.0
+     ],
+     "size": [
+      0.145,
+      0.5275,
+      0.075
+     ],
+     "group": "Bone",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "shade",
+     "roles": [
+      "Bone"
+     ],
+     "fallbackRgb": [
+      226,
+      216,
+      192
+     ]
+    },
+    {
+     "name": "cooked_meat_Meat",
+     "role": "Meat",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      152,
+      94,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Tintable"
+     ],
+     "tris": 58,
+     "center": [
+      0.025,
+      0.4773,
+      0.0
+     ],
+     "size": [
+      0.4098,
+      0.6455,
+      0.3204
+     ],
+     "group": "Meat",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "shade",
+     "roles": [
+      "Meat"
+     ],
+     "fallbackRgb": [
+      152,
+      94,
+      52
+     ]
+    }
+   ],
+   "trisVC": 98
+  },
+  {
+   "name": "CookFire",
+   "kind": "Prop",
+   "tags": [
+    "Cooking",
+    "Campfire"
+   ],
+   "notes": "A small cooking fire: stone ring 3.5 across, ash bed, five logs, an ember bed (Neon) and two forked uprights for the spit. Origin = ground centre of the ring; the spit runs along Roblox X. The Frame part can be hidden when there is no spit. Add the fire, light and sound at FireCenter. Stones are low enough to step over; a 5.5-stud character crouches at CrouchSpot_1/2 with the roast at chest height.",
+   "pivot": "ground centre of the stone ring",
+   "origin": [
+    17.25,
+    0.0,
+    0.0
+   ],
+   "size": [
+    3.877,
+    2.201,
+    3.347
+   ],
+   "boundsMin": [
+    -1.8932,
+    -0.0514,
+    -1.6474
+   ],
+   "boundsMax": [
+    1.9841,
+    2.1492,
+    1.6998
+   ],
+   "tris": 498,
+   "attachments": {
+    "FireCenter": {
+     "position": [
+      0.0,
+      0.45,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "SpitAxis": {
+     "position": [
+      0.0,
+      1.9,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrouchSpot_1": {
+     "position": [
+      0.0,
+      0.0,
+      -2.6
+     ],
+     "look": [
+      -0.0,
+      -0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "CrouchSpot_2": {
+     "position": [
+      0.0,
+      0.0,
+      2.6
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "CookFire_StoneDark",
+     "role": "StoneDark",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      112,
+      110,
+      106
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 82,
+     "center": [
+      0.0454,
+      0.1625,
+      0.2469
+     ],
+     "size": [
+      3.8773,
+      0.3483,
+      2.9059
+     ],
+     "group": "Stones",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Stone",
+     "role": "Stone",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      132,
+      128,
+      120
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 84,
+     "center": [
+      -0.0671,
+      0.1636,
+      -0.1096
+     ],
+     "size": [
+      3.1676,
+      0.343,
+      3.0756
+     ],
+     "group": "Stones",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Ash",
+     "role": "Ash",
+     "robloxMaterial": "Slate",
+     "rgb": [
+      104,
+      100,
+      96
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 30,
+     "center": [
+      0.0,
+      0.065,
+      0.0
+     ],
+     "size": [
+      1.9994,
+      0.13,
+      1.921
+     ],
+     "group": "Sticks",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Log",
+     "role": "Log",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      106,
+      82,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 112,
+     "center": [
+      -0.0207,
+      0.29,
+      -0.0747
+     ],
+     "size": [
+      1.8796,
+      0.5801,
+      1.822
+     ],
+     "group": "Sticks",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Char",
+     "role": "Char",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      54,
+      48,
+      44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 88,
+     "center": [
+      0.0557,
+      0.4419,
+      -0.0189
+     ],
+     "size": [
+      0.9209,
+      0.8138,
+      1.5019
+     ],
+     "group": "Sticks",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 22,
+     "center": [
+      0.0,
+      0.185,
+      0.0
+     ],
+     "size": [
+      0.8,
+      0.17,
+      0.6236
+     ],
+     "group": "Ember",
+     "neon": true,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "CookFire_Wood",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 80,
+     "center": [
+      0.0,
+      1.0489,
+      0.0
+     ],
+     "size": [
+      3.6616,
+      2.2006,
+      0.3874
+     ],
+     "group": "Frame",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "spit": {
+    "axisHeight": 1.9,
+    "axis": [
+     1,
+     0,
+     0
+    ],
+    "uprightsAtX": [
+     -1.72,
+     1.72
+    ],
+    "stickLength": 4.3
+   },
+   "partsVC": [
+    {
+     "name": "CookFire_Stones",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 166,
+     "center": [
+      0.0454,
+      0.1625,
+      0.0262
+     ],
+     "size": [
+      3.8773,
+      0.3483,
+      3.3472
+     ],
+     "group": "Stones",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "StoneDark",
+      "Stone"
+     ],
+     "fallbackRgb": [
+      112,
+      110,
+      106
+     ]
+    },
+    {
+     "name": "CookFire_Sticks",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 230,
+     "center": [
+      0.0,
+      0.4244,
+      -0.0126
+     ],
+     "size": [
+      1.9994,
+      0.8488,
+      1.9462
+     ],
+     "group": "Sticks",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Ash",
+      "Log",
+      "Char"
+     ],
+     "fallbackRgb": [
+      104,
+      100,
+      96
+     ]
+    },
+    {
+     "name": "CookFire_Ember",
+     "role": "Ember",
+     "robloxMaterial": "Neon",
+     "rgb": [
+      255,
+      128,
+      48
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 22,
+     "center": [
+      0.0,
+      0.185,
+      0.0
+     ],
+     "size": [
+      0.8,
+      0.17,
+      0.6236
+     ],
+     "group": "Ember",
+     "neon": true,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "shade",
+     "roles": [
+      "Ember"
+     ],
+     "fallbackRgb": [
+      255,
+      128,
+      48
+     ]
+    },
+    {
+     "name": "CookFire_Frame",
+     "role": "Wood",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      118,
+      90,
+      62
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": [],
+     "tris": 80,
+     "center": [
+      0.0,
+      1.0489,
+      0.0
+     ],
+     "size": [
+      3.6616,
+      2.2006,
+      0.3874
+     ],
+     "group": "Frame",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "shade",
+     "roles": [
+      "Wood"
+     ],
+     "fallbackRgb": [
+      118,
+      90,
+      62
+     ]
+    }
+   ],
+   "trisVC": 498
+  },
+  {
+   "name": "Butterfly",
+   "kind": "Creature",
+   "tags": [
+    "Butterfly",
+    "Swarm",
+    "Hazard",
+    "Flap"
+   ],
+   "notes": "Blue stinging butterfly, wings exported FLAT (lift 0). Origin = the thorax, on the hinge line; faces Roblox -Z. Each wing turns about its hinge, a line along the body (Roblox Z axis) through HingeL / HingeR: lift a (radians) = WingR * CFrame.Angles(0, 0, +a), WingL * CFrame.Angles(0, 0, -a), applied about the hinge point. Flap between about -25 and +78 degrees; 84 degrees is fully closed. The top is vivid blue with a dark edge, the underside slate with one pale eye, so a flapping wing flashes. The sting, antenna tips and eyes are the pale charge colour.",
+   "pivot": "thorax centre on the hinge line",
+   "origin": [
+    20.78,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.694,
+    0.072,
+    0.543
+   ],
+   "boundsMin": [
+    -0.347,
+    -0.022,
+    -0.238
+   ],
+   "boundsMax": [
+    0.347,
+    0.05,
+    0.305
+   ],
+   "tris": 180,
+   "attachments": {
+    "HingeL": {
+     "position": [
+      -0.015,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "HingeR": {
+     "position": [
+      0.015,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Sting": {
+     "position": [
+      0.0,
+      -0.016,
+      0.292
+     ],
+     "look": [
+      -0.0,
+      -0.0,
+      1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "Butterfly_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      26,
+      26,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 60,
+     "center": [
+      0.0,
+      0.0123,
+      -0.0193
+     ],
+     "size": [
+      0.1304,
+      0.0605,
+      0.3753
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "Butterfly_Charge",
+     "role": "Charge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      236,
+      244,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      0.0,
+      0.0163,
+      0.027
+     ],
+     "size": [
+      0.164,
+      0.0675,
+      0.53
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "Butterfly_WingL_Edge",
+     "role": "Edge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      20,
+      26,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 32,
+     "center": [
+      -0.181,
+      -0.003,
+      0.0335
+     ],
+     "size": [
+      0.332,
+      0.014,
+      0.543
+     ],
+     "group": "WingL",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       -0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": -1.0,
+      "attachment": "HingeL"
+     }
+    },
+    {
+     "name": "Butterfly_WingL_Blue",
+     "role": "Blue",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      126,
+      228
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 10,
+     "center": [
+      -0.1613,
+      0.006,
+      0.014
+     ],
+     "size": [
+      0.2926,
+      0.012,
+      0.4049
+     ],
+     "group": "WingL",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       -0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": -1.0,
+      "attachment": "HingeL"
+     }
+    },
+    {
+     "name": "Butterfly_WingL_Under",
+     "role": "Under",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      74,
+      110
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 10,
+     "center": [
+      -0.1613,
+      -0.012,
+      0.014
+     ],
+     "size": [
+      0.2926,
+      0.012,
+      0.4049
+     ],
+     "group": "WingL",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       -0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": -1.0,
+      "attachment": "HingeL"
+     }
+    },
+    {
+     "name": "Butterfly_WingL_Charge",
+     "role": "Charge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      236,
+      244,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 2,
+     "center": [
+      -0.185,
+      -0.022,
+      0.085
+     ],
+     "size": [
+      0.068,
+      0.0,
+      0.085
+     ],
+     "group": "WingL",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       -0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": -1.0,
+      "attachment": "HingeL"
+     }
+    },
+    {
+     "name": "Butterfly_WingR_Edge",
+     "role": "Edge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      20,
+      26,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 32,
+     "center": [
+      0.181,
+      -0.003,
+      0.0335
+     ],
+     "size": [
+      0.332,
+      0.014,
+      0.543
+     ],
+     "group": "WingR",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": 1.0,
+      "attachment": "HingeR"
+     }
+    },
+    {
+     "name": "Butterfly_WingR_Blue",
+     "role": "Blue",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      126,
+      228
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 10,
+     "center": [
+      0.1613,
+      0.006,
+      0.014
+     ],
+     "size": [
+      0.2926,
+      0.012,
+      0.4049
+     ],
+     "group": "WingR",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": 1.0,
+      "attachment": "HingeR"
+     }
+    },
+    {
+     "name": "Butterfly_WingR_Under",
+     "role": "Under",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      74,
+      110
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 10,
+     "center": [
+      0.1613,
+      -0.012,
+      0.014
+     ],
+     "size": [
+      0.2926,
+      0.012,
+      0.4049
+     ],
+     "group": "WingR",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": 1.0,
+      "attachment": "HingeR"
+     }
+    },
+    {
+     "name": "Butterfly_WingR_Charge",
+     "role": "Charge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      236,
+      244,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 2,
+     "center": [
+      0.185,
+      -0.022,
+      0.085
+     ],
+     "size": [
+      0.068,
+      0.0,
+      0.085
+     ],
+     "group": "WingR",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "hinge": {
+      "position": [
+       0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": 1.0,
+      "attachment": "HingeR"
+     }
+    }
+   ],
+   "flap": {
+    "downDeg": -25.0,
+    "upDeg": 78.0,
+    "restDeg": 84.0,
+    "cruiseHz": 7.0,
+    "glideDeg": 18.0,
+    "axis": [
+     0,
+     0,
+     1
+    ],
+    "exportedLiftDeg": 0.0,
+    "formula": "wing.CFrame = body.CFrame * CFrame.new(hinge) * CFrame.Angles(0, 0, sign * a) * CFrame.new(-hinge) * wingOffsetAtExport; sign = +1 for WingR, -1 for WingL"
+   },
+   "partsVC": [
+    {
+     "name": "Butterfly_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "center": [
+      0.0,
+      0.016,
+      0.027
+     ],
+     "size": [
+      0.164,
+      0.068,
+      0.53
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Body",
+      "Charge"
+     ],
+     "fallbackRgb": [
+      26,
+      26,
+      36
+     ]
+    },
+    {
+     "name": "Butterfly_WingL",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 54,
+     "center": [
+      -0.181,
+      -0.005,
+      0.0335
+     ],
+     "size": [
+      0.332,
+      0.034,
+      0.543
+     ],
+     "group": "WingL",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Edge",
+      "BlueLight",
+      "Blue",
+      "Under",
+      "Charge"
+     ],
+     "fallbackRgb": [
+      20,
+      26,
+      46
+     ],
+     "hinge": {
+      "position": [
+       -0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": -1.0,
+      "attachment": "HingeL"
+     }
+    },
+    {
+     "name": "Butterfly_WingR",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Wing"
+     ],
+     "tris": 54,
+     "center": [
+      0.181,
+      -0.005,
+      0.0335
+     ],
+     "size": [
+      0.332,
+      0.034,
+      0.543
+     ],
+     "group": "WingR",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Edge",
+      "BlueLight",
+      "Blue",
+      "Under",
+      "Charge"
+     ],
+     "fallbackRgb": [
+      20,
+      26,
+      46
+     ],
+     "hinge": {
+      "position": [
+       0.015,
+       0.0,
+       -0.0
+      ],
+      "axis": [
+       0,
+       0,
+       1
+      ],
+      "sign": 1.0,
+      "attachment": "HingeR"
+     }
+    }
+   ],
+   "trisVC": 180
+  },
+  {
+   "name": "ButterflyRest",
+   "kind": "Creature",
+   "tags": [
+    "Butterfly",
+    "Resting"
+   ],
+   "notes": "The same butterfly at rest: wings closed over its back (lift 84 degrees), showing the slate underside and its pale eye. A static model; origin = under the body (where it stands on a leaf or twig); faces Roblox -Z.",
+   "pivot": "under the body",
+   "origin": [
+    22.41,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.164,
+    0.348,
+    0.543
+   ],
+   "boundsMin": [
+    -0.082,
+    0.014,
+    -0.238
+   ],
+   "boundsMax": [
+    0.082,
+    0.3622,
+    0.305
+   ],
+   "tris": 180,
+   "attachments": {
+    "Feet": {
+     "position": [
+      0.0,
+      0.0,
+      -0.0
+     ],
+     "look": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "parts": [
+    {
+     "name": "ButterflyRest_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      26,
+      26,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 60,
+     "center": [
+      0.0,
+      0.0442,
+      -0.0193
+     ],
+     "size": [
+      0.1304,
+      0.0605,
+      0.3753
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyRest_Charge",
+     "role": "Charge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      236,
+      244,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 16,
+     "center": [
+      0.0,
+      0.1236,
+      0.027
+     ],
+     "size": [
+      0.164,
+      0.2181,
+      0.53
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyRest_Edge",
+     "role": "Edge",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      20,
+      26,
+      46
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 64,
+     "center": [
+      0.0,
+      0.1968,
+      0.0335
+     ],
+     "size": [
+      0.1114,
+      0.3308,
+      0.543
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyRest_Blue",
+     "role": "Blue",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      126,
+      228
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 20,
+     "center": [
+      0.0,
+      0.1777,
+      0.014
+     ],
+     "size": [
+      0.0832,
+      0.2914,
+      0.4049
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyRest_Under",
+     "role": "Under",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      74,
+      110
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 20,
+     "center": [
+      0.0,
+      0.1767,
+      0.014
+     ],
+     "size": [
+      0.111,
+      0.2906,
+      0.4049
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "partsVC": [
+    {
+     "name": "ButterflyRest_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 180,
+     "center": [
+      0.0,
+      0.1881,
+      0.0335
+     ],
+     "size": [
+      0.164,
+      0.3482,
+      0.543
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Body",
+      "Charge",
+      "Edge",
+      "BlueLight",
+      "Blue",
+      "Under"
+     ],
+     "fallbackRgb": [
+      26,
+      26,
+      36
+     ]
+    }
+   ],
+   "trisVC": 180
+  },
+  {
+   "name": "ButterflyFar",
+   "kind": "Creature",
+   "tags": [
+    "Butterfly",
+    "Swarm",
+    "FarModel"
+   ],
+   "notes": "A 14-triangle stand-in for swarm members far from the camera: two plain wings raised 30 degrees and a body, one part in the vertex-colour file. Same origin and facing as Butterfly. To fake a flap, scale the part's X size up and down.",
+   "pivot": "body centre",
+   "origin": [
+    23.99,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.59,
+    0.172,
+    0.543
+   ],
+   "boundsMin": [
+    -0.2951,
+    -0.012,
+    -0.238
+   ],
+   "boundsMax": [
+    0.2951,
+    0.16,
+    0.305
+   ],
+   "tris": 18,
+   "attachments": {},
+   "parts": [
+    {
+     "name": "ButterflyFar_Blue",
+     "role": "Blue",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      46,
+      126,
+      228
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 6,
+     "center": [
+      0.0,
+      0.08,
+      0.0335
+     ],
+     "size": [
+      0.5842,
+      0.16,
+      0.543
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyFar_Under",
+     "role": "Under",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      44,
+      74,
+      110
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 6,
+     "center": [
+      0.0,
+      0.0748,
+      0.0335
+     ],
+     "size": [
+      0.5902,
+      0.16,
+      0.543
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    },
+    {
+     "name": "ButterflyFar_Body",
+     "role": "Body",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      26,
+      26,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 6,
+     "center": [
+      0.0,
+      0.006,
+      0.0325
+     ],
+     "size": [
+      0.0416,
+      0.036,
+      0.315
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false
+    }
+   ],
+   "partsVC": [
+    {
+     "name": "ButterflyFar_Body",
+     "role": "Mixed",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      255,
+      255,
+      255
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 18,
+     "center": [
+      0.0,
+      0.074,
+      0.0335
+     ],
+     "size": [
+      0.5902,
+      0.172,
+      0.543
+     ],
+     "group": "Body",
+     "neon": false,
+     "roughness": 0.88,
+     "metalness": 0.0,
+     "doubleSided": false,
+     "vertexColors": "full",
+     "roles": [
+      "Blue",
+      "Under",
+      "Body"
+     ],
+     "fallbackRgb": [
+      46,
+      126,
+      228
+     ]
+    }
+   ],
+   "trisVC": 18
+  }
+ ],
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 18 Nov 2026, approved by the owner (\"Yes, upload them\"). Never re-upload this file; reuse its id. A re-export needs a new upload (new id) recorded here.",
+   "No textures, no vertex colours: one flat colour per part; the importer drops colours, so set Material/Color from this manifest. Not inserted into the place (an upload check only)."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_Creatures_v1",
+   "operationId": "db76b011-882a-4104-bb5a-43fc5f557bba",
+   "uploadedUtc": "2026-11-18T11:52:48.460Z",
+   "assetId": 119629886091854,
+   "moderationState": "Approved",
+   "bytes": 200876,
+   "sha256": "dd1a1e28694f3f6070a7b2da4c2ccfda52cf79899088bf786f59de98a205dc53",
+   "revisionId": "1",
+   "file": "Creatures.glb"
+  }
+ }
+}

@@ -1,0 +1,1625 @@
+{
+ "category": "TreesClimb",
+ "glb": "TreesClimb.glb",
+ "generator": "trees_climb.py",
+ "seed": 77,
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y); an asset's front is Roblox -Z (LookVector)",
+ "scale": "Built at the plain Map 1 asset's scale 1 (same heights as M1_Pine_A/B, M1_Beech_A/B). The game scales trees up about 1.2 (the owner's 'slightly bigger'); TreeClimb expects the mesh at scale 1.",
+ "gameScaleShownToOwner": 1.2,
+ "warnings": [],
+ "import": [
+  "Assets sit in a row along X; 'origin' is each asset's pivot in the file. Part 'center'/'size' and attachment positions are relative to that pivot (Roblox space).",
+  "One flat colour per part (rgb, robloxMaterial). No textures, no vertex colours, no UVs.",
+  "*_Col parts: Transparency 1, CastShadow off, CanCollide on, CanQuery on, CanTouch off; Trunk_Col is the climbable trunk (tag 'Climbable', CollisionFidelity Hull); Limb<n>_Col are the seat limbs (CollisionFidelity Box). Wood, Needles and Leaves never collide (CanCollide/CanQuery/CanTouch off).",
+  "Attachments: create Seat_<n> and ClimbStep_<n> under the Trunk_Col part with WorldCFrame = pivot * CFrame.lookAt(position, position + look, up). TreeClimb.adopt() renames the Seat_ ones to Perch<n> and tags them TreePerch.",
+  "Climbing stubs have no collider on purpose: MovementController's climb is kinematic along the tagged trunk, so the stubs are handholds to look at, and hundreds of trees stay cheap. ClimbStep_<n> marks each one for any code that wants to snap to them."
+ ],
+ "glbCheck": {
+  "file": "TreesClimb.glb",
+  "bytes": 233680,
+  "nodes": 37,
+  "meshes": 29,
+  "triangles": 3012,
+  "images": 0,
+  "nodeNames": [
+   "TC_Beech_A_Far_Leaves",
+   "TC_Beech_A_Far_Wood",
+   "TC_Beech_A_Leaves",
+   "TC_Beech_A_Limb1_Col",
+   "TC_Beech_A_Limb2_Col",
+   "TC_Beech_A_Trunk_Col",
+   "TC_Beech_A_Wood",
+   "TC_Beech_B_Far_Leaves",
+   "TC_Beech_B_Far_Wood",
+   "TC_Beech_B_Leaves",
+   "TC_Beech_B_Limb1_Col",
+   "TC_Beech_B_Limb2_Col",
+   "TC_Beech_B_Limb3_Col",
+   "TC_Beech_B_Trunk_Col",
+   "TC_Beech_B_Wood",
+   "TC_Pine_A_Far_Needles",
+   "TC_Pine_A_Far_Wood",
+   "TC_Pine_A_Limb1_Col",
+   "TC_Pine_A_Limb2_Col",
+   "TC_Pine_A_Needles",
+   "TC_Pine_A_Trunk_Col",
+   "TC_Pine_A_Wood",
+   "TC_Pine_B_Far_Needles",
+   "TC_Pine_B_Far_Wood",
+   "TC_Pine_B_Limb1_Col",
+   "TC_Pine_B_Limb2_Col",
+   "TC_Pine_B_Needles",
+   "TC_Pine_B_Trunk_Col",
+   "TC_Pine_B_Wood"
+  ]
+ },
+ "assets": [
+  {
+   "name": "TC_Pine_A",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Pine",
+    "Climbable"
+   ],
+   "notes": "Scots-pine shape like M1_Pine: a clear climbable trunk, stubs every ~4.6 studs on alternating sides, two level seat limbs (the upper one just under the first needle tier, so a sitter is hidden from below and sees out under the crown). Pivot = trunk centre on the ground; the trunk sinks 0.6 below.",
+   "replaces": "M1_Pine_A",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    16.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    14.61,
+    42.66,
+    14.29
+   ],
+   "boundsMin": [
+    -6.5058,
+    -0.6,
+    -7.2483
+   ],
+   "boundsMax": [
+    8.1044,
+    42.0602,
+    7.0406
+   ],
+   "tris": 397,
+   "parts": [
+    {
+     "name": "TC_Pine_A_Wood",
+     "role": "PineBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      96,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 261,
+     "center": [
+      -0.15,
+      19.137,
+      0.26
+     ],
+     "size": [
+      7.981,
+      39.474,
+      13.268
+     ]
+    },
+    {
+     "name": "TC_Pine_A_Needles",
+     "role": "PineNeedle",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      77,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 136,
+     "center": [
+      0.799,
+      31.506,
+      -0.104
+     ],
+     "size": [
+      14.61,
+      21.108,
+      14.289
+     ]
+    },
+    {
+     "name": "TC_Pine_A_Trunk_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 28,
+     "center": [
+      0.0,
+      16.221,
+      0.0
+     ],
+     "size": [
+      1.955,
+      33.643,
+      1.955
+     ]
+    },
+    {
+     "name": "TC_Pine_A_Limb1_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      1.288,
+      9.6,
+      -2.231
+     ],
+     "size": [
+      3.892,
+      0.8,
+      5.222
+     ]
+    },
+    {
+     "name": "TC_Pine_A_Limb2_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      -1.426,
+      20.1,
+      2.47
+     ],
+     "size": [
+      4.168,
+      0.8,
+      5.7
+     ]
+    }
+   ],
+   "attachments": {
+    "ClimbStep_1": {
+     "position": [
+      1.2507,
+      4.18,
+      1.1389
+     ],
+     "look": [
+      0.7394,
+      0.0,
+      0.6733
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_2": {
+     "position": [
+      -1.4412,
+      13.1191,
+      -0.4353
+     ],
+     "look": [
+      -0.9573,
+      0.0,
+      -0.2891
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_3": {
+     "position": [
+      1.2953,
+      17.8207,
+      0.551
+     ],
+     "look": [
+      0.9202,
+      0.0,
+      0.3915
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_1": {
+     "position": [
+      1.4104,
+      10.0,
+      -2.4429
+     ],
+     "look": [
+      0.5,
+      0.0,
+      -0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      -1.3012,
+      20.5,
+      2.2537
+     ],
+     "look": [
+      -0.5,
+      0.0,
+      0.866
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "climb": {
+    "trunkPart": "TC_Pine_A_Trunk_Col",
+    "trunk": 0.82,
+    "limbs": [
+     {
+      "y": 10.0,
+      "bearing": 30,
+      "length": 5.15,
+      "width": 1.52,
+      "thick": 0.8
+     },
+     {
+      "y": 20.5,
+      "bearing": 210,
+      "length": 5.7,
+      "width": 1.52,
+      "thick": 0.8
+     }
+    ],
+    "steps": 3,
+    "topOfClimb": 20.5,
+    "crownFrom": 23.6
+   },
+   "farAsset": "TC_Pine_A_Far",
+   "farTrisRatio": 0.28
+  },
+  {
+   "name": "TC_Pine_A_Far",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Pine",
+    "Climbable",
+    "Far"
+   ],
+   "notes": "The far version of TC_Pine_A: the same silhouette with about a third of the triangles, no colliders, no stubs. Use it where a tree is beyond climbing range.",
+   "replaces": "M1_Pine_A",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    48.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    13.92,
+    42.76,
+    14.62
+   ],
+   "boundsMin": [
+    -6.828,
+    -0.6,
+    -7.3719
+   ],
+   "boundsMax": [
+    7.0876,
+    42.1574,
+    7.2473
+   ],
+   "tris": 113,
+   "parts": [
+    {
+     "name": "TC_Pine_A_Far_Wood",
+     "role": "PineBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      96,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 53,
+     "center": [
+      -0.15,
+      19.137,
+      0.26
+     ],
+     "size": [
+      7.783,
+      39.474,
+      13.187
+     ]
+    },
+    {
+     "name": "TC_Pine_A_Far_Needles",
+     "role": "PineNeedle",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      77,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 60,
+     "center": [
+      0.13,
+      31.449,
+      -0.062
+     ],
+     "size": [
+      13.916,
+      21.417,
+      14.619
+     ]
+    }
+   ],
+   "attachments": {}
+  },
+  {
+   "name": "TC_Pine_B",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Pine",
+    "Climbable"
+   ],
+   "notes": "Scots-pine shape like M1_Pine: a clear climbable trunk, stubs every ~4.6 studs on alternating sides, two level seat limbs (the upper one just under the first needle tier, so a sitter is hidden from below and sees out under the crown). Pivot = trunk centre on the ground; the trunk sinks 0.6 below.",
+   "replaces": "M1_Pine_B",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    80.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    14.58,
+    48.81,
+    14.86
+   ],
+   "boundsMin": [
+    -7.0324,
+    -0.6,
+    -7.244
+   ],
+   "boundsMax": [
+    7.5451,
+    48.2127,
+    7.6194
+   ],
+   "tris": 427,
+   "parts": [
+    {
+     "name": "TC_Pine_B_Wood",
+     "role": "PineBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      96,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 295,
+     "center": [
+      -0.193,
+      22.02,
+      -0.23
+     ],
+     "size": [
+      10.067,
+      45.24,
+      11.848
+     ]
+    },
+    {
+     "name": "TC_Pine_B_Needles",
+     "role": "PineNeedle",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      77,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 132,
+     "center": [
+      0.256,
+      36.276,
+      0.188
+     ],
+     "size": [
+      14.578,
+      23.873,
+      14.863
+     ]
+    },
+    {
+     "name": "TC_Pine_B_Trunk_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 28,
+     "center": [
+      0.0,
+      18.672,
+      0.0
+     ],
+     "size": [
+      2.217,
+      38.544,
+      2.217
+     ]
+    },
+    {
+     "name": "TC_Pine_B_Limb1_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      1.656,
+      10.1,
+      1.973
+     ],
+     "size": [
+      4.476,
+      0.8,
+      4.924
+     ]
+    },
+    {
+     "name": "TC_Pine_B_Limb2_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      -1.833,
+      23.1,
+      -2.185
+     ],
+     "size": [
+      4.831,
+      0.8,
+      5.346
+     ]
+    }
+   ],
+   "attachments": {
+    "ClimbStep_1": {
+     "position": [
+      -1.4482,
+      4.18,
+      1.1148
+     ],
+     "look": [
+      -0.7924,
+      0.0,
+      0.61
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_2": {
+     "position": [
+      1.5127,
+      8.612,
+      -0.8468
+     ],
+     "look": [
+      0.8726,
+      0.0,
+      -0.4884
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_3": {
+     "position": [
+      -1.3122,
+      13.547,
+      0.9652
+     ],
+     "look": [
+      -0.8056,
+      0.0,
+      0.5925
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_4": {
+     "position": [
+      0.9633,
+      18.3825,
+      -1.184
+     ],
+     "look": [
+      0.6311,
+      0.0,
+      -0.7757
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_1": {
+     "position": [
+      1.8924,
+      10.5,
+      2.2552
+     ],
+     "look": [
+      0.6428,
+      0.0,
+      0.766
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      -1.7152,
+      23.5,
+      -2.044
+     ],
+     "look": [
+      -0.6428,
+      0.0,
+      -0.766
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "climb": {
+    "trunkPart": "TC_Pine_B_Trunk_Col",
+    "trunk": 0.94,
+    "limbs": [
+     {
+      "y": 10.5,
+      "bearing": 140,
+      "length": 5.15,
+      "width": 1.52,
+      "thick": 0.8
+     },
+     {
+      "y": 23.5,
+      "bearing": 320,
+      "length": 5.7,
+      "width": 1.52,
+      "thick": 0.8
+     }
+    ],
+    "steps": 4,
+    "topOfClimb": 23.5,
+    "crownFrom": 26.8
+   },
+   "farAsset": "TC_Pine_B_Far",
+   "farTrisRatio": 0.26
+  },
+  {
+   "name": "TC_Pine_B_Far",
+   "kind": "Tree",
+   "tags": [
+    "Conifer",
+    "Pine",
+    "Climbable",
+    "Far"
+   ],
+   "notes": "The far version of TC_Pine_B: the same silhouette with about a third of the triangles, no colliders, no stubs. Use it where a tree is beyond climbing range.",
+   "replaces": "M1_Pine_B",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    112.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    15.09,
+    48.92,
+    16.14
+   ],
+   "boundsMin": [
+    -7.5282,
+    -0.6,
+    -9.075
+   ],
+   "boundsMax": [
+    7.5568,
+    48.321,
+    7.0656
+   ],
+   "tris": 113,
+   "parts": [
+    {
+     "name": "TC_Pine_B_Far_Wood",
+     "role": "PineBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      124,
+      96,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 53,
+     "center": [
+      -0.193,
+      22.02,
+      -0.23
+     ],
+     "size": [
+      9.924,
+      45.24,
+      11.69
+     ]
+    },
+    {
+     "name": "TC_Pine_B_Far_Needles",
+     "role": "PineNeedle",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      58,
+      77,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 60,
+     "center": [
+      0.014,
+      36.232,
+      -1.005
+     ],
+     "size": [
+      15.085,
+      24.179,
+      16.141
+     ]
+    }
+   ],
+   "attachments": {}
+  },
+  {
+   "name": "TC_Beech_A",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Beech",
+    "Climbable"
+   ],
+   "notes": "Beech shape like M1_Beech: a stout trunk with a central leader, scaffold limbs into a crown of big faceted lobes with gaps, stubs every ~4.6 studs, and wide level seat limbs (the top one inside the crown's underside: hidden from outside, open view out between the lobes). Pivot = trunk centre on the ground; the trunk sinks 0.6 below.",
+   "replaces": "M1_Beech_A",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    144.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    22.23,
+    25.56,
+    21.17
+   ],
+   "boundsMin": [
+    -12.106,
+    -0.8726,
+    -9.9545
+   ],
+   "boundsMax": [
+    10.1278,
+    24.6859,
+    11.2155
+   ],
+   "tris": 670,
+   "parts": [
+    {
+     "name": "TC_Beech_A_Wood",
+     "role": "BeechBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 446,
+     "center": [
+      0.235,
+      8.276,
+      0.677
+     ],
+     "size": [
+      15.42,
+      18.297,
+      11.365
+     ]
+    },
+    {
+     "name": "TC_Beech_A_Leaves",
+     "role": "BeechLeaf",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      72,
+      94,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 224,
+     "center": [
+      -0.989,
+      16.155,
+      0.631
+     ],
+     "size": [
+      22.234,
+      17.062,
+      21.17
+     ]
+    },
+    {
+     "name": "TC_Beech_A_Trunk_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 28,
+     "center": [
+      0.0,
+      7.1,
+      0.0
+     ],
+     "size": [
+      2.167,
+      15.4,
+      2.167
+     ]
+    },
+    {
+     "name": "TC_Beech_A_Limb1_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      -2.68,
+      6.05,
+      0.975
+     ],
+     "size": [
+      5.945,
+      0.9,
+      3.558
+     ]
+    },
+    {
+     "name": "TC_Beech_A_Limb2_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      2.896,
+      10.35,
+      -1.054
+     ],
+     "size": [
+      6.377,
+      0.9,
+      3.715
+     ]
+    }
+   ],
+   "attachments": {
+    "ClimbStep_1": {
+     "position": [
+      -0.2901,
+      3.58,
+      -1.7434
+     ],
+     "look": [
+      -0.1641,
+      0.0,
+      -0.9864
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "ClimbStep_2": {
+     "position": [
+      0.0466,
+      8.3572,
+      1.6036
+     ],
+     "look": [
+      0.029,
+      0.0,
+      0.9996
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_1": {
+     "position": [
+      -2.7424,
+      6.5,
+      0.9981
+     ],
+     "look": [
+      -0.9397,
+      0.0,
+      0.342
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      2.6044,
+      10.8,
+      -0.9479
+     ],
+     "look": [
+      0.9397,
+      0.0,
+      -0.342
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "climb": {
+    "trunkPart": "TC_Beech_A_Trunk_Col",
+    "trunk": 0.92,
+    "limbs": [
+     {
+      "y": 6.5,
+      "bearing": 250,
+      "length": 5.7,
+      "width": 1.71,
+      "thick": 0.9
+     },
+     {
+      "y": 10.8,
+      "bearing": 70,
+      "length": 6.16,
+      "width": 1.71,
+      "thick": 0.9
+     }
+    ],
+    "steps": 2,
+    "topOfClimb": 10.8,
+    "crownFrom": 10.5
+   },
+   "farAsset": "TC_Beech_A_Far",
+   "farTrisRatio": 0.25
+  },
+  {
+   "name": "TC_Beech_A_Far",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Beech",
+    "Climbable",
+    "Far"
+   ],
+   "notes": "The far version of TC_Beech_A: the same silhouette with about a third of the triangles, no colliders, no stubs. Use it where a tree is beyond climbing range.",
+   "replaces": "M1_Beech_A",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    176.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    19.61,
+    25.29,
+    19.07
+   ],
+   "boundsMin": [
+    -9.4816,
+    -0.6,
+    -7.859
+   ],
+   "boundsMax": [
+    10.1278,
+    24.6859,
+    11.2155
+   ],
+   "tris": 166,
+   "parts": [
+    {
+     "name": "TC_Beech_A_Far_Wood",
+     "role": "BeechBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 80,
+     "center": [
+      0.235,
+      8.049,
+      0.64
+     ],
+     "size": [
+      15.374,
+      17.298,
+      11.291
+     ]
+    },
+    {
+     "name": "TC_Beech_A_Far_Leaves",
+     "role": "BeechLeaf",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      72,
+      94,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 86,
+     "center": [
+      0.323,
+      16.195,
+      1.678
+     ],
+     "size": [
+      19.609,
+      16.982,
+      19.075
+     ]
+    }
+   ],
+   "attachments": {}
+  },
+  {
+   "name": "TC_Beech_B",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Beech",
+    "Climbable"
+   ],
+   "notes": "Beech shape like M1_Beech: a stout trunk with a central leader, scaffold limbs into a crown of big faceted lobes with gaps, stubs every ~4.6 studs, and wide level seat limbs (the top one inside the crown's underside: hidden from outside, open view out between the lobes). Pivot = trunk centre on the ground; the trunk sinks 0.6 below.",
+   "replaces": "M1_Beech_B",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    208.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    27.62,
+    33.4,
+    28.32
+   ],
+   "boundsMin": [
+    -12.9082,
+    -0.873,
+    -14.6982
+   ],
+   "boundsMax": [
+    14.7146,
+    32.5314,
+    13.6179
+   ],
+   "tris": 712,
+   "parts": [
+    {
+     "name": "TC_Beech_B_Wood",
+     "role": "BeechBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 468,
+     "center": [
+      0.376,
+      11.436,
+      0.262
+     ],
+     "size": [
+      17.33,
+      24.618,
+      17.04
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Leaves",
+     "role": "BeechLeaf",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      72,
+      94,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 244,
+     "center": [
+      0.903,
+      20.829,
+      -0.54
+     ],
+     "size": [
+      27.623,
+      23.404,
+      28.316
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Trunk_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Hull",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [
+      "Climbable"
+     ],
+     "tris": 28,
+     "center": [
+      0.0,
+      10.1,
+      0.0
+     ],
+     "size": [
+      2.486,
+      21.4,
+      2.486
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Limb1_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      2.809,
+      7.55,
+      0.495
+     ],
+     "size": [
+      5.914,
+      0.9,
+      2.675
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Limb2_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      -3.035,
+      12.15,
+      -0.535
+     ],
+     "size": [
+      6.367,
+      0.9,
+      2.754
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Limb3_Col",
+     "role": "Col",
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      163,
+      162,
+      165
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": true,
+     "canTouch": false,
+     "transparency": 1.0,
+     "tags": [],
+     "tris": 12,
+     "center": [
+      -0.575,
+      16.35,
+      3.262
+     ],
+     "size": [
+      2.834,
+      0.9,
+      6.82
+     ]
+    }
+   ],
+   "attachments": {
+    "ClimbStep_1": {
+     "position": [
+      -0.4988,
+      3.58,
+      1.8836
+     ],
+     "look": [
+      -0.256,
+      0.0,
+      0.9667
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_1": {
+     "position": [
+      3.0178,
+      8.0,
+      0.5321
+     ],
+     "look": [
+      0.9848,
+      0.0,
+      0.1736
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_2": {
+     "position": [
+      -2.8796,
+      12.6,
+      -0.5078
+     ],
+     "look": [
+      -0.9848,
+      0.0,
+      -0.1736
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    },
+    "Seat_3": {
+     "position": [
+      -0.4855,
+      16.8,
+      2.7535
+     ],
+     "look": [
+      -0.1736,
+      0.0,
+      0.9848
+     ],
+     "up": [
+      0.0,
+      1.0,
+      -0.0
+     ]
+    }
+   },
+   "climb": {
+    "trunkPart": "TC_Beech_B_Trunk_Col",
+    "trunk": 1.06,
+    "limbs": [
+     {
+      "y": 8.0,
+      "bearing": 100,
+      "length": 5.7,
+      "width": 1.71,
+      "thick": 0.9
+     },
+     {
+      "y": 12.6,
+      "bearing": 280,
+      "length": 6.16,
+      "width": 1.71,
+      "thick": 0.9
+     },
+     {
+      "y": 16.8,
+      "bearing": 190,
+      "length": 6.62,
+      "width": 1.71,
+      "thick": 0.9
+     }
+    ],
+    "steps": 1,
+    "topOfClimb": 16.8,
+    "crownFrom": 13.5
+   },
+   "farAsset": "TC_Beech_B_Far",
+   "farTrisRatio": 0.27
+  },
+  {
+   "name": "TC_Beech_B_Far",
+   "kind": "Tree",
+   "tags": [
+    "Broadleaf",
+    "Beech",
+    "Climbable",
+    "Far"
+   ],
+   "notes": "The far version of TC_Beech_B: the same silhouette with about a third of the triangles, no colliders, no stubs. Use it where a tree is beyond climbing range.",
+   "replaces": "M1_Beech_B",
+   "pivot": "trunk centre on the ground",
+   "origin": [
+    240.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    25.83,
+    32.0,
+    26.55
+   ],
+   "boundsMin": [
+    -12.9082,
+    -0.6,
+    -12.9358
+   ],
+   "boundsMax": [
+    12.9221,
+    31.399,
+    13.6179
+   ],
+   "tris": 194,
+   "parts": [
+    {
+     "name": "TC_Beech_B_Far_Wood",
+     "role": "BeechBark",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      122,
+      112,
+      94
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 100,
+     "center": [
+      0.361,
+      10.425,
+      0.38
+     ],
+     "size": [
+      17.269,
+      22.05,
+      16.773
+     ]
+    },
+    {
+     "name": "TC_Beech_B_Far_Leaves",
+     "role": "BeechLeaf",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      72,
+      94,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "transparency": 0.0,
+     "tags": [],
+     "tris": 94,
+     "center": [
+      0.007,
+      20.286,
+      0.341
+     ],
+     "size": [
+      25.83,
+      22.226,
+      26.554
+     ]
+    }
+   ],
+   "attachments": {}
+  }
+ ],
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 18 Nov 2026, approved by the owner (\"Yes, upload them\"). Never re-upload this file; reuse its id. A re-export needs a new upload (new id) recorded here.",
+   "No textures, no vertex colours: one flat colour per part; the importer drops colours, so set Material/Color from this manifest. Not inserted into the place (an upload check only)."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_TreesClimb_v1",
+   "operationId": "e94d1ca2-1974-4026-89c0-4d93a810fc1d",
+   "uploadedUtc": "2026-11-18T11:53:03.747Z",
+   "assetId": 74649547382213,
+   "moderationState": "Approved",
+   "bytes": 233680,
+   "sha256": "2b44fc8b46ebbbfe65de4df5615ee0c2dd557d5cbf613545f3330b64ee8506dd",
+   "revisionId": "1",
+   "file": "TreesClimb.glb"
+  }
+ }
+}
