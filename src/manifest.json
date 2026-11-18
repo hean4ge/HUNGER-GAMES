@@ -560,10 +560,10 @@
       "fnv1a": "3b9fab2f"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainGen",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainGen",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainGen.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainGen.lua",
       "bytes": 142667,
       "fnv1a": "3958007d"
     },
@@ -600,114 +600,114 @@
       "fnv1a": "3c13556d"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/init.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/init.lua",
       "bytes": 807,
       "fnv1a": "ac678824"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData.H",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData.H",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/H.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/H.lua",
       "bytes": 82698,
       "fnv1a": "8c4fdd0d"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData.S",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData.S",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/S.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/S.lua",
       "bytes": 41398,
       "fnv1a": "339b8c01"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData.M",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData.M",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/M.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/M.lua",
       "bytes": 41398,
       "fnv1a": "afb255ac"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData.W",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData.W",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/W.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/W.lua",
       "bytes": 41398,
       "fnv1a": "e6d96107"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.TerrainData.C",
+      "studioPath": "ServerStorage.Vault_ClassicForest.TerrainData.C",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/TerrainData/C.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/TerrainData/C.lua",
       "bytes": 41398,
       "fnv1a": "f7c70dba"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.RealAssets",
+      "studioPath": "ServerStorage.Vault_ClassicForest.RealAssets",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/RealAssets/init.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/RealAssets/init.lua",
       "bytes": 33309,
       "fnv1a": "695d9daf"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.RealAssets.Manifest",
+      "studioPath": "ServerStorage.Vault_ClassicForest.RealAssets.Manifest",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/RealAssets/Manifest.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/RealAssets/Manifest.lua",
       "bytes": 61053,
       "fnv1a": "d446bbbe"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.WaterPointsBuilder",
+      "studioPath": "ServerStorage.Vault_ClassicForest.WaterPointsBuilder",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/WaterPointsBuilder.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/WaterPointsBuilder.lua",
       "bytes": 7402,
       "fnv1a": "552dfc57"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.Populate",
+      "studioPath": "ServerStorage.Vault_ClassicForest.Populate",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/Populate/init.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/Populate/init.lua",
       "bytes": 37851,
       "fnv1a": "07c7cd29"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.Populate.Sites",
+      "studioPath": "ServerStorage.Vault_ClassicForest.Populate.Sites",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/Populate/Sites.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/Populate/Sites.lua",
       "bytes": 58931,
       "fnv1a": "289fc4a0"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.Populate.Scatter",
+      "studioPath": "ServerStorage.Vault_ClassicForest.Populate.Scatter",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/Populate/Scatter.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/Populate/Scatter.lua",
       "bytes": 34240,
       "fnv1a": "b9275a17"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.Populate.Lobby",
+      "studioPath": "ServerStorage.Vault_ClassicForest.Populate.Lobby",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/Populate/Lobby.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/Populate/Lobby.lua",
       "bytes": 16510,
       "fnv1a": "1991a62d"
     },
     {
-      "studioPath": "ServerStorage.WorldGen.Populate.Audit",
+      "studioPath": "ServerStorage.Vault_ClassicForest.Populate.Audit",
       "class": "ModuleScript",
       "runContext": null,
-      "file": "src/ServerStorage/WorldGen/Populate/Audit.lua",
+      "file": "src/ServerStorage/Vault_ClassicForest/Populate/Audit.lua",
       "bytes": 44748,
       "fnv1a": "a033dcbc"
     },

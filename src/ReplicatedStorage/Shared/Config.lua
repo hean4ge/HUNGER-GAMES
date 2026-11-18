@@ -525,7 +525,7 @@ Config.Launch = {
 -- be the same arena's: ArenaService warns at start-up when the layout's Map field and Config.Map disagree.
 --   "ClassicForest"  the forest valley (vaulted in ServerStorage.Vault_ClassicForest): 24 plates round the Spire
 --   "GreenLand"      Map 1, the Green Land: 48 plinths round the Horn, a field of radius 1,800
-Config.Map = "ClassicForest"
+Config.Map = "GreenLand"
 
 Config.Maps = {
 	ClassicForest = {

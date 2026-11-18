@@ -3187,5 +3187,27 @@
   "tris": 29075,
   "longestPart": 1939.464,
   "mostTrisInAPart": 4505
+ },
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 2026-11-15 local (2026-11-16 UTC). Never re-upload a file listed here; reuse its id.",
+   "No textures: one flat colour per part, set by ServerStorage.WorldGen.Map1.Assets from this manifest. The raw insert lives in ServerStorage.MeshImports.Map1_<set> (never edit it); templates in ServerStorage.WorldAssets.Map1."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_Map1_FarValley_v3",
+   "operationId": "937a59b2-d0b2-4e1a-b97b-6f079b9800a2",
+   "uploadedUtc": "2026-11-16T07:42:35.612Z",
+   "assetId": 72938202043990,
+   "moderationState": "Approved",
+   "bytes": 2271852,
+   "sha256": "9065148892f3cc63262b6ecc94ebc0623487d6fa3e4d54243527f6b6b1ead7ae",
+   "revisionId": "1",
+   "rawInsert": "ServerStorage.MeshImports.Map1_FarValley",
+   "templates": "ServerStorage.WorldAssets.Map1",
+   "file": "Map1_FarValley.glb"
+  }
  }
 }

@@ -8310,5 +8310,27 @@
   "tris": 44000,
   "longestPart": 1946.028,
   "mostTrisInAPart": 1115
+ },
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 2026-11-15 local (2026-11-16 UTC). Never re-upload a file listed here; reuse its id.",
+   "No textures: one flat colour per part, set by ServerStorage.WorldGen.Map1.Assets from this manifest. The raw insert lives in ServerStorage.MeshImports.Map1_<set> (never edit it); templates in ServerStorage.WorldAssets.Map1."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_Map1_SkylineCut_v3",
+   "operationId": "d01f5a32-84de-40af-8c1b-120ac428f84d",
+   "uploadedUtc": "2026-11-16T07:42:09.026Z",
+   "assetId": 117769058913053,
+   "moderationState": "Approved",
+   "bytes": 6764888,
+   "sha256": "24b7d8d24bf4cfda71b460505261f36513b23823dba6799507214d113e5b186f",
+   "revisionId": "1",
+   "rawInsert": "ServerStorage.MeshImports.Map1_Skyline",
+   "templates": "ServerStorage.WorldAssets.Map1",
+   "file": "Map1_SkylineCut.glb"
+  }
  }
 }

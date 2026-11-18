@@ -170,6 +170,17 @@ local function waterInWorld(point: Vector3): boolean?
 	return nil
 end
 
+-- Does a ray from above the point meet the water's surface (and not ground first)? Only asked where the voxels hold
+-- water; the same ray as Map1.Audit's water check.
+local function waterShows(point: Vector3): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	params.IgnoreWater = false
+	local hit = workspace:Raycast(point + Vector3.new(0, 5, 0), Vector3.new(0, -12, 0), params)
+	return hit ~= nil and hit.Material == Enum.Material.Water
+end
+
 local HEADER = [[
 --[=[
 	WaterPoints - the drinkable water a thirsty newcomer is pointed to (PlayabilityPlan QW10). Client and server.
@@ -243,6 +254,11 @@ function Water.points(data: any, G: any, maxRadius: number, opts: { [string]: an
 			local real: boolean? = nil
 			if opts.verify ~= false then
 				real = waterInWorld(Vector3.new(p.x, p.y, p.z) + offset)
+				-- Water in the voxels is not always water to see: a bank or a sill between two pools can bulge over a
+				-- wet cell. Map1.Audit asks for a ray from above to meet Water at every point, so the builder does too.
+				if real == true and not waterShows(Vector3.new(p.x, p.y, p.z) + offset) then
+					real = false
+				end
 			end
 			if real == false then
 				stats.dryInWorld += 1

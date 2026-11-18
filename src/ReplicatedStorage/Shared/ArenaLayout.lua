@@ -1,1504 +1,766 @@
 --[[
-	ArenaLayout (v2) - the single source of truth for where things are in the arena: the CLASSIC FOREST ARENA.
-	World generation (ServerStorage.WorldGen.TerrainGen), the set dresser (Populate), the border, the compass,
-	ambience and the round flow all read it. TerrainGen carves the terrain from these numbers, so if you move
-	something here, re-run TerrainGen (see its header) and re-check the dependants.
+	ArenaLayout (v3) - the single source of truth for where things are in the arena: MAP 1, THE GREEN LAND.
+	Until the install this module is Shared.ArenaLayout_GreenLand. The install puts it in Shared.ArenaLayout's place
+	and moves the classic forest layout (v2) to ServerStorage.Vault_ClassicForest. The contract for every name in
+	here is docs/design/Map1Build.md, section 3.1.
 
-	CONVENTIONS
+	The border, the launch, loot, the compass, the mist and the ambience read it, on the server and on every client.
+	So it loads without yielding, never touches ServerStorage, and none of its functions errors or yields.
+	The terrain is NOT made from these numbers, as v2's was: it comes from Blender (the data pack "map1_data",
+	written into the place by ServerStorage.WorldGen.Map1). The tables between the two GENERATED marker lines come
+	from the same export, through tools/map1/gen_layout.py; everything else is written by hand. If the export
+	changes, run that script again; do not edit the block.
+
+	CONVENTIONS (the same as v2)
 	  Angles are degrees clockwise from north. North is -Z, east is +X.
 	  polar(angle, r, y) = Vector3(sin(a) * r, y, -cos(a) * r) around Center (0, 0, 0).
-	  Heights are absolute studs. Densities are "items per 1000 square studs".
+	  Heights are absolute studs.
 
-	THE MAP (centre outwards)
-	  Meadow     r 0..~150 (lobed edge, meadowEdge(angle)): open grassland, 2-5 studs of relief, tilting gently
-	             toward the lake. The Spire plaza is a flat disc r <= PlazaRadius (62) at PlazaY (46).
-	             24 launch plates at r = 52 (Plates[i]); a launch tube is carved under each one.
-	  Forest     the ring between the meadow and the mountains: rolling eroded hills, ridges, gullies, knolls,
-	             rock outcrops and a few clearings (Clearings).
-	  Lake       S/SE, closest shore ~190 from the centre: beach toward the meadow (NW shore), the river mouth (NE),
-	             rocky granite banks (E/SE), reed shallows (SW, where the marsh outflow enters), an island.
-	  Gorge      N/NNE: the river rises at the mountain foot (r ~630), cuts a winding stratified gorge with
-	             step-pool cascades through the highland forest, falls 32 studs into a plunge pool in a horseshoe
-	             amphitheatre (FallsPool), then meanders E/SE to the lake. Fords, a fallen-log spot and a footbridge
-	             spot are in Crossings.
-	  Cliffs     W/NW: an escarpment (layered faces, overhangs, scree aprons) with three caves (Caves). A creek
-	             springs at its foot, runs past the CreekCave (the hidden healing spot) and cascades into the marsh.
-	  Field      E/NE beyond the river: a broad open slope rising east (tall golden grass), a few lone trees/boulders.
-	  Marsh      SW: low wetland at MarshLevel with pools, mud, peat hummocks and a dead-tree stand; it drains to the
-	             lake through a sluggish outflow channel.
-	  Mountains  rise steeply from ~r 660-690 (the border starts at r 640, the invisible Boundary is at r ~712). A
-	             continuous cliff band (MountainWall) rings the arena between the two: no way out on foot, by jumping
-	             or by mantling.
+	THE MAP (centre outwards; heights measured on the export's height map, pass 3)
+	  The Heart      r 0..190. A knoll: level at 46 (BaseHeight) to r 50, then falling to 44.3 at the plinth ring
+	                 (RingHeight) and 43.9 at the turf's edge (r 180). On it stands the horn, on a three-pointed star
+	                 platform whose deck is at 52.05: points at 0, 120 and 240 degrees (out to r 45.7), the horn's
+	                 mouths and bronze steps at 60, 180 and 300 (the steps reach the knoll at r 33). 18 lens-shaped
+	                 flower beds lie like spokes from r 42..69 out to r 136, six teardrop beds flank the three mouth
+	                 lanes (open turf 18 wide, r 33..136), and 48 launch plinths stand at r 150, at 3.75 + 7.5 * k
+	                 degrees (Plates[k + 1]). There are no bores under the plinths in the beta.
+	  The Iris       the meadow, from the Heart to about r 600 (its edge wavers between 570 and 630; about 750 in
+	                 the south): open grass in folds, y 33..96. Three lone trees at r 300 on the mouth bearings,
+	                 eight berms, the eight runner's flags at r 340. The stream crosses its west side in a dip,
+	                 from its spring in the north-west (315 degrees, r 720) to the lake.
+	  The North Wood 300..60 degrees, from the Iris to the Edge: dense conifers on ground that climbs from 60 at
+	                 the Iris to about 240 before the Edge (higher against the ridges). The Crimson Spiral
+	                 (330, r 900), the Flower-Sun Glade (60, r 1,000), the Hedge Hollow (0, r 1,600).
+	  The ridges     EastRidge (60..120 degrees) and WestRidge (240..300): dry shoulders, then the lids with their
+	                 crag bands, up to y 500 and 522 at the field line.
+	  The South Mountain  120..240 degrees beyond r 750: the lake's bowl, scree and crags. The peak is a mesh
+	                 (180 degrees, r 1,550, summit y 640).
+	  The Lake       an ellipse 660 x 256, centred 925 south of the horn. Water at 34 (WaterLevel), up to 14 deep.
+	                 The stream's last 600 studs are at the lake's level too.
+	  The Edge       due north, r 1,640..1,800, within 24 degrees of north: level ground at about 240, then a cliff
+	                 of 107 studs into a canyon (floor 133). Its lip is nearest at r 1,718 (bearing 357) and inside
+	                 the field line between bearings 349 and 12. It is inside the border and it is a real drop.
+	  The field line r 1,800 (PlayRadius): a full round's border starts here. The Crest is the ground between it and
+	                 the invisible Boundary at r 1,900 (BoundaryRadius), y 130..593. The terrain goes on to r 2,750
+	                 (TerrainRadius, up to y 1,143) for looks; past that the far valley and the skyline are meshes.
+	  The lobby      the Tor, 8,800 studs east of the horn (LobbyPosition), outside all of it.
 
-	HEIGHT / GROUND QUERIES (edit time and on the server; on clients only where terrain has streamed in)
-	  groundAt(x, z) -> (y, normal, material)?   raycast on Terrain only, water ignored (the top solid surface;
-	                                             over a cave this is the rock above it - use Caves for interiors)
-	  heightAt(x, z) -> number?                  same y (falls back to the TerrainData grid when nothing is hit)
-	  normalAt(x, z) -> Vector3                  surface normal (Vector3.yAxis when unknown)
-	  slopeAt(x, z) -> degrees                   0 = flat
-	  waterAt(x, z) -> (waterY?, depth)          terrain water surface above the ground there, and its depth
-	  isWater(x, z) -> (boolean, waterY?, depth) true where there is terrain water over the ground
-	  moistureAt(x, z) -> 0..1                   wetness (distance/height to water, drainage lines); grid-backed
-	  distanceToCliff(position) -> studs         flat distance to the nearest steep (> 50 deg) ground; grid-backed
-	  distanceToWater(position) -> studs         flat distance to the nearest water body (analytic)
-	  distanceToRiver(position) -> (d, waterY)   kept from v1: river centreline incl. the gorge stream
-	  distanceToTrail(position) -> studs         kept from v1
-	  forestEdgeDistance(position) -> studs      distance to the nearest open area (meadow, field, lake, marsh,
-	                                             clearings); small values = forest edge (boost bushes there)
-	  getBiome(position) -> "Meadow"|"Forest"|"Lake"|"Gorge"|"Cliffs"|"Field"|"Marsh"|"Mountains"|"Lobby"
-	  isExcluded(position, rule?) -> (boolean, reason?)   the standard exclusion zones (see Exclusions)
-	  "Grid-backed" = read from ServerStorage.WorldGen.TerrainData (8-stud grid written by TerrainGen; server and
-	  edit time only). Without it they fall back to analytic approximations.
+	WHAT A RUNNING GAME READS (12 scripts, 14 names; a missing one either errors or falls back to a forest number)
+	  Center            ArenaService, RoundService, CombatService, ArenaController, HUDController, LaunchController,
+	                    LaunchIntroController, FallenRecapController: the border's centre, where contenders face, the
+	                    compass marker, the Roll Call's bearing
+	  BaseHeight        ArenaService and ArenaController (the border centre's height; the wall hangs from 110 under
+	                    it), CombatService (dummies), RoundService (fallback ring)
+	  PlinthRingRadius  LaunchController and LaunchIntroController ("on the plate ring" = within 8 studs of it),
+	                    RoundService and CombatService (fallbacks)
+	  PlinthCount       RoundService (fallback ring), LaunchIntroController (the cases in the launch hall)
+	  PlazaRadius, AssetInfo.Spire.r   ArenaService: where the Last Stand closes (see below)
+	  LobbyPosition     PlayerService: the fallback spawn, and the rescue of lobby players who fall 80 under its Y
+	  WaterLevel        PlayerService (void line, only if Config has none), ArenaController.Sky (mist height)
+	  Lake, Sectors     ArenaController.Sky: night mist over the lake's ellipse. There is no Marsh table and no sector
+	                    named Marsh or Swamp, because Sky would lay marsh mist there
+	  polar             CombatService, RoundService, ArenaController.Sky (fallback paths)
+	  flatDistance      LootService: loot only inside the round's start ring; the Feast's refill radius
+	  getBiome          AudioController: five points round the camera, five times a second, on every device
 
-	SET DRESSING DATA: Plates, PlateTube, POIs (+ POIHeights, measured), POIKits, Caves, Crossings (+ CrossingHeights),
-	Trails, Clearings, Scatter (per-biome rules naming the realistic assets), AssetInfo (their sizes), Exclusions,
-	LootZones, lootTierAt(position), dangerAt(position), MistHollows. Each is documented where it is defined below.
+	QUERIES
+	  getBiome(position) -> "Meadow" | "Field" | "Forest" | "Cliffs" | "Mountains" | "Lake" | "Lobby"
+	                                 from the replicated region grid (Shared.Map1Regions); distance bands without it
+	  regionAt(x, z) -> (id, name)   Map 1's own region there (Regions[id])
+	  groundAt(x, z) -> (y, normal, material)?   raycast on Terrain only, water ignored; nil where nothing has streamed in
+	  heightAt(x, z) -> number?      the same y, else the coarse height grid in Shared.Map1Regions, else nil
+	  polar, angleOf, flatDistance, isInLake, getSite
+
+	DATA (generated): Regions, Plates, Heart, Sites, TrailNames, Trails, Stream, Edge, Lake. All 166 placements of the
+	export (every bed, hedge, berm and mesh) are in the data pack's Layout blob, for the builders.
 ]]
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local ArenaLayout = {}
 
-ArenaLayout.Version = 2
-ArenaLayout.Seed = 1337 -- kept from v1: the lobby island and the v1 Populate scripts are seeded by it
-ArenaLayout.TerrainSeed = 2611 -- noise seed of the v2 terrain
+ArenaLayout.Version = 3 -- the classic forest layout is 2; its builders (TerrainGen, Populate) assert 2 and refuse this one
+ArenaLayout.Map = "GreenLand" -- = Config.Map
 
 ----------------------------------------------------------------------------------------------------
--- Core numbers
+-- Core numbers (Map1Build 3.1). tools/map1/gen_layout.py checks the plain numbers against the export.
 ----------------------------------------------------------------------------------------------------
 ArenaLayout.Center = Vector3.new(0, 0, 0)
-ArenaLayout.PlazaY = 46 -- the flat Spire plaza (terrain surface)
-ArenaLayout.MeadowY = 46 -- the meadow undulates 2-5 studs around this
-ArenaLayout.BaseHeight = 46 -- v1 name kept (= PlazaY): border centre height, fallback plinth ring, dummies
-ArenaLayout.WaterLevel = 34 -- the lake surface (v1 name kept)
-ArenaLayout.LakeLevel = 34
--- Water levels sit in the lower half of a 4-stud voxel layer where shallow water matters: Roblox only shows a water
--- surface whose voxel holds no solid, so a level 3.5 studs into a layer needs 1.6 studs of depth to show at all.
-ArenaLayout.MarshLevel = 36.5 -- marsh pools (36.5 = 0.5 into a layer: shallow pools render)
-ArenaLayout.SnowLine = 300 -- old snow above roughly this height on the mountains
+ArenaLayout.BaseHeight = 46 -- the knoll under the platform: the border centre's height. NOT the deck (52.05) and not the plinths
+ArenaLayout.RingHeight = 44.3 -- the turf of the plinth ring
+ArenaLayout.WaterLevel = 34 -- the lake's surface
 
-ArenaLayout.PlazaRadius = 62 -- flat disc for the 120-stud SpirePlatform (unrotated, origin = Center)
-ArenaLayout.SpireRadius = 28
-ArenaLayout.PlinthRingRadius = 52
-ArenaLayout.PlinthCount = 24
-ArenaLayout.MeadowRadius = 150 -- nominal; the real edge is meadowEdge(angle) (about 125..178)
-ArenaLayout.ClearingRadius = 150 -- v1 name kept (= MeadowRadius)
-ArenaLayout.PlayRadius = 640 -- the border starts here
-ArenaLayout.MountainRadius = 680 -- the mountain wall rises steeply from about here
-ArenaLayout.BoundaryRadius = 712 -- invisible backstop wall (workspace.Arena.Boundary)
--- The mountain wall: a cliff band all round whose foot is at TerrainGen.wallFoot(angle) (r footMin..footMax). It
--- starts with a sheer `step`, rises to `height` at ~75 degrees, then ~54 degrees for `upperRise` more: no walkable
--- slope, no ledge, nothing to mantle. Keep set dressing (and anything climbable) off it.
-ArenaLayout.MountainWall = { footMin = 651, footMax = 700, step = 18, height = 34, upperRise = 30 }
-ArenaLayout.TerrainRadius = 920 -- terrain is generated out to here
-ArenaLayout.LobbyPosition = Vector3.new(2600, 160, 0) -- top surface centre of the lobby island
+ArenaLayout.PlinthRingRadius = 150
+ArenaLayout.PlinthCount = 48
+ArenaLayout.PlinthOffsetDeg = 3.75 -- plinth k (0..47) stands at PlinthOffsetDeg + k * 360 / PlinthCount degrees
+
+ArenaLayout.PlayRadius = 1800 -- the field line: a full round's border starts here (Config holds the border's numbers)
+ArenaLayout.BoundaryRadius = 1900 -- the invisible backstop (workspace.Arena.Boundary)
+ArenaLayout.TerrainRadius = 2750 -- terrain is written out to here
+
+ArenaLayout.LobbyPosition = Vector3.new(8800, 160, 0) -- top surface centre of the lobby island (it was at x 2600 in v2)
 ArenaLayout.LobbyRadius = 90
 
+----------------------------------------------------------------------------------------------------
+-- The Last Stand: PlazaRadius and AssetInfo.Spire.r
+----------------------------------------------------------------------------------------------------
+-- These two old names are what the game reads, so they stay. On Map 1 they describe no plaza and no spire: they
+-- place the Last Stand (Map1Build decision 11: the ring closes on turf 90 to 100 studs from the centre, not on the
+-- platform).
+--
+-- ArenaService.pickFinalCenter (ArenaService/init.lua, lines 269-301) picks the point the border closes on, once
+-- a round, at a random bearing and at this distance from the centre:
+--     d = min(PlazaRadius - 6, AssetInfo.Spire.r + random(gap[1], gap[2])),  gap = Config.Border.FinalSpireGap = { 15, 25 }
+-- It keeps the point if a ray finds ground within 2 studs of BaseHeight that is nearly level (normal.Y > 0.96); after
+-- 16 misses it takes the first point unchecked.
+--     Spire.r = 75         75 + 15 = 90 and 75 + 25 = 100, so d runs from 90 to 100.
+--     PlazaRadius = 106    106 - 6 = 100: the cap does not cut that range, and it holds d to 100 whatever the gap is.
+-- The lower end needs FinalSpireGap[1] to stay 15: a smaller gap moves the point in by the difference (then raise
+-- Spire.r by as much).
+-- What is at r 90..100 (measured on the export's height map): turf at y 45.16 to 45.31 all the way round, 0.69 to
+-- 0.84 under BaseHeight, so the 2-stud test passes, and level (normal.Y 0.9998). The deck's points end at r 45.7 and
+-- the steps at r 33, so the point is never on the platform. About two fifths of the band is flower bed (the 18 beds
+-- are 12 to 13.5 wide there; a bed is mounded 1 to 1.5, which passes the test where its face is not steep), so the
+-- point can lie on a bed. The three mouth lanes are open turf: Heart.mouths[i].lane.
+--
+-- Every reader of the two names (src/ at commit 25d4073, and the scripts in Studio, 15 November 2026):
+--   PlazaRadius         ArenaService.pickFinalCenter: the cap above (62 if the name is missing).
+--                       TerrainGen v2, lines 1415 and 2021, and its archived copies: the flat plaza disc of the classic
+--                       forest arena. Vaulted builders; they refuse to load against Version 3.
+--   AssetInfo.Spire.r   ArenaService.pickFinalCenter: the distance above (20 if the name is missing).
+--   AssetInfo[name]     Populate.Sites and Populate.Scatter v2: asset sizes for spacing. Vaulted builders, as above.
+-- Nothing else reads either name. RoundService reads Center, PlinthCount, PlinthRingRadius, BaseHeight and polar; the
+-- launch's ring tests (LaunchController, LaunchIntroController) read Center, PlinthRingRadius and PlinthCount;
+-- ArenaController.Sky reads WaterLevel, Lake, Marsh, Sectors and polar. None of them is touched by these two values.
+ArenaLayout.PlazaRadius = 106
+ArenaLayout.AssetInfo = {
+	-- "Spire" = the horn. The three numbers are the horn's real size (w, h, d). r is NOT its footprint: it is the
+	-- distance the Last Stand keeps from the centre, as worked out above.
+	Spire = { 65.8, 53.3, 57.5, r = 75 },
+}
+
+----------------------------------------------------------------------------------------------------
+-- Sectors
+----------------------------------------------------------------------------------------------------
+-- Coarse angular sectors beyond the Iris (for code that walks sectors; use getBiome or regionAt for real queries).
+-- name = the biome getBiome gives there, region = Map 1's own name. There is no marsh on this map: keep any sector
+-- named "Marsh" or "Swamp" out of this list (ArenaController.Sky lays mist over one).
+ArenaLayout.Sectors = {
+	{ name = "Forest", region = "NorthWood", from = 300, to = 60 },
+	{ name = "Cliffs", region = "EastRidge", from = 60, to = 120 },
+	{ name = "Mountains", region = "SouthMountain", from = 120, to = 240 },
+	{ name = "Cliffs", region = "WestRidge", from = 240, to = 300 },
+}
+
+----------------------------------------------------------------------------------------------------
+-- polar, angleOf, flatDistance (as in v2)
+----------------------------------------------------------------------------------------------------
 local CX, CZ = ArenaLayout.Center.X, ArenaLayout.Center.Z
-local sin, cos, rad, deg, sqrt, abs, min, max, floor = math.sin, math.cos, math.rad, math.deg, math.sqrt, math.abs, math.min, math.max, math.floor
+local sin, cos, rad, deg, sqrt = math.sin, math.cos, math.rad, math.deg, math.sqrt
 local atan2 = math.atan2
-local HUGE = math.huge
 
 function ArenaLayout.polar(angleDeg: number, radius: number, y: number?): Vector3
 	local a = rad(angleDeg)
 	return Vector3.new(CX + sin(a) * radius, y or 0, CZ - cos(a) * radius)
 end
-local polar = ArenaLayout.polar
 
 function ArenaLayout.angleOf(position: Vector3): number
 	return deg(atan2(position.X - CX, -(position.Z - CZ))) % 360
 end
 
-function ArenaLayout.flatDistance(position: Vector3): number
-	local dx, dz = position.X - CX, position.Z - CZ
+-- flatDistance(position): the flat distance from the centre, exactly as in v2 (LootService calls it this way).
+-- flatDistance(a, b): the flat distance between two points.
+function ArenaLayout.flatDistance(a: Vector3, b: Vector3?): number
+	local dx, dz
+	if b then
+		dx, dz = a.X - b.X, a.Z - b.Z
+	else
+		dx, dz = a.X - CX, a.Z - CZ
+	end
 	return sqrt(dx * dx + dz * dz)
 end
 
-local function angleXZ(x: number, z: number): number
-	return deg(atan2(x - CX, -(z - CZ))) % 360
-end
-
-local function smooth(e0: number, e1: number, x: number): number
-	local t = (x - e0) / (e1 - e0)
-	if t <= 0 then
-		return 0
-	elseif t >= 1 then
-		return 1
-	end
-	return t * t * (3 - 2 * t)
-end
-ArenaLayout._smooth = smooth
-
 ----------------------------------------------------------------------------------------------------
--- Launch plates (24, r = 52, plate i at angle (i - 1) * 15, LookVector toward the Spire)
-----------------------------------------------------------------------------------------------------
--- Plates[i]: CFrame at the plaza surface (Y = PlazaY), facing the centre. A plate whose bottom face sits on
--- this CFrame is flush with the plaza. Under each plate TerrainGen carves a vertical tube (PlateTube) so the
--- plates can rise out of the ground at the start of a round (the round/day-night owner animates them).
--- NOTE: a SpirePlatform mesh laid over the plaza (r <= 60) covers the tubes: it needs openings at the plates
--- (or the plates rise through it / stand on it, PlateTube.platformTop gives its top offset).
-ArenaLayout.Plates = {}
-for i = 1, ArenaLayout.PlinthCount do
-	local p = polar((i - 1) * 360 / ArenaLayout.PlinthCount, ArenaLayout.PlinthRingRadius, ArenaLayout.PlazaY)
-	ArenaLayout.Plates[i] = CFrame.lookAt(p, Vector3.new(CX, ArenaLayout.PlazaY, CZ))
-end
-ArenaLayout.PlateTube = {
-	-- guaranteed clear radius round every plate axis, from the floor to the plaza. Terrain voxels cannot make 24
-	-- separate clean shafts 13.6 studs apart (a full voxel reaches ~1.8 studs into its empty neighbour), so
-	-- TerrainGen opens ONE annular trench under the plate band (every cell meeting r = 52 +- (radius + 1.8), floor
-	-- floorY) and the realistic SpirePlatform (pivot (0, PlazaY, 0), unrotated) covers it with its deck colliders,
-	-- leaving the 24 granite-lined openings (r 3.4). Keep the SpirePlatform in place whenever the trench exists.
-	radius = 3.6,
-	depth = 12, -- from PlazaY down to the tube floor (the SpirePlatform mesh lines each tube with granite to -11.4)
-	floorY = ArenaLayout.PlazaY - 12, -- solid floor of every tube
-	platformTop = 0.6, -- top of the SpirePlatform mesh above PlazaY (its tread level)
+-- <<< GENERATED by tools/map1/gen_layout.py (do not edit by hand: re-run the script) >>>
+-- From the Blender export of Map 1 (art/blender/map1_green_land.py, seed 50):
+--   Map1_Layout.json   sha256 e2fd2bcf1b1d  52,545 bytes
+--   Map1_Terrain.json  sha256 6fd98911247d  12,488 bytes
+-- (tools/map1/pack_manifest.json lists the same fingerprints under "sources" when the data pack is from this export.)
+
+-- Regions[id]: Map 1's regions by the id the region grid stores (Shared.Map1Regions.regionAt).
+ArenaLayout.Regions = { "Heart", "Iris", "NorthWood", "EastRidge", "SouthMountain", "Lake", "WestRidge", "Edge", "Crest", "Outside" }
+
+-- Plates[i]: launch plate i, in ring order clockwise from north (i = the export's index + 1; its plinth in the
+-- place is workspace.Arena.Plinths.Plinth01 .. Plinth48). bearing: degrees. position: the plinth's pivot, on the
+-- turf. stand: where a contender's feet go (the plinth's Stand attachment, 1.6 above the turf). yaw: the plinth
+-- mesh's yaw about +Y, as the export places it.
+ArenaLayout.Plates = {
+	{ index = 1, bearing = 3.75, position = Vector3.new(9.81, 44.301, -149.679), stand = Vector3.new(9.81, 45.901, -149.679), yaw = -3.75 },
+	{ index = 2, bearing = 11.25, position = Vector3.new(29.264, 44.302, -147.118), stand = Vector3.new(29.264, 45.902, -147.118), yaw = -11.25 },
+	{ index = 3, bearing = 18.75, position = Vector3.new(48.216, 44.301, -142.04), stand = Vector3.new(48.216, 45.901, -142.04), yaw = -18.75 },
+	{ index = 4, bearing = 26.25, position = Vector3.new(66.343, 44.301, -134.531), stand = Vector3.new(66.343, 45.901, -134.531), yaw = -26.25 },
+	{ index = 5, bearing = 33.75, position = Vector3.new(83.336, 44.302, -124.72), stand = Vector3.new(83.336, 45.902, -124.72), yaw = -33.75 },
+	{ index = 6, bearing = 41.25, position = Vector3.new(98.902, 44.302, -112.776), stand = Vector3.new(98.902, 45.902, -112.776), yaw = -41.25 },
+	{ index = 7, bearing = 48.75, position = Vector3.new(112.776, 44.302, -98.902), stand = Vector3.new(112.776, 45.902, -98.902), yaw = -48.75 },
+	{ index = 8, bearing = 56.25, position = Vector3.new(124.72, 44.302, -83.336), stand = Vector3.new(124.72, 45.902, -83.336), yaw = -56.25 },
+	{ index = 9, bearing = 63.75, position = Vector3.new(134.531, 44.301, -66.343), stand = Vector3.new(134.531, 45.901, -66.343), yaw = -63.75 },
+	{ index = 10, bearing = 71.25, position = Vector3.new(142.04, 44.301, -48.216), stand = Vector3.new(142.04, 45.901, -48.216), yaw = -71.25 },
+	{ index = 11, bearing = 78.75, position = Vector3.new(147.118, 44.302, -29.264), stand = Vector3.new(147.118, 45.902, -29.264), yaw = -78.75 },
+	{ index = 12, bearing = 86.25, position = Vector3.new(149.679, 44.301, -9.81), stand = Vector3.new(149.679, 45.901, -9.81), yaw = -86.25 },
+	{ index = 13, bearing = 93.75, position = Vector3.new(149.679, 44.301, 9.81), stand = Vector3.new(149.679, 45.901, 9.81), yaw = -93.75 },
+	{ index = 14, bearing = 101.25, position = Vector3.new(147.118, 44.302, 29.264), stand = Vector3.new(147.118, 45.902, 29.264), yaw = -101.25 },
+	{ index = 15, bearing = 108.75, position = Vector3.new(142.04, 44.301, 48.216), stand = Vector3.new(142.04, 45.901, 48.216), yaw = -108.75 },
+	{ index = 16, bearing = 116.25, position = Vector3.new(134.531, 44.301, 66.343), stand = Vector3.new(134.531, 45.901, 66.343), yaw = -116.25 },
+	{ index = 17, bearing = 123.75, position = Vector3.new(124.72, 44.302, 83.336), stand = Vector3.new(124.72, 45.902, 83.336), yaw = -123.75 },
+	{ index = 18, bearing = 131.25, position = Vector3.new(112.776, 44.302, 98.902), stand = Vector3.new(112.776, 45.902, 98.902), yaw = -131.25 },
+	{ index = 19, bearing = 138.75, position = Vector3.new(98.902, 44.302, 112.776), stand = Vector3.new(98.902, 45.902, 112.776), yaw = -138.75 },
+	{ index = 20, bearing = 146.25, position = Vector3.new(83.336, 44.302, 124.72), stand = Vector3.new(83.336, 45.902, 124.72), yaw = -146.25 },
+	{ index = 21, bearing = 153.75, position = Vector3.new(66.343, 44.301, 134.531), stand = Vector3.new(66.343, 45.901, 134.531), yaw = -153.75 },
+	{ index = 22, bearing = 161.25, position = Vector3.new(48.216, 44.301, 142.04), stand = Vector3.new(48.216, 45.901, 142.04), yaw = -161.25 },
+	{ index = 23, bearing = 168.75, position = Vector3.new(29.264, 44.302, 147.118), stand = Vector3.new(29.264, 45.902, 147.118), yaw = -168.75 },
+	{ index = 24, bearing = 176.25, position = Vector3.new(9.81, 44.301, 149.679), stand = Vector3.new(9.81, 45.901, 149.679), yaw = -176.25 },
+	{ index = 25, bearing = 183.75, position = Vector3.new(-9.81, 44.301, 149.679), stand = Vector3.new(-9.81, 45.901, 149.679), yaw = -183.75 },
+	{ index = 26, bearing = 191.25, position = Vector3.new(-29.264, 44.302, 147.118), stand = Vector3.new(-29.264, 45.902, 147.118), yaw = -191.25 },
+	{ index = 27, bearing = 198.75, position = Vector3.new(-48.216, 44.301, 142.04), stand = Vector3.new(-48.216, 45.901, 142.04), yaw = -198.75 },
+	{ index = 28, bearing = 206.25, position = Vector3.new(-66.343, 44.301, 134.531), stand = Vector3.new(-66.343, 45.901, 134.531), yaw = -206.25 },
+	{ index = 29, bearing = 213.75, position = Vector3.new(-83.336, 44.302, 124.72), stand = Vector3.new(-83.336, 45.902, 124.72), yaw = -213.75 },
+	{ index = 30, bearing = 221.25, position = Vector3.new(-98.902, 44.302, 112.776), stand = Vector3.new(-98.902, 45.902, 112.776), yaw = -221.25 },
+	{ index = 31, bearing = 228.75, position = Vector3.new(-112.776, 44.302, 98.902), stand = Vector3.new(-112.776, 45.902, 98.902), yaw = -228.75 },
+	{ index = 32, bearing = 236.25, position = Vector3.new(-124.72, 44.302, 83.336), stand = Vector3.new(-124.72, 45.902, 83.336), yaw = -236.25 },
+	{ index = 33, bearing = 243.75, position = Vector3.new(-134.531, 44.301, 66.343), stand = Vector3.new(-134.531, 45.901, 66.343), yaw = -243.75 },
+	{ index = 34, bearing = 251.25, position = Vector3.new(-142.04, 44.301, 48.216), stand = Vector3.new(-142.04, 45.901, 48.216), yaw = -251.25 },
+	{ index = 35, bearing = 258.75, position = Vector3.new(-147.118, 44.302, 29.264), stand = Vector3.new(-147.118, 45.902, 29.264), yaw = -258.75 },
+	{ index = 36, bearing = 266.25, position = Vector3.new(-149.679, 44.301, 9.81), stand = Vector3.new(-149.679, 45.901, 9.81), yaw = -266.25 },
+	{ index = 37, bearing = 273.75, position = Vector3.new(-149.679, 44.301, -9.81), stand = Vector3.new(-149.679, 45.901, -9.81), yaw = -273.75 },
+	{ index = 38, bearing = 281.25, position = Vector3.new(-147.118, 44.302, -29.264), stand = Vector3.new(-147.118, 45.902, -29.264), yaw = -281.25 },
+	{ index = 39, bearing = 288.75, position = Vector3.new(-142.04, 44.301, -48.216), stand = Vector3.new(-142.04, 45.901, -48.216), yaw = -288.75 },
+	{ index = 40, bearing = 296.25, position = Vector3.new(-134.531, 44.301, -66.343), stand = Vector3.new(-134.531, 45.901, -66.343), yaw = -296.25 },
+	{ index = 41, bearing = 303.75, position = Vector3.new(-124.72, 44.302, -83.336), stand = Vector3.new(-124.72, 45.902, -83.336), yaw = -303.75 },
+	{ index = 42, bearing = 311.25, position = Vector3.new(-112.776, 44.302, -98.902), stand = Vector3.new(-112.776, 45.902, -98.902), yaw = -311.25 },
+	{ index = 43, bearing = 318.75, position = Vector3.new(-98.902, 44.302, -112.776), stand = Vector3.new(-98.902, 45.902, -112.776), yaw = -318.75 },
+	{ index = 44, bearing = 326.25, position = Vector3.new(-83.336, 44.302, -124.72), stand = Vector3.new(-83.336, 45.902, -124.72), yaw = -326.25 },
+	{ index = 45, bearing = 333.75, position = Vector3.new(-66.343, 44.301, -134.531), stand = Vector3.new(-66.343, 45.901, -134.531), yaw = -333.75 },
+	{ index = 46, bearing = 341.25, position = Vector3.new(-48.216, 44.301, -142.04), stand = Vector3.new(-48.216, 45.901, -142.04), yaw = -341.25 },
+	{ index = 47, bearing = 348.75, position = Vector3.new(-29.264, 44.302, -147.118), stand = Vector3.new(-29.264, 45.902, -147.118), yaw = -348.75 },
+	{ index = 48, bearing = 356.25, position = Vector3.new(-9.81, 44.301, -149.679), stand = Vector3.new(-9.81, 45.901, -149.679), yaw = -356.25 },
 }
-function ArenaLayout.platePosition(i: number): Vector3
-	return ArenaLayout.Plates[i].Position
-end
+
+-- Heart: the horn's knoll and what stands on it. Y values are world heights.
+-- deckY is the deck's walkable top; hornPivotY is where the horn asset's pivot stands (its hems sink 0.05 into
+-- the deck; Map1_Terrain.json calls this plaza.deckY)
+-- the deck is walkable everywhere outside the horn; it is 6.05 above the knoll (a mantle, under the 6.5 limit)
+-- and the stairs at the mouths are the only steps
+ArenaLayout.Heart = {
+	knollY = 46, -- the knoll under the platform, level to r = flatTo
+	flatTo = 50,
+	deckY = 52.05, -- the platform deck's walkable top
+	hornPivotY = 52,
+	ringRadius = 150, -- the plinth ring
+	ringY = 44.3, -- its turf
+	turfRadius = 180, -- the fresher green disc
+	protectedDisc = { 200, 255 }, -- the terrain is the designed dome inside the first radius and blends out by the second
+	starPoints = { 0, 120, 240 }, -- bearings of the platform's three points
+	deckPolygon = { Vector3.new(-40.801, 52.05, 20.67), Vector3.new(-38.301, 52.05, 25), Vector3.new(38.301, 52.05, 25), Vector3.new(40.801, 52.05, 20.67), Vector3.new(2.5, 52.05, -45.67), Vector3.new(-2.5, 52.05, -45.67) },
+	plinth = { count = 48, step = 7.5, offset = 3.75, standHeight = 1.6, drumRadius = 2.15, tubeRadius = 3.6, rimOuterRadius = 4.2 },
+	horn = {
+		colouring = "b",
+		floorY = 52.06, -- the floor inside the horn
+		floorTriangle = { Vector3.new(0, 52.06, -20.6), Vector3.new(17.84, 52.06, 10.3), Vector3.new(-17.84, 52.06, 10.3) },
+		floorInradius = 10.5,
+		coreCornerRadius = 21,
+		apexY = 96,
+		topY = 105,
+		-- six weapon racks are modelled on the floor (props in the mesh, not loot); loot for TwoArenas 3.5's
+		-- interior ring goes at or beside them
+		rackSpots = { Vector3.new(-3, 52.06, -12.5), Vector3.new(3, 52.06, -12.5), Vector3.new(12.325, 52.06, 3.652), Vector3.new(9.325, 52.06, 8.848), Vector3.new(-9.325, 52.06, 8.848), Vector3.new(-12.325, 52.06, 3.652) },
+	},
+	-- mouths: the horn's three doorways. threshold = the doorway on the horn's floor; stairTop and stairFoot = the
+	-- bronze steps from the deck down to the knoll; lane = the open turf from the steps to the plinth ring (no bed
+	-- lies within halfWidth of the mouth's bearing between fromR and toR).
+	mouths = {
+		{ bearing = 60, threshold = Vector3.new(9.093, 52.06, -5.25), openingWidth = 14, openingHeight = 16, frameWidthAtDeck = 19,
+			stairTop = Vector3.new(21.304, 52.05, -12.3), stairFoot = Vector3.new(28.579, 46, -16.5), stairWidth = 18, stairRisers = 4, stairRise = 1.5,
+			lane = { halfWidth = 9, fromR = 33, toR = 136 } },
+		{ bearing = 180, threshold = Vector3.new(0, 52.06, 10.5), openingWidth = 14, openingHeight = 16, frameWidthAtDeck = 19,
+			stairTop = Vector3.new(0, 52.05, 24.6), stairFoot = Vector3.new(0, 46, 33), stairWidth = 18, stairRisers = 4, stairRise = 1.5,
+			lane = { halfWidth = 9, fromR = 33, toR = 136 } },
+		{ bearing = 300, threshold = Vector3.new(-9.093, 52.06, -5.25), openingWidth = 14, openingHeight = 16, frameWidthAtDeck = 19,
+			stairTop = Vector3.new(-21.304, 52.05, -12.3), stairFoot = Vector3.new(-28.579, 46, -16.5), stairWidth = 18, stairRisers = 4, stairRise = 1.5,
+			lane = { halfWidth = 9, fromR = 33, toR = 136 } },
+	},
+	-- sails: one at each star point. solid: the sail is sealed to the walls up to 16 over the deck; nobody
+	-- gets behind it
+	sails = {
+		{ bearing = 0, hemTip = Vector3.new(0, 52, -38), tip = Vector3.new(0, 100, -14), finTip = Vector3.new(0, 105, -7.5) },
+		{ bearing = 120, hemTip = Vector3.new(32.909, 52, 19), tip = Vector3.new(12.124, 100, 7), finTip = Vector3.new(6.495, 105, 3.75) },
+		{ bearing = 240, hemTip = Vector3.new(-32.909, 52, 19), tip = Vector3.new(-12.124, 100, 7), finTip = Vector3.new(-6.495, 105, 3.75) },
+	},
+	-- beds: the 18 lens-shaped flower beds, laid like spokes from innerR to outerR along their bearing; position =
+	-- the bed mesh's pivot (its middle), yaw = its yaw about +Y. Mounded 1 to 1.5 above the turf.
+	beds = {
+		{ asset = "M1_Spoke_00", bearing = 7.5, colour = "yellow", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(11.817, 45.311, -89.759), yaw = -7.5 },
+		{ asset = "M1_Spoke_01", bearing = 22.5, colour = "red", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(34.059, 45.337, -82.225), yaw = -22.5 },
+		{ asset = "M1_Spoke_02", bearing = 37.5, colour = "pink", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(62.398, 45.107, -81.319), yaw = -37.5 },
+		{ asset = "M1_Spoke_03", bearing = 82.5, colour = "lavender", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(101.623, 45.107, -13.379), yaw = -82.5 },
+		{ asset = "M1_Spoke_04", bearing = 97.5, colour = "magenta", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(88.239, 45.337, 11.617), yaw = -97.5 },
+		{ asset = "M1_Spoke_05", bearing = 112.5, colour = "yellow", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(83.642, 45.311, 34.646), yaw = -112.5 },
+		{ asset = "M1_Spoke_06", bearing = 127.5, colour = "red", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(71.825, 45.311, 55.113), yaw = -127.5 },
+		{ asset = "M1_Spoke_07", bearing = 142.5, colour = "pink", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(54.18, 45.337, 70.608), yaw = -142.5 },
+		{ asset = "M1_Spoke_08", bearing = 157.5, colour = "lavender", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(39.225, 45.107, 94.698), yaw = -157.5 },
+		{ asset = "M1_Spoke_09", bearing = 202.5, colour = "magenta", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(-39.225, 45.107, 94.698), yaw = -202.5 },
+		{ asset = "M1_Spoke_10", bearing = 217.5, colour = "yellow", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(-54.18, 45.337, 70.608), yaw = -217.5 },
+		{ asset = "M1_Spoke_11", bearing = 232.5, colour = "red", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(-71.825, 45.311, 55.113), yaw = -232.5 },
+		{ asset = "M1_Spoke_12", bearing = 247.5, colour = "pink", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(-83.642, 45.311, 34.646), yaw = -247.5 },
+		{ asset = "M1_Spoke_13", bearing = 262.5, colour = "lavender", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(-88.239, 45.337, 11.617), yaw = -262.5 },
+		{ asset = "M1_Spoke_14", bearing = 277.5, colour = "magenta", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(-101.623, 45.107, -13.379), yaw = -277.5 },
+		{ asset = "M1_Spoke_15", bearing = 322.5, colour = "yellow", length = 67, width = 12, innerR = 69, outerR = 136, position = Vector3.new(-62.398, 45.107, -81.319), yaw = -322.5 },
+		{ asset = "M1_Spoke_16", bearing = 337.5, colour = "red", length = 94, width = 13.5, innerR = 42, outerR = 136, position = Vector3.new(-34.059, 45.337, -82.225), yaw = -337.5 },
+		{ asset = "M1_Spoke_17", bearing = 352.5, colour = "pink", length = 90.93, width = 13.5, innerR = 45.07, outerR = 136, position = Vector3.new(-11.817, 45.311, -89.759), yaw = -352.5 },
+	},
+	-- teardrops: the 6 big pale petals, one on each side of each mouth lane, laid along it with the round end toward
+	-- the horn. lane = the mouth's bearing; side = which side of the lane, facing out from the horn.
+	teardrops = {
+		{ asset = "M1_TeardropPeriwinkle", lane = 60, side = "left", colour = "periwinkle", length = 68, width = 16, position = Vector3.new(46.926, 45.724, -46.722), yaw = -60 },
+		{ asset = "M1_TeardropMarigold", lane = 60, side = "right", colour = "marigold", length = 60, width = 15, position = Vector3.new(60.212, 45.792, -15.711), yaw = -60 },
+		{ asset = "M1_TeardropPeriwinkle", lane = 180, side = "left", colour = "periwinkle", length = 68, width = 16, position = Vector3.new(17, 45.724, 64), yaw = -180 },
+		{ asset = "M1_TeardropMarigold", lane = 180, side = "right", colour = "marigold", length = 60, width = 15, position = Vector3.new(-16.5, 45.792, 60), yaw = -180 },
+		{ asset = "M1_TeardropPeriwinkle", lane = 300, side = "left", colour = "periwinkle", length = 68, width = 16, position = Vector3.new(-63.926, 45.724, -17.278), yaw = -300 },
+		{ asset = "M1_TeardropMarigold", lane = 300, side = "right", colour = "marigold", length = 60, width = 15, position = Vector3.new(-43.712, 45.792, -44.289), yaw = -300 },
+	},
+}
+
+-- Sites: the design's places as points on the ground (TwoArenas 3.6 and 3.9): rings B, C and D, the eight
+-- runner's flags (F) and seven single berms (S). position.Y is the ground there in the export. built = what the
+-- export really made there; no built = a design anchor only, nothing stands there yet.
+-- From the export: TwoArenas 3.6 and 3.9's sites, runner's flags and single berms as bearings and radii put on
+-- the ground. 'built' says what the generator made there; everything else (springs, pools, the East Brook,
+-- fords, caves, the wreck, the kits) is NOT in the terrain or the meshes yet. The eight M1_Berm items above
+-- stand at the generator's own positions, not at TwoArenas 3.6's sixteen.
+ArenaLayout.Sites = {
+	{ id = "B1", name = "The NW lone tree", bearing = 300, r = 300, position = Vector3.new(-259.808, 43.263, -150), region = "Iris", slopeDegrees = 4.5, waterWithin32 = false, built = "M1_LoneTree" },
+	{ id = "B2", name = "The NE lone tree", bearing = 60, r = 300, position = Vector3.new(259.808, 50.323, -150), region = "Iris", slopeDegrees = 3.9, waterWithin32 = false, built = "M1_LoneTree" },
+	{ id = "B3", name = "The S lone tree", bearing = 180, r = 300, position = Vector3.new(0, 41.961, 300), region = "Iris", slopeDegrees = 3.6, waterWithin32 = false, built = "M1_LoneTree" },
+	{ id = "B4", name = "The Stepping Stones", bearing = 255, r = 340, position = Vector3.new(-328.415, 37.7, 87.998), region = "Iris", slopeDegrees = 17.4, waterWithin32 = true, built = "the stream passes here; no stones or ford are modelled" },
+	{ id = "B5", name = "The Stream Bend", bearing = 215, r = 470, position = Vector3.new(-269.581, 32.815, 385.001), region = "Iris", slopeDegrees = 0.2, waterWithin32 = true, built = "the stream passes here; no pool or gorse bank is shaped" },
+	{ id = "B6a", name = "The Gorse Banks", bearing = 110, r = 430, position = Vector3.new(404.068, 46.087, 147.069), region = "Iris", slopeDegrees = 7, waterWithin32 = false },
+	{ id = "B6b", name = "The Daisy Spring", bearing = 122, r = 440, position = Vector3.new(373.141, 43.271, 233.164), region = "Iris", slopeDegrees = 5.1, waterWithin32 = false },
+	{ id = "B7", name = "The South Fold", bearing = 180, r = 480, position = Vector3.new(0, 41.165, 480), region = "Iris", slopeDegrees = 0.6, waterWithin32 = false },
+	{ id = "B8a", name = "The Butterfly Lane (south end)", bearing = 5, r = 560, position = Vector3.new(48.807, 79.97, -557.869), region = "Iris", slopeDegrees = 19.5, waterWithin32 = false },
+	{ id = "B8b", name = "The Butterfly Lane (north end)", bearing = 5, r = 760, position = Vector3.new(66.238, 151.682, -757.108), region = "NorthWood", slopeDegrees = 18.8, waterWithin32 = false },
+	{ id = "B9", name = "The Cress Spring", bearing = 20, r = 520, position = Vector3.new(177.85, 64.558, -488.64), region = "Iris", slopeDegrees = 17.4, waterWithin32 = false },
+	{ id = "B10a", name = "The West Berms (5)", bearing = 320, r = 450, position = Vector3.new(-289.254, 63.352, -344.72), region = "Iris", slopeDegrees = 2, waterWithin32 = false },
+	{ id = "B10b", name = "The East Berms (4)", bearing = 75, r = 480, position = Vector3.new(463.644, 51.564, -124.233), region = "Iris", slopeDegrees = 7.9, waterWithin32 = false },
+	{ id = "C1", name = "The Crimson Spiral", bearing = 330, r = 900, position = Vector3.new(-450, 182.689, -779.423), region = "NorthWood", slopeDegrees = 0, waterWithin32 = false, built = "M1_CrimsonSpiral" },
+	{ id = "C2", name = "The Flower-Sun Glade", bearing = 60, r = 1000, position = Vector3.new(866.025, 193.401, -500), region = "NorthWood", slopeDegrees = 0, waterWithin32 = false, built = "M1_SunGlade" },
+	{ id = "C3", name = "The wreck", bearing = 20, r = 1250, position = Vector3.new(427.525, 202.026, -1174.616), region = "NorthWood", slopeDegrees = 2.9, waterWithin32 = false },
+	{ id = "C4", name = "The Fern Pools", bearing = 345, r = 1150, position = Vector3.new(-297.642, 191.491, -1110.815), region = "NorthWood", slopeDegrees = 21.2, waterWithin32 = false },
+	{ id = "C5", name = "The Apple Knoll", bearing = 35, r = 700, position = Vector3.new(401.504, 114.373, -573.406), region = "NorthWood", slopeDegrees = 15.7, waterWithin32 = false },
+	{ id = "C6", name = "The North Beach", bearing = 180, r = 800, position = Vector3.new(0, 33.554, 800), region = "SouthMountain", slopeDegrees = 18.7, waterWithin32 = true, built = "the lake's north shore" },
+	{ id = "C7", name = "The Delta", bearing = 197, r = 790, position = Vector3.new(-230.974, 35.917, 755.481), region = "SouthMountain", slopeDegrees = 9.3, waterWithin32 = true, built = "the stream's mouth" },
+	{ id = "C8", name = "The Lake Cave", bearing = 150, r = 980, position = Vector3.new(490, 92.23, 848.705), region = "SouthMountain", slopeDegrees = 41.8, waterWithin32 = false },
+	{ id = "C9", name = "The Flock Scree", bearing = 215, r = 1150, position = Vector3.new(-659.613, 126.958, 942.025), region = "SouthMountain", slopeDegrees = 26.4, waterWithin32 = false },
+	{ id = "C10", name = "The Grotto", bearing = 95, r = 1200, position = Vector3.new(1195.434, 206.16, 104.587), region = "EastRidge", slopeDegrees = 8.9, waterWithin32 = false },
+	{ id = "C11", name = "The Overhang", bearing = 265, r = 1200, position = Vector3.new(-1195.434, 203.27, 104.587), region = "WestRidge", slopeDegrees = 7.5, waterWithin32 = false },
+	{ id = "C12", name = "The West Gully Pines", bearing = 250, r = 800, position = Vector3.new(-751.754, 124.691, 273.616), region = "WestRidge", slopeDegrees = 21.6, waterWithin32 = false },
+	{ id = "C13", name = "The East Brook Ford", bearing = 100, r = 700, position = Vector3.new(689.365, 103.169, 121.554), region = "EastRidge", slopeDegrees = 20, waterWithin32 = false },
+	{ id = "C14", name = "The Burnt Pines", bearing = 195, r = 1280, position = Vector3.new(-331.288, 214.313, 1236.385), region = "SouthMountain", slopeDegrees = 50.3, waterWithin32 = false },
+	{ id = "D1", name = "The Hollow Spring", bearing = 10, r = 1480, position = Vector3.new(256.999, 221.446, -1457.516), region = "NorthWood", slopeDegrees = 5.4, waterWithin32 = false },
+	{ id = "D2", name = "The Hedge Hollow", bearing = 0, r = 1600, position = Vector3.new(0, 216.112, -1600), region = "NorthWood", slopeDegrees = 12.5, waterWithin32 = false, built = "M1_HollyHedge (22 modules)" },
+	{ id = "D3", name = "The Edge", bearing = 0, r = 1750, position = Vector3.new(0, 133.946, -1750), region = "Edge", slopeDegrees = 85.8, waterWithin32 = false, built = "the cliff lip and the canyon are in the terrain" },
+	{ id = "D4", name = "The Shoulder Cairn", bearing = 180, r = 1250, position = Vector3.new(0, 125.26, 1250), region = "SouthMountain", slopeDegrees = 32.2, waterWithin32 = false },
+	{ id = "D5", name = "The East Crest", bearing = 80, r = 1600, position = Vector3.new(1575.692, 284.911, -277.837), region = "EastRidge", slopeDegrees = 20.2, waterWithin32 = false },
+	{ id = "D6", name = "The West Crest", bearing = 280, r = 1600, position = Vector3.new(-1575.692, 365.395, -277.837), region = "WestRidge", slopeDegrees = 26.6, waterWithin32 = false },
+	{ id = "F1", name = "Runner's flag 1", bearing = 22.5, r = 340, position = Vector3.new(130.112, 47.876, -314.119), region = "Iris", slopeDegrees = 6.9, waterWithin32 = false },
+	{ id = "F2", name = "Runner's flag 2", bearing = 67.5, r = 340, position = Vector3.new(314.119, 54.427, -130.112), region = "Iris", slopeDegrees = 2, waterWithin32 = false },
+	{ id = "F3", name = "Runner's flag 3", bearing = 112.5, r = 340, position = Vector3.new(314.119, 45.679, 130.112), region = "Iris", slopeDegrees = 5.3, waterWithin32 = false },
+	{ id = "F4", name = "Runner's flag 4", bearing = 157.5, r = 340, position = Vector3.new(130.112, 42.061, 314.119), region = "Iris", slopeDegrees = 5, waterWithin32 = false },
+	{ id = "F5", name = "Runner's flag 5", bearing = 202.5, r = 340, position = Vector3.new(-130.112, 49.701, 314.119), region = "Iris", slopeDegrees = 2.7, waterWithin32 = false },
+	{ id = "F6", name = "Runner's flag 6", bearing = 247.5, r = 340, position = Vector3.new(-314.119, 38.632, 130.112), region = "Iris", slopeDegrees = 13.7, waterWithin32 = true },
+	{ id = "F7", name = "Runner's flag 7", bearing = 292.5, r = 340, position = Vector3.new(-314.119, 46.402, -130.112), region = "Iris", slopeDegrees = 1.9, waterWithin32 = false },
+	{ id = "F8", name = "Runner's flag 8", bearing = 337.5, r = 340, position = Vector3.new(-130.112, 49.702, -314.119), region = "Iris", slopeDegrees = 3.6, waterWithin32 = false },
+	{ id = "S1", name = "Single berm 1", bearing = 350, r = 640, position = Vector3.new(-111.135, 100.852, -630.277), region = "NorthWood", slopeDegrees = 18.4, waterWithin32 = false },
+	{ id = "S2", name = "Single berm 2", bearing = 40, r = 680, position = Vector3.new(437.096, 109.119, -520.91), region = "NorthWood", slopeDegrees = 17.6, waterWithin32 = false },
+	{ id = "S3", name = "Single berm 3", bearing = 100, r = 820, position = Vector3.new(807.542, 154.83, 142.392), region = "EastRidge", slopeDegrees = 19.5, waterWithin32 = false },
+	{ id = "S4", name = "Single berm 4", bearing = 260, r = 760, position = Vector3.new(-748.454, 117.199, 131.973), region = "WestRidge", slopeDegrees = 26.4, waterWithin32 = false },
+	{ id = "S5", name = "Single berm 5", bearing = 150, r = 560, position = Vector3.new(280, 36.275, 484.974), region = "Iris", slopeDegrees = 2.4, waterWithin32 = false },
+	{ id = "S6", name = "Single berm 6", bearing = 315, r = 820, position = Vector3.new(-579.828, 162.167, -579.828), region = "NorthWood", slopeDegrees = 12.7, waterWithin32 = false },
+	{ id = "S7", name = "Single berm 7", bearing = 70, r = 930, position = Vector3.new(873.914, 177.328, -318.079), region = "EastRidge", slopeDegrees = 10.7, waterWithin32 = false },
+}
+
+-- Trails[i]: the control points of each bare-earth path, heart outwards, Y = 0 (the v2 format). The path painted
+-- into the terrain is a Catmull-Rom curve through them. TrailNames[i] is its name (TwoArenas 3.8).
+ArenaLayout.TrailNames = { "Spiral Path", "Glade Path", "Lake Path" }
+ArenaLayout.Trails = {
+	{ Vector3.new(-173.205, 0, -100), Vector3.new(-285.788, 0, -165), Vector3.new(-482.136, 0, -194.795), Vector3.new(-606.218, 0, -350), Vector3.new(-548.687, 0, -609.379), Vector3.new(-430, 0, -744.782) },
+	{ Vector3.new(173.205, 0, -100), Vector3.new(285.788, 0, -165), Vector3.new(508.829, 0, -317.952), Vector3.new(744.782, 0, -430), Vector3.new(831.384, 0, -480) },
+	{ Vector3.new(0, 0, 200), Vector3.new(0, 0, 330), Vector3.new(39.064, 0, 558.636), Vector3.new(79.442, 0, 755.837) },
+}
+
+-- Stream: the one stream, from its spring in the north-west to the lake. points[i] = the centreline, with Y = the
+-- DESIGNED water level there. The water in the game is voxels written from the data pack after its repairs (sills
+-- between pools, levels snapped into their voxel layer): read the real surface from the terrain, not from here.
+-- From the export: water steps down in ~45-stud pools from ~60 to 34; dip 6-12 deep, ~90 wide
+ArenaLayout.Stream = {
+	halfWidth = 4.6,
+	points = {
+		Vector3.new(-509.117, 60.65, -509.117), Vector3.new(-508.876, 60.65, -488.667), Vector3.new(-508.975, 60.65, -467.932),
+		Vector3.new(-509.314, 60.65, -446.998), Vector3.new(-509.788, 60.65, -425.95), Vector3.new(-510.297, 60.65, -404.873),
+		Vector3.new(-510.737, 60.65, -383.854), Vector3.new(-511.007, 60.65, -362.977), Vector3.new(-511.004, 60.65, -342.327),
+		Vector3.new(-510.627, 60.65, -321.991), Vector3.new(-509.772, 60.65, -302.054), Vector3.new(-508.339, 49.74, -282.6),
+		Vector3.new(-506.224, 49.74, -263.717), Vector3.new(-503.325, 49.74, -245.488), Vector3.new(-498.739, 45.06, -224.201),
+		Vector3.new(-493.092, 45.06, -203.385), Vector3.new(-486.547, 42, -183.065), Vector3.new(-479.263, 42, -163.267),
+		Vector3.new(-471.401, 41.01, -144.015), Vector3.new(-463.124, 41.01, -125.334), Vector3.new(-454.59, 40.9, -107.251),
+		Vector3.new(-445.962, 40.9, -89.79), Vector3.new(-437.401, 40.9, -72.976), Vector3.new(-429.067, 40.9, -56.836),
+		Vector3.new(-420.428, 40.9, -40.15), Vector3.new(-408.561, 40.9, -20.261), Vector3.new(-395.948, 40.9, -2.415),
+		Vector3.new(-383.056, 40.9, 13.97), Vector3.new(-370.347, 40.9, 29.477), Vector3.new(-358.285, 40.9, 44.686),
+		Vector3.new(-347.334, 40.9, 60.182), Vector3.new(-337.958, 40.9, 76.545), Vector3.new(-330.274, 38, 94.951),
+		Vector3.new(-324.597, 38, 114.184), Vector3.new(-320.612, 38, 133.6), Vector3.new(-317.699, 38, 153.284),
+		Vector3.new(-315.234, 37.45, 173.321), Vector3.new(-312.595, 37.45, 193.795), Vector3.new(-309.162, 34, 214.794),
+		Vector3.new(-304.923, 34, 234.487), Vector3.new(-300.308, 34, 253.429), Vector3.new(-295.31, 34, 272.79),
+		Vector3.new(-290.129, 34, 292.486), Vector3.new(-284.964, 34, 312.432), Vector3.new(-280.015, 34, 332.544),
+		Vector3.new(-275.479, 34, 352.736), Vector3.new(-271.557, 34, 372.925), Vector3.new(-268.483, 34, 392.854),
+		Vector3.new(-266.384, 34, 412.546), Vector3.new(-265.009, 34, 432.328), Vector3.new(-264.104, 34, 452.197),
+		Vector3.new(-263.416, 34, 472.154), Vector3.new(-262.694, 34, 492.198), Vector3.new(-261.685, 34, 512.329),
+		Vector3.new(-260.137, 34, 532.546), Vector3.new(-257.797, 34, 552.848), Vector3.new(-254.884, 34, 572.795),
+		Vector3.new(-251.562, 34, 593.545), Vector3.new(-247.884, 34, 614.724), Vector3.new(-243.902, 34, 635.958),
+		Vector3.new(-239.668, 34, 656.869), Vector3.new(-235.235, 34, 677.085), Vector3.new(-230.654, 34, 696.229),
+		Vector3.new(-225.977, 34, 713.927), Vector3.new(-220.586, 34, 731.846), Vector3.new(-212.045, 34, 754.081),
+		Vector3.new(-202.925, 34, 772.49), Vector3.new(-193.481, 34, 788.762), Vector3.new(-183.97, 34, 804.584),
+		Vector3.new(-174.646, 34, 821.644),
+	},
+}
+
+-- Edge: the cliff in the north. lipR = the lip's nominal radius (the real lip wanders: see the header); sector =
+-- the bearings either side of north that the cliff spans; the ground above it is about canyonFloorY + cliffDrop.
+ArenaLayout.Edge = { lipR = 1752, cliffDrop = 107, canyonFloorY = 133, sector = { -21, 21 } }
+
+-- Lake: an ellipse. center.Y = the water level; radiusX = the east-west semi-axis, radiusZ = the north-south one.
+ArenaLayout.Lake = { level = 34, center = Vector3.new(0, 34, 925), radiusX = 330, radiusZ = 128, depth = 14 }
+-- <<< END GENERATED >>>
 
 ----------------------------------------------------------------------------------------------------
--- Geometry helpers (polylines and polygons)
+-- Fields worked out from the generated tables
 ----------------------------------------------------------------------------------------------------
--- Catmull-Rom through control points (x, z), linear attributes between them, sampled every `step` studs.
--- controls: { { x, z, level, hw, depth, tag? } } -> samples { { x, z, y (level), hw, depth, s, tag?, ci } }
-local function sampleSpline(controls, step: number)
-	local out = {}
-	local n = #controls
+-- Plates[i].cframe: on the turf at the plinth, facing the centre (what v2's Plates[i] was).
+for _, plate in ipairs(ArenaLayout.Plates :: { any }) do
+	local p = plate.position
+	plate.cframe = CFrame.lookAt(p, Vector3.new(CX, p.Y, CZ))
+end
+
+-- getSite("B4") or getSite("The Stepping Stones") -> the site, or nil.
+local siteByKey = {}
+for _, site in ipairs(ArenaLayout.Sites) do
+	siteByKey[site.id] = site
+	siteByKey[site.name] = site
+end
+function ArenaLayout.getSite(idOrName: string)
+	return siteByKey[idOrName]
+end
+
+-- Stream.samples: the centreline in the shape v2's River.samples had ({ x, z, y = water level, hw = half-width,
+-- s = distance along it, fall, gorge }); Stream.spring and Stream.mouth are its two ends.
+do
+	local stream = ArenaLayout.Stream :: any
+	local samples = {}
 	local along = 0
-	local lastX, lastZ
-	for i = 1, n - 1 do
-		local c0 = controls[max(i - 1, 1)]
-		local c1, c2 = controls[i], controls[i + 1]
-		local c3 = controls[min(i + 2, n)]
-		local segLen = sqrt((c2[1] - c1[1]) ^ 2 + (c2[2] - c1[2]) ^ 2)
-		local k = max(2, math.ceil(segLen / step))
-		for j = 0, k - 1 do
-			local t = j / k
-			local t2, t3 = t * t, t * t * t
-			local x = 0.5 * ((2 * c1[1]) + (-c0[1] + c2[1]) * t + (2 * c0[1] - 5 * c1[1] + 4 * c2[1] - c3[1]) * t2 + (-c0[1] + 3 * c1[1] - 3 * c2[1] + c3[1]) * t3)
-			local z = 0.5 * ((2 * c1[2]) + (-c0[2] + c2[2]) * t + (2 * c0[2] - 5 * c1[2] + 4 * c2[2] - c3[2]) * t2 + (-c0[2] + 3 * c1[2] - 3 * c2[2] + c3[2]) * t3)
-			if lastX then
-				along += sqrt((x - lastX) ^ 2 + (z - lastZ) ^ 2)
-			end
-			lastX, lastZ = x, z
-			table.insert(out, {
-				x = x,
-				z = z,
-				y = c1[3] + (c2[3] - c1[3]) * t,
-				hw = c1[4] + (c2[4] - c1[4]) * t,
-				depth = c1[5] + (c2[5] - c1[5]) * t,
-				s = along,
-				tag = (j == 0) and c1[6] or nil,
-				ci = i + t,
-			})
+	for i, p in ipairs(stream.points) do
+		if i > 1 then
+			local q = stream.points[i - 1]
+			along += sqrt((p.X - q.X) ^ 2 + (p.Z - q.Z) ^ 2)
 		end
+		samples[i] = { x = p.X, z = p.Z, y = p.Y, hw = stream.halfWidth, s = along, fall = false, gorge = 0 }
 	end
-	local cl = controls[n]
-	along += sqrt((cl[1] - lastX) ^ 2 + (cl[2] - lastZ) ^ 2)
-	table.insert(out, { x = cl[1], z = cl[2], y = cl[3], hw = cl[4], depth = cl[5], s = along, tag = cl[6], ci = n })
-	return out
-end
-ArenaLayout._sampleSpline = sampleSpline
-
--- Nearest point on a sample polyline: (flat distance, interpolated sample fields, segment index, u)
-local function nearestOnSamples(samples, x: number, z: number)
-	local best, bi, bu = HUGE, 1, 0
-	for i = 1, #samples - 1 do
-		local a, b = samples[i], samples[i + 1]
-		local dx, dz = b.x - a.x, b.z - a.z
-		local l2 = dx * dx + dz * dz
-		local u = 0
-		if l2 > 1e-9 then
-			u = ((x - a.x) * dx + (z - a.z) * dz) / l2
-			if u < 0 then
-				u = 0
-			elseif u > 1 then
-				u = 1
-			end
-		end
-		local qx, qz = x - (a.x + dx * u), z - (a.z + dz * u)
-		local d2 = qx * qx + qz * qz
-		if d2 < best then
-			best, bi, bu = d2, i, u
-		end
-	end
-	return sqrt(best), bi, bu
-end
-ArenaLayout._nearestOnSamples = nearestOnSamples
-
-local function lerpSample(samples, i: number, u: number, field: string): number
-	local a, b = samples[i], samples[min(i + 1, #samples)]
-	return a[field] + (b[field] - a[field]) * u
-end
-ArenaLayout._lerpSample = lerpSample
-
--- Polygon (list of {x, z}) helpers
-local function pointInPolygon(poly, x: number, z: number): boolean
-	local inside = false
-	local n = #poly
-	local j = n
-	for i = 1, n do
-		local xi, zi = poly[i][1], poly[i][2]
-		local xj, zj = poly[j][1], poly[j][2]
-		if (zi > z) ~= (zj > z) and x < (xj - xi) * (z - zi) / (zj - zi) + xi then
-			inside = not inside
-		end
-		j = i
-	end
-	return inside
+	stream.samples = samples
+	stream.length = along
+	stream.spring = stream.points[1]
+	stream.mouth = stream.points[#stream.points]
 end
 
-local function distanceToPolygonEdge(poly, x: number, z: number): number
-	local best = HUGE
-	local n = #poly
-	for i = 1, n do
-		local a, b = poly[i], poly[i % n + 1]
-		local dx, dz = b[1] - a[1], b[2] - a[2]
-		local l2 = dx * dx + dz * dz
-		local u = 0
-		if l2 > 1e-9 then
-			u = math.clamp(((x - a[1]) * dx + (z - a[2]) * dz) / l2, 0, 1)
-		end
-		local qx, qz = x - (a[1] + dx * u), z - (a[2] + dz * u)
-		local d2 = qx * qx + qz * qz
-		if d2 < best then
-			best = d2
-		end
-	end
-	return sqrt(best)
+-- The lake is an ellipse. shoreRadius(phi): from its centre to the shore in direction phi (degrees clockwise from
+-- north), as v2's Lake.shoreRadius. isInLake(position, margin): inside the ellipse grown by `margin` studs.
+local lakeTable = ArenaLayout.Lake :: any
+local LAKE_X, LAKE_Z = lakeTable.center.X, lakeTable.center.Z
+local LAKE_RX, LAKE_RZ = lakeTable.radiusX, lakeTable.radiusZ
+
+function lakeTable.shoreRadius(phi: number): number
+	local a = rad(phi)
+	return 1 / sqrt((sin(a) / LAKE_RX) ^ 2 + (cos(a) / LAKE_RZ) ^ 2)
 end
 
--- Signed distance to a polygon: negative inside.
-local function signedPolygonDistance(poly, x: number, z: number): number
-	local d = distanceToPolygonEdge(poly, x, z)
-	if pointInPolygon(poly, x, z) then
-		return -d
-	end
-	return d
-end
-ArenaLayout._pointInPolygon = pointInPolygon
-ArenaLayout._signedPolygonDistance = signedPolygonDistance
-
-local function polarPolygon(list)
-	local poly = {}
-	for i, p in ipairs(list) do
-		local v = polar(p[1], p[2])
-		poly[i] = { v.X, v.Z }
-	end
-	return poly
+local function inLake(x: number, z: number, margin: number): boolean
+	local dx, dz = (x - LAKE_X) / (LAKE_RX + margin), (z - LAKE_Z) / (LAKE_RZ + margin)
+	return dx * dx + dz * dz <= 1
 end
 
--- control list in polar form { angle, r, level, hw, depth, tag? } -> world {x, z, ...}
-local function polarControls(list)
-	local out = {}
-	for i, c in ipairs(list) do
-		local v = polar(c[1], c[2])
-		out[i] = { v.X, v.Z, c[3], c[4], c[5], c[6] }
-	end
-	return out
-end
-
--- Steps a gradient section of a stream into flat pools with small cascades (`drop` studs each).
--- Cascades sit where the smooth level crosses a multiple of `drop`; the stepped level is never above the smooth one
--- by more than `drop`, and is exactly the smooth level at the section ends.
-local function stepLevels(samples, fromS: number, toS: number, drop: number)
-	local first, last
-	for i, smp in ipairs(samples) do
-		if smp.s >= fromS and smp.s <= toS then
-			first = first or i
-			last = i
-		end
-	end
-	if not first then
-		return
-	end
-	local top = samples[first].y
-	for i = first, last do
-		local smp = samples[i]
-		smp.smoothY = smp.y
-		local k = floor((top - smp.y) / drop + 1e-6)
-		local stepped = top - k * drop
-		if i == last then
-			stepped = smp.y
-		end
-		smp.cascade = (i > first) and (samples[i - 1].y - stepped > 0.01) or false
-		smp.y = stepped
-	end
-end
-
-----------------------------------------------------------------------------------------------------
--- The meadow edge and the mountain edge (functions of angle)
-----------------------------------------------------------------------------------------------------
-function ArenaLayout.meadowEdge(angleDeg: number): number
-	local a = angleDeg
-	return 150 + 14 * sin(rad(3 * a + 40)) + 9 * sin(rad(5 * a + 160)) + 5 * sin(rad(9 * a + 20))
-end
-
-function ArenaLayout.mountainEdge(angleDeg: number): number
-	local a = angleDeg
-	return 676 + 10 * sin(rad(4 * a + 30)) + 6 * sin(rad(7 * a + 100))
-end
-
-----------------------------------------------------------------------------------------------------
--- The river: spring (r ~630, N) -> stratified gorge with step-pool cascades -> waterfall -> plunge pool ->
--- meanders E/SE -> lake. Control points { angle, r, waterY, halfWidth, depth, tag }.
-----------------------------------------------------------------------------------------------------
-local RIVER_CONTROLS = {
-	{ 3.5, 632, 156, 2.2, 0.8, "spring" },
-	{ 5, 610, 151, 3.0, 1.0 },
-	{ 8, 590, 142, 3.6, 1.2, "gorge" }, -- the gorge starts here
-	{ 12, 568, 130, 4.0, 1.4 },
-	{ 17, 548, 120, 4.4, 1.5 },
-	{ 14, 526, 111, 4.4, 1.5 },
-	{ 18, 506, 103, 4.6, 1.6 },
-	{ 25, 488, 97, 4.8, 1.6 },
-	{ 24, 466, 92, 4.8, 1.7 },
-	{ 29, 446, 89, 5.0, 1.7 },
-	{ 33, 426, 87, 5.2, 1.6 },
-	{ 34, 410, 86, 5.4, 1.2, "lip" }, -- waterfall lip
-	{ 36, 386, 54, 7.0, 6.0, "pool" }, -- plunge pool centre
-	{ 44, 366, 53.2, 6.5, 2.6 },
-	{ 52, 350, 52.2, 7.0, 2.8 },
-	{ 59, 332, 49.9, 7.4, 2.8, "ford" }, -- NorthFord (TerrainGen widens and shallows the bed around fords; a ford level sits <= 2 studs into a voxel layer, or it renders deeper)
-	{ 68, 322, 49.8, 7.5, 3.0 },
-	{ 78, 330, 48.4, 7.8, 3.2 },
-	{ 88, 322, 47.0, 8.0, 3.0 },
-	{ 97, 308, 45.6, 8.2, 3.0, "ford" }, -- EastFord
-	{ 106, 304, 44.0, 8.4, 3.2 },
-	{ 115, 298, 42.2, 8.6, 3.2 },
-	{ 123, 286, 40.6, 8.8, 3.0, "ford" }, -- LakeFord (40.6, not 40.0: a level on a voxel boundary needs 2 studs of depth)
-	{ 130, 272, 38.0, 9.0, 2.8 },
-	{ 137, 260, 36.0, 9.5, 2.4 },
-	{ 143, 250, 34.0, 10.0, 2.0, "mouth" },
-}
-
-local River = {}
-ArenaLayout.River = River
-River.width = 16 -- nominal lowland width (it varies 13-22; gorge stream 7-11; fords are wider and shallow)
-River.depth = 3.2 -- nominal lowland depth
-River.controls = polarControls(RIVER_CONTROLS)
-River.samples = sampleSpline(River.controls, 4)
-do
-	-- find the gorge start, the lip and the pool along the samples
-	local gorgeS, lipS, poolS
-	for _, smp in ipairs(River.samples) do
-		if smp.tag == "gorge" then
-			gorgeS = smp.s
-		elseif smp.tag == "lip" then
-			lipS = smp.s
-		elseif smp.tag == "pool" then
-			poolS = smp.s
-		end
-	end
-	River.gorgeFromS, River.lipS, River.poolS = gorgeS, lipS, poolS
-	-- step-pool cascades in the gorge (3.5-stud drops) and on the spring run (2.5)
-	stepLevels(River.samples, 0, gorgeS, 2.5)
-	stepLevels(River.samples, gorgeS, lipS, 3.5)
-	-- the fall: between the lip and the pool every sample belongs to the waterfall
-	for _, smp in ipairs(River.samples) do
-		smp.gorge = (smp.s >= gorgeS - 8 and smp.s <= lipS) and 1 or 0
-		smp.fall = smp.s > lipS and smp.s < poolS
-		if smp.fall then
-			smp.y = 54 -- below the face the water is the plunge pool
-		end
-	end
-	-- fords: shallow, wider, gravel; marked on the samples within 14 studs of a "ford" control point
-	local fordS = {}
-	for _, smp in ipairs(River.samples) do
-		if smp.tag == "ford" then
-			table.insert(fordS, smp.s)
-		end
-	end
-	for _, smp in ipairs(River.samples) do
-		local f = 0
-		for _, s in ipairs(fordS) do
-			f = max(f, 1 - smooth(6, 16, abs(smp.s - s)))
-		end
-		smp.ford = f
-	end
-end
-River.points = {}
-River.levels = {}
-for i, c in ipairs(River.controls) do
-	River.points[i] = Vector3.new(c[1], c[3], c[2])
-	River.levels[i] = c[3]
-end
-River.path = {} -- smoothed centreline the terrain carves, Y = water surface (v1 field)
-for i, smp in ipairs(River.samples) do
-	River.path[i] = Vector3.new(smp.x, smp.y, smp.z)
-end
-River.pool = { center = polar(36, 386, 54), radius = 18, level = 54 }
-River.fallTop = 86 -- waterfall lip water level
-River.fall = {
-	lip = polar(34, 410, 86), -- top of the falls (centre of the stream at the lip)
-	base = polar(35.4, 397, 54), -- where the water hits the pool (the face base)
-	top = 86,
-	bottom = 54,
-	height = 32,
-}
-River.waterfall = River.fall.base -- v1 field: where the waterfall roars
--- v1 field "upstream" = the stream above the falls (spring -> lip), with its own path
-River.upstream = { width = 9, depth = 1.6, level = River.fallTop, springRadius = 5, points = {}, path = {} }
-for _, smp in ipairs(River.samples) do
-	if smp.s <= (River.lipS or 0) then
-		table.insert(River.upstream.path, Vector3.new(smp.x, smp.y, smp.z))
-	end
-end
-for i = 1, 12 do
-	River.upstream.points[i] = River.points[i]
-end
-River.spring = polar(3.5, 632, 156)
-
-----------------------------------------------------------------------------------------------------
--- The creek (W): springs at the foot of the escarpment, runs past the CreekCave, cascades into the marsh.
-----------------------------------------------------------------------------------------------------
-local CREEK_CONTROLS = {
-	{ 334, 440, 74.5, 1.6, 0.6, "spring" },
-	{ 326, 428, 73.6, 2.0, 0.8 },
-	{ 318, 419, 72.4, 2.2, 0.9 },
-	{ 310, 422, 71.0, 2.4, 1.0 },
-	{ 304, 433.5, 69.8, 2.4, 1.0, "cave" }, -- beside the CreekCave mouth
-	{ 298, 433, 68.6, 2.5, 1.0 },
-	{ 290, 416, 67.0, 2.6, 1.0 },
-	{ 282, 407, 65.0, 2.6, 1.0 },
-	{ 274, 403, 62.4, 2.8, 1.0 },
-	{ 267, 400, 59.4, 2.8, 1.0 },
-	{ 261, 396, 55.6, 2.8, 1.0 },
-	{ 256, 391, 51.2, 3.0, 1.0 },
-	{ 252, 386, 46.8, 3.0, 1.0 },
-	{ 249, 381, 42.6, 3.0, 1.0 },
-	{ 247, 376, 39.0, 3.2, 1.0 },
-	{ 245, 370, 36.5, 3.4, 1.0, "mouth" }, -- = MarshLevel
-}
-local Creek = {}
-ArenaLayout.Creek = Creek
-Creek.width = 5
-Creek.depth = 1
-Creek.controls = polarControls(CREEK_CONTROLS)
-Creek.samples = sampleSpline(Creek.controls, 4)
-do
-	local steepFrom
-	for _, smp in ipairs(Creek.samples) do
-		if not steepFrom and smp.ci >= 10 then
-			steepFrom = smp.s
-		end
-		smp.gorge, smp.ford, smp.fall = 0, 0, false
-	end
-	stepLevels(Creek.samples, steepFrom or 0, Creek.samples[#Creek.samples].s, 2.2)
-end
-Creek.path = {}
-for i, smp in ipairs(Creek.samples) do
-	Creek.path[i] = Vector3.new(smp.x, smp.y, smp.z)
-end
-Creek.spring = polar(334, 440, 74.5)
-
-----------------------------------------------------------------------------------------------------
--- The marsh (SW) and its outflow to the lake
-----------------------------------------------------------------------------------------------------
-local Marsh = {}
-ArenaLayout.Marsh = Marsh
-Marsh.level = ArenaLayout.MarshLevel
-Marsh.center = polar(222, 350, ArenaLayout.MarshLevel)
-Marsh.radiusX, Marsh.radiusZ = 110, 115 -- an ellipse inside the outline (the client mist uses it)
-Marsh.outline = polarPolygon({
-	{ 202, 290 }, { 212, 276 }, { 224, 272 }, { 236, 282 }, { 244, 302 }, { 248, 330 }, { 248, 360 },
-	{ 244, 388 }, { 236, 410 }, { 224, 425 }, { 212, 428 }, { 203, 414 }, { 198, 390 }, { 196, 360 }, { 197, 322 },
-})
-Marsh.snags = polar(220, 385) -- the dead-tree stand
-local OUTFLOW_CONTROLS = {
-	{ 207, 292, 36.5, 2.6, 0.9 }, -- = MarshLevel
-	{ 200, 287, 36.0, 3.0, 1.0 },
-	{ 192, 284, 35.5, 3.2, 1.0 },
-	{ 184, 280, 35.0, 3.4, 1.0 },
-	{ 178, 276, 34.5, 3.6, 1.0 },
-	{ 172, 272, 34.0, 4.0, 1.0, "mouth" },
-}
-local Outflow = {}
-ArenaLayout.Outflow = Outflow
-Outflow.controls = polarControls(OUTFLOW_CONTROLS)
-Outflow.samples = sampleSpline(Outflow.controls, 4)
-for _, smp in ipairs(Outflow.samples) do
-	smp.gorge, smp.ford, smp.fall = 0, 0, false
-end
-Outflow.path = {}
-for i, smp in ipairs(Outflow.samples) do
-	Outflow.path[i] = Vector3.new(smp.x, smp.y, smp.z)
-end
-function ArenaLayout.isInMarsh(position: Vector3, margin: number?): boolean
-	return signedPolygonDistance(Marsh.outline, position.X, position.Z) < (margin or 0)
-end
-
-----------------------------------------------------------------------------------------------------
--- The lake (S/SE)
-----------------------------------------------------------------------------------------------------
-local Lake = {}
-ArenaLayout.Lake = Lake
-Lake.level = ArenaLayout.LakeLevel
-Lake.center = polar(158, 285, ArenaLayout.LakeLevel)
-Lake.radiusX = 92 -- v1 fields (approximate; the real shore is Lake.shore)
-Lake.radiusZ = 92
-Lake.depth = 11
--- shore radius around the lake centre by direction phi (degrees clockwise from north)
-function Lake.shoreRadius(phi: number): number
-	return 90 + 13 * sin(rad(2 * phi + 40)) + 8 * sin(rad(3 * phi + 130)) + 5 * sin(rad(5 * phi + 70))
-end
-Lake.shore = {} -- polygon {x, z}, 72 points
-for k = 0, 71 do
-	local phi = k * 5
-	local r = Lake.shoreRadius(phi)
-	Lake.shore[k + 1] = { Lake.center.X + sin(rad(phi)) * r, Lake.center.Z - cos(rad(phi)) * r }
-end
--- Shore character by direction phi from the lake centre (weights 0..1 that overlap softly):
---   beach: NW shore facing the meadow (sand, gentle); rocky: E/SE (granite banks, steep);
---   reeds: SW/W (wide mud shelf 0.5-1.5 deep, the marsh outflow enters); mouth: NE (river delta, pebbles).
-local function arcWeight(phi: number, centre: number, half: number): number
-	local d = abs(((phi - centre + 180) % 360) - 180)
-	return 1 - smooth(half * 0.55, half, d)
-end
-function Lake.shoreStyle(phi: number)
-	return {
-		beach = arcWeight(phi, 338, 58),
-		rocky = arcWeight(phi, 108, 52),
-		reeds = arcWeight(phi, 258, 40),
-		mouth = arcWeight(phi, 34, 22),
-	}
-end
-Lake.island = { center = polar(161, 318, 41), radius = 15, topY = 41 }
 function ArenaLayout.isInLake(position: Vector3, margin: number?): boolean
-	return signedPolygonDistance(Lake.shore, position.X, position.Z) < (margin or 0)
-end
-function Lake.phiOf(x: number, z: number): number
-	return deg(atan2(x - Lake.center.X, -(z - Lake.center.Z))) % 360
+	return inLake(position.X, position.Z, margin or 0)
 end
 
 ----------------------------------------------------------------------------------------------------
--- The escarpment (W/NW): top edge line with cliff height and scree apron width (angle, rTop, height, scree)
+-- Regions and biomes
 ----------------------------------------------------------------------------------------------------
-local ESCARPMENT = {
-	{ 344, 490, 0, 0 },
-	{ 339, 478, 22, 10 },
-	{ 332, 467, 38, 16 },
-	{ 324, 458, 48, 22 },
-	{ 316, 452, 52, 20 },
-	{ 309, 448, 54, 8 },
-	{ 304, 447.5, 54, 2 }, -- CreekCave: the creek hugs the face here
-	{ 299, 447, 53, 3 },
-	{ 293, 447.5, 51, 14 },
-	{ 286, 447, 48, 26 }, -- LedgeCave above the scree
-	{ 279, 444, 42, 26 },
-	{ 272, 438, 32, 20 },
-	{ 266, 431, 22, 14 },
-	{ 261, 423, 12, 8 },
-	{ 257, 415, 0, 0 },
+-- Map 1 has ten regions (Regions, generated). The ambience knows biomes by v2's names, so each region is given the
+-- v2 name whose sound suits it, and AudioController needs no change (Map1Build decision 13). What AudioController
+-- plays for each name: its BIOME_MIX row (the weights of its Amb_ beds by day / by night) and its BIOME_ENV reverb.
+--   Meadow     ForestDay 0.8, Wind 0.45 / ForestNight 0.85, Wind 0.35; reverb Open
+--   Field      Wind 0.75, ForestDay 0.55 / ForestNight 0.7, Wind 0.55; reverb Open
+--   Forest     PineForest 1, ForestDay 0.45, Wind 0.25 / ForestNight 0.9, PineForest 0.45, Wind 0.25; reverb Forest
+--   Cliffs     Highlands 0.8, Wind 0.6, PineForest 0.3 / Wind 0.8, Highlands 0.35, ForestNight 0.3; reverb Mountains
+--   Mountains  Wind 1, Highlands 0.45 / Wind 1; reverb Mountains
+--   Lake       Lake 1, ForestDay 0.3 / Lake 0.9, Swamp 0.35, ForestNight 0.3; reverb Lake
+--   Lobby      Lobby 1, Wind 0.4, day and night; reverb Open
+-- So the Heart sounds like the meadow it is: the day bed with a little wind. The open Iris is the same two beds with
+-- the wind on top, which tells you that you have left the ring. The North Wood is the pine forest. The ridges and
+-- the Edge are highland and wind with a mountain's echo (and a little pine: the wood is behind the Edge and in the
+-- ridges' gullies). The mountain and everything past the field line is wind. The lake is water.
+-- "Gorge" and "Marsh" are not used: Map 1 has neither. A name AudioController does not know would play its
+-- "Woodland" bed with forest reverb, so only names from its two tables belong here.
+local REGION_BIOME = {
+	Heart = "Meadow",
+	Iris = "Field",
+	NorthWood = "Forest",
+	EastRidge = "Cliffs",
+	WestRidge = "Cliffs",
+	SouthMountain = "Mountains",
+	Lake = "Lake",
+	Edge = "Cliffs",
+	Crest = "Mountains",
+	Outside = "Mountains",
 }
-local Escarpment = { keys = ESCARPMENT, faceWidth = 8 }
-ArenaLayout.Escarpment = Escarpment
--- interpolated keys by angle -> rTop, height, scree (nil outside its angular range)
-function Escarpment.at(angleDeg: number)
-	local a = angleDeg % 360
-	-- the table runs 344 -> 257 (decreasing)
-	if a > 344 or a < 257 then
+local OUTSIDE_BIOME = "Mountains" -- beyond the map, and for a position that is not a position
+ArenaLayout.RegionBiome = REGION_BIOME
+ArenaLayout.Biomes = { "Meadow", "Field", "Forest", "Cliffs", "Mountains", "Lake", "Lobby" }
+
+-- The lake's region is the water alone, so its shore would sound like the mountain. Within this many studs of the
+-- water's edge the biome is "Lake" (v2 did the same, with 10 studs round a much smaller lake).
+local LAKE_SHORE = 24
+
+local REGION_ID = {}
+for id, name in ipairs(ArenaLayout.Regions) do
+	REGION_ID[name] = id
+end
+
+-- Distance bands: Map 1's regions from radius and bearing alone. These are the Blender generator's own rules without
+-- their noise (the Iris ends at 600 +- 80 there, 150 farther out in the south). Used wherever the region grid cannot
+-- answer: before Shared.Map1Regions has replicated, if it is missing or broken, and outside its +-1,920 studs.
+local HEART_R, IRIS_R, IRIS_SOUTH_R, EDGE_FROM_R, EDGE_HALF_DEG = 190, 600, 750, 1640, 24
+local PLAY_R, BOUNDARY_R = ArenaLayout.PlayRadius, ArenaLayout.BoundaryRadius
+
+local function bandRegion(x: number, z: number): number
+	local dx, dz = x - CX, z - CZ
+	local r = sqrt(dx * dx + dz * dz)
+	if not (r <= BOUNDARY_R) then
+		return REGION_ID.Outside -- also where r is not a number
+	elseif r > PLAY_R then
+		return REGION_ID.Crest
+	elseif r < HEART_R then
+		return REGION_ID.Heart
+	elseif inLake(x, z, 0) then
+		return REGION_ID.Lake
+	elseif r < IRIS_R then
+		return REGION_ID.Iris
+	end
+	local a = deg(atan2(dx, -dz)) % 360
+	if a >= 300 or a < 60 then
+		if r >= EDGE_FROM_R and (a >= 360 - EDGE_HALF_DEG or a < EDGE_HALF_DEG) then
+			return REGION_ID.Edge
+		end
+		return REGION_ID.NorthWood
+	elseif a < 120 then
+		return REGION_ID.EastRidge
+	elseif a < 240 then
+		return if r < IRIS_SOUTH_R then REGION_ID.Iris else REGION_ID.SouthMountain
+	end
+	return REGION_ID.WestRidge
+end
+
+local BAND_BIOME = {}
+for id, name in ipairs(ArenaLayout.Regions) do
+	BAND_BIOME[id] = REGION_BIOME[name] or OUTSIDE_BIOME
+end
+
+-- Shared.Map1Regions (written by tools/map1/pack.py): regionAt(x, z) -> id (10, Outside, beyond its grid), Names[id],
+-- heightAt(x, z) -> y. The grid is 240 x 240 cells of 16 studs; the module is about 124,000 characters.
+-- It is looked for when first needed, never waited for, and required in its own thread, so a module that is late,
+-- missing, broken or slow can never make this layout error or yield: the caller gets distance bands meanwhile.
+local regions: any = nil -- the module's table, once it has loaded
+local biomeById: { [any]: string } = {} -- by the grid's region id (and by region name, should regionAt ever give one)
+local regionsState = "none" -- "none" | "loading" | "ready" | "failed"
+local regionsRetryAt = 0
+local regionsFirstMissAt: number? = nil
+local regionsFaults = 0
+local regionsWarned = false
+
+local function findRegionsModule(): ModuleScript?
+	local parent = script.Parent
+	local found = parent and parent:FindFirstChild("Map1Regions")
+	if not found then
+		local shared = ReplicatedStorage:FindFirstChild("Shared")
+		found = shared and shared:FindFirstChild("Map1Regions")
+	end
+	return if found and found:IsA("ModuleScript") then found else nil
+end
+
+local function loadRegions(): any
+	if regionsState ~= "none" then
+		return regions
+	end
+	local now = os.clock()
+	if now < regionsRetryAt then
 		return nil
 	end
-	for i = 1, #ESCARPMENT - 1 do
-		local k0, k1 = ESCARPMENT[i], ESCARPMENT[i + 1]
-		if a <= k0[1] and a >= k1[1] then
-			local t = (k0[1] - a) / (k0[1] - k1[1])
-			t = t * t * (3 - 2 * t) * 0.35 + t * 0.65
-			return k0[2] + (k1[2] - k0[2]) * t, k0[3] + (k1[3] - k0[3]) * t, k0[4] + (k1[4] - k0[4]) * t
+	regionsRetryAt = now + 1
+	local module = findRegionsModule()
+	if not module then
+		-- not replicated yet, or not installed: look again in a second; say so once if it stays away
+		regionsFirstMissAt = regionsFirstMissAt or now
+		if not regionsWarned and now - regionsFirstMissAt > 15 then
+			regionsWarned = true
+			warn("[ArenaLayout] Shared.Map1Regions is missing: getBiome and regionAt are using distance bands")
 		end
+		return nil
 	end
-	return nil
-end
--- Escarpment.line: the top edge as a polyline {x, z} (1-degree steps)
-Escarpment.line = {}
-for a = 344, 257, -1 do
-	local rTop = Escarpment.at(a)
-	if rTop then
-		local v = polar(a, rTop)
-		table.insert(Escarpment.line, { x = v.X, z = v.Z, a = a })
-	end
-end
-
-----------------------------------------------------------------------------------------------------
--- The tall-grass field (E/NE, beyond the river)
-----------------------------------------------------------------------------------------------------
-local Field = {}
-ArenaLayout.Field = Field
-Field.outline = polarPolygon({
-	{ 46, 400 }, { 52, 382 }, { 59, 364 }, { 68, 354 }, { 78, 362 }, { 88, 354 }, { 97, 340 }, { 106, 336 },
-	{ 115, 332 }, { 121, 345 }, { 123, 400 }, { 120, 450 }, { 112, 500 }, { 100, 530 }, { 85, 545 },
-	{ 70, 540 }, { 58, 520 }, { 50, 490 }, { 46, 450 },
-})
-function ArenaLayout.isInField(position: Vector3, margin: number?): boolean
-	return signedPolygonDistance(Field.outline, position.X, position.Z) < (margin or 0)
-end
-
-----------------------------------------------------------------------------------------------------
--- Caves (true 3D voxel tunnels). path points are floor centres (Y = floor height), widths/heights per point.
--- The tunnel runs from the mouth (index 1) into the rock; the last point is the chamber centre.
-----------------------------------------------------------------------------------------------------
-local function cavePath(list)
-	local out = {}
-	for i, p in ipairs(list) do
-		out[i] = polar(p[1], p[2], p[3])
-	end
-	return out
-end
-ArenaLayout.Caves = {
-	{
-		name = "CreekCave",
-		note = "hidden beside the creek at the foot of the cliffs: a hiding / healing spot",
-		path = cavePath({ { 304, 439, 71.0 }, { 305, 448, 71.2 }, { 305.8, 456, 71.4 }, { 306.5, 463, 71.5 } }),
-		-- 4-stud voxels eat about 2 studs of a tunnel's profile: these leave ~6 studs of headroom to walk in
-		widths = { 10, 9.5, 9.5, 17 },
-		heights = { 9, 9.5, 9, 10 },
-	},
-	{
-		name = "LedgeCave",
-		note = "a larger cave in the cliff face above the scree slope",
-		path = cavePath({ { 286, 440, 86.0 }, { 286.8, 450, 86.5 }, { 287.5, 460, 87.0 }, { 288.2, 471, 87.2 } }),
-		widths = { 12, 10, 9.5, 24 },
-		heights = { 10, 9, 8.5, 11.5 },
-	},
-	{
-		name = "Grotto",
-		note = "a shallow overhang shelter at the top of the scree",
-		path = cavePath({ { 322, 449, 88.0 }, { 322.4, 455, 88.2 }, { 322.8, 460, 88.4 } }),
-		widths = { 15, 14, 12 },
-		heights = { 9, 8.5, 7.5 },
-	},
-}
-for _, cave in ipairs(ArenaLayout.Caves) do
-	cave.floorY = cave.path[1].Y
-	cave.mouth = cave.path[1]
-	cave.chamber = cave.path[#cave.path]
-end
-ArenaLayout.Cave = ArenaLayout.Caves[1] -- v1 field (the cave by the stream)
-
-----------------------------------------------------------------------------------------------------
--- Crossings over water. kind: "Ford" (wade, 1 deep, gravel), "Log" (fallen-log spot, span = log length needed),
--- "Footbridge" (span = bridge length needed), "Stepping" (stepping-stone spot). position is the centre
--- (Y = water surface for fords; Y = rim height for spans once measured), direction = unit vector ACROSS the water.
-----------------------------------------------------------------------------------------------------
-local function acrossAt(samples, position: Vector3): Vector3
-	local _, i = nearestOnSamples(samples, position.X, position.Z)
-	local a, b = samples[i], samples[min(i + 1, #samples)]
-	local d = Vector3.new(b.x - a.x, 0, b.z - a.z)
-	if d.Magnitude < 1e-6 then
-		return Vector3.xAxis
-	end
-	d = d.Unit
-	return Vector3.new(-d.Z, 0, d.X)
-end
-ArenaLayout.Crossings = {
-	{ name = "NorthFord", kind = "Ford", water = "River", position = polar(59, 332, 49.9), span = 20 },
-	{ name = "EastFord", kind = "Ford", water = "River", position = polar(97, 308, 45.6), span = 22 },
-	{ name = "LakeFord", kind = "Ford", water = "River", position = polar(123, 286, 40.6), span = 24 },
-	{ name = "GorgeLog", kind = "Log", water = "River", position = polar(24.5, 477, 0), span = 20 },
-	{ name = "GorgeFootbridge", kind = "Footbridge", water = "River", position = polar(16, 516, 0), span = 40 }, -- the Footbridge asset: EndA/EndB 40 apart
-	{ name = "CreekStones", kind = "Stepping", water = "Creek", position = polar(282, 407, 65.0), span = 7 },
-	{ name = "OutflowStones", kind = "Stepping", water = "Outflow", position = polar(192, 284, 35.0), span = 8 },
-}
--- Deck heights of the span crossings (mean ground at both ends), measured on the generated terrain with
--- TerrainGen.measure(); applied to position.Y below.
-ArenaLayout.CrossingHeights = { GorgeLog = 107.2, GorgeFootbridge = 122.7 }
-for _, c in ipairs(ArenaLayout.Crossings) do
-	local samples = (c.water == "Creek" and Creek.samples) or (c.water == "Outflow" and Outflow.samples) or River.samples
-	c.direction = acrossAt(samples, c.position)
-	local h = ArenaLayout.CrossingHeights[c.name]
-	if h then
-		c.position = Vector3.new(c.position.X, h, c.position.Z)
-	end
-end
-
-----------------------------------------------------------------------------------------------------
--- Points of interest. position.Y = groundY (the terrain height at the centre, measured after generation).
--- radius = footprint (keep trees out; TerrainGen only eases the ground inside it, it never makes a plateau).
--- kind: Spire | Cave | Waterfall | Island | Overlook | GiantTree | Boulder | DeadStand | Cabin | Watchtower |
---       Bridge | Campsite. template: a suggested ServerStorage.WorldAssets / Blender asset name.
--- facing: suggested yaw (degrees, 0 = north) for the structure's front, where it matters.
--- RETIRED from v1 (they do not fit this arena): RiverMill, FishingShack, StiltHut.
-----------------------------------------------------------------------------------------------------
--- Ground heights measured on the generated terrain with TerrainGen.measure() (TerrainVersion 2, fix round of
--- 2026-11-11); applied to POI.groundY / position.Y below. Caves: the floor just inside the mouth; FallsPool: the pool
--- surface; GorgeFootbridge: the deck (rim) height = CrossingHeights.GorgeFootbridge (the gorge floor under it is
--- 105.4). Re-measure after any terrain change.
-ArenaLayout.POIHeights = {
-	CreekCave = 71.7, LedgeCave = 84.6, Grotto = 88.2, FallsPool = 54.0, LakeIsland = 41.7, GorgeOverlook = 103.0,
-	GiantTree = 47.5, FieldBoulder = 75.5, MarshSnags = 36.4, HuntersCabin = 54.0, Watchtower = 86.9,
-	GorgeFootbridge = 122.7, CampNorth = 42.3, CampEastRidge = 38.9, CampSouth = 41.0, CampWest = 39.1,
-	CampPlateau = 143.0, CampHills = 113.1,
-}
-
-local function poi(name, kind, angle, r, radius, tier, extra)
-	local t = { name = name, kind = kind, position = polar(angle, r), radius = radius, tier = tier }
-	if extra then
-		for k, v in pairs(extra) do
-			t[k] = v
-		end
-	end
-	return t
-end
-ArenaLayout.POIs = {
-	{ name = "Spire", kind = "Spire", position = Vector3.new(CX, ArenaLayout.PlazaY, CZ), radius = ArenaLayout.PlazaRadius, tier = 3, groundY = ArenaLayout.PlazaY, template = "Spire" },
-	-- natural landmarks
-	poi("CreekCave", "Cave", 304, 439, 9, 2, { cave = 1, template = "CaveMouth", note = "hidden beside the creek; hiding / healing spot" }),
-	poi("LedgeCave", "Cave", 286, 440, 12, 2, { cave = 2, template = "CaveMouth" }),
-	poi("Grotto", "Cave", 322, 449, 10, 1, { cave = 3, template = "CaveMouth" }),
-	poi("FallsPool", "Waterfall", 36, 386, 26, 2, { note = "plunge pool under the 32-stud falls; the amphitheatre is open to the SE" }),
-	poi("LakeIsland", "Island", 161, 318, 15, 2),
-	poi("GorgeOverlook", "Overlook", 34.5, 445, 10, 2, { note = "rock knoll on the east rim above the lower gorge and the falls" }),
-	poi("GiantTree", "GiantTree", 318, 268, 16, 2, { note = "a forest hollow for one giant / hollow tree" }),
-	poi("FieldBoulder", "Boulder", 84, 445, 10, 2, { note = "lone big boulder in the tall grass" }),
-	poi("MarshSnags", "DeadStand", 220, 385, 24, 1, { note = "dead-tree stand in the marsh" }),
-	-- man-made remnants
-	poi("HuntersCabin", "Cabin", 196, 468, 20, 2, { template = "HunterCabin", facing = 16, note = "porch toward the Cabin trail (north-north-east)" }),
-	poi("Watchtower", "Watchtower", 128, 478, 14, 2, { template = "Watchtower", facing = 308, note = "on the SE ridge over the lake and the field" }),
-	poi("GorgeFootbridge", "Bridge", 16, 516, 24, 2, { template = "Footbridge", crossing = "GorgeFootbridge" }),
-	poi("CampNorth", "Campsite", 348, 300, 13, 2, { template = "Tent" }),
-	poi("CampEastRidge", "Campsite", 78, 232, 13, 2, { template = "Tent" }),
-	poi("CampSouth", "Campsite", 172, 440, 13, 1, { template = "Tent" }),
-	poi("CampWest", "Campsite", 262, 285, 13, 1, { template = "Tent" }),
-	poi("CampPlateau", "Campsite", 300, 548, 13, 2, { template = "Tent" }),
-	poi("CampHills", "Campsite", 60, 572, 13, 1, { template = "Tent" }),
-	-- RETIRED (v1): { name = "RiverMill", ... }, { name = "FishingShack", ... }, { name = "StiltHut", ... }
-}
-for _, p in ipairs(ArenaLayout.POIs) do
-	local gy = ArenaLayout.POIHeights[p.name] or p.groundY
-	if gy then
-		p.groundY = gy
-		p.position = Vector3.new(p.position.X, gy, p.position.Z)
-	end
-end
-function ArenaLayout.getPOI(name: string)
-	for _, p in ipairs(ArenaLayout.POIs) do
-		if p.name == name then
-			return p
-		end
-	end
-	return nil
-end
-
-----------------------------------------------------------------------------------------------------
--- Clearings: small open glades in the forest (no trees inside; grass/ferns/flowers fine).
-----------------------------------------------------------------------------------------------------
-ArenaLayout.Clearings = {
-	{ center = polar(20, 290), radius = 22 },
-	{ center = polar(338, 398), radius = 18 },
-	{ center = polar(150, 470), radius = 20 },
-	{ center = polar(250, 520), radius = 22 },
-	{ center = polar(75, 600), radius = 18 },
-	{ center = polar(195, 560), radius = 18 },
-	{ center = polar(282, 560), radius = 16 },
-	{ center = polar(5, 470), radius = 16 },
-}
-
--- Low, sheltered hollows where ground mist reads well (fog emitters / particles), with a suggested radius.
-ArenaLayout.MistHollows = {
-	{ center = polar(222, 350), radius = 60 }, -- the marsh
-	{ center = polar(220, 400), radius = 30 },
-	{ center = polar(36, 386), radius = 22 }, -- falls pool spray
-	{ center = polar(258, 330), radius = 20 },
-	{ center = polar(150, 300), radius = 40 }, -- over the lake at dawn
-}
-
-----------------------------------------------------------------------------------------------------
--- Game trails (painted ground only, never flattened). Waypoints in polar form; smoothed and lightly wobbled.
-----------------------------------------------------------------------------------------------------
-local TRAIL_ROUTES = {
-	{ name = "Beach", { 172, 140 }, { 166, 172 }, { 160, 194 } },
-	{ name = "NorthFord", { 55, 140 }, { 57, 200 }, { 58, 268 }, { 59, 316 }, { 60, 348 }, { 63, 384 }, { 70, 410 }, { 78, 432 }, { 84, 440 } },
-	{ name = "EastFord", { 100, 140 }, { 98, 220 }, { 97, 292 }, { 99, 326 }, { 106, 360 }, { 116, 420 }, { 126, 470 } },
-	{ name = "North", { 6, 140 }, { 9, 230 }, { 13, 310 }, { 18, 372 }, { 21, 420 }, { 21.5, 458 }, { 23.4, 474 } },
-	{ name = "Overlook", { 25.8, 480 }, { 29, 468 }, { 33, 452 }, { 34.5, 446 } },
-	{ name = "Footbridge", { 21.5, 458 }, { 18, 490 }, { 14.4, 513 } },
-	{ name = "Upstream", { 17.8, 520 }, { 19, 545 }, { 15, 580 }, { 9, 612 } },
-	{ name = "Falls", { 40, 140 }, { 40, 220 }, { 41, 298 }, { 40, 344 }, { 37, 368 } },
-	{ name = "CreekCave", { 292, 140 }, { 294, 230 }, { 298, 320 }, { 301, 392 }, { 302.5, 422 }, { 303.5, 436 } },
-	{ name = "LedgeCave", { 298, 380 }, { 291, 404 }, { 287, 424 }, { 286.2, 436 } },
-	{ name = "GiantTree", { 325, 140 }, { 320, 210 }, { 318, 256 } },
-	{ name = "Marsh", { 228, 140 }, { 225, 210 }, { 222, 268 }, { 220, 330 }, { 220, 376 } },
-	{ name = "Cabin", { 190, 140 }, { 192, 230 }, { 193, 280 }, { 190, 316 }, { 188, 380 }, { 192, 440 }, { 195, 460 } },
-	{ name = "Shore", { 160, 194 }, { 147, 208 }, { 134, 234 }, { 124, 276 }, { 127, 320 }, { 132, 360 } },
-	{ name = "CampNorth", { 350, 140 }, { 349, 220 }, { 348, 292 } },
-	{ name = "CampEastRidge", { 57, 200 }, { 68, 218 }, { 77, 228 } },
-	{ name = "CampSouth", { 188, 380 }, { 179, 420 }, { 173, 436 } },
-	{ name = "CampWest", { 225, 210 }, { 244, 250 }, { 259, 282 } },
-	{ name = "Plateau", { 348, 300 }, { 345, 380 }, { 343, 450 }, { 338, 500 }, { 318, 530 }, { 302, 546 } },
-	{ name = "CampHills", { 84, 440 }, { 74, 500 }, { 62, 566 } },
-}
-ArenaLayout.TrailNames = {}
-ArenaLayout.Trails = {} -- { { Vector3 } } centrelines (Y = 0), v1 format
-do
-	local seed = ArenaLayout.TerrainSeed
-	for index, route in ipairs(TRAIL_ROUTES) do
-		local controls = {}
-		for i, wp in ipairs(route) do
-			local v = polar(wp[1], wp[2])
-			controls[i] = { v.X, v.Z, 0, 0, 0 }
-		end
-		local samples = sampleSpline(controls, 6)
-		local total = samples[#samples].s
-		local points = {}
-		for i, smp in ipairs(samples) do
-			local prev, nxt = samples[max(i - 1, 1)], samples[min(i + 1, #samples)]
-			local dx, dz = nxt.x - prev.x, nxt.z - prev.z
-			local l = sqrt(dx * dx + dz * dz)
-			local wobble = 0
-			if l > 1e-6 then
-				local fade = min(1, smp.s / 30, (total - smp.s) / 30)
-				wobble = math.noise(smp.s / 46 + index * 3.17, seed * 0.0131 + 0.5, index * 0.71) * 5 * fade
-				dx, dz = dx / l, dz / l
+	regionsState = "loading"
+	task.spawn(function()
+		local ok, result = pcall(function()
+			-- Studio caches required modules in Edit mode: a clone picks up a module that was pushed again
+			return require(if RunService:IsRunning() then module else module:Clone())
+		end)
+		if ok and type(result) == "table" and type(result.regionAt) == "function" then
+			local names = if type(result.Names) == "table" then result.Names else ArenaLayout.Regions
+			for id, name in pairs(names) do
+				if type(id) == "number" and type(name) == "string" then
+					biomeById[id] = REGION_BIOME[name] -- nil for a name this layout does not know: bands answer there
+					biomeById[name] = REGION_BIOME[name]
+				end
 			end
-			points[i] = Vector3.new(smp.x - dz * wobble, 0, smp.z + dx * wobble)
+			regions = result
+			regionsState = "ready"
+		else
+			regionsState = "failed"
+			warn("[ArenaLayout] Shared.Map1Regions did not load (" .. tostring(result) .. "): using distance bands")
 		end
-		ArenaLayout.Trails[index] = points
-		ArenaLayout.TrailNames[index] = route.name
+	end)
+	return regions
+end
+
+-- A call into the grid failed. A few of those and the grid is dropped for good, so a broken module cannot cost an
+-- error five times a frame.
+local function regionFault(err: any)
+	regionsFaults += 1
+	if regionsFaults >= 5 and regionsState == "ready" then
+		regions = nil
+		regionsState = "failed"
+		warn("[ArenaLayout] Shared.Map1Regions.regionAt keeps failing (" .. tostring(err) .. "): using distance bands")
 	end
 end
 
-----------------------------------------------------------------------------------------------------
--- Distances to features (analytic)
-----------------------------------------------------------------------------------------------------
-local function pathDistanceY(samples, x: number, z: number): (number, number)
-	local d, i, u = nearestOnSamples(samples, x, z)
-	return d, lerpSample(samples, i, u, "y")
-end
-
--- Flat distance to the river centreline (spring to mouth, incl. the gorge stream) and the water surface there.
-function ArenaLayout.distanceToRiver(position: Vector3): (number, number)
-	return pathDistanceY(River.samples, position.X, position.Z)
-end
-
-function ArenaLayout.distanceToCreek(position: Vector3): (number, number)
-	return pathDistanceY(Creek.samples, position.X, position.Z)
-end
-
--- Flat distance to the nearest open water (river/creek/outflow channel edge, lake shore, marsh outline, pool).
-function ArenaLayout.distanceToWater(position: Vector3): number
-	local x, z = position.X, position.Z
-	local best = HUGE
-	for _, samples in ipairs({ River.samples, Creek.samples, Outflow.samples }) do
-		local d, i, u = nearestOnSamples(samples, x, z)
-		best = min(best, d - lerpSample(samples, i, u, "hw"))
-	end
-	best = min(best, signedPolygonDistance(Lake.shore, x, z))
-	best = min(best, signedPolygonDistance(Marsh.outline, x, z) + 6) -- marsh pools start a little inside
-	local pc = River.pool.center
-	best = min(best, sqrt((x - pc.X) ^ 2 + (z - pc.Z) ^ 2) - River.pool.radius)
-	return max(0, best)
-end
-
-function ArenaLayout.distanceToTrail(position: Vector3): number
-	local best = HUGE
-	local x, z = position.X, position.Z
-	for _, trail in ipairs(ArenaLayout.Trails) do
-		for i = 1, #trail - 1 do
-			local a, b = trail[i], trail[i + 1]
-			local dx, dz = b.X - a.X, b.Z - a.Z
-			local l2 = dx * dx + dz * dz
-			local u = 0
-			if l2 > 0 then
-				u = math.clamp(((x - a.X) * dx + (z - a.Z) * dz) / l2, 0, 1)
-			end
-			local qx, qz = x - (a.X + dx * u), z - (a.Z + dz * u)
-			local d2 = qx * qx + qz * qz
-			if d2 < best then
-				best = d2
-			end
+-- regionAt(x, z) -> (id, name): Map 1's region at a point (Regions[id]).
+function ArenaLayout.regionAt(x: number, z: number): (number, string)
+	local id: number? = nil
+	local module = regions or loadRegions()
+	if module and x == x and z == z then
+		local ok, got = pcall(module.regionAt, x, z)
+		if not ok then
+			regionFault(got)
+		elseif type(got) == "number" and ArenaLayout.Regions[got] then
+			id = got
+		elseif type(got) == "string" then
+			id = REGION_ID[got]
 		end
 	end
-	return sqrt(best)
+	local known = id or bandRegion(x, z)
+	return known, ArenaLayout.Regions[known]
 end
 
--- Signed distance to the escarpment top edge: > 0 behind it (on the plateau), < 0 in front (cliff foot side).
--- Returns HUGE when the angle is outside the escarpment's range.
-function ArenaLayout.escarpmentDistance(x: number, z: number): (number, number?, number?)
-	local a = angleXZ(x, z)
-	local rTop, height, scree = Escarpment.at(a)
-	if not rTop then
-		return HUGE
-	end
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	return r - rTop, height, scree
-end
-
--- Gorge: flat distance to the gorge stream (gorge section only) or the falls amphitheatre.
-local GORGE_SAMPLES = {}
-for _, smp in ipairs(River.samples) do
-	if smp.gorge == 1 or smp.fall then
-		table.insert(GORGE_SAMPLES, smp)
-	end
-end
-function ArenaLayout.gorgeDistance(x: number, z: number): number
-	if #GORGE_SAMPLES < 2 then
-		return HUGE
-	end
-	local d = nearestOnSamples(GORGE_SAMPLES, x, z)
-	local pc = River.pool.center
-	return min(d, sqrt((x - pc.X) ^ 2 + (z - pc.Z) ^ 2) - 18)
-end
-
-----------------------------------------------------------------------------------------------------
--- Biomes
-----------------------------------------------------------------------------------------------------
-ArenaLayout.Biomes = { "Meadow", "Forest", "Lake", "Gorge", "Cliffs", "Field", "Marsh", "Mountains", "Lobby" }
-
--- Coarse angular sectors (compatibility for v1 code that iterates sectors; use getBiome for real queries).
-ArenaLayout.Sectors = {
-	{ name = "Forest", from = 342, to = 44 },
-	{ name = "Field", from = 44, to = 122 },
-	{ name = "Lake", from = 122, to = 196 },
-	{ name = "Marsh", from = 196, to = 256 },
-	{ name = "Cliffs", from = 256, to = 342 },
-}
-
+-- getBiome(position) -> the biome name for the ambience. It never errors, for any argument, on any device.
 function ArenaLayout.getBiome(position: Vector3): string
+	if typeof(position) ~= "Vector3" then
+		return OUTSIDE_BIOME
+	end
+	local x, z = position.X, position.Z
+	if x ~= x or z ~= z then
+		return OUTSIDE_BIOME
+	end
 	local lobby = ArenaLayout.LobbyPosition
-	local lx, lz = position.X - lobby.X, position.Z - lobby.Z
+	local lx, lz = x - lobby.X, z - lobby.Z
 	if lx * lx + lz * lz < (ArenaLayout.LobbyRadius * 2) ^ 2 then
 		return "Lobby"
 	end
-	local x, z = position.X, position.Z
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	local a = angleXZ(x, z)
-	if r > ArenaLayout.mountainEdge(a) - 18 then
-		return "Mountains"
-	end
-	if r < ArenaLayout.meadowEdge(a) then
-		return "Meadow"
-	end
-	if signedPolygonDistance(Lake.shore, x, z) < 10 then
+	if inLake(x, z, LAKE_SHORE) then
 		return "Lake"
 	end
-	if signedPolygonDistance(Marsh.outline, x, z) < 4 then
-		return "Marsh"
+	local module = regions or loadRegions()
+	if module then
+		local ok, id = pcall(module.regionAt, x, z)
+		if ok then
+			local biome = biomeById[id]
+			if biome then
+				return biome
+			end
+		else
+			regionFault(id)
+		end
 	end
-	if r > 360 and ArenaLayout.gorgeDistance(x, z) < 34 then
-		return "Gorge"
-	end
-	local e = ArenaLayout.escarpmentDistance(x, z)
-	if e > -55 and e < 34 then
-		return "Cliffs"
-	end
-	if pointInPolygon(Field.outline, x, z) then
-		return "Field"
-	end
-	return "Forest"
-end
-
--- Distance to the nearest open area (meadow edge, field, lake shore, marsh, clearings); 0 inside one.
-function ArenaLayout.forestEdgeDistance(position: Vector3): number
-	local x, z = position.X, position.Z
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	local best = max(0, r - ArenaLayout.meadowEdge(angleXZ(x, z)))
-	best = min(best, max(0, signedPolygonDistance(Field.outline, x, z)))
-	best = min(best, max(0, signedPolygonDistance(Lake.shore, x, z)))
-	best = min(best, max(0, signedPolygonDistance(Marsh.outline, x, z)))
-	for _, c in ipairs(ArenaLayout.Clearings) do
-		best = min(best, max(0, sqrt((x - c.center.X) ^ 2 + (z - c.center.Z) ^ 2) - c.radius))
-	end
-	return best
+	return BAND_BIOME[bandRegion(x, z)]
 end
 
 ----------------------------------------------------------------------------------------------------
--- Ground queries (raycasts on Terrain; grid fallback)
+-- Ground queries
 ----------------------------------------------------------------------------------------------------
-local solidParams = RaycastParams.new()
-solidParams.FilterType = Enum.RaycastFilterType.Include
-solidParams.IgnoreWater = true
-local waterParams = RaycastParams.new()
-waterParams.FilterType = Enum.RaycastFilterType.Include
-waterParams.IgnoreWater = false
-local function refreshParams()
-	solidParams.FilterDescendantsInstances = { workspace.Terrain }
-	waterParams.FilterDescendantsInstances = { workspace.Terrain }
-end
-refreshParams()
+local CAST_TOP = 1400 -- above the highest terrain (1,143, beyond the field line)
+local CAST_DOWN = Vector3.new(0, -CAST_TOP - 200, 0)
+local solidParams: RaycastParams? = nil -- made when first needed, so that loading the module touches nothing
+local solidTerrain: Instance? = nil
 
-local CAST_TOP = 1400
-local DOWN = Vector3.new(0, -CAST_TOP - 200, 0)
-
--- TerrainData grid (written by TerrainGen): lazily decoded; nil on clients.
-local gridData = nil
-local B64 = {}
-do
-	local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-	for i = 1, 64 do
-		B64[string.byte(alphabet, i)] = i - 1
-	end
-end
-local function decodeBase64(s: string): buffer
-	local n = #s
-	local pad = 0
-	if string.sub(s, -2) == "==" then
-		pad = 2
-	elseif string.sub(s, -1) == "=" then
-		pad = 1
-	end
-	local outLen = (n // 4) * 3 - pad
-	local out = buffer.create(outLen)
-	local o = 0
-	for i = 1, n, 4 do
-		local a, b, c, d = string.byte(s, i, i + 3)
-		local v = bit32.bor(bit32.lshift(B64[a] or 0, 18), bit32.lshift(B64[b] or 0, 12), bit32.lshift(B64[c] or 0, 6), B64[d] or 0)
-		if o < outLen then
-			buffer.writeu8(out, o, bit32.extract(v, 16, 8))
-		end
-		if o + 1 < outLen then
-			buffer.writeu8(out, o + 1, bit32.extract(v, 8, 8))
-		end
-		if o + 2 < outLen then
-			buffer.writeu8(out, o + 2, bit32.extract(v, 0, 8))
-		end
-		o += 3
-	end
-	return out
-end
-
-local function loadGrid()
-	if gridData ~= nil then
-		return gridData or nil
-	end
-	gridData = false
-	local ok, mod = pcall(function()
-		local ss = game:GetService("ServerStorage")
-		local wg = ss and ss:FindFirstChild("WorldGen")
-		local m = wg and wg:FindFirstChild("TerrainData")
-		if not m then
-			return nil
-		end
-		if not RunService:IsRunning() then
-			m = m:Clone() -- Studio caches required modules in Edit mode
-		end
-		return require(m)
-	end)
-	if ok and type(mod) == "table" and mod.cell then
-		local g = { cell = mod.cell, origin = mod.origin, n = mod.n, version = mod.version }
-		for key, str in pairs(mod.channels or {}) do
-			g[key] = decodeBase64(str)
-		end
-		gridData = g
-	end
-	return gridData or nil
-end
-ArenaLayout._loadGrid = loadGrid
-
--- bilinear sample of a grid channel ("H" is u16 = (h + 64) * 32, the rest u8)
-local function gridSample(key: string, x: number, z: number): number?
-	local g = loadGrid()
-	if not g or not g[key] then
+-- groundAt(x, z) -> (y, normal, material)?: the top solid Terrain surface (water and every model ignored). nil where
+-- no terrain is loaded: on a client that is anywhere outside what has streamed in.
+function ArenaLayout.groundAt(x: number, z: number): (number?, Vector3?, Enum.Material?)
+	local terrain = workspace:FindFirstChildOfClass("Terrain")
+	if not terrain then
 		return nil
 	end
-	local n, cell, o = g.n, g.cell, g.origin
-	local fx = (x - o) / cell - 0.5
-	local fz = (z - o) / cell - 0.5
-	local ix, iz = floor(fx), floor(fz)
-	local tx, tz = fx - ix, fz - iz
-	if ix < 0 or iz < 0 or ix >= n - 1 or iz >= n - 1 then
-		return nil
+	local params = solidParams
+	if not params then
+		params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.IgnoreWater = true
+		solidParams = params
 	end
-	local b = g[key]
-	local function at(i, j)
-		local k = j * n + i
-		if key == "H" then
-			return buffer.readu16(b, k * 2) / 32 - 64
-		end
-		return buffer.readu8(b, k)
+	if solidTerrain ~= terrain then
+		params.FilterDescendantsInstances = { terrain }
+		solidTerrain = terrain
 	end
-	local v00, v10, v01, v11 = at(ix, iz), at(ix + 1, iz), at(ix, iz + 1), at(ix + 1, iz + 1)
-	return (v00 * (1 - tx) + v10 * tx) * (1 - tz) + (v01 * (1 - tx) + v11 * tx) * tz
-end
-ArenaLayout._gridSample = gridSample
-
-function ArenaLayout.groundAt(x: number, z: number)
-	if solidParams.FilterDescendantsInstances[1] ~= workspace.Terrain then
-		refreshParams()
-	end
-	local hit = workspace:Raycast(Vector3.new(x, CAST_TOP, z), DOWN, solidParams)
+	local hit = workspace:Raycast(Vector3.new(x, CAST_TOP, z), CAST_DOWN, params)
 	if hit then
 		return hit.Position.Y, hit.Normal, hit.Material
 	end
 	return nil
 end
 
+-- heightAt(x, z) -> y?: the ground from a Terrain raycast; where that finds nothing, from the coarse height grid in
+-- Shared.Map1Regions (32-stud nodes: within about 1.5 studs on most ground, tens of studs out on cliffs; under water
+-- it gives the bed). nil when neither can answer: the grid is only asked inside TerrainRadius, because beyond its
+-- edge it repeats its edge.
+local TERRAIN_R2 = ArenaLayout.TerrainRadius ^ 2
+
 function ArenaLayout.heightAt(x: number, z: number): number?
 	local y = ArenaLayout.groundAt(x, z)
 	if y then
 		return y
 	end
-	return gridSample("H", x, z)
-end
-
-function ArenaLayout.normalAt(x: number, z: number): Vector3
-	local _, n = ArenaLayout.groundAt(x, z)
-	if n then
-		return n
+	local dx, dz = x - CX, z - CZ
+	if not (dx * dx + dz * dz <= TERRAIN_R2) then
+		return nil
 	end
-	local h0, h1, h2 = gridSample("H", x, z), gridSample("H", x + 4, z), gridSample("H", x, z + 4)
-	if h0 and h1 and h2 then
-		return Vector3.new(h0 - h1, 4, h0 - h2).Unit
-	end
-	return Vector3.yAxis
-end
-
-function ArenaLayout.slopeAt(x: number, z: number): number
-	local n = ArenaLayout.normalAt(x, z)
-	return deg(math.acos(math.clamp(n.Y, -1, 1)))
-end
-
--- Terrain water over the ground at (x, z): (waterY?, depth)
-function ArenaLayout.waterAt(x: number, z: number)
-	if waterParams.FilterDescendantsInstances[1] ~= workspace.Terrain then
-		refreshParams()
-	end
-	local top = workspace:Raycast(Vector3.new(x, CAST_TOP, z), DOWN, waterParams)
-	if top and top.Material == Enum.Material.Water then
-		local groundY = ArenaLayout.groundAt(x, z) or (top.Position.Y - 1)
-		return top.Position.Y, max(0, top.Position.Y - groundY)
-	end
-	if not top then
-		local depth = gridSample("W", x, z)
-		if depth and depth > 0.5 then
-			local h = gridSample("H", x, z) or 0
-			return h + depth / 10, depth / 10
+	local module = regions or loadRegions()
+	if module and type(module.heightAt) == "function" then
+		local ok, h = pcall(module.heightAt, x, z)
+		if ok and type(h) == "number" and h == h then
+			return h
 		end
 	end
-	return nil, 0
-end
-
-function ArenaLayout.isWater(x: any, z: number?)
-	if typeof(x) == "Vector3" then
-		x, z = x.X, x.Z
-	end
-	local y, depth = ArenaLayout.waterAt(x, z :: number)
-	return y ~= nil, y, depth
-end
-
--- 0 (dry) .. 1 (wet): grid-backed; analytic fallback from distance to water.
-function ArenaLayout.moistureAt(x: number, z: number): number
-	local m = gridSample("M", x, z)
-	if m then
-		return m / 255
-	end
-	local d = ArenaLayout.distanceToWater(Vector3.new(x, 0, z))
-	return math.clamp(1 - d / 80, 0, 1) * 0.8 + 0.2 * (ArenaLayout.getBiome(Vector3.new(x, 0, z)) == "Marsh" and 1 or 0)
-end
-
--- Flat distance to the nearest steep ground (> 50 degrees): grid-backed; analytic fallback.
-function ArenaLayout.distanceToCliff(position: Vector3): number
-	local c = gridSample("C", position.X, position.Z)
-	if c then
-		return c
-	end
-	local x, z = position.X, position.Z
-	local best = abs(ArenaLayout.escarpmentDistance(x, z))
-	best = min(best, abs(ArenaLayout.gorgeDistance(x, z) - 10))
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	best = min(best, abs(ArenaLayout.mountainEdge(angleXZ(x, z)) - r))
-	return best
-end
-
-----------------------------------------------------------------------------------------------------
--- Exclusion zones and scatter rules (for the set dresser)
-----------------------------------------------------------------------------------------------------
--- Standard exclusions every scatter pass should respect (studs):
-ArenaLayout.Exclusions = {
-	plaza = ArenaLayout.PlazaRadius + 8, -- nothing natural inside r < 70 (the Spire plaza and its apron)
-	plateRing = { inner = 44, outer = 60 }, -- keep the launch-plate ring clear
-	meadowCore = 100, -- no trees, rocks or bushes inside r < 100 (sightlines to the treeline)
-	trail = { tree = 3.5, bush = 3, groundCover = 1.6 }, -- from a trail centreline
-	water = { land = 0.6, reedsMaxDepth = 1.8, lilyMinDepth = 0.6 }, -- land plants need ground above water
-	slope = { tree = 34, bush = 40, groundCover = 44 }, -- max slope in degrees
-	cliffEdge = 4, -- no trees within 4 studs of > 50 deg ground (use distanceToCliff)
-	caveMouth = 6, -- keep every cave mouth clear (CreekCave: hide it with bushes/ferns 6-12 studs to the sides)
-	crossing = 6, -- keep fords, the log spot and the footbridge spot clear
-	boundary = ArenaLayout.PlayRadius + 30, -- gameplay props stop here; visual trees may continue
-}
-
--- isExcluded(position, rule?) -> (true, reason) | false
--- rule (optional): { class = "tree"|"bush"|"groundCover"|"rock"|"water", allowWater = boolean }
-function ArenaLayout.isExcluded(position: Vector3, rule): (boolean, string?)
-	local class = (rule and rule.class) or "tree"
-	local x, z = position.X, position.Z
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	local ex = ArenaLayout.Exclusions
-	if r < ex.plaza then
-		return true, "plaza"
-	end
-	if class ~= "groundCover" and r < ex.meadowCore then
-		return true, "meadowCore"
-	end
-	local trailLimit = ex.trail[class] or ex.trail.groundCover
-	if class ~= "water" and ArenaLayout.distanceToTrail(position) < trailLimit then
-		return true, "trail"
-	end
-	for _, p in ipairs(ArenaLayout.POIs) do
-		if p.kind ~= "Spire" then
-			local d = sqrt((x - p.position.X) ^ 2 + (z - p.position.Z) ^ 2)
-			if d < p.radius and class ~= "groundCover" then
-				return true, "poi:" .. p.name
-			end
-		end
-	end
-	for _, cave in ipairs(ArenaLayout.Caves) do
-		local m = cave.mouth
-		if sqrt((x - m.X) ^ 2 + (z - m.Z) ^ 2) < ex.caveMouth then
-			return true, "caveMouth"
-		end
-	end
-	for _, c in ipairs(ArenaLayout.Crossings) do
-		local d = sqrt((x - c.position.X) ^ 2 + (z - c.position.Z) ^ 2)
-		if d < max(ex.crossing, c.span * 0.6) then
-			return true, "crossing"
-		end
-	end
-	if class == "tree" then
-		for _, c in ipairs(ArenaLayout.Clearings) do
-			if sqrt((x - c.center.X) ^ 2 + (z - c.center.Z) ^ 2) < c.radius then
-				return true, "clearing"
-			end
-		end
-	end
-	if not (rule and rule.allowWater) then
-		local wet, _, depth = ArenaLayout.isWater(x, z)
-		if wet and depth > ex.water.land then
-			return true, "water"
-		end
-	end
-	local maxSlope = ex.slope[class]
-	if maxSlope and ArenaLayout.slopeAt(x, z) > maxSlope then
-		return true, "slope"
-	end
-	if class == "tree" and ArenaLayout.distanceToCliff(position) < ex.cliffEdge then
-		return true, "cliffEdge"
-	end
-	return false
-end
-
---[[
-	Scatter: per-biome rules for the set dresser. Every rule names the realistic assets directly (the *Real sets in
-	art/manifests, imported into ServerStorage.MeshAssets). density = items per 1000 sq studs before clustering and
-	exclusions. Fields:
-	  assets      asset names; weights (optional, same order) = relative shares, else equal
-	  kind        a short label; class = exclusion class for isExcluded ("tree", "bush", "groundCover", "rock", "water")
-	  cluster     { radius, min, max } -> place in clumps (seed points at density / average clump size)
-	  spacing     minimum distance between two items of this rule (studs, pivot to pivot)
-	  slope       { min, max } degrees; height { min, max } studs; moisture { min, max } (0..1, moistureAt)
-	  waterDepth  { min, max } studs of water over the ground (class "water" only: reeds, stones in the stream)
-	  edgeBoost   density multiplier where forestEdgeDistance < 25 (forest edges, clearings, shores)
-	  cliffBoost  density multiplier where distanceToCliff < 18 (talus under cliffs and gorge walls)
-	  scale       { min, max } uniform scale; tilt = random lean in degrees
-	  tiltToNormal 0..1: blend of the asset's up toward the ground normal (0 = upright: trees; 1 = lies on the slope)
-	  sink        studs pushed into the ground (rocks, logs and stumps sink so no edge floats on a slope)
-	  align       "contour" = long axis along the contour (logs), "downslope" = front faces down the slope,
-	              "outward" = front faces away from the hill (cliff faces), else random yaw
-	  where       a placement hint in words
-	Sizes (w x h x d studs) and footprint radii are in ArenaLayout.AssetInfo; POI dressing kits in ArenaLayout.POIKits.
-	Budget guide (streaming on): ~3,500 trees, ~6,000 bushes and ferns, ~15,000 grass and flower clumps (cheap cards:
-	no collision, no shadow) and ~1,500 rocks in the whole arena.
-	Placed explicitly (not scattered): Spire + SpirePlatform at Center (unrotated, pivot y = PlazaY), a Plinth on each
-	Plates[i] (pivot y = PlazaY + PlateTube.platformTop), one CaveMouth per Caves[i], the Footbridge and the log at
-	Crossings, the POI kits.
-]]
-ArenaLayout.Scatter = {
-	Forest = {
-		{ assets = { "SpruceA", "SpruceB", "FirA" }, weights = { 0.4, 0.35, 0.25 }, kind = "Conifer", class = "tree", density = 2.2, cluster = { radius = 26, min = 3, max = 8 }, spacing = 8, slope = { 0, 34 }, height = { 0, 300 }, scale = { 0.85, 1.2 }, tilt = 2, where = "the dense mixed-conifer canopy; FirA favours damp valley floors (moisture > 0.45)" },
-		{ assets = { "PineA" }, kind = "Pine", class = "tree", density = 0.45, spacing = 12, slope = { 0, 30 }, moisture = { 0, 0.5 }, scale = { 0.9, 1.15 }, tilt = 2, where = "drier ridges and knolls (convex ground)" },
-		{ assets = { "ConiferYoung" }, kind = "YoungConifer", class = "bush", density = 0.9, cluster = { radius = 9, min = 2, max = 6 }, spacing = 4, slope = { 0, 36 }, scale = { 0.7, 1.4 }, edgeBoost = 2.5, where = "regrowth at edges, clearings and canopy gaps" },
-		{ assets = { "BirchA", "BirchB" }, weights = { 0.65, 0.35 }, kind = "Birch", class = "tree", density = 0.3, cluster = { radius = 14, min = 3, max = 6 }, spacing = 7, slope = { 0, 28 }, moisture = { 0.4, 1 }, scale = { 0.85, 1.15 }, edgeBoost = 2.5 },
-		{ assets = { "OakA" }, kind = "Oak", class = "tree", density = 0.1, spacing = 26, slope = { 0, 18 }, height = { 0, 120 }, scale = { 0.9, 1.1 }, edgeBoost = 1.5, where = "the lower forest toward the meadow; climbable (OakA_Bark is tagged Climbable, Perch1-4)" },
-		{ assets = { "SnagA", "SnagB" }, kind = "Snag", class = "tree", density = 0.1, spacing = 16, slope = { 0, 36 }, scale = { 0.9, 1.2 } },
-		{ assets = { "FallenLogA", "FallenLogB" }, kind = "FallenLog", class = "bush", density = 0.35, spacing = 14, slope = { 0, 26 }, tiltToNormal = 1, sink = 0.35, align = "contour" },
-		{ assets = { "StumpA", "StumpB" }, kind = "Stump", class = "bush", density = 0.25, spacing = 10, slope = { 0, 28 }, tiltToNormal = 0.3, sink = 0.3 },
-		{ assets = { "BushA", "BushB" }, weights = { 0.55, 0.45 }, kind = "Bush", class = "bush", density = 1.8, cluster = { radius = 9, min = 2, max = 4 }, spacing = 4, slope = { 0, 40 }, scale = { 0.8, 1.25 }, edgeBoost = 2.5, where = "BushA hides a crouching contender" },
-		{ assets = { "BerryBush" }, kind = "BerryBush", class = "bush", density = 0.2, spacing = 14, slope = { 0, 30 }, edgeBoost = 3, where = "a forage cue: edges and clearings" },
-		{ assets = { "SaplingBroadleaf" }, kind = "Sapling", class = "bush", density = 0.25, spacing = 8, slope = { 0, 30 }, edgeBoost = 3 },
-		{ assets = { "FernA", "FernB" }, kind = "Fern", class = "groundCover", density = 5, cluster = { radius = 10, min = 4, max = 10 }, spacing = 2.5, slope = { 0, 44 }, scale = { 0.8, 1.35 }, tiltToNormal = 1, where = "FernA (bracken) on drier, sunnier ground (moisture < 0.5); FernB (sword fern) in damp shade and gullies" },
-		{ assets = { "GrassForest" }, kind = "GrassTuft", class = "groundCover", density = 6, cluster = { radius = 8, min = 6, max = 20 }, spacing = 1.2, slope = { 0, 40 }, tiltToNormal = 1, edgeBoost = 2.5, where = "where light reaches the floor: edges, clearings, beside trails" },
-		{ assets = { "MushroomsA" }, kind = "Mushrooms", class = "groundCover", density = 0.5, spacing = 5, slope = { 0, 30 }, moisture = { 0.45, 1 }, tiltToNormal = 1, where = "beside logs, stumps and roots" },
-		{ assets = { "MossPatch" }, kind = "Moss", class = "groundCover", density = 1.2, spacing = 4, slope = { 0, 45 }, moisture = { 0.35, 1 }, tiltToNormal = 1, where = "damp ground; also on the shaded (north) side of boulders and logs" },
-		{ assets = { "BoulderA", "BoulderB", "BoulderC", "BoulderD" }, weights = { 0.4, 0.3, 0.2, 0.1 }, kind = "Boulder", class = "rock", density = 0.45, cluster = { radius = 10, min = 2, max = 5 }, spacing = 4, slope = { 0, 50 }, cliffBoost = 4, scale = { 0.8, 1.4 }, tiltToNormal = 0.6, sink = 0.3 },
-		{ assets = { "RockFlat" }, kind = "Slab", class = "rock", density = 0.04, spacing = 30, slope = { 0, 25 }, tiltToNormal = 0.8, sink = 0.4 },
-		{ assets = { "RockOutcrop" }, kind = "Outcrop", class = "rock", density = 0.04, spacing = 30, slope = { 15, 45 }, tiltToNormal = 0.5, sink = 1.2, align = "downslope", where = "on and around the terrain's own rock knobs (Rock material at the surface, slope > 22)" },
-	},
-	Meadow = {
-		{ assets = { "FlowersA", "FlowersB" }, kind = "Wildflowers", class = "groundCover", density = 10, cluster = { radius = 14, min = 12, max = 36 }, spacing = 1.2, tiltToNormal = 1, where = "patches, more toward the edge (r > 80); none on the plaza apron (r < 70)" },
-		{ assets = { "GrassForest" }, kind = "GrassTuft", class = "groundCover", density = 12, spacing = 1.5, tiltToNormal = 1, where = "denser toward the treeline" },
-		{ assets = { "GrassTallA", "GrassTallB" }, kind = "TallGrass", class = "groundCover", density = 2, cluster = { radius = 10, min = 6, max = 16 }, spacing = 1.6, where = "only r > 115, a soft fringe at the treeline" },
-		{ assets = { "OakA", "BirchA" }, kind = "LoneTree", class = "tree", density = 0.02, spacing = 60, where = "at most 3-4 in the whole meadow, only r > 115" },
-		{ assets = { "BoulderB", "BoulderC" }, kind = "Boulder", class = "rock", density = 0.04, spacing = 30, sink = 0.3, where = "only r > 100" },
-	},
-	Field = {
-		{ assets = { "GrassTallA", "GrassTallB" }, kind = "TallGrass", class = "groundCover", density = 36, spacing = 1.4, slope = { 0, 28 }, scale = { 0.85, 1.25 }, where = "the golden tall grass; leave the trails and a few hollows open" },
-		{ assets = { "FlowersB" }, kind = "Wildflowers", class = "groundCover", density = 3, cluster = { radius = 10, min = 6, max = 18 } },
-		{ assets = { "OakA", "PineA" }, kind = "LoneTree", class = "tree", density = 0.05, spacing = 45 },
-		{ assets = { "BoulderC", "BoulderD" }, kind = "Boulder", class = "rock", density = 0.06, spacing = 30, sink = 0.4 },
-		{ assets = { "BushB", "BerryBush" }, kind = "Bush", class = "bush", density = 0.2, spacing = 14, edgeBoost = 3 },
-	},
-	Lake = {
-		{ assets = { "ReedsA" }, kind = "Reeds", class = "water", density = 9, cluster = { radius = 8, min = 4, max = 12 }, spacing = 2.5, waterDepth = { 0.1, 1.8 }, sink = 0.6, where = "densest on the reed shore (Lake.shoreStyle(phi).reeds) and the river mouth" },
-		{ assets = { "RiverStones" }, kind = "ShoreStones", class = "rock", density = 1, spacing = 6, tiltToNormal = 1, sink = 0.2, where = "the pebble shores and the river mouth (shoreStyle.mouth / beach), at the waterline" },
-		{ assets = { "BoulderB", "BoulderC", "BoulderD" }, kind = "ShoreRock", class = "rock", density = 1.4, spacing = 4, tiltToNormal = 0.6, sink = 0.5, where = "the rocky banks (shoreStyle.rocky > 0.5), half in the water" },
-		{ assets = { "RockFlat" }, kind = "Ledge", class = "rock", density = 0.1, spacing = 20, sink = 0.3, where = "a few flat rocks at the rocky banks" },
-		{ assets = { "FallenLogA" }, kind = "Driftwood", class = "rock", density = 0.3, spacing = 16, tiltToNormal = 1, sink = 0.2, where = "on the beach just above the waterline" },
-		{ assets = { "BirchA", "BirchB" }, kind = "Birch", class = "tree", density = 0.5, cluster = { radius = 12, min = 2, max = 5 }, slope = { 0, 26 } },
-	},
-	Gorge = {
-		{ assets = { "SpruceB", "FirA" }, kind = "Conifer", class = "tree", density = 2.0, spacing = 8, slope = { 0, 32 }, where = "on the rims, at least 5 studs back from the edge" },
-		{ assets = { "FernB" }, kind = "Fern", class = "groundCover", density = 7, slope = { 0, 45 }, tiltToNormal = 1, where = "ledges and the damp floor" },
-		{ assets = { "MossPatch" }, kind = "Moss", class = "groundCover", density = 3, tiltToNormal = 1, where = "ledges, wet rock beside the stream" },
-		{ assets = { "RiverStones", "BoulderA", "BoulderB", "BoulderC" }, weights = { 0.4, 0.25, 0.2, 0.15 }, kind = "StreamRocks", class = "water", density = 2.5, waterDepth = { 0, 1.2 }, sink = 0.3, where = "in and beside the stream" },
-		{ assets = { "FallenLogA", "FallenLogB" }, kind = "FallenLog", class = "rock", density = 0.3, where = "a few across the stream or wedged between the walls" },
-		{ assets = { "CliffFaceA", "CliffFaceB", "CliffFaceC" }, kind = "CliffFace", class = "rock", density = 0.25, spacing = 22, slope = { 50, 90 }, align = "outward", sink = 3, where = "against the stratified walls, front facing into the gorge" },
-		{ assets = { "ScreeA" }, kind = "Scree", class = "rock", density = 0.4, cliffBoost = 2, tiltToNormal = 1, where = "at the foot of the walls" },
-	},
-	Cliffs = {
-		{ assets = { "ScreeA" }, kind = "Scree", class = "rock", density = 2.2, spacing = 4, slope = { 18, 45 }, cliffBoost = 2, tiltToNormal = 1, sink = 0.3, where = "the scree aprons at the cliff foot" },
-		{ assets = { "BoulderA", "BoulderB", "BoulderC" }, kind = "Talus", class = "rock", density = 1.5, spacing = 3, slope = { 10, 45 }, cliffBoost = 2, tiltToNormal = 0.6, sink = 0.3 },
-		{ assets = { "CliffFaceA", "CliffFaceB", "CliffFaceC" }, kind = "CliffFace", class = "rock", density = 0.3, spacing = 18, slope = { 50, 90 }, align = "outward", sink = 3, where = "hug the terrain face, front facing outward; never over a cave mouth" },
-		{ assets = { "SpruceA", "FirA", "PineA" }, kind = "Conifer", class = "tree", density = 1.6, spacing = 9, slope = { 0, 32 }, where = "on the plateau above and below the scree" },
-		{ assets = { "FernA", "FernB" }, kind = "Fern", class = "groundCover", density = 4, moisture = { 0.4, 1 }, tiltToNormal = 1 },
-		{ assets = { "BushA" }, kind = "Bush", class = "bush", density = 1.2, where = "screen the CreekCave mouth from the creek trail (6-12 studs to the sides)" },
-		{ assets = { "MossPatch" }, kind = "Moss", class = "groundCover", density = 1.5, tiltToNormal = 1 },
-	},
-	Marsh = {
-		{ assets = { "SnagA", "SnagB" }, kind = "Snag", class = "tree", density = 0.5, cluster = { radius = 20, min = 4, max = 9 }, spacing = 7, where = "densest around Marsh.snags (the MarshSnags POI)" },
-		{ assets = { "ReedsA" }, kind = "Reeds", class = "water", density = 12, cluster = { radius = 7, min = 4, max = 12 }, waterDepth = { 0, 1.5 }, sink = 0.6 },
-		{ assets = { "BushB" }, kind = "Bush", class = "bush", density = 0.8, where = "on hummocks (ground above MarshLevel + 0.6)" },
-		{ assets = { "FernB" }, kind = "Fern", class = "groundCover", density = 2.5, tiltToNormal = 1 },
-		{ assets = { "MossPatch", "MushroomsA" }, weights = { 0.8, 0.2 }, kind = "Moss", class = "groundCover", density = 3, tiltToNormal = 1 },
-		{ assets = { "BirchA" }, kind = "Birch", class = "tree", density = 0.25, where = "marsh edges only" },
-		{ assets = { "FallenLogB" }, kind = "FallenLog", class = "rock", density = 0.35, tiltToNormal = 1, sink = 0.8, where = "half sunk in the pools" },
-	},
-	Mountains = {
-		{ assets = { "SpruceA", "SpruceB", "FirA" }, kind = "Conifer", class = "tree", density = 0.9, spacing = 10, slope = { 0, 40 }, height = { 0, 250 }, where = "visual only (outside the border); thin out with height" },
-		{ assets = { "CliffFaceC" }, kind = "Crag", class = "rock", density = 0.12, slope = { 40, 90 }, align = "outward", sink = 4 },
-		{ assets = { "ScreeA" }, kind = "Scree", class = "rock", density = 0.3, slope = { 20, 45 }, tiltToNormal = 1 },
-	},
-}
-
--- AssetInfo: realistic asset sizes (w x h x d studs, from art/manifests) and a footprint radius r for spacing and
--- exclusion checks (trees: the lower crown; everything else: half the larger side).
-ArenaLayout.AssetInfo = {
-	SpruceA = { 18.2, 55.3, 17.1, r = 7 }, SpruceB = { 15.1, 36.2, 15, r = 6 }, FirA = { 12.6, 42.2, 12.8, r = 5 },
-	PineA = { 21.3, 54.5, 25.4, r = 4 }, ConiferYoung = { 5.6, 11.8, 5.9, r = 2.6 }, BirchA = { 18.5, 30.3, 19.7, r = 4 },
-	BirchB = { 21.8, 28.6, 19.8, r = 5 }, OakA = { 29.2, 28.9, 29.2, r = 10 }, SnagA = { 9, 28.1, 9.2, r = 2.5 },
-	SnagB = { 8.9, 20.4, 9.9, r = 2.5 }, FallenLogA = { 15.8, 2, 2.3, r = 8 }, FallenLogB = { 22.4, 3.2, 3.3, r = 11 },
-	StumpA = { 5.7, 2.8, 5.6, r = 2.8 }, StumpB = { 4.5, 4.6, 5, r = 2.5 },
-	FernA = { 5.9, 2.6, 4.8, r = 2.5 }, FernB = { 4.6, 2.1, 4.2, r = 2.2 }, BushA = { 7.1, 5, 6.6, r = 3.4 },
-	BushB = { 7.3, 3.2, 6.8, r = 3.5 }, BerryBush = { 6.2, 4.4, 5.1, r = 3 }, GrassTallA = { 3.5, 3.7, 3.2, r = 1.7 },
-	GrassTallB = { 4, 3.3, 3.4, r = 1.8 }, GrassForest = { 1.8, 1.1, 1.6, r = 0.9 }, ReedsA = { 3.3, 6.2, 3.4, r = 1.7 },
-	FlowersA = { 2, 1.6, 1.8, r = 1 }, FlowersB = { 1.8, 1.5, 1.7, r = 0.9 }, MushroomsA = { 1.7, 0.6, 1.5, r = 0.8 },
-	SaplingBroadleaf = { 6.4, 9.2, 6.5, r = 3 }, MossPatch = { 4.8, 0.3, 3.3, r = 2.4 },
-	BoulderA = { 2.3, 2.1, 2.1, r = 1.2 }, BoulderB = { 4.1, 3.6, 3.8, r = 2 }, BoulderC = { 6.7, 5.3, 5.7, r = 3.3 },
-	BoulderD = { 11, 7.1, 8.4, r = 5.5 }, RockFlat = { 9.9, 1.9, 7.5, r = 5 }, RiverStones = { 7.2, 1.2, 5.6, r = 3.6 },
-	ScreeA = { 8.2, 3.1, 6.5, r = 4 }, CliffFaceA = { 27.3, 22.3, 25.3, r = 13 }, CliffFaceB = { 38.3, 31.9, 32.8, r = 19 },
-	CliffFaceC = { 48.4, 44.1, 41.1, r = 24 }, RockOutcrop = { 14.1, 6.4, 16.9, r = 8 }, CaveMouth = { 36.3, 24.6, 31.6, r = 18 },
-	HunterCabin = { 26.6, 21.4, 21.5, r = 14 }, Watchtower = { 13.9, 32.6, 13.9, r = 7 }, Footbridge = { 48.5, 6.1, 8.7, r = 24 },
-	Tent = { 7, 4.9, 12.9, r = 6.5 }, Campfire = { 3.7, 0.7, 3.7, r = 1.9 }, Woodpile = { 6.6, 3.1, 4, r = 3.3 },
-	Barrel = { 2.3, 3.2, 2.3, r = 1.2 }, Lantern = { 0.6, 1.4, 0.6, r = 0.3 }, CratePile = { 6.1, 4.7, 5.4, r = 3 },
-	FenceSegment = { 8.5, 4.2, 0.6, r = 4.3 }, Sign = { 4.4, 6.2, 1.5, r = 2.2 }, Bedroll = { 2.5, 0.7, 6.6, r = 3.3 },
-	LogBench = { 6.8, 1.7, 1.4, r = 3.4 },
-	Spire = { 40, 58.2, 40, r = 20 }, SpirePlatform = { 120, 12.4, 120, r = 60 }, Plinth = { 5.5, 12.4, 5.5, r = 2.8 },
-}
-
--- POIKits: what to place at each POI kind (centre = POI.position, footprint = POI.radius; facing = POI.facing when set).
-ArenaLayout.POIKits = {
-	Campsite = { "Tent", "Campfire", "Bedroll", "LogBench", "Woodpile", "Lantern (hung from the tent pole)", "optional: Barrel, CratePile (tier 2 camps), 1-2 broken FenceSegment" },
-	Cabin = { "HunterCabin (door / porch facing POI.facing)", "Woodpile against the east gable", "Barrel", "3-5 FenceSegment as a small paddock", "Sign where the trail arrives" },
-	Watchtower = { "Watchtower (ladder well inside; open front bay toward POI.facing)", "CratePile at its foot", "Lantern on the deck" },
-	Bridge = { "Footbridge: X axis = Crossings.GorgeFootbridge.direction (across the gorge), EndA/EndB on the rims, pivot at the centre at the rim height (Crossings[].position.Y)", "a Sign at one end" },
-	Cave = { "CaveMouth at the cave mouth (CaveEntrance attachment on Caves[i].mouth, front facing out of the hill)", "CreekCave: BushA / FernB screens 6-12 studs to the sides", "LedgeCave: an old Campfire and Bedroll inside the chamber" },
-	Waterfall = { "RiverStones and BoulderB/C round the pool rim", "MossPatch on the wet rocks", "an Emit_Waterfall AmbientEmitter at River.fall.base" },
-	Island = { "BirchA x2", "BoulderC", "RockFlat at the waterline" },
-	Overlook = { "RockFlat as a ledge at the rim (front toward the gorge)", "RockOutcrop behind it" },
-	GiantTree = { "OakA at scale 1.5-1.7 in the hollow (the giant / hollow tree), MossPatch and MushroomsA round its roots" },
-	Boulder = { "BoulderD at scale 2.2-2.6 (the lone field boulder), half sunk (sink 1.5)" },
-	DeadStand = { "SnagA / SnagB x8-12 inside the radius", "FallenLogB x2 half sunk", "ReedsA round them" },
-}
-
-----------------------------------------------------------------------------------------------------
--- Loot zones: tier 3 at the Spire, tier 2 at POIs and the meadow edge, tier 1 scattered.
-----------------------------------------------------------------------------------------------------
--- LootZones: { name, center, radius, tier, crates, ground } (suggested counts; crates = SupplyCrate markers,
--- ground = Ground markers). Kind "ring" zones are annuli (inner..radius).
-ArenaLayout.LootZones = {
-	{ name = "Spire", center = Vector3.new(CX, ArenaLayout.PlazaY, CZ), radius = 34, tier = 3, crates = 8, ground = 10, note = "crates at the Spire's CrateSlot_1..4 plus a ring around it; Feast refill needs >= 4 tier-3 markers within Config.Loot.SpireRefillRadius (90)" },
-	{ name = "PlazaEdge", kind = "ring", center = Vector3.new(CX, ArenaLayout.PlazaY, CZ), inner = 62, radius = 90, tier = 3, crates = 4, ground = 6 },
-	{ name = "MeadowEdge", kind = "ring", center = Vector3.new(CX, ArenaLayout.PlazaY, CZ), inner = 110, radius = 175, tier = 2, crates = 6, ground = 14, runnerCaches = 8, note = "at the treeline, spread around all angles; plus the 8 runner's caches (ArenaLayout.RunnerCaches, r 150-200): keep them" },
-}
-
--- RunnerCaches (PlayabilityPlan QW7): one runner's cache per 45-degree sector at r 150-200, on open, level ground at
--- the meadow edge, each in sight of the three nearest launch plates (checked against the terrain: the 10-stud pole
--- top from all three, the crate from most). LootService builds a tier-2 crate (ItemDefs.LootTables.Runner) and a pale
--- canvas on a pole beside it. Loot markers: ServerStorage.ArenaData.LootSpawns parts named by `name` (Kind Crate,
--- Tier 2, Runner = true). groundY measured on TerrainVersion 2 (2026-11-11). facing = yaw toward the Spire.
--- Set dresser: keep 6 studs clear around each (crate + pole), and give each a landmark 6-10 studs away (`landmark`
--- is a suggestion: a lone tree, a boulder or a stump).
-ArenaLayout.RunnerCaches = {
-	{ name = "RunnerCache_1", angle = 28.5, r = 180, groundY = 38.97, landmark = "BoulderC" },
-	{ name = "RunnerCache_2", angle = 68.5, r = 157.5, groundY = 37.82, landmark = "OakA" },
-	{ name = "RunnerCache_3", angle = 112.5, r = 150, groundY = 45.76, landmark = "StumpA" },
-	{ name = "RunnerCache_4", angle = 158.5, r = 150, groundY = 45.85, landmark = "BoulderB" },
-	{ name = "RunnerCache_5", angle = 197.5, r = 157.5, groundY = 43.19, landmark = "SnagA" },
-	{ name = "RunnerCache_6", angle = 251.5, r = 150, groundY = 47.07, landmark = "BirchA" },
-	{ name = "RunnerCache_7", angle = 297.5, r = 192.5, groundY = 44.98, landmark = "FallenLogA" },
-	{ name = "RunnerCache_8", angle = 339.5, r = 157.5, groundY = 45.30, landmark = "BoulderC" },
-}
-for _, c in ipairs(ArenaLayout.RunnerCaches) do
-	c.position = polar(c.angle, c.r, c.groundY)
-	c.facing = (c.angle + 180) % 360
-end
-for _, p in ipairs(ArenaLayout.POIs) do
-	if p.kind ~= "Spire" then
-		table.insert(ArenaLayout.LootZones, {
-			name = p.name,
-			center = p.position,
-			radius = p.radius + 4,
-			tier = p.tier,
-			crates = (p.kind == "Campsite") and 1 or 2,
-			ground = (p.kind == "Campsite") and 2 or 3,
-			poi = p.name,
-		})
-	end
-end
-
--- lootTierAt(position) -> 1 | 2 | 3 : the tier a loot marker at this position should use.
-function ArenaLayout.lootTierAt(position: Vector3): number
-	local x, z = position.X, position.Z
-	local best = 1
-	for _, zone in ipairs(ArenaLayout.LootZones) do
-		local d = sqrt((x - zone.center.X) ^ 2 + (z - zone.center.Z) ^ 2)
-		local inside
-		if zone.kind == "ring" then
-			inside = d >= (zone.inner or 0) and d <= zone.radius
-		else
-			inside = d <= zone.radius
-		end
-		if inside and zone.tier > best then
-			best = zone.tier
-		end
-	end
-	return best
-end
-
--- dangerAt(position) -> 0..1: exposure and contest risk (near the Spire, open meadow/field, main water
--- sources and crossings = high; deep forest, caves, the far plateau = low). Use it to bias loot quality
--- (dangerous places deserve better loot) and for AI/spectator hints.
-function ArenaLayout.dangerAt(position: Vector3): number
-	local x, z = position.X, position.Z
-	local r = sqrt((x - CX) ^ 2 + (z - CZ) ^ 2)
-	local centre = 1 - smooth(40, 260, r)
-	local biome = ArenaLayout.getBiome(position)
-	local open = (biome == "Meadow" or biome == "Field") and 0.35 or ((biome == "Lake" or biome == "Marsh") and 0.2 or 0)
-	local water = 1 - smooth(0, 40, ArenaLayout.distanceToWater(position))
-	local crossing = 0
-	for _, c in ipairs(ArenaLayout.Crossings) do
-		crossing = max(crossing, 1 - smooth(0, 30, sqrt((x - c.position.X) ^ 2 + (z - c.position.Z) ^ 2)))
-	end
-	return math.clamp(centre * 0.7 + open + water * 0.2 + crossing * 0.15, 0, 1)
+	return nil
 end
 
 return ArenaLayout
