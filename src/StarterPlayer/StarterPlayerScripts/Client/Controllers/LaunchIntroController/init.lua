@@ -5,12 +5,22 @@
 	     diamond net (a slow push in; you look up; the lift starts and carries you up toward the lens).
 	  2. "It loads up": a quick dip to black into your glass case among the other contenders in theirs (Full only):
 	     the camera at face height outside your glass looks past you along the row, then pulls back round the hall.
-	  3. The rise: your disc carries you up your pole through the round hall while the camera circles you (once in
-	     the full shot; half a turn from your disc leaving the case in the short cut), ending low and looking up at
-	     your whole body. The others rise on their own poles a little ahead or behind.
-	  4. A short white-out, and the hand-off: first person on your own plate, turned to face the Spire
-	     (LaunchController's wave-1 turn, which waits for the shot), as the plate rises out of its tube on today's
-	     timeline (GameState LaunchAt), then the last seconds of the countdown and the horn.
+	  3. The rise: your disc carries you up your pole through the round hall while the camera circles you (two thirds
+	     of a turn in the full shot, a quarter in the short cut), dropping low behind you to look up the pole, and then,
+	     for the last part of the climb, spiralling in over your right shoulder and into your own eyes (your stand-in
+	     fades as the lens reaches it; the field of view eases to your own setting). You ride the rest in first person,
+	     looking up the pole at the lit roof and the white opening it runs into. The others rise on their own poles a
+	     little ahead or behind. With Roblox's Reduce Motion the camera does not circle or travel: it holds its first
+	     bearing and a short dip to black cuts to your eyes.
+	  4. The arrival: the light from above floods the picture (the set's exposure and bloom, then a pale cover up to
+	     0.95, never a hard white frame) while your eyes come down level, and under it the shot hands off: first person
+	     on your own plate, facing the Spire, at the very bearing, pitch and field of view the shot ended on (no jump;
+	     LaunchController's wave-1 turn, which waits for the shot, asks for the same view). Then the sun's glare falls
+	     away over 1.5 to 2 seconds as your eyes adjust (Glare, a child module: stronger facing the real sun in
+	     daylight, gentle at dawn, under cloud or in shade, and at night no light at all, the cover dark and gone in
+	     under a second; "Shaders: Off" gets a plain fade of the same cover and nothing in Lighting is touched). The
+	     plate rises out of its tube on today's timeline (GameState LaunchAt), then the last seconds of the countdown
+	     and the horn. A skip still cuts through black, with no glare after it.
 	The server picks the cut and the clock (RoundService, Config.Launch): GameState LaunchCut "Full" | "Short",
 	LaunchCallAt, and LaunchAt = the end of the white-out = the start of the plate rise. Everyone in a round sees the
 	same cut on the same clock; a client that starts late joins the shot where everyone else is, or skips it when it is
@@ -28,11 +38,13 @@
 	lighting and the HUD (today's rise then plays as usual). The server's cut is the only switch: with
 	Config.Launch.Intro = false it sends none and nothing here runs (the set isn't even built).
 	Low engine quality draws none of the set's lights: each room has a flat fill for that (FILL), the same on
-	every client; with "Shaders: Off" the shot uses no bloom (the white-out is exposure, grade and cover).
+	every client; with "Shaders: Off" the shot uses no bloom (the flood of light is exposure, grade and cover).
 	Studio only (tests and stills): LocalPlayer attribute LS_LaunchPreview = "Full" | "Short" plays a preview shot
 	without a round (no hand-off; the camera goes back where it was), LS_LaunchFreeze = seconds holds the preview at
 	that moment of the shot, LS_LaunchSkipTest = true acts as a completed skip hold; LS_LaunchStats (JSON) reports
-	frame times per stage after every shot.
+	frame times per stage after every shot. LS_LaunchGlareTest = true (or the cover's alpha to start from) plays the
+	arrival's glare alone, where you stand and look, at the hour the sky shows; LS_LaunchGlareFreeze = seconds holds
+	it at that moment; LS_LaunchGlare (JSON) reports each glare when it ends (Glare).
 	The arena (docs/design/Map1Build.md): the hall has one glass case per plate (ArenaLayout.PlinthCount, else the
 	number of its Plates), but never more than MAX_CASES (24): the hall's radius and the camera's path are made for
 	24 cases 15.7 studs apart. With 48 on the same ring the cases stood 7.85 apart and the camera started inside the
@@ -65,6 +77,7 @@ local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Set = require(script:WaitForChild("Set"))
 local Figures = require(script:WaitForChild("Figures"))
+local Glare = require(script:WaitForChild("Glare"))
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 local localPlayer = Players.LocalPlayer
@@ -81,7 +94,9 @@ local HIDE_GUIS = { "HUD", "HUDFX", "Overlay", "FeedbackLines", "TouchControls",
 local HIDE_CORE = { Enum.CoreGuiType.Chat, Enum.CoreGuiType.PlayerList }
 -- The hall holds at most this many cases: its radius (Set: R_CASE 60) and the camera's path are made for 24.
 local MAX_CASES = 24
-local WHITE = Color3.fromRGB(246, 248, 252)
+local WHITE = Color3.fromRGB(246, 248, 252) -- the cover's colour when the sky can't be read (Glare.sky gives the real one)
+local FACE_PITCH = -6 -- degrees: the view the shot ends on and hands over (LaunchController's FACE_PITCH)
+local EYE_AHEAD = 12 -- studs ahead of the eyes the first-person view aims at
 local BLACK = Color3.new(0, 0, 0)
 local LIT = Set.Colors.light
 local UNLIT = Color3.fromRGB(40, 44, 50)
@@ -90,17 +105,28 @@ local UNLIT = Color3.fromRGB(40, 44, 50)
 -- server's LaunchAt - LaunchCallAt.
 --   look      the stand-in looks up the shaft     lift    the lift starts      dip   the dip to black out of the red room
 --   cases     { from, to } at your case (Full)    rise    { from, to } up the pole, the disc climbing riseHeight studs
---   white     the white-out starts                handoff first person on your plate (the white fades as it rises)
---   phi       the camera's bearing round you { start, end } in degrees (0 = in front, + = your right)
+--   white     the flood of light starts           handoff first person on your plate (the glare falls from there)
+--   phi       the camera's bearing round you { start, end } in degrees (0 = in front, + = your right). It ends
+--             behind your right shoulder (155 = -205): the pole stands behind your left one, at 220.
+--   eyes      { from, to } in rise progress (0..1): the camera leaves its circle and spirals into your own eyes;
+--             from `to` on the rise is first person
+--   low       the camera's lowest height against your feet, reached as the spiral starts (the full shot looks up at
+--             you and the pole from under the disc; the short cut has no time to go down there and back)
+--   gaze      degrees you look up the pole in first person      level  { from, to } seconds: your eyes come down to
+--             the view the hand-off gives (FACE_PITCH), mostly under the flood of light
+-- The server's clock depends on length alone (LaunchAt - LaunchCallAt); length, rise, white and handoff are as they
+-- were before the first-person ending.
 local PLANS = {
 	Full = {
 		length = 15.4, look = 1.0, lift = 3.3, dip = 4.45, cases = { 4.5, 8.6 }, rise = { 8.6, 14.95 },
-		white = 14.15, handoff = 14.95, riseHeight = 70, phi = { 34.4, 34.4 - 375 }, start = nil,
+		white = 14.15, handoff = 14.95, riseHeight = 70, phi = { 34.4, -205 }, start = nil,
+		eyes = { 0.46, 0.70 }, low = -1.9, gaze = 60, level = { 14.15, 14.9 },
 	},
 	Short = {
 		length = 6.2, look = 0.3, lift = 0.8, dip = 1.6, cases = nil, rise = { 1.66, 5.75 },
-		white = 5.05, handoff = 5.75, riseHeight = 44, phi = { 95, -15 },
+		white = 5.05, handoff = 5.75, riseHeight = 44, phi = { 60, 155 },
 		start = { r = 9.6, h = 4.3, fov = 54 },
+		eyes = { 0.40, 0.66 }, low = 1.8, gaze = 60, level = { 5.05, 5.7 },
 	},
 }
 -- the case stage's last pose (slot space) = the full rise's first: continuous position, target and field of view
@@ -173,6 +199,7 @@ local seenAt = 0
 local ui: any = nil
 local skipHeldSince: number? = nil
 local fadeToken = 0
+local glare: any = nil -- the arrival's glare while it falls away (Glare's state; see stopGlare)
 local lastStats: any = nil
 local lastTierCheck = 0
 
@@ -314,6 +341,12 @@ local function slotOf(position: Vector3): number?
 	local plates = math.max(n, plateCount())
 	local plate = math.floor(deg / (360 / plates) + 0.5) % plates
 	return (math.floor(plate * n / plates) % n) + 1
+end
+
+-- your own field of view (Settings), as CameraController starts from it: the shot ends on it and hands it over
+local function ownFov(): number
+	local settings = ClientState.settings
+	return math.clamp(tonumber(settings and settings.fov) or Config.Camera.BaseFov, 40, 110)
 end
 
 local function ringDistance(a: number, b: number, n: number): number
@@ -468,10 +501,24 @@ local function setFade(color: Color3, alpha: number)
 	ui.fade.BackgroundTransparency = 1 - clamp01(alpha)
 end
 
--- After a shot: the white (or black) gives way to the game.
+-- The arrival's glare that is falling away now (Glare's state), if any. It writes Lighting's exposure and bloom on top
+-- of the day cycle's: stopGlare takes them off at once.
+local function stopGlare()
+	local g = glare
+	if g then
+		glare = nil
+		local ok, err = pcall(Glare.finish, g)
+		if not ok then
+			warn("[LaunchIntroController] the glare couldn't be taken off: " .. tostring(err))
+		end
+	end
+end
+
+-- After a shot that did not hand off (a skip, a preview, an early end): the black gives way to the game.
 local function fadeAway(color: Color3, from: number, duration: number)
 	fadeToken += 1
 	local token = fadeToken
+	stopGlare()
 	ui.prompt.Visible = false
 	ui.skip.Visible = false
 	setLetterbox(0)
@@ -486,6 +533,80 @@ local function fadeAway(color: Color3, from: number, duration: number)
 			end
 			setFade(color, from * (1 - smooth(k)))
 			RunService.RenderStepped:Wait()
+		end
+		if token == fadeToken then
+			setFade(color, 0)
+			if not shot then
+				ui.screen.Enabled = false
+			end
+		end
+	end)
+end
+
+-- After the hand-off: the sun's glare falls away as the eyes adjust (Glare). `from` is the cover's alpha at the cut,
+-- `sky` the shot's Glare.sky table (nil: read now), `fresh` true straight after a shot. The cover is this screen's
+-- Fade frame; the over-bright picture under it is Glare's (not with "Shaders: Off": a plain fade of the cover).
+local function glareAway(from: number, sky: any, fresh: boolean)
+	fadeToken += 1
+	local token = fadeToken
+	stopGlare()
+	ui.prompt.Visible = false
+	ui.skip.Visible = false
+	setLetterbox(0)
+	local arena = Controllers and Controllers.ArenaController
+	local g = Glare.begin({
+		from = from,
+		sky = sky,
+		fresh = fresh,
+		bloom = shaderTier() ~= "Off",
+		getLook = if arena and type(arena.getLook) == "function" then arena.getLook else nil,
+	})
+	glare = g
+	local color: Color3 = g.color
+	local cover = clamp01(from)
+	-- the first frame now, in the frame of the cut (the lighting has just been given back: the glare goes on top)
+	local live, alpha, tint = pcall(Glare.update, g, 0)
+	if live then
+		color, cover = tint, alpha
+	else
+		-- (the glare broke: whatever it wrote comes off now, and the cover fades by itself)
+		warn("[LaunchIntroController] the glare failed: " .. tostring(alpha))
+		stopGlare()
+	end
+	setFade(color, cover)
+	ui.screen.Enabled = true
+	task.spawn(function()
+		local t0 = os.clock()
+		while token == fadeToken and (glare == g or not live) do
+			local dt = RunService.RenderStepped:Wait()
+			if token ~= fadeToken or (live and glare ~= g) then
+				break
+			end
+			if live then
+				local fine, a, c, done = pcall(Glare.update, g, dt)
+				if not fine then
+					warn("[LaunchIntroController] the glare failed: " .. tostring(a))
+					live = false
+					if glare == g then
+						stopGlare()
+					end
+					t0 = os.clock()
+				elseif done then
+					break
+				else
+					color, cover = c, a
+					setFade(color, cover)
+				end
+			else
+				local k = (os.clock() - t0) / 0.6
+				if k >= 1 then
+					break
+				end
+				setFade(color, cover * (1 - smooth(k)))
+			end
+		end
+		if glare == g then
+			stopGlare()
 		end
 		if token == fadeToken then
 			setFade(color, 0)
@@ -667,11 +788,16 @@ local function giveLightingBack(s)
 	s.lighting = nil
 end
 
+-- white 0..1: the flood of light at the end of the rise. s.flood (Glare.sky) says how far it goes: 1 by day (the
+-- set whites out, as it always did), less at dawn or under cloud, and under 0 at night, when the light falls away
+-- instead and the cut passes through the dark.
 local function writeLighting(s, p, white: number)
+	local flood = white * (tonumber(s.flood) or 1)
+	local glow = math.max(flood, 0)
 	Lighting.Ambient = p.Ambient
 	Lighting.OutdoorAmbient = p.Ambient
 	Lighting.Brightness = 0
-	Lighting.ExposureCompensation = p.Exposure + 2.4 * white
+	Lighting.ExposureCompensation = p.Exposure + 2.4 * flood
 	Lighting.EnvironmentDiffuseScale = 0
 	Lighting.EnvironmentSpecularScale = p.EnvSpecular
 	Lighting.ColorShift_Top = BLACK
@@ -690,17 +816,17 @@ local function writeLighting(s, p, white: number)
 		fx.atmosphere.Glare = 0
 		fx.atmosphere.Haze = 0
 	end
-	-- "Shaders: Off" has no bloom: the white-out then comes from the exposure, a stronger grade and the white cover
+	-- "Shaders: Off" has no bloom: the flood then comes from the exposure, a stronger grade and the cover
 	local bloomOn = s.bloom ~= false
 	if fx.bloom then
 		fx.bloom.Enabled = bloomOn
-		fx.bloom.Intensity = p.BloomIntensity + 1.4 * white
-		fx.bloom.Size = math.floor(p.BloomSize + 16 * white + 0.5)
-		fx.bloom.Threshold = math.max(0.2, p.BloomThreshold - 0.8 * white)
+		fx.bloom.Intensity = p.BloomIntensity + 1.4 * glow
+		fx.bloom.Size = math.floor(p.BloomSize + 16 * glow + 0.5)
+		fx.bloom.Threshold = math.max(0.2, p.BloomThreshold - 0.8 * glow)
 	end
 	if fx.grade then
 		fx.grade.Enabled = true
-		fx.grade.Brightness = (if bloomOn then 0.25 else 0.45) * white
+		fx.grade.Brightness = (if bloomOn then 0.25 else 0.45) * flood
 		fx.grade.Contrast = p.GradeContrast
 		fx.grade.Saturation = p.GradeSaturation - 0.3 * white
 		fx.grade.TintColor = p.GradeTint
@@ -951,6 +1077,7 @@ local function evaluate(s, t: number): (CFrame, number, string)
 		red.lift.CFrame = red.liftHome + up * liftY
 		s.me.place(O * CFrame.new(0, red.liftTop + liftY, 0) * CFrame.Angles(0, math.pi, 0))
 		s.me.look(0.85 * smooth((t - plan.look * k) / 1.0), 0)
+		s.me.fade(0)
 		-- the camera: over the shaft's mouth, down through the far half of the hex (its top vertex at the top of the
 		-- frame, its sides at the edges) at you on the disc; a slow push in and a slight drift round the shaft
 		local drift = if s.reduced then 0 else math.rad(lerp(-4, 3, e))
@@ -966,16 +1093,19 @@ local function evaluate(s, t: number): (CFrame, number, string)
 		slot.riser.CFrame = slot.riserCF
 		s.me.place(S * CFrame.new(0, slot.riserTop, 0))
 		s.me.look(0.04, 0.65 * smooth((t - ca - 0.5) / 1.0))
+		s.me.fade(0)
 		updateOthers(s, t)
 		-- at face height just outside your glass, looking past you along the row; then it pulls back round the hall
 		local eye = Vector3.new(3.6, 5.4, -4.6):Lerp(CASE_END_EYE, e)
 		local target = Vector3.new(-12, 4.8, -0.5):Lerp(Vector3.new(0, slot.riserTop + 3.4, 0), e)
 		return CFrame.lookAt(S * eye, S * target), lerp(46, CASE_END_FOV, e), stage
 	end
-	-- the rise: your disc climbs the pole while the camera circles you, ending low and looking up at your whole body
+	-- the rise: your disc climbs the pole while the camera circles you and drops low behind you; for the last part of
+	-- the climb it spirals in over your right shoulder and into your own eyes, and the rest is first person
 	local riseA, riseB = plan.rise[1] * k, plan.rise[2] * k
-	local u = clamp01((t - riseA) / math.max(0.1, riseB - riseA))
-	local y = plan.riseHeight * riseEase((t - riseA) / math.max(0.1, riseB - riseA))
+	local riseSpan = math.max(0.1, riseB - riseA)
+	local u = clamp01((t - riseA) / riseSpan)
+	local y = plan.riseHeight * riseEase((t - riseA) / riseSpan)
 	slot.riser.CFrame = slot.riserCF + up * y
 	local feetY = slot.riserTop + y
 	s.me.place(S * CFrame.new(0, feetY, 0))
@@ -988,21 +1118,40 @@ local function evaluate(s, t: number): (CFrame, number, string)
 		local flat = Vector2.new(CASE_END_EYE.X, CASE_END_EYE.Z)
 		r0, h0, fov0 = flat.Magnitude, CASE_END_EYE.Y - slot.riserTop, CASE_END_FOV
 	end
-	local phi = math.rad(lerp(plan.phi[1], plan.phi[2], smooth(u)))
+	-- into your eyes: 0 on the circle, 1 in first person. The circle's turn ends as the camera arrives.
+	local eyesA, eyesB = plan.eyes[1], plan.eyes[2]
+	local e = smooth((u - eyesA) / (eyesB - eyesA))
+	local phi = math.rad(lerp(plan.phi[1], plan.phi[2], smooth(u / eyesB)))
 	if s.reduced then
-		phi = math.rad(plan.phi[2]) -- Reduce Motion: a straight push up the pole, no circling
+		-- Reduce Motion: no circling and no travel into the head. The camera keeps its first bearing (going low, to look
+		-- up at your whole body), and a short dip to black (stepShot) cuts to your eyes.
+		phi = math.rad(plan.phi[1])
+		e = if u >= (eyesA + eyesB) / 2 then 1 else 0
 	end
+	local lowBy = eyesA + 0.02 - 0.3 -- (the camera is down as the spiral starts)
 	local r = lerp(r0, 8.0, smooth(u / 0.3))
-	r = lerp(r, 7.4, smooth((u - 0.7) / 0.3))
-	local h = lerp(h0, 3.0, smooth(u / 0.35))
-	h = lerp(h, -1.9, smooth((u - 0.6) / 0.4))
-	local eye = Vector3.new(math.sin(phi) * r, feetY + h, -math.cos(phi) * r)
-	local target = Vector3.new(0, feetY + lerp(3.4, 2.9, smooth((u - 0.6) / 0.4)), 0)
+	r = lerp(r, 7.4, smooth((u - 0.3) / lowBy))
+	local h = lerp(h0, 3.0, smooth(u / 0.3))
+	h = lerp(h, plan.low, smooth((u - 0.3) / lowBy))
+	local circleEye = Vector3.new(math.sin(phi) * r, feetY + h, -math.cos(phi) * r)
+	local circleTarget = Vector3.new(0, feetY + lerp(3.4, 2.9, smooth((u - 0.3) / lowBy)), 0)
+	-- first person: at your eyes, facing the hall's centre as your plinth faces the Spire. You look up the pole at the
+	-- roof's lights and the opening, and your eyes come level (the view the hand-off gives) under the flood of light.
+	local levelA, levelB = plan.level[1] * k, plan.level[2] * k
+	local gaze = if s.reduced then math.min(plan.gaze, 30) else plan.gaze
+	local pitch = math.rad(lerp(gaze, FACE_PITCH, smooth((t - levelA) / math.max(0.05, levelB - levelA))))
+	local ownEye = Vector3.new(0, feetY + s.me.eye, 0)
+	local ownTarget = ownEye + Vector3.new(0, math.sin(pitch), -math.cos(pitch)) * EYE_AHEAD
+	local eye = circleEye:Lerp(ownEye, e)
+	local target = circleTarget:Lerp(ownTarget, e)
+	-- your stand-in is not drawn once the lens comes near it (gone 2 studs behind its head)
+	s.me.fade(smooth((e - 0.4) / 0.3))
 	local keyAt = S * Vector3.new(0, feetY + 9, -2.2)
 	hall.riderAnchor.CFrame = CFrame.lookAt(keyAt, S * Vector3.new(0, feetY + 3, 0))
 	-- your case light goes out behind you once you've left it
 	slot.light.Enabled = u < 0.25
-	return CFrame.lookAt(S * eye, S * target), lerp(fov0, 61, smooth(u)), stage
+	-- the field of view ends on your own setting: nothing changes at the hand-off
+	return CFrame.lookAt(S * eye, S * target), lerp(lerp(fov0, 61, smooth(u)), ownFov(), e), stage
 end
 
 local function shotTime(s): (number, boolean)
@@ -1081,7 +1230,7 @@ local function stepShot(dt: number)
 		end
 	end
 	local holdK = if skipHeldSince then clamp01((os.clock() - (skipHeldSince :: number)) / SKIP_HOLD) else 0
-	-- the hand-off: first person on your plate (the white holds up to 1.5 s for a late placement)
+	-- the hand-off: first person on your plate (the cover closes and holds up to 1.5 s for a late placement)
 	local handoffT = plan.handoff * k
 	if not frozen and t >= handoffT then
 		if s.preview then
@@ -1111,12 +1260,19 @@ local function stepShot(dt: number)
 	cam.CameraType = Enum.CameraType.Scriptable
 	cam.CFrame = camCF
 	cam.FieldOfView = fov
-	-- light: snap at the cuts (behind black), blend otherwise; the white-out floods the exposure
+	-- light: snap at the cuts (behind black), blend otherwise; the arrival floods the exposure
 	local whiteA = plan.white * k
-	-- the white-out: the light floods first (exposure and bloom), then the white covers the frame
+	-- the arrival, one smooth rise: the light from above floods first (exposure and bloom, as far as the hour's sky
+	-- allows: s.flood), then the sky's cover comes over the frame, up to its peak (under 1: never a hard white frame)
+	-- at the hand-off. The cut onto your plinth hides under it, and Glare takes the same cover down from there.
 	local span = math.max(0.1, handoffT - 0.1 - whiteA)
 	local white = smooth((t - whiteA) / span)
-	local cover = smooth((t - whiteA - 0.35 * span) / (0.65 * span))
+	local cover = s.sky.peak * smooth((t - whiteA - 0.35 * span) / (0.65 * span))
+	if t > handoffT then
+		-- a late placement (or a preview's last moment): the cover closes while the shot waits
+		cover = lerp(cover, 1, smooth((t - handoffT) / 0.25))
+	end
+	s.cover = cover
 	local cut = s.profileStage == nil or (s.profileStage == "Red" and stage ~= "Red") -- behind the black
 	blendLighting(s, stage, if frozen then 0 else dt, frozen or cut, white)
 	s.profileStage = stage
@@ -1129,12 +1285,20 @@ local function stepShot(dt: number)
 	if t > dip - 0.1 and t < dip + 0.35 then
 		black = math.max(black, if t < dip then smooth((t - dip + 0.1) / 0.1) else 1 - smooth((t - dip - 0.06) / 0.28))
 	end
+	local riseA = plan.rise[1] * k
+	if s.reduced and stage == "Rise" then
+		-- Reduce Motion: the cut into your own eyes (evaluate) passes through a short dip to black
+		local riseSpan = math.max(0.1, plan.rise[2] * k - riseA)
+		local d = t - (riseA + riseSpan * (plan.eyes[1] + plan.eyes[2]) / 2)
+		if d > -0.2 and d < 0.4 then
+			black = math.max(black, if d < 0 then smooth((d + 0.2) / 0.2) else 1 - smooth((d - 0.05) / 0.3))
+		end
+	end
 	if cover > 0 then
-		setFade(WHITE, cover)
+		setFade(s.sky.color, cover)
 	else
 		setFade(BLACK, black)
 	end
-	local riseA = plan.rise[1] * k
 	setLetterbox(if stage == "Rise" then 1 - smooth((t - riseA) / (2.5 * k)) else 1)
 	local touch = Input.isTouch()
 	local showSkip = not s.preview and sinceStart > 1.0 and t < whiteA - 0.2
@@ -1186,14 +1350,13 @@ local function cameraToPlate()
 		local centre = arenaCentre()
 		local flat = Vector3.new(centre.X - root.Position.X, 0, centre.Z - root.Position.Z)
 		local dir = if flat.Magnitude > 0.1 then flat.Unit else root.CFrame.LookVector
-		local pitch = math.rad(-6)
+		local pitch = math.rad(FACE_PITCH)
 		local look = dir * math.cos(pitch) + Vector3.new(0, math.sin(pitch), 0)
 		local eye = head.Position + Vector3.new(0, 0.1, 0)
 		cam.CFrame = CFrame.lookAt(eye, eye + look)
 		cam.Focus = CFrame.new(eye + look)
 	end
-	local settings = ClientState.settings
-	cam.FieldOfView = math.clamp(tonumber(settings and settings.fov) or Config.Camera.BaseFov, 40, 110)
+	cam.FieldOfView = ownFov()
 end
 
 finish = function(reason: string)
@@ -1271,7 +1434,9 @@ finish = function(reason: string)
 	end)
 	try("overlay", function()
 		if reason == "handoff" then
-			fadeAway(WHITE, 1, 0.6)
+			-- the sun's glare falls away from the cover the shot ended under (Glare)
+			-- (never from less than its peak: after a stalled frame the shot's own cover may not have come up)
+			glareAway(math.max(tonumber(s.cover) or 0, tonumber(s.sky.peak) or 0.95), s.sky, true)
 		elseif reason == "skip" then
 			fadeAway(BLACK, 1, 0.5)
 		else
@@ -1315,6 +1480,7 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 		roundId = GameState:GetAttribute("RoundId"), sounds = {}, fired = {}, contenders = {}, guis = {}, stats = {},
 		joinT = math.max(0, t0), startedAt = os.clock(), lastRender = os.clock(), reduced = reducedMotion(),
 		skipText = skipText(),
+		sky = { color = WHITE, peak = 0.95, cloud = 1, day = 1 }, flood = 1, cover = 0, -- (until Glare.sky is read below)
 		saved = { cameraType = cam.CameraType, subject = cam.CameraSubject, cframe = cam.CFrame, fov = cam.FieldOfView },
 	}
 	shot = s
@@ -1339,9 +1505,16 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 				table.insert(s.copyQueue, entry)
 			end
 		end
+		-- (a glare still falling from the last shot comes off first: the lighting kept below must be the day cycle's)
+		stopGlare()
 		takeLighting(s)
 		s.profiles = shotProfiles()
 		s.bloom = shaderTier() ~= "Off"
+		-- the arrival follows the arena's sky at this hour (the cover's colour, how far the set's light floods)
+		local okSky, sky = pcall(Glare.sky)
+		if okSky and type(sky) == "table" then
+			s.sky, s.flood = sky, tonumber(sky.flood) or 1
+		end
 		holdGuis(s)
 		ui.screen.Enabled = true
 		fadeToken += 1 -- (a fade still running from the last shot stops here)
@@ -1403,6 +1576,24 @@ local function watch()
 	end
 	-- Studio previews (stills and timing checks without a round)
 	if IS_STUDIO then
+		-- the arrival's glare alone, where you stand and look, at the hour the sky shows now
+		local glareTest = localPlayer:GetAttribute("LS_LaunchGlareTest")
+		if glareTest ~= nil then
+			localPlayer:SetAttribute("LS_LaunchGlareTest", nil)
+			if glareTest == true or type(glareTest) == "number" then
+				local arena = Controllers and Controllers.ArenaController
+				local hour: number? = nil
+				if arena and type(arena.getClock) == "function" then
+					local okClock, clock = pcall(arena.getClock)
+					if okClock and type(clock) == "number" then
+						hour = clock
+					end
+				end
+				local okSky, sky = pcall(Glare.sky, hour)
+				glareAway(if type(glareTest) == "number" then glareTest else 0.95, if okSky then sky else nil, false)
+			end
+			return
+		end
 		local want = localPlayer:GetAttribute("LS_LaunchPreview")
 		if (want == "Full" or want == "Short") and GameState:GetAttribute("Phase") ~= "Countdown" then
 			if not set then

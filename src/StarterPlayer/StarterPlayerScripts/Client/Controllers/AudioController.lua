@@ -16,7 +16,15 @@
 	- Other contenders' bow draws (PlayabilityPlan QW9): the CombatAction remote's "Draw" plays the bow's creak at the
 	  archer for anyone within 45 studs, following them, and "Release" (loosed or let down) stops it.
 	- SoundGroup volumes from ClientState.settings; SFX reverb by environment (forest, mountains, lake,
-	  cave, indoors); muffle while the camera is underwater, on death and on heavy hits.
+	  cave, indoors); muffle while the camera is underwater (with the Underwater bed), on death and on heavy hits.
+	- Roblox's stock character sounds (the default RbxCharacterSounds script: Running, Jumping, Landing, Splash,
+	  Swimming, Climbing and the Died voice) are silenced on every character, because this controller plays the game's
+	  own sound for each of those events. FreeFalling and GettingUp have no counterpart here and are left alone.
+	  Works for both forms Roblox ships (Sound, or AudioPlayer under SoundService.CharacterSoundsUseNewApi).
+	- A defeated contender's body reaching the ground (BodyFall) at the body for those nearby, quietly for yourself.
+	  No voice: the cannon is the only signal of a defeat.
+	- Shared.Sfx on this client honours `regions` from Shared.Sounds: Init wraps Sfx.play, and a one-shot whose key has
+	  slices for the asset it picked is restarted inside one of them (PlaybackRegion). Sfx itself is unchanged.
 
 	Public API (through the Controllers registry, e.g. Controllers.AudioController.play("Hit_Wood", { position = p })):
 	  AudioController.play(key: string, opts?) -> (Sound?, voice?)
@@ -26,7 +34,7 @@
 	  AudioController.duck(musicFactor: number, ambienceFactor: number, seconds: number)
 	  AudioController.materialKey(material: Enum.Material) -> string?   ("Footstep_*")
 	  AudioController.setMusicSuppressed(suppressed: boolean)
-	  AudioController.debugState() -> { [string]: any }
+	  AudioController.debugState() -> { [string]: any }   (stockMuted = stock character sounds silenced so far)
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -41,6 +49,7 @@ local Sounds = require(Shared:WaitForChild("Sounds"))
 local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local Config = require(Shared:WaitForChild("Config"))
 local Net = require(Shared:WaitForChild("Net"))
+local Sfx = require(Shared:WaitForChild("Sfx"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
@@ -76,6 +85,9 @@ local TUNE = {
 	EmitterMargin = 30, -- emitters start this many studs before their RollOffMaxDistance
 	RemoteDrawRange = 45, -- studs: other contenders' bow creak is heard this close (QW9)
 	RemoteDrawGain = 1.3,
+	RemoteSlideFade = 1.1, -- seconds: another contender's slide sound fades after this (a slide lasts about 1.2 s)
+	BodyFallDelay = 0.4, -- seconds from a defeat to the body reaching the ground
+	BodyFallOwnVolume = 0.7,
 }
 local LOW_HEALTH = tonumber(Config.Feedback and Config.Feedback.LowHealth) or 0.35 -- one low-health line (QW5)
 
@@ -271,6 +283,108 @@ local function ensureEffects()
 end
 
 ---------------------------------------------------------------------------
+-- Roblox's stock character sounds. The default RbxCharacterSounds script (no script of that name is in
+-- StarterPlayerScripts, so Roblox adds its own) makes these under every character's HumanoidRootPart on this client.
+-- The ones below double a sound this controller already plays, so they are silenced: a Sound is routed to a silent
+-- SoundGroup (the stock script writes Volume on some of them), and either kind is held at Volume 0.
+-- Died is the stock voice; CharacterVisuals mutes it too, but only when it is a Sound.
+---------------------------------------------------------------------------
+local STOCK_SILENCED: { [string]: boolean } = {
+	Running = true, Jumping = true, Landing = true, Splash = true, Swimming = true, Climbing = true, Died = true,
+}
+local stockGroup: SoundGroup? = nil
+local stockSeen: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local stockWatched: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local stockMuted = 0
+
+local function silenceStock(inst: Instance)
+	if not STOCK_SILENCED[inst.Name] or stockSeen[inst] then
+		return
+	end
+	local isSound = inst:IsA("Sound")
+	if not (isSound or inst:IsA("AudioPlayer")) then
+		return
+	end
+	if not inst:FindFirstAncestor("HumanoidRootPart") then
+		return
+	end
+	stockSeen[inst] = true
+	stockMuted += 1
+	local source = inst :: any
+	if isSound and stockGroup then
+		source.SoundGroup = stockGroup
+	end
+	source.Volume = 0
+	inst:GetPropertyChangedSignal("Volume"):Connect(function()
+		if source.Volume ~= 0 then
+			source.Volume = 0
+		end
+	end)
+end
+
+local function watchStockSounds(char: Model)
+	if stockWatched[char] then
+		return
+	end
+	stockWatched[char] = true
+	for _, d in ipairs(char:GetDescendants()) do
+		silenceStock(d)
+	end
+	char.DescendantAdded:Connect(silenceStock)
+end
+
+---------------------------------------------------------------------------
+-- Shared.Sfx on this client: `regions` from Shared.Sounds. Sfx.play makes a Sound from entry.ids and plays the whole
+-- file. Wrapped here, a one-shot whose key has slices of the asset it picked is restarted inside one of them, so a
+-- recording with several takes can be cut in Shared.Sounds alone. (Stop does not fire Ended, so Sfx's own clean-up
+-- still runs when the slice ends, or at maxLifetime.)
+---------------------------------------------------------------------------
+local function applySfxRegion(key: any, sound: Sound)
+	local entry = if type(key) == "string" then entryOf(key) else nil
+	local regions = entry and entry.regions
+	if type(regions) ~= "table" or #regions == 0 or sound.Looped then
+		return
+	end
+	local id = sound.SoundId
+	local pick, n = nil, 0
+	for _, r in ipairs(regions) do
+		if r.id == id and type(r.from) == "number" and type(r.to) == "number" and r.to > r.from then
+			n += 1
+			if math.random(1, n) == 1 then
+				pick = r
+			end
+		end
+	end
+	if not pick then
+		return
+	end
+	sound:Stop()
+	sound.PlaybackRegionsEnabled = true
+	sound.PlaybackRegion = NumberRange.new(pick.from, pick.to)
+	sound.Volume = math.clamp(sound.Volume * (pick.gain or 1), 0, 10)
+	sound:Play()
+end
+
+local sfxWrapped = false
+local function wrapSfx()
+	local rawPlay = (Sfx :: any).play
+	if sfxWrapped or type(rawPlay) ~= "function" then
+		return
+	end
+	sfxWrapped = true;
+	(Sfx :: any).play = function(key: any, opts: any)
+		local sound = rawPlay(key, opts)
+		if typeof(sound) == "Instance" and sound:IsA("Sound") then
+			local ok, err = pcall(applySfxRegion, key, sound)
+			if not ok then
+				warn("[AudioController] Sfx region for " .. tostring(key) .. ": " .. tostring(err))
+			end
+		end
+		return sound
+	end
+end
+
+---------------------------------------------------------------------------
 -- Voice pools (one-shots; no Instance churn)
 ---------------------------------------------------------------------------
 local rootFolder: Folder = nil :: any -- 2D voices and loops live here (inside SoundService)
@@ -421,6 +535,19 @@ local function fadeVoice(voice, seconds: number)
 	end
 end
 
+-- fades a voice `after` seconds from now, unless it has been given another sound by then
+local function fadeVoiceAfter(voice, after: number, seconds: number)
+	if not voice then
+		return
+	end
+	local started = voice.started
+	task.delay(after, function()
+		if voice.started == started then
+			fadeVoice(voice, seconds)
+		end
+	end)
+end
+
 local function updateVoiceFades(dt: number)
 	for _, pool in ipairs({ localVoices, worldVoices }) do
 		for _, voice in ipairs(pool) do
@@ -541,7 +668,7 @@ local rootPart: BasePart? = nil
 
 local bedLoops: { [string]: any } = {}
 local musicLoops: { [string]: any } = {}
-local breathLoop, heartLoop, swimLoop
+local breathLoop, heartLoop, swimLoop, underwaterLoop
 local emitters: { [Instance]: any } = {}
 
 local settings = { sfx = 1, music = 0.6, ambience = 0.8 }
@@ -708,9 +835,21 @@ local function onMoveStateChanged(new: any, old: any)
 	end
 end
 
+-- A defeated body reaching the ground: at the body for the others (3D), flat and quieter for yourself. No voice.
+local function bodyFall(root: BasePart?)
+	task.delay(TUNE.BodyFallDelay, function()
+		if root == nil then
+			playKey("BodyFall", { volume = TUNE.BodyFallOwnVolume, priority = 3 })
+		elseif root.Parent then
+			playKey("BodyFall", { position = root.Position, priority = 3 })
+		end
+	end)
+end
+
 local function onLocalDied()
 	deathMuffle = 1
 	AudioController.duck(0.35, 0.45, 3)
+	bodyFall(nil)
 end
 
 local function onDamageTaken(info: any)
@@ -725,6 +864,7 @@ local function onCharacter(char: Model)
 	humanoid = nil
 	rootPart = nil
 	rayDirty = true
+	watchStockSounds(char)
 	task.spawn(function()
 		local hum = char:WaitForChild("Humanoid", 10)
 		local root = char:WaitForChild("HumanoidRootPart", 10)
@@ -749,6 +889,7 @@ local function newRemoteState(char: Model)
 		char = char, root = nil :: BasePart?, hum = nil :: Humanoid?, dist = 0,
 		phase = math.random() * 0.5, foot = "L", lastProbe = 0, grounded = true, swimming = false,
 		material = Enum.Material.Grass, airTime = 0, minVy = 0, stance = "Stand", climb = 0,
+		alive = false, -- seen alive while simulated: only then does a defeat play the body fall
 	}
 end
 
@@ -756,6 +897,7 @@ local function trackCharacter(char: Model)
 	if char and not remoteChars[char] then
 		remoteChars[char] = newRemoteState(char)
 		rayDirty = true
+		watchStockSounds(char)
 	end
 end
 
@@ -885,9 +1027,17 @@ local function simulateRemote(st, dt: number, now: number)
 		hum = char:FindFirstChildOfClass("Humanoid")
 		st.hum = hum
 	end
-	if not hum or hum.Health <= 0 then
+	if not hum then
 		return
 	end
+	if hum.Health <= 0 then
+		if st.alive then
+			st.alive = false
+			bodyFall(root)
+		end
+		return
+	end
+	st.alive = true
 	local vel = root.AssemblyLinearVelocity
 	local hs = math.sqrt(vel.X * vel.X + vel.Z * vel.Z)
 	if now - st.lastProbe > 0.1 then
@@ -914,7 +1064,8 @@ local function simulateRemote(st, dt: number, now: number)
 	end
 	if stance ~= st.stance then
 		if stance == "Slide" and st.grounded then
-			playKey("Slide", { position = feetOf(root, hum), volume = 0.9, priority = 2 })
+			local _, slide = playKey("Slide", { position = feetOf(root, hum), volume = 0.9, priority = 2 })
+			fadeVoiceAfter(slide, TUNE.RemoteSlideFade, 0.3)
 		end
 		st.stance = stance
 	end
@@ -938,7 +1089,7 @@ local function simulateRemote(st, dt: number, now: number)
 			st.phase += dt * 0.9
 			if st.phase >= 1 then
 				st.phase -= 1
-				playKey("Footstep_Water", { position = root.Position, volume = 0.55, pitch = 0.85 + math.random() * 0.1, priority = 1 })
+				playKey("SwimStroke", { position = root.Position, priority = 1 })
 			end
 		end
 		return
@@ -1288,6 +1439,9 @@ local function updateLocalLoops(dt: number)
 	end
 	swimLoop.target = swim
 	updateLoop(swimLoop, dt)
+	-- the bed under the surface (with the muffle in updateMix), whoever the camera is with
+	underwaterLoop.target = if underwater then 1 else 0
+	updateLoop(underwaterLoop, dt)
 	-- climbing cadence
 	if alive and ClientState.moveState == "Climb" then
 		local vel = if rootPart then rootPart.AssemblyLinearVelocity else ClientState.velocity
@@ -1394,10 +1548,11 @@ local function writeDebug()
 		worldVoicesBusy = busy,
 		remoteSimulated = #simList,
 		emitters = activeEmitters,
+		stockMuted = stockMuted,
 	}
 	if IS_STUDIO then
-		SoundService:SetAttribute("AudioDebug", string.format("biome=%s env=%s night=%.2f music=%s beds=[%s] uw=%s voices=%d remote=%d emitters=%d",
-			currentBiome, currentEnv, nightFactor, debugInfo.music, debugInfo.beds, tostring(underwater), busy, #simList, activeEmitters))
+		SoundService:SetAttribute("AudioDebug", string.format("biome=%s env=%s night=%.2f music=%s beds=[%s] uw=%s voices=%d remote=%d emitters=%d stockMuted=%d",
+			currentBiome, currentEnv, nightFactor, debugInfo.music, debugInfo.beds, tostring(underwater), busy, #simList, activeEmitters, stockMuted))
 	end
 end
 
@@ -1417,11 +1572,8 @@ local function update(dt: number)
 	timers.water += dt
 	if timers.water >= 0.125 then
 		timers.water = 0
-		local wasUnder = underwater
+		-- (going under is told by the Underwater bed and the muffle; the splash belongs to the body entering the water)
 		underwater = cameraUnderwater(camPos)
-		if underwater and not wasUnder then
-			playKey("WaterSplash", { volume = 0.35, pitch = 0.7, priority = 2 })
-		end
 	end
 
 	timers.env += dt
@@ -1628,6 +1780,20 @@ function AudioController.Init(_registry)
 	breathLoop = newLoop("BreathHeavy", rootFolder, 1.6, 0.9, true)
 	heartLoop = newLoop("Heartbeat", rootFolder, 0.9, 0.7, false)
 	swimLoop = newLoop("Swim", rootFolder, 3, 2.5, true)
+	underwaterLoop = newLoop("Underwater", rootFolder, 4, 2.5, true)
+
+	-- the silent group Roblox's stock character sounds are routed to (see silenceStock)
+	local oldStock = SoundService:FindFirstChild("StockCharacterSounds")
+	if oldStock then
+		oldStock:Destroy()
+	end
+	local silent = Instance.new("SoundGroup")
+	silent.Name = "StockCharacterSounds"
+	silent.Volume = 0
+	silent.Parent = SoundService
+	stockGroup = silent
+
+	wrapSfx()
 
 	SoundService.DopplerScale = 0.5
 	SoundService.RolloffScale = 1

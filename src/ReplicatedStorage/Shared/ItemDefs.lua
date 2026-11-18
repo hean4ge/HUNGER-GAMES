@@ -6,7 +6,8 @@
 	Bow: ammo, damageMin, damageMax, drawTime, speedMin, speedMax, gravity, headshotMultiplier
 	Throwable: damage, speed, gravity, cooldown
 	Food / Drink / Heal: hunger, thirst, heal, useTime, [becomes]
-	Armor: damageMultiplier, useTime        Utility: [fillsInto]
+	Armor: damageMultiplier, useTime        Utility: [fillsInto] [builds]
+	Food that a campfire cooks: cooksInto (item id), [cookTime]. A negative hunger or thirst is a cost (raw meat).
 	Presentation (filled with defaults below, override per item):
 	  equipSound  Sounds key played locally on equip ("Equip_Blade" | "Equip_Bow" | "Equip_Generic")
 	  useLabel    progress label while using a consumable ("Eating" / "Drinking" / "Bandaging" / "Putting on armor")
@@ -71,6 +72,16 @@ ItemDefs.Items = {
 		becomes = "empty_bottle", desc = "Clean water. Keep the bottle." },
 	empty_bottle = { name = "Empty Bottle", kind = "Utility", rarity = "Common", stack = 1, fillsInto = "water_bottle",
 		desc = "Look at water and press Drink to fill it." },
+	-- Hunting and cooking (WildlifeService, CookingService; the numbers are weighed in Shared.WildlifeConfig).
+	-- cooksInto / cookTime: what a lit campfire's spit turns it into, and after how many seconds.
+	-- builds: holding it and looking at the ground offers "Build fire" (CookingController).
+	squirrel = { name = "Squirrel", kind = "Food", rarity = "Common", stack = 3, hunger = 8, thirst = -8, useTime = 2.4,
+		cooksInto = "cooked_squirrel", cookTime = 6, useLabel = "Eating it raw",
+		desc = "Raw. It fills little and leaves you thirsty. Cook it over a fire." },
+	cooked_squirrel = { name = "Cooked Squirrel", kind = "Food", rarity = "Uncommon", stack = 3, hunger = 40, useTime = 2.2,
+		desc = "Roasted over a fire. A proper meal." },
+	firewood = { name = "Firewood", kind = "Utility", rarity = "Common", stack = 2, builds = "campfire",
+		desc = "Dry sticks. Hold them, look at the ground and build a fire." },
 	-- Armor
 	leather_vest = { name = "Leather Vest", kind = "Armor", rarity = "Uncommon", stack = 1, damageMultiplier = 0.85, useTime = 1.5,
 		desc = "Takes the edge off incoming hits." },

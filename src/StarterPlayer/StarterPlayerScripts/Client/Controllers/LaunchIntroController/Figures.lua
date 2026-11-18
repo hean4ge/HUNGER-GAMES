@@ -11,7 +11,11 @@
 	  play(idleId: string?)        start the idle clip (copies of R15 avatars; call once the model is in the workspace)
 	  look(pitch: number, yaw: number)   turn the head (radians: + pitch looks up, + yaw turns left)
 	  secure()                     once in the workspace: weld anything not joined to the root to it
+	  fade(alpha: number)          0 = as built, 1 = not drawn at all (the shot's camera moves into your own stand-in's
+	                               eyes at the end of the rise: its head must not be in front of the lens)
 	  height: number               feet to the top of the head
+	  eye: number                  feet to the eyes: where the first-person camera sits on the real character (the
+	                               middle of the head and 0.1 up, as LaunchIntroController's hand-off places it)
 	  destroy()
 	}
 ]]
@@ -38,8 +42,11 @@ local SUIT = Color3.fromRGB(216, 216, 212)
 local TRIM = Color3.fromRGB(52, 62, 82)
 local SHOE = Color3.fromRGB(58, 58, 60)
 
-local function newFigure(model: Model, root: BasePart, footOffset: number, neck: Instance?, height: number)
-	local figure = { model = model, root = root, footOffset = footOffset, height = height }
+local function newFigure(model: Model, root: BasePart, footOffset: number, neck: Instance?, height: number, eye: number?)
+	-- the eyes: as measured, else where a standing body has them (about 1.7 above the root's middle; `height` can't
+	-- say, a tall hat or a pair of wings raises it)
+	local eyeHeight = if eye and eye == eye then math.clamp(eye, 1, 12) else math.min(0.88 * height, footOffset + 1.7)
+	local figure = { model = model, root = root, footOffset = footOffset, height = height, eye = eyeHeight }
 	-- the neck: a Motor6D (turned through its C0), or an AnimationConstraint (the avatar joint upgrade: turned through
 	-- its torso-side attachment)
 	local neckC0 = if neck and neck:IsA("Motor6D") then neck.C0 else nil
@@ -136,6 +143,31 @@ local function newFigure(model: Model, root: BasePart, footOffset: number, neck:
 		end
 	end
 
+	-- Seen or not: every part and decal of the figure through its LocalTransparencyModifier (nothing else writes it on
+	-- a stand-in: it has no scripts and is nobody's camera subject). The list is made on the first call that changes
+	-- anything, so a figure that is never faded costs nothing.
+	local fadeParts: { any }? = nil
+	local fadeAlpha = 0
+	function figure.fade(alpha: number)
+		local a = if alpha == alpha then math.clamp(alpha, 0, 1) else 0
+		if math.abs(a - fadeAlpha) < 0.004 and not (a ~= fadeAlpha and (a == 0 or a == 1)) then
+			return
+		end
+		if not fadeParts then
+			local list = {}
+			for _, d in ipairs(model:GetDescendants()) do
+				if d:IsA("BasePart") or d:IsA("Decal") then
+					table.insert(list, d)
+				end
+			end
+			fadeParts = list
+		end
+		fadeAlpha = a
+		for _, d in ipairs(fadeParts :: { any }) do
+			d.LocalTransparencyModifier = a
+		end
+	end
+
 	function figure.destroy()
 		if track then
 			pcall(function()
@@ -228,7 +260,17 @@ function Figures.copy(character: Model?): any
 		footOffset = copyHumanoid.HipHeight + copyRoot.Size.Y / 2
 		height = 5.2
 	end
-	return newFigure(model, copyRoot, footOffset, neck, height)
+	-- the eyes: the middle of the head and 0.1 up, measured in the pose the copy was taken in (a head that is missing
+	-- or far from where a standing body has it gives nil: newFigure then puts them where a standing body has them)
+	local eye: number? = nil
+	local head = model:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		local above = head.Position.Y - copyRoot.Position.Y
+		if above > 0.6 and above < 4 then
+			eye = footOffset + above + 0.1
+		end
+	end
+	return newFigure(model, copyRoot, footOffset, neck, height, eye)
 end
 
 function Figures.plain(seed: number): any
@@ -294,7 +336,7 @@ function Figures.plain(seed: number): any
 	face.Texture = "rbxasset://textures/face.png"
 	face.Transparency = 0.35
 	face.Parent = head
-	return newFigure(model, root, 2.3, nil, 5.6)
+	return newFigure(model, root, 2.3, nil, 5.6, 2.3 + 2.62 + 0.1)
 end
 
 return Figures

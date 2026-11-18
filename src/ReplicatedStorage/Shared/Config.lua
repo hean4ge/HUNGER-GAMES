@@ -94,6 +94,23 @@ Config.Border = {
 	WarningLeadTime = 30, -- warn this many seconds before it starts moving
 	WallPanels = 96, -- segments in the client-side border wall
 	WallHeight = 520, -- studs (the wall starts 110 studs below the clearing)
+	-- The wall's look (ArenaController; owner, 18 Nov: "hollow blue"). A see-through barrier in a clear, cool blue: a
+	-- bright line on the ground, a thin rail above it and thin posts between them (the outline), an almost empty
+	-- sheet and a slow rising lattice only where you stand close to it. Nothing with any area shows from far away, so
+	-- the valley and the sky keep their own colours. WallColor: the sheet, the rail, the posts and the lattice.
+	-- WallLineColor: the ground line and the lattice bars (a little lighter, so it reads on grass and on the lake).
+	-- OutsideTint: the screen's grade while you are outside the border (a cold blue-grey; it was a soft red).
+	WallColor = Color3.fromRGB(44, 112, 255), -- (Neon draws a colour brighter and nearer cyan than it is written)
+	WallLineColor = Color3.fromRGB(56, 124, 255),
+	OutsideTint = Color3.fromRGB(176, 204, 255),
+	-- Stages (optional). nil: the ring closes in one run, as described above. A list: the ring closes in stages and
+	-- rests between them. Each stage is { at = the round second it starts moving, over = seconds it moves,
+	-- radius = where it stops }, in order; the last one must end at FinalRadius, and ShrinkStartTime / ShrinkDuration
+	-- must be the last stage's at / over (the final closing: GameState.BorderShrinking, the music, the HUD's line).
+	-- ArenaService warns WarningLeadTime seconds before every stage, starts a stage earlier (never before the stage
+	-- before it has stopped) if it would otherwise move faster than MaxShrinkSpeed, and publishes GameState
+	-- BorderStage, BorderStageCount, BorderMoving, BorderNextMoveAt and BorderMoveEndAt.
+	Stages = nil,
 	-- Small rounds start smaller (QW3; opened up in wave 2 after "why so small"): the start radius grows with the
 	-- headcount N, from MinStartRadius for a lone contender to StartRadius at FullContenders:
 	-- MinStartRadius + (StartRadius - MinStartRadius) * sqrt((N - 1) / (FullContenders - 1)) (500 alone, 529 for 2,
@@ -560,18 +577,58 @@ Config.Maps = {
 		Loot = { SpireRefillRadius = 90, FeastDropHeight = 55 },
 	},
 	GreenLand = {
-		Round = { MaxContenders = 48 }, -- one per plinth
+		-- Owner, 18 Nov 2026 (evening): "make it shrink slower and make the world map more open for people to explore".
+		-- A round is 20 minutes at most (it was 15), so the ring can rest wide open first and then close slowly in
+		-- stages. The day/night schedule is the old one stretched by 4/3 (same hours, same order):
+		--   sunset 1 at 6:53 (413 s), the moon at 7:36, Roll Call 1 at 7:40 (460 s), the vigil to 8:45, a moonlit night of
+		--   2.3 minutes, the moon sets at 11:10, sunrise at 11:51 (711 s), the Offering at 13:05 (785 s, 08:30 on day 2),
+		--   sunset 2 at 18:01 (1,081 s), Roll Call 2 at 18:45 (1,125 s, in the list only: the final closing is on), the
+		--   time limit at 20:00.
+		Round = {
+			MaxContenders = 48, -- one per plinth
+			MaxRoundTime = 20 * 60,
+			DaySchedule = {
+				{ 0, 7.4 },
+				{ 360, 17.0 },
+				{ 440, 18.5 },
+				{ 460, 19.45 },
+				{ 525, 20.45 },
+				{ 660, 28.45 },
+				{ 700, 29.6 },
+				{ 740, 31.0 },
+				{ 1065, 41.6 },
+				{ 1105, 42.6 },
+				{ 1125, 43.45 },
+				{ 1200, 44.55 },
+			},
+		},
 		Border = {
-			-- 1,800 for 48 contenders down to 700 for a lone one (860 for 2, 978 for 4, 1,125 for 8, 1,321 for 16, 1,469
-			-- for 24). A lone tester's ring takes in the forest edge (r 570 to 630) and the stream; two testers' reaches
-			-- the lake (r 800). It was 520 until 18 Nov 2026: a lone ring that stopped short of the trees.
-			-- At MaxShrinkSpeed (3.5) a ring wider than about 770 starts closing before ShrinkStartTime (the slide of its
-			-- centre counts): a full ring at about 5:04 (304 s), 24 contenders' at 6:38, 8 contenders' at 8:17, 4
-			-- contenders' at 8:59, 2 contenders' at 9:32; a lone contender's at 10:00. Every ring has closed at
-			-- ShrinkStartTime + ShrinkDuration (13:50), as before.
+			-- Every round starts with the whole field open (radius 1,800), whatever the head count: ScaleWithContenders
+			-- is off. Until 18 Nov (evening) a lone contender's ring started at 700 and two contenders' at 860, and a
+			-- lone tester never reached the lake. MinStartRadius is not read while the scaling is off (Map1.Audit still
+			-- wants it under StartRadius; it is the number to go back to).
 			StartRadius = 1800,
+			ScaleWithContenders = false,
 			MinStartRadius = 700,
 			FullContenders = 48,
+			-- The ring rests wide open for 3:30, then closes in four stages with 45 seconds of rest between them, and
+			-- never moves faster than 2.5 studs a second (it was 3.5; a jog is 13, a crouched walk 6.5):
+			--   stage 1   3:30 to  7:45   1,800 to 1,200   2.35 studs/s (2.49 with the slide of its centre)
+			--   stage 2   8:30 to 12:05   1,200 to   700   2.33         (2.46)   the lake (r 800) is inside until 11:20
+			--   stage 3  12:50 to 16:00     700 to   300   2.11         (2.23)   the Offering falls at 13:05, ring 668
+			--   stage 4  16:45 to 19:00     300 to    60   1.78         (1.88)   the final closing
+			--   the Last Stand, 19:00 to 19:55: 60 to nothing (1.09), as before.
+			-- Until 18 Nov it closed in one run at up to 3.5 studs/s and had closed at 13:50 (a full ring from 5:04, a lone
+			-- contender's 700 from 10:00).
+			MaxShrinkSpeed = 2.5,
+			Stages = {
+				{ at = 210, over = 255, radius = 1200 },
+				{ at = 510, over = 215, radius = 700 },
+				{ at = 770, over = 190, radius = 300 },
+				{ at = 1005, over = 135, radius = 60 },
+			},
+			ShrinkStartTime = 1005, -- the last stage: the final closing (was 600)
+			ShrinkDuration = 135, -- closed at 1,140 s (19:00; was 830 s, 13:50)
 			-- The ring is 60 wide when the Last Stand begins, round a point on the turf 90 to 100 studs from the Horn (the
 			-- layout's LastStandPoints: the middle of a mouth lane), so it never closes on the platform.
 			FinalRadius = 60,
@@ -579,9 +636,10 @@ Config.Maps = {
 			WallPanels = 160, -- 71 studs each at r 1,800; their corners stand 0.35 studs outside the circle, as the forest's did
 			WallHeight = 800, -- from 110 below the knoll (y -64) to y 736: above the ground on the start circle (524) and the peak (640)
 		},
-		-- a full round's ring is still 1,250 studs out two minutes before the Offering and 860 at it (66 s at a jog), so the
-		-- warning comes two minutes ahead (it reads "in 2 minutes"; ThreatLine words 90 s as 2 minutes too)
-		Events = { FeastWarning = 120 },
+		-- the Offering at 08:30 on day 2, as before (785 s on the 20-minute schedule; it was 590). The ring is about 840
+		-- studs out two minutes before it and 668 at it (51 s at a jog), so the warning comes two minutes ahead (it reads
+		-- "in 2 minutes"; ThreatLine words 90 s as 2 minutes too)
+		Events = { FeastTime = 785, FeastWarning = 120 },
 		Loot = {
 			SpireRefillRadius = 90, -- the Horn's floor, its deck and the foot of its steps (r 0 to 40)
 			FeastDropHeight = 55, -- (markers under the Horn's sails carry DropIn = false: restocked in place)

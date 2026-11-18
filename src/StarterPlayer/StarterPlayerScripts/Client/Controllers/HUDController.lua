@@ -1,19 +1,39 @@
 --[[
 	HUDController - the in-arena HUD. Owned by the UI system.
 	Drives StarterGui.HUD (safe-area layout) and StarterGui.HUDFX (full-bleed, true screen centre), both built by
-	ServerStorage.WorldGen.UIBuilder.
-	  * Vitals: health (+ armor chip and line), hunger, thirst, stamina (auto-hides when full). Thin bars, a ghost bar
-	    that trails damage, and a pulse plus a "LOW" tag when a value runs low.
-	  * Hotbar: Config.Inventory.Slots slots with 3D icons (ItemModels.build(id, "world") framed by its bounding box,
-	    text fallback), stack counts, rarity line, selected lift, item-name toast, tap to select on touch.
-	    On touch screens it slides left so it never overlaps the action buttons (Theme.TouchLayout / Shared.Input).
-	  * Compass ribbon from the camera yaw with a Spire marker (+ distance when facing it) and, when you're outside
-	    the border, a border marker and an alert. Round clock, "17 REMAIN", practice tag, next-event line. One countdown at
-	    a time: the round clock shows only while the event line has no sooner countdown of its own (round-flow QA).
-	  * Kill feed (KillFeed remote), crosshair (spread from ClientState.crosshairSpread), hit/kill marker
-	    (ClientState.hitConfirmed), directional damage arcs (ClientState.damageTaken), low-health / outside-border /
-	    hurt vignettes, use ring (ClientState.useProgress), bow draw gauge upright beside the crosshair
-	    (ClientState.drawAlpha; under it, it covered a far target's legs), interaction hint (ClientState.interactHint).
+	ServerStorage.WorldGen.UIBuilder in the "Quiet" style (docs/design/ui/StyleA_Quiet/README.md; Shared.Theme,
+	Shared.QuietUI): no boxes, one ink colour, Sun for "look at this", Red only for a danger state (low health, the
+	border), never as a hit effect. Things rest or fade when they are not needed.
+	  * Vitals: health (+ a thin armour line), hunger, thirst, stamina (only while in use). Slim lines with an icon and
+	    a number, and a ghost that trails a loss. A value that is fine rests (dimmed); one that just changed is full
+	    ink for a few seconds. Hunger or thirst at or under the healing tick turns Sun; low health turns Red (also
+	    while you are outside the border). No "LOW" tags: the colour says it.
+	  * Hotbar: Config.Inventory.Slots cells with no boxes: the item's own 3D picture (ItemModels.build(id, "world")
+	    framed by its bounding box, text fallback), the cell's number, the stack count. The cell in hand has a bigger
+	    picture and a line under it, and its name shows above the hotbar for a moment. An empty cell is a small
+	    ring. With a keyboard or a gamepad the cells you do not hold dim a few seconds after the last change. Tap to
+	    select on touch. On touch screens it slides left so it never overlaps the action buttons (Theme.TouchLayout /
+	    Shared.Input).
+	  * Compass line from the camera yaw with a Spire marker (its distance under it when facing it) and, when you're
+	    outside the border, a border marker, a Red line, one line of text and a thin Red edge around the screen
+	    (HUDFX.BorderLine). The round's facts: "17 left" with the day and the time of day (GameState.Clock through
+	    Shared.DayCycle, in ten-minute steps), top right on a desktop (HUD.Root.Facts) and in the line under the
+	    compass on touch screens. Practice tag, next-event line. One countdown at a time: the round clock shows only
+	    while the event line has no sooner countdown of its own (round-flow QA).
+	  * Kill feed (KillFeed remote): plain lines, a small blade between the two names; a line dims after a few
+	    seconds and then fades out. Crosshair (a dot and a thin ring; spread lines from ClientState.crosshairSpread
+	    with a bow or a throw), hit/kill marker (ClientState.hitConfirmed), directional damage arcs
+	    (ClientState.damageTaken), low-health / outside-border / hurt edges, use ring (ClientState.useProgress), bow
+	    draw gauge upright beside the crosshair (ClientState.drawAlpha; under it, it covered a far target's legs),
+	    interaction hint (ClientState.interactHint).
+	  * Prompts: a ProximityPrompt whose Style is Custom (crates, ground items, loose arrows: InventoryController,
+	    LootCueController and WorldItemController set it) is drawn here as a key square and a few words under the
+	    crosshair, in the interaction hint's place: "[E] Open crate", "[E] Take Bandage ×2". The text is the prompt's
+	    attribute PromptLine, else its ActionText and ObjectText. A hold fills a short line under it. On a touch
+	    screen the key reads TAP and the line is a button (48 px tall). The engine still reads E / ButtonX itself.
+	    Prompts in any other style are left to Roblox.
+	  * The practice dummies' name and health line (BillboardGui "HealthBar" in the head of a TrainingDummy, built
+	    and driven by the server) are restyled on this client: a slim ink line that mirrors the server's fill.
 	  * Core GUI: Backpack and Health off, reset disabled while InArena, mouse icon hidden in arena first person.
 	  PlayabilityPlan quick wins drawn here:
 	  * QW2  the action hint (ClientState.actionHint = { text, keys? }) under the crosshair in the key-cap style: "[LMB]"
@@ -23,14 +43,14 @@
 	  * QW5  a tick at Config.Survival.RegenMinStat on Hunger and Thirst (the healing line); under Health a dim
 	         "NOT HEALING · THIRSTY" only when a meter is the reason (player attribute Regen, else the meters), red
 	         "DEHYDRATED · LOSING HEALTH" (or STARVING) at an empty meter; a slow shimmer while health comes back.
-	         One low-health line: Config.Feedback.LowHealth drives the LOW tag and the red vignette.
+	         One low-health line: Config.Feedback.LowHealth turns the health line Red and brings the dark edge.
 	  * QW9  the event line always shows the next beat (dim while more than a minute away), built by Shared.ThreatLine
 	         with Shared.Lore's names: ROLL CALL AT DUSK, THE OFFERING, THE BORDER MOVES, THE LAST STAND.
 	  * QW10 Guidance: below 50 thirst with nothing to drink, a water drop and its distance on the compass (nearest
 	         Shared.WaterPoints point inside the border). A drink retires it until thirst drops under 50 again (or 5
 	         below a drink that left you under 50). Off the ribbon it waits at the edge with its distance and an arrow
-	         ("‹ 64 m"). The water's and the Spire's distances keep to a side of their marker that stays on the ribbon
-	         and clear of the other (the Spire's gives way when there is no room). Once the border moves
+	         ("‹ 64 m"). Each distance sits centred under its marker; where the water's and the Spire's would meet,
+	         the Spire's gives way. Once the border moves
 	         and you're within 80 m of its edge: "BORDER 42 m" under the compass and a tick toward the edge.
 	Public API (Controllers.HUDController):
 	  flashItemName(itemId: string?)               show the item-name toast above the hotbar
@@ -43,6 +63,7 @@
 	  keyName(action: "Interact" | "Use") -> string  this device's button as hints print it ("E", "LMB", "X", ...)
 	  pulseWater(seconds: number?)                 the THIRSTY card is up: show and pulse the water marker
 ]]
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -53,6 +74,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Input = require(Shared:WaitForChild("Input"))
 local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
@@ -69,25 +91,44 @@ do
 		WaterPoints = if ok and type(result) == "table" then result else nil
 	end
 end
+-- the day and the time of day beside "17 left" (GameState.Clock); without the module that line is left out
+local DayCycle: any = nil
+do
+	local module = Shared:FindFirstChild("DayCycle")
+	if module and module:IsA("ModuleScript") then
+		local ok, result = pcall(require, module)
+		DayCycle = if ok and type(result) == "table" then result else nil
+	end
+end
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 
 local player = Players.LocalPlayer
 local C = Theme.Colors
+local T = Theme.Transparency
 
 local HUDController = {}
 
 local SLOTS = math.max(1, math.floor(tonumber(Config.Inventory.Slots) or 6))
 local SLOT_GAP = (Theme.Layout and Theme.Layout.SlotGap) or 6
 local BUTTON_MARGIN = (Theme.Layout and Theme.Layout.HotbarButtonMargin) or 12
+local ICON = (Theme.Layout and Theme.Layout.IconSize) or 44 -- an item's picture in its cell (design px)
+local ICON_SELECTED = (Theme.Layout and Theme.Layout.IconSelected) or 54 -- ...and the one in hand
+local IDLE = (Theme.Time and Theme.Time.Idle) or 4 -- seconds a quiet thing stays lit after it last changed
 local STUD_TO_METERS = 0.28
 local COMPASS_WIDTH = 360 -- design px (UIBuilder)
 local COMPASS_SPAN = 150 -- degrees visible across the ribbon
-local LOW_HEALTH = tonumber(Config.Feedback and Config.Feedback.LowHealth) or 0.35 -- also the vignette and heartbeat
-local NEUTRAL_EDGE = Color3.fromRGB(12, 12, 14) -- the hurt flash and the low-health edge: dark, never red
-local LOW = { Health = LOW_HEALTH, Hunger = 0.25, Thirst = 0.25 }
+local MARKER_Y = 24 -- every compass marker's y inside Markers (UIBuilder's MARKER_Y)
+local LOW_HEALTH = tonumber(Config.Feedback and Config.Feedback.LowHealth) or 0.35 -- also the dark edge and the heartbeat
+local LOW = { Health = LOW_HEALTH, Hunger = 0.25, Thirst = 0.25 } -- at or under these the line also pulses
 local REGEN_MIN = tonumber(Config.Survival.RegenMinStat) or 55 -- health only comes back above this on both meters
+local MONO_FAMILY = "rbxasset://fonts/families/RobotoMono.json" -- numbers inside a RichText line of words
+local FEED_IN, FEED_OUT, FEED_FAST = 0.16, 0.5, 0.12 -- a kill-feed line's fades (seconds)
+local FEED_REST_AT, FEED_REST_TIME = 3.2, 0.6 -- when a line dims to "old", and how long that takes
+local PROMPT_Y = 64 -- the interaction hint's place under the crosshair (UIBuilder), shared by prompts
+local PROMPT_TAP = Vector2.new(280, 48) -- the touch target over a prompt (design px; never under 44)
+local DUMMY_TAG = "TrainingDummy"
 local HINT_HOLD = 0.25 -- hints stay up this long after their source goes, so they never flicker (P8)
 local DRINK_HINT_MAX = 95 -- the "Drink" hint is not drawn at or above this thirst (a swimmer at 97 had it on screen)
 local WATER_THIRST = 50 -- Guidance: the water marker shows below this thirst
@@ -106,7 +147,6 @@ local CAUSE_ALONE = {
 	Fall = "fell to their death", Border = "was caught by the border", Starvation = "starved",
 	Dehydration = "died of thirst", Combat = "was eliminated", Other = "was eliminated", Left = "left the arena",
 }
-local CAUSE_WITH = { Fall = "fall", Border = "border", Starvation = "starvation", Dehydration = "thirst", Other = "eliminated" }
 local HIT_DIRS = { A = { 1, -1 }, B = { -1, -1 }, C = { 1, 1 }, D = { -1, 1 } }
 
 local hud: ScreenGui? = nil
@@ -124,9 +164,19 @@ local humanoid: Humanoid? = nil
 local charConnections: { RBXScriptConnection } = {}
 local health, maxHealth = 100, 100
 local armorText: string? = nil
+local armorNoteUntil = 0 -- os.clock() until which the armour's share is written beside the health number
+local armorNoteShown: boolean? = nil
 local stats: { [string]: any } = {}
 local slotRefs: { any } = {}
 local equippedSlot = 0
+local hotbarLitUntil = 0 -- os.clock() until which every cell is fully lit (after that the ones not in hand dim)
+local hotbarRest = false
+local factsOn = false -- the round's facts are in HUD.Root.Facts (desktop) instead of the line under the compass
+local reducedMotion = false -- QuietUI.reducedMotion(), read once a second
+local reducedAt = -math.huge
+local clockRaw: any = nil -- GameState.Clock as last decoded...
+local clockBase: any = nil -- ...and its time base (Shared.DayCycle)
+local baselineRed: boolean? = nil
 local feed: { any } = {}
 local feedCounter = 0
 local damageDirs: { any } = {}
@@ -159,7 +209,6 @@ local reasonState = { text = nil :: string?, danger = false }
 local descShown: { [string]: number } = {}
 local drankThisRound = false -- a drink retired the water marker until thirst drops under waterRearmBelow
 local waterRearmBelow = 0
-local waterLabelSide = -1 -- the side of its drop the water's distance sat on last frame (-1 left, 1 right)
 local thirstyCardRound = false -- the THIRSTY card showed this round: the water marker comes with it
 local waterPulseUntil = 0
 local waterCache = { at = 0, point = nil :: Vector3?, distance = 0 }
@@ -171,6 +220,12 @@ local actionState = { sig = nil :: string?, token = 0, ref = nil :: any, refText
 local actionPool = { keys = {} :: { any }, texts = {} :: { any }, used = {} :: { any } }
 local flashHint: { segments: { any }, untilT: number }? = nil -- a short HUD-side hint, e.g. [SHIFT] SPRINT at the horn
 local lastCardUp: boolean? = nil -- a death, result or victory card had the screen last frame (update)
+-- ProximityPrompts in the Custom style, drawn in the interaction hint's place (the newest one shown has it)
+local prompts: { { prompt: ProximityPrompt, input: Enum.ProximityPromptInputType, connections: { RBXScriptConnection } } } = {}
+local promptHold: { prompt: ProximityPrompt, t0: number, duration: number }? = nil
+local promptLineCache = { prompt = nil :: ProximityPrompt?, action = "", object = "", attribute = nil :: any, line = "" }
+local tapPrompt: ProximityPrompt? = nil -- the prompt a finger is holding through the tap button
+local dummyBars: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any -- restyled practice-dummy bars
 
 --------------------------------------------------------------------------------------------------------------------
 -- Helpers
@@ -189,6 +244,29 @@ local function setVisible(obj: GuiObject, on: boolean)
 	if visibleCache[obj] ~= on then
 		visibleCache[obj] = on
 		obj.Visible = on
+	end
+end
+
+-- RichText: a number in RobotoMono inside a line of words, and a word in the dim tone.
+local function mono(text: string | number): string
+	return "<font family=\"" .. MONO_FAMILY .. "\">" .. tostring(text) .. "</font>"
+end
+
+local DIM_HEX = Theme.hex(C.Ink2)
+local function dimmed(text: string): string
+	return "<font color=\"" .. DIM_HEX .. "\">" .. text .. "</font>"
+end
+
+-- Fades an icon made by QuietUI.icon (its Ink parts, and the shade copy under them) for a moment's transition.
+-- To keep an icon dim, tint it (QuietUI.tint): its parts overlap, and transparency would show the overlaps.
+local function iconTransparency(icon: Instance, t: number)
+	for _, layer in ipairs(icon:GetChildren()) do
+		local base = if layer.Name == "Drop" then 0.45 else 0
+		for _, part in ipairs(layer:GetChildren()) do
+			if part:IsA("GuiObject") then
+				part.BackgroundTransparency = base + (1 - base) * t
+			end
+		end
 	end
 end
 
@@ -366,21 +444,6 @@ end
 --------------------------------------------------------------------------------------------------------------------
 -- Vitals
 --------------------------------------------------------------------------------------------------------------------
-local function refreshLabel(name: string)
-	local s = stats[name]
-	if not s then
-		return
-	end
-	local text = s.baseText
-	if name == "Health" and armorText then
-		text ..= "  " .. armorText
-	end
-	if s.low then
-		text ..= string.format("  <font color=\"%s\">LOW</font>", Theme.hex(C.Danger))
-	end
-	s.label.Text = text
-end
-
 local function makeStat(name: string)
 	local row = R.vitals:WaitForChild(name)
 	local s = {
@@ -391,17 +454,16 @@ local function makeStat(name: string)
 		fill = row.Track:WaitForChild("Fill"),
 		ghost = row.Track:WaitForChild("Ghost"),
 		alpha = 1,
-		low = false,
+		state = "", -- "rest" | "active" | "low" | "danger" (QuietUI.barState); updateVitalStates sets it
+		litUntil = 0, -- os.clock() until which a value that just changed stays in full ink
 		ghostToken = 0,
 		fillT = -1,
 		vis = -1,
 	}
-	s.baseText = s.label.Text
-	s.color = s.fill.BackgroundColor3
 	stats[name] = s
 end
 
-local function setStat(name: string, alpha: number, valueText: string, isLow: boolean, instant: boolean?)
+local function setStat(name: string, alpha: number, valueText: string, instant: boolean?)
 	local s = stats[name]
 	if not s then
 		return
@@ -409,20 +471,25 @@ local function setStat(name: string, alpha: number, valueText: string, isLow: bo
 	local a = math.clamp(alpha, 0, 1)
 	if math.abs(a - s.alpha) > 0.0005 or instant then
 		local dropping = a < s.alpha
+		-- health that moved either way, and a meal or a drink, light the row for a few seconds (a meter that only
+		-- drains stays at rest until it reaches the healing tick)
+		if not instant and (name == "Health" or a > s.alpha + 0.015) then
+			s.litUntil = os.clock() + IDLE
+		end
 		s.alpha = a
 		if instant then
 			s.ghostToken += 1
 			s.fill.Size = UDim2.fromScale(a, 1)
 			s.ghost.Size = UDim2.fromScale(a, 1)
 		else
-			Theme.tween(s.fill, Theme.Tween.Bar, { Size = UDim2.fromScale(a, 1) })
+			QuietUI.tween(s.fill, Theme.Tween.Bar, { Size = UDim2.fromScale(a, 1) })
 			if dropping then
-				-- the ghost holds where the bar was, then catches up: you see how much you just lost
+				-- the ghost holds where the line was, then catches up: you see how much you just lost
 				s.ghostToken += 1
 				local token = s.ghostToken
 				task.delay(0.45, function()
 					if s.ghostToken == token then
-						Theme.tween(s.ghost, Theme.Tween.Ghost, { Size = UDim2.fromScale(s.alpha, 1) })
+						QuietUI.tween(s.ghost, Theme.Tween.Ghost, { Size = UDim2.fromScale(s.alpha, 1) })
 					end
 				end)
 			else
@@ -434,25 +501,61 @@ local function setStat(name: string, alpha: number, valueText: string, isLow: bo
 	if s.value.Text ~= valueText then
 		s.value.Text = valueText
 	end
-	if s.low ~= isLow then
-		s.low = isLow
-		refreshLabel(name)
-		if name == "Health" then
-			s.fill.BackgroundColor3 = if isLow then C.HealthLow else s.color
-		end
-	end
 end
 
 local function updateHealth(instant: boolean?)
 	local a = health / math.max(1, maxHealth)
-	setStat("Health", a, tostring(math.max(0, math.ceil(health))), a <= LOW.Health and health > 0, instant)
+	setStat("Health", a, tostring(math.max(0, math.ceil(health))), instant)
 end
 
 local function updateSurvival(instant: boolean?)
 	local hunger = math.clamp(tonumber(player:GetAttribute("Hunger")) or 100, 0, 100)
 	local thirst = math.clamp(tonumber(player:GetAttribute("Thirst")) or 100, 0, 100)
-	setStat("Hunger", hunger / 100, tostring(math.floor(hunger + 0.5)), hunger / 100 <= LOW.Hunger, instant)
-	setStat("Thirst", thirst / 100, tostring(math.floor(thirst + 0.5)), thirst / 100 <= LOW.Thirst, instant)
+	setStat("Hunger", hunger / 100, tostring(math.floor(hunger + 0.5)), instant)
+	setStat("Thirst", thirst / 100, tostring(math.floor(thirst + 0.5)), instant)
+end
+
+-- Each row's Quiet state, and the fill's own transparency (rest, the low pulse, the stamina fade). Every frame.
+--   health:  danger (Red) at or under Config.Feedback.LowHealth, and while you are outside the border; active (ink)
+--            while it is not full or has just changed; else at rest
+--   hunger, thirst:  low (Sun) at or under the healing tick (Config.Survival.RegenMinStat: health no longer comes
+--            back), pulsing at a quarter and under; active for a few seconds after a meal or a drink; else at rest
+--   stamina: low (Sun) while exhausted, else active (the whole row fades out when it is not in use)
+local function updateVitalStates(t: number, combat: boolean)
+	for name, s in pairs(stats) do
+		local state = "rest"
+		local pulse = false
+		if name == "Health" then
+			local low = health > 0 and s.alpha <= LOW.Health
+			if low or (outside and combat) then
+				state, pulse = "danger", low
+			elseif s.alpha < 0.999 or t < s.litUntil then
+				state = "active"
+			end
+		elseif name == "Stamina" then
+			state = if ClientState.exhausted == true then "low" else "active"
+		elseif s.alpha <= REGEN_MIN / 100 then
+			state, pulse = "low", s.alpha <= (LOW[name] or 0.25)
+		elseif t < s.litUntil then
+			state = "active"
+		end
+		if state ~= s.state then
+			s.state = state
+			QuietUI.barState(s.row, state)
+			s.vis = -1 -- (barState wrote the number's transparency: the stamina fade writes its own again)
+			s.fillT = -1
+		end
+		local base = if state == "rest" then T.TextRest else 0
+		if pulse and not reducedMotion then
+			base = 0.45 * (0.5 + 0.5 * math.sin(t * 5))
+		end
+		local vis = if name == "Stamina" then staminaVis else 1
+		local target = 1 - (1 - base) * vis
+		if math.abs(target - s.fillT) > 0.01 then
+			s.fillT = target
+			s.fill.BackgroundTransparency = target
+		end
+	end
 end
 
 -- QW5: why health isn't coming back, only when a meter is the reason. Red when a meter is empty (you lose health).
@@ -480,13 +583,13 @@ local function updateReason(combat: boolean)
 				thirsty = regen == "thirst" or regen == "both" or thirst <= REGEN_MIN
 			end
 			if hungry or thirsty then
-				-- the reason in its meter's colour, so the line points at the bar that needs filling
-				local function word(w: string, color: Color3): string
-					return string.format("<font color=\"%s\">%s</font>", Theme.hex(color), w)
+				-- the reason in Sun, like the line of the meter that needs filling
+				local function word(w: string): string
+					return string.format("<font color=\"%s\">%s</font>", Theme.hex(C.Sun), w)
 				end
-				local what = if hungry and thirsty then word("HUNGRY", C.Hunger) .. " AND " .. word("THIRSTY", C.Thirst)
-					elseif thirsty then word("THIRSTY", C.Thirst)
-					else word("HUNGRY", C.Hunger)
+				local what = if hungry and thirsty then word("HUNGRY") .. " AND " .. word("THIRSTY")
+					elseif thirsty then word("THIRSTY")
+					else word("HUNGRY")
 				text = "NOT HEALING  ·  " .. what
 			end
 		end
@@ -498,17 +601,17 @@ local function updateReason(combat: boolean)
 	label.Visible = text ~= nil
 	if text then
 		label.Text = text
-		label.TextColor3 = if danger then C.Danger else C.Text -- on its own dark backing (UIBuilder)
+		label.TextColor3 = if danger then C.Red else C.Ink
 	end
 end
 
--- QW5: a slow light sweep over the health bar while health is coming back.
+-- QW5: a slow sweep over the health line while health is coming back.
 local function updateShimmer(dt: number, combat: boolean)
 	local shimmer = R.shimmer
 	if not shimmer then
 		return
 	end
-	local on = combat and health > 0 and health < maxHealth - 0.05 and os.clock() - lastHealthRise < 1.2
+	local on = combat and health > 0 and health < maxHealth - 0.05 and os.clock() - lastHealthRise < 1.2 and not reducedMotion
 	if shimmer.Visible ~= on then
 		shimmer.Visible = on
 	end
@@ -518,17 +621,38 @@ local function updateShimmer(dt: number, combat: boolean)
 	end
 end
 
+-- Armour: a thin line under the health line for as long as you wear some. Its share ("ARMOR 15%") is written beside
+-- the health number for a few seconds when it changes (desktop only: on a touch screen that place is the compass's).
 local function updateArmor()
 	local id = player:GetAttribute("Armor")
 	local def = if type(id) == "string" and id ~= "" then ItemDefs.get(id) else nil
+	local text: string? = nil
 	if def and type(def.damageMultiplier) == "number" then
-		local pct = math.floor((1 - def.damageMultiplier) * 100 + 0.5)
-		armorText = string.format("<font color=\"%s\">ARMOR %d%%</font>", Theme.hex(C.Armor), pct)
-	else
-		armorText = nil
+		text = string.format("ARMOR %d%%", math.floor((1 - def.damageMultiplier) * 100 + 0.5))
 	end
-	R.armorLine.Visible = armorText ~= nil
-	refreshLabel("Health")
+	if text ~= armorText then
+		armorText = text
+		armorNoteUntil = if text then os.clock() + IDLE + 2 else 0
+		local s = stats.Health
+		if text and s then
+			s.label.Text = text -- (taken off, the old words stay while they fade)
+		end
+	end
+	if R.armorLine then
+		R.armorLine.Visible = armorText ~= nil
+	end
+end
+
+local function updateArmorNote(t: number)
+	local s = stats.Health
+	if not s then
+		return
+	end
+	local shown = armorText ~= nil and layoutKey == "Desktop" and t < armorNoteUntil
+	if shown ~= armorNoteShown then
+		armorNoteShown = shown
+		QuietUI.fadeText(s.label, shown)
+	end
 end
 
 local function bindCharacter(character: Model?)
@@ -565,6 +689,7 @@ local function bindCharacter(character: Model?)
 	end)
 end
 
+-- Stamina shows only while it is in use: the line, its track and its number fade together.
 local function updateStamina(dt: number, t: number)
 	local s = stats.Stamina
 	if not s then
@@ -585,39 +710,11 @@ local function updateStamina(dt: number, t: number)
 	if s.value.Text ~= text then
 		s.value.Text = text
 	end
-	if s.low ~= exhausted then
-		s.low = exhausted
-		refreshLabel("Stamina")
-	end
 	if math.abs(staminaVis - s.vis) > 0.01 then
 		s.vis = staminaVis
 		local hidden = 1 - staminaVis
-		s.label.TextTransparency = hidden
-		s.value.TextTransparency = hidden
-		local ls, vs = s.label:FindFirstChild("Shadow"), s.value:FindFirstChild("Shadow")
-		if ls then
-			ls.Transparency = Theme.Transparency.TextShadow + (1 - Theme.Transparency.TextShadow) * hidden
-		end
-		if vs then
-			vs.Transparency = Theme.Transparency.TextShadow + (1 - Theme.Transparency.TextShadow) * hidden
-		end
-		s.track.BackgroundTransparency = Theme.Transparency.BarTrack + (1 - Theme.Transparency.BarTrack) * hidden
-	end
-end
-
--- low-value pulse (and the stamina fade) on the fills
-local function updatePulses(t: number)
-	for name, s in pairs(stats) do
-		local base = 0
-		if s.low then
-			base = 0.08 + 0.42 * (0.5 + 0.5 * math.sin(t * 6.5))
-		end
-		local vis = if name == "Stamina" then staminaVis else 1
-		local target = 1 - (1 - base) * vis
-		if math.abs(target - s.fillT) > 0.01 then
-			s.fillT = target
-			s.fill.BackgroundTransparency = target
-		end
+		QuietUI.textTransparency(s.value, hidden)
+		s.track.BackgroundTransparency = T.BarTrack + (1 - T.BarTrack) * hidden
 	end
 end
 
@@ -677,31 +774,71 @@ local function frameIcon(viewport: ViewportFrame, itemId: string): boolean
 	return true
 end
 
+-- One cell, the Quiet way: no box. The cell in hand has a bigger picture, the line under it and its number in full
+-- ink. An empty cell is a small ring. At rest (hotbarRest: keyboard and gamepad, a few seconds after the last
+-- change) the cells that are not in hand dim.
 local function paintSlot(i: number)
 	local r = slotRefs[i]
 	if not r then
 		return
 	end
-	local selected = i == equippedSlot and r.itemId ~= nil
 	local empty = r.itemId == nil
-	Theme.tween(r.card, Theme.Tween.Fast, {
-		Position = UDim2.fromOffset(0, if selected then -5 else 0),
-		BackgroundColor3 = if selected then C.PanelLight else C.Panel,
-		BackgroundTransparency = if selected then 0.2 elseif empty then 0.64 else 0.42,
+	local selected = i == equippedSlot and not empty
+	local rest = hotbarRest and not selected
+	local px = if selected then ICON_SELECTED else ICON
+	QuietUI.tween(r.viewport, Theme.Tween.Fast, {
+		Size = UDim2.fromOffset(px, px),
+		ImageTransparency = if selected then 0 elseif rest then 0.32 else 0.08,
 	})
-	r.stroke.Color = if selected then C.Text else C.Stroke
-	r.stroke.Transparency = if selected then 0.12 else 0.84
-	r.stroke.Thickness = if selected then 1.5 else 1
-	r.key.TextColor3 = if selected then C.Text else C.TextDim
+	r.key.TextColor3 = if selected then C.Ink else C.Ink2
+	QuietUI.textTransparency(r.key, if selected then 0 elseif rest then T.TextFaint else 0.12)
+	QuietUI.textTransparency(r.count, if rest then T.TextDim else 0)
+	if r.fallback.Visible then
+		QuietUI.textTransparency(r.fallback, if rest then T.TextDim else 0)
+		r.fallback.TextColor3 = if selected then C.Ink else C.Ink2
+	end
+	if r.under then
+		r.under.Visible = selected
+	end
+	if r.ring then
+		r.ring.Visible = empty
+		if r.ringInk then
+			r.ringInk.Transparency = if rest then 0.6 else 0.25
+		end
+	end
 end
 
-local function setSlot(i: number, data: any)
+-- Lights every cell again (a pickup, a change of hand, a refused empty cell); they dim IDLE + 2 s later.
+local function wakeHotbar()
+	hotbarLitUntil = os.clock() + IDLE + 2
+	if hotbarRest then
+		hotbarRest = false
+		for i = 1, SLOTS do
+			paintSlot(i)
+		end
+	end
+end
+
+local function updateHotbarRest(t: number)
+	-- a touch screen's cells are buttons: they stay lit
+	local rest = not touchLayout and t > hotbarLitUntil
+	if rest ~= hotbarRest then
+		hotbarRest = rest
+		for i = 1, SLOTS do
+			paintSlot(i)
+		end
+	end
+end
+
+-- Returns true when the cell's item or count changed.
+local function setSlot(i: number, data: any): boolean
 	local r = slotRefs[i]
 	if not r then
-		return
+		return false
 	end
 	local id = if type(data) == "table" and type(data.id) == "string" then data.id else nil
 	local count = if id then math.max(1, math.floor(tonumber(data.count) or 1)) else 0
+	local changed = id ~= r.itemId or count ~= r.amount
 	if id ~= r.itemId then
 		r.itemId = id
 		clearViewport(r.viewport)
@@ -709,15 +846,17 @@ local function setSlot(i: number, data: any)
 		local hasIcon = id ~= nil and frameIcon(r.viewport, id)
 		r.fallback.Visible = id ~= nil and not hasIcon
 		r.fallback.Text = if def then string.upper(def.name) elseif id then string.upper(id) else ""
-		r.rarity.Visible = def ~= nil
-		if def then
-			r.rarity.BackgroundColor3 = Theme.Rarity[def.rarity] or C.TextDim
-		end
 	end
+	r.amount = count
+	-- (no rarity colours on the HUD: one ink. The cell's Rarity line stays hidden.)
+	r.rarity.Visible = false
 	r.count.Text = if count > 1 then tostring(count) else ""
 	paintSlot(i)
+	return changed
 end
 
+-- The name of what you just took in hand, above the hotbar for a moment (with what kind of thing it is; and, the
+-- first few times for a new player, what it is for).
 local function flashItemName(itemId: string?)
 	local group = R.itemName
 	if not group then
@@ -727,17 +866,12 @@ local function flashItemName(itemId: string?)
 	local token = itemNameToken
 	local def = ItemDefs.get(itemId)
 	if not def then
-		Theme.tween(group, Theme.Tween.Fast, { GroupTransparency = 1 })
+		QuietUI.tween(group, Theme.Tween.Fast, { GroupTransparency = 1 })
 		return
 	end
+	wakeHotbar()
 	R.itemTitle.Text = def.name
-	local rarityColor = Theme.Rarity[def.rarity] or C.TextDim
-	R.itemSub.Text = string.format(
-		"<font color=\"%s\">%s</font>   ·   %s",
-		Theme.hex(rarityColor),
-		string.upper(tostring(def.rarity)),
-		KIND_LABEL[def.kind] or ""
-	)
+	R.itemSub.Text = KIND_LABEL[def.kind] or ""
 	-- QW2: what it's for, the first few times each item shows (Guidance)
 	local showDesc = false
 	if R.itemDesc and type(def.desc) == "string" and def.desc ~= "" and guidanceOn() then
@@ -752,12 +886,17 @@ local function flashItemName(itemId: string?)
 		R.itemDesc.Visible = showDesc
 	end
 	group.Size = UDim2.fromOffset(400, if showDesc then 60 else 42)
-	group.GroupTransparency = 1
-	group.Position = UDim2.new(0.5, 0, 0, 2)
-	Theme.tween(group, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, 0, -4) })
-	task.delay(if showDesc then 3.6 else 1.8, function()
+	if reducedMotion then
+		group.Position = UDim2.new(0.5, 0, 0, -4)
+		group.GroupTransparency = 0
+	else
+		group.GroupTransparency = 1
+		group.Position = UDim2.new(0.5, 0, 0, 2)
+		QuietUI.tween(group, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, 0, -4) })
+	end
+	task.delay(if showDesc then 4.2 else 2.4, function()
 		if token == itemNameToken then
-			Theme.tween(group, Theme.Tween.FadeOut, { GroupTransparency = 1 })
+			QuietUI.tween(group, Theme.Tween.FadeOut, { GroupTransparency = 1 })
 		end
 	end)
 end
@@ -770,13 +909,14 @@ local function onInventory(inventory: any)
 	local newEquipped = math.floor(tonumber(inventory.equipped) or 0)
 	local equipChanged = newEquipped ~= equippedSlot
 	equippedSlot = newEquipped
+	local changed = equipChanged
 	for i = 1, SLOTS do
-		setSlot(i, slots[i])
-	end
-	if equipChanged then
-		for i = 1, SLOTS do
-			paintSlot(i)
+		if setSlot(i, slots[i]) then
+			changed = true
 		end
+	end
+	if changed then
+		wakeHotbar()
 	end
 end
 
@@ -856,22 +996,66 @@ end
 --------------------------------------------------------------------------------------------------------------------
 -- Kill feed
 --------------------------------------------------------------------------------------------------------------------
-local function removeEntry(entry: any, fast: boolean?)
-	if entry.removed then
+-- A line of the feed is plain text on the picture: "Kestrel [blade] Rowan", "Orla  was caught by the border". It
+-- fades in, dims to "old" after a few seconds and fades out at the end of its life (at once when newer lines push
+-- it out). updateFeed drives every line each frame from its age: there are no tweens to keep track of.
+local function endEntry(entry: any, now: number, fast: boolean?)
+	if entry.dieAt then
 		return
 	end
-	entry.removed = true
-	local index = table.find(feed, entry)
-	if index then
-		table.remove(feed, index)
+	entry.dieAt = now
+	entry.dieTime = if fast then FEED_FAST else FEED_OUT
+end
+
+-- fade: 0 shown .. 1 gone.  rest: 0 new .. 1 old.
+local function paintEntry(entry: any, fade: number, rest: number)
+	local t = 1 - (1 - fade) * (1 - T.TextFaint * rest)
+	QuietUI.textTransparency(entry.text, t)
+	if entry.second then
+		QuietUI.textTransparency(entry.second, t)
 	end
-	local info = if fast then Theme.Tween.Fast else Theme.Tween.FadeOut
-	Theme.tween(entry.frame, info, { BackgroundTransparency = 1 })
-	Theme.tween(entry.mark, info, { BackgroundTransparency = 1 })
-	local t = Theme.tween(entry.text, info, { TextTransparency = 1 })
-	t.Completed:Once(function()
-		entry.frame:Destroy()
-	end)
+	if entry.icon then
+		iconTransparency(entry.icon, fade)
+		if rest ~= entry.restShown then
+			QuietUI.tint(entry.icon, C.Ink:Lerp(C.TextFaint, rest)) -- (an icon dims by colour: its parts overlap)
+		end
+	end
+	entry.mark.BackgroundTransparency = t
+	entry.fadeShown, entry.restShown = fade, rest
+end
+
+local function updateFeed()
+	if #feed == 0 then
+		return
+	end
+	local now = os.clock()
+	for i = #feed, 1, -1 do
+		local entry = feed[i]
+		local age = now - entry.born
+		if not entry.dieAt and age >= entry.life then
+			endEntry(entry, now, false)
+		end
+		local fade = if age < FEED_IN then 1 - age / FEED_IN else 0
+		local rest = math.clamp((age - FEED_REST_AT) / FEED_REST_TIME, 0, 1)
+		local gone = false
+		if entry.dieAt then
+			local k = math.clamp((now - entry.dieAt) / math.max(0.01, entry.dieTime), 0, 1)
+			fade += (1 - fade) * k
+			gone = k >= 1
+		end
+		if gone then
+			table.remove(feed, i)
+			entry.frame:Destroy()
+		else
+			if reducedMotion then
+				fade = if fade > 0.5 then 1 else 0
+				rest = if rest > 0.5 then 1 else 0
+			end
+			if math.abs(fade - entry.fadeShown) > 0.01 or math.abs(rest - entry.restShown) > 0.01 then
+				paintEntry(entry, fade, rest)
+			end
+		end
+	end
 end
 
 local function addKill(data: any)
@@ -881,13 +1065,7 @@ local function addKill(data: any)
 	local victim = if type(data.victim) == "string" then data.victim else "Someone"
 	local killer = if type(data.killer) == "string" and data.killer ~= "" then data.killer else nil
 	local cause = if type(data.cause) == "string" then data.cause else "Other"
-	local weapon = if type(data.weaponName) == "string" and data.weaponName ~= "" then data.weaponName else nil
-	if not weapon and type(data.weapon) == "string" then
-		local def = ItemDefs.get(data.weapon)
-		weapon = if def then def.name else nil
-	end
 	local me = player.DisplayName
-	local dim = Theme.hex(C.TextDim)
 	-- "you" is decided by UserId when the payload carries one (killerUserId / victimUserId): display names are not
 	-- unique. A payload without ids falls back to the names.
 	local function mine(n: string?, id: any): boolean
@@ -899,51 +1077,85 @@ local function addKill(data: any)
 	end
 	local victimMine = mine(victim, data.victimUserId)
 	local killerMine = killer ~= nil and mine(killer, data.killerUserId)
-	local function name(n: string, isVictim: boolean): string
-		local s = "<b>" .. Theme.escape(n) .. "</b>"
-		if if isVictim then victimMine else killerMine then
-			return string.format("<font color=\"%s\">%s</font>", Theme.hex(if isVictim then C.Danger else C.AccentSoft), s)
+	-- your own name is in Sun, either way round (Red is kept for a danger state)
+	local function name(n: string, isMine: boolean): string
+		local s = Theme.escape(n)
+		if isMine then
+			return string.format("<font color=\"%s\">%s</font>", Theme.hex(C.Sun), s)
 		end
 		return s
 	end
 	local involved = victimMine or killerMine
-	local text
+	local first: string
+	local second: string? = nil
 	if type(data.text) == "string" and data.text ~= "" and not killer then
-		text = string.format("%s  <font color=\"%s\">%s</font>", name(victim, true), dim, Theme.escape(data.text))
+		first = name(victim, victimMine) .. "  " .. dimmed(Theme.escape(data.text))
 	elseif killer then
-		local how = weapon or CAUSE_WITH[cause] or "eliminated"
-		if weapon == nil and cause == "Combat" then
-			how = "fists"
-		end
-		text = string.format("%s  <font color=\"%s\">%s</font>  %s", name(killer, false), dim, Theme.escape(how), name(victim, true))
+		-- two names with a small blade between them (the weapon is not named: the line stays short)
+		first, second = name(killer, killerMine), name(victim, victimMine)
 	else
-		text = string.format("%s  <font color=\"%s\">%s</font>", name(victim, true), dim, CAUSE_ALONE[cause] or "was eliminated")
+		first = name(victim, victimMine) .. "  " .. dimmed(CAUSE_ALONE[cause] or "was eliminated")
 	end
 
 	local frame = R.killTemplate:Clone()
+	local textLabel = frame:FindFirstChild("Text")
+	local mark = frame:FindFirstChild("Mark")
+	if not (textLabel and textLabel:IsA("TextLabel") and mark and mark:IsA("GuiObject")) then
+		frame:Destroy()
+		return
+	end
 	feedCounter += 1
 	frame.Name = "Kill" .. feedCounter
 	frame.LayoutOrder = feedCounter
-	local textLabel = frame:FindFirstChild("Text")
-	local mark = frame:FindFirstChild("Mark")
-	textLabel.Text = text
+	textLabel.Text = first
 	mark.Visible = involved
-	frame.BackgroundTransparency = 1
-	textLabel.TextTransparency = 1
+	local icon: Frame? = nil
+	local secondLabel: TextLabel? = nil
+	if second then
+		icon = QuietUI.icon("blade", { Name = "Blade", Px = 13, LayoutOrder = 3 })
+		icon.Parent = frame
+		local clone = textLabel:Clone()
+		clone.Name = "Victim"
+		clone.LayoutOrder = 4
+		clone.Text = second
+		clone.Parent = frame
+		secondLabel = clone
+	end
+	local entry = {
+		frame = frame,
+		text = textLabel,
+		second = secondLabel,
+		icon = icon,
+		mark = mark,
+		born = os.clock(),
+		life = if involved then 9 else 6.5,
+		dieAt = nil :: number?,
+		dieTime = FEED_OUT,
+		fadeShown = -1,
+		restShown = -1,
+	}
+	paintEntry(entry, 1, 0) -- it starts clear; updateFeed brings it in
 	frame.Visible = true
 	frame.Parent = R.killFeed
-	Theme.tween(frame, Theme.Tween.Normal, { BackgroundTransparency = if involved then 0.25 else 0.42 })
-	Theme.tween(textLabel, Theme.Tween.Normal, { TextTransparency = 0 })
-	local entry = { frame = frame, text = textLabel, mark = mark }
 	table.insert(feed, entry)
 	local layout = Theme.Layout and Theme.Layout[layoutKey]
 	local limit = if layout and layout.KillFeed and layout.KillFeed.max then layout.KillFeed.max elseif touchLayout then 2 else 5
-	while #feed > limit do
-		removeEntry(feed[1], true)
+	local live = 0
+	for _, e in ipairs(feed) do
+		if not e.dieAt then
+			live += 1
+		end
 	end
-	task.delay(if involved then 9 else 6.5, function()
-		removeEntry(entry)
-	end)
+	local now = os.clock()
+	for _, e in ipairs(feed) do
+		if live <= limit then
+			break
+		end
+		if not e.dieAt then
+			endEntry(e, now, true)
+			live -= 1
+		end
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -960,7 +1172,6 @@ local function collectCompass()
 				y = child.Position.Y,
 				isLabel = child:IsA("TextLabel"),
 				base = tonumber(child:GetAttribute("BaseTransparency")) or 0,
-				shadow = child:FindFirstChild("Shadow"),
 				fade = -1,
 				visible = true,
 			})
@@ -986,38 +1197,14 @@ local function carriesDrink(): boolean
 	return false
 end
 
--- QW10 compass labels (round-flow QA pt2, pt4): a distance beside a marker never runs off the ribbon (the compass clips
--- it: "55 m" read "5 m") or into the other marker's ("667 1m m"). Widths come from the text (RobotoMono, 0.6 em a
--- character: a little generous), so a label is placed before the engine has laid it out.
+-- QW10 compass labels: a distance sits centred under its marker (UIBuilder builds it there; the compass no longer
+-- clips, so one under a marker at the ribbon's end is whole). The water's and the Spire's must not run into each
+-- other ("667 1m m", round-flow QA): where they would meet, the Spire's gives way. Widths come from the text
+-- (RobotoMono, 0.6 em a character: a little generous), so nothing waits for the engine to lay a label out.
 local compassSpire = { shown = false, x = 0, label = false, from = 0, to = 0, meters = -1, text = "" }
-local labelSides: { [Instance]: number } = {}
 
 local function monoWidth(text: string, size: number): number
 	return (utf8.len(text) or #text) * size * 0.6
-end
-
--- the span of a label `width` wide on the left (-1) or the right (1) of a marker at x; gap = half the marker + 3 px
-local function labelSpan(x: number, side: number, width: number, gap: number): (number, number)
-	if side < 0 then
-		return x - gap - width, x - gap
-	end
-	return x + gap, x + gap + width
-end
-
-local function setLabelSide(label: TextLabel, side: number)
-	if labelSides[label] == side then
-		return
-	end
-	labelSides[label] = side
-	if side > 0 then
-		label.AnchorPoint = Vector2.new(0, 0.5)
-		label.Position = UDim2.new(1, 3, 0.5, 0)
-		label.TextXAlignment = Enum.TextXAlignment.Left
-	else
-		label.AnchorPoint = Vector2.new(1, 0.5)
-		label.Position = UDim2.new(0, -3, 0.5, 0)
-		label.TextXAlignment = Enum.TextXAlignment.Right
-	end
 end
 
 -- Returns true when the Spire's distance has to give way to the water's.
@@ -1055,11 +1242,11 @@ local function updateWater(camPos: Vector3, heading: number, half: number, pxPer
 	local wd = wrapDelta(bearing(camPos, point), heading)
 	local atEdge = math.abs(wd) > half - 4
 	local x = math.clamp(wd, -(half - 4), half - 4) * pxPerDeg
-	marker.Position = UDim2.new(0.5, x, 0, 24)
-	-- it pulses while the THIRSTY card is up. Off the ribbon it waits at the edge with the distance on the inside and
-	-- an arrow toward the water, so the number never disappears.
+	marker.Position = UDim2.new(0.5, x, 0, MARKER_Y)
+	-- it pulses while the THIRSTY card is up. Off the ribbon it waits at the edge, its distance with an arrow toward
+	-- the water, so the number never disappears.
 	local alpha = 0
-	if now < waterPulseUntil then
+	if now < waterPulseUntil and not reducedMotion then
 		alpha = 0.5 * (0.5 + 0.5 * math.sin(now * 6))
 	end
 	R.waterTip.BackgroundTransparency = alpha
@@ -1073,61 +1260,9 @@ local function updateWater(camPos: Vector3, heading: number, half: number, pxPer
 	if R.waterDist.Text ~= text then
 		R.waterDist.Text = text
 	end
-	-- the distance sits beside the drop on a side that stays on the ribbon (the compass clips past its ends) and clear
-	-- of the Spire marker and its distance. At the edge it stays on the inside, by its arrow. If the Spire's distance is
-	-- in the way on every side, that one gives way (returns true).
-	local width = monoWidth(text, R.waterDist.TextSize)
-	local limit = half * pxPerDeg - 2
-	local sides = if side < 0 then { 1 } elseif side > 0 then { -1 } elseif waterLabelSide > 0 then { 1, -1 } else { -1, 1 }
-	local function clear(s: number, withSpireLabel: boolean): boolean
-		local from, to = labelSpan(x, s, width, 11)
-		if from < -limit or to > limit then
-			return false
-		end
-		if compassSpire.shown then
-			if from < compassSpire.x + 10 and compassSpire.x - 10 < to then
-				return false -- over the Spire's diamond
-			end
-			if withSpireLabel and compassSpire.label and from < compassSpire.to + 3 and compassSpire.from < to + 3 then
-				return false -- over its distance
-			end
-		end
-		return true
-	end
-	local chosen: number? = nil
-	local yields = false
-	for _, s in ipairs(sides) do
-		if clear(s, true) then
-			chosen = s
-			break
-		end
-	end
-	if not chosen and compassSpire.label then
-		for _, s in ipairs(sides) do
-			if clear(s, false) then
-				chosen, yields = s, true
-				break
-			end
-		end
-	end
-	if not chosen then
-		-- the water lies right behind the Spire: keep the number on the ribbon, and the Spire's out of its way
-		yields = compassSpire.label
-		for _, s in ipairs(sides) do
-			local from, to = labelSpan(x, s, width, 11)
-			if from >= -limit and to <= limit then
-				chosen = s
-				break
-			end
-		end
-	end
-	waterLabelSide = chosen or sides[1]
-	setLabelSide(R.waterDist, waterLabelSide)
-	-- nor does the Spire's distance lie over the drop itself
-	if compassSpire.label and compassSpire.from < x + 8 and x - 8 < compassSpire.to then
-		yields = true
-	end
-	return yields
+	-- the Spire's distance gives way where the two would meet under the line
+	local halfWidth = monoWidth(text, R.waterDist.TextSize) / 2
+	return compassSpire.label and x - halfWidth < compassSpire.to + 6 and compassSpire.from - 6 < x + halfWidth
 end
 
 local function updateCompass(camCF: CFrame, phase: string)
@@ -1151,10 +1286,7 @@ local function updateCompass(camCF: CFrame, phase: string)
 				if math.abs(fade - item.fade) > 0.02 then
 					item.fade = fade
 					if item.isLabel then
-						item.inst.TextTransparency = fade
-						if item.shadow then
-							item.shadow.Transparency = 0.6 + 0.4 * fade
-						end
+						QuietUI.textTransparency(item.inst, fade) -- the letter and its dark stroke together
 					else
 						item.inst.BackgroundTransparency = item.base + (1 - item.base) * fade
 					end
@@ -1196,14 +1328,14 @@ local function updateCompass(camCF: CFrame, phase: string)
 	if showSpire then
 		local edge = math.abs(d) > half - 4
 		local x = math.clamp(d, -(half - 4), half - 4) * pxPerDeg
-		R.spire.Position = UDim2.new(0.5, x, 0, 24)
+		R.spire.Position = UDim2.new(0.5, x, 0, MARKER_Y)
 		compassSpire.x = x
 		local feast = GameState:GetAttribute("ArenaEvent") == "Feast"
-		local size = if feast then 7 + 2.5 * (0.5 + 0.5 * math.sin(os.clock() * 5)) else 7
+		local size = if feast and not reducedMotion then 7 + 2.5 * (0.5 + 0.5 * math.sin(os.clock() * 5)) else 7
 		R.spireDiamond.Size = UDim2.fromOffset(size, size)
 		R.spireDiamond.BackgroundTransparency = if edge then 0.45 else 0
-		-- distance rides next to the marker while it's on the ribbon: on its right, or on its left near the ribbon's right
-		-- end (it was clipped there). Shown below, once the water's distance has had its say.
+		-- its distance sits centred under the marker while that is on the ribbon. Shown below, once the water's
+		-- distance has had its say.
 		if not edge then
 			local meters = math.floor(spireDistance * STUD_TO_METERS + 0.5)
 			if meters ~= compassSpire.meters then
@@ -1211,16 +1343,8 @@ local function updateCompass(camCF: CFrame, phase: string)
 				compassSpire.text = string.format("%d m", meters)
 				R.spireDist.Text = compassSpire.text
 			end
-			local text = compassSpire.text
-			local width = monoWidth(text, R.spireDist.TextSize)
-			local side = 1
-			local from, to = labelSpan(x, 1, width, 9)
-			if to > half * pxPerDeg - 2 then
-				side = -1
-				from, to = labelSpan(x, -1, width, 9)
-			end
-			setLabelSide(R.spireDist, side)
-			compassSpire.label, compassSpire.from, compassSpire.to = true, from, to
+			local halfWidth = monoWidth(compassSpire.text, R.spireDist.TextSize) / 2
+			compassSpire.label, compassSpire.from, compassSpire.to = true, x - halfWidth, x + halfWidth
 		end
 	end
 
@@ -1236,24 +1360,29 @@ local function updateCompass(camCF: CFrame, phase: string)
 		setVisible(R.edgeMarker, showEdge)
 		if showEdge then
 			local ed = wrapDelta(edgeBearing :: number, heading)
-			R.edgeMarker.Position = UDim2.new(0.5, math.clamp(ed, -(half - 4), half - 4) * pxPerDeg, 0, 24)
+			R.edgeMarker.Position = UDim2.new(0.5, math.clamp(ed, -(half - 4), half - 4) * pxPerDeg, 0, MARKER_Y)
 			R.edgeTick.BackgroundTransparency = if math.abs(ed) > half - 4 then 0.45 else 0
 		end
 	end
 
-	-- QW10: water for the thirsty (its distance keeps clear of the Spire's, which gives way when there's no room)
+	-- QW10: water for the thirsty (where its distance would meet the Spire's, the Spire's gives way)
 	local spireYields = updateWater(camPos, heading, half, pxPerDeg, phase, combat, center, radius)
 	if showSpire then
 		setVisible(R.spireDist, compassSpire.label and not spireYields)
 	end
 
-	-- the border marker, only while you're outside it
+	-- the border marker, only while you're outside it: the way back in. The compass line itself turns Red meanwhile.
 	local showBorder = outside and phase == "Active" and typeof(center) == "Vector3"
 	setVisible(R.borderMarker, showBorder)
 	if showBorder then
 		local b = bearing(camPos, center)
 		local bd = wrapDelta(b, heading)
-		R.borderMarker.Position = UDim2.new(0.5, math.clamp(bd, -(half - 4), half - 4) * pxPerDeg, 0, 24)
+		R.borderMarker.Position = UDim2.new(0.5, math.clamp(bd, -(half - 4), half - 4) * pxPerDeg, 0, MARKER_Y)
+	end
+	if R.baseline and showBorder ~= baselineRed then
+		baselineRed = showBorder
+		R.baseline.BackgroundColor3 = if showBorder then C.Red else C.Ink
+		R.baseline.BackgroundTransparency = if showBorder then 0.1 else 0.4 -- (0.4: as UIBuilder builds it)
 	end
 end
 

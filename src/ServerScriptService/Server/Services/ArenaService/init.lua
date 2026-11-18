@@ -25,13 +25,21 @@
 	    practice). GameState.LastStand = true while the finale runs.
 	  * The arena's own numbers (docs/design/Map1Build.md, decisions 11 and 14) come from Config (laid over it from
 	    Config.Maps[Config.Map]) and from Shared.ArenaLayout, never from constants here:
+	    - The ring closes in stages when Config.Border.Stages lists them ({ at, over, radius }: Map 1 rests wide open,
+	      then closes in four stages with a rest between them), else in one run from ShrinkStartTime over
+	      ShrinkDuration. Every stage is warned WarningLeadTime seconds ahead ("THE BORDER MOVES IN 30 SECONDS", "Stage
+	      2 of 4"), announced when it moves and when it rests, and published: GameState BorderStage (0 while the ring
+	      rests wide open, then the stage's number from its warning on), BorderStageCount, BorderMoving (the wall is
+	      moving right now: the wall's pulse), BorderNextMoveAt and BorderMoveEndAt (round-schedule seconds, -1 = none),
+	      BorderTargetRadius (where the announced stage stops).
 	    - The wall never moves faster than Config.Border.MaxShrinkSpeed (studs a second of round time, the slide of its
-	      centre included). The shrink always ends at ShrinkStartTime + ShrinkDuration; a ring too big to close in
-	      ShrinkDuration at that speed starts earlier, as early as it must. Each round's own times are published at
-	      the Countdown as GameState BorderShrinkStart / BorderShrinkEnd (round-schedule seconds; ThreatLine and the
-	      HUD's event line read them). GameState.BorderShrinking keeps its meaning and its time: it turns true at
-	      ShrinkStartTime, the final closing (music, the wall's pulse, the event line, a list-only Roll Call). A ring
-	      that started earlier is only creeping until then: BorderRadius falls, a warning says so, nothing else changes.
+	      centre included). A stage always ends when Config says; one that would be too fast starts earlier, as early
+	      as it must (never before the stage before it has stopped). The round's own times are published at the
+	      Countdown as GameState BorderShrinkStart (the first movement) / BorderShrinkEnd (closed to FinalRadius), in
+	      round-schedule seconds (ThreatLine and the HUD's event line read them). GameState.BorderShrinking keeps its
+	      meaning: it turns true at ShrinkStartTime, the final closing (music, the event line, a list-only Roll Call),
+	      which is the last stage. Earlier stages are slow: BorderRadius falls, warnings say so, nothing else changes.
+	    - The ring's centre slides to the Last Stand point in step with its radius (there when it reaches FinalRadius).
 	    - Where the Last Stand closes: one of the layout's LastStandPoints when it names them; else, when the layout
 	      has Heart.mouths (Map 1), a point 90 to 100 studs out on the centre line of a mouth's open lane; else the
 	      classic rule above (PlazaRadius, AssetInfo.Spire.r, FinalSpireGap).
@@ -91,7 +99,7 @@ local BorderCfg = Config.Border
 local EventsCfg = Config.Events
 
 local TICK = 0.2 -- border, events and time-base checks per second: 5 (clients animate the clock every frame)
-local EARLY_START = 20 -- seconds before ShrinkStartTime from which a ring's first movement gets its own "slowly" warnings
+local EARLY_START = 20 -- seconds before ShrinkStartTime from which the last stage's movement gets its own "slowly" warnings
 
 local ArenaService = {}
 
@@ -106,6 +114,7 @@ local borderCenter = Vector3.new(ArenaLayout.Center.X, ArenaLayout.BaseHeight, A
 local baseCenter = borderCenter -- the Spire: where the ring starts
 local finalCenter: Vector3? = nil -- QW14: where it closes (beside the Spire, picked once per round)
 local shrinkStartAt = BorderCfg.ShrinkStartTime -- this round's first movement, round-schedule seconds (<= ShrinkStartTime)
+local plan: { { [string]: any } } = {} -- this round's stages (buildPlan): { from, to, fromRadius, radius, moves }
 local shrinkRound: any = nil -- the RoundId shrinkStartAt was worked out for (nil outside a round)
 local borderRadius = BorderCfg.StartRadius
 local warned = {}
@@ -116,9 +125,10 @@ local rollCallSeq = 0
 
 local function newEvents()
 	return {
-		borderWarned = false,
-		borderCreeping = false, -- a big ring's early, slow start has been announced
-		borderMoving = false,
+		stageWarned = {}, -- [stage] = true: its warning has gone out (or its time has passed)
+		stageStarted = {}, -- [stage] = true: it has started to move
+		stageRested = {}, -- [stage] = true: it has stopped
+		borderMoving = false, -- the final closing has been announced
 		borderClosed = false,
 		feastWarned = false,
 		feastDone = false,
@@ -213,7 +223,7 @@ local function ensureRound()
 		table.clear(outsideSince)
 		ev = newEvents()
 		endingClock = nil
-		finalCenter = nil -- a new point for the new round (resetBorder / centerAt pick it)
+		finalCenter = nil -- a new point for the new round (resetBorder / centerFor pick it)
 	end
 end
 
@@ -375,63 +385,141 @@ local function nominalShrink(): (number, number)
 	return start, start + math.max(1, BorderCfg.ShrinkDuration)
 end
 
--- Map1Build.md decision 11: the wall never moves faster than Config.Border.MaxShrinkSpeed. The shrink ends when Config
--- says; a ring too big to close in ShrinkDuration at that speed starts earlier, as early as it must (never later than
--- ShrinkStartTime, never before the horn). The distance is the radius it loses plus the slide of its centre to the
--- Last Stand point: the far side of the wall moves by both.
-local function computeShrinkStart(): number
-	local nominalStart, closeAt = nominalShrink()
+-- How far the ring's centre slides while it closes (to the Last Stand point); 0 without the Last Stand.
+local function slideDistance(): number
+	if not lastStandOn() then
+		return 0
+	end
+	local final = ensureFinalCenter()
+	return Vector3.new(final.X - baseCenter.X, 0, final.Z - baseCenter.Z).Magnitude
+end
+
+-- This round's closing as a list of stages, in order: { from, to (round-schedule seconds), fromRadius, radius,
+-- moves }. Config.Border.Stages gives them ({ at, over, radius }); without it the ring closes in one run from
+-- ShrinkStartTime over ShrinkDuration, as it always did.
+-- Map1Build.md decision 11: the wall never moves faster than Config.Border.MaxShrinkSpeed. A stage always ends when
+-- Config says; one that would be too fast starts earlier, as early as it must (never before the stage before it has
+-- stopped, never before the horn). The distance is the radius it loses plus its share of the slide of the ring's
+-- centre to the Last Stand point (the centre moves in step with the radius): the far side of the wall moves by both.
+-- A stage whose radius the ring is already inside (a smaller starting ring) does not move and is not announced.
+local function buildPlan(withSlide: boolean): { { [string]: any } }
+	local r0 = startRadius()
+	local finalRadius = math.min(BorderCfg.FinalRadius, r0)
+	local travel = r0 - finalRadius
+	local slide = if withSlide and travel > 0 then slideDistance() / travel else 0
 	local speed = tonumber(BorderCfg.MaxShrinkSpeed)
-	if not speed or speed <= 0 then
-		return nominalStart
+	local stages = BorderCfg.Stages
+	if type(stages) ~= "table" or #stages == 0 then
+		local nominalStart, closeAt = nominalShrink()
+		stages = { { at = nominalStart, over = closeAt - nominalStart, radius = finalRadius } }
 	end
-	local travel = math.max(0, startRadius() - BorderCfg.FinalRadius)
-	if lastStandOn() then
-		local final = ensureFinalCenter()
-		travel += Vector3.new(final.X - baseCenter.X, 0, final.Z - baseCenter.Z).Magnitude
+	local list = {}
+	local radius, previousEnd = r0, 0
+	local count = #stages
+	for index, stage in ipairs(stages) do
+		local at, over, target = tonumber(stage.at), tonumber(stage.over), tonumber(stage.radius)
+		if at and over and target then
+			if index == count then
+				target = finalRadius -- whatever the list says, the last stage ends at the final ring
+			end
+			target = math.clamp(target, finalRadius, radius)
+			local to = math.max(at + math.max(1, over), previousEnd + 1)
+			local from = math.min(at, to - 1)
+			local distance = (radius - target) * (1 + slide)
+			if speed and speed > 0 and distance > 0 then
+				from = math.min(from, to - distance / speed)
+			end
+			from = math.clamp(from, previousEnd, to - 1)
+			if speed and speed > 0 and distance / (to - from) > speed + 0.01 then
+				warnOnce("stageSpeed" .. index, string.format(
+					"Border stage %d would move at %.2f studs/s, over MaxShrinkSpeed %.2f: give it more time in Config.Border.Stages",
+					index, distance / (to - from), speed))
+			end
+			table.insert(list, { from = from, to = to, fromRadius = radius, radius = target, moves = radius - target > 0.01 })
+			radius, previousEnd = target, to
+		end
 	end
-	return math.clamp(closeAt - travel / speed, 0, nominalStart)
+	return list
 end
 
--- This round's shrink: (first movement, closed). Equal to nominalShrink() unless the ring had to start early.
-local function shrinkWindow(): (number, number)
+-- The second this round's ring has closed to FinalRadius (the Last Stand begins).
+local function closeTime(): number
+	local last = plan[#plan]
+	if last then
+		return last.to
+	end
 	local _, closeAt = nominalShrink()
-	return math.min(shrinkStartAt, closeAt - 1), closeAt
+	return closeAt
 end
 
--- Works out this round's shrink and publishes it (the Countdown, once the start radius and the Last Stand point are
+local function setPlan(list: { { [string]: any } })
+	plan = list
+	local nominalStart = nominalShrink()
+	shrinkStartAt = nominalStart
+	for _, stage in ipairs(list) do
+		if stage.moves then
+			shrinkStartAt = stage.from
+			break
+		end
+	end
+	local closeAt = closeTime()
+	setAttr("BorderShrinkStart", math.floor(math.min(shrinkStartAt, closeAt - 1) * 10 + 0.5) / 10)
+	setAttr("BorderShrinkEnd", closeAt)
+	setAttr("BorderStageCount", #list)
+end
+
+-- Works out this round's stages and publishes them (the Countdown, once the start radius and the Last Stand point are
 -- known; clients count down to GameState.BorderShrinkStart).
 local function planShrink()
-	shrinkStartAt = computeShrinkStart()
+	setPlan(buildPlan(true))
 	shrinkRound = trackedRound
-	local _, closeAt = nominalShrink()
-	setAttr("BorderShrinkStart", math.floor(shrinkStartAt * 10 + 0.5) / 10)
-	setAttr("BorderShrinkEnd", closeAt)
-end
-
-local function centerAt(elapsed: number): Vector3
-	if not lastStandOn() then
-		return baseCenter
-	end
-	local start, closeAt = shrinkWindow()
-	local t = math.clamp((elapsed - start) / math.max(1, closeAt - start), 0, 1)
-	return baseCenter:Lerp(ensureFinalCenter(), t)
 end
 
 local function radiusAt(elapsed: number): number
-	local r0 = startRadius()
-	local start, closeAt = shrinkWindow()
-	if elapsed <= start then
-		return r0
+	local radius = startRadius()
+	for _, stage in ipairs(plan) do
+		if elapsed <= stage.from then
+			return stage.fromRadius
+		end
+		if elapsed < stage.to then
+			return stage.fromRadius + (stage.radius - stage.fromRadius) * (elapsed - stage.from) / (stage.to - stage.from)
+		end
+		radius = stage.radius
 	end
-	if elapsed <= closeAt or not lastStandOn() then
-		local t = math.clamp((elapsed - start) / math.max(1, closeAt - start), 0, 1)
-		return r0 + (BorderCfg.FinalRadius - r0) * t
+	if not lastStandOn() then
+		return radius
 	end
 	-- the Last Stand: from FinalRadius to nothing (to the practice floor in a practice round)
-	local t = math.clamp((elapsed - closeAt) / math.max(1, BorderCfg.LastStandDuration or 55), 0, 1)
-	local floor = lastStandFloor()
-	return floor + (BorderCfg.FinalRadius - floor) * (1 - t)
+	local t = math.clamp((elapsed - closeTime()) / math.max(1, BorderCfg.LastStandDuration or 55), 0, 1)
+	local floor = math.min(lastStandFloor(), radius)
+	return floor + (radius - floor) * (1 - t)
+end
+
+-- Where the ring is heading: its own radius until a stage is announced, then that stage's.
+local function targetAt(elapsed: number, lead: number): number
+	local radius = startRadius()
+	for _, stage in ipairs(plan) do
+		if elapsed < stage.from - lead then
+			return radius
+		end
+		radius = stage.radius
+	end
+	return radius
+end
+
+-- The ring's centre for a radius: it slides from the Spire to the Last Stand point in step with the radius, so it is
+-- there when the ring has closed to FinalRadius and every ring lies inside the one before it.
+local function centerFor(radius: number): Vector3
+	if not lastStandOn() then
+		return baseCenter
+	end
+	local r0 = startRadius()
+	local travel = r0 - BorderCfg.FinalRadius
+	local t = if travel > 0 then math.clamp((r0 - radius) / travel, 0, 1) elseif radius < r0 - 0.01 then 1 else 0
+	if t <= 0 then
+		return baseCenter
+	end
+	return baseCenter:Lerp(ensureFinalCenter(), t)
 end
 
 local function publishBorder(radius: number, target: number, shrinking: boolean)
@@ -446,6 +534,18 @@ local function publishBorder(radius: number, target: number, shrinking: boolean)
 	setAttr("BorderShrinking", shrinking)
 end
 
+-- The stage read-outs (for the wall's pulse and for a HUD that wants to count down to the next stage):
+--   BorderStage       0 while the ring rests wide open; from a stage's warning on, that stage's number
+--   BorderMoving      the wall is moving right now (any stage, and the Last Stand)
+--   BorderNextMoveAt  the round-schedule second the next stage starts moving; -1 when none is left
+--   BorderMoveEndAt   the round-schedule second the movement under way stops; -1 while the ring rests
+local function publishStage(stage: number, moving: boolean, nextMoveAt: number, moveEndAt: number)
+	setAttr("BorderStage", stage)
+	setAttr("BorderMoving", moving)
+	setAttr("BorderNextMoveAt", math.floor(nextMoveAt * 10 + 0.5) / 10)
+	setAttr("BorderMoveEndAt", math.floor(moveEndAt * 10 + 0.5) / 10)
+end
+
 local function resetBorder()
 	baseCenter = computeCenter()
 	borderCenter = baseCenter
@@ -453,15 +553,13 @@ local function resetBorder()
 		ensureFinalCenter()
 		planShrink()
 	else
-		-- no round: Config's own times
-		local nominalStart, closeAt = nominalShrink()
-		shrinkStartAt = nominalStart
+		-- no round: Config's own times (no Last Stand point is picked outside a round)
+		setPlan(buildPlan(false))
 		shrinkRound = nil
-		setAttr("BorderShrinkStart", nominalStart)
-		setAttr("BorderShrinkEnd", closeAt)
 	end
 	local r0 = startRadius()
 	publishBorder(r0, r0, false)
+	publishStage(0, false, math.min(shrinkStartAt, closeTime() - 1), -1)
 	setAttr("LastStand", false)
 end
 
@@ -470,47 +568,91 @@ local function updateBorder(elapsed: number)
 		planShrink() -- (a round whose Countdown this loop never saw)
 	end
 	local scale = timeScale()
-	-- finalStart: Config.Border.ShrinkStartTime, the final closing (GameState.BorderShrinking). shrinkStart: when this
-	-- round's ring first moves; earlier than finalStart only for a ring too big to close in time at MaxShrinkSpeed.
-	local finalStart = BorderCfg.ShrinkStartTime
-	local shrinkStart, shrinkEnd = shrinkWindow()
-	-- "early" only for a real head start: a ring that begins a few seconds before finalStart is announced as usual
-	-- (its own "moves" warning, then "is moving" at finalStart), not with three warnings in half a minute
-	local early = shrinkStart < finalStart - EARLY_START
-	local slowly = "Slowly at first · keep inside the ring"
-	if not ev.borderWarned and elapsed >= shrinkStart - BorderCfg.WarningLeadTime and elapsed < shrinkStart then
-		ev.borderWarned = true
-		local seconds = math.max(1, math.ceil((shrinkStart - elapsed) / scale))
-		local action = if early then slowly else "Head for " .. lore("Spire", "the Spire")
-		local title, sub = headline({ name = "Border", verb = "moves", action = action, seconds = seconds },
-			string.format("THE BORDER MOVES IN %d SECONDS", seconds), action)
-		announce({ style = "Warning", text = title, sub = sub, duration = 6 })
-		Sfx.play("BorderWarning")
-	end
-	if early and not ev.borderCreeping and elapsed >= shrinkStart and elapsed < finalStart then
-		ev.borderCreeping = true
-		ev.borderWarned = true
-		local title, sub = headline({ name = "Border", verb = "is moving", action = slowly }, "THE BORDER IS MOVING", slowly)
-		announce({ style = "Warning", text = title, sub = sub, duration = 5 })
-		Sfx.play("BorderWarning")
+	local lead = BorderCfg.WarningLeadTime
+	local count = #plan
+	local closeAt = closeTime()
+	-- finalStart: Config.Border.ShrinkStartTime, the final closing (GameState.BorderShrinking: the music, the HUD's
+	-- line, a list-only Roll Call). With Config.Border.Stages it is the last stage's start. A stage that moves before
+	-- it (every stage but the last; the last too when it had to start early to keep to MaxShrinkSpeed) is "slow": its
+	-- warnings say so and nothing else changes.
+	local finalStart = math.min(BorderCfg.ShrinkStartTime, closeAt - 1)
+	local slowly = "Slowly · keep inside the ring"
+	local toSpire = "Head for " .. lore("Spire", "the Spire")
+	local stageNow, moving, nextMoveAt, moveEndAt = 0, false, -1, -1
+	for index, stage in ipairs(plan) do
+		if stage.moves then
+			local last = index == count
+			local slow = not last or stage.from < finalStart - EARLY_START
+			local label = if count > 1 then string.format("Stage %d of %d · ", index, count) else ""
+			if elapsed >= stage.from - lead then
+				stageNow = index
+			end
+			if elapsed < stage.from and nextMoveAt < 0 then
+				nextMoveAt = stage.from
+			end
+			if elapsed >= stage.from and elapsed < stage.to then
+				moving, moveEndAt = true, stage.to
+			end
+			-- the warning, WarningLeadTime seconds before the stage moves
+			if not ev.stageWarned[index] and elapsed >= stage.from - lead then
+				ev.stageWarned[index] = true
+				if elapsed < stage.from then
+					local seconds = math.max(1, math.ceil((stage.from - elapsed) / scale))
+					local action = label .. (if slow then slowly else toSpire)
+					local title, sub = headline({ name = "Border", verb = "moves", action = action, seconds = seconds },
+						string.format("THE BORDER MOVES IN %d SECONDS", seconds), action)
+					announce({ style = "Warning", text = title, sub = sub, duration = 6 })
+					Sfx.play("BorderWarning")
+				end
+			end
+			-- it moves (the last stage starting on time is announced as the final closing, below)
+			if not ev.stageStarted[index] and elapsed >= stage.from then
+				ev.stageStarted[index] = true
+				if slow and elapsed < math.min(stage.to, if last then finalStart else stage.to) then
+					local action = label .. slowly
+					local title, sub = headline({ name = "Border", verb = "is moving", action = action }, "THE BORDER IS MOVING", action)
+					announce({ style = "Warning", text = title, sub = sub, duration = 5 })
+					Sfx.play("BorderWarning")
+				end
+			end
+			-- it rests: say for how long (only when another stage is still to come)
+			if not ev.stageRested[index] and elapsed >= stage.to then
+				ev.stageRested[index] = true
+				local nextStage = nil
+				for later = index + 1, count do
+					if plan[later].moves then
+						nextStage = plan[later]
+						break
+					end
+				end
+				if nextStage and elapsed < nextStage.from - lead then
+					local border = lore("Border", "the border")
+					announce({
+						style = "Toast",
+						text = string.upper(string.sub(border, 1, 1)) .. string.sub(border, 2) .. " rests",
+						sub = "It moves again in " .. tostring(math.max(1, math.ceil((nextStage.from - elapsed) / scale))) .. " seconds",
+						duration = 4,
+					})
+				end
+			end
+		end
 	end
 	local lastStand = lastStandOn()
-	local shrinking = elapsed >= finalStart
-		and elapsed < (if lastStand then shrinkEnd + (BorderCfg.LastStandDuration or 55) else shrinkEnd)
+	local standEnd = closeAt + (BorderCfg.LastStandDuration or 55)
+	local shrinking = elapsed >= finalStart and elapsed < (if lastStand then standEnd else closeAt)
 	if shrinking and not ev.borderMoving then
 		ev.borderMoving = true
-		ev.borderWarned = true
-		local toSpire = "Head for " .. lore("Spire", "the Spire") .. " and stay inside the ring"
-		-- a ring that has been creeping in for minutes "closes in" now; one that starts here "is moving", as before
-		local title, sub = headline({ name = "Border", verb = if early then "closes in" else "is moving", action = toSpire },
-			if early then "THE BORDER CLOSES IN" else "THE BORDER IS MOVING", toSpire)
+		local toRing = toSpire .. " and stay inside the ring"
+		-- a ring that has been closing in for minutes "closes in" now; one that starts here "is moving", as before
+		local before = radiusAt(finalStart - EARLY_START) < startRadius() - 0.5
+		local title, sub = headline({ name = "Border", verb = if before then "closes in" else "is moving", action = toRing },
+			if before then "THE BORDER CLOSES IN" else "THE BORDER IS MOVING", toRing)
 		announce({ style = "Warning", text = title, sub = sub, duration = 5 })
 		Sfx.play("BorderWarning")
 	end
-	if elapsed >= shrinkEnd and not ev.borderClosed then
+	if elapsed >= closeAt and not ev.borderClosed then
 		ev.borderClosed = true
 		ev.borderMoving = true
-		ev.borderWarned = true
 		if lastStand then
 			-- QW14: the finale. The ring closes to nothing beside the Spire.
 			ev.lastStandAt = now()
@@ -534,11 +676,14 @@ local function updateBorder(elapsed: number)
 			})
 		end
 	end
-	local target = if not ev.borderWarned then startRadius()
-		elseif lastStand and ev.borderClosed then lastStandFloor()
-		else BorderCfg.FinalRadius
-	borderCenter = centerAt(elapsed)
-	publishBorder(radiusAt(elapsed), target, shrinking)
+	if lastStand and elapsed >= closeAt and elapsed < standEnd then
+		moving, moveEndAt = true, standEnd
+	end
+	local radius = radiusAt(elapsed)
+	local target = if lastStand and ev.borderClosed then lastStandFloor() else targetAt(elapsed, lead)
+	borderCenter = centerFor(radius)
+	publishBorder(radius, target, shrinking)
+	publishStage(stageNow, moving, nextMoveAt, moveEndAt)
 	setAttr("LastStand", lastStand and ev.borderClosed) -- GameState.LastStand: the finale is on (HUD)
 end
 
