@@ -19,9 +19,9 @@ Up to 48 contenders rise onto plinths around the Horn in a green mountain valley
 On your own? You get a practice round with training dummies while you wait for other players.
 
 THIS IS A BETA IN TESTING. Things will change, and some will break. It is built for PC, phone and controller; phone and controller are still being tested.
-
-No pay-to-win: nothing you can buy changes a fight.
 ```
+
+*The "no pay-to-win" line was taken out on 18 November: you decided that epic items from the wheel and loot boxes will be stronger.*
 
 **What each line rests on**
 - "Up to 48", the plinths, the Horn, the signal, crates, hunger and thirst, the stream and the lake, night, the border, spectating and the practice round are all in the game today ([Status.md](Status.md)).
