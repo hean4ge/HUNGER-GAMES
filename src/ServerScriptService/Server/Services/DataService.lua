@@ -16,6 +16,10 @@
 	has loaded, and only the keys this session changed, merged into the stored table: a change made while the profile
 	was still loading keeps every other stored key, and a session whose load failed never writes Settings at all
 	(SettingsController sends only the keys the player changed). Every call is pcall-wrapped with retries.
+	A profile that could not be loaded at join is asked for again every LOAD_RETRY_INTERVAL seconds while the player
+	stays. One store call runs per session at a time (session.saving): a save never starts beside another one, so the
+	same deltas are never written twice. A player whose leave save failed keeps their unsaved stats on this server
+	(orphans): the autosave loop and the shutdown save try again, and they get them back if they rejoin this server.
 	In Studio without API access (or an unpublished place) it logs once and keeps session-only defaults.
 ]]
 local DataStoreService = game:GetService("DataStoreService")
@@ -31,7 +35,10 @@ local Util = require(Shared:WaitForChild("Util"))
 local STORE_NAME = "PlayerStats_v1"
 local AUTOSAVE_INTERVAL = 120
 local LOAD_ATTEMPTS = 4
+local LOAD_RETRY_INTERVAL = 30 -- seconds between later tries for a profile that did not load at join
 local SAVE_ATTEMPTS = 3
+local SAVE_WAIT = 90 -- seconds a save waits for the store call already running for that session before it gives up
+local ORPHAN_TRIES = 10 -- autosave rounds a departed player's unsaved stats are retried for (20 minutes)
 local STATS = { "Wins", "TotalKills", "RoundsPlayed" }
 local IS_STAT = { Wins = true, TotalKills = true, RoundsPlayed = true }
 local SETTING_LIMITS = {
@@ -62,6 +69,7 @@ local store: DataStore? = nil
 local available = true
 local unavailableLogged = false
 local sessions = {} -- [Player] = session (see newSession)
+local orphans = {} -- [userId] = { session, player, tries }: left with changes the leave save could not write
 
 -- Helpers ----------------------------------------------------------------------------------------------------------
 
@@ -177,33 +185,59 @@ end
 
 -- Load / save ------------------------------------------------------------------------------------------------------
 
+-- One GetAsync for a session whose profile has not loaded yet. Returns true once it has; false and the error
+-- otherwise ("busy": another store call is running for this session; the caller checks the session is still current).
+local function fetchProfile(player: Player, session): (boolean, any)
+	if session.saving then
+		return false, "busy"
+	end
+	session.saving = true -- a save waits for this answer: a read that crossed a write would bring back the older totals
+	waitForBudget(Enum.DataStoreRequestType.GetAsync, 5)
+	local ok, result = pcall(function()
+		return (store :: DataStore):GetAsync(keyFor(session.userId))
+	end)
+	session.saving = false
+	if sessions[player] ~= session then
+		return false, "left"
+	end
+	if not ok then
+		return false, result
+	end
+	if type(result) == "table" then
+		for _, stat in ipairs(STATS) do
+			session.base[stat] = math.max(0, math.floor(tonumber(result[stat]) or 0))
+		end
+		-- stored settings, overridden only by the keys the player changed while we were loading
+		local merged = sanitizeSettings(result.Settings)
+		for k in pairs(session.changed) do
+			merged[k] = session.settings[k]
+		end
+		session.settings = merged
+	end
+	session.loaded = true
+	return true, nil
+end
+
 local function loadPlayer(player: Player)
 	local session = newSession(player.UserId)
 	sessions[player] = session
+	-- back on the server they left with unsaved stats: this session carries them on (unless that save is running now)
+	local orphan = orphans[session.userId]
+	if orphan and not orphan.session.saving then
+		orphans[session.userId] = nil
+		for _, stat in ipairs(STATS) do
+			session.pending[stat] += orphan.session.pending[stat]
+			orphan.session.pending[stat] = 0
+		end
+	end
 	mirror(player, session, false)
 	if store and available then
-		local key = keyFor(session.userId)
 		for attempt = 1, LOAD_ATTEMPTS do
-			waitForBudget(Enum.DataStoreRequestType.GetAsync, 5)
-			local ok, result = pcall(function()
-				return (store :: DataStore):GetAsync(key)
-			end)
+			local ok, result = fetchProfile(player, session)
 			if sessions[player] ~= session then
 				return
 			end
 			if ok then
-				if type(result) == "table" then
-					for _, stat in ipairs(STATS) do
-						session.base[stat] = math.max(0, math.floor(tonumber(result[stat]) or 0))
-					end
-					-- stored settings, overridden only by the keys the player changed while we were loading
-					local merged = sanitizeSettings(result.Settings)
-					for k in pairs(session.changed) do
-						merged[k] = session.settings[k]
-					end
-					session.settings = merged
-				end
-				session.loaded = true
 				break
 			end
 			if Config.IsStudio and looksUnavailable(result) then
@@ -216,7 +250,8 @@ local function loadPlayer(player: Player)
 			end
 		end
 		if not session.loaded and available then
-			warn("[DataService] Couldn't load " .. player.Name .. "'s stats; new progress is still saved safely as deltas.")
+			warn("[DataService] Couldn't load " .. player.Name .. "'s stats yet; new progress is still saved safely as deltas,"
+				.. " and the load is tried again every " .. LOAD_RETRY_INTERVAL .. " s.")
 		end
 	end
 	if sessions[player] ~= session then
@@ -226,14 +261,35 @@ local function loadPlayer(player: Player)
 		session.loaded = true -- session-only defaults
 	end
 	mirror(player, session, true)
+	-- a profile that did not load is asked for again while the player stays: until it answers their Wins and
+	-- RoundsPlayed read 0 (new-player help is on) and their settings changes are not written
+	while store and available and not session.loaded do
+		task.wait(LOAD_RETRY_INTERVAL)
+		if sessions[player] ~= session or not available then
+			return
+		end
+		local ok = fetchProfile(player, session)
+		if sessions[player] ~= session then
+			return
+		end
+		if ok then
+			mirror(player, session, true)
+			print("[DataService] Loaded " .. player.Name .. "'s stats on a later try.")
+		end
+	end
 end
 
 local function savePlayer(player: Player, session): boolean
 	if not store or not available then
 		return false
 	end
+	-- one store call per session at a time. A write still in its retries has these same deltas in hand: starting a
+	-- second one beside it would add them twice, so this one waits, and gives up (false) if that takes too long.
 	local waited = 0
-	while session.saving and waited < 30 do
+	while session.saving do
+		if waited >= SAVE_WAIT then
+			return false
+		end
 		task.wait(0.25)
 		waited += 0.25
 	end
@@ -399,9 +455,23 @@ function DataService.Init(_registry)
 		if not session then
 			return
 		end
-		savePlayer(player, session)
+		local saved = savePlayer(player, session)
 		if sessions[player] == session then
 			sessions[player] = nil
+		end
+		-- the leave save failed (or another write was still running): keep what is unsaved and try again later
+		if not saved and store and available and hasChanges(session) then
+			local earlier = orphans[session.userId]
+			if earlier and earlier.session ~= session and not earlier.session.saving then
+				for _, stat in ipairs(STATS) do
+					session.pending[stat] += earlier.session.pending[stat]
+					earlier.session.pending[stat] = 0
+				end
+			end
+			orphans[session.userId] = { session = session, player = player, tries = 0 }
+			warn(string.format(
+				"[DataService] %s left before their stats were saved (Wins +%d, TotalKills +%d, RoundsPlayed +%d); kept and tried again.",
+				player.Name, session.pending.Wins, session.pending.TotalKills, session.pending.RoundsPlayed))
 		end
 	end)
 	Net.event("SaveSettings").OnServerEvent:Connect(onSaveSettings)
@@ -414,6 +484,13 @@ function DataService.Init(_registry)
 			running += 1
 			task.spawn(function()
 				pcall(savePlayer, player, session)
+				running -= 1
+			end)
+		end
+		for _, orphan in pairs(orphans) do
+			running += 1
+			task.spawn(function()
+				pcall(savePlayer, orphan.player, orphan.session)
 				running -= 1
 			end)
 		end
@@ -443,6 +520,34 @@ function DataService.Start()
 				if sessions[entry.player] == entry.session then
 					task.spawn(savePlayer, entry.player, entry.session)
 					task.wait(0.3)
+				end
+			end
+			-- players who left with changes their leave save could not write
+			local left = {}
+			for userId, orphan in pairs(orphans) do
+				table.insert(left, { userId = userId, orphan = orphan })
+			end
+			for _, entry in ipairs(left) do
+				local userId, orphan = entry.userId, entry.orphan
+				if orphans[userId] == orphan then
+					if not hasChanges(orphan.session) then
+						orphans[userId] = nil
+					else
+						orphan.tries += 1
+						task.spawn(function()
+							local saved = savePlayer(orphan.player, orphan.session)
+							if orphans[userId] == orphan and (saved or orphan.tries >= ORPHAN_TRIES) then
+								orphans[userId] = nil
+								if not saved then
+									local pending = orphan.session.pending
+									warn(string.format(
+										"[DataService] Gave up saving user %d's stats after they left (Wins +%d, TotalKills +%d, RoundsPlayed +%d).",
+										userId, pending.Wins, pending.TotalKills, pending.RoundsPlayed))
+								end
+							end
+						end)
+						task.wait(0.3)
+					end
 				end
 			end
 		end

@@ -1,0 +1,1473 @@
+-- MPT_Driver (mp-test): test-only server driver for a Studio multiplayer test started with
+-- StudioTestService:ExecuteMultiplayerTestAsync(n, { suite = "mpt", batch = ... }). It is put into ServerScriptService
+-- only while a test is being started and removed again; outside such a test (no test args, or not Studio) it does
+-- nothing. Every line it prints starts with "[MPT]"; the bots' lines are relayed as "[MPT] C:<player> ...".
+local RunService = game:GetService("RunService")
+if not RunService:IsStudio() or not RunService:IsServer() then
+	return
+end
+local STS = game:GetService("StudioTestService")
+local okArgs, ARGS = pcall(function()
+	return STS:GetTestArgs()
+end)
+if not okArgs or type(ARGS) ~= "table" or ARGS.suite ~= "mpt" then
+	return
+end
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local SSS = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
+local HttpService = game:GetService("HttpService")
+local LogService = game:GetService("LogService")
+local CollectionService = game:GetService("CollectionService")
+
+local seq = 0
+local function now(): number
+	return workspace:GetServerTimeNow() % 100000
+end
+local function L(s: string)
+	seq += 1
+	print(string.format("[MPT] %04d %.3f %s", seq, now(), s))
+end
+local function json(v: any): string
+	local ok, res = pcall(HttpService.JSONEncode, HttpService, v)
+	return if ok then res else "<json failed: " .. tostring(res) .. ">"
+end
+local function v3(v: Vector3): string
+	return string.format("(%.1f,%.1f,%.1f)", v.X, v.Y, v.Z)
+end
+local function fmt(v: any, depth: number?): string
+	local d = depth or 0
+	local t = typeof(v)
+	if t == "table" then
+		if d > 4 then
+			return "{...}"
+		end
+		local keys = {}
+		for k in pairs(v) do
+			table.insert(keys, k)
+		end
+		table.sort(keys, function(a, b)
+			return tostring(a) < tostring(b)
+		end)
+		local out = {}
+		for _, k in ipairs(keys) do
+			table.insert(out, tostring(k) .. "=" .. fmt(v[k], d + 1))
+		end
+		return "{" .. table.concat(out, ", ") .. "}"
+	elseif t == "Vector3" then
+		return v3(v)
+	elseif t == "Instance" then
+		return v.ClassName .. ":" .. v.Name
+	elseif t == "number" then
+		return if v % 1 == 0 then tostring(v) else string.format("%.3f", v)
+	end
+	return tostring(v)
+end
+
+L("driver starting: args=" .. json(ARGS) .. string.format(" uptime=%.1f", time()))
+
+-- the session always ends by itself
+local FAILSAFE = tonumber(ARGS.failsafe) or 330
+local ended = false
+local function endTest(summary: string)
+	if ended then
+		return
+	end
+	ended = true
+	L("ENDTEST " .. summary)
+	task.wait(1.5) -- let the last client lines arrive and the log flush
+	pcall(function()
+		STS:EndTest(summary)
+	end)
+end
+task.delay(FAILSAFE, function()
+	endTest("failsafe after " .. FAILSAFE .. " s")
+end)
+
+LogService.MessageOut:Connect(function(message, kind)
+	if kind ~= Enum.MessageType.MessageError and kind ~= Enum.MessageType.MessageWarning then
+		return
+	end
+	if string.find(message, "[MPT]", 1, true) then
+		return
+	end
+	task.defer(L, (if kind == Enum.MessageType.MessageError then "LOG-E " else "LOG-W ") .. string.sub((string.gsub(message, "\n", " | ")), 1, 400))
+end)
+
+local Shared = RS:WaitForChild("Shared")
+local GS = RS:WaitForChild("GameState")
+local Config = require(Shared:WaitForChild("Config"))
+-- a real round needs two: before anything else, so the first client to load does not get a practice round
+local MINP = tonumber(ARGS.minPlayers) or 2
+-- held until the lobby has been looked at: no round and no practice round starts before release()
+Config.Round.MinPlayers = 99
+Config.Round.SoloPractice = false
+local function release()
+	Config.Round.SoloPractice = true
+	Config.Round.MinPlayers = MINP
+	GS:SetAttribute("MinPlayers", MINP)
+	L("RELEASE MinPlayers=" .. MINP)
+end
+L("held: MinPlayers=99 SoloPractice=false; IntermissionTime=" .. tostring(Config.Round.IntermissionTime))
+if ARGS.timeScale then
+	Config.Round.StudioTimeScale = ARGS.timeScale
+end
+if ARGS.border then
+	-- a small ring, so that "outside the border" is a few steps from the plates (the damage path is the game's own)
+	Config.Border.MinStartRadius = ARGS.border
+	Config.Border.StartRadius = ARGS.border
+end
+if ARGS.cut then
+	GS:SetAttribute("LaunchCutTest", ARGS.cut)
+end
+
+local function req(parent: Instance, name: string): any
+	local m = parent:WaitForChild(name, 30)
+	if not m then
+		L("REQUIRE no module " .. name)
+		return nil
+	end
+	local ok, res = pcall(require, m)
+	if not ok then
+		L("REQUIRE FAIL " .. name .. ": " .. tostring(res))
+		return nil
+	end
+	return res
+end
+local Services = SSS:WaitForChild("Server"):WaitForChild("Services")
+local Net = req(Shared, "Net")
+local ItemDefs = req(Shared, "ItemDefs")
+local Inv = req(Services, "InventoryService")
+local Combat = req(Services, "CombatService")
+local PS = req(Services, "PlayerService")
+local Round = req(Services, "RoundService")
+local Arena = req(Services, "ArenaService")
+local Loot = req(Services, "LootService")
+local Data = req(Services, "DataService")
+
+-- remotes for the bots ---------------------------------------------------------------------------------------------------
+local callFn = Instance.new("RemoteFunction")
+callFn.Name = "MPT_Call"
+callFn.Parent = RS
+local repEv = Instance.new("RemoteEvent")
+repEv.Name = "MPT_Rep"
+repEv.Parent = RS
+local botReady: { [Player]: boolean } = {}
+local clientLines: { [string]: { string } } = {} -- per player name, every line the bot sent (for searching)
+repEv.OnServerEvent:Connect(function(p, text)
+	if type(text) ~= "string" then
+		return
+	end
+	if text == "\0READY" then
+		botReady[p] = true
+		L("BOT READY " .. p.Name)
+		return
+	end
+	local store = clientLines[p.Name]
+	if not store then
+		store = {}
+		clientLines[p.Name] = store
+	end
+	for line in string.gmatch(text, "[^\n]+") do
+		table.insert(store, line)
+		seq += 1
+		print(string.format("[MPT] %04d C:%s %s", seq, p.Name, line))
+	end
+end)
+
+local botTemplate = script:FindFirstChild("MPT_Bot")
+local function giveBot(p: Player)
+	local gui = p:WaitForChild("PlayerGui", 20)
+	if not (gui and botTemplate) then
+		L("BOT cannot be given to " .. p.Name)
+		return
+	end
+	local holder = Instance.new("ScreenGui")
+	holder.Name = "MPT"
+	holder.ResetOnSpawn = false
+	holder.Enabled = false
+	local copy = botTemplate:Clone()
+	copy.Disabled = false
+	copy.Parent = holder
+	holder.Parent = gui
+end
+
+-- calls a bot; never waits longer than `timeout`
+local function call(p: Player?, cmd: string, arg: any, timeout: number?): any
+	if not (p and p.Parent == Players) then
+		return nil
+	end
+	local done, result = false, nil
+	task.spawn(function()
+		local ok, res = pcall(function()
+			return callFn:InvokeClient(p, cmd, arg)
+		end)
+		result = if ok then res else { error = tostring(res) }
+		done = true
+	end)
+	local t0 = os.clock()
+	while not done and os.clock() - t0 < (timeout or 8) do
+		task.wait(0.03)
+	end
+	if not done then
+		L("CALL " .. cmd .. " to " .. p.Name .. " timed out")
+		return nil
+	end
+	return result
+end
+
+-- server truth, logged as it happens ---------------------------------------------------------------------------------------
+local CORE = { "Phase", "LobbyCount", "AliveCount", "StartedCount", "Practice", "WinnerName", "WinnerUserId", "RoundId", "LaunchCut",
+	"BorderStartRadius", "SoloStartAt", "PrivateServer", "ArenaEvent" }
+for _, n in ipairs(CORE) do
+	GS:GetAttributeChangedSignal(n):Connect(function()
+		L("GS " .. n .. "=" .. tostring(GS:GetAttribute(n)))
+	end)
+end
+GS:GetAttributeChangedSignal("RollCall"):Connect(function()
+	L("GS RollCall=" .. string.sub(tostring(GS:GetAttribute("RollCall")), 1, 700))
+end)
+GS:GetAttributeChangedSignal("PhaseEndsAt"):Connect(function()
+	local e = tonumber(GS:GetAttribute("PhaseEndsAt")) or 0
+	L(string.format("GS PhaseEndsAt in %.1f s", if e > 0 then e - workspace:GetServerTimeNow() else -1))
+end)
+
+local WATCH = { "Alive", "InArena", "Frozen", "Kills", "Placement", "KilledBy", "Wins", "RoundsPlayed", "TotalKills", "Launched", "UsingItem",
+	"NewPlayer", "Armor" }
+local hpLog: { [string]: { { t: number, from: number, to: number } } } = {}
+local function hookPlayer(p: Player)
+	L(string.format("PLAYER+ %s userId=%d display=%s", p.Name, p.UserId, p.DisplayName))
+	for _, n in ipairs(WATCH) do
+		p:GetAttributeChangedSignal(n):Connect(function()
+			L("PA " .. p.Name .. "." .. n .. "=" .. tostring(p:GetAttribute(n)))
+		end)
+	end
+	local function onChar(c: Model)
+		L("CHAR+ " .. p.Name)
+		task.spawn(function()
+			local hum = c:WaitForChild("Humanoid", 10) :: Humanoid?
+			if not hum then
+				return
+			end
+			local last = hum.Health
+			hum.HealthChanged:Connect(function(h)
+				if math.abs(h - last) >= 0.5 then
+					L(string.format("HP %s %.1f -> %.1f", p.Name, last, h))
+					local list = hpLog[p.Name] or {}
+					hpLog[p.Name] = list
+					table.insert(list, { t = now(), from = last, to = h })
+					last = h
+				end
+			end)
+		end)
+		for _, n in ipairs({ "Stance", "EquippedItem" }) do
+			c:GetAttributeChangedSignal(n):Connect(function()
+				L("CA " .. p.Name .. "." .. n .. "=" .. tostring(c:GetAttribute(n)))
+			end)
+		end
+	end
+	p.CharacterAdded:Connect(onChar)
+	p.CharacterRemoving:Connect(function()
+		L("CHAR- " .. p.Name)
+	end)
+	if p.Character then
+		onChar(p.Character)
+	end
+	p:GetPropertyChangedSignal("ReplicationFocus"):Connect(function()
+		L("FOCUS " .. p.Name .. " = " .. (if p.ReplicationFocus then p.ReplicationFocus:GetFullName() else "nil"))
+	end)
+	task.spawn(giveBot, p)
+end
+Players.PlayerAdded:Connect(hookPlayer)
+Players.PlayerRemoving:Connect(function(p)
+	botReady[p] = nil
+	L("PLAYER- " .. p.Name)
+end)
+for _, p in ipairs(Players:GetPlayers()) do
+	hookPlayer(p)
+end
+
+if PS and PS.died then
+	PS.died:Connect(function(victim, killer, cause)
+		L(string.format("SIGNAL died victim=%s killer=%s cause=%s", victim.Name, if killer then killer.Name else "nil", tostring(cause)))
+	end)
+end
+local function contenderNames(): string
+	local names = {}
+	for _, p in ipairs(Players:GetPlayers()) do
+		if Round.isContender(p) then
+			table.insert(names, p.Name)
+		end
+	end
+	table.sort(names)
+	return table.concat(names, "+")
+end
+if Round then
+	Round.phaseChanged:Connect(function(new, old)
+		L(string.format("SIGNAL phase %s -> %s practice=%s roundId=%s contenders=%s", tostring(old), tostring(new), tostring(Round.isPractice()),
+			tostring(Round.getRoundId()), contenderNames()))
+	end)
+	Round.roundEnded:Connect(function(winner)
+		L("SIGNAL roundEnded winner=" .. (if winner then winner.Name else "nil"))
+	end)
+end
+if Combat and type(Combat.applyHit) == "function" then
+	local orig = Combat.applyHit
+	Combat.applyHit = function(attacker, humanoid, base, info)
+		local isHum = typeof(humanoid) == "Instance"
+		local before = if isHum then humanoid.Health else -1
+		local dealt, killed = orig(attacker, humanoid, base, info)
+		L(string.format("APPLYHIT %s -> %s base=%s dealt=%s killed=%s weapon=%s melee=%s headshot=%s hp %.1f -> %.1f", if attacker then attacker.Name else "nil",
+			if isHum and humanoid.Parent then humanoid.Parent.Name else "?", tostring(base), tostring(dealt), tostring(killed),
+			tostring(info and info.weaponId), tostring(info and info.melee), tostring(info and info.headshot), before, if isHum then humanoid.Health else -1))
+		return dealt, killed
+	end
+end
+if Net then
+	Net.event("MeleeSwing").OnServerEvent:Connect(function(p, a, predicted, variant, target, startTime)
+		L(string.format("RECV MeleeSwing from=%s a=%s predicted=%s variant=%s target=%s startAgo=%s", p.Name,
+			if typeof(a) == "Vector3" then "dir" else tostring(a), tostring(predicted), tostring(variant),
+			if typeof(target) == "Instance" then target.Name else tostring(target),
+			if type(startTime) == "number" then string.format("%.3f", workspace:GetServerTimeNow() - startTime) else "nil"))
+	end)
+	Net.event("RangedRelease").OnServerEvent:Connect(function(p, _id, _origin, _dir, charge, mode)
+		L(string.format("RECV RangedRelease from=%s mode=%s charge=%s", p.Name, tostring(mode), tostring(charge)))
+	end)
+	Net.event("SpectateTarget").OnServerEvent:Connect(function(p, target)
+		L(string.format("RECV SpectateTarget from=%s target=%s", p.Name, if typeof(target) == "Instance" then target.Name else tostring(target)))
+	end)
+	for _, n in ipairs({ "UseStart", "UseFinish", "UseCancel", "Drink", "TakeWorldItem", "EquipSlot" }) do
+		Net.event(n).OnServerEvent:Connect(function(p, a)
+			L(string.format("RECV %s from=%s arg=%s", n, p.Name, tostring(a)))
+		end)
+	end
+end
+
+-- helpers ---------------------------------------------------------------------------------------------------------------
+local results: { string } = {}
+local function check(id: string, pass: boolean?, detail: string)
+	local verdict = if pass == true then "PASS" elseif pass == false then "FAIL" else "NOTE"
+	local line = string.format("[CHECK] %s %s %s", id, verdict, detail)
+	table.insert(results, id .. "=" .. verdict)
+	L(line)
+end
+local function waitFor(cond: () -> any, timeout: number): any
+	local t0 = os.clock()
+	while os.clock() - t0 < timeout do
+		local v = cond()
+		if v then
+			return v
+		end
+		task.wait(0.05)
+	end
+	return nil
+end
+local function phase(): string
+	return tostring(GS:GetAttribute("Phase"))
+end
+local function waitPhase(name: string, timeout: number): boolean
+	return waitFor(function()
+		return phase() == name
+	end, timeout) ~= nil
+end
+local function parts(p: Player?): (Humanoid?, BasePart?)
+	local c = p and p.Character
+	if not c then
+		return nil, nil
+	end
+	return c:FindFirstChildOfClass("Humanoid"), c:FindFirstChild("HumanoidRootPart") :: any
+end
+local function arenaCenter(): Vector3
+	local arena = workspace:FindFirstChild("Arena")
+	local c = arena and arena:GetAttribute("Center")
+	return if typeof(c) == "Vector3" then c else Vector3.zero
+end
+local function flatDist(a: Vector3, b: Vector3): number
+	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
+end
+local function groundAt(x: number, yFrom: number, z: number): Vector3?
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore = {}
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p.Character then
+			table.insert(ignore, p.Character)
+		end
+	end
+	params.FilterDescendantsInstances = ignore
+	params.IgnoreWater = true
+	local hit = workspace:Raycast(Vector3.new(x, yFrom + 40, z), Vector3.new(0, -160, 0), params)
+	return if hit then hit.Position else nil
+end
+-- stands p on the ground at (x, z), facing `lookAt`
+local function standAt(p: Player, x: number, z: number, lookAt: Vector3?, yHint: number?): Vector3?
+	local hum, root = parts(p)
+	if not (hum and root and p.Character) then
+		return nil
+	end
+	local g = groundAt(x, yHint or root.Position.Y, z)
+	local y = (if g then g.Y else root.Position.Y - hum.HipHeight - root.Size.Y / 2) + hum.HipHeight + root.Size.Y / 2 + 0.1
+	local pos = Vector3.new(x, y, z)
+	root.AssemblyLinearVelocity = Vector3.zero
+	local target = if lookAt then Vector3.new(lookAt.X, y, lookAt.Z) else pos + root.CFrame.LookVector
+	if (target - pos).Magnitude < 0.05 then
+		target = pos + Vector3.new(0, 0, -1)
+	end
+	p.Character:PivotTo(CFrame.lookAt(pos, target))
+	return pos
+end
+-- a flat duel line: A at `base`, B `dist` studs (flat, root to root) further along `dir`; they face each other
+local duelBase: Vector3? = nil
+local duelDir: Vector3 = Vector3.new(1, 0, 0)
+local function duel(a: Player, b: Player, dist: number): string
+	if not duelBase then
+		return "no duel base"
+	end
+	local pb = duelBase + duelDir * dist
+	local posA = standAt(a, duelBase.X, duelBase.Z, pb, duelBase.Y)
+	local posB = standAt(b, pb.X, pb.Z, duelBase, duelBase.Y)
+	task.wait(0.6)
+	local _, ra = parts(a)
+	local _, rb = parts(b)
+	if not (ra and rb and posA and posB) then
+		return "duel: a character is missing"
+	end
+	return string.format("A at %s B at %s flat=%.2f dy=%.2f", v3(ra.Position), v3(rb.Position), flatDist(ra.Position, rb.Position), rb.Position.Y - ra.Position.Y)
+end
+local function setHealth(p: Player, h: number?)
+	local hum = parts(p)
+	if hum and hum.Health > 0 then
+		hum.Health = h or hum.MaxHealth
+	end
+end
+local function health(p: Player): number
+	local hum = parts(p)
+	return if hum then hum.Health else -1
+end
+local function slotOf(p: Player, itemId: string): number?
+	local snap = Inv.getSnapshot(p)
+	for i, s in ipairs(snap.slots) do
+		if type(s) == "table" and s.id == itemId then
+			return i
+		end
+	end
+	return nil
+end
+local function invLine(p: Player): string
+	local snap = Inv.getSnapshot(p)
+	local out = {}
+	for i, s in ipairs(snap.slots) do
+		if type(s) == "table" then
+			table.insert(out, string.format("%d:%sx%s", i, tostring(s.id), tostring(s.count)))
+		end
+	end
+	return table.concat(out, " ") .. " equipped=" .. tostring(snap.equipped) .. " armor=" .. tostring(snap.armor)
+end
+-- lines a bot sent since index `from` that contain `pattern` (plain)
+local function clientFind(p: Player, pattern: string, from: number?): (string?, number?)
+	local store = clientLines[p.Name]
+	if not store then
+		return nil, nil
+	end
+	for i = (from or 0) + 1, #store do
+		if string.find(store[i], pattern, 1, true) then
+			return store[i], tonumber(string.match(store[i], "^([%d%.]+)"))
+		end
+	end
+	return nil, nil
+end
+local function mark(p: Player): number
+	local store = clientLines[p.Name]
+	return if store then #store else 0
+end
+local function refusals(): string
+	local out = {}
+	for reason, count in pairs((Combat and Combat._refusals) or {}) do
+		table.insert(out, tostring(reason) .. "=" .. tostring(count))
+	end
+	table.sort(out)
+	return if #out > 0 then table.concat(out, " ") else "none"
+end
+local function guiHas(p: Player, needle: string): (boolean, string)
+	local list = call(p, "gui", needle)
+	if type(list) ~= "table" then
+		return false, "no gui reply"
+	end
+	return #list > 0, table.concat(list, " ; ")
+end
+
+local A: Player, B: Player
+local P3: Player? = nil
+local EXPECT = math.max(2, tonumber(ARGS.clients) or 2)
+
+-- one attack by A on B: returns what every side saw
+local function attack(label: string, steps: { any }, settle: number?): { [string]: any }
+	local mA, mB = mark(A), mark(B)
+	local hpBefore = health(B)
+	local hpCount = #(hpLog[B.Name] or {})
+	local t0 = now()
+	call(A, "seq", steps, 20)
+	task.wait(settle or 1.2)
+	local hp = hpLog[B.Name] or {}
+	local drop = hp[hpCount + 1]
+	local _, tConfirm = clientFind(A, "REMOTE HitConfirm", mA)
+	local strikeLine, tStrike = clientFind(A, "ACT Strike", mA)
+	local _, tSwingA = clientFind(A, "ACT Swing", mA)
+	local actLine, tAct = clientFind(B, "REMOTE CombatAction", mB)
+	local _, tSeeSwing = clientFind(B, "SEE-SWING " .. A.Name, mB)
+	local dmgLine, tDmg = clientFind(B, "REMOTE DamageTaken", mB)
+	local _, tSeeHp = clientFind(A, "SEE-HP " .. B.Name, mA)
+	local r = {
+		label = label, hpBefore = hpBefore, hpAfter = health(B), dealt = hpBefore - health(B), tServerDrop = drop and drop.t,
+		tSwingA = tSwingA, tStrike = tStrike, strike = strikeLine, tConfirm = tConfirm, tAct = tAct, act = actLine, tSeeSwing = tSeeSwing,
+		tDmg = tDmg, dmg = dmgLine, tSeeHp = tSeeHp, t0 = t0,
+	}
+	local function rel(t: number?): string
+		return if t then string.format("%+.3f", t - t0) else "none"
+	end
+	L(string.format("ATTACK %s: hp %.1f -> %.1f | A swing %s strike %s (%s) confirm %s seesHp %s | server drop %s | B combatAction %s seesSwing %s damageTaken %s | refusals %s",
+		label, hpBefore, r.hpAfter, rel(tSwingA), rel(tStrike), tostring(strikeLine and string.match(strikeLine, "hit=%S+")), rel(tConfirm), rel(tSeeHp),
+		rel(r.tServerDrop), rel(tAct), rel(tSeeSwing), rel(tDmg), refusals()))
+	return r
+end
+
+local function snapshotAll(tag: string)
+	for _, p in ipairs(Players:GetPlayers()) do
+		local hum, root = parts(p)
+		L(string.format("STATE[%s] server %s contender=%s alive=%s inArena=%s frozen=%s hp=%.1f pos=%s inv=%s", tag, p.Name, tostring(Round.isContender(p)),
+			tostring(p:GetAttribute("Alive")), tostring(p:GetAttribute("InArena")), tostring(p:GetAttribute("Frozen")), if hum then hum.Health else -1,
+			if root then v3(root.Position) else "none", invLine(p)))
+		local st = call(p, "state")
+		L(string.format("STATE[%s] client %s %s", tag, p.Name, fmt(st)))
+		local see = call(p, "see")
+		L(string.format("SEE[%s] client %s sees %s", tag, p.Name, fmt(see)))
+	end
+end
+
+-- batches ---------------------------------------------------------------------------------------------------------------
+local function lobbyChecks()
+	local ok = waitFor(function()
+		local list = Players:GetPlayers()
+		if #list < EXPECT then
+			return false
+		end
+		for _, p in ipairs(list) do
+			if not botReady[p] or not p.Character then
+				return false
+			end
+		end
+		return true
+	end, 150)
+	local list = Players:GetPlayers()
+	table.sort(list, function(a, b)
+		return a.UserId > b.UserId -- -1 first (Player1), then -2
+	end)
+	A, B = list[1], list[2]
+	P3 = list[3]
+	if not (ok and A and B) then
+		check("lobby.join", false, "two players with bots did not appear in 150 s: " .. #list .. " players")
+		return false
+	end
+	L(string.format("A=%s (%d) B=%s (%d) uptime=%.1f phase=%s", A.Name, A.UserId, B.Name, B.UserId, time(), phase()))
+	task.wait(1.0)
+	snapshotAll("lobby")
+	local seeA, seeB = call(A, "see") or {}, call(B, "see") or {}
+	local sa, sb = seeA[B.Name], seeB[A.Name]
+	local _, ra = parts(A)
+	local _, rb = parts(B)
+	local okSee = sa ~= nil and sb ~= nil and sa.char == true and sb.char == true
+	local errA = if sb and sb.pos and ra then (sb.pos - ra.Position).Magnitude else -1
+	local errB = if sa and sa.pos and rb then (sa.pos - rb.Position).Magnitude else -1
+	check("lobby.seeEachOther", okSee and errA >= 0 and errA < 3 and errB >= 0 and errB < 3,
+		string.format("A sees B's character=%s (position off by %.2f from the server's), B sees A's=%s (off by %.2f); A sees %d/%d of B's body parts visible, B %d/%d of A's",
+			tostring(sa and sa.char), errB, tostring(sb and sb.char), errA, sa and sa.bodyVisible or -1, sa and sa.bodyParts or -1, sb and sb.bodyVisible or -1,
+			sb and sb.bodyParts or -1))
+	check("lobby.state", A:GetAttribute("InArena") ~= true and B:GetAttribute("InArena") ~= true and (tonumber(GS:GetAttribute("LobbyCount")) or 0) == 2,
+		string.format("phase=%s LobbyCount=%s A.InArena=%s B.InArena=%s Practice=%s", phase(), tostring(GS:GetAttribute("LobbyCount")),
+			tostring(A:GetAttribute("InArena")), tostring(B:GetAttribute("InArena")), tostring(GS:GetAttribute("Practice"))))
+	for _, p in ipairs({ A, B }) do
+		local list = call(p, "gui") or {}
+		L("GUI[lobby,held] " .. p.Name .. ": " .. string.sub(table.concat(list, " ; "), 1, 1500))
+	end
+	-- the lobby countdown as each client shows it
+	release()
+	waitFor(function()
+		return phase() == "Intermission" or phase() == "Countdown"
+	end, 20)
+	task.wait(0.5)
+	for _, p in ipairs({ A, B }) do
+		local has, text = guiHas(p, "next round")
+		check("lobby.timer." .. p.Name, has, "phase=" .. phase() .. " texts with 'next round': " .. string.sub(text, 1, 300))
+	end
+	return true
+end
+
+local function roundStartChecks(tag: string): boolean
+	local mA0, mB0 = mark(A), mark(B)
+	if not waitPhase("Countdown", 60) then
+		check(tag .. ".countdown", false, "no Countdown within 60 s, phase=" .. phase())
+		return false
+	end
+	local cut = tostring(GS:GetAttribute("LaunchCut"))
+	local both = Round.isContender(A) and Round.isContender(B) and (EXPECT < 3 or (P3 ~= nil and Round.isContender(P3)))
+	check(tag .. ".realRound", both and GS:GetAttribute("Practice") == false and GS:GetAttribute("StartedCount") == EXPECT
+		and workspace:FindFirstChild("TrainingDummies") == nil,
+		string.format("contenders=%s Practice=%s StartedCount=%s cut=%s dummiesFolder=%s BorderStartRadius=%s", contenderNames(), tostring(GS:GetAttribute("Practice")),
+			tostring(GS:GetAttribute("StartedCount")), cut, tostring(workspace:FindFirstChild("TrainingDummies") ~= nil), tostring(GS:GetAttribute("BorderStartRadius"))))
+	task.wait(1.0)
+	local center = arenaCenter()
+	local _, ra = parts(A)
+	local _, rb = parts(B)
+	if ra and rb then
+		local function facing(root: BasePart): number
+			local to = Vector3.new(center.X - root.Position.X, 0, center.Z - root.Position.Z)
+			local look = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+			return if to.Magnitude > 0.1 and look.Magnitude > 0.1 then to.Unit:Dot(look.Unit) else -2
+		end
+		local apart = flatDist(ra.Position, rb.Position)
+		local ringA, ringB = flatDist(ra.Position, center), flatDist(rb.Position, center)
+		check(tag .. ".plinths", apart > 20 and facing(ra) > 0.97 and facing(rb) > 0.97 and A:GetAttribute("Frozen") == true and B:GetAttribute("Frozen") == true,
+			string.format("A at %s (ring radius %.1f, facing-the-Horn dot %.3f, frozen %s), B at %s (radius %.1f, dot %.3f, frozen %s); %.1f studs apart", v3(ra.Position),
+				ringA, facing(ra), tostring(A:GetAttribute("Frozen")), v3(rb.Position), ringB, facing(rb), tostring(B:GetAttribute("Frozen")), apart))
+	else
+		check(tag .. ".plinths", false, "a contender has no character in the Countdown")
+	end
+	-- the launch intro on both clients
+	local mA, mB = mA0, mB0
+	local shotA = waitFor(function()
+		return clientFind(A, "LAUNCHSHOT true", mA)
+	end, 6)
+	local shotB = waitFor(function()
+		return clientFind(B, "LAUNCHSHOT true", mB)
+	end, 2)
+	if cut ~= "" then
+		check(tag .. ".introStarts", shotA ~= nil and shotB ~= nil, string.format("cut=%s; launch shot took the camera on A: %s, on B: %s", cut, tostring(shotA ~= nil),
+			tostring(shotB ~= nil)))
+		task.wait(2.5)
+		for _, p in ipairs({ A, B }) do
+			local st = call(p, "state") or {}
+			L(string.format("INTRO mid-shot client %s launchShot=%s camType=%s camPos=%s frozen=%s", p.Name, tostring(st.launchShot), tostring(st.camType),
+				fmt(st.camPos), tostring(st.frozen)))
+			local see = call(p, "see") or {}
+			L(string.format("INTRO mid-shot client %s sees %s", p.Name, fmt(see)))
+		end
+	end
+	if not waitPhase("Active", 40) then
+		check(tag .. ".horn", false, "no Active phase within 40 s of the Countdown, phase=" .. phase())
+		return false
+	end
+	task.wait(1.2)
+	local stA, stB = call(A, "state") or {}, call(B, "state") or {}
+	local function own(st: any, p: Player): boolean
+		return st.launchShot ~= true and st.camType == "Custom" and type(st.camSubject) == "string" and string.find(st.camSubject, p.Name, 1, true) ~= nil
+			and st.frozen == false and st.inArena == true and st.alive == true
+	end
+	check(tag .. ".horn", own(stA, A) and own(stB, B),
+		string.format("after the horn: A launchShot=%s cam=%s subject=%s frozen=%s alive=%s | B launchShot=%s cam=%s subject=%s frozen=%s alive=%s",
+			tostring(stA.launchShot), tostring(stA.camType), tostring(stA.camSubject), tostring(stA.frozen), tostring(stA.alive), tostring(stB.launchShot),
+			tostring(stB.camType), tostring(stB.camSubject), tostring(stB.frozen), tostring(stB.alive)))
+	-- nobody left in a tube on the other's screen
+	local seeA, seeB = call(A, "see") or {}, call(B, "see") or {}
+	local _, ra2 = parts(A)
+	local _, rb2 = parts(B)
+	local sa, sb = seeA[B.Name], seeB[A.Name]
+	if sa and sb and sa.pos and sb.pos and ra2 and rb2 then
+		local eB, eA = (sa.pos - rb2.Position).Magnitude, (sb.pos - ra2.Position).Magnitude
+		check(tag .. ".riseOnOtherScreen", eA < 1.5 and eB < 1.5, string.format(
+			"after the horn A's screen has B %.2f studs from the server's position (y %.2f vs %.2f); B's screen has A %.2f studs off (y %.2f vs %.2f)", eB, sa.pos.Y,
+			rb2.Position.Y, eA, sb.pos.Y, ra2.Position.Y))
+	else
+		check(tag .. ".riseOnOtherScreen", nil, "the other contender's character is not streamed in on one client (they stand "
+			.. (if ra2 and rb2 then string.format("%.0f", flatDist(ra2.Position, rb2.Position)) else "?") .. " studs apart): A sees B=" .. tostring(sa and sa.char)
+			.. " B sees A=" .. tostring(sb and sb.char))
+	end
+	check(tag .. ".roundsPlayed", nil, string.format("RoundsPlayed A=%s B=%s", tostring(A:GetAttribute("RoundsPlayed")), tostring(B:GetAttribute("RoundsPlayed"))))
+	return true
+end
+
+-- puts both on flat ground near A's plate and readies the duel line
+local function setupDuel()
+	local _, ra = parts(A)
+	local center = arenaCenter()
+	if not ra then
+		return
+	end
+	local toCenter = Vector3.new(center.X - ra.Position.X, 0, center.Z - ra.Position.Z).Unit
+	-- across the line to the Horn, a little inside the plate ring: open ground
+	local side = Vector3.new(-toCenter.Z, 0, toCenter.X)
+	local base = ra.Position + toCenter * 14
+	duelBase = base
+	duelDir = side
+	local best, bestSpread = nil, math.huge
+	for _, try in ipairs({ { 14, 1 }, { 14, -1 }, { 22, 1 }, { 22, -1 }, { 30, 1 }, { 8, 1 } }) do
+		local b = ra.Position + toCenter * try[1]
+		local lo, hi = math.huge, -math.huge
+		local okAll = true
+		for d = 0, 24, 3 do
+			local g = groundAt(b.X + side.X * d * try[2], ra.Position.Y, b.Z + side.Z * d * try[2])
+			if g then
+				lo, hi = math.min(lo, g.Y), math.max(hi, g.Y)
+			else
+				okAll = false
+			end
+		end
+		if okAll and hi - lo < bestSpread then
+			bestSpread = hi - lo
+			best = { b, side * try[2] }
+		end
+	end
+	if best then
+		duelBase, duelDir = best[1], best[2]
+	end
+	L(string.format("DUEL line base %s dir (%.2f,%.2f) ground spread over 24 studs %.2f", v3(duelBase :: Vector3), duelDir.X, duelDir.Z, bestSpread))
+end
+
+local function combatChecks()
+	setupDuel()
+	Inv.clear(A)
+	Inv.clear(B)
+	L("give A: sword " .. Inv.give(A, "sword", 1) .. " knife " .. Inv.give(A, "knife", 1) .. " bow " .. Inv.give(A, "bow", 1) .. " arrow " .. Inv.give(A, "arrow", 12)
+		.. " throwing_knife " .. Inv.give(A, "throwing_knife", 4) .. " mace " .. Inv.give(A, "mace", 1))
+	L("give B: knife " .. Inv.give(B, "knife", 1))
+	task.wait(0.5)
+	L("inv A " .. invLine(A) .. " | inv B " .. invLine(B))
+	local sword, knife, bow, tk, mace = slotOf(A, "sword"), slotOf(A, "knife"), slotOf(A, "bow"), slotOf(A, "throwing_knife"), slotOf(A, "mace")
+	local target = B.Name
+
+	-- sword in reach
+	L(duel(A, B, 7))
+	local r = attack("sword@7", { { "select", sword }, { "wait", 0.7 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	local seen = r.tAct ~= nil and r.tDmg ~= nil and r.tAct < r.tDmg
+	check("melee.sword.damage", math.abs(r.dealt - 40) < 0.6 and r.tConfirm ~= nil, string.format(
+		"sword at 7 studs: B lost %.1f on the server (expected 40); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
+		tostring(r.tSeeHp ~= nil)))
+	check("melee.sword.victimSeesSwingFirst", seen, string.format(
+		"on B's client the swing message arrived %s s before the damage message (swing start on A %.3f, B told %s, B plays the swing %s, B damage %s, server health drop %s); message: %s",
+		if r.tAct and r.tDmg then string.format("%.3f", r.tDmg - r.tAct) else "?", r.tSwingA or -1, tostring(r.tAct), tostring(r.tSeeSwing), tostring(r.tDmg),
+		tostring(r.tServerDrop), tostring(r.act)))
+	check("melee.sword.attackerSeesReact", r.tSeeHp ~= nil and r.tConfirm ~= nil, string.format("A's client: HitConfirm %s, B's health change seen at %s (strike at %s)",
+		tostring(r.tConfirm), tostring(r.tSeeHp), tostring(r.tStrike)))
+	local dmgLine = r.dmg
+	L("B DamageTaken line: " .. tostring(dmgLine))
+
+	-- sword at the edge and beyond
+	setHealth(B)
+	L(duel(A, B, 10))
+	r = attack("sword@10", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	check("melee.sword.reach10", math.abs(r.dealt - 40) < 0.6, string.format("sword at 10 studs: B lost %.1f (the reach is 10 root to root)", r.dealt))
+	setHealth(B)
+	L(duel(A, B, 11.5))
+	r = attack("sword@11.5", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	check("melee.sword.beyondReach", r.dealt < 0.5, string.format("sword at 11.5 studs: B lost %.1f (expected 0); A's client predicted %s", r.dealt,
+		tostring(r.strike and string.match(r.strike, "hit=%S+"))))
+	r = attack("sword raw claim@11.5", { { "face", target }, { "wait", 0.3 }, { "remote", "MeleeSwing", "raw", target } })
+	check("melee.sword.rawClaimBeyondReach", r.dealt < 0.5, string.format("a modified client claiming a hit from 11.5 studs: B lost %.1f (expected 0); refusals: %s",
+		r.dealt, refusals()))
+
+	-- the first swing after a weapon switch
+	setHealth(B)
+	L(duel(A, B, 6))
+	r = attack("knife then switch to sword, attack during the switch",
+		{ { "select", knife }, { "wait", 0.8 }, { "face", target }, { "wait", 0.3 }, { "click" }, { "wait", 0.25 }, { "select", sword }, { "wait", 0.05 }, { "click" },
+			{ "wait", 1.0 } }, 1.0)
+	check("melee.switch.firstSwingLands", math.abs(r.dealt - 62) < 0.6, string.format(
+		"knife hit (22), switch to the sword and attack during the switch (40): B lost %.1f in all (expected 62); refusals: %s", r.dealt, refusals()))
+	setHealth(B)
+	r = attack("sword then switch to mace", { { "face", target }, { "wait", 0.2 }, { "click" }, { "wait", 0.3 }, { "select", mace }, { "wait", 0.05 }, { "click" },
+		{ "wait", 1.6 } }, 1.0)
+	check("melee.switch.swordToMace", math.abs(r.dealt - 86) < 0.6, string.format("sword hit (40), switch to the mace and attack (46): B lost %.1f (expected 86); refusals: %s",
+		r.dealt, refusals()))
+
+	-- bow
+	setHealth(B)
+	L(duel(A, B, 20))
+	local arrowsBefore = Inv.count(A, "arrow")
+	r = attack("bow@20", { { "select", bow }, { "wait", 0.9 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "down" }, { "track", target, 1.2 },
+		{ "wait", 1.15 }, { "up" }, { "wait", 0.8 } }, 1.0)
+	local fired = clientFind(B, "REMOTE ProjectileFired", 0)
+	check("bow.damage", r.dealt > 20 and r.tConfirm ~= nil and Inv.count(A, "arrow") == arrowsBefore - 1, string.format(
+		"a drawn arrow at 20 studs: B lost %.1f (full draw to the body = 50); arrows %d -> %d; A got HitConfirm=%s; B was told of the arrow in flight=%s; B's draw/release messages: %s",
+		r.dealt, arrowsBefore, Inv.count(A, "arrow"), tostring(r.tConfirm ~= nil), tostring(fired ~= nil), tostring(r.act)))
+	-- bow far beyond: an undrawn release must not shoot
+	setHealth(B)
+
+	-- thrown knife
+	L(duel(A, B, 14))
+	local tkBefore = Inv.count(A, "throwing_knife")
+	r = attack("throwing knife@14", { { "select", tk }, { "wait", 0.9 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" }, { "wait", 1.0 } }, 1.0)
+	check("throw.knife.damage", math.abs(r.dealt - 28) < 0.6 and r.tConfirm ~= nil, string.format(
+		"a thrown knife at 14 studs: B lost %.1f (expected 28); knives %d -> %d; A got HitConfirm=%s; B's messages: %s", r.dealt, tkBefore, Inv.count(A, "throwing_knife"),
+		tostring(r.tConfirm ~= nil), tostring(r.act)))
+	setHealth(B)
+	L("refusals after combat: " .. refusals())
+	snapshotAll("afterCombat")
+end
+
+local function shot(name: string, hold: number?)
+	L("SHOT " .. name)
+	task.wait(hold or 1.6)
+end
+
+local function seeOf(viewer: Player, target: Player): any
+	local s = call(viewer, "see") or {}
+	return s[target.Name] or {}
+end
+
+local function speedOf(s: any): number
+	return if s and typeof(s.vel) == "Vector3" then Vector3.new(s.vel.X, 0, s.vel.Z).Magnitude else -1
+end
+
+local function poseLine(tag: string, s: any): string
+	return string.format(
+		"POSE %s: B sees A stance=%s humState=%s speed=%.1f headHeight=%s held=%s heldVisible=%s rightHand=%s leftHand=%s feet L=%s R=%s swing=%s onScreen=%s screen=%s tracks=%s",
+		tag, tostring(s.stance), tostring(s.humState), speedOf(s), if s.headHeight then string.format("%.2f", s.headHeight) else "?", tostring(s.held),
+		tostring(s.heldVisible), fmt(s.handFromRoot), fmt(s.leftHand), fmt(s.leftFoot), fmt(s.rightFoot), tostring(s.swing), tostring(s.onScreen), tostring(s.screen),
+		tostring(s.tracks))
+end
+
+local function giveKit()
+	Inv.clear(A)
+	Inv.clear(B)
+	L("give A: sword " .. Inv.give(A, "sword", 1) .. " bow " .. Inv.give(A, "bow", 1) .. " arrow " .. Inv.give(A, "arrow", 12)
+		.. " throwing_knife " .. Inv.give(A, "throwing_knife", 4) .. " spear " .. Inv.give(A, "spear", 1) .. " apple " .. Inv.give(A, "apple", 2))
+	L("give B: knife " .. Inv.give(B, "knife", 1))
+	task.wait(0.5)
+	L("inv A " .. invLine(A) .. " | inv B " .. invLine(B))
+end
+
+local RAW_CLAIMS = { 12, 13.5, 15 }
+local function swordChecks()
+	local sword = slotOf(A, "sword")
+	local target = B.Name
+	setHealth(B)
+	L(duel(A, B, 7))
+	local r = attack("sword@7", { { "select", sword }, { "wait", 0.7 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	check("melee.sword.damage", math.abs(r.dealt - 40) < 0.6 and r.tConfirm ~= nil, string.format(
+		"sword at 7 studs: B lost %.1f on the server (expected 40); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
+		tostring(r.tSeeHp ~= nil)))
+	check("melee.sword.victimSeesSwingFirst", r.tAct ~= nil and r.tDmg ~= nil and r.tAct < r.tDmg, string.format(
+		"B's client: swing message %s s before the damage message (A starts %s, B told %s, B plays it %s, B damage %s, server drop %s); %s",
+		if r.tAct and r.tDmg then string.format("%.3f", r.tDmg - r.tAct) else "?", tostring(r.tSwingA), tostring(r.tAct), tostring(r.tSeeSwing), tostring(r.tDmg),
+		tostring(r.tServerDrop), tostring(r.act)))
+	setHealth(B)
+	L(duel(A, B, 10))
+	r = attack("sword@10", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	check("melee.sword.reach10", math.abs(r.dealt - 40) < 0.6, string.format("sword at 10 studs: B lost %.1f (expected 40: the reach is 10 root to root); A predicted %s",
+		r.dealt, tostring(r.strike and string.match(r.strike, "hit=%S+"))))
+	setHealth(B)
+	L(duel(A, B, 11.5))
+	r = attack("sword@11.5", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
+	check("melee.sword.beyondReach", r.dealt < 0.5, string.format("sword at 11.5 studs: B lost %.1f (expected 0); A's client predicted %s", r.dealt,
+		tostring(r.strike and string.match(r.strike, "hit=%S+"))))
+	for _, d in ipairs(RAW_CLAIMS) do
+		setHealth(B)
+		L(duel(A, B, d))
+		r = attack("sword raw claim@" .. d, { { "face", target }, { "wait", 0.3 }, { "remote", "MeleeSwing", "raw", target } })
+		check("melee.sword.rawClaim@" .. d, nil, string.format("a modified client claiming a sword hit from %.1f studs: B lost %.1f; refusals: %s", d, r.dealt, refusals()))
+	end
+	setHealth(B)
+end
+
+local function poseChecks()
+	local target = A.Name
+	local perp = Vector3.new(-duelDir.Z, 0, duelDir.X)
+	local center = arenaCenter()
+	if duelBase and (center - (duelBase + perp * 10)).Magnitude > (center - duelBase).Magnitude then
+		perp = -perp -- walk toward the Horn: open ground
+	end
+	local sword = slotOf(A, "sword")
+	call(B, "setattr", { name = "LS_SwingSlowMo", value = nil })
+	L(duel(A, B, 10))
+	call(B, "track", { target = target, seconds = 90 })
+	call(A, "seq", { { "select", sword }, { "wait", 0.6 } }, 6)
+	task.wait(0.6)
+	local stand = seeOf(B, A)
+	L(poseLine("stand", stand))
+	shot("pose_stand")
+
+	-- walking: A looks toward the Horn and pushes its move input fully forward (across B's view)
+	local _, raw = parts(A)
+	local ahead = if raw then raw.Position + perp * 60 + Vector3.new(0, 1.5, 0) else Vector3.zero
+	local moved = call(A, "move", { seconds = 2.6, face = ahead })
+	task.wait(1.1)
+	local walk = seeOf(B, A)
+	local stA = call(A, "state") or {}
+	L(poseLine("walk", walk) .. " | A moveState=" .. tostring(stA.moveState) .. " speed=" .. tostring(stA.speed) .. " moveAction=" .. tostring(moved))
+	shot("pose_walk", 1.3)
+	check("pose.walk", speedOf(walk) > 6 and stA.moveState == "Walk" and walk.onScreen == true, string.format(
+		"A walks (its own client: %s at %s studs/s); B's client has A moving at %.1f studs/s, on screen=%s, feet L=%s R=%s", tostring(stA.moveState),
+		tostring(stA.speed), speedOf(walk), tostring(walk.onScreen), fmt(walk.leftFoot), fmt(walk.rightFoot)))
+	task.wait(0.5)
+
+	-- sprinting: the keyboard's sprint mode set to Auto on A's client (a player setting: a full push forward sprints)
+	L(duel(A, B, 10))
+	local was = call(A, "setting", { name = "sprintMode", value = 2 })
+	_, raw = parts(A)
+	ahead = if raw then raw.Position + perp * 80 + Vector3.new(0, 1.5, 0) else Vector3.zero
+	call(A, "move", { seconds = 2.6, face = ahead })
+	task.wait(1.3)
+	local sprint = seeOf(B, A)
+	stA = call(A, "state") or {}
+	L(poseLine("sprint", sprint) .. " | A moveState=" .. tostring(stA.moveState) .. " speed=" .. tostring(stA.speed))
+	shot("pose_sprint", 1.1)
+	check("pose.sprint", speedOf(sprint) > 16 and stA.moveState == "Sprint", string.format(
+		"A sprints (its own client: %s at %s studs/s); B's client has A moving at %.1f studs/s, feet L=%s R=%s", tostring(stA.moveState), tostring(stA.speed),
+		speedOf(sprint), fmt(sprint.leftFoot), fmt(sprint.rightFoot)))
+	task.wait(0.6)
+	call(A, "setting", { name = "sprintMode", value = was or 0 })
+	call(A, "move", {})
+
+	-- crouching
+	L(duel(A, B, 10))
+	local mB = mark(B)
+	call(A, "touch", { name = "Crouch", down = true })
+	task.wait(1.0)
+	local crouch = seeOf(B, A)
+	stA = call(A, "state") or {}
+	L(poseLine("crouch", crouch) .. " | A moveState=" .. tostring(stA.moveState))
+	shot("pose_crouch")
+	local told = clientFind(B, "SEE-ATTR " .. A.Name .. ".Stance=Crouch", mB)
+	check("pose.crouch", crouch.stance == "Crouch" and told ~= nil and (crouch.headHeight or 9) < (stand.headHeight or 0) - 0.4, string.format(
+		"A crouches (its own client: %s); B's client has A's Stance=%s (told: %s) and A's head %.2f studs above its feet, standing %.2f", tostring(stA.moveState),
+		tostring(crouch.stance), tostring(told ~= nil), crouch.headHeight or -1, stand.headHeight or -1))
+	_, raw = parts(A)
+	call(A, "move", { seconds = 1.6, face = if raw then raw.Position + perp * 60 + Vector3.new(0, 1.5, 0) else nil })
+	task.wait(0.9)
+	local cw = seeOf(B, A)
+	L(poseLine("crouch-walk", cw))
+	shot("pose_crouchwalk", 1.0)
+	stA = call(A, "state") or {}
+	if stA.moveState == "Crouch" then
+		call(A, "touch", { name = "Crouch", down = true }) -- toggle off
+		task.wait(0.4)
+		stA = call(A, "state") or {}
+		if stA.moveState == "Crouch" then
+			call(A, "touch", { name = "Crouch", down = false })
+		end
+	end
+	task.wait(0.6)
+	local up = seeOf(B, A)
+	L(poseLine("stand again", up))
+
+	-- what A holds, as B sees it
+	L(duel(A, B, 8))
+	local okHolds, holds = true, {}
+	for _, id in ipairs({ "sword", "bow", "throwing_knife", "spear", "apple" }) do
+		local slot = slotOf(A, id)
+		call(A, "seq", { { "select", slot }, { "wait", 0.9 } }, 6)
+		local s = seeOf(B, A)
+		L(poseLine("hold " .. id, s))
+		L("HELD " .. id .. " on B's client: " .. tostring(call(B, "heldinfo", A.Name)))
+		local good = s.held == id and (s.heldVisible or 0) > 0 and s.equippedAttr == id
+		okHolds = okHolds and good
+		table.insert(holds, string.format("%s: model=%s visible parts=%s hand=%s", id, tostring(s.held), tostring(s.heldVisible), fmt(s.handFromRoot)))
+		shot("hold_" .. id, 1.2)
+	end
+	check("pose.holds", okHolds, "what B's client has in A's hand: " .. table.concat(holds, "; "))
+
+	-- a swing seen from the side, slowed 8 times on B's client only (a look hook of CharacterVisuals; damage is not involved)
+	call(B, "setattr", { name = "LS_SwingSlowMo", value = 8 })
+	local _, ra = parts(A)
+	local away = if ra then ra.Position + perp * 30 + Vector3.new(0, 1.5, 0) else Vector3.zero
+	mB = mark(B)
+	call(A, "seq", { { "select", sword }, { "wait", 0.8 }, { "face", away }, { "wait", 0.4 }, { "click" } }, 8)
+	task.wait(0.5)
+	L(poseLine("swing sword, slow motion", seeOf(B, A)))
+	shot("swing_1", 0.9)
+	L(poseLine("swing sword, slow motion", seeOf(B, A)))
+	shot("swing_2", 0.9)
+	L(poseLine("swing sword, slow motion", seeOf(B, A)))
+	shot("swing_3", 0.9)
+	local sw = clientFind(B, "SEE-SWING " .. A.Name, mB)
+	check("pose.swing", sw ~= nil, "B's client plays A's swing: " .. tostring(sw))
+	task.wait(2.5)
+	call(B, "setattr", { name = "LS_SwingSlowMo", value = nil })
+	-- the bow drawn, seen from the side
+	mB = mark(B)
+	call(A, "seq", { { "select", slotOf(A, "bow") }, { "wait", 0.9 }, { "face", away }, { "wait", 0.3 }, { "down" } }, 8)
+	task.wait(0.9)
+	L(poseLine("bow drawn", seeOf(B, A)))
+	shot("bow_drawn", 1.2)
+	call(A, "seq", { { "select", sword }, { "up" }, { "wait", 0.5 } }, 6) -- (switching away lets the draw down without a shot)
+	local draw = clientFind(B, "action=Draw", mB)
+	check("pose.bowDraw", draw ~= nil, "B's client was told A draws the bow: " .. tostring(draw) .. " ; then: "
+		.. tostring(clientFind(B, "cancelled=true", mB) or clientFind(B, "action=Release", mB)))
+	call(B, "track", {})
+end
+
+local function lootCheck()
+	local _, ra = parts(A)
+	if not (ra and Loot) then
+		check("loot.takenIsGone", false, "no character or no LootService")
+		return
+	end
+	L(duel(A, B, 8))
+	_, ra = parts(A)
+	local pos = (ra :: BasePart).Position + duelDir * 3
+	local model = Loot.spawnGroundItem("bandage", 2, pos + Vector3.new(0, 1.5, 0))
+	task.wait(1.5)
+	local near = { x = pos.X, y = pos.Y, z = pos.Z }
+	local itemsA, itemsB = call(A, "items", { near = near, radius = 12 }) or {}, call(B, "items", { near = near, radius = 12 }) or {}
+	L("LOOT before: A's client has " .. #itemsA .. " [" .. table.concat(itemsA, " ; ") .. "] B's client has " .. #itemsB .. " [" .. table.concat(itemsB, " ; ") .. "]")
+	local before = Inv.count(A, "bandage")
+	call(A, "face", near)
+	call(B, "face", near)
+	task.wait(0.7)
+	local res = call(A, "prompt", { radius = 10 }, 8)
+	task.wait(1.2)
+	local after = Inv.count(A, "bandage")
+	local itemsA2, itemsB2 = call(A, "items", { near = near, radius = 12 }) or {}, call(B, "items", { near = near, radius = 12 }) or {}
+	local resB = call(B, "prompt", { radius = 10 }, 8)
+	task.wait(0.8)
+	L("LOOT after: A used " .. tostring(res) .. " ; A's client has " .. #itemsA2 .. ", B's client has " .. #itemsB2 .. " [" .. table.concat(itemsB2, " ; ")
+		.. "] ; B tried: " .. tostring(resB) .. " ; B bandages " .. Inv.count(B, "bandage"))
+	check("loot.takenIsGone", after == before + 2 and #itemsB >= 1 and #itemsB2 == #itemsB - 1 and (model == nil or model.Parent == nil) and Inv.count(B, "bandage") == 0,
+		string.format("a bandage x2 on the ground between them: A's bag %d -> %d; B's client saw %d item(s) there before and %d after; the server's item is gone=%s; B then got %d",
+			before, after, #itemsB, #itemsB2, tostring(model == nil or model.Parent == nil), Inv.count(B, "bandage")))
+end
+
+local function useChecks()
+	Inv.clear(A)
+	L("give A: sword " .. Inv.give(A, "sword", 1) .. " apple " .. Inv.give(A, "apple", 2) .. " water_bottle " .. Inv.give(A, "water_bottle", 1))
+	task.wait(0.4)
+	PS.addHunger(A, -45)
+	PS.addThirst(A, -55)
+	task.wait(0.3)
+	L(duel(A, B, 8))
+	call(B, "track", { target = A.Name, seconds = 12 })
+	for _, item in ipairs({ { "apple", "Hunger", 1.2 }, { "water_bottle", "Thirst", 1.6 } }) do
+		local id, stat, useTime = item[1], item[2], item[3]
+		local v0 = tonumber(A:GetAttribute(stat)) or -1
+		local n0 = Inv.count(A, id)
+		local mB = mark(B)
+		call(A, "seq", { { "select", slotOf(A, id) }, { "wait", 0.9 }, { "down" }, { "wait", useTime * 0.5 } }, 10)
+		local mid = seeOf(B, A)
+		L(poseLine("using " .. id, mid) .. " using=" .. tostring(mid.using))
+		shot("use_" .. id, useTime * 0.5 + 0.25)
+		call(A, "seq", { { "up" }, { "wait", 0.5 } }, 6)
+		local v1 = tonumber(A:GetAttribute(stat)) or -1
+		local told = clientFind(B, "SEE-PATTR " .. A.Name .. ".UsingItem=" .. id, mB)
+		check("use." .. id, v1 > v0 + 3 and Inv.count(A, id) == n0 - 1 and told ~= nil and mid.held == id, string.format(
+			"A uses %s: %s %.1f -> %.1f on the server, bag %d -> %d; B's client saw A.UsingItem=%s (%s) with the %s in A's hand (%s)", id, stat, v0, v1, n0,
+			Inv.count(A, id), id, tostring(told ~= nil), id, tostring(mid.held)))
+	end
+end
+
+local function groundHigh(x: number, z: number): Vector3?
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore = {}
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p.Character then
+			table.insert(ignore, p.Character)
+		end
+	end
+	params.FilterDescendantsInstances = ignore
+	params.IgnoreWater = true
+	local hit = workspace:Raycast(Vector3.new(x, 900, z), Vector3.new(0, -1800, 0), params)
+	return if hit then hit.Position else nil
+end
+
+local function borderCheck()
+	local center, radius = Arena.getBorder()
+	local _, ra = parts(A)
+	if not ra then
+		return
+	end
+	local dir = Vector3.new(ra.Position.X - center.X, 0, ra.Position.Z - center.Z).Unit
+	local side = Vector3.new(-dir.Z, 0, dir.X)
+	local pa = center + dir * (radius + 14)
+	local pb = pa + side * 7
+	local ga, gb = groundHigh(pa.X, pa.Z), groundHigh(pb.X, pb.Z)
+	L(string.format("BORDER centre %s radius %.1f; standing A at %s (ground %s) and B at %s (ground %s)", v3(center), radius, v3(pa), if ga then v3(ga) else "none", v3(pb),
+		if gb then v3(gb) else "none"))
+	if not (ga and gb) then
+		check("border.hurtsBoth", nil, "no ground found outside the ring")
+		return
+	end
+	setHealth(A)
+	setHealth(B)
+	local mA, mB = mark(A), mark(B)
+	standAt(A, pa.X, pa.Z, center, ga.Y)
+	standAt(B, pb.X, pb.Z, center, gb.Y)
+	task.wait(4.0)
+	local _, ra2 = parts(A)
+	local _, rb2 = parts(B)
+	local outA = ra2 ~= nil and not Arena.isInsideBorder(ra2.Position)
+	local outB = rb2 ~= nil and not Arena.isInsideBorder(rb2.Position)
+	local hA, hB = health(A), health(B)
+	local dA = clientFind(A, "cause=Border", mA)
+	local dB = clientFind(B, "cause=Border", mB)
+	shot("border", 1.0)
+	check("border.hurtsBoth", outA and outB and hA < 99 and hB < 99 and dA ~= nil and dB ~= nil, string.format(
+		"both 14 studs outside the ring (radius %.0f) for 4 s: A outside=%s health %.1f, B outside=%s health %.1f; A's client told: %s ; B's client told: %s", radius,
+		tostring(outA), hA, tostring(outB), hB, tostring(dA), tostring(dB)))
+	L(duel(A, B, 8))
+	setHealth(A)
+	setHealth(B)
+end
+
+-- A kills B with the sword; returns the marks taken before the killing blows
+local function killB(tag: string): (number, number)
+	local sword = slotOf(A, "sword") or (Inv.give(A, "sword", 1) > 0 and slotOf(A, "sword")) or 1
+	setHealth(B)
+	L(duel(A, B, 7))
+	local mA, mB = mark(A), mark(B)
+	for i = 1, 4 do
+		attack(tag .. " blow " .. i, { { "select", sword }, { "wait", if i == 1 then 0.8 else 0.05 }, { "face", B.Name }, { "wait", 0.3 }, { "click" } }, 0.75)
+		if B:GetAttribute("Alive") ~= true then
+			break
+		end
+	end
+	task.wait(0.8)
+	return mA, mB
+end
+
+local function deathChecks(tag: string, mA: number, mB: number, expectPlacement: number)
+	local died = clientFind(B, "REMOTE YouDied", mB)
+	local kfA, kfB = clientFind(A, "REMOTE KillFeed", mA), clientFind(B, "REMOTE KillFeed", mB)
+	local guiB = call(B, "gui") or {}
+	L("GUI[" .. tag .. " death] " .. B.Name .. ": " .. string.sub(table.concat(guiB, " ; "), 1, 1800))
+	local idText = "killerUserId=" .. tostring(A.UserId)
+	check(tag .. ".deathCard", died ~= nil and string.find(died, idText, 1, true) ~= nil and string.find(died, "placement=" .. expectPlacement, 1, true) ~= nil
+		and B:GetAttribute("Alive") ~= true, "B's client got: " .. tostring(died))
+	local function feedOk(line: string?): boolean
+		return line ~= nil and string.find(line, idText, 1, true) ~= nil and string.find(line, "victimUserId=" .. tostring(B.UserId), 1, true) ~= nil
+	end
+	check(tag .. ".killFeed", feedOk(kfA) and feedOk(kfB), "A's client: " .. tostring(kfA) .. " | B's client: " .. tostring(kfB))
+	local hasA, textA = guiHas(A, B.DisplayName)
+	local hasB, textB = guiHas(B, A.DisplayName)
+	L("GUI[" .. tag .. " feed] on A with B's name: " .. string.sub(textA, 1, 400) .. " | on B with A's name: " .. string.sub(textB, 1, 400))
+	check(tag .. ".killCredit", A:GetAttribute("Kills") == 1 and B:GetAttribute("Placement") == expectPlacement and B:GetAttribute("KilledBy") == A.UserId,
+		string.format("A.Kills=%s B.Placement=%s B.KilledBy=%s (A is %d); kill feed text on A's screen=%s, A's name on B's screen=%s", tostring(A:GetAttribute("Kills")),
+			tostring(B:GetAttribute("Placement")), tostring(B:GetAttribute("KilledBy")), A.UserId, tostring(hasA), tostring(hasB)))
+	shot(tag .. "_death", 1.0)
+end
+
+local function resultChecks(tag: string, mA: number, mB: number, winner: Player, others: { Player })
+	if not waitPhase("Ending", 6) then
+		check(tag .. ".ending", false, "the round did not end, phase=" .. phase() .. " AliveCount=" .. tostring(GS:GetAttribute("AliveCount")))
+		return
+	end
+	task.wait(1.6)
+	local idLine = "GS WinnerUserId=" .. tostring(winner.UserId)
+	local vicW = clientFind(winner, "style=Victory", mA)
+	local hasW, textW = guiHas(winner, "victory")
+	local detail = { string.format("server: WinnerName=%s WinnerUserId=%s; winner's client: announce %s ; its WinnerUserId attribute seen=%s ; texts with VICTORY: %s",
+		tostring(GS:GetAttribute("WinnerName")), tostring(GS:GetAttribute("WinnerUserId")), tostring(vicW), tostring(clientFind(winner, idLine, mA) ~= nil),
+		string.sub(textW, 1, 300)) }
+	local ok = GS:GetAttribute("WinnerUserId") == winner.UserId and vicW ~= nil and string.find(vicW, "winnerUserId=" .. tostring(winner.UserId), 1, true) ~= nil and hasW
+	for _, p in ipairs(others) do
+		if p.Parent == Players then
+			local has, text = guiHas(p, "victory")
+			local all = call(p, "gui") or {}
+			L("GUI[" .. tag .. " result] " .. p.Name .. ": " .. string.sub(table.concat(all, " ; "), 1, 1500))
+			ok = ok and not has
+			table.insert(detail, string.format("%s's client: texts with VICTORY: [%s]", p.Name, string.sub(text, 1, 200)))
+		end
+	end
+	local allW = call(winner, "gui") or {}
+	L("GUI[" .. tag .. " result] " .. winner.Name .. ": " .. string.sub(table.concat(allW, " ; "), 1, 1500))
+	check(tag .. ".victoryById", ok, table.concat(detail, " | "))
+	shot(tag .. "_result", 1.0)
+end
+
+local function backToLobby(tag: string, players: { Player }): boolean
+	local okPhase = waitFor(function()
+		return phase() == "Lobby" or phase() == "Intermission"
+	end, 60)
+	task.wait(2.5)
+	local ok = okPhase ~= nil
+	local detail = { "phase=" .. phase() }
+	for _, p in ipairs(players) do
+		if p.Parent == Players then
+			local st = call(p, "state") or {}
+			local own = st.camType == "Custom" and type(st.camSubject) == "string" and string.find(st.camSubject, p.Name, 1, true) ~= nil
+			local good = p:GetAttribute("InArena") ~= true and p:GetAttribute("Alive") ~= true and p.Character ~= nil and st.inArena == false and own and st.inv == ""
+				and st.spectating == nil
+			ok = ok and good
+			table.insert(detail, string.format("%s InArena=%s Alive=%s Kills=%s Wins=%s RoundsPlayed=%s client: inArena=%s cam=%s subject=%s bag='%s' spectating=%s pos=%s",
+				p.Name, tostring(p:GetAttribute("InArena")), tostring(p:GetAttribute("Alive")), tostring(p:GetAttribute("Kills")), tostring(p:GetAttribute("Wins")),
+				tostring(p:GetAttribute("RoundsPlayed")), tostring(st.inArena), tostring(st.camType), tostring(st.camSubject), tostring(st.inv), tostring(st.spectating),
+				fmt(st.pos)))
+		end
+	end
+	check(tag .. ".backToLobby", ok, table.concat(detail, " | "))
+	return ok
+end
+
+local function rollCallSeen(tag: string, marks: { [Player]: number }, name: string, timeout: number): boolean
+	local seenAll = true
+	local detail = {}
+	for p, m in pairs(marks) do
+		if p.Parent == Players then
+			local line = waitFor(function()
+				return (clientFind(p, "style=RollCall", m))
+			end, timeout)
+			timeout = 2
+			local has = line ~= nil and string.find(line, name, 1, true) ~= nil
+			seenAll = seenAll and has
+			table.insert(detail, p.Name .. ": " .. (if line then string.sub(line, 1, 420) else "no Roll Call message"))
+		end
+	end
+	check(tag, seenAll, "the Roll Call names " .. name .. " on every client: " .. table.concat(detail, " | "))
+	return seenAll
+end
+
+local function batchB()
+	setupDuel()
+	giveKit()
+	swordChecks()
+	poseChecks()
+	useChecks() -- (starts from a small kit: the loot check after it needs a free slot in A's bag)
+	lootCheck()
+	borderCheck()
+	snapshotAll("beforeKill")
+	local mA, mB = killB("round1")
+	deathChecks("round1", mA, mB, 2)
+	local spec = call(B, "spectate", { op = "start", target = A.Name })
+	L("B tries to spectate A after a 2-player round was decided: " .. tostring(spec))
+	resultChecks("round1", mA, mB, A, { B })
+	rollCallSeen("round1.rollCall", { [A] = mA, [B] = mB }, B.DisplayName, 10)
+	task.wait(3.0)
+	shot("round1_rollcall", 1.0)
+	backToLobby("round1", { A, B })
+	if roundStartChecks("round2") then
+		snapshotAll("round2")
+	end
+end
+
+local function batchB2()
+	setupDuel()
+	giveKit()
+	RAW_CLAIMS = { 15, 16.5, 18 }
+	local sword = slotOf(A, "sword")
+	call(A, "seq", { { "select", slotOf(A, "bow") }, { "wait", 0.5 }, { "select", sword }, { "wait", 0.7 } }, 6)
+	for _, d in ipairs(RAW_CLAIMS) do
+		setHealth(B)
+		L(duel(A, B, d))
+		local r = attack("sword raw claim@" .. d, { { "face", B.Name }, { "wait", 0.3 }, { "remote", "MeleeSwing", "raw", B.Name } })
+		check("melee.sword.rawClaim@" .. d, nil, string.format("a modified client claiming a sword hit from %.1f studs: B lost %.1f; refusals: %s", d, r.dealt, refusals()))
+	end
+	setHealth(B)
+	poseChecks()
+	useChecks()
+	lootCheck()
+end
+
+local function batchC()
+	local C = P3 :: Player
+	setupDuel()
+	Inv.give(A, "sword", 1)
+	local mC = mark(C)
+	local mA, mB = killB("round1")
+	deathChecks("round1", mA, mB, 3)
+	task.wait(0.3)
+	check("round1.goesOnWithTwo", phase() == "Active" and GS:GetAttribute("AliveCount") == 2, "phase=" .. phase() .. " AliveCount=" .. tostring(GS:GetAttribute("AliveCount")))
+	-- B watches A, through its own respawn into the lobby
+	local res = call(B, "spectate", { op = "start", target = A.Name })
+	task.wait(1.5)
+	local st = call(B, "state") or {}
+	local _, ra = parts(A)
+	local s = seeOf(B, A)
+	check("spectate.start", st.spectating == A.Name and B.ReplicationFocus ~= nil and s.pos ~= nil and ra ~= nil and (s.pos - ra.Position).Magnitude < 3, string.format(
+		"B asked to watch A (%s): B's client spectating=%s camera subject=%s; the server's streaming focus for B=%s; on B's screen A stands %.2f studs from the server's position",
+		tostring(res), tostring(st.spectating), tostring(st.camSubject), if B.ReplicationFocus then B.ReplicationFocus:GetFullName() else "nil",
+		if s.pos and ra then (s.pos - ra.Position).Magnitude else -1))
+	shot("spectate_A", 1.0)
+	task.wait(3.0) -- B's new lobby character has loaded by now (RespawnDelay 2)
+	st = call(B, "state") or {}
+	s = seeOf(B, A)
+	check("spectate.survivesRespawn", st.spectating == A.Name and B.ReplicationFocus ~= nil and s.char == true, string.format(
+		"after B's respawn in the lobby: spectating=%s camera subject=%s server focus=%s B's own position=%s A still on B's client=%s", tostring(st.spectating),
+		tostring(st.camSubject), if B.ReplicationFocus then B.ReplicationFocus:GetFullName() else "nil", fmt(st.pos), tostring(s.char)))
+	res = call(B, "spectate", { op = "next" })
+	task.wait(2.0)
+	st = call(B, "state") or {}
+	local sc = seeOf(B, C)
+	local _, rc = parts(C)
+	check("spectate.cycle", st.spectating == C.Name and sc.pos ~= nil and rc ~= nil and (sc.pos - rc.Position).Magnitude < 3, string.format(
+		"next target (%s): spectating=%s server focus=%s; on B's screen %s stands %.2f studs from the server's position", tostring(res), tostring(st.spectating),
+		if B.ReplicationFocus then B.ReplicationFocus:GetFullName() else "nil", C.Name, if sc.pos and rc then (sc.pos - rc.Position).Magnitude else -1))
+	shot("spectate_C", 1.0)
+	call(B, "spectate", { op = "prev" })
+	-- the dusk Roll Call (the round clock runs ARGS.timeScale times faster)
+	local ok = rollCallSeen("rollCall.dusk", { [A] = mA, [B] = mB, [C] = mC }, B.DisplayName, 90)
+	if ok then
+		local c0 = arenaCenter()
+		call(A, "face", { x = c0.X, y = c0.Y + 260, z = c0.Z })
+		task.wait(5)
+		shot("rollcall_dusk", 1.2)
+		task.wait(4)
+		shot("rollcall_dusk2", 1.2)
+	end
+	L("clock " .. fmt({ Arena.getClock() }) .. " fallen " .. fmt(Arena.getFallen()))
+	-- C leaves in the middle of the round
+	mA, mB = mark(A), mark(B)
+	local t0 = os.clock()
+	call(C, "leave")
+	local ended = waitPhase("Ending", 12)
+	local took = os.clock() - t0
+	task.wait(0.5)
+	local feed = clientFind(A, "left the arena", mA)
+	check("leave.endsRound", ended and GS:GetAttribute("WinnerUserId") == A.UserId, string.format(
+		"C left mid-round: phase=%s %.1f s later, WinnerName=%s WinnerUserId=%s AliveCount=%s; A's kill feed: %s", phase(), took, tostring(GS:GetAttribute("WinnerName")),
+		tostring(GS:GetAttribute("WinnerUserId")), tostring(GS:GetAttribute("AliveCount")), tostring(feed)))
+	resultChecks("leave", mA, mB, A, { B })
+	backToLobby("leave", { A, B })
+	L(string.format("after the round: A Wins=%s RoundsPlayed=%s TotalKills=%s", tostring(A:GetAttribute("Wins")), tostring(A:GetAttribute("RoundsPlayed")),
+		tostring(A:GetAttribute("TotalKills"))))
+end
+
+local function batchD()
+	setupDuel()
+	lootCheck()
+	-- a third client joins in the middle of the round
+	local before = #Players:GetPlayers()
+	local okAdd, errAdd = pcall(function()
+		STS:AddPlayers(1)
+	end)
+	L("AddPlayers(1): " .. tostring(okAdd) .. " " .. tostring(errAdd))
+	local joined = waitFor(function()
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= A and p ~= B and botReady[p] and p.Character then
+				return p
+			end
+		end
+		return nil
+	end, 90)
+	if not joined then
+		check("late.join", false, "no third client with a bot within 90 s (players now " .. #Players:GetPlayers() .. ", before " .. before .. ")")
+		return
+	end
+	local J = joined :: Player
+	P3 = J
+	task.wait(2.5)
+	local st = call(J, "state") or {}
+	check("late.waitsInLobby", phase() == "Active" and not Round.isContender(J) and J:GetAttribute("InArena") ~= true and st.inArena == false, string.format(
+		"%s joined during the round: phase=%s contender=%s InArena=%s; its client: inArena=%s camera=%s subject=%s position=%s", J.Name, phase(),
+		tostring(Round.isContender(J)), tostring(J:GetAttribute("InArena")), tostring(st.inArena), tostring(st.camType), tostring(st.camSubject), fmt(st.pos)))
+	local has, text = guiHas(J, "next round in")
+	local all = call(J, "gui") or {}
+	L("GUI[late] " .. J.Name .. ": " .. string.sub(table.concat(all, " ; "), 1, 1200))
+	check("late.timer", has and string.find(string.lower(text), "remain", 1, true) ~= nil, "the lobby line on the late joiner's screen: " .. string.sub(text, 1, 300))
+	shot("late_lobby", 1.0)
+	local res = call(J, "spectate", { op = "start", target = A.Name })
+	task.wait(2.0)
+	st = call(J, "state") or {}
+	local s = seeOf(J, A)
+	local _, ra = parts(A)
+	check("late.spectate", st.spectating == A.Name and s.pos ~= nil and ra ~= nil and (s.pos - ra.Position).Magnitude < 3 and J.ReplicationFocus ~= nil, string.format(
+		"the late joiner watches A (%s): spectating=%s camera subject=%s server focus=%s; on its screen A stands %.2f studs from the server's position", tostring(res),
+		tostring(st.spectating), tostring(st.camSubject), if J.ReplicationFocus then J.ReplicationFocus:GetFullName() else "nil",
+		if s.pos and ra then (s.pos - ra.Position).Magnitude else -1))
+	shot("late_spectate", 1.2)
+	-- B leaves in the middle of the round: A is the last one standing
+	local mA, mJ = mark(A), mark(J)
+	local t0 = os.clock()
+	call(B, "leave")
+	local ended = waitPhase("Ending", 12)
+	local took = os.clock() - t0
+	task.wait(0.5)
+	check("leave.endsRound", ended and GS:GetAttribute("WinnerUserId") == A.UserId, string.format(
+		"B left mid-round: phase=%s %.1f s later, WinnerName=%s WinnerUserId=%s; A's kill feed: %s ; the watcher's: %s", phase(), took,
+		tostring(GS:GetAttribute("WinnerName")), tostring(GS:GetAttribute("WinnerUserId")), tostring(clientFind(A, "left the arena", mA)),
+		tostring(clientFind(J, "left the arena", mJ))))
+	resultChecks("leave", mA, mJ, A, { J })
+	task.wait(1.0)
+	st = call(J, "state") or {}
+	L("the watcher after the round was decided: spectating=" .. tostring(st.spectating) .. " camera subject=" .. tostring(st.camSubject))
+	backToLobby("leave", { A, J })
+	-- the next round takes the late joiner
+	if waitPhase("Countdown", 40) then
+		check("late.pickedNextRound", Round.isContender(J) and Round.isContender(A) and GS:GetAttribute("Practice") == false and GS:GetAttribute("StartedCount") == 2,
+			string.format("next round: contenders=%s Practice=%s StartedCount=%s cut=%s", contenderNames(), tostring(GS:GetAttribute("Practice")),
+				tostring(GS:GetAttribute("StartedCount")), tostring(GS:GetAttribute("LaunchCut"))))
+		if waitPhase("Active", 40) then
+			task.wait(1.2)
+			st = call(J, "state") or {}
+			check("late.playsNextRound", st.alive == true and st.frozen == false and st.launchShot ~= true and st.camType == "Custom", string.format(
+				"the late joiner after the horn: alive=%s frozen=%s launchShot=%s camera=%s subject=%s", tostring(st.alive), tostring(st.frozen), tostring(st.launchShot),
+				tostring(st.camType), tostring(st.camSubject)))
+		end
+	else
+		check("late.pickedNextRound", false, "no Countdown within 40 s, phase=" .. phase())
+	end
+end
+
+-- one of two contenders leaves during the Countdown, in the middle of the launch shot
+local function batchE()
+	if not waitPhase("Countdown", 60) then
+		check("countdownLeave.cancelled", false, "no Countdown, phase=" .. phase())
+		return
+	end
+	task.wait(4.0)
+	local st0 = call(A, "state") or {}
+	L(string.format("mid-countdown: cut=%s A launchShot=%s camera=%s; RoundsPlayed A=%s", tostring(GS:GetAttribute("LaunchCut")), tostring(st0.launchShot),
+		tostring(st0.camType), tostring(A:GetAttribute("RoundsPlayed"))))
+	local mA = mark(A)
+	local played = A:GetAttribute("RoundsPlayed")
+	local t0 = os.clock()
+	call(B, "leave")
+	local back = waitFor(function()
+		return phase() == "Lobby" or phase() == "Intermission"
+	end, 10)
+	local took = os.clock() - t0
+	task.wait(3.0)
+	local toast = clientFind(A, "Round cancelled", mA)
+	local victory = clientFind(A, "style=Victory", mA)
+	local st = call(A, "state") or {}
+	local hasV, textV = guiHas(A, "victory")
+	local all = call(A, "gui") or {}
+	L("GUI[cancelled] " .. A.Name .. ": " .. string.sub(table.concat(all, " ; "), 1, 900))
+	local own = st.camType == "Custom" and type(st.camSubject) == "string" and string.find(st.camSubject, A.Name, 1, true) ~= nil
+	check("countdownLeave.cancelled", back ~= nil and toast ~= nil and victory == nil and not hasV and A:GetAttribute("InArena") ~= true and st.launchShot ~= true and own
+		and st.inArena == false and A:GetAttribute("RoundsPlayed") == played and (GS:GetAttribute("WinnerName") or "") == "", string.format(
+		"B left %.1f s before... the Countdown ended %.1f s after the leave: phase=%s; A's client: toast=%s ; winner card=%s (texts with VICTORY: [%s]); launchShot=%s camera=%s subject=%s inArena=%s position=%s; RoundsPlayed %s -> %s; WinnerName='%s'",
+		0.3, took, phase(), tostring(toast), tostring(victory), string.sub(textV, 1, 120), tostring(st.launchShot), tostring(st.camType), tostring(st.camSubject),
+		tostring(st.inArena), fmt(st.pos), tostring(played), tostring(A:GetAttribute("RoundsPlayed")), tostring(GS:GetAttribute("WinnerName"))))
+	shot("cancelled", 1.0)
+	task.wait(2.0)
+	local has, text = guiHas(A, "round")
+	L("the lobby line for the one left alone (live rules: 2 needed): " .. string.sub(text, 1, 300) .. " | phase=" .. phase() .. " SoloStartAt="
+		.. tostring(GS:GetAttribute("SoloStartAt")))
+end
+
+local function run()
+	local batch = tostring(ARGS.batch or "A")
+	L("BATCH " .. batch)
+	if not lobbyChecks() then
+		return
+	end
+	if batch == "E" then
+		batchE()
+		return
+	end
+	if not roundStartChecks("round1") then
+		return
+	end
+	if batch == "A" then
+		combatChecks()
+	elseif batch == "B" then
+		batchB()
+	elseif batch == "B2" then
+		batchB2()
+	elseif batch == "C" then
+		batchC()
+	elseif batch == "D" then
+		batchD()
+	end
+end
+
+task.spawn(function()
+	local ok, err = xpcall(run, function(e)
+		return tostring(e) .. " | " .. debug.traceback()
+	end)
+	if not ok then
+		L("DRIVER ERROR " .. (string.gsub(tostring(err), "\n", " | ")))
+	end
+	L("RESULTS " .. table.concat(results, " "))
+	endTest("batch done")
+end)

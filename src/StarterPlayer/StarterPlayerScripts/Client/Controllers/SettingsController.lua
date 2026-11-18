@@ -40,6 +40,7 @@ local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local Input = require(Shared:WaitForChild("Input"))
 local Glyphs = require(Shared:WaitForChild("Glyphs"))
@@ -132,7 +133,7 @@ end
 
 -- The controls reference (Menu > Controls and the lobby's HOW TO PLAY), with this device's button names. Most-used first,
 -- so the lobby panel shows moving, attacking and aiming (the spear throw) without scrolling.
-local function controlsFor(device: string): { { string } }
+local function allControlsFor(device: string): { { string } }
 	if device == "Gamepad" then
 		local g = Glyphs.forKey
 		local K = Enum.KeyCode
@@ -192,6 +193,22 @@ local function controlsFor(device: string): { { string } }
 		{ "Spectate: previous / next", "Q / E" },
 		{ "Menu", "M" },
 	}
+end
+
+-- Map 1 (the Green Land) has nothing to climb: nothing there is tagged Climbable (docs/design/Map1Build.md lists
+-- climbing trees under Later). Its controls list leaves the climb out; vaulting and pulling up onto a ledge stay.
+local function controlsFor(device: string): { { string } }
+	local rows = allControlsFor(device)
+	if Config.Map ~= "GreenLand" then
+		return rows
+	end
+	local out = {}
+	for _, row in ipairs(rows) do
+		if row[1] ~= "Let go of a climb" then
+			table.insert(out, { (string.gsub(row[1], " · climb$", "")), row[2] })
+		end
+	end
+	return out
 end
 
 function SettingsController.currentDevice(): string

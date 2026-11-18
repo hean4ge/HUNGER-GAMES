@@ -2017,7 +2017,8 @@ local function update(dt: number)
 	local wantTouch = not spectating
 	if wantTouch ~= touchVisible then
 		touchVisible = wantTouch
-		Input.setTouchVisible("Sprint", wantTouch)
+		-- RUN is hidden while Sprint is on Auto (bindModeInputs): leaving the spectator view must not bring it back
+		Input.setTouchVisible("Sprint", wantTouch and modeFor("sprint", "Touch") ~= 2)
 		Input.setTouchVisible("Crouch", wantTouch)
 	end
 
@@ -2575,7 +2576,7 @@ local function update(dt: number)
 	debugOut.strideScale = c.rig.strideScale or 1
 	debugOut.wedged = WEDGE.ready
 	-- tuning probes: mirrored onto dbg_* attributes of the local player while it has LS_MoveDebug = true
-	if t >= debugNextAt and player:GetAttribute("LS_MoveDebug") == true then
+	if Config.IsStudio and t >= debugNextAt and player:GetAttribute("LS_MoveDebug") == true then -- (Studio only)
 		debugNextAt = t + 0.1
 		for key, value in pairs(MovementController.getDebug()) do
 			local kind = typeof(value)
@@ -2804,6 +2805,11 @@ local function bindModeInputs()
 		keys = { Enum.KeyCode.C, Enum.KeyCode.LeftControl, Enum.KeyCode.ButtonB },
 		touch = { toggle = crouchTouch == 1 },
 	})
+	if not touchVisible then
+		-- rebound while spectating (a mode changed in the Menu): the new buttons stay hidden like the old ones
+		Input.setTouchVisible("Sprint", false)
+		Input.setTouchVisible("Crouch", false)
+	end
 end
 
 -- Character lifecycle ---------------------------------------------------------------------------------------------------
@@ -2864,6 +2870,14 @@ local function setupCharacter(character: Model)
 		return
 	end
 	cleanupCharacter()
+	-- a new life starts standing: a crouch or sprint toggle (the default on phones and controllers) does not carry
+	-- over from the life before, through the lobby and onto the next round's plate
+	if sprintToggled then
+		setSprintToggle(false)
+	end
+	if crouchToggled then
+		setCrouchToggle(false)
+	end
 	local humanoid = character:WaitForChild("Humanoid", 10)
 	local root = character:WaitForChild("HumanoidRootPart", 10)
 	if not humanoid or not root or not humanoid:IsA("Humanoid") or not root:IsA("BasePart") or player.Character ~= character then

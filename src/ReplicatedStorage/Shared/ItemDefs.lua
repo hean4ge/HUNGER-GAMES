@@ -53,11 +53,11 @@ ItemDefs.Items = {
 	arrow = { name = "Arrow", kind = "Ammo", rarity = "Common", stack = 24, desc = "Ammunition for the bow." },
 	-- Healing
 	herbs = { name = "Healing Herbs", kind = "Heal", rarity = "Common", stack = 6, heal = 10, useTime = 1.5,
-		desc = "Crushed leaves that soothe small wounds.", useLabel = "Applying herbs" },
+		desc = "Crushed leaves that restore a little health.", useLabel = "Applying herbs" },
 	bandage = { name = "Bandage", kind = "Heal", rarity = "Common", stack = 4, heal = 20, useTime = 2.5,
-		desc = "Clean cloth to bind a wound." },
+		desc = "Clean cloth that restores some health." },
 	medkit = { name = "Med Kit", kind = "Heal", rarity = "Epic", stack = 1, heal = 65, useTime = 5,
-		desc = "Everything needed to patch up a bad wound.", useLabel = "Treating wounds" },
+		desc = "Everything needed to restore a lot of health.", useLabel = "Using the kit" },
 	-- Food and drink
 	berries = { name = "Wild Berries", kind = "Food", rarity = "Common", stack = 10, hunger = 12, useTime = 1.0,
 		desc = "A handful of tart berries." },

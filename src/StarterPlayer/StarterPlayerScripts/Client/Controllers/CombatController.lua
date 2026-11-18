@@ -4,9 +4,15 @@
 	Binds Attack (MouseButton1 / ButtonR2 / touch "ATTACK") and Aim (MouseButton2 / ButtonL2 / touch "AIM", shown only
 	for the bow and the spear) through Shared.Input, and only while alive in the arena and not spectating, so lobby
 	clicks and the third-person camera are untouched. Input is ignored while ClientState.menuOpen.
-	  Melee: windup -> strike -> recover, timed from ItemDefs (windup, cooldown). At the strike moment MeleeSwing is
-	    sent with the camera look vector, whether the local trace touched someone (only such a swing can land) and the
-	    swing's set (variant 1-8: other players see the same swing, CharacterVisuals).
+	  Melee: windup -> strike -> recover, timed from ItemDefs (windup, cooldown). When the swing starts MeleeSwing
+	    ("Start", set) tells the server, which shows the others the swing from its beginning. At the strike moment
+	    MeleeSwing is sent with the camera look vector, whether the local trace touched someone (only such a swing can
+	    land), the swing's set (variant 1-8: other players see the same swing, CharacterVisuals), the body the trace
+	    touched (the server checks that one and no other) and the server time at which the swing started (the server
+	    gates swings by the rule used here: the next may start once the last one's `total` has passed since its start).
+	    The trace (predictMelee) takes whoever is under the crosshair first; only when the crosshair is on nobody does
+	    the forgiving ball decide. It starts at the default camera (CameraController.getBaseCFrame: half a stud behind
+	    the head, no kick, bob or shake), whatever the render-step order is.
 	    Swing sets (#90): each weapon remembers its last set. A swing that starts within Config.Combat.SwingChainWindow of
 	    the same weapon's last swing ending (held Attack, a buffered or quick press) takes the next set in order; a fresh
 	    click takes any other set at random, so a set never plays twice running. How many sets a style has is read from
@@ -311,18 +317,43 @@ end
 -- Local hit prediction (mirrors CombatService's trace without the lag allowance)
 --------------------------------------------------------------------------------------------------------------------
 
-local function humanoidOf(part: Instance?): Humanoid?
+-- The humanoid a touched part belongs to, and its body: a body part, something worn, or (given the target list)
+-- anything else inside a target, such as the weapon it holds.
+local function humanoidOf(part: Instance?, targets: { Instance }?): (Humanoid?, Instance?)
 	if not part then
-		return nil
+		return nil, nil
 	end
 	local parent = part.Parent
 	if parent and parent:IsA("Accessory") then
 		parent = parent.Parent
 	end
 	if parent and parent:IsA("Model") then
-		return parent:FindFirstChildOfClass("Humanoid")
+		local humanoid = parent:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			return humanoid, parent
+		end
 	end
-	return nil
+	if targets then
+		for _, target in ipairs(targets) do
+			if part:IsDescendantOf(target) then
+				return target:FindFirstChildOfClass("Humanoid"), target
+			end
+		end
+	end
+	return nil, nil
+end
+
+-- The default camera's CFrame (before the eye offset, kick, bob and shake): where melee traces start. Read from
+-- CameraController, so it doesn't depend on which render step ran last.
+local function baseCFrame(): CFrame
+	local controller = Controllers.CameraController
+	if controller and type(controller.getBaseCFrame) == "function" then
+		local ok, cf = pcall(controller.getBaseCFrame)
+		if ok and typeof(cf) == "CFrame" then
+			return cf
+		end
+	end
+	return camera.CFrame
 end
 
 local function targetModels(): { Instance }
@@ -409,25 +440,45 @@ local function ballisticDirection(origin: Vector3, target: Vector3, speed: numbe
 	return dir
 end
 
-type Prediction = { character: boolean, position: Vector3, normal: Vector3?, material: Enum.Material? }
+type Prediction = { character: boolean, position: Vector3, normal: Vector3?, material: Enum.Material?, target: Instance? }
 
+-- What this swing touches, as the server will check it (CombatService.meleeTrace). First a thin ray along the look:
+-- whoever is under the crosshair, out to the ball's front. Only when the crosshair is on nobody, the forgiving ball
+-- (the first body it touches), then a point-blank overlap check. (The ball alone took the first body it touched: a
+-- bystander's arm beside the line, or the next practice dummy's hand, instead of the one aimed at.) Only living bodies
+-- count: one that just fell neither takes the swing nor blocks it.
 local function predictMelee(def: any, cf: CFrame): Prediction?
 	local origin = cf.Position
 	local direction = cf.LookVector
 	local reach = def.range or 5
 	local radius = CombatConfig.MeleeHitRadius * 0.85
-	local targets = targetModels()
-	local world = worldParams(targets)
+	local everyone = targetModels()
+	local world = worldParams(everyone) -- (no body, living or not, is world)
+	local targets = {}
+	for _, model in ipairs(everyone) do
+		local humanoid = model:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.Health > 0 then
+			table.insert(targets, model)
+		end
+	end
 	if #targets > 0 then
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Include
 		params.FilterDescendantsInstances = targets
 		local candidate: Vector3? = nil
-		local swept = workspace:Spherecast(origin, radius, direction * reach, params)
-		if swept then
-			local humanoid = humanoidOf(swept.Instance)
+		local body: Instance? = nil
+		local aimed = workspace:Raycast(origin, direction * (reach + radius), params)
+		if aimed then
+			local humanoid, model = humanoidOf(aimed.Instance, targets)
 			if humanoid and humanoid.Health > 0 then
-				candidate = swept.Position
+				candidate, body = aimed.Position, model
+			end
+		end
+		local swept = if candidate then nil else workspace:Spherecast(origin, radius, direction * reach, params)
+		if swept then
+			local humanoid, model = humanoidOf(swept.Instance, targets)
+			if humanoid and humanoid.Health > 0 then
+				candidate, body = swept.Position, model
 			end
 		end
 		if not candidate then
@@ -436,12 +487,12 @@ local function predictMelee(def: any, cf: CFrame): Prediction?
 			overlap.FilterDescendantsInstances = targets
 			local best = math.huge
 			for _, part in ipairs(workspace:GetPartBoundsInRadius(origin + direction * radius, radius, overlap)) do
-				local humanoid = humanoidOf(part)
+				local humanoid, model = humanoidOf(part, targets)
 				if humanoid and humanoid.Health > 0 then
 					local offset = part.Position - origin
 					if offset:Dot(direction) > -0.5 and offset.Magnitude < best then
 						best = offset.Magnitude
-						candidate = part.Position
+						candidate, body = part.Position, model
 					end
 				end
 			end
@@ -451,7 +502,7 @@ local function predictMelee(def: any, cf: CFrame): Prediction?
 			local distance = offset.Magnitude
 			local blocked = if distance > 0.5 then workspace:Raycast(origin, offset, world) else nil
 			if blocked == nil or blocked.Distance >= distance - 0.75 then
-				return { character = true, position = candidate }
+				return { character = true, position = candidate, target = body }
 			end
 		end
 	end
@@ -585,22 +636,29 @@ local function startMelee(now: number)
 		total = total,
 		struck = false,
 		hit = nil,
+		startedAt = workspace:GetServerTimeNow(), -- (sent with the strike: the server times its cooldown from here)
 	}
 	CombatController.current = rec
 	nextActionAt = now + total
 	spendStamina(def.staminaCost)
+	if MeleeSwing then
+		-- the others see the swing from its start (the server relays it), not from the moment it lands
+		MeleeSwing:FireServer("Start", if variant <= 8 then variant else nil)
+	end
 	CombatController.action:Fire("Swing", rec)
 end
 
 local function strike(rec: any, now: number)
 	rec.struck = true
 	lastStrikeAt = now
-	local cf = camera.CFrame
+	local cf = baseCFrame()
 	local hit = predictMelee(rec.def, cf)
 	if MeleeSwing then
-		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts; the set
-		-- (1-8) lets the other players see this same swing
-		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character, if rec.variant <= 8 then rec.variant else nil)
+		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts, and it
+		-- checks the body this trace touched and no other; the set (1-8) lets the other players see this same swing;
+		-- the start time lets the server gate the swing by when it began here, however late this message arrives
+		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character, if rec.variant <= 8 then rec.variant else nil,
+			if hit and hit.character then hit.target else nil, rec.startedAt)
 	end
 	Sfx.play(if rec.weight == "Light" then "Swing_Light" else "Swing_Heavy")
 
@@ -722,7 +780,14 @@ end
 local function releaseThrow(rec: any, now: number)
 	rec.released = true
 	local def = rec.def
-	local cf = camera.CFrame
+	-- Aim along what the screen shows, like the bow: this runs in the render step, where the camera is the default one
+	-- again, so the view's landing dip, kick and shake (ClientState.cameraBob, last frame's) are put back on. Without
+	-- them a spear thrown while landing a jump left up to 2.4 degrees off the crosshair.
+	local cf = baseCFrame()
+	local bob = ClientState.cameraBob
+	if typeof(bob) == "CFrame" then
+		cf = cf * bob.Rotation
+	end
 	local speed = if rec.spear then def.throwSpeed or 150 else def.speed or 150
 	local gravity = if rec.spear then def.throwGravity or 45 else def.gravity or 40
 	local aimCF = cf

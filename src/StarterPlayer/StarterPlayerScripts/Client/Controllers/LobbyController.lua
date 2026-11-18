@@ -12,6 +12,8 @@
 	  * SETTINGS opens the menu (SettingsController).
 	Shown while you're not in the arena and not spectating, and once the death card or the round's result card
 	(NotificationController.isCardUp) has gone: the two never draw text over text (round-flow QA pt2/pt3).
+	While a headline or the Roll Call list shows (NotificationController.isBannerUp), the status pill (phones: they
+	share the top band) and HOW TO PLAY (the Roll Call panel's edge) step aside.
 	Public API (Controllers.LobbyController): setHowToVisible(visible: boolean)
 ]]
 local Players = game:GetService("Players")
@@ -44,6 +46,7 @@ local spectateAvailable = false
 local spectateBound = false
 local visible = nil :: boolean?
 local howToTouched = false -- the player opened or closed HOW TO PLAY themselves: leave it as they set it
+local howToYield, statusYield = false, false -- hidden for a headline or the Roll Call (updateYield)
 local soloBar = { at = 0, total = 1 } -- QW1: the practice countdown on show (its SoloStartAt) and its bar's full length
 
 local function settingsController()
@@ -104,7 +107,14 @@ local function nextRoundIn(remaining: number): number
 			ending = math.max(ending, length + (tonumber(Config.Round.EpilogueLeadIn) or 2.5) + 1)
 		end
 	end
-	return remaining + ending + (tonumber(Config.Round.IntermissionTime) or 25) + (tonumber(Config.Round.CountdownTime) or 10)
+	-- with the launch intro the Countdown is as long as its cut (RoundService.launchTiming): the longest one, since
+	-- which cut plays is only known at the call (audit F16: the pill promised up to 12 s too little)
+	local countdown = tonumber(Config.Round.CountdownTime) or 10
+	local launch = (Config :: any).Launch
+	if type(launch) == "table" and launch.Intro ~= false then
+		countdown = math.max(tonumber(launch.FullCountdown) or 22, tonumber(launch.ShortCountdown) or 12)
+	end
+	return remaining + ending + (tonumber(Config.Round.IntermissionTime) or 25) + countdown
 end
 
 local function setHowTo(on: boolean, animate: boolean?)
@@ -112,7 +122,7 @@ local function setHowTo(on: boolean, animate: boolean?)
 	local panel = R.howTo
 	if on then
 		refreshControls()
-		panel.Visible = true
+		panel.Visible = not howToYield -- (a Roll Call or headline has its place for the moment: updateYield)
 		if animate then
 			panel.GroupTransparency = 1
 			Theme.tween(panel, Theme.Tween.Normal, { GroupTransparency = 0 })
@@ -296,6 +306,33 @@ local function cardUp(): boolean
 	return false
 end
 
+-- Headlines and the Roll Call list (NotificationController, drawn above this screen) have the place first. On phones
+-- both use the top band, where the status pill is; elsewhere the Roll Call panel sits at the right edge, over HOW TO
+-- PLAY. The pill and the panel step aside until they are gone, so text is never drawn over text.
+local function updateYield()
+	local headline, roll = false, false
+	local notifications = Controllers and Controllers.NotificationController
+	if notifications and notifications.isBannerUp then
+		local ok, h, r = pcall(notifications.isBannerUp)
+		if ok then
+			headline, roll = h == true, r == true
+		end
+	end
+	local small = phone()
+	local hideStatus = small and (headline or roll)
+	local hideHowTo = roll or (small and headline)
+	if R.status and hideStatus ~= statusYield then
+		statusYield = hideStatus
+		R.status.Visible = not hideStatus
+	end
+	if hideHowTo ~= howToYield then
+		howToYield = hideHowTo
+		if howToOpen and R.howTo then
+			R.howTo.Visible = not hideHowTo
+		end
+	end
+end
+
 local function updateVisibility()
 	local want = not ClientState.inArena and ClientState.spectating == nil and not cardUp()
 	if want == visible then
@@ -352,6 +389,7 @@ function LobbyController.Start()
 	Theme.bindRoot(lobby)
 	local root = lobby:WaitForChild("Root") :: any
 	local status = root:WaitForChild("Status")
+	R.status = status
 	local pill = status:WaitForChild("Pill")
 	R.pillPad = pill:WaitForChild("Pad")
 	R.dot = pill:WaitForChild("Dot")
@@ -456,6 +494,7 @@ function LobbyController.Start()
 		updateVisibility() -- it also waits for the death and result cards
 		if visible then
 			updateStatus()
+			updateYield()
 		end
 		task.wait(0.1)
 	end

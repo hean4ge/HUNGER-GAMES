@@ -31,7 +31,7 @@
 	no change here as long as its class is one of this table's.
 
 	The tier, first match wins:
-	  1 workspace attribute DetailTier = "Low" | "Medium" | "High" (tests and previews)
+	  1 in Studio only, workspace attribute DetailTier = "Low" | "Medium" | "High" (tests and previews)
 	  2 the player's graphics level, UserGameSettings.SavedQualityLevel: 1-3 Low, 4-6 Medium, 7-10 High
 	  3 in Studio, the render quality level when Studio exposes it to scripts (settings().Rendering.QualityLevel):
 	    1-6 Low, 7-13 Medium, 14-21 High (a LocalScript can't read it in current Studio builds)
@@ -49,11 +49,21 @@
 	  in Studio, the workspace attribute DevShaders = "Off" | "Phone" | "Mid" | "High" forces it (tests, captures)
 	ShaderDevice is the tier the device would have on Auto (Off keeps that tier's haze).
 
+	The far canopy (Map 1): workspace.Arena.FarValley holds, per 1,900-stud tile, a dark canopy shell (Role
+	"FarCanopy") that stands for the forests beyond the streamed radius. It lies at tree-top height over the real
+	trees too, and where the engine has dropped the real trees (low quality levels cull them a few hundred studs
+	out) a slab hovered over bare ground (seen at the lake, 18 Nov). So each canopy part is hidden on this client
+	(LocalTransparencyModifier) while the camera is within FAR_HIDE studs of its footprint and fades in up to
+	FAR_SHOW: the tile you stand in and the next one you walk toward never draw over ground that is streamed in;
+	from the heart (r under 190) the ring tiles, 700 studs and more away, all show. The ground parts of the far
+	valley (grass, heather, rock, water) lie under the real terrain and are never touched.
+
 	Bookkeeping: models are bucketed into 40-stud cells as they stream in (ChildAdded on the Flora and Forest biome
 	folders and on Map 1's Scatter cells) and dropped as they stream out. Every 0.25 s, once the camera has moved
 	6 studs or the tier changed, only the cells whose distance band changed are flipped.
-	API (for tests): DetailController.stats() -> { tier, why, models, cells, hidden }, DetailController.refresh().
-	The stats are also published as LocalPlayer attribute DetailHidden (parts hidden now).
+	API (for tests): DetailController.stats() -> { tier, why, models, cells, hidden, farCanopy, farCanopyHidden },
+	DetailController.refresh(). The stats are also published as LocalPlayer attributes DetailHidden (parts hidden now)
+	and DetailFarHidden ("hidden/all" far canopy parts).
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -63,6 +73,7 @@ local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
 local DetailController = {}
 
+local IS_STUDIO = RunService:IsStudio()
 local CELL = 40
 local HALF_DIAG = CELL * 0.7071
 local INF = math.huge
@@ -90,6 +101,11 @@ local ROOTS = { Flora = true, Forest = true, Scatter = true }
 local ORDER = { "Low", "Medium", "High" }
 DetailController.TIERS = TIERS
 DetailController.FLORA = FLORA
+
+-- the far canopy shells: hidden inside FAR_HIDE studs of the camera (measured to the part's footprint), shown from FAR_SHOW
+local FAR_HIDE, FAR_SHOW = 450, 650
+local FAR_ROLE = "FarCanopy"
+local farParts = {} -- { part, x0, x1, z0, z1, k (the modifier written) }
 
 local cells = {} -- key -> { x, z, [class] = { parts }, shown = { [class] = bool } }
 local modelCell = {} -- model -> { k, groups = { [class] = { parts } } }
@@ -217,6 +233,59 @@ local function watchBiome(folder: Instance, kind: string)
 	folder.ChildRemoved:Connect(unregister)
 end
 
+-- The far canopy --------------------------------------------------------------------------------------------------
+
+local function addFarPart(d: Instance)
+	if not d:IsA("BasePart") then
+		return
+	end
+	if d:GetAttribute("Role") ~= FAR_ROLE and string.sub(d.Name, -7) ~= "_Canopy" then
+		return
+	end
+	for _, e in ipairs(farParts) do
+		if e.part == d then
+			return
+		end
+	end
+	-- the footprint: the part's box on the ground (the tiles are placed unrotated; a turned one gets its outer box)
+	local cf, size = d.CFrame, d.Size
+	local rx, rz = cf.RightVector, cf.LookVector
+	local ux = cf.UpVector
+	local hx = (math.abs(rx.X) * size.X + math.abs(ux.X) * size.Y + math.abs(rz.X) * size.Z) / 2
+	local hz = (math.abs(rx.Z) * size.X + math.abs(ux.Z) * size.Y + math.abs(rz.Z) * size.Z) / 2
+	table.insert(farParts, { part = d, x0 = cf.Position.X - hx, x1 = cf.Position.X + hx, z0 = cf.Position.Z - hz,
+		z1 = cf.Position.Z + hz, k = -1 })
+end
+
+local function watchFar(holder: Instance)
+	for _, d in ipairs(holder:GetDescendants()) do
+		addFarPart(d)
+	end
+	holder.DescendantAdded:Connect(function(d)
+		addFarPart(d)
+		forceRefresh = true
+	end)
+end
+
+local function refreshFar(p: Vector3)
+	for i = #farParts, 1, -1 do
+		local e = farParts[i]
+		if not e.part.Parent then
+			table.remove(farParts, i)
+		else
+			local dx = math.max(e.x0 - p.X, 0, p.X - e.x1)
+			local dz = math.max(e.z0 - p.Z, 0, p.Z - e.z1)
+			local d = math.sqrt(dx * dx + dz * dz)
+			-- 1 = hidden, 0 = shown; in steps of 1/20 so a walk writes a few times, not every pass
+			local k = math.floor(math.clamp((FAR_SHOW - d) / (FAR_SHOW - FAR_HIDE), 0, 1) * 20 + 0.5) / 20
+			if k ~= e.k then
+				e.k = k
+				e.part.LocalTransparencyModifier = k
+			end
+		end
+	end
+end
+
 -- the player's graphics level 1-10, or nil on Automatic
 local function savedLevel(): number?
 	local ok, q = pcall(function()
@@ -261,7 +330,8 @@ end
 
 local engineBand, pendingBand, pendingSince = nil, nil, 0
 local function chooseTier(): (string, string)
-	local forced = workspace:GetAttribute("DetailTier")
+	-- Studio only: a test attribute left in a saved place must not force every player's tier (Map1.Audit lists it too)
+	local forced = if IS_STUDIO then workspace:GetAttribute("DetailTier") else nil
 	if type(forced) == "string" and TIERS[forced] then
 		return forced, "workspace DetailTier"
 	end
@@ -307,6 +377,7 @@ function DetailController.refresh()
 	end
 	forceRefresh = false
 	lastCam = p
+	refreshFar(p)
 	local tier = TIERS[tierName]
 	for _, c in pairs(cells) do
 		local dx, dz = c.x - p.X, c.z - p.Z
@@ -330,7 +401,14 @@ function DetailController.stats()
 			end
 		end
 	end
-	return { tier = tierName, why = tierWhy, models = nModels, cells = nCells, hidden = hidden, shaders = shaderName, shaderDevice = shaderDevice }
+	local farHidden = 0
+	for _, e in ipairs(farParts) do
+		if e.k >= 1 then
+			farHidden += 1
+		end
+	end
+	return { tier = tierName, why = tierWhy, models = nModels, cells = nCells, hidden = hidden, shaders = shaderName, shaderDevice = shaderDevice,
+		farCanopy = #farParts, farCanopyHidden = farHidden }
 end
 
 -- The shader tier and the tier this device has on Auto (see the header).
@@ -340,7 +418,7 @@ local shaderName, shaderDevice = "", ""
 local function chooseShaders(): (string, string)
 	local device = SHADER_OF[tierName] or "High"
 	local touchOnly = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-	if touchOnly and savedLevel() == nil and workspace:GetAttribute("DetailTier") == nil then
+	if touchOnly and savedLevel() == nil and not (IS_STUDIO and workspace:GetAttribute("DetailTier") ~= nil) then
 		device = "Phone" -- a phone on automatic graphics: the planned low look until its player asks for more
 	end
 	if RunService:IsStudio() then
@@ -421,6 +499,17 @@ function DetailController.Start()
 		watchRoot(child)
 	end
 	arena.ChildAdded:Connect(watchRoot)
+	-- Map 1's far valley (a Persistent model: there from the start, or arriving a moment later)
+	local function watchFarHolder(child: Instance)
+		if child.Name == "FarValley" and child:IsA("Model") then
+			watchFar(child)
+			forceRefresh = true
+		end
+	end
+	for _, child in ipairs(arena:GetChildren()) do
+		watchFarHolder(child)
+	end
+	arena.ChildAdded:Connect(watchFarHolder)
 	task.delay(30, function()
 		if next(watching) == nil then
 			warn("[DetailController] workspace.Arena has no Flora, Forest or Scatter folder: the scenery is not scaled")
@@ -478,7 +567,9 @@ function DetailController.Start()
 			applyTier()
 			local lp = Players.LocalPlayer
 			if lp then
-				lp:SetAttribute("DetailHidden", DetailController.stats().hidden)
+				local st = DetailController.stats()
+				lp:SetAttribute("DetailHidden", st.hidden)
+				lp:SetAttribute("DetailFarHidden", string.format("%d/%d", st.farCanopyHidden, st.farCanopy))
 			end
 		end
 		DetailController.refresh()

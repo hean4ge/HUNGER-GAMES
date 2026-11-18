@@ -436,11 +436,12 @@ function Props.build(Kit, folders)
 		rule.BorderSizePixel = 0
 		rule.Parent = paper
 		label("Rules", table.concat({
-			"- Twenty-four contenders. One walks out.",
-			"- At the horn: rush the Spire for the best gear, or slip into the woods.",
-			"- Hunger and thirst never rest. Drink from rivers and the lake.",
-			"- Hide in bushes and trees. Listen for footsteps and the cannon.",
-			"- On the second morning the border closes in. Be the last one standing.", -- PlayabilityPlan QW6
+			-- Map 1's wording (the same five lines are on the two boards in workspace.Lobby)
+			"- Up to forty-eight contenders. One walks out.",
+			"- At the signal: rush the Horn for the best gear, or run for the hills.",
+			"- Hunger and thirst never rest. Drink from streams and the lake.",
+			"- Crouch for quieter steps. Listen for footsteps.",
+			"- The border closes in on the Horn. Be the last one standing.", -- PlayabilityPlan QW6
 		}, "\n"), 0.38, 0.58, Theme.Fonts.Body, Color3.fromRGB(46, 42, 38), Enum.TextXAlignment.Left)
 		finish("NoticeBoard", { frame, face }, { Category = "Prop", Kind = "NoticeBoard", Footprint = 4.6, Sink = 0.3 })
 	end

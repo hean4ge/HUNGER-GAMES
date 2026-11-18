@@ -24,8 +24,8 @@
 	  PlayerService.setFrozen(player, frozen)
 	  PlayerService.clearSpectate(player)
 	Remote: SpectateTarget(target: Player?) points the requester's ReplicationFocus at an alive contender. A fallen
-	contender who is watching keeps the target and the focus when they respawn on the Tor while the round is Active and
-	the target alive (keepsSpectate): their SpectateController keeps watching and sends SpectateTarget only when the
+	contender who is watching keeps the target and the focus when they respawn on the Tor while the round is Active (or
+	Ending: the result) and the target alive (keepsSpectate): their SpectateController keeps watching and sends SpectateTarget only when the
 	target changes, so clearing it there pulled streaming back to the Tor for the rest of the watch.
 YouDied { placement, total, killer, killerUserId?, cause, weapon, weaponName, headshot, phase ("Active" | "Countdown"),
 	practice } goes to the victim, who also
@@ -80,6 +80,7 @@ PlayerService.died = Signal.new()
 local Services = nil
 local states = {} -- [Player] = per-player state (see onPlayerAdded)
 local spectateTargets = {} -- [requester] = target Player
+local spectateQueued = {} -- [requester] = { target = Player? }: the latest SpectateTarget that arrived over the rate limit
 local warned = {}
 local fallbackPad = nil
 local spawnCache = { list = {}, at = -math.huge }
@@ -477,11 +478,14 @@ local function releaseSpectatorsOf(target: Player)
 end
 
 -- A fallen contender watching the round keeps their spectate target and ReplicationFocus across their respawn on the Tor
--- (see the header): the round is Active, they are out, and the one they watch is still alive.
+-- (see the header): the round is Active (or Ending: the result, when a respawn that lands a moment after the last
+-- elimination would otherwise send their streaming back to the lobby while their camera stays on the winner), they
+-- are out, and the one they watch is still alive.
 local function keepsSpectate(player: Player): boolean
 	local target = spectateTargets[player]
+	local phase = phaseNow()
 	return target ~= nil
-		and phaseNow() == "Active"
+		and (phase == "Active" or phase == "Ending")
 		and player:GetAttribute("Alive") ~= true
 		and target.Parent == Players
 		and target:GetAttribute("Alive") == true
@@ -565,6 +569,9 @@ local function handleDeath(victim: Player, info, position: Vector3?, leaving: bo
 		Net.event("KillFeed"):FireAllClients({
 			killer = killerName,
 			victim = victim.DisplayName,
+			-- ids: the HUD marks "you" by UserId (display names are not unique)
+			killerUserId = if killer then killer.UserId else nil,
+			victimUserId = victim.UserId,
 			weapon = weaponId,
 			weaponName = weaponName,
 			cause = cause,
@@ -1085,6 +1092,7 @@ local function onPlayerRemoving(player: Player)
 		handleDeath(player, { cause = "Left" }, position, true)
 	end
 	spectateTargets[player] = nil
+	spectateQueued[player] = nil
 	releaseSpectatorsOf(player)
 	for _, connection in ipairs(st.charConnections) do
 		connection:Disconnect()
@@ -1098,10 +1106,7 @@ local function onPlayerRemoving(player: Player)
 	states[player] = nil
 end
 
-local function onSpectateTarget(player: Player, target: any)
-	if not states[player] or not Net.rateLimit(player, "SpectateTarget", 5, 10) then
-		return
-	end
+local function applySpectateTarget(player: Player, target: any)
 	if PlayerService.isAlive(player) then
 		PlayerService.clearSpectate(player)
 		return
@@ -1115,6 +1120,31 @@ local function onSpectateTarget(player: Player, target: any)
 		end
 	end
 	PlayerService.clearSpectate(player)
+end
+
+-- Each change moves the requester's ReplicationFocus (the server streams a new region to them): two a second after a
+-- burst of six. A request over the limit is not dropped, or a fast cycle through the contenders would leave the focus
+-- on an earlier target than the one on screen: the latest one is kept and applied a second later.
+local function onSpectateTarget(player: Player, target: any)
+	if not states[player] then
+		return
+	end
+	if Net.rateLimit(player, "SpectateTarget", 2, 6) then
+		spectateQueued[player] = nil
+		applySpectateTarget(player, target)
+		return
+	end
+	local waiting = spectateQueued[player] ~= nil
+	spectateQueued[player] = { target = target }
+	if not waiting then
+		task.delay(1, function()
+			local queued = spectateQueued[player]
+			spectateQueued[player] = nil
+			if queued and states[player] then
+				applySpectateTarget(player, queued.target)
+			end
+		end)
+	end
 end
 
 -- Lifecycle ----------------------------------------------------------------------------------------------------------

@@ -12,7 +12,12 @@
 	Motor6D rigs. A joint the Animator didn't write this frame (throttled or unanimated) reuses its previous base, so
 	nothing ever accumulates. Everything runs in this one pass, in a fixed order, so the leg IK always sees the final
 	stance pose (an IKControl solves inside the animation step and could not see these poses). Characters within
-	POSE_RANGE studs of the camera are processed (IK within IK_RANGE):
+	LOD.poseRange studs of the camera are processed (IK within LOD.ikRange), with caps so a crowd cannot sink a frame
+	(47 contenders run to the horn together): only the nearest LOD.ikMax other characters get foot IK and the air pose
+	(three rays each), only the nearest LOD.poseMax get the twist and lean, and one behind the camera (further than
+	LOD.behindNear) counts as far; the rest keep only what must be seen at any distance, stances (crouch, slide,
+	climb) and swings, and cost nothing while they do neither. Ranked every LOD.rank seconds; phones and tablets use
+	the smaller LOD_TOUCH numbers. CharacterVisuals._poseStats has the measured cost.
 	  1. Stance poses: Crouch (bent hips and knees that exactly absorb the hitbox drop, slight forward lean), Slide
 	     (lean back, leading leg forward, trailing leg folded) and Climb (arms up, diagonal reach cycle). Remote
 	     characters use the replicated character attribute Stance; the local character uses MovementController's
@@ -35,8 +40,10 @@
 	  6. Air: the legs tuck toward the apex and reach for the ground before touch-down, the arms come out a little
 	     for balance (wider in a long fall), over Animate's take-off/air clip pose (local: moveState "Air";
 	     remote: the ground probe and vertical speed, swimmers excluded).
-	  7. Melee swings (#90): other players' swings, from the CombatAction remote ("Swing", which the server sends at the
-	     strike with the attacker's swing set as `variant`), as a short procedural swing on the waist, neck, shoulders
+	  7. Melee swings (#90): other players' swings, from the CombatAction remote ("Swing", which the server relays when
+	     the swing starts, with the attacker's swing set as `variant` and `lead`, the seconds until the strike: the
+	     wind-up is fitted so the cut crosses at the strike, when the damage lands; a swing announced only at its strike
+	     (lead 0) starts wound up), as a short procedural swing on the waist, neck, shoulders
 	     and elbows over whatever the Animator plays (the "toolnone" hold with a weapon, the idle with fists): a flat or
 	     falling cut to the left, a backhand to the right, an overhead chop, a spear thrust (straight, high or low), a
 	     left jab or a right cross. The shape follows the first-person set the attacker played (ViewmodelController.Poses:
@@ -50,21 +57,27 @@
 	downward view the own body keeps the jump clip's root lift and forward trunk pitch at most at the bind pose (the clip
 	lifts the pelvis ~0.2 studs and pitches the trunk ~8 degrees forward, which brought the chest up into the view and
 	hid the hands), and the air tuck and lean flatten out. A shown body part within NEAR_CULL studs of the camera is
-	hidden until it moves away (never cut open by the near plane). Test hook: the local player's attribute LS_PoseAsRemote = true poses
-	the own body through the remote path (what other players' clients compute) and lets CombatAction swings sent about
-	yourself show on it; LS_SwingSlowMo = n (Studio only) plays the swings that start while it is set n times slower.
+	hidden until it moves away (never cut open by the near plane). Test hooks (Studio only): the local player's attribute
+	LS_PoseAsRemote = true poses the own body through the remote path (what other players' clients compute) and lets
+	CombatAction swings sent about yourself show on it; LS_SwingSlowMo = n plays the swings that start while it is set n
+	times slower.
 
 	Public API (through the Controllers registry):
 	  CharacterVisuals.headLean(rig, crouchWeight, slideWeight) -> (forward: number, down: number)
 	      how far the head centre moves (root space, studs) under the crouch/slide poses; CameraController uses it.
-	  CharacterVisuals.playSwing(character, itemId?, variant?) -> boolean
+	  CharacterVisuals.playSwing(character, itemId?, variant?, lead?) -> boolean
 	      a third-person swing (item 7) on that character; any R15 model (a test rig, an NPC) is tracked on first use.
+	      lead: seconds from now to the strike (0 = it lands now: the swing starts wound up); nil = the plain shape.
+	  CharacterVisuals._poseStats -> { ms, last, peak, entries, posed, ik }   test hook: the pose pass's cost per frame (ms:
+	      smoothed, last frame's, the recent peak) and how many characters it tracked, posed and gave foot IK last frame.
+	  CharacterVisuals._lod   test hook: the caps (LOD), to compare costs live in a playtest.
 	  CharacterVisuals._swingOf(character) -> { shape, style, variant, u, duration }?   test hook: the swing it plays.
 	  CharacterVisuals._swingShapes   test hook: the shape table (radians), to try new angles live in a playtest.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -76,8 +89,16 @@ local CharacterVisuals = {}
 local player = Players.LocalPlayer
 
 local MOVE = Config.Movement or {}
-local POSE_RANGE = 150
-local IK_RANGE = 75
+-- How much of a crowd is posed (see the header). Distances are from the camera.
+local LOD = {
+	poseRange = 150, -- studs: further characters are left to the Animator
+	ikRange = 75, -- studs: foot IK inside this
+	ikMax = 8, -- the nearest this many other characters get foot IK and the air pose (both read the ground)
+	poseMax = 24, -- the nearest this many get the twist and lean; the rest only stances and swings
+	behindNear = 14, -- studs: a character behind the camera and further than this counts as far
+	rank = 0.25, -- seconds between rankings
+}
+local LOD_TOUCH = { poseRange = 90, ikRange = 45, ikMax = 4, poseMax = 12 } -- phones and tablets
 local BLEND_RATE = 11 -- remote stance blend speed (1/s)
 local CLIMB_STROKE = (MOVE.Climb and MOVE.Climb.StrokeLength) or 2.6
 local FALL_GRAVITY = (tonumber(MOVE.AirGravity) or 125) * (tonumber(MOVE.FallGravityScale) or 1.08)
@@ -260,6 +281,19 @@ waterParams.RespectCanCollide = true
 local filterDirty = true
 
 local IDENTITY = CFrame.identity
+
+-- The slide pose's angles before a rig's own are solved (solveSlidePose, the first time that character slides).
+local DEFAULT_SLIDE_POSE = {
+	leadThigh = math.rad(72),
+	leadKnee = SLIDE_LEAD_KNEE,
+	leadAnkle = SLIDE_LEAD_ANKLE,
+	trailThigh = SLIDE_TRAIL_THIGH,
+	trailShin = SLIDE_TRAIL_SHIN,
+	trailAnkle = SLIDE_TRAIL_ANKLE,
+}
+
+local poseStats = { ms = 0, last = 0, peak = 0, entries = 0, posed = 0, ik = 0 }
+local ikCount = 0 -- characters given foot IK this frame
 
 local function movement()
 	return Controllers and Controllers.MovementController
@@ -533,7 +567,7 @@ local function ensureRig(entry): boolean
 	entry.rig = rig
 	entry.humanoid = humanoid
 	entry.root = root
-	entry.slidePose = solveSlidePose(rig)
+	entry.slidePose = nil -- (about 1,900 leg solves: left until this character first slides, see poseEntry)
 	local left, right = legInfo(rig.joints, "Left"), legInfo(rig.joints, "Right")
 	entry.legs = if left and right then { left, right } else nil
 	entry.footHold = {
@@ -664,7 +698,7 @@ local swingRng = Random.new()
 
 -- Starts a third-person swing on a character (item 7 in the header): itemId gives the style and weight, variant (1-8)
 -- the attacker's swing set.
-function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: number?): boolean
+function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: number?, lead: number?): boolean
 	if typeof(character) ~= "Instance" or not character:IsA("Model") or not character:IsDescendantOf(workspace) then
 		return false
 	end
@@ -713,6 +747,26 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	end
 	local duration = math.clamp((SWING_TIME_STYLE[style] or SWING_TIME[weight] or 0.42)
 		* (1 + (swingRng:NextNumber() * 2 - 1) * SWING_TIME_JITTER), 0.35, 0.5)
+	-- The cut crosses when the damage lands. With `lead` seconds to the strike (the swing's start was relayed), the
+	-- wind-up takes what the lead leaves before the cut and the rest of the swing keeps its length. With no lead left
+	-- (announced at the strike) the swing starts already wound up and blends in over SWING_FADE.
+	local uW = SWING_WINDUP[weight] or 0.24
+	local cutShare, followShare, holdShare = SWING_CUT, SWING_FOLLOW, SWING_HOLD
+	local startU = 0 -- the share of the swing already behind it when it starts
+	local leadTime = tonumber(lead)
+	if leadTime and leadTime == leadTime then
+		local windup = uW * duration
+		local rest = duration - windup
+		if leadTime > 0.02 then
+			local fitted = math.clamp(leadTime - SWING_CUT * duration, 0.04, 0.3)
+			local scale = duration / (fitted + rest)
+			duration = fitted + rest
+			uW = fitted / duration
+			cutShare, followShare, holdShare = SWING_CUT * scale, SWING_FOLLOW * scale, SWING_HOLD * scale
+		else
+			startU = uW
+		end
+	end
 	if Config.IsStudio then
 		local slow = tonumber(player:GetAttribute("LS_SwingSlowMo"))
 		if slow and slow > 1 then
@@ -723,8 +777,9 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	local from = nil
 	if entry.swing and entry.swingOut and now - (entry.swingOutAt or -math.huge) < 0.1 then
 		from = table.clone(entry.swingOut) -- (cutting into a swing: blend from where the body is)
+	elseif startU > 0 then
+		from = table.create(SWING_N, 0) -- (starting wound up: blend from the body as the Animator has it)
 	end
-	local uW = SWING_WINDUP[weight] or 0.24
 	entry.swing = {
 		name = name,
 		style = style,
@@ -734,12 +789,13 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 		F = F,
 		settle = settle,
 		from = from,
-		t0 = now,
+		at = now, -- when it began to show here (the blend from `from` runs from this)
+		t0 = now - startU * duration,
 		duration = duration,
 		uW = uW,
-		uM = uW + SWING_CUT,
-		uF = uW + SWING_CUT + SWING_FOLLOW,
-		uH = uW + SWING_CUT + SWING_FOLLOW + SWING_HOLD,
+		uM = uW + cutShare,
+		uF = uW + cutShare + followShare,
+		uH = uW + cutShare + followShare + holdShare,
 	}
 	return true
 end
@@ -768,7 +824,9 @@ local function onCombatAction(payload: any)
 	end
 	local character = attacker.Character
 	if character then
-		CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant)
+		-- lead: seconds until the strike (the swing's start was relayed); 0 or missing: the strike is now
+		CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant,
+			tonumber(payload.lead) or 0)
 	end
 end
 
@@ -815,7 +873,7 @@ local function swingPose(entry, now: number): { number }?
 	sampleSwing(swing, math.min(u + SWING_LEAD, 0.999), swingBody)
 	swingArm[1], swingArm[2], swingArm[3] = swingBody[1], swingBody[2], swingBody[3]
 	local from = swing.from
-	local since = now - swing.t0
+	local since = now - (swing.at or swing.t0)
 	if from and since < SWING_FADE then
 		local k = smooth01(since / SWING_FADE)
 		for i = 1, SWING_N do
@@ -925,8 +983,11 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		end
 		return
 	end
+	-- how much of the pose this character gets this frame (rankEntries): 2 = everything, 1 = no foot IK, 0 = stances
+	-- and swings only
+	local lod = if entry.isLocal then 2 else (entry.lod or 0)
 	local distance = (root.Position - camPos).Magnitude
-	if not entry.isLocal and distance > POSE_RANGE then
+	if not entry.isLocal and distance > LOD.poseRange then
 		if entry.posed then
 			clearPose(entry)
 		end
@@ -988,6 +1049,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		land = smooth01(entry.land)
 	end
 	entry.prevVy = vel.Y
+	if lod == 0 and not entry.posed and entry.swing == nil and c < 0.002 and s < 0.002 and k < 0.002 then
+		return -- far, unseen or beyond the crowd cap, and neither in a stance nor swinging: the Animator's pose as it is
+	end
 
 	-- Ground under the body: grounded estimate and the reference plane the animation's feet stand on
 	local drop = rig.crouchDrop * math.max(c, s) + (rig.slideDrop - rig.crouchDrop) * s
@@ -1002,7 +1066,10 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		ikParams.FilterDescendantsInstances = list
 		waterParams.FilterDescendantsInstances = list
 	end
-	local doIK = entry.legs ~= nil and distance <= IK_RANGE
+	local doIK = entry.legs ~= nil and lod >= 2 and distance <= LOD.ikRange
+	if doIK then
+		ikCount += 1
+	end
 	local ls = math.clamp((rig.thigh + rig.shin) / REF_LEGS, 0.6, 1.6) -- this rig's legs against the classic rig's
 	local groundHit = nil
 	if doIK then
@@ -1064,6 +1131,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		end
 		twistTarget = math.clamp(angle * 0.65, -TWIST_MAX, TWIST_MAX) * math.clamp((speedH - 1.5) / 3, 0, 1)
 	end
+	if lod < 1 then
+		twistTarget = 0
+	end
 	entry.twist += (twistTarget - entry.twist) * expAlpha(9, dt)
 	local twist = entry.twist
 
@@ -1078,6 +1148,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		leanXTarget = -math.clamp(aF * LEAN_PER_ACCEL, -LEAN_BACK_MAX, LEAN_FORWARD_MAX)
 			- RUN_LEAN * math.clamp(vF / SPRINT_SPEED, 0, 1) * (if grounded then 1 else 0.4)
 		leanZTarget = -math.clamp(aL * ROLL_PER_ACCEL, -ROLL_MAX, ROLL_MAX)
+	end
+	if lod < 1 then
+		leanXTarget, leanZTarget = 0, 0
 	end
 	entry.leanX += (leanXTarget - entry.leanX) * expAlpha(7, dt)
 	entry.leanZ += (leanZTarget - entry.leanZ) * expAlpha(7, dt)
@@ -1107,6 +1180,14 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	local kneeCrouch = -2 * theta
 	local ankleCrouch = theta
 	local sp = entry.slidePose
+	if not sp then
+		if s > 0.002 then
+			sp = solveSlidePose(rig) -- (this rig's own angles, the first time it slides)
+			entry.slidePose = sp
+		else
+			sp = DEFAULT_SLIDE_POSE -- (every use below is times s)
+		end
+	end
 	local hipLead = (sp.leadThigh - SLIDE_ROOT) * s
 	local hipTrail = (sp.trailThigh - SLIDE_ROOT) * s
 	local kneeLead = sp.leadKnee * s
@@ -1310,17 +1391,69 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	entry.posed = true
 end
 
+-- Ranks the other characters by distance from the camera and gives each its share of the pose (entry.lod, see LOD).
+local ranked: { any } = {}
+local rankAt = -math.huge
+local function byRankDistance(a: any, b: any): boolean
+	return a.rankDistance < b.rankDistance
+end
+local function rankEntries(camCF: CFrame?)
+	table.clear(ranked)
+	local camPos = if camCF then camCF.Position else Vector3.zero
+	local look = if camCF then camCF.LookVector else nil
+	for _, entry in pairs(entries) do
+		if entry.isLocal then
+			entry.lod = 2
+		else
+			entry.lod = 0
+			local root = entry.root
+			if root and root.Parent then
+				local offset = root.Position - camPos
+				local d = offset.Magnitude
+				-- (behind: more than about 100 degrees off the look, outside any field of view)
+				local behind = look ~= nil and d > LOD.behindNear and offset:Dot(look) < -0.2 * d
+				if d <= LOD.poseRange and not behind then
+					entry.rankDistance = d
+					table.insert(ranked, entry)
+				end
+			end
+		end
+	end
+	table.sort(ranked, byRankDistance)
+	for i, entry in ipairs(ranked) do
+		entry.lod = if i <= LOD.ikMax and entry.rankDistance <= LOD.ikRange then 2 elseif i <= LOD.poseMax then 1 else 0
+	end
+end
+
 local function preSimulation(dt: number)
+	local started = os.clock()
 	local cam = workspace.CurrentCamera
 	local camPos = if cam then cam.CFrame.Position else Vector3.zero
+	if started - rankAt >= LOD.rank then
+		rankAt = started
+		rankEntries(if cam then cam.CFrame else nil)
+	end
+	ikCount = 0
+	local count, posed = 0, 0
 	for _, entry in pairs(entries) do
 		local ok, err = pcall(poseEntry, entry, dt, camPos)
 		if not ok and os.clock() - errorAt > 5 then
 			errorAt = os.clock()
 			warn("[CharacterVisuals] pose error: " .. tostring(err))
 		end
+		count += 1
+		if entry.posed then
+			posed += 1
+		end
 	end
+	local ms = (os.clock() - started) * 1000
+	poseStats.last = ms
+	poseStats.ms += (ms - poseStats.ms) * 0.05
+	poseStats.peak = math.max(poseStats.peak * 0.995, ms)
+	poseStats.entries, poseStats.posed, poseStats.ik = count, posed, ikCount
 end
+CharacterVisuals._poseStats = poseStats -- (test hooks, see the header)
+CharacterVisuals._lod = LOD
 
 -- First-person body ----------------------------------------------------------------------------------------------------
 
@@ -1416,8 +1549,13 @@ function CharacterVisuals.Init(registry)
 end
 
 function CharacterVisuals.Start()
+	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+		for key, value in pairs(LOD_TOUCH) do
+			(LOD :: any)[key] = value -- a phone or tablet: a smaller crowd is posed
+		end
+	end
 	local function readHook()
-		poseAsRemote = player:GetAttribute("LS_PoseAsRemote") == true
+		poseAsRemote = Config.IsStudio and player:GetAttribute("LS_PoseAsRemote") == true -- (a test hook: Studio only)
 	end
 	readHook()
 	player:GetAttributeChangedSignal("LS_PoseAsRemote"):Connect(readHook)

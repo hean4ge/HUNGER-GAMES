@@ -43,8 +43,8 @@
 	markers sit on its meshes (the ray starts 3 studs over the designed floor and must not find bare terrain). A
 	marker on the open ground is looked for from RULES.CoverProbe studs up, so a mesh over the spot (the peak, a
 	hedge, a boulder, a trunk) is met first and the spot counts as taken. A marker whose spot is taken moves to the
-	nearest clear one (the Horn's stay on their own floor); one that finds none is left where it was planned and
-	listed as "blocked". With no world there at all (a dry run before the terrain is written) the data alone decides
+	nearest clear one (the Horn's stay on their own floor); one that finds none is "blocked": a scattered marker
+	is then left out of the build, a designed one is left where it was planned and listed as a problem. With no world there at all (a dry run before the terrain is written) the data alone decides
 	and the report counts those markers "by the data alone": run it again after the landmarks are in.
 
 	USE (execute_luau, Edit mode; Studio caches required modules, so require a clone)
@@ -891,7 +891,9 @@ local function seatAll(markers: { any }, stats: { [string]: any }, opts: { [stri
 		table.insert(exclude, opts.parent)
 	end
 	local params = rayParams(exclude)
-	local counts = { world = 0, data = 0, blocked = 0, moved = 0, dropInFalse = 0, covered = 0 }
+	local scatter = arena and arena:FindFirstChild("Scatter")
+	local counts = { world = 0, data = 0, blocked = 0, moved = 0, dropInFalse = 0, covered = 0, dropped = 0 }
+	stats.notes = stats.notes or {}
 
 	local function tryAt(m: any, x: number, z: number, y: number): (boolean, number?)
 		local fy, inst = floorAt(m, x, z, y, offset, params)
@@ -903,6 +905,11 @@ local function seatAll(markers: { any }, stats: { [string]: any }, opts: { [stri
 		end
 		if m.floorIsMesh and inst and inst:IsA("Terrain") then
 			return false, fy -- the deck or the Horn's floor was expected
+		end
+		-- a plant or a stone is never a floor: a boulder under 3 studs high passed the height test above, and a crate
+		-- stood on top of it (the North Beach, 18 Nov)
+		if inst and scatter and inst:IsDescendantOf(scatter) then
+			return false, fy
 		end
 		if m.kind == "Crate" then
 			local look: Vector3 = m.look
@@ -963,8 +970,18 @@ local function seatAll(markers: { any }, stats: { [string]: any }, opts: { [stri
 			if not found then
 				m.seated = "blocked"
 				counts.blocked += 1
-				table.insert(stats.problems, string.format("%s at (%.0f, %.0f): no clear spot on the real ground (data y %.1f, world y %.1f); left at its planned place",
-					m.source, m.x, m.z, m.y, fy))
+				-- A scattered marker with no clear spot is left out (Loot.build): under the peak's shell three of them
+				-- lay 100 to 200 studs inside the mesh, out of reach, and every rebuild brought them back. A designed
+				-- marker (the Horn, a site, a runner's cache) stays at its planned place and is listed as a problem.
+				if m.group == "Scatter" then
+					m.dropped = true
+					counts.dropped += 1
+					table.insert(stats.notes, string.format("%s at (%.0f, %.0f): no clear spot on the real ground (data y %.1f, world y %.1f)",
+						m.source, m.x, m.z, m.y, fy))
+				else
+					table.insert(stats.problems, string.format("%s at (%.0f, %.0f): no clear spot on the real ground (data y %.1f, world y %.1f); left at its planned place",
+						m.source, m.x, m.z, m.y, fy))
+				end
 			end
 		end
 		-- the Feast: anything solid over a tier-3 crate near the centre means it is restocked in place
@@ -1072,9 +1089,19 @@ function Loot.build(options: { [string]: any }?): (string, { [string]: any })
 		parent = opts.parent or lootFolder()
 	end
 
-	local seat = { world = 0, data = #markers, blocked = 0, moved = 0, dropInFalse = 0, covered = 0 }
+	local seat = { world = 0, data = #markers, blocked = 0, moved = 0, dropInFalse = 0, covered = 0, dropped = 0 }
 	if opts.seat ~= false then
 		seat = seatAll(markers, stats, { offset = offset, parent = parent })
+		-- blocked scattered markers are not built (and not counted in the tables below)
+		if seat.dropped > 0 then
+			local kept = {}
+			for _, m in ipairs(markers) do
+				if not m.dropped then
+					table.insert(kept, m)
+				end
+			end
+			markers = kept
+		end
 	else
 		for _, m in ipairs(markers) do
 			m.seated = "data"
@@ -1151,8 +1178,11 @@ function Loot.build(options: { [string]: any }?): (string, { [string]: any })
 		stats.expected, stats.crateMean, stats.groundChance))
 	table.insert(lines, string.format("  tier-3 markers within %d of the centre: %d (%d with DropIn = false); runner's caches: %d; farthest marker r %.0f (limit %d)",
 		stats.refillRadius, tier3Near, seat.dropInFalse, runners, farthest, stats.lootLimit))
-	table.insert(lines, string.format("  seated on the world: %d (moved to a clear spot: %d); by the data alone: %d; blocked: %d; tier-3 crates with something over them: %d",
-		seat.world, seat.moved, seat.data, seat.blocked, seat.covered))
+	table.insert(lines, string.format("  seated on the world: %d (moved to a clear spot: %d); by the data alone: %d; blocked: %d (%d of them scattered markers, left out); tier-3 crates with something over them: %d",
+		seat.world, seat.moved, seat.data, seat.blocked, seat.dropped, seat.covered))
+	for _, note in ipairs(stats.notes or {}) do
+		table.insert(lines, "  left out: " .. note)
+	end
 	local rows = Loot.table(markers, stats)
 	local cells = {}
 	for _, row in ipairs(rows) do

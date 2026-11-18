@@ -56,6 +56,19 @@ Config.Round = {
 	SoloWaitTime = 30,
 	PracticeHandoffTime = 60,
 	PracticeIntermissionTime = 8,
+	-- Filling a public server (RoundService). On a live public server (not Studio, not a private server) a player who
+	-- joins during the Intermission restarts its countdown, so the first two players do not start alone while the
+	-- server is still filling; it never runs longer than FillMaxTime seconds from its start, and with FillTarget or
+	-- more already waiting it is not held at all (a busy server keeps its pace between rounds). A private server
+	-- (game.PrivateServerId ~= "", GameState.PrivateServer = true) starts with whoever is there after the normal
+	-- IntermissionTime. A round takes MaxContenders at most: the others watch, and whoever played least recently is
+	-- picked first for the next round.
+	FillExtendOnJoin = true,
+	FillTarget = 8,
+	FillMaxTime = 90,
+	-- When the Intermission ends with two or more players present but fewer than two of them ready (still loading or
+	-- respawning), the pick waits up to this many seconds instead of starting a practice round for the one who is ready.
+	StartHoldTime = 10,
 	-- The finale (QW14, Q3): the ring keeps closing to nothing beside the Spire (Config.Border.LastStand*), the border
 	-- never takes the last contender standing, and a timeout with two or more alive goes to the healthiest (then the
 	-- most kills). Roll Calls once the border moves post their names in the 2D list only (no sky show, no silence).
@@ -432,7 +445,7 @@ Config.Inventory = {
 	UseFinishTolerance = 0.25, -- seconds a UseFinish may arrive early (network jitter)
 	DropForwardSpeed = 8, -- toss speed (studs/s) when you drop an item
 	DropUpSpeed = 10,
-	EquipRequestsPerSecond = 20, -- server-side rate limit for EquipSlot
+	EquipRequestsPerSecond = 8, -- server-side rate limit for EquipSlot (each change rebuilds the held model for everyone near)
 	FullAt = 95, -- QW12: food is refused at Hunger >= this and drinks at Thirst >= this (client and server)
 }
 
@@ -500,8 +513,8 @@ Config.Feedback = {
 -- client). At the call every contender watches one shot on the round's clock: the red room under the net, the cut to
 -- the glass cases (the full shot only), the rise up the pole through the round hall with the camera circling, a short
 -- white-out, then today's plate rise in first person and the last seconds of the countdown. The full shot plays when
--- any contender in the round hasn't seen it yet this session (player attribute Launched), the short cut otherwise;
--- practice rounds play PracticeCut. The countdown grows to fit: FullCountdown / ShortCountdown seconds from the call
+-- at least FullCutShare of the round's contenders haven't seen it yet this session (player attribute Launched), the
+-- short cut otherwise; practice rounds play PracticeCut. The countdown grows to fit: FullCountdown / ShortCountdown seconds from the call
 -- to the horn, the plates rising at FullRiseAt / ShortRiseAt (GameState LaunchAt) as the white-out ends, and the
 -- "Stay on your plate" announcements only in the last AnnounceLast seconds. Intro = false: today's countdown
 -- (Round.CountdownTime) and plate rise, unchanged. Studio only: GameState attribute LaunchCutTest = "Full" | "Short"
@@ -513,6 +526,10 @@ Config.Launch = {
 	ShortCountdown = 12,
 	ShortRiseAt = 6.2,
 	PracticeCut = "Short", -- "Short" | "Full"
+	-- The full shot plays only when at least this share of the round's contenders has not seen it this session (a
+	-- server's first round: everyone). One newcomer among many no longer makes every contender wait through the long
+	-- cut; they see the short one. 0 = the full shot whenever any contender is new.
+	FullCutShare = 0.5,
 	AnnounceLast = 10,
 	SkipHold = 0.6, -- seconds to hold Skip (Space / A / the SKIP button); it only cuts your own camera to your plate
 	StandIns = 8, -- other contenders shown as copies of their avatars (the rest as plain figures); fewer on Medium / Low
@@ -545,11 +562,15 @@ Config.Maps = {
 	GreenLand = {
 		Round = { MaxContenders = 48 }, -- one per plinth
 		Border = {
-			-- 1,800 for 48 contenders down to 520 for a lone one (707 for 2, 843 for 4, 1,014 for 8, 1,243 for 16, 1,415
-			-- for 24). At MaxShrinkSpeed (3.5) a ring wider than about 770 starts closing before ShrinkStartTime: a full
-			-- ring at about 5:06 (306 s), 24 contenders' at 6:56, 8 contenders' at 8:50; 1 or 2 contenders' at 10:00.
+			-- 1,800 for 48 contenders down to 700 for a lone one (860 for 2, 978 for 4, 1,125 for 8, 1,321 for 16, 1,469
+			-- for 24). A lone tester's ring takes in the forest edge (r 570 to 630) and the stream; two testers' reaches
+			-- the lake (r 800). It was 520 until 18 Nov 2026: a lone ring that stopped short of the trees.
+			-- At MaxShrinkSpeed (3.5) a ring wider than about 770 starts closing before ShrinkStartTime (the slide of its
+			-- centre counts): a full ring at about 5:04 (304 s), 24 contenders' at 6:38, 8 contenders' at 8:17, 4
+			-- contenders' at 8:59, 2 contenders' at 9:32; a lone contender's at 10:00. Every ring has closed at
+			-- ShrinkStartTime + ShrinkDuration (13:50), as before.
 			StartRadius = 1800,
-			MinStartRadius = 520,
+			MinStartRadius = 700,
 			FullContenders = 48,
 			-- The ring is 60 wide when the Last Stand begins, round a point on the turf 90 to 100 studs from the Horn (the
 			-- layout's LastStandPoints: the middle of a mouth lane), so it never closes on the platform.

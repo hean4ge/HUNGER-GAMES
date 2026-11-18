@@ -46,6 +46,9 @@
 	  T.applyLook({ remember = true }) ... T.restoreLook()   -- a look for a test: the old one waits in an attribute
 	  T.applyStreaming()      -- today's streaming numbers
 	  T.buildBoundary(opts)   -- the invisible backstop at Params.boundaryRadius, following the ground
+	  T.fillUnder(opts)       -- raises the ground under a landmark shell (the Peak) to its underside, so nobody
+	                          --   walks in under its skirt. Run it after the terrain AND the landmarks are in.
+	  T.surveyUnder(opts)     -- the same survey without writing: how many columns are open, and where
 	  T.windowBox(minX, maxX, minZ, maxZ) / T.windowAround(x, z, radius)   -- a window from map studs
 	opts for generate / run / plan / verify:
 	  offset   Vector3, multiples of 4. Everything is written at map position + offset (a tile at the workbench).
@@ -1168,14 +1171,16 @@ function Writer.applyLook(opts: any?): string
 	)
 end
 
--- today's numbers (the classic TerrainGen.applyStreaming), kept until the far view is tuned
+-- the classic numbers (TerrainGen.applyStreaming) with ArenaV3 7.4's StreamOutBehavior
 function Writer.applyStreaming(): string
 	workspace.StreamingEnabled = true
 	workspace.StreamingTargetRadius = 1024
 	workspace.StreamingMinRadius = 128
-	workspace.StreamOutBehavior = Enum.StreamOutBehavior.Default
+	-- Opportunistic (docs/design/ArenaV3.md 7.4): what lies beyond the target radius streams out again. With Default a
+	-- client kept everything it had passed (measured 18 Nov: 20,253 of 25,567 loaded plants were beyond 1,024 studs).
+	workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic
 	workspace.StreamingIntegrityMode = Enum.StreamingIntegrityMode.PauseOutsideLoadedArea
-	return "streaming: target 1024, minimum 128, StreamOutBehavior Default, PauseOutsideLoadedArea"
+	return "streaming: target 1024, minimum 128, StreamOutBehavior Opportunistic, PauseOutsideLoadedArea"
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -1268,6 +1273,151 @@ end
 ----------------------------------------------------------------------------------------------------
 -- the run
 ----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- the ground under a landmark shell (the Peak)
+----------------------------------------------------------------------------------------------------
+-- The Peak is a mesh shell on top of a lower hill of real terrain. Its collision is solid from the skin down to a
+-- flat underside at the model's base (y 190), and on its north side the real ground lies 10 to 110 studs under that
+-- base: the skirt hung in the air over about 380 studs of rim, a player walked in under it and, the skin being
+-- one-sided, looked out unseen (found in play, 18 Nov). fillUnder raises the ground in every column under the model
+-- to just under its underside. The result is a steep bank of terrain that meets the skirt all round.
+-- Map1.Audit's "peak" check fails while any rim column is open. A new terrain write puts the hill back as the data
+-- has it: run fillUnder again after it (and after placeLandmarks).
+--   opts.model   the landmark (default workspace.Arena.Landmarks.Peak)
+--   opts.gap     a column is open when its underside is more than this over the ground (default 3: less than a body)
+--   opts.under   the fill stops this far under the underside (default 0: up to it)
+--   opts.widen   each column's block is this much wider than the step (default 4: a block the size of one column
+--                only half fills its voxels, and the smooth surface then sags between columns; cracks 3 to 17
+--                studs high were left that way on the first run)
+--   opts.step    studs between columns (default 4, the voxel size)
+--   opts.passes  the survey and fill are repeated up to this many times while columns are still open (default 3)
+local function underSurvey(o: any): (any, string?)
+	local model = o.model
+	if model == nil then
+		local arena = workspace:FindFirstChild("Arena")
+		local landmarks = arena and arena:FindFirstChild("Landmarks")
+		model = landmarks and landmarks:FindFirstChild("Peak")
+	end
+	if not model then
+		return nil, "no landmark (workspace.Arena.Landmarks.Peak is missing)"
+	end
+	local step = o.step or 4
+	local gap = o.gap or 3
+	local cf, size = model:GetBoundingBox()
+	local x0 = floor((cf.Position.X - size.X / 2) / step) * step + step / 2
+	local x1 = cf.Position.X + size.X / 2
+	local z0 = floor((cf.Position.Z - size.Z / 2) / step) * step + step / 2
+	local z1 = cf.Position.Z + size.Z / 2
+	local top = cf.Position.Y + size.Y / 2 + 50
+	local meshParams = RaycastParams.new()
+	meshParams.FilterType = Enum.RaycastFilterType.Include
+	meshParams.FilterDescendantsInstances = { model }
+	local groundParams = RaycastParams.new()
+	groundParams.FilterType = Enum.RaycastFilterType.Include
+	groundParams.FilterDescendantsInstances = { workspace.Terrain }
+	groundParams.IgnoreWater = true
+	local reach = top + 600
+	local out = { model = model, step = step, columns = {}, footprint = 0, open = 0, rim = 0, rimOpen = 0, largest = 0, sample = nil }
+	local covered: { [number]: boolean } = {}
+	local nz = floor((z1 - z0) / step) + 1
+	local i = 0
+	local x = x0
+	while x <= x1 do
+		local j = 0
+		local z = z0
+		while z <= z1 do
+			local skin = workspace:Raycast(Vector3.new(x, top, z), Vector3.new(0, -reach, 0), meshParams)
+			if skin then
+				out.footprint += 1
+				covered[i * (nz + 2) + j] = true
+				local under = workspace:Raycast(Vector3.new(x, top - reach, z), Vector3.new(0, reach, 0), meshParams)
+				local underY = if under then under.Position.Y else skin.Position.Y
+				local ground = workspace:Raycast(Vector3.new(x, top, z), Vector3.new(0, -reach, 0), groundParams)
+				if ground and underY - ground.Position.Y > gap then
+					out.open += 1
+					out.largest = max(out.largest, underY - ground.Position.Y)
+					table.insert(out.columns, { x = x, z = z, i = i, j = j, ground = ground.Position.Y, under = underY, material = ground.Material })
+				end
+			end
+			j += 1
+			z += step
+		end
+		i += 1
+		x += step
+		if i % 24 == 0 then
+			task.wait()
+		end
+	end
+	-- the rim: columns under the model with a neighbour that is not; an open one is a way in
+	local function isCovered(a: number, b: number): boolean
+		return covered[a * (nz + 2) + b] == true
+	end
+	for key in pairs(covered) do
+		local a, b = key // (nz + 2), key % (nz + 2)
+		if not (isCovered(a + 1, b) and isCovered(a - 1, b) and isCovered(a, b + 1) and isCovered(a, b - 1)) then
+			out.rim += 1
+		end
+	end
+	for _, c in ipairs(out.columns) do
+		if not (isCovered(c.i + 1, c.j) and isCovered(c.i - 1, c.j) and isCovered(c.i, c.j + 1) and isCovered(c.i, c.j - 1)) then
+			out.rimOpen += 1
+			if not out.sample then
+				out.sample = string.format("(%.0f, %.0f): ground %.0f, underside %.0f", c.x, c.z, c.ground, c.under)
+			end
+		end
+	end
+	return out, nil
+end
+
+function Writer.surveyUnder(opts: any?): (string, any)
+	local s, problem = underSurvey(opts or {})
+	if not s then
+		return "surveyUnder: " .. tostring(problem), nil
+	end
+	return string.format("%s: %d columns under it (every %d studs), %d open (underside more than %g over the ground, the largest by %.0f); rim columns %d, open %d%s",
+		s.model:GetFullName(), s.footprint, s.step, s.open, (opts and opts.gap) or 3, s.largest, s.rim, s.rimOpen,
+		if s.sample then "; e.g. " .. s.sample else ""), s
+end
+
+function Writer.fillUnder(opts: any?): string
+	assert(not RunService:IsRunning(), "Map1.Terrain works in Edit mode only")
+	local o = opts or {}
+	local s, problem = underSurvey(o)
+	if not s then
+		return "fillUnder: " .. tostring(problem)
+	end
+	local keep = o.under or 0
+	local wide = (o.step or 4) + (o.widen or 4)
+	local terrain = workspace.Terrain
+	local filled, volume = 0, 0
+	local first = s
+	local after = s
+	for _ = 1, o.passes or 3 do
+		if after.open == 0 then
+			break
+		end
+		for n, c in ipairs(after.columns) do
+			local lo, hi = c.ground - 4, c.under - keep
+			if hi - lo > 0.5 then
+				local material = c.material
+				if material == MAT.Air or material == MAT.Water then
+					material = MAT.Rock
+				end
+				terrain:FillBlock(CFrame.new(c.x, (lo + hi) / 2, c.z), Vector3.new(wide, hi - lo, wide), material)
+				filled += 1
+				volume += (hi - lo) * s.step * s.step
+			end
+			if n % 400 == 0 then
+				task.wait()
+			end
+		end
+		task.wait(0.3) -- rays just after a write meet the old collision mesh
+		after = underSurvey(o) or after
+	end
+	return string.format("fillUnder %s: %d of %d columns under it were open (the largest gap %.0f studs; %d on the rim); filled %d columns, about %d voxels. After: %d open, %d on the rim",
+		first.model:GetFullName(), first.open, first.footprint, first.largest, first.rimOpen, filled, floor(volume / 64), after.open, after.rimOpen)
+end
+
 function Writer.status(): string
 	local terrain = workspace.Terrain
 	return string.format("%s | %s", tostring(terrain:GetAttribute("Map1Status")), tostring(terrain:GetAttribute("Map1Progress")))

@@ -29,7 +29,8 @@
 	                                       -- bindings). Kept when Roblox's own camera settings change (sensitivity,
 	                                       -- invert). nil clears it. Returns whether the bindings exist;
 	                                       -- Input.lookBindingsReady() says the same without changing them.
-	Every binding is also mirrored onto LocalPlayer.InputBindings (attribute per action) for ServerStorage.Dev.InputCheck.
+	Studio only: every binding is also mirrored onto LocalPlayer.InputBindings (attribute per action) for
+	ServerStorage.Dev.InputCheck.
 	Studio only: the LocalPlayer attribute LS_InputOverride = "Touch" | "Gamepad" | "KeyboardMouse" pretends that device
 	is in use (hints and settings rows follow it), for checking every device's text from a PC.
 	Studio only: Input.testTouch(name, down?) acts as a touch on an action's button, for checking a touch control from
@@ -281,10 +282,11 @@ end
 -- Dev tools (ServerStorage.Dev.InputCheck) read the bindings from LocalPlayer.InputBindings: one attribute per action,
 -- "keys=E,ButtonX;touch=DRINK". Instances are shared with the command bar, which runs its own copy of this module.
 local mirrorFolder: Instance? = nil
+local IS_STUDIO = RunService:IsStudio()
 local function mirrorBinding(name: string)
 	local player = Players.LocalPlayer
-	if not player then
-		return
+	if not player or not IS_STUDIO then
+		return -- a dev tool's mirror: nothing in a live game reads it
 	end
 	pcall(function()
 		if not (mirrorFolder and mirrorFolder.Parent) then
@@ -486,7 +488,19 @@ local lookSpeeds: { [string]: number } = {}
 local baseScales: { [Instance]: Vector2 } = {}
 local lookHooked = false
 
+-- CameraController asks every frame (lookBindingsReady): the action is kept once found, and while it does not exist
+-- (the default camera's input contexts load after us, or this engine version has none) it is looked for twice a second
+local rotationCache: Instance? = nil
+local rotationMissAt = -math.huge
 local function rotationAction(): Instance?
+	local cached = rotationCache
+	if cached and cached.Parent ~= nil then
+		return cached
+	end
+	rotationCache = nil
+	if os.clock() - rotationMissAt < 0.5 then
+		return nil
+	end
 	local roots = { StarterPlayer:FindFirstChild("PlayerModule") }
 	local player = Players.LocalPlayer
 	local scripts = player and player:FindFirstChildOfClass("PlayerScripts")
@@ -498,9 +512,11 @@ local function rotationAction(): Instance?
 		local camera = contexts and contexts:FindFirstChild("CameraContext")
 		local action = camera and camera:FindFirstChild("CameraRotationAction")
 		if action then
+			rotationCache = action
 			return action
 		end
 	end
+	rotationMissAt = os.clock()
 	return nil
 end
 

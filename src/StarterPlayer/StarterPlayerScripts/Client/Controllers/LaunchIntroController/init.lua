@@ -17,8 +17,8 @@
 	nearly over.
 	While the shot plays (ClientState.launchShot = true) this controller owns the camera (Scriptable), the lighting
 	(a profile per room; ArenaController's day cycle holds and writes its whole look again afterwards) and the screen:
-	the HUD, HUDFX, Overlay, FeedbackLines, TouchControls and Menu ScreenGuis and Roblox's touch controls are switched
-	off and put back as they were (the Menu comes back at once if you open it); CameraController, the zoom and
+	the HUD, HUDFX, Overlay, FeedbackLines, TouchControls and Menu ScreenGuis, Roblox's touch controls, chat window
+	and player list are switched off and put back as they were (the Menu comes back at once if you open it); CameraController, the zoom and
 	ViewmodelController stand down; NotificationController holds its countdown numbers and ticks; music ducks and
 	the arena's ambience is muted. Skip: hold Space / A, or hold the SKIP button on touch (Input action "LaunchSkip",
 	bound only during the shot, Config.Launch.SkipHold): it cuts your own camera to your plate (in the tube until the
@@ -27,12 +27,17 @@
 	the arena, a stalled render step or a shot still running at the horn ends it at once and gives back the camera, the
 	lighting and the HUD (today's rise then plays as usual). The server's cut is the only switch: with
 	Config.Launch.Intro = false it sends none and nothing here runs (the set isn't even built).
+	Low engine quality draws none of the set's lights: each room has a flat fill for that (FILL), the same on
+	every client; with "Shaders: Off" the shot uses no bloom (the white-out is exposure, grade and cover).
 	Studio only (tests and stills): LocalPlayer attribute LS_LaunchPreview = "Full" | "Short" plays a preview shot
 	without a round (no hand-off; the camera goes back where it was), LS_LaunchFreeze = seconds holds the preview at
 	that moment of the shot, LS_LaunchSkipTest = true acts as a completed skip hold; LS_LaunchStats (JSON) reports
 	frame times per stage after every shot.
 	The arena (docs/design/Map1Build.md): the hall has one glass case per plate (ArenaLayout.PlinthCount, else the
-	number of its Plates: 24 on the forest arena, 48 on Map 1), and a contender's case is the plate they stand on:
+	number of its Plates), but never more than MAX_CASES (24): the hall's radius and the camera's path are made for
+	24 cases 15.7 studs apart. With 48 on the same ring the cases stood 7.85 apart and the camera started inside the
+	neighbour's (seen 18 Nov). On Map 1 (48 plates) two neighbouring plates share a case, and the second contender of
+	a pair is shown in the nearest free one. A contender's case is the plate they stand on:
 	plate k of n stands at ArenaLayout.PlinthOffsetDeg + k * 360 / n degrees (the offset is 0 on the forest arena and
 	3.75 on Map 1), so slotOf takes the offset off the bearing before it rounds. "On the plate ring" is
 	LaunchController.onRing, the same test the plate rise uses. Map 1's plinths have no bores (decision 6): the plate
@@ -46,6 +51,7 @@ local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local Lighting = game:GetService("Lighting")
 local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -70,6 +76,11 @@ local SKIP_ACTION = "LaunchSkip"
 local RENDER_NAME = "LS_LaunchShot"
 local SKIP_HOLD = tonumber(LaunchCfg.SkipHold) or 0.6
 local HIDE_GUIS = { "HUD", "HUDFX", "Overlay", "FeedbackLines", "TouchControls", "Menu" }
+-- Roblox's own windows that would sit over the letterboxed shot (the pointer is already hidden: HUDController hides it
+-- for a living contender in the arena)
+local HIDE_CORE = { Enum.CoreGuiType.Chat, Enum.CoreGuiType.PlayerList }
+-- The hall holds at most this many cases: its radius (Set: R_CASE 60) and the camera's path are made for 24.
+local MAX_CASES = 24
 local WHITE = Color3.fromRGB(246, 248, 252)
 local BLACK = Color3.new(0, 0, 0)
 local LIT = Set.Colors.light
@@ -115,6 +126,28 @@ local PROFILES = {
 		AtmColor = Color3.fromRGB(30, 40, 58), AtmDecay = Color3.fromRGB(22, 30, 44), BloomIntensity = 1.0,
 		BloomSize = 32, BloomThreshold = 1.0, GradeContrast = 0.14, GradeSaturation = -0.04,
 		GradeTint = Color3.fromRGB(232, 240, 255),
+	},
+}
+-- The flat fill. At low engine quality (a phone on automatic graphics, a weak PC, an unfocused Studio window: levels
+-- about 1 to 5 of 21) the engine draws none of the set's SpotLights and PointLights, and the rooms above are lit by
+-- their Ambient alone. Measured 18 Nov at level 4: the red room's disc read luma 5 and the rise luma 4 (only the Neon
+-- bars showed); the response to Ambient is steep (red room (200,160,160) gave luma 123).
+--   Full   the picture reads with no local light, no shadow and no bloom at all. Every client gets it: no script can
+--          read the engine's running quality level (the detail tier said High in a window drawing at level 3.5), and
+--          with the lights drawing at full quality Full changes little (measured in Studio: the red room's frame
+--          luma 44 without the fill, 54 with it; the rise 13 and 42, the figure 78 and 159, nothing clipped).
+--   Part   a smaller lift, kept for comparison: at level 3.5 it left the rooms dim (seen in play, 18 Nov)
+-- Studio tests: LocalPlayer attribute LS_LaunchFill = "Full" | "Part" | "None" picks one.
+local FILL = {
+	Full = {
+		Red = { Ambient = Color3.fromRGB(150, 118, 120) },
+		Cases = { Ambient = Color3.fromRGB(128, 150, 190), Exposure = 0.6 },
+		Rise = { Ambient = Color3.fromRGB(120, 140, 180), Exposure = 0.6 },
+	},
+	Part = {
+		Red = { Ambient = Color3.fromRGB(124, 92, 94) },
+		Cases = { Ambient = Color3.fromRGB(96, 114, 150), Exposure = 0.45 },
+		Rise = { Ambient = Color3.fromRGB(90, 106, 140), Exposure = 0.45 },
 	},
 }
 local LIGHT_PROPS = { "Ambient", "OutdoorAmbient", "Brightness", "ExposureCompensation", "EnvironmentDiffuseScale",
@@ -191,6 +224,35 @@ local function standInLimit(): number
 	return math.max(0, n)
 end
 
+-- the shader tier (DetailController): "Off" is the player's own "Shaders: Off", which switches bloom off
+local function shaderTier(): string
+	local t = localPlayer:GetAttribute("ShaderTier")
+	return if type(t) == "string" then t else "High"
+end
+
+-- the rooms' lighting for this shot: PROFILES with the flat fill this client needs (see FILL)
+local function shotProfiles(): { [string]: any }
+	local name = "Full"
+	if IS_STUDIO then
+		local forced = localPlayer:GetAttribute("LS_LaunchFill")
+		if forced == "Full" or forced == "Part" or forced == "None" then
+			name = forced
+		end
+	end
+	local fill = FILL[name]
+	local out = {}
+	for room, profile in pairs(PROFILES) do
+		local p = table.clone(profile)
+		if fill and fill[room] then
+			for key, value in pairs(fill[room]) do
+				p[key] = value
+			end
+		end
+		out[room] = p
+	end
+	return out
+end
+
 local function reducedMotion(): boolean
 	local ok, on = pcall(function()
 		return (GuiService :: any).ReducedMotionEnabled
@@ -247,7 +309,11 @@ local function slotOf(position: Vector3): number?
 	local n = #set.hall.slots
 	local first = tonumber((ArenaLayout :: any).PlinthOffsetDeg) or 0
 	local deg = (math.deg(math.atan2(position.X - centre.X, -(position.Z - centre.Z))) - first) % 360
-	return (math.floor(deg / (360 / n) + 0.5) % n) + 1
+	-- the plate first (a whole number, well away from any rounding edge), then its case: with more plates than
+	-- cases (Map 1: 48 and 24) plates 0 and 1 share case 1, plates 2 and 3 case 2, and so on
+	local plates = math.max(n, plateCount())
+	local plate = math.floor(deg / (360 / plates) + 0.5) % plates
+	return (math.floor(plate * n / plates) % n) + 1
 end
 
 local function ringDistance(a: number, b: number, n: number): number
@@ -266,7 +332,7 @@ local function ensureSet()
 	end
 	building = true
 	task.spawn(function()
-		local ok, result = pcall(Set.build, { detail = tier(), slots = plateCount() })
+		local ok, result = pcall(Set.build, { detail = tier(), slots = math.min(plateCount(), MAX_CASES) })
 		if ok and result then
 			if set and not shot then
 				set.model:Destroy()
@@ -471,6 +537,24 @@ local function holdGuis(s)
 			s.touchControls = false
 		end
 	end
+	-- Roblox's chat window and player list (they covered the corners of the letterboxed shot): off once, and back
+	-- on in releaseGuis only where this shot switched them off
+	if s.coreGuis == nil then
+		s.coreGuis = {}
+		for _, kind in ipairs(HIDE_CORE) do
+			local ok, was = pcall(function()
+				return StarterGui:GetCoreGuiEnabled(kind)
+			end)
+			if ok and was == true then
+				local done = pcall(function()
+					StarterGui:SetCoreGuiEnabled(kind, false)
+				end)
+				if done then
+					table.insert(s.coreGuis, kind)
+				end
+			end
+		end
+	end
 end
 
 local function releaseGuis(s)
@@ -484,6 +568,14 @@ local function releaseGuis(s)
 		pcall(function()
 			GuiService.TouchControlsEnabled = true
 		end)
+	end
+	if s.coreGuis then
+		for _, kind in ipairs(s.coreGuis) do
+			pcall(function()
+				StarterGui:SetCoreGuiEnabled(kind, true)
+			end)
+		end
+		s.coreGuis = nil
 	end
 end
 
@@ -582,15 +674,17 @@ local function writeLighting(s, p, white: number)
 		fx.atmosphere.Glare = 0
 		fx.atmosphere.Haze = 0
 	end
+	-- "Shaders: Off" has no bloom: the white-out then comes from the exposure, a stronger grade and the white cover
+	local bloomOn = s.bloom ~= false
 	if fx.bloom then
-		fx.bloom.Enabled = true
+		fx.bloom.Enabled = bloomOn
 		fx.bloom.Intensity = p.BloomIntensity + 1.4 * white
 		fx.bloom.Size = math.floor(p.BloomSize + 16 * white + 0.5)
 		fx.bloom.Threshold = math.max(0.2, p.BloomThreshold - 0.8 * white)
 	end
 	if fx.grade then
 		fx.grade.Enabled = true
-		fx.grade.Brightness = 0.25 * white
+		fx.grade.Brightness = (if bloomOn then 0.25 else 0.45) * white
 		fx.grade.Contrast = p.GradeContrast
 		fx.grade.Saturation = p.GradeSaturation - 0.3 * white
 		fx.grade.TintColor = p.GradeTint
@@ -604,7 +698,7 @@ local function writeLighting(s, p, white: number)
 end
 
 local function blendLighting(s, name: string, dt: number, snapTo: boolean, white: number)
-	local target = PROFILES[name]
+	local target = (s.profiles or PROFILES)[name]
 	local cur = s.profile
 	if snapTo or not cur then
 		cur = table.clone(target)
@@ -1230,6 +1324,8 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 			end
 		end
 		takeLighting(s)
+		s.profiles = shotProfiles()
+		s.bloom = shaderTier() ~= "Off"
 		holdGuis(s)
 		ui.screen.Enabled = true
 		fadeToken += 1 -- (a fade still running from the last shot stops here)
@@ -1305,12 +1401,16 @@ local function watch()
 			return
 		end
 	end
-	if GameState:GetAttribute("Phase") ~= "Countdown" then
+	local phase = GameState:GetAttribute("Phase")
+	if phase ~= "Countdown" then
 		-- with the intro on, the set is built ahead (and rebuilt for a new detail tier between rounds); without it,
-		-- only when a cut arrives anyway (a Studio test)
+		-- only when a cut arrives anyway (a Studio test). A missing set is built in any phase; a set of another tier
+		-- is rebuilt only in the Lobby or the Intermission, never under a fight (the tier follows the engine's
+		-- quality, which dips in fights: 1,500 to 2,000 parts built and destroyed for a set not needed until the
+		-- next countdown).
 		if LaunchCfg.Intro == true and os.clock() - lastTierCheck > 5 then
 			lastTierCheck = os.clock()
-			if not set or set.detail ~= tier() then
+			if not set or (set.detail ~= tier() and (phase == "Lobby" or phase == "Intermission")) then
 				ensureSet()
 			end
 		end

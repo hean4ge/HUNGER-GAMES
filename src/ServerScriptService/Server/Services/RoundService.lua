@@ -14,12 +14,23 @@
 	       Practice rounds add no Wins and no RoundsPlayed.
 	  QW3  GameState.BorderStartRadius at each Countdown: MinStartRadius + (StartRadius - MinStartRadius) *
 	       sqrt((N - 1) / (FullContenders - 1)) for N contenders, from Config.Border (the forest arena: 500 alone, 640 at
-	       24; Map 1: 520 alone, 1,800 at 48) (set before LootService.populate; ArenaService and the wall start from it).
+	       24; Map 1: 700 alone, 1,800 at 48) (set before LootService.populate; ArenaService and the wall start from it).
 	       Practice results rank nobody who fell (placement 0: the result card shows no "#1" for a lone player's death).
 	  Q1   player attribute NewPlayer at each Countdown: RoundsPlayed < Config.Guidance.NewPlayerRounds.
 	  QW6  no banner at the horn of a real round (it covered the first sprint); practice rounds keep PRACTICE ROUND.
 	  QW14 a timeout with two or more alive goes to the healthiest, then the most kills (Config.Round.LastStand);
 	       the epilogue Roll Call (ArenaService.startEpilogue) plays behind the winner card and Ending grows to fit it.
+	Filling a server (Config.Round.FillExtendOnJoin, FillTarget, FillMaxTime, StartHoldTime):
+	  * On a live public server a player who joins during the Intermission restarts its countdown (PhaseEndsAt moves),
+	    never past FillMaxTime seconds from the Intermission's start, and not when FillTarget are already waiting. Not in
+	    Studio and not in a private server (game.PrivateServerId ~= ""; GameState.PrivateServer = true says so to the lobby
+	    UI): there a round starts with whoever is there after the normal Intermission. Studio only: GameState attribute
+	    FillTest (any number) turns the rule on, and each change of its value counts as a player joining (tests).
+	  * A round takes MaxContenders at most (one per plate). With more waiting, whoever played least recently is picked
+	    first (someone left out of a round is in the next one); the ones left out get a toast and can spectate.
+	  * Two or more present but fewer than two ready when the Intermission ends (loading, respawning): the pick waits up to
+	    StartHoldTime seconds for the second, instead of a practice round for the first.
+	  * A real round whose contenders drop under two during the Countdown is cancelled (it would end on its first tick).
 	The arena (docs/design/Map1Build.md, decision 14): the plates are the instances in workspace.Arena.Plinths, in name
 	order (24 round the Spire on the forest arena; Plinth01..Plinth48 at radius 150 on Map 1). Head counts and the
 	border come from Config (Config.Maps[Config.Map] laid over it), the fallback ring from Shared.ArenaLayout (its Plates,
@@ -84,6 +95,13 @@ local soloRound = false -- QW1: this Intermission was started for a lone player 
 local handoffAt = 0 -- QW1: the practice round ends at this server time because a contender arrived
 local againFor: Player? = nil -- QW1: the contender of the practice round that just ended (alone, they go again sooner)
 local quickIntermission = false -- QW1: this Intermission is the short one before that player's next practice round
+local isPrivate = game.PrivateServerId ~= "" -- a private or reserved server: it never waits for the server to fill
+local joinSerial = 0 -- how many players have joined this server (a join during the Intermission restarts it)
+local fillSeen = 0 -- joinSerial when the Intermission last looked
+local fillStartedAt = 0 -- when this Intermission began (joins never move its end past this + FillMaxTime)
+local holdUntil = 0 -- the pick waits until here for a second player who is not ready yet (StartHoldTime); 0 = no hold
+local lastPlayed: { [Player]: number } = {} -- the last round each player was a contender in (the least recent go first)
+local underSince: number? = nil -- Countdown: since when a real round has had fewer than two contenders on their plates
 
 -- Helpers ----------------------------------------------------------------------------------------------------------
 
@@ -141,6 +159,18 @@ local function startSignal(bare: boolean?): string
 		return string.match(text, "^[Tt]he%s+(.+)$") or text
 	end
 	return text
+end
+
+-- Filling a public server: joins during the Intermission restart its countdown (see the header). Off in a private
+-- server and in Studio (there GameState.FillTest turns it on for a test).
+local function fillRule(): boolean
+	if RoundCfg.FillExtendOnJoin == false or isPrivate then
+		return false
+	end
+	if Config.IsStudio then
+		return GameState:GetAttribute("FillTest") ~= nil
+	end
+	return true
 end
 
 -- QW1: lone players get practice rounds on servers that need more than one player to start
@@ -403,6 +433,7 @@ local function finishRound(cancelled: boolean?)
 	GameState:SetAttribute("Practice", false)
 	GameState:SetAttribute("AliveCount", 0)
 	GameState:SetAttribute("StartedCount", 0)
+	GameState:SetAttribute("WinnerUserId", 0)
 	GameState:SetAttribute("WinnerName", "")
 	GameState:SetAttribute("RoundStartedAt", 0)
 	setPhase("Lobby")
@@ -448,6 +479,8 @@ local function endRound(winner: Player?, reason: string)
 	end
 
 	local winnerName = if winner then winner.DisplayName else nil
+	-- the id first: clients decide "you won" by UserId when WinnerName changes (display names are not unique)
+	GameState:SetAttribute("WinnerUserId", if winner then winner.UserId else 0)
 	GameState:SetAttribute("WinnerName", winnerName or "")
 	GameState:SetAttribute("AliveCount", #alive)
 	-- QW14: the epilogue (a short Roll Call of the fallen not yet shown in the sky) plays behind the winner card
@@ -476,7 +509,8 @@ local function endRound(winner: Player?, reason: string)
 		text = "NO SURVIVORS"
 		sub = "The arena claimed everyone"
 	end
-	announce({ style = "Victory", text = text, sub = sub, winner = winnerName, duration = endingTime })
+	announce({ style = "Victory", text = text, sub = sub, winner = winnerName, winnerUserId = if winner then winner.UserId else nil,
+		duration = endingTime })
 	Net.event("RoundSummary"):FireAllClients(buildSummary(winnerName, duration))
 	-- a walkover (everyone else left before anything happened) doesn't count as a win
 	local earned = duration >= 15 or (tonumber(if winner then winner:GetAttribute("Kills") else 0) or 0) > 0
@@ -515,12 +549,25 @@ local function enterActive(t: number)
 end
 
 local function countdownTick(t: number)
-	if #playerService().getAlivePlayers() == 0 then
+	-- nobody left on a plate, or a real round left with one contender (it would end on its first tick with a winner
+	-- card and no win): back to the lobby. One contender must have been alone for a second (a character that is
+	-- missing for a moment is not a contender who left).
+	local aliveNow = #playerService().getAlivePlayers()
+	local short = not practice and aliveNow < 2
+	if short and aliveNow > 0 then
+		underSince = underSince or t
+	else
+		underSince = nil
+	end
+	if aliveNow == 0 or (short and underSince ~= nil and t - underSince >= 1) then
+		underSince = nil
 		announce({
 			style = "Toast",
 			text = if practice then "Practice cancelled" else "Round cancelled",
-			sub = if practice then "You left your plate before " .. startSignal() else "Every contender left",
-			duration = 3,
+			sub = if practice then "You left your plate before " .. startSignal()
+				elseif aliveNow == 0 then "Every contender left"
+				else "The other contenders left before " .. startSignal(),
+			duration = 4,
 		})
 		finishRound(true)
 		return
@@ -539,13 +586,14 @@ local function countdownTick(t: number)
 			duration = 1,
 		})
 	end
-	if t >= phaseEndsAt then
+	if t >= phaseEndsAt and not short then
 		enterActive(t)
 	end
 end
 
--- The launch intro (Config.Launch, LaunchIntroController): the cut this round plays. "Full" when any contender hasn't
--- seen the full shot yet this session (player attribute Launched), "Short" otherwise, PracticeCut in a practice round;
+-- The launch intro (Config.Launch, LaunchIntroController): the cut this round plays. "Full" when at least FullCutShare
+-- of the contenders haven't seen the full shot yet this session (player attribute Launched; a share of 0 = any one of
+-- them), "Short" otherwise, PracticeCut in a practice round;
 -- "" without the intro (today's countdown and plate rise). Studio only: GameState attribute LaunchCutTest = "Full" |
 -- "Short" forces a cut, even with the intro off (tests).
 local function launchCut(): string
@@ -562,12 +610,20 @@ local function launchCut(): string
 	if practice then
 		return if launch.PracticeCut == "Full" then "Full" else "Short"
 	end
+	-- the full shot only when enough of the round is new to it (FullCutShare): one newcomer among many gets the short
+	-- cut like everyone else, instead of making every contender wait through the long one
+	local total, new = 0, 0
 	for player in pairs(contenders) do
+		total += 1
 		if player:GetAttribute("Launched") ~= true then
-			return "Full"
+			new += 1
 		end
 	end
-	return "Short"
+	if new == 0 then
+		return "Short"
+	end
+	local share = math.clamp(tonumber(launch.FullCutShare) or 0, 0, 1)
+	return if new >= share * total then "Full" else "Short"
 end
 
 -- A cut's countdown (seconds from the call to the horn) and when the plates start rising in it (LaunchAt).
@@ -589,14 +645,34 @@ local function enterCountdown()
 		setPhase("Lobby")
 		return
 	end
+	if #candidates > count then
+		-- more players than plates: whoever played least recently goes first (left out of the last round, or new), in
+		-- the shuffled order among equals
+		local order = {}
+		for i, player in ipairs(candidates) do
+			order[player] = i
+		end
+		table.sort(candidates, function(a, b)
+			local la, lb = lastPlayed[a] or 0, lastPlayed[b] or 0
+			if la ~= lb then
+				return la < lb
+			end
+			return order[a] < order[b]
+		end)
+	end
 
 	table.clear(contenders)
 	local offset = rng:NextInteger(0, #spots - 1)
 	local picked = 0
-	for i = 1, count do
-		local player = candidates[i]
-		-- spread contenders evenly around the ring when there are fewer than plinths
-		local index = ((math.floor((i - 1) * #spots / count) + offset) % #spots) + 1
+	local leftOut = {}
+	for _, player in ipairs(candidates) do
+		if picked >= count then
+			table.insert(leftOut, player)
+			continue
+		end
+		-- spread contenders evenly around the ring when there are fewer than plinths (a candidate who can't be placed
+		-- leaves their spot to the next one)
+		local index = ((math.floor(picked * #spots / count) + offset) % #spots) + 1
 		call("InventoryService", "clear", player)
 		if ps.prepareContender(player, spots[index]) then
 			picked += 1
@@ -609,6 +685,18 @@ local function enterCountdown()
 	end
 
 	roundId += 1
+	underSince = nil
+	for player in pairs(contenders) do
+		lastPlayed[player] = roundId
+	end
+	for _, player in ipairs(leftOut) do
+		Net.event("Announce"):FireClient(player, {
+			style = "Toast",
+			text = "This round is full",
+			sub = "You are first in line for the next one · you can spectate from the lobby",
+			duration = 6,
+		})
+	end
 	practice = picked == 1
 	lastCountdownSecond = nil
 	roundStartedAt = 0
@@ -616,6 +704,7 @@ local function enterCountdown()
 	GameState:SetAttribute("Practice", practice)
 	GameState:SetAttribute("StartedCount", picked)
 	GameState:SetAttribute("AliveCount", picked)
+	GameState:SetAttribute("WinnerUserId", 0)
 	GameState:SetAttribute("WinnerName", "")
 	GameState:SetAttribute("RoundStartedAt", 0)
 	handoffAt = 0
@@ -657,6 +746,9 @@ local function enterIntermission(solo: boolean?, quick: boolean?)
 		duration = math.min(duration, tonumber(RoundCfg.PracticeIntermissionTime) or duration)
 	end
 	quickIntermission = quick == true
+	fillStartedAt = now()
+	fillSeen = joinSerial
+	holdUntil = 0
 	if solo then
 		-- before the Phase, so the lobby never sees a practice Intermission without its countdown (LobbyController)
 		setAttr("SoloStartAt", now() + duration)
@@ -733,6 +825,20 @@ local function rescueStrays(t: number)
 	end
 end
 
+-- The Intermission is over with two or more players present but fewer than two ready to be picked (the others are
+-- still loading or respawning): wait up to StartHoldTime seconds for the second, instead of giving the one who is ready
+-- a practice round while a real opponent stands by.
+local function startHeld(t: number, waiting: number): boolean
+	local hold = tonumber(RoundCfg.StartHoldTime) or 0
+	if hold <= 0 or waiting < 2 or #playerService().getLobbyPlayers() >= 2 then
+		return false
+	end
+	if holdUntil == 0 then
+		holdUntil = t + hold
+	end
+	return t < holdUntil
+end
+
 local function step()
 	local ps = playerService()
 	local t = now()
@@ -783,12 +889,35 @@ local function step()
 				enterIntermission(false) -- with the normal Intermission (the short one was for a lone player)
 			end
 		end
+		-- filling a public server: a join restarts the countdown, never past FillMaxTime from this Intermission's start
+		if joinSerial ~= fillSeen and waiting >= minPlayers() then
+			fillSeen = joinSerial
+			-- (only while the lobby is thin: with FillTarget or more waiting, the round is worth starting on time)
+			local most = math.min(tonumber(RoundCfg.MaxContenders) or math.huge, tonumber(RoundCfg.FillTarget) or math.huge)
+			if fillRule() and not soloRound and waiting < most then
+				local cap = fillStartedAt + math.max(RoundCfg.IntermissionTime, tonumber(RoundCfg.FillMaxTime) or 90)
+				local wanted = math.min(t + RoundCfg.IntermissionTime, cap)
+				if wanted > phaseEndsAt + 1 then
+					phaseEndsAt = wanted
+					holdUntil = 0
+					GameState:SetAttribute("PhaseEndsAt", phaseEndsAt)
+					announce({
+						style = "Toast",
+						text = "A contender has arrived",
+						sub = string.format("Contenders are chosen in %d seconds", math.floor(wanted - t + 0.5)),
+						duration = 4,
+					})
+				end
+			end
+		end
 		if waiting < minPlayers() and not (soloRound and waiting >= 1) then
 			soloSince = nil
 			soloRound = false
 			setAttr("SoloStartAt", 0)
 			announce({ style = "Toast", text = "Waiting for players", sub = "The countdown resumes when enough contenders are here", duration = 3 })
 			setPhase("Lobby")
+		elseif t >= phaseEndsAt and startHeld(t, waiting) then
+			-- (two or more are here and fewer than two are ready: the pick waits a little for the second)
 		elseif t >= phaseEndsAt then
 			soloSince = nil
 			soloRound = false
@@ -873,21 +1002,34 @@ function RoundService.Start()
 	local function onPlayerAdded(player: Player)
 		if not joinedAt[player] then
 			joinedAt[player] = now()
+			joinSerial += 1
 			player:SetAttribute("JoinedAt", math.floor(joinedAt[player] * 100 + 0.5) / 100)
 		end
 	end
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		joinedAt[player] = nil
+		lastPlayed[player] = nil
 	end)
 	for _, player in ipairs(Players:GetPlayers()) do
 		onPlayerAdded(player)
+	end
+	-- for the lobby UI: a private server starts with whoever is there (no waiting for the server to fill)
+	GameState:SetAttribute("PrivateServer", isPrivate)
+	if Config.IsStudio then
+		-- tests: each change of GameState.FillTest counts as a player joining (and a set value turns the fill rule on)
+		GameState:GetAttributeChangedSignal("FillTest"):Connect(function()
+			if GameState:GetAttribute("FillTest") ~= nil then
+				joinSerial += 1
+			end
+		end)
 	end
 	GameState:SetAttribute("MinPlayers", minPlayers())
 	GameState:SetAttribute("RoundId", roundId)
 	GameState:SetAttribute("Practice", false)
 	GameState:SetAttribute("AliveCount", 0)
 	GameState:SetAttribute("StartedCount", 0)
+	GameState:SetAttribute("WinnerUserId", 0)
 	GameState:SetAttribute("WinnerName", "")
 	GameState:SetAttribute("RoundStartedAt", 0)
 	GameState:SetAttribute("SoloStartAt", 0)

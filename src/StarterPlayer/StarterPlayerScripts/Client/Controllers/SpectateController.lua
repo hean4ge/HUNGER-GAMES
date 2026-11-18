@@ -261,7 +261,7 @@ local function onTargetLost(p: Player, delay: number)
 		end
 		-- QW4: follow the one who took them out (PlayerService sets KilledBy to the killer's UserId)
 		local killerId = tonumber(p:GetAttribute("KilledBy"))
-		local killer = if killerId and killerId > 0 then Players:GetPlayerByUserId(killerId) else nil
+		local killer = if killerId and killerId ~= 0 then Players:GetPlayerByUserId(killerId) else nil -- (ids are negative in a Studio test server)
 		if killer and table.find(list, killer) then
 			setTarget(killer)
 			return

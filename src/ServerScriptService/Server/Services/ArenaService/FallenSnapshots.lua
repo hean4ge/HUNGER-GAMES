@@ -15,7 +15,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FallenSnapshots = {}
 
 local FOLDER_NAME = "FallenSnapshots"
-local MAX_SNAPSHOTS = 40
+-- one for everyone who can fall in a round (47 of Map 1's 48 contenders): the epilogue Roll Call names every snapshot
+-- not shown yet, and one trimmed away before then would be a name without its figure
+local okConfig, Config = pcall(function()
+	return require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")) :: any
+end)
+local MAX_SNAPSHOTS = math.max(40, tonumber(okConfig and Config.Round and Config.Round.MaxContenders) or 48)
 local counter = 0
 
 function FallenSnapshots.folder(): Folder

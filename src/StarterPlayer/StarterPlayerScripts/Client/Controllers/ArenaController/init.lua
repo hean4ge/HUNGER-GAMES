@@ -4,12 +4,13 @@
 	    (GameState "Clock", Shared.DayCycle) and the whole lighting look for that hour (Shared.DayCycle.Looks):
 	    moonlit nights, warm low dawns and dusks, the "ArenaGrade" colour correction, atmosphere, bloom, sun rays;
 	    low mist over the marsh and the lake at night and dawn. Lobby players keep the lobby hour.
-	  * The border wall: a ring of tall ForceField panels (workspace.Arena.Border, client-local) placed every frame from
+	  * The border wall: a ring of tall, thin panels of orange light (Neon, mostly clear: workspace.Arena.Border,
+    client-local; ForceField panels showed only where two met, as thin seams, by day) placed every frame from
 	    GameState BorderCenter / BorderRadius with workspace:BulkMoveTo. Visible during the Countdown (so the round's
 	    starting ring - GameState.BorderStartRadius, PlayabilityPlan QW3 - shows from the plates) and Active, while
 	    you're in the arena or spectating; it pulses while the border is moving, and a low hum (Sounds.BorderHum) plays from its
 	    nearest point.
-	  * A soft red grade (Lighting.BorderTint, local) while your own character is outside the border.
+	  * A soft red grade (Lighting.BorderTint, local) while your own character is outside the border in the Active phase.
 	API:
 	  ArenaController.getBorder() -> (center: Vector3, radius: number, shrinking: boolean)
 	  ArenaController.isInsideBorder(position: Vector3) -> boolean   (true outside Active)
@@ -40,8 +41,22 @@ local PANEL_COUNT = math.clamp(math.floor(BorderCfg.WallPanels or 96), 24, 256)
 local WALL_HEIGHT = BorderCfg.WallHeight or 520
 local WALL_BELOW = 110 -- studs the wall reaches below BorderCenter (lake beds, ravines)
 local PANEL_THICKNESS = 0.4
-local BASE_TRANSPARENCY = 0.25
-local PULSE_TRANSPARENCY = 0.14
+-- Neon is not lit by the scene, so the wall reads the same at noon and at midnight: a clear orange sheet you can see
+-- the land through. ForceField (until 18 Nov) drew only at grazing angles: straight on, at 32 studs, the wall was a
+-- few thin seams where panels met. The sheet is thicker in colour while the border moves (the pulse).
+local WALL_MATERIAL = Enum.Material.Neon
+-- 0.74 (seen in Studio at 32 and at 250 studs, noon and 21:00) read at once but dyed the land behind it orange and
+-- the sky pink; 0.84 is the sheet with the valley still in its own colours behind it.
+local BASE_TRANSPARENCY = 0.84
+-- That held only at Studio's low unfocused quality. At full engine quality (seen 18 Nov, focused, Shaders Off and
+-- Full) the 0.84 sheet dyed everything behind it: from the plates of a small round (ring 700, 550 studs away) the
+-- far forest read red, the mountains pink and the sky purple. So a panel is the full sheet only near the camera and
+-- thins out with distance: the wall reads where you can walk into it, and from afar the valley keeps its own colours
+-- (0.965 at 550 studs still shows the ring as a faint warm band).
+local FAR_TRANSPARENCY = 0.965
+local FADE_NEAR = 60 -- studs from the camera (flat) to a panel's middle: nearer panels are the full sheet
+local FADE_FAR = 360 -- panels this far and farther are at FAR_TRANSPARENCY
+local PULSE_TRANSPARENCY = -0.12 -- added at the top of the pulse: more solid while it moves
 local PULSE_SPEED = 2.6
 local OUTSIDE_TINT = Color3.fromRGB(255, 190, 176)
 
@@ -88,7 +103,7 @@ local function buildWall()
 		panel.CanTouch = false
 		panel.CastShadow = false
 		panel.Locked = true
-		panel.Material = Enum.Material.ForceField
+		panel.Material = WALL_MATERIAL
 		panel.Color = Theme.Colors.Border
 		panel.Transparency = BASE_TRANSPARENCY
 		panel.Size = Vector3.new(4, WALL_HEIGHT, PANEL_THICKNESS)
@@ -185,11 +200,22 @@ local function updatePulse(dt: number)
 		pulseTime = 0
 	end
 	local t = os.clock()
-	if math.abs(target - panelTransparency) > 0.008 and t - lastTransparencyWrite >= 1 / 20 then
-		panelTransparency = target
-		lastTransparencyWrite = t
-		for _, panel in ipairs(panels) do
-			panel.Transparency = target
+	if t - lastTransparencyWrite < 1 / 20 then
+		return
+	end
+	lastTransparencyWrite = t
+	panelTransparency = target
+	-- each panel by its flat distance from the camera: the full sheet near, thinned out far (see FAR_TRANSPARENCY)
+	local camera = workspace.CurrentCamera
+	local eye = if camera then camera.CFrame.Position else displayCenter
+	local span = math.max(FADE_FAR - FADE_NEAR, 1)
+	for i, panel in ipairs(panels) do
+		local p = cframes[i].Position
+		local dx, dz = p.X - eye.X, p.Z - eye.Z
+		local k = math.clamp((math.sqrt(dx * dx + dz * dz) - FADE_NEAR) / span, 0, 1)
+		local value = target + (FAR_TRANSPARENCY - target) * k
+		if math.abs(value - panel.Transparency) > 0.004 then
+			panel.Transparency = value
 		end
 	end
 end
@@ -214,7 +240,9 @@ end
 
 local function updateTint(dt: number, center: Vector3, radius: number)
 	local outside = false
-	if wallVisible and ClientState.alive and ClientState.inArena then
+	-- Active only: in the Countdown the wall already shows while the body is still in the lobby, far outside the ring,
+	-- until the server has streamed the plate in and placed it (the launch intro and the plate got a red grade)
+	if wallVisible and ClientState.alive and ClientState.inArena and GameState:GetAttribute("Phase") == "Active" then
 		local character = localPlayer.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then

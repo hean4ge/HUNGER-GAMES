@@ -1,0 +1,98 @@
+--[[
+	MPTest - a real multiplayer test from Studio: one server and 2 to 4 clients as separate Studio processes
+	(StudioTestService), driven by test code, with the results in the test server's log file. Studio only: nothing
+	here runs in a live game (the scripts sit in ServerStorage, where scripts do not run, and the driver also checks
+	RunService:IsStudio() and the test's own arguments).
+
+	From execute_luau, in Edit mode:
+	  return require(game.ServerStorage.Dev.MPTest:Clone()).start({ batch = "B", clients = 2 })
+	It copies Driver (with Bot inside) into ServerScriptService as MPT_Driver, starts the test and returns at once.
+	The copy is removed from the Edit data model when the test ends, and the QA_Lock it took is cleared.
+
+	Arguments (all optional but batch):
+	  batch     "A" combat (bow, thrown knife, weapon switches) | "B" sword reach, poses, loot, eating, the border,
+	            a kill, the result, the Roll Call, round two | "B2" poses, eating, loot | "C" three clients: a kill,
+	            spectating, the dusk Roll Call, a contender leaves | "D" loot, a client joins mid-round, a contender
+	            leaves, the next round takes the late joiner | "E" a contender leaves during the Countdown
+	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
+	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
+	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
+	  timeScale Config.Round.StudioTimeScale (batch "C" uses 6: dusk comes 57 s after the horn)
+	  failsafe  seconds after which the test ends itself whatever happens (default 330)
+	  lock      the QA_Lock label to take (default "mp-test")
+
+	Reading the result: every line starts with "[MPT]"; checks are "[MPT] nnnn t [CHECK] <id> PASS|FAIL|NOTE ...".
+	  python tools/mp_test/readlog.py 6 --newest --grep CHECK
+	Pictures of each client window at the driver's "SHOT <name>" lines: tools/mp_test/shots.ps1 (start it first).
+	A server and two clients take about 9 GB of memory; they close by themselves when the batch ends.
+	Test players are Player1, Player2, ... with UserIds -1, -2, ...; DataStores are off in Studio.
+]]
+local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local StudioTestService = game:GetService("StudioTestService")
+
+local MPTest = {}
+
+function MPTest.start(args: { [string]: any }?): string
+	if not RunService:IsStudio() or RunService:IsRunning() then
+		return "MPTest: Edit mode in Studio only"
+	end
+	local a: { [string]: any } = table.clone(args or {})
+	a.suite = "mpt"
+	a.batch = a.batch or "B"
+	a.clients = math.clamp(math.floor(tonumber(a.clients) or (if a.batch == "C" then 3 else 2)), 2, 4)
+	a.minPlayers = a.minPlayers or (if a.batch == "C" then a.clients else 2)
+	-- each batch's own settings, as in the runs of 18 November 2026
+	if a.batch == "B" and a.border == nil then
+		a.border = 170
+	elseif a.batch == "C" then
+		a.timeScale = a.timeScale or 6
+		a.cut = a.cut or "Short"
+	elseif a.batch == "D" or a.batch == "B2" then
+		a.cut = a.cut or "Short"
+	end
+	local label = tostring(a.lock or "mp-test")
+	a.lock = nil
+	local lock = workspace:GetAttribute("QA_Lock")
+	if type(lock) == "string" and string.sub(lock, 1, #label + 1) ~= label .. "|" then
+		local t = tonumber(string.match(lock, "|(%d+)$")) or 0
+		if os.time() - t < 540 then
+			return "MPTest: Studio is locked by " .. lock
+		end
+	end
+	if not StudioTestService.EditModeActive then
+		return "MPTest: a test is already running"
+	end
+	local driverSource = script:FindFirstChild("Driver")
+	local botSource = script:FindFirstChild("Bot")
+	if not (driverSource and botSource) then
+		return "MPTest: Driver or Bot is missing (require a :Clone() of the module, children included)"
+	end
+	for _, child in ipairs(ServerScriptService:GetChildren()) do
+		if child.Name == "MPT_Driver" then
+			child:Destroy()
+		end
+	end
+	workspace:SetAttribute("QA_Lock", label .. "|" .. os.time())
+	local driver = driverSource:Clone()
+	driver.Name = "MPT_Driver"
+	local bot = botSource:Clone()
+	bot.Name = "MPT_Bot"
+	bot.Parent = driver
+	driver.Parent = ServerScriptService
+	task.spawn(function()
+		local ok, result = pcall(function()
+			return StudioTestService:ExecuteMultiplayerTestAsync(a.clients, a)
+		end)
+		print("[MPT][EDIT] finished ok=" .. tostring(ok) .. " result=" .. tostring(result))
+		local left = ServerScriptService:FindFirstChild("MPT_Driver")
+		if left then
+			left:Destroy()
+		end
+		workspace:SetAttribute("QA_Lock", nil)
+		print("[MPT][EDIT] driver removed from Edit, lock cleared")
+	end)
+	return string.format("MPTest: batch %s with %d clients started at %d", tostring(a.batch), a.clients, os.time())
+end
+
+return MPTest

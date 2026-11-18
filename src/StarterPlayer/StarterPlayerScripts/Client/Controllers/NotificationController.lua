@@ -7,6 +7,7 @@
 	  * YouDied: the death screen ("#7 OF 24", killer or cause, weapon) with SPECTATE / CONTINUE, a muted grade.
 	    QW4: "OUTLASTED 15 OF 24 · 6:12", and one tip for the cause and weapon class (a more specific one the second
 	    time the same thing kills you; the border's first tip follows the border as it was: still on day 1, closer in for few). SPECTATE opens on your killer (payload killerUserId, else the killer's name).
+	    Whether YOU won is decided by UserId (payload winnerUserId), never by the display name alone (iWon).
 	    When your death ends the round (a lone practice contender, the runner-up), the death card stays up for
 	    DEATH_DWELL s (or until CONTINUE) with the result in its note, and the result card follows. Practice deaths read
 	    "FALLEN" (not "#1 OF 1"); a death before the horn (payload phase "Countdown") reads "OUT" with no tip.
@@ -28,6 +29,8 @@
 	                                        duration: number?, when: (() -> boolean)?, onShow: (() -> ())? }
 	  hideDeathScreen()
 	  isCardUp() -> boolean                the death card or the round's result card is up (the lobby waits for it)
+	  isBannerUp() -> (boolean, boolean)    a headline is showing, the Roll Call list is showing (the lobby's status pill
+	                                        and HOW TO PLAY step aside for them)
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -135,6 +138,23 @@ end
 
 local function isMe(name: any): boolean
 	return type(name) == "string" and (name == player.DisplayName or name == player.Name)
+end
+
+-- Whether this client is the round's winner. Display names are not unique, so the name alone never decides it (audit
+-- F4: a fallen contender with the winner's display name got the gold VICTORY screen). The server's winnerUserId when
+-- the payload carries one. Without it: the name, AND this player is still standing (Alive; anyone who fell is not,
+-- from the moment they fell) in first place (Placement 1, set by RoundService before it announces the result; a
+-- survivor ranked lower by a tiebreak holds 2 or more; 0 = not arrived yet). Placement alone is not enough: a lone
+-- practice contender who falls holds place 1 too.
+local function iWon(winnerName: string?, winnerUserId: any): boolean
+	local id = tonumber(winnerUserId)
+	if id and id ~= 0 then
+		return id == player.UserId
+	end
+	if not isMe(winnerName) or player:GetAttribute("Alive") ~= true then
+		return false
+	end
+	return math.floor(tonumber(player:GetAttribute("Placement")) or 0) <= 1
 end
 
 local function isPhone(): boolean
@@ -755,7 +775,7 @@ local function killerOf(data: any): Player?
 		return nil
 	end
 	local id = tonumber(data.killerUserId)
-	local found: Player? = if id and id > 0 then Players:GetPlayerByUserId(id) else nil
+	local found: Player? = if id and id ~= 0 then Players:GetPlayerByUserId(id) else nil -- (negative in a Studio test server)
 	if not found and type(data.killer) == "string" and data.killer ~= "" then
 		for _, other in ipairs(Players:GetPlayers()) do
 			if other.DisplayName == data.killer or other.Name == data.killer then
@@ -851,10 +871,10 @@ local TIPS: { [string]: { () -> string } } = {
 	},
 	Fall = {
 		function()
-			return string.format("Drops of more than about %d m hurt. Climb down, or drop into water.", meters(tonumber(Config.Movement.FallDamage.MinHeight) or 13))
+			return string.format("Drops of more than about %d m hurt. Take the slope down, or drop into water.", meters(tonumber(Config.Movement.FallDamage.MinHeight) or 13))
 		end,
 		function()
-			return string.format("A drop of about %d m kills from full health. Find a slope, climb down a tree, or land in deep water.", meters(tonumber(Config.Movement.FallDamage.LethalHeight) or 58))
+			return string.format("A drop of about %d m kills from full health. Find a slope, or land in deep water.", meters(tonumber(Config.Movement.FallDamage.LethalHeight) or 58))
 		end,
 	},
 	Bow = {
@@ -868,7 +888,7 @@ local TIPS: { [string]: { () -> string } } = {
 			local bow = ItemDefs.get("bow")
 			local damage = (bow and bow.damageMax) or 50
 			local head = math.floor(damage * ((bow and bow.headshotMultiplier) or 2) + 0.5)
-			return string.format("A full-draw arrow hits for %d, %d to the head. Move from tree to tree, and never stop in the open.", damage, head)
+			return string.format("A full-draw arrow hits for %d, %d to the head. Move from cover to cover, and never stop in the open.", damage, head)
 		end,
 	},
 	Melee = {
@@ -1022,6 +1042,13 @@ NotificationController.hideDeathScreen = hideDeath
 -- two never draw text over text (round-flow QA pt2/pt3, survival P2).
 function NotificationController.isCardUp(): boolean
 	return deathVisible or victoryVisible
+end
+
+-- A headline is showing; the Roll Call list is showing. On phones both use the top band, where the lobby's status
+-- pill is, and elsewhere the Roll Call panel sits at the right edge, where HOW TO PLAY is: LobbyController moves
+-- them out of the way meanwhile.
+function NotificationController.isBannerUp(): (boolean, boolean)
+	return headlineCurrent ~= nil, R.roll ~= nil and R.roll.Visible == true
 end
 
 local function showDeath(data: any)
@@ -1199,11 +1226,13 @@ local function hideVictory(immediate: boolean?)
 	end)
 end
 
-local function showVictory(text: string?, sub: string?, winner: any, fallback: boolean?)
+-- winnerUserId: the winner's UserId when the server sent it. wonBefore: the answer worked out when the result first
+-- arrived (a result that waited behind the death card is shown later, when Placement and Alive may have been reset).
+local function showVictory(text: string?, sub: string?, winner: any, fallback: boolean?, winnerUserId: any, wonBefore: boolean?)
 	local roundId = GameState:GetAttribute("RoundId")
 	local winnerName = if type(winner) == "string" and winner ~= "" then winner else nil
 	local participated = participatedRound ~= nil and participatedRound == roundId
-	local won = participated and isMe(winnerName)
+	local won = if wonBefore ~= nil then wonBefore else participated and iWon(winnerName, winnerUserId)
 	local practice = GameState:GetAttribute("Practice") == true
 	local title = if type(text) == "string" and text ~= "" then text elseif winnerName then winnerName else "ROUND OVER"
 	local subText = if type(sub) == "string" then sub elseif winnerName then "is the last one standing" else ""
@@ -1230,7 +1259,8 @@ local function showVictory(text: string?, sub: string?, winner: any, fallback: b
 			else
 				note = Theme.escape(string.upper(title))
 			end
-			pendingVictory = { roundId = roundId, text = text, sub = sub, winner = winner, note = note }
+			pendingVictory = { roundId = roundId, text = text, sub = sub, winner = winner, note = note,
+				winnerUserId = winnerUserId, won = won }
 		end
 		refreshDeathButtons()
 		return
@@ -1256,7 +1286,9 @@ local function showVictory(text: string?, sub: string?, winner: any, fallback: b
 		if practice or startedCount <= 1 then
 			R.vSub.Text = string.format("%d %s", kills, if kills == 1 then "elimination" else "eliminations")
 		else
-			R.vSub.Text = string.format("You outlasted %d contenders   ·   <b>%d</b> %s", startedCount - 1, kills, if kills == 1 then "elimination" else "eliminations")
+			-- (a two-player round: "1 contender", not "1 contenders")
+			R.vSub.Text = string.format("You outlasted %d %s   ·   <b>%d</b> %s", startedCount - 1, if startedCount - 1 == 1 then "contender" else "contenders",
+				kills, if kills == 1 then "elimination" else "eliminations")
 		end
 	else
 		R.vEyebrow.Text = "THE ROUND IS OVER"
@@ -1294,7 +1326,7 @@ flushVictory = function()
 	if p.roundId ~= GameState:GetAttribute("RoundId") or phase == "Countdown" or phase == "Active" then
 		return
 	end
-	showVictory(p.text, p.sub, p.winner)
+	showVictory(p.text, p.sub, p.winner, nil, p.winnerUserId, p.won)
 	if victoryVisible and (phase == "Lobby" or phase == "Intermission") then
 		local token = victoryToken
 		task.delay(if summary and summary.roundId == p.roundId then 7 else 4, function()
@@ -1556,7 +1588,7 @@ local function onAnnounce(payload: any)
 	elseif style == "RollCall" then
 		showRollCall(payload)
 	elseif style == "Victory" then
-		showVictory(text, sub, payload.winner)
+		showVictory(text, sub, payload.winner, nil, payload.winnerUserId)
 	elseif text ~= "" then
 		NotificationController.toast(text, sub, duration)
 	end
@@ -1613,7 +1645,7 @@ local function onPhase()
 			if GameState:GetAttribute("Phase") == "Ending" and victoryRound ~= GameState:GetAttribute("RoundId") then
 				local winner = GameState:GetAttribute("WinnerName")
 				local w = if type(winner) == "string" and winner ~= "" then winner else nil
-				showVictory(w, if w then "is the last one standing" else nil, w, true)
+				showVictory(w, if w then "is the last one standing" else nil, w, true, GameState:GetAttribute("WinnerUserId"))
 			end
 		end)
 	elseif phase == "Lobby" or phase == "Intermission" then

@@ -777,7 +777,7 @@ local DEV_NAMES = {
 }
 
 local function devRollCall(count: number, opts: { [string]: any }?)
-	count = math.clamp(math.floor(count), 0, 23)
+	count = math.clamp(math.floor(count), 0, math.max(23, (tonumber(RoundCfg.MaxContenders) or 24) - 1)) -- (47 on Map 1)
 	local source = nil
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Character then

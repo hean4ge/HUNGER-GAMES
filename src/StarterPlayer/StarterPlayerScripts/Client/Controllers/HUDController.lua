@@ -163,7 +163,8 @@ local waterCache = { at = 0, point = nil :: Vector3?, distance = 0 }
 local lastThirst: number? = nil
 local interactSeen: { text: string, key: string?, at: number }? = nil
 local actionSeen: { segments: { any }, at: number }? = nil
-local actionState = { sig = nil :: string?, token = 0, ref = nil :: any, refText = nil :: string?, parsed = nil :: { any }? }
+local actionState = { sig = nil :: string?, token = 0, ref = nil :: any, refText = nil :: string?, parsed = nil :: { any }?,
+	sigFor = nil :: { any }?, sigText = nil :: string? } -- sigFor / sigText: the segments the signature was last built from
 local actionPool = { keys = {} :: { any }, texts = {} :: { any }, used = {} :: { any } }
 local flashHint: { segments: { any }, untilT: number }? = nil -- a short HUD-side hint, e.g. [SHIFT] SPRINT at the horn
 
@@ -883,14 +884,25 @@ local function addKill(data: any)
 	end
 	local me = player.DisplayName
 	local dim = Theme.hex(C.TextDim)
+	-- "you" is decided by UserId when the payload carries one (killerUserId / victimUserId): display names are not
+	-- unique. A payload without ids falls back to the names.
+	local function mine(n: string?, id: any): boolean
+		local userId = tonumber(id)
+		if userId and userId ~= 0 then
+			return userId == player.UserId
+		end
+		return n ~= nil and (n == me or n == player.Name)
+	end
+	local victimMine = mine(victim, data.victimUserId)
+	local killerMine = killer ~= nil and mine(killer, data.killerUserId)
 	local function name(n: string, isVictim: boolean): string
 		local s = "<b>" .. Theme.escape(n) .. "</b>"
-		if n == me or n == player.Name then
+		if if isVictim then victimMine else killerMine then
 			return string.format("<font color=\"%s\">%s</font>", Theme.hex(if isVictim then C.Danger else C.AccentSoft), s)
 		end
 		return s
 	end
-	local involved = victim == me or killer == me or victim == player.Name or killer == player.Name
+	local involved = victimMine or killerMine
 	local text
 	if type(data.text) == "string" and data.text ~= "" and not killer then
 		text = string.format("%s  <font color=\"%s\">%s</font>", name(victim, true), dim, Theme.escape(data.text))
@@ -973,7 +985,7 @@ end
 -- QW10 compass labels (round-flow QA pt2, pt4): a distance beside a marker never runs off the ribbon (the compass clips
 -- it: "55 m" read "5 m") or into the other marker's ("667 1m m"). Widths come from the text (RobotoMono, 0.6 em a
 -- character: a little generous), so a label is placed before the engine has laid it out.
-local compassSpire = { shown = false, x = 0, label = false, from = 0, to = 0 }
+local compassSpire = { shown = false, x = 0, label = false, from = 0, to = 0, meters = -1, text = "" }
 local labelSides: { [Instance]: number } = {}
 
 local function monoWidth(text: string, size: number): number
@@ -1189,10 +1201,13 @@ local function updateCompass(camCF: CFrame, phase: string)
 		-- distance rides next to the marker while it's on the ribbon: on its right, or on its left near the ribbon's right
 		-- end (it was clipped there). Shown below, once the water's distance has had its say.
 		if not edge then
-			local text = string.format("%d m", math.floor(spireDistance * STUD_TO_METERS + 0.5))
-			if R.spireDist.Text ~= text then
-				R.spireDist.Text = text
+			local meters = math.floor(spireDistance * STUD_TO_METERS + 0.5)
+			if meters ~= compassSpire.meters then
+				compassSpire.meters = meters
+				compassSpire.text = string.format("%d m", meters)
+				R.spireDist.Text = compassSpire.text
 			end
+			local text = compassSpire.text
 			local width = monoWidth(text, R.spireDist.TextSize)
 			local side = 1
 			local from, to = labelSpan(x, 1, width, 9)
@@ -1720,12 +1735,15 @@ local function updateAction(show: boolean)
 		segments = flashHint.segments
 	end
 	local sig: string? = nil
-	if segments then
+	if segments and segments == actionState.sigFor then
+		sig = actionState.sigText -- the same parsed hint as last frame (parseHint and the hold both hand back one table)
+	elseif segments then
 		local parts = {}
 		for _, seg in ipairs(segments) do
 			table.insert(parts, seg.kind .. ":" .. seg.text)
 		end
 		sig = table.concat(parts, "|")
+		actionState.sigFor, actionState.sigText = segments, sig
 	end
 	if sig == actionState.sig then
 		return
@@ -1917,6 +1935,9 @@ end
 function HUDController.Start()
 	setCoreGui(Enum.CoreGuiType.Backpack, false)
 	setCoreGui(Enum.CoreGuiType.Health, false)
+	-- Roblox's player list opens by itself on a PC, in the corner the kill feed uses (one row per player, up to 48): off.
+	-- The Roblox menu keeps its own players page for muting and reporting.
+	setCoreGui(Enum.CoreGuiType.PlayerList, false)
 
 	local pg = player:WaitForChild("PlayerGui") :: PlayerGui
 	playerGui = pg

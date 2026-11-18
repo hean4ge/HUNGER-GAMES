@@ -925,15 +925,32 @@ end
 -- Equip and drop remotes
 --------------------------------------------------------------------------------------------------------------------
 
+-- Each change rebuilds the held model for everyone near, so the limit is low (Config.Inventory.EquipRequestsPerSecond;
+-- the client sends 12 a second at most). A request over it is not dropped, or a fast scroll through the slots would end
+-- on an earlier slot than the one the player stopped on: the latest one is kept and applied a moment later.
+local equipQueued: { [Player]: any } = {}
+
 local function onEquipSlot(player: Player, slot: any)
-	local rate = InvCfg.EquipRequestsPerSecond or 20
-	if not Net.rateLimit(player, "EquipSlot", rate, rate) then
-		return
-	end
 	if toSlot(slot, true) == nil then
 		return
 	end
-	InventoryService.equip(player, slot)
+	local rate = InvCfg.EquipRequestsPerSecond or 8
+	if Net.rateLimit(player, "EquipSlot", rate, rate) then
+		equipQueued[player] = nil
+		InventoryService.equip(player, slot)
+		return
+	end
+	local waiting = equipQueued[player] ~= nil
+	equipQueued[player] = slot
+	if not waiting then
+		task.delay(0.25, function()
+			local queued = equipQueued[player]
+			equipQueued[player] = nil
+			if queued ~= nil then
+				InventoryService.equip(player, queued) -- (does nothing for a player who has left)
+			end
+		end)
+	end
 end
 
 local function onDropSlot(player: Player, slot: any, count: any)
@@ -1094,6 +1111,7 @@ local function onPlayerRemoving(player: Player)
 	end
 	destroyModel(inv)
 	inventories[player] = nil
+	equipQueued[player] = nil
 end
 
 --------------------------------------------------------------------------------------------------------------------

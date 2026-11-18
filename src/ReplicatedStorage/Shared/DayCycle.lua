@@ -537,15 +537,21 @@ local CLASSIC = {
 ]]
 local NIGHT_G = {
 	Brightness = 2.8, -- moonlight, as tuned in this place for a readable ground
-	Exposure = 0.65,
-	-- The fill where the sky is blocked. Measured in Studio at 21:00: the night's ground light is the sky light, and
-	-- under the North Wood's canopy none of it arrives, so with the classic (26,30,42) the forest floor was luma 0.
-	-- (64,72,98) brings it to about 5 and the open meadow from 18 to about 24. A wood at night stays dark.
-	Ambient = rgb(64, 72, 98),
-	Outdoor = rgb(60, 70, 100),
+	Exposure = 0.6,
+	-- The fill. Under the North Wood's canopy neither the moon nor the sky light arrives: Ambient is the only light
+	-- there, and the picture's response to it is steep at the dark end. Measured in Studio at 21:00 (full quality,
+	-- forest floor luma): (26,30,42) 0, (64,72,98) under 1, (100,112,152) 5, (130,146,198) 13 to 16, (160,180,244)
+	-- 23. So (64,72,98), the first try, changed nothing a player could see. The engine also never lets the open
+	-- ground's fill fall under Ambient (OutdoorAmbient below it does nothing: (60,70,100), (30,35,50) and 0 gave the
+	-- same meadow), so this fill lifts the meadow too: 22 before, 50 at (130,146,198) with the sky light at 0.8, 39
+	-- with it at 0.4 or less. Hence the three numbers together: this Ambient, the sky light down to 0.4 and the
+	-- exposure down a little, for a wood you can walk through (about 12) under a meadow still clearly brighter (low
+	-- 30s). The wood stays the darkest place of the night.
+	Ambient = rgb(120, 135, 184),
+	Outdoor = rgb(120, 135, 184),
 	ShiftTop = rgb(70, 95, 150),
 	ShiftBottom = rgb(0, 0, 0),
-	EnvDiffuse = 0.8,
+	EnvDiffuse = 0.4,
 	EnvSpecular = 0.8,
 	Softness = 0.35,
 	AtmDensity = 0.2,
@@ -574,7 +580,9 @@ local NIGHT_G = {
 	Stars = 4500,
 	WaterReflect = 0.6, -- the moon's path on the lake
 	WaterWave = 0.08,
-	InteriorLight = 0.45, -- the horn at night: a dim, warm room, not a lantern
+	-- the horn at night: a dim, warm room, not a lantern. 0.22 since the night's fill went up (18 Nov): with 0.45 on
+	-- top of it the horn's floor read luma 110 at 21:00, as bright as by day
+	InteriorLight = 0.22,
 }
 
 local DAY_G = {
@@ -623,8 +631,8 @@ local GREEN_LAND = {
 	with(NIGHT_G, {
 		hour = 5.3,
 		Exposure = 0.55,
-		Ambient = rgb(56, 62, 84),
-		Outdoor = rgb(70, 78, 106),
+		Ambient = rgb(104, 116, 158), -- (56,62,84) left the wood black from the moon's fade to sunrise
+		Outdoor = rgb(104, 116, 158),
 		ShiftTop = rgb(150, 150, 200),
 		EnvDiffuse = 0.85,
 		EnvSpecular = 0.85,
@@ -856,8 +864,9 @@ local GREEN_LAND = {
 		hour = 18.75,
 		Brightness = 2.0,
 		Exposure = 0.55,
-		Ambient = rgb(56, 62, 84),
-		Outdoor = rgb(72, 80, 108),
+		Ambient = rgb(104, 116, 158), -- the wood at dusk: under the twilight fill the open ground gets (124,138,166)
+		Outdoor = rgb(104, 116, 158),
+		EnvDiffuse = 0.8, -- as it was: the last of the sky's light
 		ShiftTop = rgb(112, 116, 170),
 		Softness = 0.3,
 		AtmDensity = 0.24,
@@ -876,7 +885,7 @@ local GREEN_LAND = {
 		Mist = 0.5,
 		Night = 0.6,
 		WaterReflect = 0.65,
-		InteriorLight = 0.55,
+		InteriorLight = 0.35,
 	}),
 	with(NIGHT_G, { hour = 19.7 }),
 	with(NIGHT_G, { hour = 24 }),
@@ -1242,6 +1251,11 @@ DayCycle.Recap = {
 	HoldMax = 3.0, -- seconds each bust holds (shorter when many fell)
 	HoldMin = 1.5,
 	HoldStep = 0.09,
+	-- A long list: the whole show stays near MaxTotal seconds however many fell (it grew by 3.55 s a head: 2 min 46 s
+	-- for 40). What is left for the one-by-one part is shared out, each entry's break, assembly and hold shortened
+	-- alike, down to EntryMin seconds an entry (47 fallen: 47.7 s). Lists of up to three are as they were. nil = no cap.
+	MaxTotal = 45,
+	EntryMin = 0.5,
 	SingleExtra = 1.5, -- extra hold when only one contender fell (there is no group finale)
 	FinaleAssemble = 2.4, -- all of the day's fallen together
 	FinaleHold = 4.6,
@@ -1314,8 +1328,22 @@ function DayCycle.recapTimeline(count: number, mode: string?)
 			hold += R.SingleExtra
 		end
 		local assemble = math.clamp(R.Assemble - 0.05 * math.max(0, count - 6), R.AssembleMin, R.Assemble)
+		local breakTime = R.Break
+		-- the cap (Recap.MaxTotal): everything but the one-by-one part is fixed, so each entry gets an equal share of
+		-- what is left
+		local cap = tonumber(R.MaxTotal)
+		if cap and count >= 2 then
+			local fixed = t + (R.Break + R.FinaleAssemble + R.FinaleHold) + (R.Break + R.CloseAssemble + R.CloseHold)
+				+ R.Dissolve + R.StaticOut + R.FadeOut
+			local each = breakTime + assemble + hold
+			local allowed = math.max((cap - fixed) / count, tonumber(R.EntryMin) or 0.5)
+			if allowed < each then
+				local k = allowed / each
+				breakTime, assemble, hold = breakTime * k, assemble * k, hold * k
+			end
+		end
 		for i = 1, count do
-			local tb = t + R.Break
+			local tb = t + breakTime
 			local t1 = tb + assemble
 			table.insert(segments, { kind = "person", index = i, t0 = t, tb = tb, t1 = t1, t2 = t1 + hold })
 			revealAt[i] = t1

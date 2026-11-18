@@ -2,21 +2,32 @@
 	CombatService - server-authoritative melee and ranged combat, plus the training dummies of practice rounds.
 
 	Client -> server
-	  MeleeSwing(lookDirection: Vector3, predictedHit: boolean, variant: number?) sent at the strike moment of a swing;
+	  MeleeSwing("Start", variant: number?) sent when a swing starts: the others near the attacker are told at once
+	    (CombatAction "Swing" with lead = the weapon's windup), so they see the swing begin before the blow lands
+	  MeleeSwing(lookDirection: Vector3, predictedHit: boolean, variant: number?, target: Model?, startTime: number?)
+	    sent at the strike moment of a swing;
 	    predictedHit = the attacker's own trace touched someone (CombatController): a swing their screen showed as a miss
 	    never lands. variant (optional) = the swing's set, an integer 1-8: passed on to the other clients so they show the
-	    same swing (CharacterVisuals); any other value is ignored and the swing goes ahead without it
+	    same swing (CharacterVisuals); any other value is ignored and the swing goes ahead without it.
+	    target (optional) = the body that trace touched: the server checks that one body and no other, so a bystander
+	    in the swing's path never takes the hit. startTime (optional) = workspace:GetServerTimeNow() when the swing
+	    started on the attacker's client (see trySwing)
 	  RangedRelease(shotId, origin, direction, charge, mode)
-	    "Fire"   bow shot: consumes 1 arrow; speed and damage scale with charge (capped by the measured draw time)
+	    "Fire"   bow shot: consumes 1 arrow; speed and damage scale with charge (capped by the measured draw time).
+	             Needs a "Draw" for that bow first; a charge under Config.Combat.MinBowCharge is refused
 	    "Throw"  throwing knife (consumes 1) or spear (removes the equipped spear)
 	    "Draw"   the bow draw started: the server times the charge and tells other clients (CombatAction "Draw")
 	    "Cancel" the draw was let down without shooting
 	Server -> client
 	  HitConfirm { damage, headshot, killed, position? (hit point), target = "Player" | "Dummy", weaponId?, melee }
 	    to the attacker
-	  CombatAction { userId, action = "Swing" | "Draw" | "Release" | "Throw", itemId, cancelled?, variant? }   to everyone
-	    else (variant: a Swing's set, 1-8, when the attacker sent a valid one)
-	  Sfx: swing, release and impact sounds for everyone except the attacker (who plays them locally, instantly)
+	  CombatAction { userId, action = "Swing" | "Draw" | "Release" | "Throw", itemId, cancelled?, variant?, lead? }
+	    to the other players within ACTION_RANGE studs (variant: a Swing's set, 1-8, when the attacker sent a valid one;
+	    lead: seconds from this message to the swing's strike: the windup when sent at the swing's start, 0 when the
+	    attacker's client sent no start and the swing is announced at the strike)
+	  Sfx: swing, release and impact sounds for the players who can hear them (within the sound's roll-off distance of
+	    where they listen from: their character, or the contender they spectate), except the attacker, who plays them
+	    locally, instantly
 
 	API
 	  CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamage: number, info) -> (damageDealt, killed)
@@ -25,7 +36,9 @@
 	    Players: damage * InventoryService.getArmorMultiplier(victim) through PlayerService.damage.
 	    Other humanoids (training dummies): Humanoid:TakeDamage. Never yourself, dead players, or outside Active.
 	  CombatService.characterFromPart(part) -> (Humanoid?, Model?, BasePart?)   accessories resolve to the body part they're worn on
-	  CombatService.getTargets(exclude: Instance?) -> { Model }   every character and training dummy that can be hit
+	  CombatService.getTargets(exclude: Instance?, aliveOnly: boolean?) -> { Model }   every character and training dummy
+	    that can be hit; aliveOnly leaves out bodies whose Humanoid is dead (melee: a body that just fell never takes or
+	    blocks a swing). Accessory parts are not part of anyone's hit box (CanQuery off, set here as characters load).
 
 	Training dummies: practice rounds only (GameState.Practice), during Active; in Studio, and on live servers while
 	Config.Round.SoloPractice is on (PlayabilityPlan QW1).
@@ -35,8 +48,9 @@
 	on screen (DUMMY_BAR_SIZE) and hide while the contender stands within DUMMY_BAR_HIDE studs, where they would sit on
 	the HUD's compass.
 	Template: ServerStorage.Dev.TrainingDummy (built by ServerStorage.WorldGen.DummyBuilder).
-	Melee cooldown: the next swing may come once the cooldown of the weapon now in hand has passed since the last swing
-	(trySwing), so a knife after a mace isn't refused while the attacker's screen shows it hit.
+	Melee cooldown: the same rule as the attacker's client (CombatController: nextActionAt = start + total). The next swing
+	may START once the cooldown of the weapon that swung last has passed since that swing started, whatever is in hand
+	now (trySwing). Refusals are counted by reason in CombatService._refusals (and printed in Studio).
 ]]
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -49,7 +63,7 @@ local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local Net = require(Shared:WaitForChild("Net"))
-local Sfx = require(Shared:WaitForChild("Sfx"))
+local Sounds = require(Shared:WaitForChild("Sounds"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local Util = require(Shared:WaitForChild("Util"))
 
@@ -69,26 +83,35 @@ local MELEE_FACING_DOT = -0.2 -- flat swing direction vs. character facing; leni
 -- that can move (a player) was on the attacker's screen up to interpolation plus ping ago and may have backed off
 -- several studs since, so a hit seen on one is checked out to range + MeleeLagTolerance + MeleeHitRadius. The front
 -- never passes that, since the attacker's speed is reported by their own client.
+-- MELEE_REACH_ALLOWANCE was 1: with it a sword (range 8) standing still was confirmed on a still target 11 studs away,
+-- root to root, a full stud past what an honest client's trace can touch (10). Half a stud keeps the slack for the
+-- small difference between the server's head and the client's camera, and 11 is refused whatever the client claims.
 local MELEE_PREDICT_RADIUS = 0.85
 local MELEE_CAMERA_BEHIND = 0.5
-local MELEE_REACH_ALLOWANCE = 1
+local MELEE_REACH_ALLOWANCE = 0.5
 local MELEE_LAG_TIME = 0.25
 local RANGED_FACING_DOT = -0.35
 local HEAVY_SWING_COOLDOWN = 0.75 -- weapons at least this slow use the heavy swing sound
-local BOW_MIN_INTERVAL = 0.3 -- seconds between two arrows, on top of the draw time
-local CHARGE_JITTER = 0.15 -- seconds of draw time forgiven for network jitter
+local BOW_RECOVER = 0.32 -- seconds after a shot before the next draw can begin (CombatController's BOW_RECOVER)
+local CHARGE_JITTER = 0.15 -- seconds of draw time forgiven for network jitter (not banked from shot to shot)
+local SWING_LATE = 0.35 -- seconds a swing may arrive late and still be timed from when its client says it started
+local START_MIN_GAP = 0.3 -- seconds between two swing starts relayed for one attacker
+local ACTION_RANGE = 220 -- studs: CombatAction reaches the clients listening this close to the attacker
+local SOUND_MARGIN = 30 -- studs past a sound's roll-off distance that still get it (the listener may be moving)
 
 local CombatService = {}
 
 local Services: { [string]: any } = {}
 local HitConfirm: RemoteEvent
 local CombatAction: RemoteEvent
+local SfxRemote: RemoteEvent
 
 type PlayerState = {
-	lastSwing: number, -- when the last melee swing counted (trySwing)
-	nextShot: number,
+	nextSwingStart: number, -- server time (workspace:GetServerTimeNow) from which the next swing may start (trySwing)
+	startAt: number?, -- when the last swing start was relayed (MeleeSwing "Start"), and for which weapon
+	startItem: string?,
 	nextThrow: number,
-	lastShot: number,
+	bowFree: number, -- os.clock() from which the next draw may count (the last shot + BOW_RECOVER)
 	drawStart: number?,
 	drawItem: string?,
 }
@@ -119,7 +142,8 @@ end
 local function stateFor(player: Player): PlayerState
 	local st = playerState[player]
 	if not st then
-		st = { lastSwing = -math.huge, nextShot = 0, nextThrow = 0, lastShot = 0, drawStart = nil, drawItem = nil }
+		st = { nextSwingStart = -math.huge, startAt = nil, startItem = nil, nextThrow = 0, bowFree = 0, drawStart = nil,
+			drawItem = nil }
 		playerState[player] = st
 	end
 	return st
@@ -136,17 +160,35 @@ local function tryCooldown(st: any, key: string, cooldown: number, now: number):
 	return true
 end
 
--- Melee: the next swing may come once the cooldown of the weapon now in hand has passed since the last swing, whatever
--- swung it. One window shared across weapons let a mace's 1.1 s refuse the first knife or fist swing after a switch
--- while the attacker's screen showed it hit (the "ghost hit"). Like tryCooldown, an early swing doesn't pull the next
--- one earlier, and a slow weapon after a quick one still waits its own full cooldown.
-local function trySwing(st: PlayerState, cooldown: number, now: number): boolean
-	local ready = st.lastSwing + cooldown
-	if now < ready - (CombatConfig.CooldownJitter or 0.12) then
+-- Melee, the same rule as the attacker's client (CombatController.startMelee: nextActionAt = start + total): the next
+-- swing may START once the cooldown of the weapon that swung last has passed since that swing started, whatever is in
+-- hand now. (Gating strike to strike by the weapon now in hand refused the first swing after a switch from a quick weapon
+-- to a slower one, which the client allows: the attacker saw and heard a hit that never landed, the "ghost swing".)
+-- `now` is workspace:GetServerTimeNow() when the strike arrived. The swing started at most `windup` before that; the
+-- client's own start time (claimedStart, on the same clock) is believed when it is up to SWING_LATE earlier still, so a
+-- strike held up on the way doesn't push the next swing's window back and get that one refused. Nothing is banked: a
+-- client that always claims the earliest start gains SWING_LATE once, and its rate stays one swing per cooldown, because
+-- an early swing never pulls the next window earlier.
+local function trySwing(st: PlayerState, def: any, now: number, claimedStart: any): boolean
+	local latest = now - (def.windup or 0.1)
+	local start = latest
+	if Util.isFiniteNumber(claimedStart) then
+		start = math.clamp(claimedStart, latest - SWING_LATE, latest)
+	end
+	if start < st.nextSwingStart - (CombatConfig.CooldownJitter or 0.12) then
 		return false
 	end
-	st.lastSwing = math.max(now, ready)
+	st.nextSwingStart = math.max(start, st.nextSwingStart) + (def.cooldown or 0.5)
 	return true
+end
+
+-- Refusals by reason (a swing or shot the server dropped): read CombatService._refusals; printed in Studio.
+local refusals: { [string]: number } = {}
+local function refuse(player: Player, reason: string)
+	refusals[reason] = (refusals[reason] or 0) + 1
+	if Config.IsStudio then
+		print(string.format("[CombatService] refused %s from %s (%d so far)", reason, player.Name, refusals[reason]))
+	end
 end
 
 local function getContext(player: Player): Context?
@@ -227,12 +269,51 @@ local function facingOk(root: BasePart, direction: Vector3, minDot: number): boo
 	return flat.Unit:Dot(flatLook.Unit) >= minDot
 end
 
-local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?, variant: number?)
+-- Where a player listens and watches from: the contender they spectate (PlayerService points their ReplicationFocus
+-- there), else their own character. nil while they have neither (still loading).
+local function listenerPosition(other: Player): Vector3?
+	local focus = other.ReplicationFocus
+	if focus and focus:IsA("PVInstance") and focus:IsDescendantOf(workspace) then
+		return focus:GetPivot().Position
+	end
+	local character = other.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if root and root:IsA("BasePart") then
+		return root.Position
+	end
+	return nil
+end
+
+-- A positional sound, sent only to the players who can hear it: within its roll-off distance (Sounds: rollMax) plus
+-- SOUND_MARGIN of where they listen from. (Sfx.play sends to every client, the lobby 8,800 studs away included.)
+local function playSound(key: string, position: Vector3, exclude: Player?, volume: number?, pitch: number?)
+	local entry = (Sounds :: any)[key]
+	local range = ((if type(entry) == "table" then tonumber(entry.rollMax) else nil) or 160) + SOUND_MARGIN
+	local data = { position = position, volume = volume, pitch = pitch }
+	for _, other in ipairs(Players:GetPlayers()) do
+		if other ~= exclude then
+			local at = listenerPosition(other)
+			if at and (at - position).Magnitude <= range then
+				SfxRemote:FireClient(other, key, data)
+			end
+		end
+	end
+end
+
+-- To the other players within ACTION_RANGE of the attacker (everyone else, if the attacker has no body to measure from).
+local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?, variant: number?, lead: number?)
 	local payload = { userId = player.UserId, action = action, itemId = itemId or "fists", cancelled = cancelled == true }
 	payload.variant = variant -- (a Swing's set, when the attacker sent a valid one)
+	payload.lead = lead -- (a Swing: seconds until its strike)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local from = if root and root:IsA("BasePart") then root.Position else nil
 	for _, other in ipairs(Players:GetPlayers()) do
 		if other ~= player then
-			CombatAction:FireClient(other, payload)
+			local at = if from then listenerPosition(other) else nil
+			if from == nil or (at ~= nil and (at - from).Magnitude <= ACTION_RANGE) then
+				CombatAction:FireClient(other, payload)
+			end
 		end
 	end
 end
@@ -341,20 +422,48 @@ function CombatService.characterFromPart(part: Instance?): (Humanoid?, Model?, B
 	return nil, nil, nil
 end
 
-function CombatService.getTargets(exclude: Instance?): { Instance }
+local function isLive(model: Instance): boolean
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	return humanoid ~= nil and humanoid.Health > 0
+end
+
+function CombatService.getTargets(exclude: Instance?, aliveOnly: boolean?): { Instance }
 	local list = {}
 	for _, other in ipairs(Players:GetPlayers()) do
 		local character = other.Character
-		if character and character ~= exclude and character.Parent then
+		if character and character ~= exclude and character.Parent and (not aliveOnly or isLive(character)) then
 			table.insert(list, character)
 		end
 	end
 	for _, dummy in ipairs(CollectionService:GetTagged(DUMMY_TAG)) do
-		if dummy ~= exclude and dummy:IsA("Model") and dummy:IsDescendantOf(workspace) then
+		if dummy ~= exclude and dummy:IsA("Model") and dummy:IsDescendantOf(workspace) and (not aliveOnly or isLive(dummy)) then
 			table.insert(list, dummy)
 		end
 	end
 	return list
+end
+
+-- The hit box is the body. Hats, hair, wings, auras and layered clothing took swings and arrows that missed the body (and
+-- anything worn on the head counted as a headshot), so accessory parts are left out of every ray and sweep, on the
+-- server and (the property replicates) in each client's own trace. Accessory parts never collide, so nothing else changes.
+local function bodyOnlyPart(inst: Instance)
+	if inst:IsA("BasePart") and inst.CanQuery and inst:FindFirstAncestorWhichIsA("Accessory") then
+		inst.CanQuery = false
+	end
+end
+
+local function watchHitBox(character: Model)
+	for _, inst in ipairs(character:GetDescendants()) do
+		bodyOnlyPart(inst)
+	end
+	character.DescendantAdded:Connect(bodyOnlyPart) -- (accessories arrive after the body; gone with the character)
+end
+
+local function watchPlayerHitBox(player: Player)
+	player.CharacterAdded:Connect(watchHitBox)
+	if player.Character then
+		watchHitBox(player.Character)
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -456,9 +565,10 @@ local function dummyLayout(): { CFrame }
 	local count = math.max(0, math.floor(CombatConfig.PracticeDummies or 3))
 	for i = 1, count do
 		-- alternate sides: the first pair 6 studs either side of the line (a clear lane about 7 studs wide between their
-		-- stands), then 7 studs further out each
+		-- stands), then 12 studs further out each. (At 7 a dummy's outstretched hand was about a stud off the line from
+		-- the plate to the next dummy's chest, and took the swings aimed at that one.)
 		local side = if i % 2 == 1 then 1 else -1
-		local lateral = side * (6 + 7 * math.floor((i - 1) / 2))
+		local lateral = side * (6 + 12 * math.floor((i - 1) / 2))
 		local ahead = 13 + math.abs(lateral) * 0.3
 		local spot = anchor + toCenter * ahead + right * lateral
 		local ground = workspace:Raycast(Vector3.new(spot.X, anchor.Y + 40, spot.Z), Vector3.new(0, -120, 0), params)
@@ -526,7 +636,7 @@ local function breakDummy(model: Model, slot: DummySlot)
 		end
 	end
 	if soundAt then
-		Sfx.play("Hit_Wood", { position = soundAt, volume = 1.3, pitch = 0.75 })
+		playSound("Hit_Wood", soundAt, nil, 1.3, 0.75)
 	end
 	task.delay(CombatConfig.DummyRespawnTime or 3, function()
 		if model.Parent then
@@ -798,20 +908,49 @@ type MeleeHit = {
 	material: Enum.Material?,
 }
 
--- A forgiving sphere sweep against characters, a point-blank overlap check (Spherecast skips parts that already
--- overlap its start), a line-of-sight check so nobody is hit through a wall, then a thin ray for the world sound.
+-- The body a touched part belongs to: a body part or something worn (characterFromPart), or anything else inside one of
+-- `targets` (the weapon it holds): a swing that meets the target's sword first still lands on the target.
+local function bodyFromPart(part: Instance, targets: { Instance }): (Humanoid?, Model?, BasePart?)
+	local humanoid, model, bodyPart = CombatService.characterFromPart(part)
+	if humanoid then
+		return humanoid, model, bodyPart
+	end
+	for _, target in ipairs(targets) do
+		if part:IsDescendantOf(target) and target:IsA("Model") then
+			return target:FindFirstChildOfClass("Humanoid"), target, nil
+		end
+	end
+	return nil, nil, nil
+end
+
+-- What the swing lands on. First a thin ray along the look: whoever is under the crosshair, out to the sweep's front.
+-- Only when that touches nobody, the forgiving sphere sweep (first body touched), then a point-blank overlap check
+-- (Spherecast skips parts that already overlap its start). A line-of-sight check so nobody is hit through a wall, then
+-- a thin ray for the world sound. `reach` is the sweep's length: its front is reach + radius from the origin.
+-- Only living bodies count (one that just fell neither takes the swing nor blocks it). `only` (the body the attacker's
+-- own trace touched): that body is checked and no other, so a bystander in the path never takes the hit.
 -- worldOnly skips the characters (the attacker's own trace missed them) and keeps the world sound.
-local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, worldOnly: boolean?): MeleeHit?
-	local targets = CombatService.getTargets(character)
-	local world = worldParams(targets, character)
-	if #targets > 0 and not worldOnly then
+local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, worldOnly: boolean?, only: Instance?): MeleeHit?
+	local world = worldParams(CombatService.getTargets(character), character) -- (no body, living or not, is world)
+	local targets = if worldOnly then {} else CombatService.getTargets(character, true)
+	if only ~= nil then
+		targets = if table.find(targets, only) then { only } else {} -- (it just fell, or was never a target: nobody)
+	end
+	if #targets > 0 then
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Include
 		params.FilterDescendantsInstances = targets
 		local candidate: MeleeHit? = nil
-		local swept = workspace:Spherecast(origin, radius, direction * reach, params)
+		local aimed = workspace:Raycast(origin, direction * (reach + radius), params)
+		if aimed then
+			local humanoid, model, bodyPart = bodyFromPart(aimed.Instance, targets)
+			if humanoid and humanoid.Health > 0 then
+				candidate = { humanoid = humanoid, model = model, part = bodyPart, position = aimed.Position }
+			end
+		end
+		local swept = if candidate then nil else workspace:Spherecast(origin, radius, direction * reach, params)
 		if swept then
-			local humanoid, model, bodyPart = CombatService.characterFromPart(swept.Instance)
+			local humanoid, model, bodyPart = bodyFromPart(swept.Instance, targets)
 			if humanoid and humanoid.Health > 0 then
 				candidate = { humanoid = humanoid, model = model, part = bodyPart, position = swept.Position }
 			end
@@ -822,7 +961,7 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 			overlap.FilterDescendantsInstances = targets
 			local bestDistance = math.huge
 			for _, part in ipairs(workspace:GetPartBoundsInRadius(origin + direction * radius, radius, overlap)) do
-				local humanoid, model, bodyPart = CombatService.characterFromPart(part)
+				local humanoid, model, bodyPart = bodyFromPart(part, targets)
 				if humanoid and humanoid.Health > 0 then
 					local offset = part.Position - origin
 					local distance = offset.Magnitude
@@ -872,8 +1011,42 @@ end
 -- Remotes
 --------------------------------------------------------------------------------------------------------------------
 
-local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any, variant: any)
+-- MeleeSwing("Start", variant): a swing began on the attacker's client. The others near them are told now, so they see
+-- it wind up before the blow lands (told at the strike, the victim was hurt first and saw the swing afterwards). Cheap:
+-- no trace, one small message to the players in range, at most one every START_MIN_GAP per attacker, and not while the
+-- swing gate is closed.
+local function onMeleeStart(player: Player, variant: any)
+	if not Net.rateLimit(player, "MeleeStart", 5, 3) then
+		return
+	end
+	local ctx = getContext(player)
+	if not ctx then
+		return
+	end
+	local def = meleeDefFor(equippedItemId(player))
+	if not def then
+		return
+	end
+	local st = stateFor(player)
+	local now = workspace:GetServerTimeNow()
+	if now < st.nextSwingStart - (CombatConfig.CooldownJitter or 0.12) then
+		return -- (the strike, if it is accepted after all, announces the swing itself)
+	end
+	if st.startAt and now - st.startAt < START_MIN_GAP then
+		return
+	end
+	st.startAt = now
+	st.startItem = def.id
+	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), def.windup or 0.1)
+end
+
+local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any, variant: any, target: any, startTime: any)
+	if lookDirection == "Start" then
+		onMeleeStart(player, predictedHit)
+		return
+	end
 	if not Net.rateLimit(player, "MeleeSwing", 5, 3) then
+		refuse(player, "MeleeRate")
 		return
 	end
 	if not Util.isFiniteVector(lookDirection) then
@@ -889,17 +1062,29 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 		return
 	end
 	local def = meleeDefFor(equippedItemId(player))
-	if not def or not facingOk(ctx.root, direction, MELEE_FACING_DOT) then
+	if not def then
 		return
 	end
-	if not trySwing(stateFor(player), def.cooldown or 0.5, os.clock()) then
+	if not facingOk(ctx.root, direction, MELEE_FACING_DOT) then
+		refuse(player, "MeleeFacing")
+		return
+	end
+	local st = stateFor(player)
+	local now = workspace:GetServerTimeNow()
+	if not trySwing(st, def, now, startTime) then
+		refuse(player, "MeleeCooldown")
 		return
 	end
 
 	local origin = ctx.head.Position
 	local heavy = (def.cooldown or 0) >= HEAVY_SWING_COOLDOWN
-	Sfx.play(if heavy then "Swing_Heavy" else "Swing_Light", { position = origin, exclude = player })
-	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant))
+	playSound(if heavy then "Swing_Heavy" else "Swing_Light", origin, player)
+	-- the others saw this swing start (onMeleeStart); if its start never came, they are told now
+	local announced = st.startAt ~= nil and st.startItem == def.id and now - st.startAt < (def.windup or 0.1) + 0.6
+	st.startAt = nil
+	if not announced then
+		broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), 0)
+	end
 
 	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
 	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE, plus lag, past the front of the attacker's own
@@ -914,8 +1099,12 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 		front = maxFront
 	end
 	front = math.min(front, maxFront)
-	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true)
+	local claimed = if typeof(target) == "Instance" and target:IsA("Model") then target else nil
+	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true, claimed)
 	if not hit then
+		if predictedHit == true then
+			refuse(player, "MeleeNoTarget") -- (the attacker's screen showed a hit; the server found nobody there)
+		end
 		return
 	end
 	if hit.humanoid then
@@ -927,10 +1116,13 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 			melee = true,
 		})
 		if dealt > 0 then
-			Sfx.play("Hit_Flesh", { position = hit.position, exclude = player })
+			playSound("Hit_Flesh", hit.position, player)
 		end
 	else
-		Sfx.play(worldHitSound(hit.material), { position = hit.position, exclude = player })
+		if predictedHit == true then
+			refuse(player, "MeleeNoTarget") -- (the attacker's screen showed a hit; the server found nobody there)
+		end
+		playSound(worldHitSound(hit.material), hit.position, player)
 	end
 end
 
@@ -941,7 +1133,10 @@ local function validOrigin(ctx: Context, origin: any, targets: { Instance }): Ve
 	end
 	local offset = (origin :: Vector3) - head
 	local speed = math.min(ctx.root.AssemblyLinearVelocity.Magnitude, 80)
-	local limit = (CombatConfig.RangedOriginTolerance or 6) + CombatConfig.MeleeLagTolerance + speed * 0.12
+	-- The honest origin is the eye, under 2 studs from the head, plus what the body moved while the message travelled.
+	-- A shot that claims to start further from where the server sees the attacker starts at their head instead: 3 studs
+	-- standing still, more with speed, never more than the old allowance (9 studs at rest let a shot start round a corner).
+	local limit = math.min(3 + speed * 0.2, (CombatConfig.RangedOriginTolerance or 6) + CombatConfig.MeleeLagTolerance + speed * 0.12)
 	if offset.Magnitude > limit then
 		return head
 	end
@@ -978,6 +1173,7 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		if st.drawStart then
 			st.drawStart = nil
 			broadcastAction(player, "Release", st.drawItem or itemId, true)
+			st.drawItem = nil
 		end
 		return
 	end
@@ -1007,18 +1203,32 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		if def.kind ~= "Bow" then
 			return
 		end
-		local drawStart = if st.drawItem == itemId and st.drawStart then st.drawStart else st.lastShot
-		local maxCharge = math.clamp((now - drawStart + CHARGE_JITTER) / math.max(def.drawTime or 1, 0.05), 0, 1)
-		amount = math.min(amount, maxCharge)
-		if not tryCooldown(st, "nextShot", BOW_MIN_INTERVAL, now) then
+		-- An arrow's power comes from a real draw of this bow: the "Draw" the client sent when the string came back
+		-- (cleared by a shot, a let-down or a weapon switch). Without one there is no shot. (Measured from the last
+		-- shot instead, a client that never sent Draw had a full-power arrow the instant it equipped the bow, and
+		-- half power every 0.3 s.) The draw counts from the later of that message and BOW_RECOVER after the last shot
+		-- (bowFree), with CHARGE_JITTER forgiven for the network; a shot that used the forgiveness counts as loosed
+		-- when its charge was really reached, so the forgiveness is never banked from shot to shot.
+		local drawStart = if st.drawItem == itemId then st.drawStart else nil
+		st.drawStart = nil -- (each shot needs its own draw)
+		if not drawStart then
+			refuse(player, "BowNoDraw")
+			return
+		end
+		local drawTime = math.max(def.drawTime or 1, 0.05)
+		local began = math.max(drawStart, st.bowFree)
+		amount = math.min(amount, math.clamp((now - began + CHARGE_JITTER) / drawTime, 0, 1))
+		if amount < (CombatConfig.MinBowCharge or 0.2) - 1e-3 then
+			refuse(player, "BowCharge")
+			broadcastAction(player, "Release", itemId, true) -- (the others stop hearing the draw)
 			return
 		end
 		local ammo = def.ammo or "arrow"
 		if not consumeItem(player, ammo, 1) then
+			broadcastAction(player, "Release", itemId, true)
 			return
 		end
-		st.drawStart = nil
-		st.lastShot = now
+		st.bowFree = math.max(now, began + amount * drawTime) + BOW_RECOVER
 		local speed = Util.lerp(def.speedMin or 90, def.speedMax or 240, amount)
 		local damage = Util.lerp(def.damageMin or 10, def.damageMax or 40, amount)
 		local fired = projectiles.fire(player, ammo, start, aim * speed, def.gravity or 50, damage, {
@@ -1031,7 +1241,7 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 			refund(player, ammo)
 			return
 		end
-		Sfx.play("BowRelease", { position = start, exclude = player })
+		playSound("BowRelease", start, player)
 		broadcastAction(player, "Release", itemId)
 		return
 	end
@@ -1071,13 +1281,27 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		refund(player, itemId :: string)
 		return
 	end
-	Sfx.play("Throw", { position = start, exclude = player })
+	playSound("Throw", start, player)
 	broadcastAction(player, "Throw", itemId)
 end
 
--- Test hooks (Edit-mode checks): the server's melee trace, and the check on MeleeSwing's variant.
+-- A draw doesn't outlive the bow in hand: switching away and back gave a full-power arrow at once.
+local function onEquippedChanged(player: Player)
+	local st = playerState[player]
+	if st and st.drawStart then
+		local was = st.drawItem
+		st.drawStart = nil
+		st.drawItem = nil
+		broadcastAction(player, "Release", was, true)
+	end
+end
+
+-- Test hooks (server only): the server's melee trace, the check on MeleeSwing's variant, the swing gate, and the count
+-- of refused swings and shots by reason.
 CombatService._trace = meleeTrace
 CombatService._swingVariant = swingVariant
+CombatService._trySwing = trySwing
+CombatService._refusals = refusals
 
 --------------------------------------------------------------------------------------------------------------------
 -- Lifecycle
@@ -1087,6 +1311,7 @@ function CombatService.Init(registry)
 	Services = registry
 	HitConfirm = Net.event("HitConfirm")
 	CombatAction = Net.event("CombatAction")
+	SfxRemote = Net.event("Sfx")
 end
 
 function CombatService.Start()
@@ -1095,6 +1320,14 @@ function CombatService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		playerState[player] = nil
 	end)
+	Players.PlayerAdded:Connect(watchPlayerHitBox)
+	for _, player in ipairs(Players:GetPlayers()) do
+		watchPlayerHitBox(player)
+	end
+	local inventory = Services.InventoryService
+	if inventory and type(inventory.equippedChanged) == "table" and type(inventory.equippedChanged.Connect) == "function" then
+		inventory.equippedChanged:Connect(onEquippedChanged)
+	end
 	-- Training dummies come and go with practice rounds, in Studio and on live servers alike (wantDummies decides);
 	-- updateDummies returns at once while there are none.
 	GameState:GetAttributeChangedSignal("Phase"):Connect(refreshDummies)

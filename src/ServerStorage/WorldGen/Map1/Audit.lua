@@ -31,6 +31,8 @@
 	              seated on the real floor; a tier-3 marker within SpireRefillRadius; DropIn = false under the sails;
 	              the runner's caches; what each round size finds inside its start ring
 	  boundary    workspace.Arena.Boundary stands all the way round at BoundaryRadius, solid, invisible, NoMantle
+	  peak        nobody can walk in under the Peak's shell: no column on its rim has its underside more than 3 studs
+	              over the ground (Map1.Terrain.fillUnder raises the ground there)
 	  instances   the instances of Map1Build.md 3.2, and nothing of the forest arena left behind
 	  lobby       spawns on the island at LobbyPosition, ground under it, clear of the arena's terrain
 	  ambience    the AmbientEmitter parts and their SoundKeys
@@ -49,8 +51,8 @@ local sin, cos, rad, deg = math.sin, math.cos, math.rad, math.deg
 local Audit = {}
 Audit.VERSION = 1
 Audit.MAP = "GreenLand"
-Audit.CHECKS = { "switch", "layout", "plinths", "terrain", "water", "loot", "boundary", "instances", "lobby", "ambience",
-	"scripts", "leftovers", "manual" }
+Audit.CHECKS = { "switch", "layout", "plinths", "terrain", "water", "loot", "boundary", "peak", "instances", "lobby",
+	"ambience", "scripts", "leftovers", "manual" }
 
 local function fresh(module: Instance): any
 	return require(if RunService:IsRunning() then module else module:Clone() :: any)
@@ -495,10 +497,20 @@ function checks.terrain(ctx)
 	local samples, holes, off = 0, 0, 0
 	local worst = Problems(5)
 	local sum, most = 0, 0
+	-- under the Peak's shell the ground is raised to the mesh on purpose (Map1.Terrain.fillUnder): not the grid's height
+	local landmarks = ctx.arena and ctx.arena:FindFirstChild("Landmarks")
+	local peak = landmarks and landmarks:FindFirstChild("Peak")
+	local peakParams = RaycastParams.new()
+	peakParams.FilterType = Enum.RaycastFilterType.Include
+	peakParams.FilterDescendantsInstances = { peak }
+	local underPeak = 0
 	for row = stride // 2, n - 1, stride do
 		for col = stride // 2, n - 1, stride do
 			local x, z = G.centre(col, row)
-			if x * x + z * z <= limit * limit then
+			if peak and x * x + z * z <= limit * limit
+				and workspace:Raycast(Vector3.new(x, 1400, z) + ctx.offset, Vector3.new(0, -1600, 0), peakParams) then
+				underPeak += 1
+			elseif x * x + z * z <= limit * limit then
 				samples += 1
 				local want = G.height(col, row)
 				local got = terrainY(ctx, x, z, want + 60, 140)
@@ -550,8 +562,8 @@ function checks.terrain(ctx)
 			end
 		end
 	end
-	local detail = string.format("%d rays inside r %d: %d holes, %d off the grid (mean %.2f, worst %.1f studs); %d wet cells sampled: %d without water; %d bank cells: %d under their water",
-		samples, limit, holes, off, if samples > holes then sum / (samples - holes) else 0, most, wet, missing, banks, leaks)
+	local detail = string.format("%d rays inside r %d: %d holes, %d off the grid (mean %.2f, worst %.1f studs); %d more under the Peak not compared; %d wet cells sampled: %d without water; %d bank cells: %d under their water",
+		samples, limit, holes, off, if samples > holes then sum / (samples - holes) else 0, most, underPeak, wet, missing, banks, leaks)
 	-- a hole anywhere fails; the other three allow for smooth terrain rounding a few cells (1 or 2 in a hundred)
 	if holes > 0 or off > samples * 0.01 or missing > wet * 0.02 or leaks > banks * 0.01 then
 		return "FAIL", worst.text() .. " | " .. detail
@@ -900,6 +912,26 @@ function checks.boundary(ctx)
 	return "PASS", detail
 end
 
+function checks.peak(ctx)
+	local landmarks = ctx.arena and ctx.arena:FindFirstChild("Landmarks")
+	local peak = landmarks and landmarks:FindFirstChild("Peak")
+	if not peak or not ctx.terrainHere then
+		return "SKIP", "the Peak or Map 1's terrain is not in the place"
+	end
+	local module = map1Module("Terrain")
+	if not module then
+		return "FAIL", "ServerStorage.WorldGen.Map1.Terrain is missing"
+	end
+	local text, survey = fresh(module).surveyUnder({ model = peak, step = 8 })
+	if not survey then
+		return "FAIL", text
+	end
+	if survey.rimOpen > 0 then
+		return "FAIL", text .. " | a player can walk in under the shell: run Map1.Terrain.fillUnder()"
+	end
+	return "PASS", text
+end
+
 function checks.instances(ctx)
 	local arena = ctx.arena
 	if not arena then
@@ -1098,7 +1130,8 @@ function checks.leftovers(ctx)
 	present(workspace, "TrainingDummies", "a playtest's dummies")
 	present(ReplicatedStorage, "DevInputCheck", "InputCheck's probe")
 	present(ServerStorage, "_SyntaxProbes", "SyntaxCheck's probes")
-	for _, name in ipairs({ "QA_Lock" }) do
+	-- test attributes: DetailTier forces every Studio client's scenery tier, DevShaders / DevLookHour the look
+	for _, name in ipairs({ "QA_Lock", "DetailTier", "DevShaders", "DevLookHour" }) do
 		if workspace:GetAttribute(name) ~= nil then
 			bad.add("workspace attribute " .. name)
 		end
