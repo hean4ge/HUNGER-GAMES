@@ -13,7 +13,7 @@
   {
    "name": "Height",
    "bytes": 3786752,
-   "fnv": "bb2439aa",
+   "fnv": "a79c8714",
    "content": "1376 x 1376 uint16 LE, y = value / 32 (water repairs applied)"
   },
   {
@@ -31,7 +31,7 @@
   {
    "name": "WaterLevel",
    "bytes": 3786752,
-   "fnv": "9df27642",
+   "fnv": "42c28127",
    "content": "1376 x 1376 uint16 LE, y = value / 32, 0 = dry (repaired)"
   },
   {
@@ -114,8 +114,8 @@
   },
   {
    "name": "Manifest_FarValley",
-   "bytes": 57477,
-   "fnv": "ee956eed",
+   "bytes": 57639,
+   "fnv": "4bc69bfa",
    "content": "Map1_FarValley.manifest.json as text"
   }
  ],
@@ -202,8 +202,8 @@
    "sha256": "e37c43c7a0c206c2fc0be69d560f1fa04c3e0101b1deefb71f2010f1b9b6e493"
   },
   "Map1_FarValley.manifest.json": {
-   "bytes": 60666,
-   "sha256": "d0fb921930b9b34c8b47b21a7658a0cdb33b939312dc984214fc7b5912873dff"
+   "bytes": 60829,
+   "sha256": "bd560a4a89b05849a522f8f113284cb1e4c78326a4f8089a915cc5057150822a"
   },
   "Map1_BiomeGrid16.json": {
    "bytes": 129214,
@@ -247,11 +247,11 @@
   },
   "cellsDried": 20,
   "banksRaised": 22,
-  "heightsRaised": 42,
-  "margin": false,
-  "marginCells": 0,
+  "heightsRaised": 46,
+  "margin": true,
+  "marginCells": 281,
   "marginDepth": 0.25,
-  "wetCells": 9104,
+  "wetCells": 9385,
   "levels": [
    34.0,
    37.4375,
@@ -278,7 +278,7 @@
  },
  "module": {
   "bytes": 123655,
-  "fnv": "a4f669da",
+  "fnv": "0d3bd44e",
   "regionGrid": [
    240,
    240
@@ -293,19 +293,19 @@
   "heightStep": 0.35,
   "accuracyInsideR1800": {
    "points": 200000,
-   "mean": 0.5383110978926664,
-   "p50": 0.31808335990722725,
-   "p95": 1.4063785914182332,
-   "p99": 3.0366214312761,
+   "mean": 0.5386637569814242,
+   "p50": 0.31812338452810707,
+   "p95": 1.4077547956937377,
+   "p99": 3.044519873517735,
    "max": 85.62582777754972,
-   "within6": 0.995855
+   "within6": 0.995865
   },
   "file": "src/ReplicatedStorage/Shared/Map1Regions.lua",
-  "packHeight": "bb2439aa",
+  "packHeight": "a79c8714",
   "packRegion": "b6404fbd"
  },
  "notes": [],
- "build": 2,
+ "build": 3,
  "history": [
   {
    "build": 1,
@@ -320,11 +320,20 @@
    "changes": [
     "changed Manifest_Skyline (ac035fe8 -> 37ff6cf0): now Map1_SkylineCut.manifest.json as text",
     "added Manifest_FarValley (57477 bytes, ee956eed)"
+   ]
+  },
+  {
+   "build": 3,
+   "date": "2026-11-18 08:45",
+   "changes": [
+    "changed Height (bb2439aa -> a79c8714): 287 cells differ, by up to 2.9375",
+    "changed WaterLevel (9df27642 -> 42c28127): 281 cells differ, by up to 60.65625",
+    "changed Manifest_FarValley (ee956eed -> 4bc69bfa): now Map1_FarValley.manifest.json as text"
    ],
    "blobs": {
     "Height": [
      3786752,
-     "bb2439aa"
+     "a79c8714"
     ],
     "Material": [
      1893376,
@@ -336,7 +345,7 @@
     ],
     "WaterLevel": [
      3786752,
-     "9df27642"
+     "42c28127"
     ],
     "Mask_Conifer": [
      473344,
@@ -391,8 +400,8 @@
      "37ff6cf0"
     ],
     "Manifest_FarValley": [
-     57477,
-     "ee956eed"
+     57639,
+     "4bc69bfa"
     ]
    }
   }
