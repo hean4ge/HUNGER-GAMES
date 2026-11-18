@@ -1551,3 +1551,52 @@ with the same arguments starts Blender for you (`$env:BLENDER` overrides where i
   `compare_*.png`. Keep them in a work folder.
 - It always exits 0. Spec errors, missing files and bad options are reported in the table and the JSON.
 - Pass 2's results and the calls still open are in `docs/design/TwoArenas.md` section 8.2.
+
+## 15. Map 1 - the green land (2026-11-15)
+
+`map1_green_land.py` (seed 50) builds Map 1 at game scale from `docs/design/UpcomingFilm_Brief.md` section 1; its
+header lists the passes, the stages and every output. Pass 3 is what goes into the game
+(`docs/design/Map1Build.md`). `map1_far_exports.py` beside it adds the two far-view files.
+
+```powershell
+$map1 = "$env:USERPROFILE/OneDrive/Documents/LastStanding/BlenderExports/Map1"
+& $blender --background --factory-startup --python art/blender/map1_green_land.py -- $map1 art/previews/Map1 [stages] [shots]   # ~15 min
+#   stages: data, assets, scene, render, compare, tones (default all). "assets" rewrites all three GLBs at once.
+#   env MAP1_WORK (work folder: field.npz, Map1_scene.blend), MAP1_HORN (b or a), MAP1_SAMPLES, MAP1_RES
+& $blender --background --factory-startup --python art/blender/map1_far_exports.py -- $map1 art/previews/Map1 [stages]   # ~15 s, render ~10 min
+#   stages: skyline, farvalley, verify (default), render. Needs MAP1_WORK with the generator's field.npz.
+```
+
+- **The generator's 22 files** (`BlenderExports/Map1/`): `Map1_Height.png` (16-bit, 1,376 x 1,376, 4 studs a pixel,
+  y = value / 32), `Map1_Material.png`, `Map1_Region.png`, `Map1_WaterMask.png`, `Map1_WaterLevel.png`, eight
+  `Map1_Mask_<Kind>.png` scatter masks (688 x 688, 8 studs a pixel), `Map1_BiomeGrid16.json`, `Map1_Terrain.json`
+  (legends, palette, lake, stream, trails), `Map1_Layout.json` (166 placements, the heart's measures, the designed
+  sites) and three GLBs with their manifests: `Map1_Landmarks` (55 assets, 163 parts, 68,216 triangles),
+  `Map1_Plants` (13 placeholder plants) and `Map1_Skyline` (the far range, r 2,600-7,600, 8 sectors, 44,000
+  triangles). One flat colour per part; no textures, no vertex colours; every part single-sided.
+- **The two far-view files** (`map1_far_exports.py`, 15 November). The script imports the generator, reads its cached
+  field and never writes the generator's 22 files (it checks their SHA-256 before and after each run).
+  - `Map1_SkylineCut.glb` is `Map1_Skyline.glb` re-cut for Roblox, whose parts may be at most 2,048 studs long (the
+    sectors are up to 6,027). The same 44,000 triangles are regrouped into 64 square tiles on the world's axes: 161
+    parts, none over 1,946 studs. The eight assets keep their names (`M1_Skyline_N` ... `NW`), so `Map1_Layout.json`
+    still places them; parts are `M1_Skyline_<sector>_T<nn>_<role>`. **Upload this file, not `Map1_Skyline.glb`.**
+  - `Map1_FarValley.glb` is a low-poly copy of the valley for the view where voxel terrain is not streamed in: a
+    polar height field (2-degree steps, cells about 30 studs at r 850 growing to 64 x 96 at the rim), fitted as a
+    lower envelope of `Map1_Height.png` and dropped 6 studs, so real terrain covers it wherever terrain is present
+    (measured: never less than 6 under, 14 on average). The vertices are nudged off the exact grid (`FV_JITTER`):
+    the grid is centred on the horn, and without the nudge every patch of a class is a rectangle seen from there.
+    Tiles `M1_Far_A1` ... `M1_Far_C3` cover the ring r 850-2,750; `M1_Far_Core` (r under 850) is optional. Parts
+    `M1_Far_<tile>_<class>`: Grass, DryGrass, Heather, Rock, Scree and Water in the palette's colours
+    (smooth-shaded), and Canopy, a flat-shaded dark green sheet at least 18 studs over the ground where the conifers
+    are dense. 10 assets, 48 parts, 29,075 triangles.
+  - Both manifests keep the usual schema and add `position` and `size` to every part (its bounding box in Roblox
+    world space) and `placement` to every asset: all of them stand at the map centre, yaw 0. In the game every part
+    is Anchored, Persistent, `RenderFidelity` Precise, with CanCollide, CanQuery, CanTouch and CastShadow off.
+  - `verify` reads both GLBs back with numpy: names, triangle counts, colours, normals against the winding, every
+    triangle facing up, sizes, the 6-stud rule at all 1.48 million samples, and no hole in the ring.
+- **Previews** (`previews/Map1/`): the generator's own renders (`overview_aerial`, `birdseye_34`, `match_*`, `fp_*`,
+  `data_maps`), and `far_classes.png` plus the `far_*` views, which show the two files as exported (flat part
+  colours) with the terrain and the scatter removed past r 1,024, beside `_full` (the pass-3 scene) and
+  `_no_far_valley`. Compare sheets hold film frames and stay outside the repo.
+- **In the repo's manifest copies** the assets builder records its uploads under `assetIds`; `map1_far_exports.py`
+  keeps keys added there when it copies a manifest again.

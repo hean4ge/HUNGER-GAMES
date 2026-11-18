@@ -5611,5 +5611,27 @@
   }
  ],
  "hornColouring": "b",
- "notes": "One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) and is also the base colour of the part's material in the GLB (one material per role and colour). A part painted in several colours is exported as its colour groups: <asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the role's Roblox material and collision. The GLB carries no vertex colours and no textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries them). Every part is single-sided; 'faces' says which way an open sheet was turned (up, out from or in toward the asset's vertical axis)."
+ "notes": "One flat colour per part: rgb (sRGB) is the part's painted tone (UpcomingFilm_Brief 1.10) and is also the base colour of the part's material in the GLB (one material per role and colour). A part painted in several colours is exported as its colour groups: <asset>_<role>, <asset>_<role>_2, ... (colourGroup n of colourGroups), all with the role's Roblox material and collision. The GLB carries no vertex colours and no textures: the +-3-6% facet value jitter and the top/underside shading seen in the Blender previews are NOT in the export (a later baked colour map, ArtStyle rule 4-5, carries them). Every part is single-sided; 'faces' says which way an open sheet was turned (up, out from or in toward the asset's vertical axis).",
+ "assetIds": {
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (creator user 5458010221), 2026-11-15 local (2026-11-16 UTC). Never re-upload a file listed here; reuse its id.",
+   "No textures: one flat colour per part, set by ServerStorage.WorldGen.Map1.Assets from this manifest. The raw insert lives in ServerStorage.MeshImports.Map1_<set> (never edit it); templates in ServerStorage.WorldAssets.Map1."
+  ],
+  "creator": {
+   "userId": 5458010221
+  },
+  "model": {
+   "displayName": "LS_Map1_Landmarks_v3",
+   "operationId": "aaf71138-4a61-4701-92b3-7cf2cc9a788b",
+   "uploadedUtc": "2026-11-16T06:26:25.405Z",
+   "assetId": 86947338706257,
+   "moderationState": "Approved",
+   "bytes": 10147972,
+   "sha256": "62f189374e34a9a90515e0ae05ae710060d4708ca2234ee545e843c88116d385",
+   "revisionId": "1",
+   "rawInsert": "ServerStorage.MeshImports.Map1_Landmarks",
+   "templates": "ServerStorage.WorldAssets.Map1",
+   "file": "Map1_Landmarks.glb"
+  }
+ }
 }

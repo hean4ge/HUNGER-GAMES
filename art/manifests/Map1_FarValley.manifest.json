@@ -1,0 +1,3191 @@
+{
+ "category": "Map1_FarValley",
+ "glb": "Map1_FarValley.glb",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox: X east, Y up, Z south (glTF +Y up; Blender (x,y,z) -> Roblox (x,z,-y))",
+ "generator": "art/blender/map1_far_exports.py",
+ "seed": 50,
+ "warnings": [],
+ "placeholder": false,
+ "assets": [
+  {
+   "name": "M1_Far_A1",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile A1 of the ring r 850-2750 (column A from the west, row 1 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    2617.405,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1754.142,
+    666.629,
+    1774.9
+   ],
+   "boundsMin": [
+    -2615.405,
+    208.399,
+    -2584.155
+   ],
+   "boundsMax": [
+    -861.263,
+    875.029,
+    -809.255
+   ],
+   "tris": 1231,
+   "parts": [
+    {
+     "name": "M1_Far_A1_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 32,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1090.681,
+      265.317,
+      -1109.765
+     ],
+     "size": [
+      364.686,
+      113.836,
+      556.153
+     ],
+     "boundsMin": [
+      -1273.023,
+      208.399,
+      -1387.842
+     ],
+     "boundsMax": [
+      -908.338,
+      322.235,
+      -831.689
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "A1",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_A1_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 381,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1754.778,
+      544.349,
+      -1706.304
+     ],
+     "size": [
+      1721.256,
+      661.358,
+      1755.701
+     ],
+     "boundsMin": [
+      -2615.405,
+      213.67,
+      -2584.155
+     ],
+     "boundsMax": [
+      -894.15,
+      875.029,
+      -828.454
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "A1",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_A1_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 453,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1688.926,
+      556.359,
+      -1660.752
+     ],
+     "size": [
+      1655.325,
+      637.34,
+      1702.995
+     ],
+     "boundsMin": [
+      -2516.588,
+      237.689,
+      -2512.25
+     ],
+     "boundsMax": [
+      -861.263,
+      875.029,
+      -809.255
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "A1",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_A1_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 84,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1494.043,
+      552.67,
+      -1957.647
+     ],
+     "size": [
+      1243.3,
+      476.558,
+      1184.216
+     ],
+     "boundsMin": [
+      -2115.693,
+      314.391,
+      -2549.756
+     ],
+     "boundsMax": [
+      -872.393,
+      790.949,
+      -1365.539
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "A1",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_A1_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 281,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1739.152,
+      550.159,
+      -1593.358
+     ],
+     "size": [
+      1690.005,
+      621.013,
+      1526.329
+     ],
+     "boundsMin": [
+      -2584.155,
+      239.653,
+      -2356.523
+     ],
+     "boundsMax": [
+      -894.15,
+      860.666,
+      -830.193
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "A1",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "A1",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_A2",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile A2 of the ring r 850-2750 (column A from the west, row 2 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    4510.142,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1855.198,
+    757.391,
+    1842.117
+   ],
+   "boundsMin": [
+    -2750.0,
+    62.845,
+    -924.983
+   ],
+   "boundsMax": [
+    -894.802,
+    820.237,
+    917.133
+   ],
+   "tris": 3432,
+   "parts": [
+    {
+     "name": "M1_Far_A2_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 536,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1302.221,
+      165.735,
+      3.159
+     ],
+     "size": [
+      814.839,
+      205.78,
+      1782.292
+     ],
+     "boundsMin": [
+      -1709.641,
+      62.845,
+      -887.987
+     ],
+     "boundsMax": [
+      -894.802,
+      268.625,
+      894.305
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "A2",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_A2_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1079,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1824.435,
+      451.655,
+      -10.377
+     ],
+     "size": [
+      1851.13,
+      737.164,
+      1829.212
+     ],
+     "boundsMin": [
+      -2750.0,
+      83.073,
+      -924.983
+     ],
+     "boundsMax": [
+      -898.87,
+      820.237,
+      904.229
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "A2",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_A2_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 637,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1965.258,
+      511.934,
+      12.26
+     ],
+     "size": [
+      1569.484,
+      616.606,
+      1809.746
+     ],
+     "boundsMin": [
+      -2750.0,
+      203.631,
+      -892.613
+     ],
+     "boundsMax": [
+      -1180.516,
+      820.237,
+      917.133
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "A2",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_A2_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 24,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -2499.102,
+      685.688,
+      185.876
+     ],
+     "size": [
+      471.667,
+      269.097,
+      696.879
+     ],
+     "boundsMin": [
+      -2734.935,
+      551.139,
+      -162.563
+     ],
+     "boundsMax": [
+      -2263.268,
+      820.237,
+      534.316
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "A2",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_A2_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1156,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1814.869,
+      440.634,
+      3.136
+     ],
+     "size": [
+      1840.133,
+      668.508,
+      1791.497
+     ],
+     "boundsMin": [
+      -2734.935,
+      106.38,
+      -892.613
+     ],
+     "boundsMax": [
+      -894.802,
+      774.888,
+      898.884
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "A2",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "A2",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_A3",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile A3 of the ring r 850-2750 (column A from the west, row 3 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    6234.745,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1736.712,
+    608.078,
+    1785.235
+   ],
+   "boundsMin": [
+    -2615.405,
+    65.477,
+    798.92
+   ],
+   "boundsMax": [
+    -878.693,
+    673.555,
+    2584.155
+   ],
+   "tris": 1400,
+   "parts": [
+    {
+     "name": "M1_Far_A3_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 225,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1618.876,
+      195.414,
+      1293.372
+     ],
+     "size": [
+      1426.513,
+      250.278,
+      948.588
+     ],
+     "boundsMin": [
+      -2332.132,
+      70.275,
+      819.078
+     ],
+     "boundsMax": [
+      -905.62,
+      320.553,
+      1767.666
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "A3",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_A3_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 454,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1747.049,
+      343.04,
+      1655.585
+     ],
+     "size": [
+      1736.712,
+      555.125,
+      1713.33
+     ],
+     "boundsMin": [
+      -2615.405,
+      65.477,
+      798.92
+     ],
+     "boundsMax": [
+      -878.693,
+      620.602,
+      2512.25
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "A3",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_A3_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 268,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1733.206,
+      424.089,
+      1705.468
+     ],
+     "size": [
+      1701.898,
+      452.942,
+      1757.374
+     ],
+     "boundsMin": [
+      -2584.155,
+      197.618,
+      826.78
+     ],
+     "boundsMax": [
+      -882.257,
+      650.56,
+      2584.155
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "A3",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_A3_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 453,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1747.049,
+      390.058,
+      1665.664
+     ],
+     "size": [
+      1736.712,
+      566.994,
+      1693.172
+     ],
+     "boundsMin": [
+      -2615.405,
+      106.561,
+      819.078
+     ],
+     "boundsMax": [
+      -878.693,
+      673.555,
+      2512.25
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "A3",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "A3",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_B1",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile B1 of the ring r 850-2750 (column B from the west, row 1 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    6342.562,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1950.826,
+    896.454,
+    1856.845
+   ],
+   "boundsMin": [
+    -982.51,
+    36.218,
+    -2750.0
+   ],
+   "boundsMax": [
+    968.317,
+    932.672,
+    -893.155
+   ],
+   "tris": 3761,
+   "parts": [
+    {
+     "name": "M1_Far_B1_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 998,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.188,
+      180.929,
+      -1494.784
+     ],
+     "size": [
+      1848.733,
+      266.541,
+      1203.098
+     ],
+     "boundsMin": [
+      -916.179,
+      47.659,
+      -2096.333
+     ],
+     "boundsMax": [
+      932.555,
+      314.2,
+      -893.235
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "B1",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_B1_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 834,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3.989,
+      463.877,
+      -1821.577
+     ],
+     "size": [
+      1906.609,
+      855.318,
+      1856.845
+     ],
+     "boundsMin": [
+      -957.294,
+      36.218,
+      -2750.0
+     ],
+     "boundsMax": [
+      949.316,
+      891.536,
+      -893.155
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "B1",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_B1_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 305,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      7.652,
+      484.445,
+      -2063.601
+     ],
+     "size": [
+      1921.329,
+      896.454,
+      1369.447
+     ],
+     "boundsMin": [
+      -953.012,
+      36.218,
+      -2748.325
+     ],
+     "boundsMax": [
+      968.317,
+      932.672,
+      -1378.878
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "B1",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_B1_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 263,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -13.291,
+      505.841,
+      -2055.828
+     ],
+     "size": [
+      1938.438,
+      853.663,
+      1224.97
+     ],
+     "boundsMin": [
+      -982.51,
+      79.01,
+      -2668.313
+     ],
+     "boundsMax": [
+      955.928,
+      932.672,
+      -1443.343
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "B1",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_B1_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1361,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3.162,
+      438.301,
+      -1763.691
+     ],
+     "size": [
+      1871.432,
+      488.332,
+      1741.073
+     ],
+     "boundsMin": [
+      -938.878,
+      194.135,
+      -2634.228
+     ],
+     "boundsMax": [
+      932.555,
+      682.467,
+      -893.155
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "B1",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "B1",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_B2",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile B2 of the ring r 850-2750 (column B from the west, row 2 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    8251.887,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1878.715,
+    232.633,
+    1879.852
+   ],
+   "boundsMin": [
+    -937.009,
+    13.308,
+    -940.335
+   ],
+   "boundsMax": [
+    941.706,
+    245.941,
+    939.517
+   ],
+   "tris": 2923,
+   "parts": [
+    {
+     "name": "M1_Far_B2_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1127,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2.349,
+      119.122,
+      -1.423
+     ],
+     "size": [
+      1878.715,
+      190.357,
+      1877.823
+     ],
+     "boundsMin": [
+      -937.009,
+      23.944,
+      -940.335
+     ],
+     "boundsMax": [
+      941.706,
+      214.3,
+      937.488
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "B2",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_B2_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 758,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2.127,
+      116.345,
+      -1.602
+     ],
+     "size": [
+      1872.82,
+      187.644,
+      1876.366
+     ],
+     "boundsMin": [
+      -934.283,
+      22.523,
+      -939.785
+     ],
+     "boundsMax": [
+      938.538,
+      210.167,
+      936.582
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "B2",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_B2_Water",
+     "role": "FarWater",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      40,
+      94,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 92,
+     "metalness": 0.0,
+     "roughness": 0.3,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2.76,
+      20.867,
+      878.295
+     ],
+     "size": [
+      671.064,
+      15.119,
+      122.444
+     ],
+     "boundsMin": [
+      -332.772,
+      13.308,
+      817.072
+     ],
+     "boundsMax": [
+      338.292,
+      28.427,
+      939.517
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Water",
+     "tile": "B2",
+     "paletteKey": "water"
+    },
+    {
+     "name": "M1_Far_B2_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 946,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2.383,
+      171.112,
+      -8.965
+     ],
+     "size": [
+      1878.646,
+      149.658,
+      1862.739
+     ],
+     "boundsMin": [
+      -936.94,
+      96.283,
+      -940.335
+     ],
+     "boundsMax": [
+      941.706,
+      245.941,
+      922.405
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "B2",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "B2",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_B3",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile B3 of the ring r 850-2750 (column B from the west, row 3 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    10174.181,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1939.464,
+    801.498,
+    1856.86
+   ],
+   "boundsMin": [
+    -976.588,
+    13.253,
+    893.14
+   ],
+   "boundsMax": [
+    962.876,
+    814.751,
+    2750.0
+   ],
+   "tris": 2976,
+   "parts": [
+    {
+     "name": "M1_Far_B3_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 684,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      11.497,
+      178.619,
+      1568.291
+     ],
+     "size": [
+      1901.992,
+      317.67,
+      1350.303
+     ],
+     "boundsMin": [
+      -939.499,
+      19.784,
+      893.14
+     ],
+     "boundsMax": [
+      962.492,
+      337.454,
+      2243.443
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "B3",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_B3_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1014,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6.856,
+      387.121,
+      1823.517
+     ],
+     "size": [
+      1939.464,
+      731.926,
+      1852.966
+     ],
+     "boundsMin": [
+      -976.588,
+      21.158,
+      897.034
+     ],
+     "boundsMax": [
+      962.876,
+      753.083,
+      2750.0
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "B3",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_B3_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 447,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.263,
+      477.666,
+      1890.288
+     ],
+     "size": [
+      1897.637,
+      591.03,
+      1719.424
+     ],
+     "boundsMin": [
+      -940.555,
+      182.151,
+      1030.576
+     ],
+     "boundsMax": [
+      957.081,
+      773.181,
+      2750.0
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "B3",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_B3_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 104,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -72.935,
+      384.615,
+      1665.387
+     ],
+     "size": [
+      1253.783,
+      695.377,
+      1522.364
+     ],
+     "boundsMin": [
+      -699.827,
+      36.926,
+      904.205
+     ],
+     "boundsMax": [
+      553.956,
+      732.304,
+      2426.569
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "B3",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_B3_Scree",
+     "role": "FarScree",
+     "robloxMaterial": "Basalt",
+     "rgb": [
+      140,
+      124,
+      104
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 23,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      26.257,
+      244.394,
+      1464.692
+     ],
+     "size": [
+      487.261,
+      110.815,
+      226.614
+     ],
+     "boundsMin": [
+      -217.373,
+      188.986,
+      1351.385
+     ],
+     "boundsMax": [
+      269.888,
+      299.802,
+      1577.999
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Scree",
+     "tile": "B3",
+     "paletteKey": "scree"
+    },
+    {
+     "name": "M1_Far_B3_Water",
+     "role": "FarWater",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      40,
+      94,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 127,
+     "metalness": 0.0,
+     "roughness": 0.3,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5.722,
+      23.287,
+      983.939
+     ],
+     "size": [
+      688.028,
+      20.067,
+      174.716
+     ],
+     "boundsMin": [
+      -349.736,
+      13.253,
+      896.581
+     ],
+     "boundsMax": [
+      338.292,
+      33.32,
+      1071.297
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Water",
+     "tile": "B3",
+     "paletteKey": "water"
+    },
+    {
+     "name": "M1_Far_B3_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 577,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6.821,
+      456.829,
+      1798.198
+     ],
+     "size": [
+      1912.109,
+      715.844,
+      1790.071
+     ],
+     "boundsMin": [
+      -949.234,
+      98.907,
+      903.163
+     ],
+     "boundsMax": [
+      962.876,
+      814.751,
+      2693.234
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "B3",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "B3",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_C1",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile C1 of the ring r 850-2750 (column C from the west, row 1 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    10271.602,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1745.95,
+    682.238,
+    1771.373
+   ],
+   "boundsMin": [
+    869.455,
+    205.078,
+    -2584.155
+   ],
+   "boundsMax": [
+    2615.405,
+    887.316,
+    -812.782
+   ],
+   "tris": 1291,
+   "parts": [
+    {
+     "name": "M1_Far_C1_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 452,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1747.154,
+      496.505,
+      -1647.457
+     ],
+     "size": [
+      1736.504,
+      582.855,
+      1648.454
+     ],
+     "boundsMin": [
+      878.902,
+      205.078,
+      -2471.684
+     ],
+     "boundsMax": [
+      2615.405,
+      787.932,
+      -823.23
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "C1",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_C1_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 422,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1676.747,
+      547.749,
+      -1681.269
+     ],
+     "size": [
+      1589.873,
+      646.549,
+      1736.974
+     ],
+     "boundsMin": [
+      881.811,
+      224.475,
+      -2549.756
+     ],
+     "boundsMax": [
+      2471.684,
+      871.023,
+      -812.782
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "C1",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_C1_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 71,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1498.886,
+      608.779,
+      -1723.006
+     ],
+     "size": [
+      1258.861,
+      557.073,
+      1722.297
+     ],
+     "boundsMin": [
+      869.455,
+      330.242,
+      -2584.155
+     ],
+     "boundsMax": [
+      2128.316,
+      887.316,
+      -861.857
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "C1",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_C1_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 346,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1615.692,
+      488.506,
+      -1620.444
+     ],
+     "size": [
+      1432.881,
+      509.173,
+      1615.324
+     ],
+     "boundsMin": [
+      899.251,
+      233.919,
+      -2428.106
+     ],
+     "boundsMax": [
+      2332.132,
+      743.092,
+      -812.782
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "C1",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "C1",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_C2",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile C2 of the ring r 850-2750 (column C from the west, row 2 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    11999.06,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1858.053,
+    1060.126,
+    1821.901
+   ],
+   "boundsMin": [
+    891.947,
+    61.478,
+    -911.273
+   ],
+   "boundsMax": [
+    2750.0,
+    1121.604,
+    910.628
+   ],
+   "tris": 3312,
+   "parts": [
+    {
+     "name": "M1_Far_C2_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 570,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1280.637,
+      196.954,
+      -1.126
+     ],
+     "size": [
+      777.379,
+      229.573,
+      1786.347
+     ],
+     "boundsMin": [
+      891.947,
+      82.168,
+      -894.299
+     ],
+     "boundsMax": [
+      1669.326,
+      311.74,
+      892.047
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "C2",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_C2_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1062,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1823.076,
+      580.467,
+      -0.323
+     ],
+     "size": [
+      1853.848,
+      1037.977,
+      1821.901
+     ],
+     "boundsMin": [
+      896.152,
+      61.478,
+      -911.273
+     ],
+     "boundsMax": [
+      2750.0,
+      1099.455,
+      910.628
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "C2",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_C2_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 461,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1973.402,
+      663.664,
+      5.316
+     ],
+     "size": [
+      1553.196,
+      915.879,
+      1810.622
+     ],
+     "boundsMin": [
+      1196.804,
+      205.725,
+      -899.995
+     ],
+     "boundsMax": [
+      2750.0,
+      1121.604,
+      910.628
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "C2",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_C2_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 186,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2170.063,
+      769.35,
+      12.269
+     ],
+     "size": [
+      1159.874,
+      683.243,
+      1763.304
+     ],
+     "boundsMin": [
+      1590.126,
+      427.729,
+      -869.383
+     ],
+     "boundsMax": [
+      2750.0,
+      1110.972,
+      893.92
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "C2",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_C2_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1033,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1809.494,
+      470.944,
+      -30.738
+     ],
+     "size": [
+      1827.486,
+      550.983,
+      1761.07
+     ],
+     "boundsMin": [
+      895.751,
+      195.453,
+      -911.273
+     ],
+     "boundsMax": [
+      2723.237,
+      746.436,
+      849.797
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "C2",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "C2",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_C3",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far valley tile C3 of the ring r 850-2750 (column C from the west, row 3 from the north), in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false",
+   "origin": [
+    13890.823,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1753.168,
+    701.63,
+    1778.541
+   ],
+   "boundsMin": [
+    862.237,
+    65.66,
+    805.614
+   ],
+   "boundsMax": [
+    2615.405,
+    767.289,
+    2584.155
+   ],
+   "tris": 1031,
+   "parts": [
+    {
+     "name": "M1_Far_C3_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 328,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1308.659,
+      198.588,
+      1667.945
+     ],
+     "size": [
+      850.395,
+      265.857,
+      1688.61
+     ],
+     "boundsMin": [
+      883.462,
+      65.66,
+      823.64
+     ],
+     "boundsMax": [
+      1733.857,
+      331.517,
+      2512.25
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "C3",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_C3_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 411,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1738.821,
+      413.874,
+      1589.593
+     ],
+     "size": [
+      1753.168,
+      618.088,
+      1567.959
+     ],
+     "boundsMin": [
+      862.237,
+      104.829,
+      805.614
+     ],
+     "boundsMax": [
+      2615.405,
+      722.918,
+      2373.572
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "C3",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_C3_Heather",
+     "role": "FarHeather",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      118,
+      90,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 177,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1719.184,
+      473.649,
+      1699.022
+     ],
+     "size": [
+      1661.144,
+      498.537,
+      1770.265
+     ],
+     "boundsMin": [
+      888.612,
+      224.381,
+      813.889
+     ],
+     "boundsMax": [
+      2549.756,
+      722.918,
+      2584.155
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Heather",
+     "tile": "C3",
+     "paletteKey": "heath"
+    },
+    {
+     "name": "M1_Far_C3_Rock",
+     "role": "FarRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      156,
+      152,
+      140
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 31,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2061.171,
+      498.703,
+      1187.045
+     ],
+     "size": [
+      987.451,
+      374.113,
+      702.077
+     ],
+     "boundsMin": [
+      1567.446,
+      311.646,
+      836.006
+     ],
+     "boundsMax": [
+      2554.897,
+      685.759,
+      1538.084
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Rock",
+     "tile": "C3",
+     "paletteKey": "limestone"
+    },
+    {
+     "name": "M1_Far_C3_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 84,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1738.821,
+      549.1,
+      1682.115
+     ],
+     "size": [
+      1753.168,
+      436.379,
+      1692.218
+     ],
+     "boundsMin": [
+      862.237,
+      330.91,
+      836.006
+     ],
+     "boundsMax": [
+      2615.405,
+      767.289,
+      2528.224
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "C3",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "C3",
+   "optional": false
+  },
+  {
+   "name": "M1_Far_Core",
+   "kind": "FarValley",
+   "tags": [
+    "FarValley",
+    "Persistent",
+    "NoCollision",
+    "NoShadow",
+    "Optional"
+   ],
+   "notes": "far valley, the core (r under 850): the heart and the Iris meadow, for views from the valley sides when the heart is not streamed in. OPTIONAL: leave it out and the file is exactly the ring r 850-2750. Its rim is the ring's inner rim (the same vertices), so the two join without a gap.",
+   "origin": [
+    17360.228,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    1700.0,
+    186.729,
+    1700.0
+   ],
+   "boundsMin": [
+    -850.0,
+    16.326,
+    -850.0
+   ],
+   "boundsMax": [
+    850.0,
+    203.054,
+    850.0
+   ],
+   "tris": 7718,
+   "parts": [
+    {
+     "name": "M1_Far_Core_Grass",
+     "role": "FarGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      106,
+      124,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 4505,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      0.0,
+      93.511,
+      -12.624
+     ],
+     "size": [
+      1700.0,
+      146.815,
+      1674.751
+     ],
+     "boundsMin": [
+      -850.0,
+      20.104,
+      -850.0
+     ],
+     "boundsMax": [
+      850.0,
+      166.919,
+      824.751
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Grass",
+     "tile": "Core",
+     "paletteKey": "meadow"
+    },
+    {
+     "name": "M1_Far_Core_DryGrass",
+     "role": "FarDryGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      128,
+      128,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 2031,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      11.309,
+      95.49,
+      -12.365
+     ],
+     "size": [
+      1611.527,
+      143.072,
+      1674.234
+     ],
+     "boundsMin": [
+      -794.454,
+      23.954,
+      -849.482
+     ],
+     "boundsMax": [
+      817.072,
+      167.026,
+      824.751
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "DryGrass",
+     "tile": "Core",
+     "paletteKey": "dry"
+    },
+    {
+     "name": "M1_Far_Core_Water",
+     "role": "FarWater",
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      40,
+      94,
+      100
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 34,
+     "metalness": 0.0,
+     "roughness": 0.3,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      0.0,
+      22.983,
+      817.023
+     ],
+     "size": [
+      411.267,
+      13.315,
+      65.955
+     ],
+     "boundsMin": [
+      -205.634,
+      16.326,
+      784.045
+     ],
+     "boundsMax": [
+      205.634,
+      29.641,
+      850.0
+     ],
+     "shading": "smooth",
+     "renderFidelity": "Precise",
+     "class": "Water",
+     "tile": "Core",
+     "paletteKey": "water"
+    },
+    {
+     "name": "M1_Far_Core_Canopy",
+     "role": "FarCanopy",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      52,
+      78,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1148,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      0.0,
+      148.833,
+      -252.137
+     ],
+     "size": [
+      1700.0,
+      108.443,
+      1195.726
+     ],
+     "boundsMin": [
+      -850.0,
+      94.611,
+      -850.0
+     ],
+     "boundsMax": [
+      850.0,
+      203.054,
+      345.726
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "class": "Canopy",
+     "tile": "Core",
+     "paletteKey": "needles"
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tile": "Core",
+   "optional": true
+  }
+ ],
+ "hornColouring": "b",
+ "notes": "A low-poly copy of Map 1's valley for the view where voxel terrain is not streamed in: a decimated height field on a polar grid (2-degree steps; cells about 30 studs at r 850 growing to 64 x 96 at the rim, r 2,750; the vertices are nudged off the exact grid so that patches of a class do not show as rectangles from the horn). The ground is a LOWER ENVELOPE of Map1_Height.png: at every 4-stud sample it lies at least 6 studs under the lowest of that sample and its eight neighbours, so real terrain covers it wherever terrain is present ('fit' gives the measured depths). Tiles: M1_Far_A1 ... M1_Far_C3 are a 3 x 3 grid over the ring (column A west to C east, row 1 north to 3 south); M1_Far_Core is the disc inside r 850 and is optional. Parts: M1_Far_<tile>_<class>, one flat colour per part, the palette's own (Map1_Terrain.json 'palette'), the same in every tile. Ground classes (Grass, DryGrass, Heather, Rock, Scree, Water) are smooth-shaded with normals worked out on the whole sheet before it was cut (faces that meet at over 45 degrees keep an edge), so parts and tiles shade as one surface; Water is the lake's bed in the lake's colour (the bed, not the surface, so that it stays under the real lake). Canopy is a separate flat-shaded sheet at least 18 studs above the true ground (18-24 on even ground) wherever the conifers are dense; it has no sides and faces up only, so from under it, among the real trees, it is not drawn. No vertex colours, no textures, single-sided, every triangle faces up. Every asset of this file is modelled in world space with its pivot at the map centre (0, 0, 0): place each at position (0, 0, 0) with yaw 0. In the file the assets stand in a row along +X, as in every other GLB of this project; 'origin' is each asset's pivot in the file. Each part also carries 'position' and 'size': the centre and the extent of its bounding box in Roblox world space once its asset stands at the map centre. A MeshPart's Position is its bounding box's centre, so a part is in place when its Position equals 'position' and its Size equals 'size' (after the importer's own turn about Y has been undone, as for every other asset). Set RenderFidelity to Precise: neighbouring parts share an edge exactly, and a part simplified on its own could open a crack along it. CanCollide, CanQuery, CanTouch and CastShadow are false; the model is Persistent.",
+ "classes": {
+  "Grass": {
+   "role": "FarGrass",
+   "robloxMaterial": "Grass",
+   "paletteKey": "meadow",
+   "rgb": [
+    106,
+    124,
+    66
+   ],
+   "shading": "smooth"
+  },
+  "DryGrass": {
+   "role": "FarDryGrass",
+   "robloxMaterial": "Grass",
+   "paletteKey": "dry",
+   "rgb": [
+    128,
+    128,
+    80
+   ],
+   "shading": "smooth"
+  },
+  "Heather": {
+   "role": "FarHeather",
+   "robloxMaterial": "LeafyGrass",
+   "paletteKey": "heath",
+   "rgb": [
+    118,
+    90,
+    100
+   ],
+   "shading": "smooth"
+  },
+  "Rock": {
+   "role": "FarRock",
+   "robloxMaterial": "Limestone",
+   "paletteKey": "limestone",
+   "rgb": [
+    156,
+    152,
+    140
+   ],
+   "shading": "smooth"
+  },
+  "Scree": {
+   "role": "FarScree",
+   "robloxMaterial": "Basalt",
+   "paletteKey": "scree",
+   "rgb": [
+    140,
+    124,
+    104
+   ],
+   "shading": "smooth"
+  },
+  "Water": {
+   "role": "FarWater",
+   "robloxMaterial": "SmoothPlastic",
+   "paletteKey": "water",
+   "rgb": [
+    40,
+    94,
+    100
+   ],
+   "shading": "smooth"
+  },
+  "Canopy": {
+   "role": "FarCanopy",
+   "robloxMaterial": "LeafyGrass",
+   "paletteKey": "needles",
+   "rgb": [
+    52,
+    78,
+    50
+   ],
+   "shading": "flat"
+  }
+ },
+ "fit": {
+  "drop": 6.0,
+  "samples": 1484592,
+  "minBelow": 6.0,
+  "meanBelow": 14.3,
+  "medianBelow": 11.24,
+  "p90Below": 24.69,
+  "p99Below": 45.81,
+  "maxBelow": 264.1,
+  "byRadius": [
+   {
+    "r": [
+     0,
+     850
+    ],
+    "meanBelow": 7.64,
+    "p90Below": 8.85,
+    "p99Below": 12.03
+   },
+   {
+    "r": [
+     850,
+     1100
+    ],
+    "meanBelow": 8.36,
+    "p90Below": 10.1,
+    "p99Below": 18.95
+   },
+   {
+    "r": [
+     1100,
+     1500
+    ],
+    "meanBelow": 9.16,
+    "p90Below": 11.91,
+    "p99Below": 20.75
+   },
+   {
+    "r": [
+     1500,
+     1900
+    ],
+    "meanBelow": 11.98,
+    "p90Below": 15.72,
+    "p99Below": 54.38
+   },
+   {
+    "r": [
+     1900,
+     2400
+    ],
+    "meanBelow": 16.91,
+    "p90Below": 25.71,
+    "p99Below": 47.75
+   },
+   {
+    "r": [
+     2400,
+     2750
+    ],
+    "meanBelow": 20.17,
+    "p90Below": 32.58,
+    "p99Below": 51.22
+   }
+  ]
+ },
+ "canopy": {
+  "minAboveGround": 18.0,
+  "jitter": 6.0,
+  "triangles": 7385,
+  "meanAboveGround": 26.07,
+  "p99AboveGround": 47.3,
+  "denseAt": 0.4
+ },
+ "grid": {
+  "ringInnerR": 850.0,
+  "rimR": 2750.0,
+  "angularSteps": 180,
+  "radialStepAtInner": 30.0,
+  "radialStepAtRim": 64.0,
+  "vertexJitter": 0.22,
+  "rings": [
+   [
+    0.0,
+    1
+   ],
+   [
+    106.25,
+    45
+   ],
+   [
+    132.81,
+    45
+   ],
+   [
+    159.38,
+    45
+   ],
+   [
+    185.94,
+    45
+   ],
+   [
+    212.5,
+    45
+   ],
+   [
+    243.0,
+    90
+   ],
+   [
+    273.33,
+    90
+   ],
+   [
+    303.67,
+    90
+   ],
+   [
+    334.0,
+    90
+   ],
+   [
+    364.33,
+    90
+   ],
+   [
+    394.67,
+    90
+   ],
+   [
+    425.0,
+    90
+   ],
+   [
+    455.0,
+    180
+   ],
+   [
+    485.38,
+    180
+   ],
+   [
+    515.77,
+    180
+   ],
+   [
+    546.15,
+    180
+   ],
+   [
+    576.54,
+    180
+   ],
+   [
+    606.92,
+    180
+   ],
+   [
+    637.31,
+    180
+   ],
+   [
+    667.69,
+    180
+   ],
+   [
+    698.08,
+    180
+   ],
+   [
+    728.46,
+    180
+   ],
+   [
+    758.85,
+    180
+   ],
+   [
+    789.23,
+    180
+   ],
+   [
+    819.62,
+    180
+   ],
+   [
+    850.0,
+    180
+   ],
+   [
+    880.52,
+    180
+   ],
+   [
+    911.59,
+    180
+   ],
+   [
+    943.23,
+    180
+   ],
+   [
+    975.45,
+    180
+   ],
+   [
+    1008.25,
+    180
+   ],
+   [
+    1041.65,
+    180
+   ],
+   [
+    1075.65,
+    180
+   ],
+   [
+    1110.28,
+    180
+   ],
+   [
+    1145.54,
+    180
+   ],
+   [
+    1181.43,
+    180
+   ],
+   [
+    1217.99,
+    180
+   ],
+   [
+    1255.2,
+    180
+   ],
+   [
+    1293.1,
+    180
+   ],
+   [
+    1331.68,
+    180
+   ],
+   [
+    1370.97,
+    180
+   ],
+   [
+    1410.97,
+    180
+   ],
+   [
+    1451.7,
+    180
+   ],
+   [
+    1493.17,
+    180
+   ],
+   [
+    1535.4,
+    180
+   ],
+   [
+    1578.39,
+    180
+   ],
+   [
+    1622.17,
+    180
+   ],
+   [
+    1666.75,
+    180
+   ],
+   [
+    1712.13,
+    180
+   ],
+   [
+    1758.34,
+    180
+   ],
+   [
+    1805.4,
+    180
+   ],
+   [
+    1853.31,
+    180
+   ],
+   [
+    1902.09,
+    180
+   ],
+   [
+    1951.76,
+    180
+   ],
+   [
+    2002.34,
+    180
+   ],
+   [
+    2053.83,
+    180
+   ],
+   [
+    2106.26,
+    180
+   ],
+   [
+    2159.65,
+    180
+   ],
+   [
+    2214.01,
+    180
+   ],
+   [
+    2269.36,
+    180
+   ],
+   [
+    2325.71,
+    180
+   ],
+   [
+    2383.1,
+    180
+   ],
+   [
+    2441.52,
+    180
+   ],
+   [
+    2501.01,
+    180
+   ],
+   [
+    2561.58,
+    180
+   ],
+   [
+    2623.26,
+    180
+   ],
+   [
+    2686.06,
+    180
+   ],
+   [
+    2750.0,
+    180
+   ]
+  ],
+  "tiles": [
+   "A1",
+   "A2",
+   "A3",
+   "B1",
+   "B2",
+   "B3",
+   "C1",
+   "C2",
+   "C3",
+   "Core"
+  ],
+  "partRule": "a triangle belongs to the tile its centroid lies in; a ground class with under 24 triangles in a tile (Scree: under 8) takes that tile's commonest other ground class"
+ },
+ "colourNote": "To match the real terrain exactly at the streaming edge, give the Grass and DryGrass parts the colour the terrain's Grass material ends up with; the palette values here are the Blender paint's (meadow and dry).",
+ "totals": {
+  "assets": 10,
+  "parts": 48,
+  "tris": 29075,
+  "longestPart": 1939.464,
+  "mostTrisInAPart": 4505
+ }
+}

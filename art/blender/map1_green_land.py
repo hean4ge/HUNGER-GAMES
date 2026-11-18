@@ -3191,6 +3191,27 @@ def render_object(asset, coll):
 
 
 # ================================================================================================ GLB export
+def copy_manifest_to_repo(mpath, man):
+    """the manifest's copy in art/manifests. Since 15 Nov 2026 the repo copy may carry top-level keys the export does
+    not have (the assets builder records its upload there under "assetIds"): a re-export keeps them, after everything
+    this run wrote. An "assetIds" block names the SHA-256 of the file that was uploaded, so a re-export that changes
+    the GLB shows up as a mismatch there instead of silently losing the record."""
+    dst = os.path.join(MANIFEST_COPY, os.path.basename(mpath))
+    kept = {}
+    if os.path.exists(dst):
+        try:
+            with open(dst) as f:
+                kept = {k: v for k, v in json.load(f).items() if k not in man}
+        except ValueError:
+            kept = {}
+    if not kept:
+        shutil.copy2(mpath, dst)
+        return
+    with open(dst, "w") as f:
+        json.dump(dict(man, **kept), f, indent=1)
+    log("the repo copy %s keeps the keys added in the repo: %s" % (os.path.basename(dst), sorted(kept)))
+
+
 def export_glbs(A):
     for glb in ("Map1_Landmarks", "Map1_Plants", "Map1_Skyline"):
         names = [a for a in A.values() if a.export and a.glb == glb]
@@ -3285,7 +3306,7 @@ def export_glbs(A):
         with open(mpath, "w") as f:
             json.dump(man, f, indent=1)
         if os.path.isdir(MANIFEST_COPY) and os.path.normcase(OUT) == os.path.normcase(DEFAULT_OUT):
-            shutil.copy2(mpath, os.path.join(MANIFEST_COPY, os.path.basename(mpath)))
+            copy_manifest_to_repo(mpath, man)
         log("EXPORTED %s (%.2f MB), %d assets, %d warnings" % (path, os.path.getsize(path) / 1e6,
                                                                  len(manifest_assets), len(man["warnings"])))
         for w in man["warnings"]:

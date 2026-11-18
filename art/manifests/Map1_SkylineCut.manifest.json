@@ -1,0 +1,8314 @@
+{
+ "category": "Map1_SkylineCut",
+ "glb": "Map1_SkylineCut.glb",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox: X east, Y up, Z south (glTF +Y up; Blender (x,y,z) -> Roblox (x,z,-y))",
+ "generator": "art/blender/map1_far_exports.py",
+ "seed": 50,
+ "warnings": [],
+ "placeholder": false,
+ "assets": [
+  {
+   "name": "M1_Skyline_N",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector N (bearing 0 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_N: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    2585.643,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5178.411,
+    1285.878,
+    5140.178
+   ],
+   "boundsMin": [
+    -2583.643,
+    528.007,
+    -7600.0
+   ],
+   "boundsMax": [
+    2594.768,
+    1813.885,
+    -2459.822
+   ],
+   "tris": 4973,
+   "parts": [
+    {
+     "name": "M1_Skyline_N_T01_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1003,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.577,
+      1047.206,
+      -3342.578
+     ],
+     "size": [
+      1759.287,
+      1038.397,
+      1765.512
+     ],
+     "boundsMin": [
+      -871.066,
+      528.007,
+      -4225.334
+     ],
+     "boundsMax": [
+      888.221,
+      1566.404,
+      -2459.822
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T01",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T01_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      71,
+      85,
+      59
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 353,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      7.303,
+      705.048,
+      -3027.348
+     ],
+     "size": [
+      1748.555,
+      354.081,
+      1018.063
+     ],
+     "boundsMin": [
+      -866.974,
+      528.007,
+      -3536.379
+     ],
+     "boundsMax": [
+      881.58,
+      882.088,
+      -2518.316
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T01",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T01_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 279,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      10.328,
+      1072.73,
+      -3361.374
+     ],
+     "size": [
+      1737.733,
+      1045.226,
+      1707.05
+     ],
+     "boundsMin": [
+      -858.538,
+      550.117,
+      -4214.899
+     ],
+     "boundsMax": [
+      879.195,
+      1595.343,
+      -2507.849
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T01",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T02_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 412,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5.035,
+      1377.225,
+      -5012.068
+     ],
+     "size": [
+      1759.209,
+      816.231,
+      1770.44
+     ],
+     "boundsMin": [
+      -884.64,
+      969.109,
+      -5897.288
+     ],
+     "boundsMax": [
+      874.569,
+      1785.34,
+      -4126.847
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T02",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T02_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 351,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.738,
+      1379.156,
+      -5042.964
+     ],
+     "size": [
+      1792.191,
+      869.457,
+      1847.565
+     ],
+     "boundsMin": [
+      -887.358,
+      944.428,
+      -5966.747
+     ],
+     "boundsMax": [
+      904.833,
+      1813.885,
+      -4119.182
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T02",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T03_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 300,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1689.289,
+      1460.134,
+      -4972.769
+     ],
+     "size": [
+      1810.957,
+      707.502,
+      1821.848
+     ],
+     "boundsMin": [
+      783.811,
+      1106.383,
+      -5883.692
+     ],
+     "boundsMax": [
+      2594.768,
+      1813.885,
+      -4061.845
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T03",
+     "shareFromThisSector": 0.601
+    },
+    {
+     "name": "M1_Skyline_N_T03_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 401,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1681.364,
+      1450.116,
+      -4975.391
+     ],
+     "size": [
+      1783.99,
+      670.449,
+      1827.643
+     ],
+     "boundsMin": [
+      789.368,
+      1114.891,
+      -5889.213
+     ],
+     "boundsMax": [
+      2573.359,
+      1785.34,
+      -4061.57
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T03",
+     "shareFromThisSector": 0.79
+    },
+    {
+     "name": "M1_Skyline_N_T04_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 384,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1688.831,
+      1288.53,
+      -4967.133
+     ],
+     "size": [
+      1772.763,
+      899.386,
+      1843.953
+     ],
+     "boundsMin": [
+      -2575.212,
+      838.837,
+      -5889.109
+     ],
+     "boundsMax": [
+      -802.449,
+      1738.223,
+      -4045.156
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T04",
+     "shareFromThisSector": 0.634
+    },
+    {
+     "name": "M1_Skyline_N_T04_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 323,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1686.303,
+      1316.667,
+      -4973.839
+     ],
+     "size": [
+      1774.112,
+      955.66,
+      1867.608
+     ],
+     "boundsMin": [
+      -2573.359,
+      838.837,
+      -5907.643
+     ],
+     "boundsMax": [
+      -799.247,
+      1794.497,
+      -4040.035
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T04",
+     "shareFromThisSector": 0.822
+    },
+    {
+     "name": "M1_Skyline_N_T05_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 256,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.847,
+      1328.099,
+      -6725.754
+     ],
+     "size": [
+      1814.496,
+      858.437,
+      1748.492
+     ],
+     "boundsMin": [
+      -898.401,
+      898.88,
+      -7600.0
+     ],
+     "boundsMax": [
+      916.094,
+      1757.317,
+      -5851.508
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T05",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T05_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 162,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      8.847,
+      1382.93,
+      -6717.712
+     ],
+     "size": [
+      1814.619,
+      856.92,
+      1757.075
+     ],
+     "boundsMin": [
+      -898.463,
+      954.47,
+      -7596.25
+     ],
+     "boundsMax": [
+      916.157,
+      1811.39,
+      -5839.175
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T05",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_N_T06_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 212,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1688.243,
+      1342.485,
+      -6651.203
+     ],
+     "size": [
+      1772.331,
+      833.158,
+      1805.801
+     ],
+     "boundsMin": [
+      -2574.408,
+      925.906,
+      -7554.103
+     ],
+     "boundsMax": [
+      -802.078,
+      1759.064,
+      -5748.302
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T06",
+     "shareFromThisSector": 0.996
+    },
+    {
+     "name": "M1_Skyline_N_T06_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 162,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1685.115,
+      1392.741,
+      -6578.022
+     ],
+     "size": [
+      1797.056,
+      837.298,
+      1677.892
+     ],
+     "boundsMin": [
+      -2583.643,
+      974.092,
+      -7416.967
+     ],
+     "boundsMax": [
+      -786.587,
+      1811.39,
+      -5739.076
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T06",
+     "shareFromThisSector": 0.995
+    },
+    {
+     "name": "M1_Skyline_N_T07_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 242,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1694.934,
+      1313.585,
+      -6662.08
+     ],
+     "size": [
+      1785.713,
+      693.198,
+      1784.046
+     ],
+     "boundsMin": [
+      802.078,
+      966.985,
+      -7554.103
+     ],
+     "boundsMax": [
+      2587.79,
+      1660.184,
+      -5770.057
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T07",
+     "shareFromThisSector": 0.994
+    },
+    {
+     "name": "M1_Skyline_N_T07_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 133,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1679.31,
+      1389.228,
+      -6577.166
+     ],
+     "size": [
+      1815.831,
+      790.122,
+      1603.39
+     ],
+     "boundsMin": [
+      771.395,
+      994.167,
+      -7378.861
+     ],
+     "boundsMax": [
+      2587.226,
+      1784.289,
+      -5775.471
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T07",
+     "shareFromThisSector": 0.991
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07"
+   ]
+  },
+  {
+   "name": "M1_Skyline_NE",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector NE (bearing 45 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_NE: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    4378.713,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6120.968,
+    1301.653,
+    6504.1
+   ],
+   "boundsMin": [
+    805.697,
+    501.555,
+    -7150.694
+   ],
+   "boundsMax": [
+    6926.665,
+    1803.208,
+    -646.594
+   ],
+   "tris": 5125,
+   "parts": [
+    {
+     "name": "M1_Skyline_NE_T08_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 499,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1860.188,
+      725.673,
+      -1521.66
+     ],
+     "size": [
+      1432.692,
+      448.236,
+      1750.133
+     ],
+     "boundsMin": [
+      1143.842,
+      501.555,
+      -2396.726
+     ],
+     "boundsMax": [
+      2576.534,
+      949.791,
+      -646.594
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T08",
+     "shareFromThisSector": 0.954
+    },
+    {
+     "name": "M1_Skyline_NE_T08_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      85,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 217,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1836.473,
+      652.692,
+      -1836.453
+     ],
+     "size": [
+      1458.894,
+      295.757,
+      1118.452
+     ],
+     "boundsMin": [
+      1107.026,
+      504.814,
+      -2395.679
+     ],
+     "boundsMax": [
+      2565.92,
+      800.57,
+      -1277.227
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T08",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T09_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 846,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1693.935,
+      1146.267,
+      -3245.331
+     ],
+     "size": [
+      1768.373,
+      1137.89,
+      1793.016
+     ],
+     "boundsMin": [
+      809.749,
+      577.323,
+      -4141.838
+     ],
+     "boundsMax": [
+      2578.121,
+      1715.212,
+      -2348.823
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T09",
+     "shareFromThisSector": 0.708
+    },
+    {
+     "name": "M1_Skyline_NE_T09_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      85,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 239,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1491.974,
+      727.953,
+      -2863.324
+     ],
+     "size": [
+      1353.103,
+      284.306,
+      1021.547
+     ],
+     "boundsMin": [
+      815.422,
+      585.8,
+      -3374.097
+     ],
+     "boundsMax": [
+      2168.526,
+      870.106,
+      -2352.55
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T09",
+     "shareFromThisSector": 0.648
+    },
+    {
+     "name": "M1_Skyline_NE_T09_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 387,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1693.385,
+      1193.934,
+      -3281.299
+     ],
+     "size": [
+      1775.375,
+      1138.98,
+      1728.706
+     ],
+     "boundsMin": [
+      805.697,
+      624.444,
+      -4145.652
+     ],
+     "boundsMax": [
+      2581.072,
+      1763.424,
+      -2416.946
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T09",
+     "shareFromThisSector": 0.708
+    },
+    {
+     "name": "M1_Skyline_NE_T10_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 475,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3387.465,
+      1250.781,
+      -2687.539
+     ],
+     "size": [
+      1810.257,
+      1028.092,
+      1850.471
+     ],
+     "boundsMin": [
+      2482.336,
+      736.735,
+      -3612.774
+     ],
+     "boundsMax": [
+      4292.593,
+      1764.827,
+      -1762.303
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T10",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T10_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      85,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 33,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2704.82,
+      787.259,
+      -1994.754
+     ],
+     "size": [
+      416.039,
+      152.648,
+      451.475
+     ],
+     "boundsMin": [
+      2496.801,
+      710.935,
+      -2220.491
+     ],
+     "boundsMax": [
+      2912.84,
+      863.583,
+      -1769.016
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T10",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T10_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 585,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3387.37,
+      1319.863,
+      -2687.568
+     ],
+     "size": [
+      1797.741,
+      941.575,
+      1839.532
+     ],
+     "boundsMin": [
+      2488.5,
+      849.075,
+      -3607.334
+     ],
+     "boundsMax": [
+      4286.241,
+      1790.65,
+      -1767.802
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T10",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T11_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 287,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3381.341,
+      1319.133,
+      -4469.467
+     ],
+     "size": [
+      1837.178,
+      924.231,
+      1862.848
+     ],
+     "boundsMin": [
+      2462.752,
+      857.017,
+      -5400.891
+     ],
+     "boundsMax": [
+      4299.929,
+      1781.248,
+      -3538.043
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T11",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T11_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 350,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3389.367,
+      1323.181,
+      -4472.064
+     ],
+     "size": [
+      1821.125,
+      932.328,
+      1868.802
+     ],
+     "boundsMin": [
+      2478.804,
+      857.017,
+      -5406.465
+     ],
+     "boundsMax": [
+      4299.929,
+      1789.345,
+      -3537.663
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T11",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T12_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 288,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5073.744,
+      1251.465,
+      -3568.042
+     ],
+     "size": [
+      1840.053,
+      942.099,
+      1827.521
+     ],
+     "boundsMin": [
+      4153.717,
+      780.415,
+      -4481.803
+     ],
+     "boundsMax": [
+      5993.77,
+      1722.514,
+      -2654.281
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T12",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T12_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 229,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5076.438,
+      1326.525,
+      -3600.614
+     ],
+     "size": [
+      1845.443,
+      953.367,
+      1876.102
+     ],
+     "boundsMin": [
+      4153.717,
+      849.842,
+      -4538.665
+     ],
+     "boundsMax": [
+      5999.16,
+      1803.208,
+      -2662.563
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T12",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T13_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 192,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3389.9,
+      1226.336,
+      -6232.905
+     ],
+     "size": [
+      1827.946,
+      768.739,
+      1835.577
+     ],
+     "boundsMin": [
+      2475.927,
+      841.967,
+      -7150.694
+     ],
+     "boundsMax": [
+      4303.873,
+      1610.706,
+      -5315.117
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T13",
+     "shareFromThisSector": 0.886
+    },
+    {
+     "name": "M1_Skyline_NE_T13_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 139,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3350.116,
+      1305.203,
+      -5925.506
+     ],
+     "size": [
+      1750.398,
+      911.825,
+      1211.596
+     ],
+     "boundsMin": [
+      2474.917,
+      849.291,
+      -6531.304
+     ],
+     "boundsMax": [
+      4225.315,
+      1761.116,
+      -5319.708
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T13",
+     "shareFromThisSector": 0.976
+    },
+    {
+     "name": "M1_Skyline_NE_T14_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 146,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5072.205,
+      1174.603,
+      -5361.665
+     ],
+     "size": [
+      1865.946,
+      933.12,
+      1848.296
+     ],
+     "boundsMin": [
+      4139.232,
+      708.043,
+      -6285.812
+     ],
+     "boundsMax": [
+      6005.178,
+      1641.163,
+      -4437.517
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T14",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T14_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      85,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 4,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5104.083,
+      848.165,
+      -5434.195
+     ],
+     "size": [
+      369.708,
+      149.834,
+      211.934
+     ],
+     "boundsMin": [
+      4919.23,
+      773.248,
+      -5540.162
+     ],
+     "boundsMax": [
+      5288.937,
+      923.083,
+      -5328.228
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T14",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T14_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 101,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5049.728,
+      1288.519,
+      -5228.093
+     ],
+     "size": [
+      1820.991,
+      909.603,
+      1554.17
+     ],
+     "boundsMin": [
+      4139.232,
+      833.718,
+      -6005.178
+     ],
+     "boundsMax": [
+      5960.223,
+      1743.32,
+      -4451.008
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T14",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T15_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 91,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6370.38,
+      951.963,
+      -3939.677
+     ],
+     "size": [
+      1112.57,
+      523.136,
+      1624.335
+     ],
+     "boundsMin": [
+      5814.095,
+      690.395,
+      -4751.844
+     ],
+     "boundsMax": [
+      6926.665,
+      1213.531,
+      -3127.509
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T15",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T15_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      73,
+      85,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 9,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6172.323,
+      807.173,
+      -4086.929
+     ],
+     "size": [
+      615.485,
+      127.187,
+      231.879
+     ],
+     "boundsMin": [
+      5864.58,
+      743.58,
+      -4202.868
+     ],
+     "boundsMax": [
+      6480.065,
+      870.767,
+      -3970.989
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T15",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NE_T15_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 8,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6226.561,
+      1043.265,
+      -3848.945
+     ],
+     "size": [
+      674.728,
+      516.06,
+      1438.368
+     ],
+     "boundsMin": [
+      5889.197,
+      785.235,
+      -4568.129
+     ],
+     "boundsMax": [
+      6563.925,
+      1301.295,
+      -3129.762
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T15",
+     "shareFromThisSector": 1.0
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15"
+   ]
+  },
+  {
+   "name": "M1_Skyline_E",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector E (bearing 90 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_E: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    8811.747,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5102.369,
+    1300.043,
+    6469.884
+   ],
+   "boundsMin": [
+    2497.631,
+    496.615,
+    -3215.634
+   ],
+   "boundsMax": [
+    7600.0,
+    1796.658,
+    3254.25
+   ],
+   "tris": 6779,
+   "parts": [
+    {
+     "name": "M1_Skyline_E_T16_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 997,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3392.88,
+      1022.518,
+      919.059
+     ],
+     "size": [
+      1762.235,
+      983.275,
+      1838.118
+     ],
+     "boundsMin": [
+      2511.763,
+      530.881,
+      -0.0
+     ],
+     "boundsMax": [
+      4273.998,
+      1514.155,
+      1838.118
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T16",
+     "shareFromThisSector": 0.762
+    },
+    {
+     "name": "M1_Skyline_E_T16_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      65,
+      82,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 336,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3024.942,
+      677.849,
+      908.476
+     ],
+     "size": [
+      1022.874,
+      362.469,
+      1816.952
+     ],
+     "boundsMin": [
+      2513.505,
+      496.615,
+      -0.0
+     ],
+     "boundsMax": [
+      3536.379,
+      859.084,
+      1816.952
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T16",
+     "shareFromThisSector": 0.887
+    },
+    {
+     "name": "M1_Skyline_E_T16_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 323,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3381.803,
+      1034.395,
+      914.972
+     ],
+     "size": [
+      1747.907,
+      959.521,
+      1829.943
+     ],
+     "boundsMin": [
+      2507.849,
+      554.634,
+      -0.0
+     ],
+     "boundsMax": [
+      4255.756,
+      1514.155,
+      1829.943
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T16",
+     "shareFromThisSector": 0.75
+    },
+    {
+     "name": "M1_Skyline_E_T17_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1000,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3389.044,
+      1159.186,
+      -907.183
+     ],
+     "size": [
+      1782.825,
+      1189.345,
+      1814.366
+     ],
+     "boundsMin": [
+      2497.631,
+      564.513,
+      -1814.366
+     ],
+     "boundsMax": [
+      4280.456,
+      1753.859,
+      -0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T17",
+     "shareFromThisSector": 0.8
+    },
+    {
+     "name": "M1_Skyline_E_T17_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      65,
+      82,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 362,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2939.447,
+      720.812,
+      -905.549
+     ],
+     "size": [
+      851.884,
+      274.076,
+      1811.099
+     ],
+     "boundsMin": [
+      2513.505,
+      583.775,
+      -1811.099
+     ],
+     "boundsMax": [
+      3365.389,
+      857.85,
+      -0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T17",
+     "shareFromThisSector": 0.724
+    },
+    {
+     "name": "M1_Skyline_E_T17_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 289,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3432.998,
+      1186.842,
+      -908.909
+     ],
+     "size": [
+      1697.399,
+      1134.034,
+      1817.818
+     ],
+     "boundsMin": [
+      2584.298,
+      619.825,
+      -1817.818
+     ],
+     "boundsMax": [
+      4281.698,
+      1753.859,
+      -0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T17",
+     "shareFromThisSector": 0.769
+    },
+    {
+     "name": "M1_Skyline_E_T18_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 436,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5084.522,
+      1315.167,
+      13.324
+     ],
+     "size": [
+      1805.914,
+      831.705,
+      1866.301
+     ],
+     "boundsMin": [
+      4181.565,
+      899.314,
+      -919.827
+     ],
+     "boundsMax": [
+      5987.479,
+      1731.019,
+      946.474
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T18",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T18_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 341,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5068.696,
+      1337.678,
+      9.236
+     ],
+     "size": [
+      1796.101,
+      876.729,
+      1894.356
+     ],
+     "boundsMin": [
+      4170.646,
+      899.314,
+      -937.942
+     ],
+     "boundsMax": [
+      5966.747,
+      1776.043,
+      956.414
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T18",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T19_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 286,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5059.115,
+      1398.296,
+      -1790.05
+     ],
+     "size": [
+      1790.112,
+      796.723,
+      1885.292
+     ],
+     "boundsMin": [
+      4164.058,
+      999.935,
+      -2732.696
+     ],
+     "boundsMax": [
+      5954.171,
+      1796.658,
+      -847.404
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T19",
+     "shareFromThisSector": 0.691
+    },
+    {
+     "name": "M1_Skyline_E_T19_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 414,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5079.091,
+      1399.21,
+      -1784.206
+     ],
+     "size": [
+      1840.948,
+      794.896,
+      1861.587
+     ],
+     "boundsMin": [
+      4158.617,
+      1001.762,
+      -2714.999
+     ],
+     "boundsMax": [
+      5999.565,
+      1796.658,
+      -853.413
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T19",
+     "shareFromThisSector": 0.65
+    },
+    {
+     "name": "M1_Skyline_E_T20_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 368,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5079.191,
+      1331.602,
+      1799.753
+     ],
+     "size": [
+      1795.507,
+      864.577,
+      1937.431
+     ],
+     "boundsMin": [
+      4181.438,
+      899.314,
+      831.038
+     ],
+     "boundsMax": [
+      5976.944,
+      1763.891,
+      2768.468
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T20",
+     "shareFromThisSector": 0.707
+    },
+    {
+     "name": "M1_Skyline_E_T20_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 326,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5081.342,
+      1345.258,
+      1805.328
+     ],
+     "size": [
+      1767.112,
+      837.265,
+      1909.058
+     ],
+     "boundsMin": [
+      4197.786,
+      926.626,
+      850.799
+     ],
+     "boundsMax": [
+      5964.898,
+      1763.891,
+      2759.857
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T20",
+     "shareFromThisSector": 0.601
+    },
+    {
+     "name": "M1_Skyline_E_T21_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 237,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6723.999,
+      1220.613,
+      828.944
+     ],
+     "size": [
+      1752.002,
+      1005.706,
+      1657.889
+     ],
+     "boundsMin": [
+      5847.998,
+      717.76,
+      -0.0
+     ],
+     "boundsMax": [
+      7600.0,
+      1723.466,
+      1657.889
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T21",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T21_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      65,
+      82,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 11,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      7344.076,
+      795.82,
+      700.631
+     ],
+     "size": [
+      494.973,
+      156.12,
+      699.073
+     ],
+     "boundsMin": [
+      7096.59,
+      717.76,
+      351.095
+     ],
+     "boundsMax": [
+      7591.563,
+      873.88,
+      1050.167
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T21",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T21_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 126,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6717.712,
+      1223.803,
+      825.05
+     ],
+     "size": [
+      1757.075,
+      999.325,
+      1650.101
+     ],
+     "boundsMin": [
+      5839.175,
+      724.141,
+      -0.0
+     ],
+     "boundsMax": [
+      7596.25,
+      1723.466,
+      1650.101
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T21",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T22_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 186,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6725.754,
+      1269.758,
+      -812.934
+     ],
+     "size": [
+      1748.492,
+      870.152,
+      1625.869
+     ],
+     "boundsMin": [
+      5851.508,
+      834.682,
+      -1625.869
+     ],
+     "boundsMax": [
+      7600.0,
+      1704.834,
+      -0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T22",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T22_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 187,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6638.842,
+      1277.984,
+      -820.521
+     ],
+     "size": [
+      1599.335,
+      886.605,
+      1641.041
+     ],
+     "boundsMin": [
+      5839.175,
+      834.682,
+      -1641.041
+     ],
+     "boundsMax": [
+      7438.51,
+      1721.287,
+      -0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T22",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T23_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 178,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6645.894,
+      1325.143,
+      -2378.409
+     ],
+     "size": [
+      1592.399,
+      828.031,
+      1674.45
+     ],
+     "boundsMin": [
+      5849.694,
+      911.127,
+      -3215.634
+     ],
+     "boundsMax": [
+      7442.093,
+      1739.159,
+      -1541.183
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T23",
+     "shareFromThisSector": 0.833
+    },
+    {
+     "name": "M1_Skyline_E_T23_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 98,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6553.09,
+      1372.477,
+      -2362.436
+     ],
+     "size": [
+      1441.258,
+      811.866,
+      1657.926
+     ],
+     "boundsMin": [
+      5832.461,
+      966.544,
+      -3191.399
+     ],
+     "boundsMax": [
+      7273.719,
+      1778.41,
+      -1533.473
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T23",
+     "shareFromThisSector": 0.558
+    },
+    {
+     "name": "M1_Skyline_E_T24_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 150,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6633.331,
+      1172.911,
+      2369.889
+     ],
+     "size": [
+      1567.273,
+      943.572,
+      1732.067
+     ],
+     "boundsMin": [
+      5849.694,
+      701.125,
+      1503.856
+     ],
+     "boundsMax": [
+      7416.967,
+      1644.697,
+      3235.923
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T24",
+     "shareFromThisSector": 0.688
+    },
+    {
+     "name": "M1_Skyline_E_T24_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      65,
+      82,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 8,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      7135.15,
+      768.744,
+      2382.895
+     ],
+     "size": [
+      326.165,
+      135.238,
+      607.028
+     ],
+     "boundsMin": [
+      6972.067,
+      701.125,
+      2079.381
+     ],
+     "boundsMax": [
+      7298.232,
+      836.363,
+      2686.409
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T24",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_E_T24_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 120,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6634.534,
+      1202.947,
+      2389.684
+     ],
+     "size": [
+      1564.867,
+      1003.644,
+      1729.131
+     ],
+     "boundsMin": [
+      5852.1,
+      701.125,
+      1525.119
+     ],
+     "boundsMax": [
+      7416.967,
+      1704.768,
+      3254.25
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T24",
+     "shareFromThisSector": 0.747
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T16",
+    "T17",
+    "T18",
+    "T19",
+    "T20",
+    "T21",
+    "T22",
+    "T23",
+    "T24"
+   ]
+  },
+  {
+   "name": "M1_Skyline_SE",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector SE (bearing 135 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_SE: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    15605.998,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6066.937,
+    1515.304,
+    6504.1
+   ],
+   "boundsMin": [
+    809.749,
+    185.27,
+    646.594
+   ],
+   "boundsMax": [
+    6876.686,
+    1700.574,
+    7150.694
+   ],
+   "tris": 5123,
+   "parts": [
+    {
+     "name": "M1_Skyline_SE_T25_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 317,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1830.461,
+      476.694,
+      1703.051
+     ],
+     "size": [
+      1446.871,
+      582.847,
+      1416.148
+     ],
+     "boundsMin": [
+      1107.026,
+      185.27,
+      994.977
+     ],
+     "boundsMax": [
+      2553.897,
+      768.117,
+      2411.125
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T25",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T25_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 379,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2120.587,
+      532.138,
+      1609.552
+     ],
+     "size": [
+      871.63,
+      505.113,
+      1612.216
+     ],
+     "boundsMin": [
+      1684.772,
+      279.582,
+      803.444
+     ],
+     "boundsMax": [
+      2556.402,
+      784.695,
+      2415.66
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T25",
+     "shareFromThisSector": 0.957
+    },
+    {
+     "name": "M1_Skyline_SE_T25_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 14,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2336.274,
+      687.848,
+      1514.886
+     ],
+     "size": [
+      442.778,
+      337.552,
+      1736.585
+     ],
+     "boundsMin": [
+      2114.885,
+      519.072,
+      646.594
+     ],
+     "boundsMax": [
+      2557.663,
+      856.624,
+      2383.178
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T25",
+     "shareFromThisSector": 0.42
+    },
+    {
+     "name": "M1_Skyline_SE_T26_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1105,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1686.108,
+      602.138,
+      3247.949
+     ],
+     "size": [
+      1752.719,
+      833.735,
+      1821.335
+     ],
+     "boundsMin": [
+      809.749,
+      185.27,
+      2337.282
+     ],
+     "boundsMax": [
+      2562.468,
+      1019.006,
+      4158.617
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T26",
+     "shareFromThisSector": 0.645
+    },
+    {
+     "name": "M1_Skyline_SE_T26_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 271,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1693.871,
+      574.715,
+      3213.991
+     ],
+     "size": [
+      1734.679,
+      587.22,
+      1764.978
+     ],
+     "boundsMin": [
+      826.532,
+      281.105,
+      2331.502
+     ],
+     "boundsMax": [
+      2561.211,
+      868.326,
+      4096.48
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T26",
+     "shareFromThisSector": 0.915
+    },
+    {
+     "name": "M1_Skyline_SE_T26_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 103,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2233.454,
+      693.706,
+      3229.629
+     ],
+     "size": [
+      619.533,
+      589.156,
+      1761.613
+     ],
+     "boundsMin": [
+      1923.687,
+      399.128,
+      2348.823
+     ],
+     "boundsMax": [
+      2543.221,
+      988.283,
+      4110.436
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T26",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T27_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 747,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3387.029,
+      1029.024,
+      2690.277
+     ],
+     "size": [
+      1744.782,
+      1014.027,
+      1896.107
+     ],
+     "boundsMin": [
+      2514.639,
+      522.01,
+      1742.224
+     ],
+     "boundsMax": [
+      4259.42,
+      1536.037,
+      3638.33
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T27",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T27_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 62,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2724.827,
+      708.491,
+      2348.956
+     ],
+     "size": [
+      426.164,
+      357.029,
+      1176.916
+     ],
+     "boundsMin": [
+      2511.745,
+      529.976,
+      1760.498
+     ],
+     "boundsMax": [
+      2937.909,
+      887.005,
+      2937.414
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T27",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T27_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 279,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3386.781,
+      1091.89,
+      2689.89
+     ],
+     "size": [
+      1747.398,
+      888.295,
+      1883.22
+     ],
+     "boundsMin": [
+      2513.082,
+      647.742,
+      1748.279
+     ],
+     "boundsMax": [
+      4260.479,
+      1536.037,
+      3631.5
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T27",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T28_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 554,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3381.636,
+      995.061,
+      4479.41
+     ],
+     "size": [
+      1772.256,
+      589.559,
+      1935.667
+     ],
+     "boundsMin": [
+      2495.508,
+      700.281,
+      3511.577
+     ],
+     "boundsMax": [
+      4267.764,
+      1289.84,
+      5447.243
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T28",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T28_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 23,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3363.992,
+      805.742,
+      4653.725
+     ],
+     "size": [
+      1726.229,
+      138.282,
+      1505.481
+     ],
+     "boundsMin": [
+      2500.878,
+      736.601,
+      3900.984
+     ],
+     "boundsMax": [
+      4227.107,
+      874.883,
+      5406.465
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T28",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T28_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 66,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3385.837,
+      1010.355,
+      4408.431
+     ],
+     "size": [
+      1733.646,
+      547.508,
+      1776.299
+     ],
+     "boundsMin": [
+      2519.014,
+      736.601,
+      3520.281
+     ],
+     "boundsMax": [
+      4252.661,
+      1284.109,
+      5296.58
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T28",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T29_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 416,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5072.781,
+      1249.71,
+      3597.053
+     ],
+     "size": [
+      1774.885,
+      793.953,
+      1946.028
+     ],
+     "boundsMin": [
+      4185.338,
+      852.733,
+      2624.038
+     ],
+     "boundsMax": [
+      5960.223,
+      1646.686,
+      4570.067
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T29",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T29_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 105,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5081.883,
+      1283.283,
+      3607.968
+     ],
+     "size": [
+      1744.39,
+      834.582,
+      1924.198
+     ],
+     "boundsMin": [
+      4209.688,
+      865.992,
+      2645.869
+     ],
+     "boundsMax": [
+      5954.078,
+      1700.574,
+      4570.067
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T29",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T30_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 222,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3356.784,
+      836.619,
+      6214.646
+     ],
+     "size": [
+      1737.061,
+      570.537,
+      1872.096
+     ],
+     "boundsMin": [
+      2488.254,
+      551.35,
+      5278.598
+     ],
+     "boundsMax": [
+      4225.315,
+      1121.887,
+      7150.694
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T30",
+     "shareFromThisSector": 0.937
+    },
+    {
+     "name": "M1_Skyline_SE_T30_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 96,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3378.321,
+      733.604,
+      6184.174
+     ],
+     "size": [
+      1787.026,
+      359.649,
+      1764.254
+     ],
+     "boundsMin": [
+      2484.808,
+      553.779,
+      5302.047
+     ],
+     "boundsMax": [
+      4271.834,
+      913.429,
+      7066.301
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T30",
+     "shareFromThisSector": 0.871
+    },
+    {
+     "name": "M1_Skyline_SE_T30_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 9,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      3172.407,
+      905.439,
+      5971.085
+     ],
+     "size": [
+      1279.954,
+      432.897,
+      1302.754
+     ],
+     "boundsMin": [
+      2532.43,
+      688.99,
+      5319.708
+     ],
+     "boundsMax": [
+      3812.384,
+      1121.887,
+      6622.462
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T30",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T31_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 186,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      5064.667,
+      994.496,
+      5285.171
+     ],
+     "size": [
+      1733.209,
+      624.012,
+      1726.716
+     ],
+     "boundsMin": [
+      4198.062,
+      682.491,
+      4421.813
+     ],
+     "boundsMax": [
+      5931.271,
+      1306.502,
+      6148.529
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T31",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T31_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      74,
+      86,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 29,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      4781.67,
+      784.696,
+      5697.224
+     ],
+     "size": [
+      1184.682,
+      204.411,
+      1177.177
+     ],
+     "boundsMin": [
+      4189.329,
+      682.491,
+      5108.636
+     ],
+     "boundsMax": [
+      5374.012,
+      886.902,
+      6285.812
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T31",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T31_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 32,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      4956.492,
+      1036.446,
+      4843.248
+     ],
+     "size": [
+      1495.768,
+      540.113,
+      811.461
+     ],
+     "boundsMin": [
+      4208.608,
+      766.389,
+      4437.517
+     ],
+     "boundsMax": [
+      5704.376,
+      1306.502,
+      5248.978
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T31",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T32_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      121,
+      116,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 83,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6342.264,
+      1163.547,
+      3922.233
+     ],
+     "size": [
+      965.491,
+      754.682,
+      1659.222
+     ],
+     "boundsMin": [
+      5859.519,
+      786.206,
+      3092.623
+     ],
+     "boundsMax": [
+      6825.01,
+      1540.888,
+      4751.844
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T32",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SE_T32_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 25,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      6370.633,
+      1097.026,
+      3657.502
+     ],
+     "size": [
+      1012.106,
+      621.639,
+      1090.733
+     ],
+     "boundsMin": [
+      5864.58,
+      786.206,
+      3112.135
+     ],
+     "boundsMax": [
+      6876.686,
+      1407.845,
+      4202.868
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T32",
+     "shareFromThisSector": 1.0
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T25",
+    "T26",
+    "T27",
+    "T28",
+    "T29",
+    "T30",
+    "T31",
+    "T32"
+   ]
+  },
+  {
+   "name": "M1_Skyline_S",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector S (bearing 180 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_S: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    25081.452,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5178.411,
+    1567.267,
+    5140.178
+   ],
+   "boundsMin": [
+    -2594.768,
+    230.901,
+    2459.822
+   ],
+   "boundsMax": [
+    2583.643,
+    1798.168,
+    7600.0
+   ],
+   "tris": 4973,
+   "parts": [
+    {
+     "name": "M1_Skyline_S_T33_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1115,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6.158,
+      763.875,
+      3337.361
+     ],
+     "size": [
+      1754.448,
+      916.819,
+      1755.077
+     ],
+     "boundsMin": [
+      -883.382,
+      305.466,
+      2459.822
+     ],
+     "boundsMax": [
+      871.066,
+      1222.285,
+      4214.899
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T33",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T33_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      78,
+      88,
+      63
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 492,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      47.833,
+      587.681,
+      3342.578
+     ],
+     "size": [
+      1636.976,
+      516.468,
+      1765.512
+     ],
+     "boundsMin": [
+      -770.655,
+      329.448,
+      2459.822
+     ],
+     "boundsMax": [
+      866.321,
+      845.915,
+      4225.334
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T33",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T33_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 28,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -536.344,
+      919.929,
+      3571.838
+     ],
+     "size": [
+      703.753,
+      792.892,
+      1306.994
+     ],
+     "boundsMin": [
+      -888.221,
+      523.483,
+      2918.341
+     ],
+     "boundsMax": [
+      -184.468,
+      1316.375,
+      4225.334
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T33",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T34_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 507,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -8.738,
+      886.32,
+      5042.964
+     ],
+     "size": [
+      1792.191,
+      1117.053,
+      1847.565
+     ],
+     "boundsMin": [
+      -904.833,
+      327.793,
+      4119.182
+     ],
+     "boundsMax": [
+      887.358,
+      1444.846,
+      5966.747
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T34",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T34_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      78,
+      88,
+      63
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 82,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      367.885,
+      609.972,
+      5014.3
+     ],
+     "size": [
+      913.967,
+      519.708,
+      1761.61
+     ],
+     "boundsMin": [
+      -89.098,
+      350.118,
+      4133.495
+     ],
+     "boundsMax": [
+      824.869,
+      869.826,
+      5895.105
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T34",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T34_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 174,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -158.472,
+      1035.841,
+      5018.569
+     ],
+     "size": [
+      1468.431,
+      971.527,
+      1758.893
+     ],
+     "boundsMin": [
+      -892.687,
+      550.077,
+      4139.122
+     ],
+     "boundsMax": [
+      575.744,
+      1521.604,
+      5898.015
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T34",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T35_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 406,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1699.841,
+      1287.281,
+      4975.391
+     ],
+     "size": [
+      1789.854,
+      694.821,
+      1827.643
+     ],
+     "boundsMin": [
+      -2594.768,
+      939.871,
+      4061.57
+     ],
+     "boundsMax": [
+      -804.914,
+      1634.692,
+      5889.213
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T35",
+     "shareFromThisSector": 0.751
+    },
+    {
+     "name": "M1_Skyline_S_T35_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 295,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1684.709,
+      1378.24,
+      4975.477
+     ],
+     "size": [
+      1801.797,
+      839.856,
+      1827.264
+     ],
+     "boundsMin": [
+      -2585.607,
+      958.312,
+      4061.845
+     ],
+     "boundsMax": [
+      -783.811,
+      1798.168,
+      5889.109
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T35",
+     "shareFromThisSector": 0.672
+    },
+    {
+     "name": "M1_Skyline_S_T36_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 591,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1687.23,
+      637.629,
+      4973.839
+     ],
+     "size": [
+      1775.965,
+      766.509,
+      1867.608
+     ],
+     "boundsMin": [
+      799.247,
+      254.375,
+      4040.035
+     ],
+     "boundsMax": [
+      2575.212,
+      1020.884,
+      5907.643
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T36",
+     "shareFromThisSector": 0.768
+    },
+    {
+     "name": "M1_Skyline_S_T36_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      78,
+      88,
+      63
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 105,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2127.816,
+      638.083,
+      4990.582
+     ],
+     "size": [
+      891.086,
+      461.918,
+      1801.148
+     ],
+     "boundsMin": [
+      1682.273,
+      407.124,
+      4090.008
+     ],
+     "boundsMax": [
+      2573.359,
+      869.043,
+      5891.156
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T36",
+     "shareFromThisSector": 0.393
+    },
+    {
+     "name": "M1_Skyline_S_T36_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 11,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2229.863,
+      757.209,
+      4647.304
+     ],
+     "size": [
+      677.52,
+      611.218,
+      911.835
+     ],
+     "boundsMin": [
+      1891.103,
+      451.6,
+      4191.386
+     ],
+     "boundsMax": [
+      2568.623,
+      1062.819,
+      5103.221
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T36",
+     "shareFromThisSector": 0.093
+    },
+    {
+     "name": "M1_Skyline_S_T37_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 265,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -8.847,
+      906.238,
+      6719.587
+     ],
+     "size": [
+      1814.619,
+      1195.709,
+      1760.825
+     ],
+     "boundsMin": [
+      -916.157,
+      308.384,
+      5839.175
+     ],
+     "boundsMax": [
+      898.463,
+      1504.093,
+      7600.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T37",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T37_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      78,
+      88,
+      63
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 75,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -149.727,
+      623.441,
+      6734.045
+     ],
+     "size": [
+      1842.244,
+      525.162,
+      1724.41
+     ],
+     "boundsMin": [
+      -1070.849,
+      360.86,
+      5871.84
+     ],
+     "boundsMax": [
+      771.395,
+      886.022,
+      7596.25
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T37",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T37_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 80,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -269.231,
+      1001.982,
+      6641.268
+     ],
+     "size": [
+      1293.727,
+      1004.221,
+      1557.742
+     ],
+     "boundsMin": [
+      -916.094,
+      499.872,
+      5862.397
+     ],
+     "boundsMax": [
+      377.633,
+      1504.093,
+      7420.139
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T37",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T38_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 248,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1687.188,
+      1222.513,
+      6647.119
+     ],
+     "size": [
+      1801.204,
+      960.789,
+      1754.122
+     ],
+     "boundsMin": [
+      -2587.79,
+      742.118,
+      5770.057
+     ],
+     "boundsMax": [
+      -786.587,
+      1702.908,
+      7524.18
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T38",
+     "shareFromThisSector": 0.993
+    },
+    {
+     "name": "M1_Skyline_S_T38_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      154,
+      150,
+      137
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 125,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1679.31,
+      1218.741,
+      6657.721
+     ],
+     "size": [
+      1815.831,
+      1046.218,
+      1764.702
+     ],
+     "boundsMin": [
+      -2587.226,
+      695.632,
+      5775.37
+     ],
+     "boundsMax": [
+      -771.395,
+      1741.85,
+      7540.072
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T38",
+     "shareFromThisSector": 0.995
+    },
+    {
+     "name": "M1_Skyline_S_T39_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      118,
+      115,
+      84
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 339,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      1685.115,
+      479.256,
+      6651.203
+     ],
+     "size": [
+      1797.056,
+      496.71,
+      1805.801
+     ],
+     "boundsMin": [
+      786.587,
+      230.901,
+      5748.302
+     ],
+     "boundsMax": [
+      2583.643,
+      727.611,
+      7554.103
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T39",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_S_T39_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      78,
+      88,
+      63
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 35,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      2173.232,
+      493.84,
+      6550.154
+     ],
+     "size": [
+      718.396,
+      403.391,
+      1622.156
+     ],
+     "boundsMin": [
+      1814.034,
+      292.145,
+      5739.076
+     ],
+     "boundsMax": [
+      2532.43,
+      695.536,
+      7361.232
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T39",
+     "shareFromThisSector": 0.949
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T33",
+    "T34",
+    "T35",
+    "T36",
+    "T37",
+    "T38",
+    "T39"
+   ]
+  },
+  {
+   "name": "M1_Skyline_SW",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector SW (bearing 225 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_SW: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    34595.76,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6120.968,
+    1543.993,
+    6504.1
+   ],
+   "boundsMin": [
+    -6926.665,
+    196.885,
+    646.594
+   ],
+   "boundsMax": [
+    -805.697,
+    1740.878,
+    7150.694
+   ],
+   "tris": 5125,
+   "parts": [
+    {
+     "name": "M1_Skyline_SW_T40_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 491,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1878.455,
+      411.331,
+      1520.837
+     ],
+     "size": [
+      1396.159,
+      428.891,
+      1748.486
+     ],
+     "boundsMin": [
+      -2576.534,
+      196.885,
+      646.594
+     ],
+     "boundsMax": [
+      -1180.375,
+      625.777,
+      2395.08
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T40",
+     "shareFromThisSector": 0.977
+    },
+    {
+     "name": "M1_Skyline_SW_T40_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 212,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1834.128,
+      453.459,
+      1541.398
+     ],
+     "size": [
+      1454.203,
+      375.594,
+      1710.656
+     ],
+     "boundsMin": [
+      -2561.229,
+      265.662,
+      686.07
+     ],
+     "boundsMax": [
+      -1107.026,
+      641.256,
+      2396.726
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T40",
+     "shareFromThisSector": 0.946
+    },
+    {
+     "name": "M1_Skyline_SW_T40_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 13,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -2236.24,
+      464.213,
+      1673.236
+     ],
+     "size": [
+      614.361,
+      196.694,
+      1281.303
+     ],
+     "boundsMin": [
+      -2543.421,
+      365.867,
+      1032.585
+     ],
+     "boundsMax": [
+      -1929.059,
+      562.56,
+      2313.887
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T40",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T41_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 926,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1693.385,
+      943.568,
+      3247.237
+     ],
+     "size": [
+      1775.375,
+      1200.859,
+      1796.829
+     ],
+     "boundsMin": [
+      -2581.072,
+      343.138,
+      2348.823
+     ],
+     "boundsMax": [
+      -805.697,
+      1543.997,
+      4145.652
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T41",
+     "shareFromThisSector": 0.694
+    },
+    {
+     "name": "M1_Skyline_SW_T41_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 283,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1524.93,
+      702.201,
+      2782.365
+     ],
+     "size": [
+      1211.79,
+      366.896,
+      863.856
+     ],
+     "boundsMin": [
+      -2130.825,
+      518.753,
+      2350.437
+     ],
+     "boundsMax": [
+      -919.035,
+      885.649,
+      3214.293
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T41",
+     "shareFromThisSector": 0.812
+    },
+    {
+     "name": "M1_Skyline_SW_T41_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 263,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1686.108,
+      1080.971,
+      3312.261
+     ],
+     "size": [
+      1752.719,
+      1171.731,
+      1659.154
+     ],
+     "boundsMin": [
+      -2562.468,
+      495.105,
+      2482.684
+     ],
+     "boundsMax": [
+      -809.749,
+      1666.836,
+      4141.838
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T41",
+     "shareFromThisSector": 0.704
+    },
+    {
+     "name": "M1_Skyline_SW_T42_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 673,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3387.37,
+      906.467,
+      2690.288
+     ],
+     "size": [
+      1797.741,
+      1392.895,
+      1844.972
+     ],
+     "boundsMin": [
+      -4286.241,
+      210.019,
+      1767.802
+     ],
+     "boundsMax": [
+      -2488.5,
+      1602.914,
+      3612.774
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T42",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T42_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 4,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3216.652,
+      620.279,
+      2791.467
+     ],
+     "size": [
+      1342.717,
+      401.563,
+      971.297
+     ],
+     "boundsMin": [
+      -3888.01,
+      419.497,
+      2305.818
+     ],
+     "boundsMax": [
+      -2545.293,
+      821.06,
+      3277.115
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T42",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T42_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 416,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3387.465,
+      1063.738,
+      2685.012
+     ],
+     "size": [
+      1810.257,
+      1354.281,
+      1845.417
+     ],
+     "boundsMin": [
+      -4292.593,
+      386.597,
+      1762.303
+     ],
+     "boundsMax": [
+      -2482.336,
+      1740.878,
+      3607.721
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T42",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T43_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 448,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3381.341,
+      928.976,
+      4472.064
+     ],
+     "size": [
+      1837.178,
+      1267.397,
+      1868.802
+     ],
+     "boundsMin": [
+      -4299.929,
+      295.278,
+      3537.663
+     ],
+     "boundsMax": [
+      -2462.752,
+      1562.675,
+      5406.465
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T43",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T43_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 10,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3800.065,
+      653.108,
+      4983.456
+     ],
+     "size": [
+      370.26,
+      290.038,
+      760.932
+     ],
+     "boundsMin": [
+      -3985.195,
+      508.089,
+      4602.991
+     ],
+     "boundsMax": [
+      -3614.935,
+      798.127,
+      5363.922
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T43",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T43_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 179,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3378.453,
+      1069.816,
+      4472.254
+     ],
+     "size": [
+      1799.299,
+      1157.411,
+      1868.422
+     ],
+     "boundsMin": [
+      -4278.103,
+      491.11,
+      3538.043
+     ],
+     "boundsMax": [
+      -2478.804,
+      1648.521,
+      5406.465
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T43",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T44_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 273,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5073.744,
+      1071.773,
+      3613.559
+     ],
+     "size": [
+      1840.053,
+      1295.3,
+      1850.214
+     ],
+     "boundsMin": [
+      -5993.77,
+      424.123,
+      2688.452
+     ],
+     "boundsMax": [
+      -4153.717,
+      1719.423,
+      4538.665
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T44",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T44_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -4849.718,
+      721.46,
+      4339.785
+     ],
+     "size": [
+      582.388,
+      208.911,
+      262.354
+     ],
+     "boundsMin": [
+      -5140.912,
+      617.004,
+      4208.608
+     ],
+     "boundsMax": [
+      -4558.524,
+      825.915,
+      4470.962
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T44",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T44_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 241,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5080.928,
+      1226.449,
+      3481.405
+     ],
+     "size": [
+      1836.463,
+      1023.424,
+      1654.247
+     ],
+     "boundsMin": [
+      -5999.16,
+      714.737,
+      2654.281
+     ],
+     "boundsMax": [
+      -4162.697,
+      1738.161,
+      4308.528
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T44",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T45_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 201,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3386.104,
+      1099.676,
+      6232.905
+     ],
+     "size": [
+      1820.354,
+      1193.692,
+      1835.577
+     ],
+     "boundsMin": [
+      -4296.281,
+      502.83,
+      5315.117
+     ],
+     "boundsMax": [
+      -2475.927,
+      1696.521,
+      7150.694
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T45",
+     "shareFromThisSector": 0.9
+    },
+    {
+     "name": "M1_Skyline_SW_T45_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 5,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3839.985,
+      723.817,
+      6285.383
+     ],
+     "size": [
+      912.591,
+      285.048,
+      972.534
+     ],
+     "boundsMin": [
+      -4296.281,
+      581.293,
+      5799.116
+     ],
+     "boundsMax": [
+      -3383.69,
+      866.341,
+      6771.65
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T45",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T45_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 125,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3389.395,
+      1086.429,
+      6057.847
+     ],
+     "size": [
+      1828.955,
+      1220.186,
+      1476.278
+     ],
+     "boundsMin": [
+      -4303.873,
+      476.336,
+      5319.708
+     ],
+     "boundsMax": [
+      -2474.917,
+      1696.521,
+      6795.986
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T45",
+     "shareFromThisSector": 0.955
+    },
+    {
+     "name": "M1_Skyline_SW_T46_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 236,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5072.205,
+      671.466,
+      5327.727
+     ],
+     "size": [
+      1865.946,
+      793.495,
+      1780.421
+     ],
+     "boundsMin": [
+      -6005.178,
+      274.718,
+      4437.517
+     ],
+     "boundsMax": [
+      -4139.232,
+      1068.214,
+      6217.938
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T46",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T46_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      75,
+      86,
+      61
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 6,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -4668.466,
+      586.995,
+      5449.917
+     ],
+     "size": [
+      958.273,
+      188.901,
+      1671.79
+     ],
+     "boundsMin": [
+      -5147.602,
+      492.545,
+      4614.022
+     ],
+     "boundsMax": [
+      -4189.329,
+      681.446,
+      6285.812
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T46",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T46_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 9,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -4959.159,
+      699.017,
+      5242.393
+     ],
+     "size": [
+      1639.853,
+      648.526,
+      1205.435
+     ],
+     "boundsMin": [
+      -5779.085,
+      374.753,
+      4639.676
+     ],
+     "boundsMax": [
+      -4139.232,
+      1023.28,
+      5845.11
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T46",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T47_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      120,
+      116,
+      86
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 75,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6370.38,
+      1183.099,
+      3939.677
+     ],
+     "size": [
+      1112.57,
+      637.805,
+      1624.335
+     ],
+     "boundsMin": [
+      -6926.665,
+      864.196,
+      3127.509
+     ],
+     "boundsMax": [
+      -5814.095,
+      1502.002,
+      4751.844
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T47",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_SW_T47_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 33,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6256.227,
+      1335.182,
+      3625.729
+     ],
+     "size": [
+      873.936,
+      736.344,
+      991.934
+     ],
+     "boundsMin": [
+      -6693.194,
+      967.01,
+      3129.762
+     ],
+     "boundsMax": [
+      -5819.259,
+      1703.354,
+      4121.696
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T47",
+     "shareFromThisSector": 1.0
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T40",
+    "T41",
+    "T42",
+    "T43",
+    "T44",
+    "T45",
+    "T46",
+    "T47"
+   ]
+  },
+  {
+   "name": "M1_Skyline_W",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector W (bearing 270 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_W: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    41394.062,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    5102.369,
+    1567.891,
+    6469.884
+   ],
+   "boundsMin": [
+    -7600.0,
+    240.287,
+    -3254.25
+   ],
+   "boundsMax": [
+    -2497.631,
+    1808.178,
+    3215.634
+   ],
+   "tris": 6779,
+   "parts": [
+    {
+     "name": "M1_Skyline_W_T48_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 988,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3389.044,
+      923.585,
+      906.413
+     ],
+     "size": [
+      1782.825,
+      1366.596,
+      1812.826
+     ],
+     "boundsMin": [
+      -4280.456,
+      240.287,
+      0.0
+     ],
+     "boundsMax": [
+      -2497.631,
+      1606.882,
+      1812.826
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T48",
+     "shareFromThisSector": 0.804
+    },
+    {
+     "name": "M1_Skyline_W_T48_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      70,
+      84,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 364,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3285.982,
+      604.651,
+      782.797
+     ],
+     "size": [
+      1555.433,
+      553.032,
+      1565.593
+     ],
+     "boundsMin": [
+      -4063.698,
+      328.135,
+      0.0
+     ],
+     "boundsMax": [
+      -2508.265,
+      881.167,
+      1565.593
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T48",
+     "shareFromThisSector": 0.839
+    },
+    {
+     "name": "M1_Skyline_W_T48_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 299,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3403.003,
+      1033.869,
+      908.909
+     ],
+     "size": [
+      1757.39,
+      1272.286,
+      1817.818
+     ],
+     "boundsMin": [
+      -4281.698,
+      397.726,
+      0.0
+     ],
+     "boundsMax": [
+      -2524.308,
+      1670.012,
+      1817.818
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T48",
+     "shareFromThisSector": 0.619
+    },
+    {
+     "name": "M1_Skyline_W_T49_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 915,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3385.818,
+      1058.921,
+      -916.2
+     ],
+     "size": [
+      1755.937,
+      1124.706,
+      1832.4
+     ],
+     "boundsMin": [
+      -4263.787,
+      496.568,
+      -1832.4
+     ],
+     "boundsMax": [
+      -2507.849,
+      1621.274,
+      0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T49",
+     "shareFromThisSector": 0.774
+    },
+    {
+     "name": "M1_Skyline_W_T49_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      70,
+      84,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 448,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -2995.957,
+      687.163,
+      -908.476
+     ],
+     "size": [
+      964.767,
+      395.338,
+      1816.952
+     ],
+     "boundsMin": [
+      -3478.34,
+      489.494,
+      -1816.952
+     ],
+     "boundsMax": [
+      -2513.573,
+      884.832,
+      0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T49",
+     "shareFromThisSector": 0.688
+    },
+    {
+     "name": "M1_Skyline_W_T49_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 293,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3591.268,
+      1109.717,
+      -919.059
+     ],
+     "size": [
+      1365.459,
+      1115.109,
+      1838.118
+     ],
+     "boundsMin": [
+      -4273.998,
+      552.163,
+      -1838.118
+     ],
+     "boundsMax": [
+      -2908.539,
+      1667.272,
+      0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T49",
+     "shareFromThisSector": 0.885
+    },
+    {
+     "name": "M1_Skyline_W_T50_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 327,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5079.063,
+      1324.09,
+      -4.266
+     ],
+     "size": [
+      1816.833,
+      812.491,
+      1884.416
+     ],
+     "boundsMin": [
+      -5987.479,
+      917.845,
+      -946.474
+     ],
+     "boundsMax": [
+      -4170.646,
+      1730.335,
+      937.942
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T50",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T50_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 450,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5074.156,
+      1304.32,
+      -14.574
+     ],
+     "size": [
+      1785.182,
+      885.867,
+      1883.679
+     ],
+     "boundsMin": [
+      -5966.747,
+      861.387,
+      -956.414
+     ],
+     "boundsMax": [
+      -4181.565,
+      1747.253,
+      927.265
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T50",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T51_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 322,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5079.191,
+      1420.544,
+      -1802.699
+     ],
+     "size": [
+      1795.507,
+      692.222,
+      1931.538
+     ],
+     "boundsMin": [
+      -5976.944,
+      1074.434,
+      -2768.468
+     ],
+     "boundsMax": [
+      -4181.438,
+      1766.655,
+      -836.93
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T51",
+     "shareFromThisSector": 0.61
+    },
+    {
+     "name": "M1_Skyline_W_T51_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 372,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5076.992,
+      1441.306,
+      -1791.074
+     ],
+     "size": [
+      1780.718,
+      733.745,
+      1920.073
+     ],
+     "boundsMin": [
+      -5967.351,
+      1074.434,
+      -2751.11
+     ],
+     "boundsMax": [
+      -4186.633,
+      1808.178,
+      -831.038
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T51",
+     "shareFromThisSector": 0.726
+    },
+    {
+     "name": "M1_Skyline_W_T52_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 317,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5071.768,
+      1363.328,
+      1776.979
+     ],
+     "size": [
+      1826.303,
+      668.648,
+      1859.151
+     ],
+     "boundsMin": [
+      -5984.92,
+      1029.004,
+      847.404
+     ],
+     "boundsMax": [
+      -4158.617,
+      1697.652,
+      2706.555
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T52",
+     "shareFromThisSector": 0.73
+    },
+    {
+     "name": "M1_Skyline_W_T52_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 383,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5082.157,
+      1399.344,
+      1793.054
+     ],
+     "size": [
+      1834.816,
+      740.679,
+      1879.283
+     ],
+     "boundsMin": [
+      -5999.565,
+      1029.004,
+      853.413
+     ],
+     "boundsMax": [
+      -4164.749,
+      1769.683,
+      2732.696
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T52",
+     "shareFromThisSector": 0.596
+    },
+    {
+     "name": "M1_Skyline_W_T53_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 234,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6719.587,
+      1259.953,
+      812.934
+     ],
+     "size": [
+      1760.825,
+      830.352,
+      1625.869
+     ],
+     "boundsMin": [
+      -7600.0,
+      844.777,
+      0.0
+     ],
+     "boundsMax": [
+      -5839.175,
+      1675.129,
+      1625.869
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T53",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T53_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 139,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6725.285,
+      1302.269,
+      820.521
+     ],
+     "size": [
+      1747.555,
+      879.134,
+      1641.041
+     ],
+     "boundsMin": [
+      -7599.062,
+      862.702,
+      0.0
+     ],
+     "boundsMax": [
+      -5851.508,
+      1741.836,
+      1641.041
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T53",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T54_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 237,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6723.999,
+      1267.972,
+      -828.944
+     ],
+     "size": [
+      1752.002,
+      915.826,
+      1657.889
+     ],
+     "boundsMin": [
+      -7600.0,
+      810.059,
+      -1657.889
+     ],
+     "boundsMax": [
+      -5847.998,
+      1725.885,
+      0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T54",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T54_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 137,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6580.187,
+      1344.335,
+      -825.05
+     ],
+     "size": [
+      1482.025,
+      889.435,
+      1650.101
+     ],
+     "boundsMin": [
+      -7321.2,
+      899.618,
+      -1650.101
+     ],
+     "boundsMax": [
+      -5839.175,
+      1789.052,
+      0.0
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T54",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T55_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 167,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6637.277,
+      1330.323,
+      2366.291
+     ],
+     "size": [
+      1609.632,
+      847.251,
+      1650.215
+     ],
+     "boundsMin": [
+      -7442.093,
+      906.698,
+      1541.183
+     ],
+     "boundsMax": [
+      -5832.461,
+      1753.949,
+      3191.399
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T55",
+     "shareFromThisSector": 0.797
+    },
+    {
+     "name": "M1_Skyline_W_T55_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 109,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6519.972,
+      1308.325,
+      2374.553
+     ],
+     "size": [
+      1340.554,
+      891.247,
+      1682.161
+     ],
+     "boundsMin": [
+      -7190.249,
+      862.702,
+      1533.473
+     ],
+     "boundsMax": [
+      -5849.694,
+      1753.949,
+      3215.634
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T55",
+     "shareFromThisSector": 0.648
+    },
+    {
+     "name": "M1_Skyline_W_T56_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      122,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 143,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6633.331,
+      1246.807,
+      -2369.889
+     ],
+     "size": [
+      1567.273,
+      1020.804,
+      1732.067
+     ],
+     "boundsMin": [
+      -7416.967,
+      736.406,
+      -3235.923
+     ],
+     "boundsMax": [
+      -5849.694,
+      1757.209,
+      -1503.856
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T56",
+     "shareFromThisSector": 0.813
+    },
+    {
+     "name": "M1_Skyline_W_T56_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      70,
+      84,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 3,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -7318.014,
+      818.012,
+      -1757.956
+     ],
+     "size": [
+      197.907,
+      163.212,
+      264.174
+     ],
+     "boundsMin": [
+      -7416.967,
+      736.406,
+      -1890.043
+     ],
+     "boundsMax": [
+      -7219.061,
+      899.618,
+      -1625.869
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T56",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_W_T56_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 132,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6562.91,
+      1278.653,
+      -2386.07
+     ],
+     "size": [
+      1421.619,
+      957.113,
+      1736.36
+     ],
+     "boundsMin": [
+      -7273.719,
+      800.097,
+      -3254.25
+     ],
+     "boundsMax": [
+      -5852.1,
+      1757.209,
+      -1517.89
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T56",
+     "shareFromThisSector": 0.674
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T48",
+    "T49",
+    "T50",
+    "T51",
+    "T52",
+    "T53",
+    "T54",
+    "T55",
+    "T56"
+   ]
+  },
+  {
+   "name": "M1_Skyline_NW",
+   "kind": "Skyline",
+   "tags": [
+    "Skyline",
+    "Persistent",
+    "NoCollision",
+    "NoShadow"
+   ],
+   "notes": "far range, the tiles whose centres lie in sector NW (bearing 315 +-22.5), r 2,600-7,600, in world space: place at the map centre, ModelStreamingMode Persistent, CanCollide/CanQuery/CanTouch/CastShadow false. Re-cut of Map1_Skyline.glb's M1_Skyline_NW: the same triangles regrouped into tiles of at most 2,000 studs, so a tile on the sector's edge holds some triangles of the neighbouring sector (shareFromThisSector).",
+   "origin": [
+    45777.116,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    6066.937,
+    1289.186,
+    6504.1
+   ],
+   "boundsMin": [
+    -6876.686,
+    524.829,
+    -7150.694
+   ],
+   "boundsMax": [
+    -809.749,
+    1814.015,
+    -646.594
+   ],
+   "tris": 5123,
+   "parts": [
+    {
+     "name": "M1_Skyline_NW_T57_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 454,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1880.642,
+      715.124,
+      -1531.127
+     ],
+     "size": [
+      1354.041,
+      380.59,
+      1769.067
+     ],
+     "boundsMin": [
+      -2557.663,
+      524.829,
+      -2415.66
+     ],
+     "boundsMax": [
+      -1203.621,
+      905.419,
+      -646.594
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T57",
+     "shareFromThisSector": 0.973
+    },
+    {
+     "name": "M1_Skyline_NW_T57_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      84,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 236,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1826.923,
+      691.636,
+      -1634.948
+     ],
+     "size": [
+      1439.793,
+      288.855,
+      1552.354
+     ],
+     "boundsMin": [
+      -2546.819,
+      547.208,
+      -2411.125
+     ],
+     "boundsMax": [
+      -1107.026,
+      836.063,
+      -858.771
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T57",
+     "shareFromThisSector": 0.967
+    },
+    {
+     "name": "M1_Skyline_NW_T57_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 20,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1956.011,
+      735.407,
+      -1987.176
+     ],
+     "size": [
+      1141.521,
+      276.277,
+      724.468
+     ],
+     "boundsMin": [
+      -2526.772,
+      597.268,
+      -2349.41
+     ],
+     "boundsMax": [
+      -1385.25,
+      873.545,
+      -1624.942
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T57",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T58_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 1026,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1686.108,
+      1136.694,
+      -3245.06
+     ],
+     "size": [
+      1752.719,
+      1117.676,
+      1827.114
+     ],
+     "boundsMin": [
+      -2562.468,
+      577.856,
+      -4158.617
+     ],
+     "boundsMax": [
+      -809.749,
+      1695.532,
+      -2331.502
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T58",
+     "shareFromThisSector": 0.721
+    },
+    {
+     "name": "M1_Skyline_NW_T58_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      84,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 207,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1440.406,
+      757.772,
+      -2801.259
+     ],
+     "size": [
+      1227.749,
+      223.674,
+      927.955
+     ],
+     "boundsMin": [
+      -2054.281,
+      645.935,
+      -3265.237
+     ],
+     "boundsMax": [
+      -826.532,
+      869.609,
+      -2337.282
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T58",
+     "shareFromThisSector": 0.74
+    },
+    {
+     "name": "M1_Skyline_NW_T58_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 246,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -1697.196,
+      1188.011,
+      -3274.59
+     ],
+     "size": [
+      1728.03,
+      1015.042,
+      1745.006
+     ],
+     "boundsMin": [
+      -2561.211,
+      680.491,
+      -4147.093
+     ],
+     "boundsMax": [
+      -833.181,
+      1695.532,
+      -2402.087
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T58",
+     "shareFromThisSector": 0.668
+    },
+    {
+     "name": "M1_Skyline_NW_T59_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 638,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3385.321,
+      1192.247,
+      -2687.489
+     ],
+     "size": [
+      1744.478,
+      983.35,
+      1888.021
+     ],
+     "boundsMin": [
+      -4257.56,
+      700.572,
+      -3631.5
+     ],
+     "boundsMax": [
+      -2513.082,
+      1683.923,
+      -1743.478
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T59",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T59_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      84,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 54,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -2719.877,
+      772.591,
+      -1985.734
+     ],
+     "size": [
+      385.927,
+      209.99,
+      470.435
+     ],
+     "boundsMin": [
+      -2912.84,
+      667.596,
+      -2220.952
+     ],
+     "boundsMax": [
+      -2526.913,
+      877.587,
+      -1750.516
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T59",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T59_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 396,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3386.112,
+      1275.88,
+      -2690.277
+     ],
+     "size": [
+      1748.735,
+      1035.712,
+      1896.107
+     ],
+     "boundsMin": [
+      -4260.479,
+      758.024,
+      -3638.33
+     ],
+     "boundsMax": [
+      -2511.745,
+      1793.735,
+      -1742.224
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T59",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T60_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 321,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3383.924,
+      1354.482,
+      -4480.934
+     ],
+     "size": [
+      1767.679,
+      919.064,
+      1921.7
+     ],
+     "boundsMin": [
+      -4267.764,
+      894.95,
+      -5441.784
+     ],
+     "boundsMax": [
+      -2500.085,
+      1814.015,
+      -3520.084
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T60",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T60_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 322,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3365.514,
+      1363.642,
+      -4479.41
+     ],
+     "size": [
+      1740.012,
+      900.745,
+      1935.667
+     ],
+     "boundsMin": [
+      -4235.52,
+      913.269,
+      -5447.243
+     ],
+     "boundsMax": [
+      -2495.508,
+      1814.015,
+      -3511.577
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T60",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T61_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 284,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5072.781,
+      1319.523,
+      -3597.053
+     ],
+     "size": [
+      1774.885,
+      833.575,
+      1946.028
+     ],
+     "boundsMin": [
+      -5960.223,
+      902.736,
+      -4570.067
+     ],
+     "boundsMax": [
+      -4185.338,
+      1736.311,
+      -2624.038
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T61",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T61_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 237,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5077.968,
+      1337.453,
+      -3602.824
+     ],
+     "size": [
+      1764.511,
+      869.435,
+      1932.591
+     ],
+     "boundsMin": [
+      -5960.223,
+      902.736,
+      -4569.12
+     ],
+     "boundsMax": [
+      -4195.713,
+      1772.171,
+      -2636.528
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T61",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T62_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 165,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3378.321,
+      1307.452,
+      -6214.646
+     ],
+     "size": [
+      1787.026,
+      806.808,
+      1872.096
+     ],
+     "boundsMin": [
+      -4271.834,
+      904.048,
+      -7150.694
+     ],
+     "boundsMax": [
+      -2484.808,
+      1710.855,
+      -5278.598
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T62",
+     "shareFromThisSector": 0.899
+    },
+    {
+     "name": "M1_Skyline_NW_T62_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 162,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -3355.061,
+      1332.246,
+      -6146.249
+     ],
+     "size": [
+      1740.507,
+      835.506,
+      1732.679
+     ],
+     "boundsMin": [
+      -4225.315,
+      914.493,
+      -7012.589
+     ],
+     "boundsMax": [
+      -2484.808,
+      1749.999,
+      -5279.91
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T62",
+     "shareFromThisSector": 0.932
+    },
+    {
+     "name": "M1_Skyline_NW_T63_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 138,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5022.615,
+      1155.911,
+      -5388.267
+     ],
+     "size": [
+      1666.571,
+      876.123,
+      1795.09
+     ],
+     "boundsMin": [
+      -5855.901,
+      717.85,
+      -6285.812
+     ],
+     "boundsMax": [
+      -4189.329,
+      1593.973,
+      -4490.722
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T63",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T63_SkylineForest",
+     "role": "SkylineForest",
+     "robloxMaterial": "LeafyGrass",
+     "rgb": [
+      68,
+      84,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 5,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5321.12,
+      796.2,
+      -5361.637
+     ],
+     "size": [
+      438.083,
+      156.7,
+      519.118
+     ],
+     "boundsMin": [
+      -5540.162,
+      717.85,
+      -5621.196
+     ],
+     "boundsMax": [
+      -5102.078,
+      874.55,
+      -5102.078
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T63",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T63_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 104,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -5060.3,
+      1278.65,
+      -5293.112
+     ],
+     "size": [
+      1741.942,
+      1012.972,
+      1742.598
+     ],
+     "boundsMin": [
+      -5931.271,
+      772.164,
+      -6164.411
+     ],
+     "boundsMax": [
+      -4189.329,
+      1785.137,
+      -4421.813
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T63",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T64_SkylineGrass",
+     "role": "SkylineGrass",
+     "robloxMaterial": "Grass",
+     "rgb": [
+      124,
+      121,
+      87
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 72,
+     "metalness": 0.0,
+     "roughness": 0.95,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6370.633,
+      1066.465,
+      -3931.99
+     ],
+     "size": [
+      1012.106,
+      554.98,
+      1639.709
+     ],
+     "boundsMin": [
+      -6876.686,
+      788.975,
+      -4751.844
+     ],
+     "boundsMax": [
+      -5864.58,
+      1343.955,
+      -3112.135
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T64",
+     "shareFromThisSector": 1.0
+    },
+    {
+     "name": "M1_Skyline_NW_T64_SkylineRock",
+     "role": "SkylineRock",
+     "robloxMaterial": "Limestone",
+     "rgb": [
+      155,
+      151,
+      138
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [],
+     "tris": 36,
+     "metalness": 0.0,
+     "roughness": 0.9,
+     "colourGroup": 1,
+     "colourGroups": 1,
+     "faces": "up",
+     "position": [
+      -6288.069,
+      1277.644,
+      -3783.842
+     ],
+     "size": [
+      857.1,
+      850.643,
+      1382.44
+     ],
+     "boundsMin": [
+      -6716.619,
+      852.322,
+      -4475.062
+     ],
+     "boundsMax": [
+      -5859.519,
+      1702.965,
+      -3092.623
+     ],
+     "shading": "flat",
+     "renderFidelity": "Precise",
+     "tile": "T64",
+     "shareFromThisSector": 1.0
+    }
+   ],
+   "attachments": {},
+   "pivot": "the map centre at y 0 (world space): place the asset at position (0, 0, 0), yaw 0",
+   "placement": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "yawDegrees": 0.0
+   },
+   "tiles": [
+    "T57",
+    "T58",
+    "T59",
+    "T60",
+    "T61",
+    "T62",
+    "T63",
+    "T64"
+   ]
+  }
+ ],
+ "hornColouring": "b",
+ "replaces": "Map1_Skyline.glb",
+ "notes": "The far range of Map1_Skyline.glb re-cut for Roblox, whose parts may be at most 2,048 studs long: the same 44,000 triangles (the generator's build_skyline), regrouped into tiles on the world's own axes so that no part's bounding box is over 2,000 studs on any axis. The eight assets keep the names Map1_Layout.json places at the map centre. Parts: M1_Skyline_<sector>_<tile>_<role>; one flat colour per part (rgb, also the part's material colour in the GLB): the colour that sector's role has in Map1_Skyline.glb. No vertex colours, no textures, flat-shaded, single-sided, every triangle faces up, which is toward the arena. Every asset of this file is modelled in world space with its pivot at the map centre (0, 0, 0): place each at position (0, 0, 0) with yaw 0. In the file the assets stand in a row along +X, as in every other GLB of this project; 'origin' is each asset's pivot in the file. Each part also carries 'position' and 'size': the centre and the extent of its bounding box in Roblox world space once its asset stands at the map centre. A MeshPart's Position is its bounding box's centre, so a part is in place when its Position equals 'position' and its Size equals 'size' (after the importer's own turn about Y has been undone, as for every other asset). Set RenderFidelity to Precise: neighbouring parts share an edge exactly, and a part simplified on its own could open a crack along it. CanCollide, CanQuery, CanTouch and CastShadow are false; the model is Persistent.",
+ "tiling": {
+  "limit": 2000.0,
+  "method": "columns of equal width along X, each cut into equal slabs along Z; a triangle goes where its centroid lies; a part of under 24 triangles joins the same role's part in a neighbouring tile when the joint box still fits",
+  "tiles": [
+   {
+    "id": "T01",
+    "sector": "N",
+    "centreBearing": 360.0,
+    "centreR": 3410.4,
+    "tris": 1635
+   },
+   {
+    "id": "T02",
+    "sector": "N",
+    "centreBearing": 0.1,
+    "centreR": 5037.9,
+    "tris": 763
+   },
+   {
+    "id": "T03",
+    "sector": "N",
+    "centreBearing": 18.8,
+    "centreR": 5234.9,
+    "tris": 701
+   },
+   {
+    "id": "T04",
+    "sector": "N",
+    "centreBearing": 341.4,
+    "centreR": 5234.7,
+    "tris": 707
+   },
+   {
+    "id": "T05",
+    "sector": "N",
+    "centreBearing": 0.2,
+    "centreR": 6680.5,
+    "tris": 418
+   },
+   {
+    "id": "T06",
+    "sector": "N",
+    "centreBearing": 345.8,
+    "centreR": 6794.9,
+    "tris": 374
+   },
+   {
+    "id": "T07",
+    "sector": "N",
+    "centreBearing": 13.8,
+    "centreR": 6797.9,
+    "tris": 375
+   },
+   {
+    "id": "T08",
+    "sector": "NE",
+    "centreBearing": 48.4,
+    "centreR": 2840.8,
+    "tris": 716
+   },
+   {
+    "id": "T09",
+    "sector": "NE",
+    "centreBearing": 27.4,
+    "centreR": 3703.5,
+    "tris": 1472
+   },
+   {
+    "id": "T10",
+    "sector": "NE",
+    "centreBearing": 51.2,
+    "centreR": 4324.2,
+    "tris": 1093
+   },
+   {
+    "id": "T11",
+    "sector": "NE",
+    "centreBearing": 37.3,
+    "centreR": 5595.3,
+    "tris": 637
+   },
+   {
+    "id": "T12",
+    "sector": "NE",
+    "centreBearing": 54.5,
+    "centreR": 6187.6,
+    "tris": 517
+   },
+   {
+    "id": "T13",
+    "sector": "NE",
+    "centreBearing": 28.8,
+    "centreR": 6901.3,
+    "tris": 331
+   },
+   {
+    "id": "T14",
+    "sector": "NE",
+    "centreBearing": 43.7,
+    "centreR": 7063.7,
+    "tris": 251
+   },
+   {
+    "id": "T15",
+    "sector": "NE",
+    "centreBearing": 59.2,
+    "centreR": 7270.2,
+    "tris": 108
+   },
+   {
+    "id": "T16",
+    "sector": "E",
+    "centreBearing": 105.3,
+    "centreR": 3525.5,
+    "tris": 1656
+   },
+   {
+    "id": "T17",
+    "sector": "E",
+    "centreBearing": 75.0,
+    "centreR": 3591.7,
+    "tris": 1651
+   },
+   {
+    "id": "T18",
+    "sector": "E",
+    "centreBearing": 89.9,
+    "centreR": 5034.7,
+    "tris": 777
+   },
+   {
+    "id": "T19",
+    "sector": "E",
+    "centreBearing": 70.3,
+    "centreR": 5358.9,
+    "tris": 700
+   },
+   {
+    "id": "T20",
+    "sector": "E",
+    "centreBearing": 109.9,
+    "centreR": 5392.8,
+    "tris": 694
+   },
+   {
+    "id": "T21",
+    "sector": "E",
+    "centreBearing": 96.7,
+    "centreR": 6753.4,
+    "tris": 374
+   },
+   {
+    "id": "T22",
+    "sector": "E",
+    "centreBearing": 83.2,
+    "centreR": 6756.4,
+    "tris": 373
+   },
+   {
+    "id": "T23",
+    "sector": "E",
+    "centreBearing": 70.3,
+    "centreR": 6937.9,
+    "tris": 276
+   },
+   {
+    "id": "T24",
+    "sector": "E",
+    "centreBearing": 109.5,
+    "centreR": 6951.7,
+    "tris": 278
+   },
+   {
+    "id": "T25",
+    "sector": "SE",
+    "centreBearing": 131.7,
+    "centreR": 2838.7,
+    "tris": 710
+   },
+   {
+    "id": "T26",
+    "sector": "SE",
+    "centreBearing": 151.7,
+    "centreR": 3677.4,
+    "tris": 1479
+   },
+   {
+    "id": "T27",
+    "sector": "SE",
+    "centreBearing": 128.4,
+    "centreR": 4329.5,
+    "tris": 1088
+   },
+   {
+    "id": "T28",
+    "sector": "SE",
+    "centreBearing": 142.9,
+    "centreR": 5587.6,
+    "tris": 643
+   },
+   {
+    "id": "T29",
+    "sector": "SE",
+    "centreBearing": 125.0,
+    "centreR": 6195.1,
+    "tris": 521
+   },
+   {
+    "id": "T30",
+    "sector": "SE",
+    "centreBearing": 151.7,
+    "centreR": 6913.6,
+    "tris": 327
+   },
+   {
+    "id": "T31",
+    "sector": "SE",
+    "centreBearing": 136.5,
+    "centreR": 7066.8,
+    "tris": 247
+   },
+   {
+    "id": "T32",
+    "sector": "SE",
+    "centreBearing": 120.5,
+    "centreR": 7273.5,
+    "tris": 108
+   },
+   {
+    "id": "T33",
+    "sector": "S",
+    "centreBearing": 180.4,
+    "centreR": 3383.6,
+    "tris": 1635
+   },
+   {
+    "id": "T34",
+    "sector": "S",
+    "centreBearing": 180.6,
+    "centreR": 5014.8,
+    "tris": 763
+   },
+   {
+    "id": "T35",
+    "sector": "S",
+    "centreBearing": 198.9,
+    "centreR": 5207.8,
+    "tris": 701
+   },
+   {
+    "id": "T36",
+    "sector": "S",
+    "centreBearing": 160.9,
+    "centreR": 5242.2,
+    "tris": 707
+   },
+   {
+    "id": "T37",
+    "sector": "S",
+    "centreBearing": 180.5,
+    "centreR": 6702.0,
+    "tris": 418
+   },
+   {
+    "id": "T38",
+    "sector": "S",
+    "centreBearing": 194.1,
+    "centreR": 6776.0,
+    "tris": 375
+   },
+   {
+    "id": "T39",
+    "sector": "S",
+    "centreBearing": 165.9,
+    "centreR": 6815.3,
+    "tris": 374
+   },
+   {
+    "id": "T40",
+    "sector": "SW",
+    "centreBearing": 228.4,
+    "centreR": 2840.8,
+    "tris": 716
+   },
+   {
+    "id": "T41",
+    "sector": "SW",
+    "centreBearing": 207.5,
+    "centreR": 3700.8,
+    "tris": 1472
+   },
+   {
+    "id": "T42",
+    "sector": "SW",
+    "centreBearing": 232.2,
+    "centreR": 4335.2,
+    "tris": 1093
+   },
+   {
+    "id": "T43",
+    "sector": "SW",
+    "centreBearing": 216.7,
+    "centreR": 5564.6,
+    "tris": 637
+   },
+   {
+    "id": "T44",
+    "sector": "SW",
+    "centreBearing": 235.2,
+    "centreR": 6188.6,
+    "tris": 517
+   },
+   {
+    "id": "T45",
+    "sector": "SW",
+    "centreBearing": 208.6,
+    "centreR": 6916.8,
+    "tris": 331
+   },
+   {
+    "id": "T46",
+    "sector": "SW",
+    "centreBearing": 223.6,
+    "centreR": 7087.2,
+    "tris": 251
+   },
+   {
+    "id": "T47",
+    "sector": "SW",
+    "centreBearing": 239.4,
+    "centreR": 7254.0,
+    "tris": 108
+   },
+   {
+    "id": "T48",
+    "sector": "W",
+    "centreBearing": 254.4,
+    "centreR": 3540.1,
+    "tris": 1651
+   },
+   {
+    "id": "T49",
+    "sector": "W",
+    "centreBearing": 285.0,
+    "centreR": 3566.9,
+    "tris": 1656
+   },
+   {
+    "id": "T50",
+    "sector": "W",
+    "centreBearing": 270.0,
+    "centreR": 5017.4,
+    "tris": 777
+   },
+   {
+    "id": "T51",
+    "sector": "W",
+    "centreBearing": 289.3,
+    "centreR": 5346.9,
+    "tris": 694
+   },
+   {
+    "id": "T52",
+    "sector": "W",
+    "centreBearing": 250.1,
+    "centreR": 5370.8,
+    "tris": 700
+   },
+   {
+    "id": "T53",
+    "sector": "W",
+    "centreBearing": 263.3,
+    "centreR": 6727.3,
+    "tris": 373
+   },
+   {
+    "id": "T54",
+    "sector": "W",
+    "centreBearing": 276.6,
+    "centreR": 6763.7,
+    "tris": 374
+   },
+   {
+    "id": "T55",
+    "sector": "W",
+    "centreBearing": 250.4,
+    "centreR": 6930.3,
+    "tris": 276
+   },
+   {
+    "id": "T56",
+    "sector": "W",
+    "centreBearing": 289.5,
+    "centreR": 6963.2,
+    "tris": 278
+   },
+   {
+    "id": "T57",
+    "sector": "NW",
+    "centreBearing": 312.0,
+    "centreR": 2838.7,
+    "tris": 710
+   },
+   {
+    "id": "T58",
+    "sector": "NW",
+    "centreBearing": 332.5,
+    "centreR": 3697.7,
+    "tris": 1479
+   },
+   {
+    "id": "T59",
+    "sector": "NW",
+    "centreBearing": 308.3,
+    "centreR": 4348.9,
+    "tris": 1088
+   },
+   {
+    "id": "T60",
+    "sector": "NW",
+    "centreBearing": 322.9,
+    "centreR": 5611.9,
+    "tris": 643
+   },
+   {
+    "id": "T61",
+    "sector": "NW",
+    "centreBearing": 305.4,
+    "centreR": 6229.2,
+    "tris": 521
+   },
+   {
+    "id": "T62",
+    "sector": "NW",
+    "centreBearing": 331.4,
+    "centreR": 6893.0,
+    "tris": 327
+   },
+   {
+    "id": "T63",
+    "sector": "NW",
+    "centreBearing": 316.2,
+    "centreR": 7035.2,
+    "tris": 247
+   },
+   {
+    "id": "T64",
+    "sector": "NW",
+    "centreBearing": 300.5,
+    "centreR": 7241.8,
+    "tris": 108
+   }
+  ]
+ },
+ "totals": {
+  "assets": 8,
+  "parts": 161,
+  "tris": 44000,
+  "longestPart": 1946.028,
+  "mostTrisInAPart": 1115
+ }
+}
