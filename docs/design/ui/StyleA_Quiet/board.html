@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiet results board</title>
+<link rel="stylesheet" href="quiet.css">
+<style>
+  /* ---- the board face: 1600 x 900, the same thing a SurfaceGui would draw ---- */
+  .face { width: 1600px; height: 900px; padding: 46px 60px 0; background: var(--paper); color: var(--paper-ink); font-weight: 500; overflow: hidden; }
+  .face .num { font-weight: 400; }
+  .face .lab { font-size: 30px; font-weight: 600; }
+  .face .soft { color: rgba(35,39,43,.66); }
+  .face .top { display: flex; justify-content: space-between; align-items: baseline; height: 46px; }
+  .face .rule { height: 2px; background: rgba(35,39,43,.28); margin-top: 18px; }
+  .face .cols { display: flex; height: 606px; padding-top: 34px; }
+  .face .win { width: 600px; }
+  .face .win .head { width: 148px; height: 148px; margin-top: 34px; border-radius: 16px; background: #7A5B48; position: relative; overflow: hidden; }
+  .face .win .head::before { content: ''; position: absolute; left: 46px; top: 28px; width: 56px; height: 54px; background: #EAE5D9; border-radius: 10px; }
+  .face .win .head::after { content: ''; position: absolute; left: 26px; top: 94px; width: 96px; height: 70px; background: #EAE5D9; border-radius: 12px 12px 0 0; }
+  .face .win .name { margin-top: 26px; margin-left: -6px; font-size: 124px; line-height: 132px; font-weight: 300; }
+  .face .win .sub { margin-top: 14px; font-size: 32px; }
+  .face .win .sub .num { font-size: 31px; }
+  .face .table { flex: 1; }
+  .face .r { position: relative; display: flex; align-items: center; height: 76px; padding: 0 22px; font-size: 40px; border-bottom: 2px solid rgba(35,39,43,.12); }
+  .face .r .num { font-size: 37px; }
+  .face .r.h { height: 48px; align-items: flex-start; font-size: 30px; font-weight: 600; color: rgba(35,39,43,.66); border-bottom-color: rgba(35,39,43,.28); }
+  .face .c1 { width: 76px; }
+  .face .c2 { flex: 1; }
+  .face .c3 { width: 200px; text-align: right; }
+  .face .c4 { width: 230px; text-align: right; }
+  .face .gap { height: 40px; display: flex; align-items: center; gap: 9px; padding-left: 28px; }
+  .face .gap i { width: 7px; height: 7px; background: rgba(35,39,43,.45); border-radius: 50%; }
+  .face .r.you { background: rgba(232,182,90,.42); border-bottom: 0; font-weight: 600; }
+  .face .r.you::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: #C98A22; }
+  .face .tag { margin-left: 20px; font-size: 30px; font-weight: 600; color: #8A5C10; }
+  .face .facts { display: flex; justify-content: space-between; padding-top: 30px; }
+  .face .facts div { display: flex; flex-direction: column; gap: 8px; }
+  .face .facts b { font-size: 38px; font-weight: 500; }
+  .face .facts .num { font-size: 36px; }
+
+  /* ---- page ---- */
+  .left { left: 0; top: 0; width: 1000px; height: 1080px; background: #15181B; }
+  .left .cap, .right .cap { position: absolute; left: 44px; top: 36px; font-size: 16px; font-weight: 500; }
+  .flat { position: absolute; left: 44px; top: 282px; width: 912px; height: 513px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  .flat .face { transform: scale(.57); transform-origin: 0 0; }
+
+  .right { left: 1000px; top: 0; width: 920px; height: 1080px; background: url('img/bg_lobby.jpg') 0 0 / 1920px 1080px; overflow: hidden; }
+  .stage { position: absolute; left: 0; top: 0; width: 920px; height: 1080px; perspective: 1700px; perspective-origin: 30% 46%; }
+  .stand { position: absolute; left: 50px; top: 250px; width: 790px; height: 700px; transform: scale(.93) rotateY(-27deg) rotateX(1.5deg); transform-origin: 50% 60%; transform-style: preserve-3d; }
+  .post { position: absolute; top: -16px; width: 30px; height: 716px; background: #5A4535; box-shadow: inset -9px 0 0 #43332A, inset 3px 0 0 #6B5340; }
+  .post.l { left: 0; } .post.r { right: 0; }
+  .post::before { content: ''; position: absolute; left: -4px; top: -8px; width: 38px; height: 10px; background: #6B5340; box-shadow: inset 0 -3px 0 #43332A; }
+  .frame { position: absolute; left: 22px; top: 16px; width: 746px; height: 431px; background: #5A4535; box-shadow: inset 0 4px 0 #6B5340, inset 0 -5px 0 #43332A, inset 4px 0 0 #644D3B, inset -5px 0 0 #43332A; }
+  .frame .hold { position: absolute; left: 13px; top: 13px; width: 720px; height: 405px; overflow: hidden; }
+  .frame .hold .face { transform: scale(.45); transform-origin: 0 0; }
+  .frame .hold::after { content: ''; position: absolute; inset: 0; background: linear-gradient(170deg, rgba(255,250,235,.10) 0%, rgba(40,30,20,.13) 100%); box-shadow: inset 0 9px 10px -8px rgba(30,20,10,.55), inset 7px 0 8px -7px rgba(30,20,10,.35); }
+  .ground { position: absolute; left: 6px; bottom: 0; width: 778px; height: 150px; transform-origin: 50% 100%; transform: rotateX(90deg); background: rgba(12,10,18,.5); filter: blur(10px); }
+</style>
+</head>
+<body>
+<div class="screen" style="background:#15181B">
+  <div class="abs left">
+    <div class="cap">The face of the results board</div>
+    <div class="flat"><div class="face">
+  <div class="top"><span class="lab">LAST ROUND</span><span class="lab soft">24 contenders &nbsp;·&nbsp; 3 days &nbsp;·&nbsp; <span class="num">9:41</span></span></div>
+  <div class="rule"></div>
+  <div class="cols">
+    <div class="win">
+      <div class="lab soft">WINNER</div>
+      <div class="head"></div>
+      <div class="name">Kestrel</div>
+      <div class="sub"><span class="num">5</span> defeats &nbsp;·&nbsp; survived <span class="num">9:41</span></div>
+    </div>
+    <div class="table">
+      <div class="r h"><span class="c1"></span><span class="c2">CONTENDER</span><span class="c3">DEFEATS</span><span class="c4">SURVIVED</span></div>
+      <div class="r "><span class="c1 num">1</span><span class="c2">Kestrel</span><span class="c3 num">5</span><span class="c4 num">9:41</span></div>
+      <div class="r "><span class="c1 num">2</span><span class="c2">Rowan</span><span class="c3 num">3</span><span class="c4 num">9:38</span></div>
+      <div class="r "><span class="c1 num">3</span><span class="c2">Juniper</span><span class="c3 num">2</span><span class="c4 num">8:05</span></div>
+      <div class="r "><span class="c1 num">4</span><span class="c2">Flint</span><span class="c3 num">0</span><span class="c4 num">7:44</span></div>
+      <div class="r "><span class="c1 num">5</span><span class="c2">Wren</span><span class="c3 num">1</span><span class="c4 num">7:12</span></div>
+      <div class="gap"><i></i><i></i><i></i></div>
+      <div class="r you"><span class="c1 num">9</span><span class="c2">Ash<span class="tag">YOU</span></span><span class="c3 num">1</span><span class="c4 num">6:12</span></div>
+    </div>
+  </div>
+  <div class="rule"></div>
+  <div class="facts">
+    <div><span class="lab soft">FIRST TO FALL</span><b>Orla, <span class="num">0:14</span></b></div>
+    <div><span class="lab soft">MOST DEFEATS</span><b>Kestrel, <span class="num">5</span></b></div>
+    <div><span class="lab soft">CAUGHT BY THE BORDER</span><b><span class="num">4</span></b></div>
+    <div><span class="lab soft">FELL AT THE HORN</span><b><span class="num">7</span></b></div>
+  </div>
+</div></div>
+  </div>
+  <div class="abs right">
+    <div class="stage">
+      <div class="stand">
+        <div class="ground"></div>
+        <div class="post l"></div><div class="post r"></div>
+        <div class="frame"><div class="hold"><div class="face">
+  <div class="top"><span class="lab">LAST ROUND</span><span class="lab soft">24 contenders &nbsp;·&nbsp; 3 days &nbsp;·&nbsp; <span class="num">9:41</span></span></div>
+  <div class="rule"></div>
+  <div class="cols">
+    <div class="win">
+      <div class="lab soft">WINNER</div>
+      <div class="head"></div>
+      <div class="name">Kestrel</div>
+      <div class="sub"><span class="num">5</span> defeats &nbsp;·&nbsp; survived <span class="num">9:41</span></div>
+    </div>
+    <div class="table">
+      <div class="r h"><span class="c1"></span><span class="c2">CONTENDER</span><span class="c3">DEFEATS</span><span class="c4">SURVIVED</span></div>
+      <div class="r "><span class="c1 num">1</span><span class="c2">Kestrel</span><span class="c3 num">5</span><span class="c4 num">9:41</span></div>
+      <div class="r "><span class="c1 num">2</span><span class="c2">Rowan</span><span class="c3 num">3</span><span class="c4 num">9:38</span></div>
+      <div class="r "><span class="c1 num">3</span><span class="c2">Juniper</span><span class="c3 num">2</span><span class="c4 num">8:05</span></div>
+      <div class="r "><span class="c1 num">4</span><span class="c2">Flint</span><span class="c3 num">0</span><span class="c4 num">7:44</span></div>
+      <div class="r "><span class="c1 num">5</span><span class="c2">Wren</span><span class="c3 num">1</span><span class="c4 num">7:12</span></div>
+      <div class="gap"><i></i><i></i><i></i></div>
+      <div class="r you"><span class="c1 num">9</span><span class="c2">Ash<span class="tag">YOU</span></span><span class="c3 num">1</span><span class="c4 num">6:12</span></div>
+    </div>
+  </div>
+  <div class="rule"></div>
+  <div class="facts">
+    <div><span class="lab soft">FIRST TO FALL</span><b>Orla, <span class="num">0:14</span></b></div>
+    <div><span class="lab soft">MOST DEFEATS</span><b>Kestrel, <span class="num">5</span></b></div>
+    <div><span class="lab soft">CAUGHT BY THE BORDER</span><b><span class="num">4</span></b></div>
+    <div><span class="lab soft">FELL AT THE HORN</span><b><span class="num">7</span></b></div>
+  </div>
+</div></div></div>
+      </div>
+    </div>
+    <div class="cap txt">On its stand in the lobby</div>
+  </div>
+</div>
+</body>
+</html>

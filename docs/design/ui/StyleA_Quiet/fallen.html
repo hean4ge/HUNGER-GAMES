@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiet fallen</title>
+<link rel="stylesheet" href="quiet.css">
+<style>
+  .screen { background-image: url('img/bg_fallen.jpg'); }
+
+  .facts { right: 44px; top: 30px; text-align: right; }
+  .facts .left { display: flex; justify-content: flex-end; align-items: baseline; gap: 10px; }
+  .facts .left b { font-weight: 300; font-size: 46px; line-height: 50px; }
+  .facts .left span { font-size: 17px; font-weight: 500; }
+  .facts .day { font-size: 16px; margin-top: 2px; }
+
+  /* the whole "you fell" moment is this one strip */
+  .strip { left: 44px; right: 44px; bottom: 30px; height: 78px; }
+  .strip .hair { position: absolute; left: 0; right: 0; top: 0; }
+  .strip .rowx { position: absolute; left: 0; right: 0; top: 1px; bottom: 0; display: flex; align-items: center; justify-content: space-between; }
+  .you { display: flex; align-items: center; gap: 14px; font-size: 20px; font-weight: 500; width: 640px; }
+  .you b { font-weight: 600; }
+  .you .sep { width: 1px; height: 26px; background: rgba(244,241,234,.5); box-shadow: 1px 0 0 rgba(13,16,18,.35); margin: 0 8px; }
+  .you .red { width: 8px; height: 8px; background: var(--red); box-shadow: 0 1px 1px rgba(13,16,18,.55); transform: rotate(45deg); margin-right: 2px; }
+  .watch { display: flex; align-items: center; gap: 18px; font-size: 20px; font-weight: 500; }
+  .watch .who { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 250px; }
+  .watch .who b { font-weight: 600; }
+  .watch .who .line { width: 150px; }
+  .watch .chev { font-size: 32px; font-weight: 400; line-height: 30px; margin-top: -6px; }
+  .leave { display: flex; align-items: center; justify-content: flex-end; gap: 13px; font-size: 18px; font-weight: 500; width: 640px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="blade" viewBox="0 0 24 24"><g transform="rotate(45 12 12)"><polygon points="12,0 14,3 14,15 10,15 10,3"/><rect x="6.5" y="15" width="11" height="2.4"/><rect x="10.8" y="17.4" width="2.4" height="5"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="screen">
+
+  <div class="abs facts txt">
+    <div class="left"><b>8</b><span>left</span></div>
+    <div class="day">Day 2 <span class="dim">&nbsp;·&nbsp;</span> <span class="num">18:40</span></div>
+  </div>
+
+  <div class="abs strip txt">
+    <div class="hair"></div>
+    <div class="rowx">
+      <div class="you">
+        <span class="red"></span>
+        <span>Defeated by <b>Kestrel</b></span>
+        <svg class="ic ic-ink" width="17" height="17"><use href="#blade"/></svg>
+        <span class="sep"></span>
+        <span>You placed <b>9th</b> of 24</span>
+      </div>
+      <div class="watch">
+        <span class="key">Q</span><span class="chev">‹</span>
+        <div class="who"><span><span style="opacity:.85;font-weight:400">Spectating</span> <b>Rowan</b></span><div class="line"><i style="width:64%"></i></div></div>
+        <span class="chev">›</span><span class="key">E</span>
+      </div>
+      <div class="leave"><span>Back to lobby</span><span class="key" style="font-size:14px">Backspace</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

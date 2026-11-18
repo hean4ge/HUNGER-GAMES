@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiet lobby</title>
+<link rel="stylesheet" href="quiet.css">
+<style>
+  .screen { background-image: url('img/bg_lobby.jpg'); }
+
+  /* title and status, lower left */
+  .head { left: 96px; top: 626px; }
+  .title { font-weight: 300; font-size: 68px; line-height: 78px; letter-spacing: 11px; margin-left: -4px; white-space: nowrap; text-shadow: 0 1px 2px rgba(13,16,18,.6), 0 0 3px rgba(13,16,18,.35); }
+  .status { margin-top: 30px; font-size: 30px; font-weight: 300; }
+  .status .num { font-size: 28px; }
+  .status + .line { width: 372px; margin-top: 14px; }
+  .waiting { margin-top: 14px; font-size: 18px; font-weight: 500; }
+
+  /* three text buttons */
+  .menu { left: 96px; bottom: 58px; display: flex; gap: 52px; }
+  .menu a { display: flex; align-items: center; gap: 11px; height: 44px; font-size: 17px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .menu a.plus { opacity: .7; font-weight: 500; }
+
+  /* who is here, lower right */
+  .list { right: 96px; bottom: 58px; width: 372px; }
+  .list h2 { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; font-weight: 600; padding-bottom: 10px; }
+  .list .hair { margin-bottom: 8px; }
+  .row { position: relative; display: flex; align-items: center; gap: 13px; height: 42px; font-size: 19px; font-weight: 500; }
+  .row .face { width: 28px; height: 28px; border-radius: 6px; box-shadow: 0 1px 1px rgba(13,16,18,.55); position: relative; overflow: hidden; }
+  .row .face::before { content: ''; position: absolute; left: 7px; top: 5px; width: 14px; height: 12px; background: rgba(244,241,234,.9); border-radius: 2px; }
+  .row .face::after { content: ''; position: absolute; left: 4px; top: 20px; width: 20px; height: 10px; background: rgba(244,241,234,.9); border-radius: 2px 2px 0 0; }
+  .row .tag { font-size: 14px; font-weight: 600; color: var(--sun); }
+  .row .wins { margin-left: auto; font-size: 15px; font-weight: 400; }
+  .row .wins .num { font-size: 15px; }
+  .row.you::before { content: ''; position: absolute; left: -16px; top: 9px; width: 3px; height: 24px; background: var(--sun); box-shadow: 0 1px 1px rgba(13,16,18,.5); }
+  .record { margin-top: 12px; padding-top: 12px; font-size: 15px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="gear" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 1h4v3.2l2.3 1 2.3-2.3 2.8 2.8-2.3 2.3 1 2.3H23v4h-2.9l-1 2.3 2.3 2.3-2.8 2.8-2.3-2.3-2.3 1V23h-4v-2.6l-2.3-1-2.3 2.3-2.8-2.8 2.300-2.3-1-2.3H1v-4h2.900l1-2.3-2.300-2.300 2.800-2.800 2.300 2.300 2.300-1zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></symbol>
+    <symbol id="book" viewBox="0 0 24 24"><polygon points="2,4 11,6 11,21 2,19"/><polygon points="22,4 13,6 13,21 22,19"/></symbol>
+    <symbol id="plus" viewBox="0 0 24 24"><polygon points="9.500,3 14.500,3 14.500,9.500 21,9.500 21,14.500 14.500,14.500 14.500,21 9.500,21 9.500,14.500 3,14.500 3,9.500 9.500,9.500"/></symbol>
+  </defs>
+</svg>
+
+<div class="screen">
+
+  <div class="abs head txt">
+    <!-- one label per letter in a row layout: Roblox has no letter-spacing setting -->
+    <div class="title">LAST STANDING</div>
+    <div class="status">Next round in 0:24</div>
+    <div class="line"><i style="width:60%"></i></div>
+    <div class="waiting">7 contenders waiting</div>
+  </div>
+
+  <div class="abs menu txt">
+    <a><svg class="ic ic-ink" width="20" height="20"><use href="#gear"/></svg>SETTINGS</a>
+    <a><svg class="ic ic-ink" width="20" height="20"><use href="#book"/></svg>HOW TO PLAY</a>
+    <a class="plus"><svg class="ic ic-ink" width="18" height="18"><use href="#plus"/></svg>ROBLOX PLUS</a>
+  </div>
+
+  <div class="abs list txt">
+    <h2><span>IN THE LOBBY</span><span class="num" style="font-size:15px">7</span></h2>
+    <div class="hair"></div>
+    <div class="row you"><span class="face" style="background:#3B4148"></span>Ash <span class="tag">YOU</span><span class="wins"><span class="num">3</span> wins</span></div>
+    <div class="row"><span class="face" style="background:#7A5B48"></span>Kestrel <span class="tag">PLUS</span><span class="wins"><span class="num">11</span> wins</span></div>
+    <div class="row"><span class="face" style="background:#5E7352"></span>Rowan<span class="wins"><span class="num">6</span> wins</span></div>
+    <div class="row"><span class="face" style="background:#6A6F86"></span>Juniper<span class="wins"><span class="num">2</span> wins</span></div>
+    <div class="row"><span class="face" style="background:#8A6E4A"></span>Flint<span class="wins"><span class="num">1</span> win</span></div>
+    <div class="row"><span class="face" style="background:#4F6E7A"></span>Wren<span class="wins" style="opacity:.82">first round</span></div>
+    <div class="row"><span class="face" style="background:#7A4E55"></span>Orla<span class="wins" style="opacity:.82">first round</span></div>
+  </div>
+</div>
+</body>
+</html>
