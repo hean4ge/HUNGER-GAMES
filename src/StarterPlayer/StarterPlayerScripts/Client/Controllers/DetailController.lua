@@ -14,10 +14,21 @@
 	Bushes, rocks, cliffs and buildings are never hidden, and nothing that hides a contender is hidden within the
 	distances a fight happens at, so every tier sees the same cover where it matters.
 
-	  tier     ground   fern   tall   branches   detail   tree
-	  High     220      300    -      -          -        -       (- = never hidden)
-	  Medium   130      180    260    320        220      -
-	  Low       70      110    170    160        100      420
+	  tier     ground   fern   tall   branches   detail   tree   heath
+	  High     220      300    -      -          -        -      -       (- = never hidden)
+	  Medium   130      180    260    320        220      -      320
+	  Low       70      110    170    160        100      420    200
+
+	Map 1 (the Green Land) keeps all its plants in workspace.Arena.Scatter, one Folder per 80-stud cell, each plant a
+	Model named after its Blender asset (ServerStorage.WorldGen.Map1.Scatter). A Scatter model is classed whole, by
+	its name, like a Flora model:
+	  ground   M1_Wildflowers_A
+	  heath    M1_Heather_A / _B: the heather mats that colour the upper slopes (they hide nobody)
+	  tall     M1_TallGrass_A
+	  tree     the firs, pines and beeches (M1_Fir_*, M1_Pine_*, M1_Beech_*)
+	Gorse, boulders and crags are cover and are never hidden. The Scatter folder's attribute DetailClasses
+	("M1_Fir_A=tree;M1_Heather_A=heath;...", written by the builder) adds to the table below, so a new asset needs
+	no change here as long as its class is one of this table's.
 
 	The tier, first match wins:
 	  1 workspace attribute DetailTier = "Low" | "Medium" | "High" (tests and previews)
@@ -31,8 +42,8 @@
 	of the sources above this client can read (this client only).
 
 	Bookkeeping: models are bucketed into 40-stud cells as they stream in (ChildAdded on the Flora and Forest biome
-	folders) and dropped as they stream out. Every 0.25 s, once the camera has moved 6 studs or the tier changed, only
-	the cells whose distance band changed are flipped.
+	folders and on Map 1's Scatter cells) and dropped as they stream out. Every 0.25 s, once the camera has moved
+	6 studs or the tier changed, only the cells whose distance band changed are flipped.
 	API (for tests): DetailController.stats() -> { tier, why, models, cells, hidden }, DetailController.refresh().
 	The stats are also published as LocalPlayer attribute DetailHidden (parts hidden now).
 ]]
@@ -45,18 +56,27 @@ local DetailController = {}
 local CELL = 40
 local HALF_DIAG = CELL * 0.7071
 local INF = math.huge
--- Flora models: one class for the whole model
+-- Flora models, and Map 1's Scatter models: one class for the whole model, by its name
 local FLORA = {
+	-- the classic forest arena (workspace.Arena.Flora)
 	GrassForest = "ground", FlowersA = "ground", FlowersB = "ground", MossPatch = "ground", MushroomsA = "ground",
 	FernA = "fern", FernB = "fern",
 	GrassTallA = "tall", GrassTallB = "tall", ReedsA = "tall",
+	-- Map 1, the Green Land (workspace.Arena.Scatter). Not listed, so never hidden: M1_Gorse_*, M1_Boulder_*, M1_Crag_*
+	M1_Wildflowers_A = "ground",
+	M1_Heather_A = "heath", M1_Heather_B = "heath",
+	M1_TallGrass_A = "tall",
+	M1_Fir_A = "tree", M1_Fir_B = "tree", M1_Fir_C = "tree", M1_Pine_A = "tree", M1_Pine_B = "tree",
+	M1_Beech_A = "tree", M1_Beech_B = "tree",
 }
-local CLASSES = { "ground", "fern", "tall", "branches", "detail", "tree" }
+local CLASSES = { "ground", "fern", "tall", "branches", "detail", "tree", "heath" }
 local TIERS = {
-	High = { ground = 220, fern = 300, tall = INF, branches = INF, detail = INF, tree = INF },
-	Medium = { ground = 130, fern = 180, tall = 260, branches = 320, detail = 220, tree = INF },
-	Low = { ground = 70, fern = 110, tall = 170, branches = 160, detail = 100, tree = 420 },
+	High = { ground = 220, fern = 300, tall = INF, branches = INF, detail = INF, tree = INF, heath = INF },
+	Medium = { ground = 130, fern = 180, tall = 260, branches = 320, detail = 220, tree = INF, heath = 320 },
+	Low = { ground = 70, fern = 110, tall = 170, branches = 160, detail = 100, tree = 420, heath = 200 },
 }
+-- the scenery folders of workspace.Arena this controller watches, and how their models are classed
+local ROOTS = { Flora = true, Forest = true, Scatter = true }
 local ORDER = { "Low", "Medium", "High" }
 DetailController.TIERS = TIERS
 DetailController.FLORA = FLORA
@@ -95,14 +115,16 @@ local function register(m: Instance, kind: string)
 	if not m:IsA("Model") or modelCell[m] then
 		return
 	end
+	-- Flora and Map 1's Scatter: the whole model by its name. Forest: each part by its own name.
+	local byName = kind ~= "Forest"
 	local floraCls = FLORA[m.Name]
-	if kind == "Flora" and not floraCls then
+	if byName and not floraCls then
 		return
 	end
 	local groups, any = {}, false
 	for _, d in ipairs(m:GetDescendants()) do
 		if d:IsA("BasePart") then
-			local cls = if kind == "Flora" then floraCls else forestClass(d)
+			local cls = if byName then floraCls else forestClass(d)
 			local g = groups[cls]
 			if not g then
 				g = {}
@@ -323,21 +345,44 @@ function DetailController.Start()
 	while not arena do
 		arena = workspace:WaitForChild("Arena", 60)
 	end
-	for _, kind in ipairs({ "Flora", "Forest" }) do
-		local root = arena:WaitForChild(kind, 30)
-		if root then
-			for _, sub in ipairs(root:GetChildren()) do
+	-- The classic arena dresses Flora and Forest (a Folder per biome); Map 1 dresses Scatter (a Folder per cell).
+	-- Whichever are there are watched, and any that arrives later: nothing waits for a folder this map does not have.
+	local watching = {}
+	local function watchRoot(root: Instance)
+		local kind = root.Name
+		if not ROOTS[kind] or not root:IsA("Folder") or watching[root] then
+			return
+		end
+		watching[root] = true
+		if kind == "Scatter" then
+			-- the builder's own list, "Name=class;Name=class": it adds to FLORA (classes this table does not have are skipped)
+			local listed = root:GetAttribute("DetailClasses")
+			if type(listed) == "string" then
+				for name, cls in string.gmatch(listed, "([^=;]+)=([^=;]+)") do
+					if TIERS.High[cls] ~= nil then
+						FLORA[name] = cls
+					end
+				end
+			end
+		end
+		for _, sub in ipairs(root:GetChildren()) do
+			watchBiome(sub, kind)
+		end
+		root.ChildAdded:Connect(function(sub)
+			if sub:IsA("Folder") then
 				watchBiome(sub, kind)
 			end
-			root.ChildAdded:Connect(function(sub)
-				if sub:IsA("Folder") then
-					watchBiome(sub, kind)
-				end
-			end)
-		else
-			warn("[DetailController] no workspace.Arena." .. kind .. ": it is not scaled")
-		end
+		end)
 	end
+	for _, child in ipairs(arena:GetChildren()) do
+		watchRoot(child)
+	end
+	arena.ChildAdded:Connect(watchRoot)
+	task.delay(30, function()
+		if next(watching) == nil then
+			warn("[DetailController] workspace.Arena has no Flora, Forest or Scatter folder: the scenery is not scaled")
+		end
+	end)
 	workspace:GetAttributeChangedSignal("DetailTier"):Connect(applyTier)
 	pcall(function()
 		UserSettings():GetService("UserGameSettings"):GetPropertyChangedSignal("SavedQualityLevel"):Connect(applyTier)

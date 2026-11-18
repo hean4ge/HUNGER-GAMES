@@ -15,9 +15,10 @@
 
 	It reads the bindings that Shared.Input mirrors onto LocalPlayer.InputBindings (one attribute per action), so it works
 	from the command bar too, which runs its own copy of every module. The state is detected from the LocalPlayer's
-	attributes: Lobby, Plate (Countdown, frozen on a launch plate), Arena (alive in a round); from the command bar,
-	Spectating isn't visible, so pass run({ state = "Spectating" }) while you spectate, and run({ state = "Launch" })
-	while the launch intro plays (LaunchIntroController).
+	attributes: Lobby, Plate (Countdown, frozen on a launch plate), Arena (alive in a round), and Launch while the
+	launch intro plays (its skip, LaunchSkip, is bound only then; LaunchIntroController). From the command bar
+	Spectating isn't visible, so pass run({ state = "Spectating" }) while you spectate. run({ state = ... }) checks any
+	state's table against what is bound now.
 	An action may name a stand-in for one device: "gui:<path under PlayerGui>" (a button the UI draws, e.g. the touch
 	menu button or the hotbar slots), "via:<Action>" (another action covers it, e.g. LB / RB pick items on a gamepad),
 	"wheel" (the mouse wheel, InventoryController), "auto" (touch sprint on Auto needs no button), "none" (this device has
@@ -169,6 +170,11 @@ end
 local function detectState(player: Player): string
 	if player:GetAttribute("InArena") ~= true then
 		return "Lobby"
+	end
+	-- the launch intro binds its skip only while the shot plays (LaunchIntroController): that is the Launch state
+	local mirror = player:FindFirstChild("InputBindings")
+	if mirror and mirror:GetAttribute("LaunchSkip") ~= nil then
+		return "Launch"
 	elseif player:GetAttribute("Frozen") == true then
 		return "Plate"
 	end

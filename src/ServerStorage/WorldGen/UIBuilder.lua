@@ -5,6 +5,12 @@
 	  return require(game.ServerStorage.WorldGen.UIBuilder).preview("HUD")  -- sample content + enabled, for screenshots
 	     ("HUD" | "Lobby" | "Death" | "Victory" | "Menu" | "Spectate" | "Countdown" | "RollCall")
 	  return require(game.ServerStorage.WorldGen.UIBuilder).build()          -- back to clean + disabled
+	The Lobby screen's three HOW TO PLAY tips are written from the arena in the place (Shared.Lore's names for
+	Config.Map, the border's time from Shared.ThreatLine). After Config.Map changes, write them again, from a copy of
+	this module so that Studio's module cache cannot serve an old builder. Either only the three tips, in place:
+	  return require(game.ServerStorage.WorldGen.UIBuilder:Clone()).applyTips()
+	or every screen from scratch:
+	  return require(game.ServerStorage.WorldGen.UIBuilder:Clone()).build()
 	Every ScreenGui is Enabled = false at edit time; the client controllers enable them at runtime.
 	The instance names below are the controllers' contract (StarterPlayerScripts.Client.Controllers):
 	  HUD + HUDFX -> HUDController, Lobby -> LobbyController, Overlay -> NotificationController,
@@ -21,12 +27,46 @@ UIBuilder.Names = { "HUD", "HUDFX", "Lobby", "Overlay", "Menu", "Spectate" }
 local Theme: any
 local Config: any
 
--- three short tips (P3: say less), so the control rows from Aim up show without scrolling at 720 px tall
-local TIPS = {
-	"Last one standing wins. At the horn, rush the Spire for gear, or run for a runner's cache under a pale flag.",
-	"Keep hunger and thirst above 55 and your health comes back. Drink from streams and the lake.",
-	"From the second morning the border closes in on the Spire. Stay inside it.",
-}
+-- three short tips (P3: say less), so the control rows from Aim up show without scrolling at 720 px tall. They are
+-- baked into the Lobby screen, so they are written from the arena in the place when the screens are built: the names
+-- from Shared.Lore (the Spire, or the Horn on Map 1; the start signal's word), the border's time from Shared.ThreatLine
+-- ("the second morning" in the forest; a full ring on Map 1 first moves on "the first evening"). Rebuild the Lobby
+-- screen after Config.Map changes: require(game.ServerStorage.WorldGen.UIBuilder:Clone()).build()
+local function tips(): { string }
+	local shared = ReplicatedStorage:WaitForChild("Shared")
+	-- fresh copies of the three modules, side by side: Studio caches a required module for the whole session, and a
+	-- lone copy of Lore would not find Config beside it
+	local box = Instance.new("Folder")
+	local lore: any = nil
+	local threat: any = nil
+	pcall(function()
+		for _, moduleName in ipairs({ "Config", "Lore", "ThreatLine" }) do
+			shared:WaitForChild(moduleName):Clone().Parent = box
+		end
+		lore = require(box:FindFirstChild("Lore") :: any)
+		threat = require(box:FindFirstChild("ThreatLine") :: any)
+	end)
+	box:Destroy()
+	local function name(key: string, fallback: string): string
+		local value = lore and lore[key]
+		return if type(value) == "string" and value ~= "" then value else fallback
+	end
+	local when = "the second morning"
+	if threat and type(threat.dayPart) == "function" and type(threat.fullRingMovesAt) == "function" then
+		local ok, words = pcall(function()
+			return threat.dayPart(threat.fullRingMovesAt())
+		end)
+		if ok and type(words) == "string" and words ~= "" then
+			when = words
+		end
+	end
+	return {
+		string.format("Last one standing wins. At %s, rush %s for gear, or run for a %s under a pale flag.",
+			name("StartSignal", "the horn"), name("Spire", "the Spire"), name("RunnerCache", "runner's cache")),
+		"Keep hunger and thirst above 55 and your health comes back. Drink from streams and the lake.",
+		string.format("From %s %s closes in on %s. Stay inside it.", when, name("Border", "the border"), name("Spire", "the Spire")),
+	}
+end
 -- the goal in one line at the top of HOW TO PLAY (QW6); LobbyController rewrites it from Shared.Lore at runtime
 local STEPS = "RISE ON YOUR PLATE  →  TAKE GEAR AT THE SPIRE, OR RUN  →  OUTLAST THE BORDER"
 
@@ -909,7 +949,7 @@ local function buildLobby(): ScreenGui
 		LayoutOrder = 0,
 		Parent = body,
 	})
-	for i, text in ipairs(TIPS) do
+	for i, text in ipairs(tips()) do
 		local tip = frame("Tip" .. i, { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = i, Parent = body })
 		label("Num", string.format("%02d", i), "Mono", 13, { Size = UDim2.fromOffset(24, 18), TextColor3 = C.Accent, TextYAlignment = Enum.TextYAlignment.Top, Parent = tip })
 		label("Text", text, "Body", 14, {
@@ -1980,6 +2020,33 @@ function UIBuilder.preview(which: string, opts: { [string]: any }?): string
 		previewOverlay(parent, which)
 	end
 	return string.format("previewing %s at %dx%d, scale %.2f", which, viewport.X, viewport.Y, s)
+end
+
+-- The three HOW TO PLAY tips as they are written for the arena in the place (Shared.Lore, Shared.ThreatLine).
+UIBuilder.tips = tips
+
+-- Rewrites only those three tips in the built Lobby screen (StarterGui.Lobby ... Body.Tip1..3.Text): for a change
+-- of Config.Map without building every screen again. Returns a line per tip: written or not found, and its text.
+function UIBuilder.applyTips(parent: Instance?): string
+	local root = (parent or StarterGui):FindFirstChild("Lobby")
+	if not root then
+		return "UIBuilder.applyTips: there is no Lobby screen (run build())"
+	end
+	local lines = {}
+	for i, text in ipairs(tips()) do
+		local written = 0
+		for _, d in ipairs(root:GetDescendants()) do
+			if d.Name == "Tip" .. i and d:IsA("Frame") then
+				local label = d:FindFirstChild("Text")
+				if label and label:IsA("TextLabel") then
+					label.Text = text
+					written += 1
+				end
+			end
+		end
+		table.insert(lines, string.format("tip %d %s: %s", i, if written > 0 then "written" else "NOT FOUND", text))
+	end
+	return table.concat(lines, "\n")
 end
 
 return UIBuilder

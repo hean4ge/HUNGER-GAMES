@@ -71,6 +71,11 @@ Config.Border = {
 	FinalRadius = 35,
 	ShrinkStartTime = 600, -- seconds after the start horn (09:00 on day 2)
 	ShrinkDuration = 230, -- fully closed at 830 s, just after the second sunset
+	-- The wall never moves faster than this (studs a second of round time, the slide of its centre included). A ring too
+	-- big to close in ShrinkDuration at that speed starts earlier, as early as it must, and still closes at
+	-- ShrinkStartTime + ShrinkDuration; ArenaService publishes each round's own start as GameState.BorderShrinkStart.
+	-- GameState.BorderShrinking still turns true at ShrinkStartTime (the final closing). nil or 0 = no limit.
+	MaxShrinkSpeed = 3.5,
 	DamagePerSecond = 4,
 	LateDamagePerSecond = 10, -- once the border has fully closed
 	WarningLeadTime = 30, -- warn this many seconds before it starts moving
@@ -279,10 +284,11 @@ Config.Camera = {
 	-- turns the sprint widening off and slows the look by the same ratio.
 	ZoomFovMultiplier = 0.45, -- the default level: 72 -> 32.4 vertical, 2.5x (the bow's aim is 1.4x)
 	-- While the zoom is on, the mouse wheel changes its level. Each notch multiplies (or divides) the magnification by
-	-- ZoomWheelStep, so a notch feels the same at every level. The level is kept until the player leaves.
-	ZoomWheelStep = 1.104,
-	ZoomWheelStepsOut = 4, -- notches the wheel can pull back from the default: to 1.68x (FOV x0.65 at 72)...
-	ZoomWheelStepsIn = 5, -- ...and push in: to 4.1x (FOV x0.28 at 72)
+	-- ZoomWheelStep, so a notch feels the same at every level: 1.56x, 1.76x, 1.98x, 2.22x, 2.5x, 2.81x, 3.16x, 3.56x, 4x.
+	-- The level is kept until the player leaves.
+	ZoomWheelStep = 1.125,
+	ZoomWheelStepsOut = 4, -- notches the wheel can pull back from the default: to 1.56x (72 -> 49.9, FOV x0.69)...
+	ZoomWheelStepsIn = 4, -- ...and push in: to 4x (72 -> 20.6, FOV x0.29)
 	ZoomInTime = 0.18, -- seconds for the view to ease in (98 % of the way; no overshoot)...
 	ZoomOutTime = 0.14, -- ...back out...
 	ZoomStepTime = 0.1, -- ...and from one wheel level to the next
@@ -354,13 +360,41 @@ Config.Combat = {
 	ThirdPersonSwings = true, -- other players' swings show on their bodies (CharacterVisuals, from CombatAction "Swing")
 }
 
--- First-person arms (ViewmodelController). "Faceted": the faceted Blender hands and forearms (Assets.Viewmodel.ArmsFaceted:
--- bare skin in your avatar's arm colours, a charcoal sleeve; relaxed when empty, a fist only while punching), lit like
--- the world; "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when your appearance changes);
+-- First-person arms (ViewmodelController). "Blocky" (the default): a Roblox character's arms, square blocks built from
+-- Parts, the hand in your avatar's own arm colour, matte, lit by the engine alone (no lamp, no overlay); relaxed and low
+-- when empty, fists only for a punch and the short guard after it. The older styles stay selectable: "Faceted": the
+-- faceted Blender hands and forearms (Assets.Viewmodel.ArmsFaceted: bare skin in your avatar's arm colours, a charcoal
+-- sleeve); "Avatar": your own avatar's R15 arms (skin colour and shirt, rebuilt when your appearance changes);
 -- "Classic": the original part-built arms (dark sleeves, block fists).
 Config.Viewmodel = {
-	ArmStyle = "Faceted",
-	GuardHold = 1.5, -- (Faceted) seconds the fists stay up as a guard after the last punch before the hands relax
+	ArmStyle = "Blocky", -- "Blocky" | "Faceted" | "Avatar" | "Classic"
+	-- The block arms (ViewmodelController.Blocky). Each value is read when the arms are built.
+	Blocky = {
+		Variant = "A", -- the hand. "A": one block. "B": a palm block, one four-finger block and a thumb block
+		Sleeve = "Jacket", -- "Jacket": a long sleeve to the wrist. "Bare": bare arms. "Short": rolled up to mid-forearm
+		SleeveColor = Color3.fromRGB(96, 88, 80),
+		SleeveMaterial = Enum.Material.SmoothPlastic, -- (clean and without gloss in game; Fabric shows its weave up close)
+		SkinMaterial = Enum.Material.SmoothPlastic,
+		SkinMaxValue = 0.92, -- the hand colour's brightest channel is held to this (pure white arms would bloom in full sun)
+		-- Nothing lights the block arms but the engine. When the sun is gone its fill light is strong and the ground is
+		-- dark, so a pale hand would be several times brighter than everything round it; these values bring pale arm
+		-- colours down, by colour alone, at dusk (DuskDarken), at night (NightDarken), under trees (ShadeDarken by day and
+		-- NightShadeDarken at night, times how much sky is covered; SunShadeDarken when the sun is hidden from the eye),
+		-- never below MinExposure. Dark colours (a dark skin tone, the sleeve) are not darkened. At night under open sky
+		-- they are lifted instead, until their brightest channel reaches NightFloor (their unlit faces rendered black; 0:
+		-- off; not under cover, where the whole scene is black). Shade = false: all of this off.
+		Shade = {
+			DuskDarken = 0.36,
+			NightDarken = 0.30,
+			ShadeDarken = 0.30,
+			NightShadeDarken = 0.40,
+			SunShadeDarken = 0.15,
+			MinExposure = 0.5,
+			NightFloor = 0.5,
+			Adapt = 3, -- how fast it follows the light (1/s)
+		},
+	},
+	GuardHold = 1.5, -- (Blocky, Faceted) seconds the fists stay up as a guard after the last punch before the hands relax
 	ArmScale = 0.46, -- avatar arms are drawn this wide, a fraction of the avatar's (a full-width Roblox arm fills the view)
 	ArmReach = 1.34, -- ... and this long, shoulder to wrist in studs, whatever the avatar's proportions (the poses' reach)
 	ArmMaterial = Enum.Material.SmoothPlastic,
@@ -483,6 +517,84 @@ Config.Launch = {
 	SkipHold = 0.6, -- seconds to hold Skip (Space / A / the SKIP button); it only cuts your own camera to your plate
 	StandIns = 8, -- other contenders shown as copies of their avatars (the rest as plain figures); fewer on Medium / Low
 }
+
+-- The arena (docs/design/Map1Build.md, decision 14). Config.Map names the arena this place holds. Config.Maps[name]
+-- holds that arena's own numbers, section by section; they are laid over the sections above when this module loads, so
+-- every reader keeps reading Config.Round, Config.Border, Config.Events and Config.Loot. What belongs to the world
+-- itself (the centre, the plinth ring, the lobby's place) comes from ReplicatedStorage.Shared.ArenaLayout, which must
+-- be the same arena's: ArenaService warns at start-up when the layout's Map field and Config.Map disagree.
+--   "ClassicForest"  the forest valley (vaulted in ServerStorage.Vault_ClassicForest): 24 plates round the Spire
+--   "GreenLand"      Map 1, the Green Land: 48 plinths round the Horn, a field of radius 1,800
+Config.Map = "ClassicForest"
+
+Config.Maps = {
+	ClassicForest = {
+		Round = { MaxContenders = 24 },
+		Border = {
+			StartRadius = 640,
+			MinStartRadius = 500,
+			FullContenders = 24,
+			FinalRadius = 35,
+			FinalSpireGap = { 15, 25 },
+			WallPanels = 96,
+			WallHeight = 520,
+		},
+		Events = { FeastWarning = 45 },
+		Loot = { SpireRefillRadius = 90, FeastDropHeight = 55 },
+	},
+	GreenLand = {
+		Round = { MaxContenders = 48 }, -- one per plinth
+		Border = {
+			-- 1,800 for 48 contenders down to 520 for a lone one (707 for 2, 843 for 4, 1,014 for 8, 1,243 for 16, 1,415
+			-- for 24). At MaxShrinkSpeed (3.5) a ring wider than about 770 starts closing before ShrinkStartTime: a full
+			-- ring at about 5:06 (306 s), 24 contenders' at 6:56, 8 contenders' at 8:50; 1 or 2 contenders' at 10:00.
+			StartRadius = 1800,
+			MinStartRadius = 520,
+			FullContenders = 48,
+			-- The ring is 60 wide when the Last Stand begins, round a point on the turf 90 to 100 studs from the Horn (the
+			-- layout's LastStandPoints: the middle of a mouth lane), so it never closes on the platform.
+			FinalRadius = 60,
+			FinalSpireGap = { 15, 25 }, -- used only when the layout has no LastStandPoints: this far past AssetInfo.Spire.r
+			WallPanels = 160, -- 71 studs each at r 1,800; their corners stand 0.35 studs outside the circle, as the forest's did
+			WallHeight = 800, -- from 110 below the knoll (y -64) to y 736: above the ground on the start circle (524) and the peak (640)
+		},
+		-- a full round's ring is still 1,250 studs out two minutes before the Offering and 860 at it (66 s at a jog), so the
+		-- warning comes two minutes ahead (it reads "in 2 minutes"; ThreatLine words 90 s as 2 minutes too)
+		Events = { FeastWarning = 120 },
+		Loot = {
+			SpireRefillRadius = 90, -- the Horn's floor, its deck and the foot of its steps (r 0 to 40)
+			FeastDropHeight = 55, -- (markers under the Horn's sails carry DropIn = false: restocked in place)
+			-- How much loot there is. LootService puts a crate on every Crate marker and an item on GroundSpawnChance of
+			-- the Ground markers inside the round's start ring, so the amount is the marker set, and
+			-- ServerStorage.WorldGen.Map1.Loot builds that set from this plan (edit time; nothing reads it in a round):
+			-- fixed markers at the Horn, the runner's flags and the sites (the sites' counts are written for
+			-- SiteContenders and grow with Round.MaxContenders), then scattered tier-1 ground markers at one density over
+			-- the whole field, as many as bring a full round's expected loot to ItemsPerContender a head (a crate counts
+			-- as the mean of CrateItemsMin..Max, a ground marker as GroundSpawnChance). One density means a smaller
+			-- round's loot follows its ring's area: it keeps the Horn and the nearer sites, and a share of the rest.
+			Plan = {
+				ItemsPerContender = 10,
+				SiteContenders = 24,
+			},
+		},
+	},
+}
+
+do
+	local map = Config.Maps[Config.Map]
+	if type(map) ~= "table" then
+		warn("[Config] Config.Map names no arena in Config.Maps (" .. tostring(Config.Map) .. "); using ClassicForest")
+		Config.Map, map = "ClassicForest", Config.Maps.ClassicForest
+	end
+	for section, values in pairs(map) do
+		local target = (Config :: any)[section]
+		if type(target) == "table" and type(values) == "table" then
+			for key, value in pairs(values) do
+				target[key] = value
+			end
+		end
+	end
+end
 
 Config.Studio = {
 	-- Only applied inside Roblox Studio. Set to false to test real pacing.

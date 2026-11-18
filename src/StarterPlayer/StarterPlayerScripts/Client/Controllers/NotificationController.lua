@@ -14,7 +14,8 @@
 	    also shows the water marker), HUNGRY below 60 hunger. Cards never show during a Roll Call; they wait for it.
 	    They sit at the left (Overlay Cards), clear of the item toast and the held item; toasts sit above the item toast.
 	  * QW6: the countdown caption says the goal while the plate rises ("LAST ONE STANDING WINS"; alone in a practice
-	    round, "PRACTICE ROUND · NO RIVALS, JUST TRAINING DUMMIES") and the choice once it locks ("RUSH THE SPIRE FOR WEAPONS · OR RUN FOR THE TREES"), with a
+	    round, "PRACTICE ROUND · NO RIVALS, JUST TRAINING DUMMIES") and the choice once it locks ("RUSH THE SPIRE FOR WEAPONS · OR RUN FOR THE TREES";
+	    both names are the arena's, from Shared.Lore: "RUSH THE HORN FOR WEAPONS · OR RUN FOR THE HILLS" on Map 1), with a
 	    line about the runner's caches for new players; trying to step off the plate brings back "STAY ON YOUR PLATE".
 	  * Victory: Phase Ending + WinnerName (or the Victory announce); a special version when you won; then the
 	    RoundSummary table. Players who didn't take part in the round get a headline instead.
@@ -46,6 +47,8 @@ local Util = require(Shared:WaitForChild("Util"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local DayCycle = require(Shared:WaitForChild("DayCycle"))
+local ThreatLineModule = Shared:FindFirstChild("ThreatLine")
+local ThreatLine = if ThreatLineModule and ThreatLineModule:IsA("ModuleScript") then require(ThreatLineModule) :: any else nil
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local GameState = ReplicatedStorage:WaitForChild("GameState")
@@ -582,8 +585,10 @@ local function goalCaption(): string
 		end
 		return "LAST ONE STANDING WINS"
 	end
+	-- the centre and where a runner runs to are the arena's own names (the Spire and the trees; the Horn and the hills)
 	local spire = Lore.upper("Spire")
-	return if isPhone() then "RUSH " .. spire .. "  ·  OR RUN" else "RUSH " .. spire .. " FOR WEAPONS  ·  OR RUN FOR THE TREES"
+	return if isPhone() then "RUSH " .. spire .. "  ·  OR RUN"
+		else "RUSH " .. spire .. " FOR WEAPONS  ·  OR RUN FOR " .. (if type(Lore.Cover) == "string" then Lore.upper("Cover") else "THE TREES")
 end
 
 -- once the plate locks, new players learn where running pays: the pale flags behind them (every plate faces the Spire)
@@ -827,7 +832,17 @@ local TIPS: { [string]: { () -> string } } = {
 			elseif not moving then
 				return Lore.cap("Border") .. " hurts from the start, even before it moves. If you stray out, follow the marker on your compass back in."
 			end
-			return "From the second morning " .. Lore.Border .. " closes on " .. Lore.Spire .. ". Head in when the timer shows."
+			-- when this round's ring first moved, in words ("the second morning"; "the first evening" for a big ring)
+			local when = "the second morning"
+			if ThreatLine and type(ThreatLine.dayPart) == "function" and type(ThreatLine.borderMovesAt) == "function" then
+				local ok, words = pcall(function()
+					return ThreatLine.dayPart(ThreatLine.borderMovesAt())
+				end)
+				if ok and type(words) == "string" and words ~= "" then
+					when = words
+				end
+			end
+			return "From " .. when .. " " .. Lore.Border .. " closes on " .. Lore.Spire .. ". Head in when the timer shows."
 		end,
 		function()
 			return string.format("Outside %s you lose %d health a second, %d once it has closed. Near its edge the compass shows how far it is.",
@@ -1040,7 +1055,7 @@ local function showDeath(data: any)
 	else
 		R.dTitle.Text = "FALLEN"
 	end
-	R.dCause.Text = if beforeHorn then "You left your plate before the horn" else causeLine(data)
+	R.dCause.Text = if beforeHorn then "You left your plate before " .. (if type(Lore.StartSignal) == "string" then Lore.StartSignal else "the horn") else causeLine(data)
 	lastDeath = data
 	if R.dProgress then
 		local progress = if beforeHorn then nil else progressLine(data)

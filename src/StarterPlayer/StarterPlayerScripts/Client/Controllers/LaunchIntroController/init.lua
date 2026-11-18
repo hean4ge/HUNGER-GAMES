@@ -31,6 +31,12 @@
 	without a round (no hand-off; the camera goes back where it was), LS_LaunchFreeze = seconds holds the preview at
 	that moment of the shot, LS_LaunchSkipTest = true acts as a completed skip hold; LS_LaunchStats (JSON) reports
 	frame times per stage after every shot.
+	The arena (docs/design/Map1Build.md): the hall has one glass case per plate (ArenaLayout.PlinthCount, else the
+	number of its Plates: 24 on the forest arena, 48 on Map 1), and a contender's case is the plate they stand on:
+	plate k of n stands at ArenaLayout.PlinthOffsetDeg + k * 360 / n degrees (the offset is 0 on the forest arena and
+	3.75 on Map 1), so slotOf takes the offset off the bearing before it rounds. "On the plate ring" is
+	LaunchController.onRing, the same test the plate rise uses. Map 1's plinths have no bores (decision 6): the plate
+	does not rise, and the white-out hands off to a contender already standing on their plinth.
 	API: LaunchIntroController.isPlaying() -> boolean, LaunchIntroController.stats() -> { [string]: any }?
 ]]
 local Players = game:GetService("Players")
@@ -201,15 +207,46 @@ local function arenaCentre(): Vector3
 	return ArenaLayout.Center or Vector3.zero
 end
 
--- the case of the plate a contender stands on (or nil when they're not on the plate ring yet)
-local function slotOf(position: Vector3): number?
+-- standing on the plate ring: LaunchController's test (the layout's PlinthRingRadius, or the ring measured from the
+-- plates in the place); without that controller, the layout's radius alone
+local RING_TOLERANCE = 8
+local function onPlateRing(position: Vector3): boolean
+	local launch = Controllers and Controllers.LaunchController
+	if launch and type(launch.onRing) == "function" then
+		local ok, result = pcall(launch.onRing, position)
+		if ok then
+			return result == true
+		end
+	end
+	local ring = tonumber((ArenaLayout :: any).PlinthRingRadius)
+	if not ring then
+		return false
+	end
 	local centre = arenaCentre()
-	local flat = Vector2.new(position.X - centre.X, position.Z - centre.Z)
-	if math.abs(flat.Magnitude - (ArenaLayout.PlinthRingRadius or 52)) > 8 then
+	return math.abs(Vector2.new(position.X - centre.X, position.Z - centre.Z).Magnitude - ring) <= RING_TOLERANCE
+end
+
+-- how many plates the arena has = how many cases the hall gets
+local function plateCount(): number
+	local layout = ArenaLayout :: any
+	local n = tonumber(layout.PlinthCount)
+	if not n and type(layout.Plates) == "table" and #layout.Plates > 0 then
+		n = #layout.Plates
+	end
+	return math.max(1, math.floor(n or tonumber(Config.Round.MaxContenders) or 24))
+end
+
+-- the case of the plate a contender stands on (or nil when they're not on the plate ring yet). Plate k (from 0) of n
+-- stands at PlinthOffsetDeg + k * 360 / n degrees, clockwise from north. The offset comes off before the rounding:
+-- on Map 1 (3.75 degrees, half a step of 48) the bare bearing sits exactly on the edge between two cases.
+local function slotOf(position: Vector3): number?
+	if not onPlateRing(position) then
 		return nil
 	end
+	local centre = arenaCentre()
 	local n = #set.hall.slots
-	local deg = math.deg(math.atan2(position.X - centre.X, -(position.Z - centre.Z))) % 360
+	local first = tonumber((ArenaLayout :: any).PlinthOffsetDeg) or 0
+	local deg = (math.deg(math.atan2(position.X - centre.X, -(position.Z - centre.Z))) - first) % 360
 	return (math.floor(deg / (360 / n) + 0.5) % n) + 1
 end
 
@@ -229,7 +266,7 @@ local function ensureSet()
 	end
 	building = true
 	task.spawn(function()
-		local ok, result = pcall(Set.build, { detail = tier(), slots = ArenaLayout.PlinthCount or 24 })
+		local ok, result = pcall(Set.build, { detail = tier(), slots = plateCount() })
 		if ok and result then
 			if set and not shot then
 				set.model:Destroy()

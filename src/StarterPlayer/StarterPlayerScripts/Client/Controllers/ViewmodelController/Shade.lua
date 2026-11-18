@@ -2,6 +2,11 @@
 	ViewmodelController.Shade - lights the first-person arms like the world around them (Config.Viewmodel.Shade): the
 	faceted arms (ArmStyle "Faceted", whose painted skin and charcoal sleeve need no shade layer: Rig:setShade does
 	nothing for them) and the avatar arms.
+	The block arms (ArmStyle "Blocky", Config.Viewmodel.Blocky.Shade) use only the first of the three things below: the
+	exposure, which for them is a change of their own colours (Rig:setExposure -> Blocky.setExposure). They never get the
+	key light or the shade layer: update returns before either. They have one thing of their own: the night floor
+	(NightFloor, Rig:setFloor): at night under open sky, dark arm colours (a dark skin tone, the sleeve) are lifted a
+	little, by colour alone, because their unlit faces rendered black; not under cover, where the whole scene is black.
 
 	The engine lights the arms where they float, a few studs above the ground in the open air. In daylight that already
 	looks right (the sun gives them a lit side and a shadow side). But at dusk and at night the light is mostly the flat
@@ -61,6 +66,98 @@ params.FilterType = Enum.RaycastFilterType.Exclude
 params.IgnoreWater = true
 params.RespectCanCollide = false
 
+-- Tree crowns (block arms only). Leaves and needles are not seen by raycasts: the world builders switch CanQuery off on
+-- them (the classic forest's Kit.SOFT, Map 1's scatter), so under trees every sky ray above would count as open sky
+-- and the sun as unhidden. For the block arms the crown parts of the trees whose trunks (which are queryable) stand
+-- within CROWN_REACH studs of the eye are tested as boxes: a tree is the Model a found part sits in, its crown the
+-- parts of that Model named with one of CROWN_WORDS. The boxes are shrunk a little (a crown is not a full box).
+local CROWN_WORDS = { "Leaves", "Needles", "Crown", "Canopy", "Foliage" }
+local CROWN_REACH = 36
+local CROWN_FILL = 0.85 -- the share of a crown part's box, along each axis, that counts as cover
+local CROWN_KEEP = 8 -- seconds a tree's crown boxes are remembered
+local CROWN_MOST = 400 -- crown parts looked at per Model (a streaming cell may hold many trees)
+local overlap = OverlapParams.new()
+overlap.FilterType = Enum.RaycastFilterType.Exclude
+overlap.MaxParts = 150
+local crownCache: { [Instance]: any } = setmetatable({}, { __mode = "k" }) :: any
+
+local function isCrown(name: string): boolean
+	for _, word in ipairs(CROWN_WORDS) do
+		if string.find(name, word, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+-- The crown boxes ({ cf, half }) of the trees round `origin`.
+local function crownBoxes(origin: Vector3, ignore: { Instance }): { any }
+	overlap.FilterDescendantsInstances = ignore
+	local now = os.clock()
+	local out = {}
+	local seen: { [Instance]: boolean } = {}
+	for _, part in ipairs(workspace:GetPartBoundsInRadius(origin, CROWN_REACH, overlap)) do
+		local model = part.Parent
+		if model and model ~= workspace and not seen[model] then
+			seen[model] = true
+			local entry = crownCache[model]
+			if not entry or now - entry.at > CROWN_KEEP then
+				entry = { at = now, boxes = {} }
+				for i, child in ipairs(model:GetChildren()) do
+					if i > CROWN_MOST then
+						break
+					end
+					if child:IsA("BasePart") and child.Transparency < 0.9 and isCrown(child.Name) then
+						table.insert(entry.boxes, { cf = child.CFrame, half = child.Size * (CROWN_FILL / 2) })
+					end
+				end
+				crownCache[model] = entry
+			end
+			for _, box in ipairs(entry.boxes) do
+				table.insert(out, box)
+			end
+		end
+	end
+	return out
+end
+
+-- Does the ray from `origin` along `dir` pass through one of the boxes?
+local function throughCrown(origin: Vector3, dir: Vector3, boxes: { any }): boolean
+	for _, box in ipairs(boxes) do
+		local o: Vector3 = box.cf:PointToObjectSpace(origin)
+		local d: Vector3 = box.cf:VectorToObjectSpace(dir)
+		local h: Vector3 = box.half
+		local tmin, tmax = 0, math.huge
+		local hit = true
+		for axis = 1, 3 do
+			local oa = if axis == 1 then o.X elseif axis == 2 then o.Y else o.Z
+			local da = if axis == 1 then d.X elseif axis == 2 then d.Y else d.Z
+			local ha = if axis == 1 then h.X elseif axis == 2 then h.Y else h.Z
+			if math.abs(da) < 1e-6 then
+				if math.abs(oa) > ha then
+					hit = false
+					break
+				end
+			else
+				local t1, t2 = (-ha - oa) / da, (ha - oa) / da
+				if t1 > t2 then
+					t1, t2 = t2, t1
+				end
+				tmin = math.max(tmin, t1)
+				tmax = math.min(tmax, t2)
+				if tmin > tmax then
+					hit = false
+					break
+				end
+			end
+		end
+		if hit then
+			return true
+		end
+	end
+	return false
+end
+
 function Shade.new(rig: any)
 	local self = setmetatable({}, Shade)
 	self.rig = rig
@@ -68,7 +165,7 @@ function Shade.new(rig: any)
 	self.sampleAt = 0
 	-- sampled (targets) and smoothed (current) state
 	self.skyOpen, self.sunLit, self.night, self.twilight, self.sunBlocked = 1, 1, 0, 0, 0
-	self.cur = { exposure = 1, key = 0 }
+	self.cur = { exposure = 1, key = 0, floor = 0 }
 	self.fresh = true
 	self.lightDir = Vector3.yAxis
 	self.keyColor = Color3.new(1, 1, 1)
@@ -93,11 +190,16 @@ function Shade:_sample(camCF: CFrame)
 	end
 	params.FilterDescendantsInstances = list
 	local origin = camCF.Position
+	-- (block arms) the crowns of the trees round the eye, which the rays below cannot see
+	local crowns = if self.rig.blocky then crownBoxes(origin, list) else nil
+	if crowns and #crowns == 0 then
+		crowns = nil
+	end
 	local open, total = 0, 0
 	for i, dir in ipairs(SKY_DIRS) do
 		local w = if i == 1 then 2 else 1
 		total += w
-		if not workspace:Raycast(origin, dir * SKY_RAY, params) then
+		if not workspace:Raycast(origin, dir * SKY_RAY, params) and not (crowns and throughCrown(origin, dir, crowns)) then
 			open += w
 		end
 	end
@@ -111,7 +213,7 @@ function Shade:_sample(camCF: CFrame)
 	local lit = 0
 	if dir.Y > 0.03 then
 		self.lightDir = dir
-		if not workspace:Raycast(origin, dir * SUN_RAY, params) then
+		if not workspace:Raycast(origin, dir * SUN_RAY, params) and not (crowns and throughCrown(origin, dir, crowns)) then
 			lit = 1
 		end
 	else
@@ -151,6 +253,13 @@ function Shade:update(dt: number, camCF: CFrame, tuck: number?): CFrame?
 	cur.key += (key - cur.key) * a
 	local rig = self.rig
 	rig:setExposure(cur.exposure)
+	if rig.blocky then
+		-- the night floor: with the night, and only as far as the sky above is open
+		local floor = opt("NightFloor", 0) * self.night * self.skyOpen
+		cur.floor += (floor - cur.floor) * a
+		rig:setFloor(cur.floor)
+		return nil -- (the block arms: no lamp and no layer over them, whatever the options say)
+	end
 	rig:setShade(opt("ShadeColor", Color3.fromRGB(235, 235, 240)), opt("ShadeTransparency", 0.72), opt("HandShadeTransparency", 0.86))
 	local light = rig.key
 	if cur.key < 0.02 then

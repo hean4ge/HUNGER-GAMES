@@ -18,6 +18,11 @@
 	       Relaxed curls them 38 degrees; Open lays them flat. One set of parts per shape; Rig:setHands swaps them.
 	Sleeve (Config.Viewmodel.Blocky.Sleeve): "Jacket" (default; a 0.32 sleeve block to the wrist), "Short" (rolled up:
 	the sleeve ends SleeveEnd studs from the elbow, bare forearm from there) or "Bare" (bare arm, sleeve colour unused).
+	Material: SmoothPlastic for the hand and for the sleeve (SkinMaterial, SleeveMaterial), chosen in game on 15 Nov
+	2026 at 14:00, 17:30 (toward the low sun and away from it) and 21:00 against Plastic, Fabric, Rubber, Plaster, Sand,
+	Cardboard, Leather and a fully rough MaterialVariant: it is the only one with clean faces at arm's length (the
+	others show weave, grain or blotches), and it has no gloss here: its faces are within 2 grey levels (of 255) of
+	the fully rough variant's on the hand and within 6 on the sleeve, looking toward the low sun.
 
 	Piece space, as the Faceted kit (Rig.MESH_IN_HAND): +Y along the bone toward the fingers, +Z the palm side, +X the
 	thumb side on the right arm; the left arm's pieces are X mirrors. Pivots: shoulder, elbow, wrist joint.
@@ -30,7 +35,12 @@
 	    spec  = { upper, fore, grip = { Right, Left }, palm = { Right, Left }, handGrip, bowGrip, hook }   (Rig.useStyle)
 	    info  = { variant, sleeve, sleeveWidth, palmShift, palmFromFaceted, ... }      (Rig keeps it as rig.blocky)
 	Blocky.setSkin(arms, info, right: Color3, left: Color3?)      the hands (and bare forearms) in the arm colours
-	Blocky.setExposure(arms, info, level)       0..1: every arm part's colour x level (albedo only: nothing is overlaid)
+	Blocky.setExposure(arms, info, level)       0..1: the arm parts' colours brought down toward level (albedo only:
+	                                            nothing is overlaid, nothing is lit). Pale colours take all of it, dark
+	                                            ones (a dark skin tone, the sleeve) almost none: Blocky.PALE_FROM / PALE_FULL;
+	                                            near-white ones a little more: Blocky.WHITE_*
+	Blocky.setFloor(arms, info, floor)          0..1: dark arm colours lifted so their brightest channel is at least
+	                                            `floor` (at night in the open: their unlit faces rendered black)
 	Blocky.poses(Poses, info) -> style table    Poses.FACETED with the Blocky changes; the controller registers it as
 	                                            Poses.STYLES.Blocky before Poses.useStyle("Blocky")
 ]]
@@ -64,6 +74,16 @@ Blocky.HAND_LEN = 0.34 -- ... and ends this far beyond it (the Faceted fist's kn
 Blocky.ELBOW_PAD = 0.16 -- the upper arm and the forearm overlap this much round the elbow
 Blocky.SLEEVE_END = 0.36 -- ("Short") the rolled-up sleeve ends this far from the elbow
 Blocky.SKIN_INSET = 0.002 -- a bare forearm is this much slimmer than the hand per side (no coplanar faces)
+-- The upper arm is seen whole from Blocky.NEAR_SHOW studs (eye to elbow) and not at all inside Blocky.NEAR_HIDE (Rig:pose):
+-- in the holds and the punches the elbow is 1.2 to 1.6 studs from the eye; in a high wind-up it is 0.65, and the upper
+-- arm would then be a sleeve face across the whole side of the view.
+Blocky.NEAR_SHOW = 0.95
+Blocky.NEAR_HIDE = 0.78
+-- The string arm's elbow pole while a bow is held low (Rig.POLE.BowRight for these arms; the drawn pole is the Faceted
+-- one). The Faceted pole (1.2, -1, 0) brings the forearm in from the lower right, across the bottom of the view: the
+-- sleeve block then lies behind hotbar slots 1 and 2. With the elbow lower and further back the forearm leaves the
+-- view straight down behind the hand.
+Blocky.BOW_POLE = V3(0.8, -1, 0.3)
 -- variant B
 Blocky.PALM_T = 0.15 -- the palm block's thickness (back of the hand to the palm face)
 Blocky.FINGER_LEN = 0.24
@@ -77,6 +97,21 @@ Blocky.SHAPES = {
 	Fist = { curl = 180, thumb = "Closed" },
 }
 local SHAPE_NAMES = { "Relaxed", "Fist", "Grip", "Open" } -- (Rig.HAND_SHAPES)
+-- Held things on the block hand (Rig:setItem reads these before its own tables):
+--   ITEM_SCALE  the view scale of a thing much wider than the 0.30 hand (the ration tin is 0.49 across: at full size
+--               it was twice the hand's width)
+--   PALM_HOLD   where a thing lies on the palm face (Rig.PALM space, as Rig.FACETED_PALM_HOLD)
+--   ITEM_HOLD   where a gripped thing sits in the grip (Grip space, as Rig.ITEM_HOLD: -Z toward its business end). The
+--               dried meat's bone and the herbs' stems run through the block: they are pushed up through it, so their
+--               ends stay inside the block instead of showing as a stub on its near face
+Blocky.ITEM_SCALE = { ration = 0.68 } :: { [string]: number }
+Blocky.PALM_HOLD = {
+	ration = CFrame.new(0, 0.05, -0.17) * CFrame.Angles(0, math.rad(90), 0),
+} :: { [string]: CFrame }
+Blocky.ITEM_HOLD = {
+	dried_meat = CFrame.new(0, 0, -0.07),
+	herbs = CFrame.new(0, 0, -0.09),
+} :: { [string]: CFrame }
 
 local PARKED = CFrame.new(0, -10000, 0)
 local DEFAULT_SLEEVE = Color3.fromRGB(96, 88, 80) -- the Faceted kit's charcoal (ArtStyle rule 6: not darker)
@@ -219,7 +254,7 @@ function Blocky.build(parent: Instance, options: { [string]: any }?): ({ [string
 		sleeveMode = "Jacket"
 	end
 	local skinMaterial = option(options, "SkinMaterial", Enum.Material.SmoothPlastic)
-	local sleeveMaterial = option(options, "SleeveMaterial", Enum.Material.Fabric)
+	local sleeveMaterial = option(options, "SleeveMaterial", Enum.Material.SmoothPlastic)
 	local sleeveColor = option(options, "SleeveColor", DEFAULT_SLEEVE)
 	local info = {
 		variant = variant,
@@ -232,6 +267,7 @@ function Blocky.build(parent: Instance, options: { [string]: any }?): ({ [string
 		skinMax = math.clamp(tonumber(option(options, "SkinMaxValue", 0.92)) or 0.92, 0.5, 1),
 		skin = { Right = DEFAULT_SKIN, Left = DEFAULT_SKIN },
 		level = 1,
+		floor = 0,
 	}
 	-- shadows: Config.Viewmodel.Blocky.CastShadow, else the shared Config.Viewmodel.ArmShadows (off)
 	local castShadow = option(options, "CastShadow", nil)
@@ -246,7 +282,7 @@ function Blocky.build(parent: Instance, options: { [string]: any }?): ({ [string
 			sleeveMode = sleeveMode,
 			sleeveEnd = tonumber(option(options, "SleeveEnd", Blocky.SLEEVE_END)) or Blocky.SLEEVE_END,
 			skinMaterial = if typeof(skinMaterial) == "EnumItem" then skinMaterial else Enum.Material.SmoothPlastic,
-			sleeveMaterial = if typeof(sleeveMaterial) == "EnumItem" then sleeveMaterial else Enum.Material.Fabric,
+			sleeveMaterial = if typeof(sleeveMaterial) == "EnumItem" then sleeveMaterial else Enum.Material.SmoothPlastic,
 			skinVariant = option(options, "SkinMaterialVariant", nil),
 			sleeveVariant = option(options, "SleeveMaterialVariant", nil),
 			skin = DEFAULT_SKIN,
@@ -285,6 +321,7 @@ function Blocky.build(parent: Instance, options: { [string]: any }?): ({ [string
 		end
 	end
 	spec.hook = spec.handGrip.Position + V3(0, tonumber(option(options, "HookBelow", HOOK_BELOW)) or HOOK_BELOW, 0)
+	spec.bowPole = Blocky.BOW_POLE -- (Rig.useStyle: the string arm's elbow pole at the low ready)
 	return arms, spec, info
 end
 
@@ -314,15 +351,49 @@ local function capped(color: Color3, most: number): Color3
 	return color
 end
 
-local function scaled(color: Color3, level: number): Color3
-	return Color3.new(color.R * level, color.G * level, color.B * level)
+-- How much of a darkening a colour takes (Blocky.setExposure). At dusk, at night and under trees the engine's fill
+-- light is strong and the ground is dark, so a pale hand is several times brighter than everything round it (measured
+-- in game: 2.3 times the grass at 14:00, 5 to 6 times at 18:45, at night and in forest shade). The darkening brings pale
+-- colours back to their midday standing; a colour that is dark already keeps its own, so a dark skin tone and the sleeve
+-- never go black.
+Blocky.PALE_FROM = 0.35 -- a colour whose brightest channel is at most this is left alone
+Blocky.PALE_FULL = 0.85 -- ... and from this up it takes the whole darkening
+-- White and near-white arms have far more light in them than a pale skin tone with the same brightest channel (all
+-- three channels are high), and stood out more at dusk and at night than at midday: 3.7 to 4.6 times the ground against
+-- 2.7 at 14:00 (measured in game, 15 Nov 2026). So colours whose luma is above WHITE_FROM are darkened a little
+-- further once it is dusk or darker: by WHITE_EXTRA for a colour of luma WHITE_FULL or more, reached when the
+-- darkening itself has taken WHITE_BY off. In full daylight they are left as they are.
+Blocky.WHITE_FROM = 0.75
+Blocky.WHITE_FULL = 0.92
+Blocky.WHITE_EXTRA = 0.23
+Blocky.WHITE_BY = 0.2
+-- The night floor (Blocky.setFloor): a dark colour is lifted, hue kept, until its brightest channel reaches the floor,
+-- but by no more than FLOOR_MOST times (a black avatar's arms stay near black).
+Blocky.FLOOR_MOST = 1.6
+local function scaled(color: Color3, level: number, floor: number): Color3
+	local m = math.max(color.R, color.G, color.B)
+	local k = 1
+	if level < 0.999 then
+		local w = math.clamp((m - Blocky.PALE_FROM) / math.max(Blocky.PALE_FULL - Blocky.PALE_FROM, 0.01), 0, 1)
+		k = 1 + (level - 1) * w
+		local luma = 0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B
+		local white = math.clamp((luma - Blocky.WHITE_FROM) / math.max(Blocky.WHITE_FULL - Blocky.WHITE_FROM, 0.01), 0, 1)
+		k *= 1 - Blocky.WHITE_EXTRA * white * math.clamp((1 - level) / math.max(Blocky.WHITE_BY, 0.01), 0, 1)
+	end
+	if floor > 0 and m > 1e-3 and m * k < floor then
+		k = math.min(floor / m, Blocky.FLOOR_MOST)
+	end
+	if k == 1 then
+		return color
+	end
+	return Color3.new(math.min(color.R * k, 1), math.min(color.G * k, 1), math.min(color.B * k, 1))
 end
 
 local function paint(arms: { [string]: any }, info: { [string]: any })
-	local level = info.level
+	local level, floor = info.level, info.floor or 0
 	for _, side in ipairs({ "Right", "Left" }) do
-		local skin = scaled(capped(info.skin[side], info.skinMax), level)
-		local sleeve = scaled(info.sleeveColor, level)
+		local skin = scaled(capped(info.skin[side], info.skinMax), level, floor)
+		local sleeve = scaled(info.sleeveColor, level, floor)
 		eachPiece(arms[side], function(piece)
 			for _, p in ipairs(piece.skins) do
 				p.Color = skin
@@ -340,13 +411,26 @@ function Blocky.setSkin(arms: { [string]: any }, info: { [string]: any }, right:
 	paint(arms, info)
 end
 
--- level 0..1: the arms at that share of their lit brightness, by colour alone.
+-- level 0..1: pale arm colours at that share of their lit brightness, by colour alone (see `scaled`).
 function Blocky.setExposure(arms: { [string]: any }, info: { [string]: any }, level: number)
 	level = math.clamp(level, 0, 1)
 	if math.abs(level - info.level) < 0.004 then
 		return
 	end
 	info.level = level
+	paint(arms, info)
+end
+
+-- floor 0..1: dark arm colours lifted to at least that in their brightest channel (see `scaled`): by colour alone, as
+-- the darkening. At night in the open a dark skin tone's and the sleeve's unlit faces rendered black; the controller's
+-- Shade raises the floor with the night and with how much sky is open (never under a roof or deep in the forest, where
+-- the whole scene is black and the arms should be too).
+function Blocky.setFloor(arms: { [string]: any }, info: { [string]: any }, floor: number)
+	floor = math.clamp(floor, 0, 1)
+	if math.abs(floor - (info.floor or 0)) < 0.004 then
+		return
+	end
+	info.floor = floor
 	paint(arms, info)
 end
 
@@ -361,6 +445,8 @@ end
 --   WRAP.hold         the bandage roll further from the forearm's axis (the sleeve block is wider than the Faceted
 --                     forearm).
 --   TOP.GUARD_DIP     (A) hardly any dip when the guard drops: there is no hand shape to swap out of sight
+--   SWING, THROW      the sets whose wrist is held high and close to the eye have their own keys (see "Swing sets"
+--                     below): a 0.32-stud sleeve block that near the eye is a flat slab across the view
 function Blocky.poses(Poses: any, info: { [string]: any }): { [string]: any }
 	local H, FH = Poses.hand, Poses.facetedHand
 	local base = Poses.FACETED
@@ -371,15 +457,104 @@ function Blocky.poses(Poses: any, info: { [string]: any }): { [string]: any }
 	local function V(x: number, y: number, z: number): Vector3
 		return Vector3.new(x, y, z)
 	end
+	-- Swing sets. The Faceted sets were drawn for a slim, tapered forearm. Where they hold the wrist above the eye line
+	-- within a stud of the eye, the block arms' square sleeve is a flat slab across the view: in set 3 of the slashes
+	-- (the high cut, the elbow out to the side) it covered over a quarter of a 16:9 screen at the moment of the cut and
+	-- came within 4 % of the screen's height of the crosshair; the wind-ups of the overhead sets covered a fifth. So
+	-- those sets have their own keys here: the hand works from the right edge of the view (wrist x about 1, where the
+	-- arm stands along the edge and little of it shows) and the weapon does the travelling.
+	--   Slash 3            the high cut: wound back over the right shoulder, the blade sweeps level over the crosshair
+	--                      and on round to the left; the hand stays at the right edge. No pole of its own, no way back
+	--                      under the view (it returns the way it came, the blade passing overhead)
+	--   Slash 4, Chop 1,   the overhead sets: the arm goes up along the right edge (W), the weapon comes over the
+	--   Smash 1            right shoulder (A) and down right of the crosshair (M, a little further right)
+	--   Slash 1, Chop 2,   the wind-up and the first of the cut (W, A) a little further right
+	--   Smash 2
+	--   THROW              the knife's wind-up further right; the spear's release a little further right
+	-- Measured with the real Rig at the real timings on a 16:9 screen at field of view 72 (15 Nov 2026): in every
+	-- slash, chop and smash the arm blocks cover at most 13 % of the screen (15 % with the per-swing jitter at its
+	-- corners; 5 % at rest; the throws 15 %), in the sets changed here they stay a fifth of the screen's height or more
+	-- from the crosshair, and the weapon stays out of the crosshair's 6 % circle as before (8 % at the nearest, with
+	-- the jitter). Each set keeps its tp and its kick, so the swing other players see (CharacterVisuals) and the camera
+	-- kick are those of the faceted arms. The indexes are Poses.FACETED.SWING's as of that day.
+	local function reposed(set: any, moves: { [string]: Vector3 }?, keys: { [string]: any }?): any
+		local copy = table.clone(set)
+		for key, by in pairs(moves or {}) do
+			if typeof(copy[key]) == "CFrame" then
+				copy[key] += by -- (moved in camera space; the key keeps its rotation)
+			end
+		end
+		for key, value in pairs(keys or {}) do
+			copy[key] = value
+		end
+		return copy
+	end
+	local function swingSets(style: string, changes: { [number]: (any) -> any })
+		local list = base.SWING and base.SWING[style]
+		if type(list) ~= "table" then
+			return
+		end
+		local copy = table.clone(list)
+		for index, change in pairs(changes) do
+			if type(copy[index]) == "table" and typeof(copy[index].W) == "CFrame" then
+				copy[index] = change(copy[index])
+			end
+		end
+		out.SWING[style] = copy
+	end
+	-- the overhead wind-up of the hatchet and the mace: up along the right edge, the head back over the shoulder
+	local overW = H(V(1.070, 0.300, -0.800), V(0.145, 0.078, 0.986), V(-0.019, 0.997, -0.076))
+	local overA = H(V(0.970, 0.200, -0.980), V(0.770, 0.553, -0.318), V(-0.633, 0.595, -0.495))
+	swingSets("Slash", {
+		[1] = function(set)
+			return reposed(set, { W = V(0.14, 0, 0), A = V(0.08, 0, 0) })
+		end,
+		[3] = function(set)
+			return {
+				tp = set.tp, kick = set.kick,
+				W = H(V(1.060, 0.050, -0.820), V(0.486, 0.399, 0.778), V(-0.158, 0.915, -0.370)),
+				M = H(V(1.040, 0.000, -0.950), V(-0.982, 0.041, -0.185), V(0.111, 0.916, -0.385)),
+				F = H(V(0.980, -0.080, -1.000), V(-0.717, 0.105, 0.689), V(-0.286, 0.858, -0.427)),
+			}
+		end,
+		[4] = function(set)
+			return reposed(set, { M = V(0.10, -0.05, -0.02) }, {
+				W = H(V(1.070, 0.300, -0.800), V(0.165, 0.237, 0.957), V(-0.071, 0.971, -0.228)),
+				A = H(V(0.970, 0.200, -0.980), V(0.813, 0.519, -0.265), V(-0.574, 0.635, -0.518)),
+			})
+		end,
+	})
+	swingSets("Chop", {
+		[1] = function(set)
+			return reposed(set, { M = V(0.13, 0, -0.02) }, { W = overW, A = overA })
+		end,
+		[2] = function(set)
+			return reposed(set, { W = V(0.14, -0.05, 0), A = V(0.10, 0, 0) })
+		end,
+	})
+	swingSets("Smash", {
+		[1] = function(set)
+			return reposed(set, { M = V(0.13, 0, -0.04) }, { W = overW, A = overA })
+		end,
+		[2] = function(set)
+			return reposed(set, { W = V(0.08, -0.05, 0), A = V(0.06, 0, 0) })
+		end,
+	})
+	if base.THROW and base.THROW.knife and base.THROW.spear then
+		out.THROW.knife = reposed(base.THROW.knife, { W = V(0.15, 0, 0) })
+		out.THROW.spear = reposed(base.THROW.spear, { R = V(0.12, 0, 0) })
+	end
 	if info.variant == "B" then
 		out.HOLD.Relaxed = {
-			right = FH(V(0.92, -0.92, -1.05), V(-0.10, -0.40, -0.97), V(-0.5, -0.85, 0.15)),
-			left = FH(V(-0.92, -0.92, -1.05), V(0.10, -0.40, -0.97), V(0.5, -0.85, 0.15), true),
+			-- (the widest footprint that still sits between the vitals and the hotbar on a 16:9 screen, the hands as
+			-- much in view as variant A's blocks: 11 % of the height)
+			right = FH(V(0.86, -0.86, -1.02), V(0.10, -0.30, -0.97), V(-0.5, -0.85, 0.15)),
+			left = FH(V(-0.86, -0.86, -1.02), V(-0.10, -0.30, -0.97), V(0.5, -0.85, 0.15), true),
 		}
 	else
 		out.HOLD.Relaxed = {
-			right = H(V(0.78, -0.92, -0.95), V(-0.25, 0.95, 0.15), V(-0.12, -0.12, -0.98)),
-			left = H(V(-0.78, -0.92, -0.95), V(0.25, 0.95, 0.15), V(0.12, -0.12, -0.98)),
+			right = H(V(0.82, -0.92, -0.95), V(-0.25, 0.95, 0.15), V(-0.12, -0.12, -0.98)),
+			left = H(V(-0.82, -0.92, -0.95), V(0.25, 0.95, 0.15), V(0.12, -0.12, -0.98)),
 		}
 	end
 	out.HOLD.Fists = {
@@ -389,6 +564,26 @@ function Blocky.poses(Poses: any, info: { [string]: any }): { [string]: any }
 	out.HOLD.SpearRaised = {
 		right = H(V(1.02, 0.05, -0.36), V(-0.1, 0, -1), V(0, 1, 0.1)),
 		left = base.HOLD.SpearRaised.left,
+	}
+	-- Two resting holds lay over the hotbar with the block arms (the Faceted frames with a wider hand and sleeve).
+	-- Spear guard: the left hand block covered the left third of slot 1 and the shaft ran behind slots 1 and 2. The
+	-- whole guard is 0.3 further left (the right hand stays below the view) and the left hand holds the shaft lower
+	-- (SPEAR_LEFT), so the hand sits in the gap between the vitals and the hotbar and the shaft comes up left of slot 1.
+	-- Bow at the low ready: the string arm's sleeve lay behind slots 1 and 2 (Blocky.BOW_POLE takes it away) and the
+	-- two hand blocks behind slot 1. The bow is 0.12 lower and further left and turned 18 degrees to the left about its
+	-- grip (the nock, behind the grip, swings right: the string hand stays off the vitals while the bow hand leaves the
+	-- hotbar); the arrow still passes above slot 1. Checked by rays from the eye against the HUD's own boxes (hotbar,
+	-- its slots, vitals; each grown by 10 px at 1080 lines) on 16:9 and 16:10 screens at field of view 72: nothing of the
+	-- arms, the bow, the arrow or the spear on them (16:10: under 1 % of the vitals box). The draw, the thrusts and the
+	-- raise start from these and are otherwise the Faceted ones.
+	out.HOLD.Spear = {
+		right = base.HOLD.Spear.right + V(-0.30, -0.02, 0),
+		left = base.HOLD.Spear.left,
+	}
+	out.TOP.SPEAR_LEFT = V(-0.711, -0.939, -1.371)
+	out.HOLD.BowReady = {
+		right = base.HOLD.BowReady.right,
+		left = H(V(-0.703, -1.315, -1.376), V(-0.555, 0.822, 0.128), V(-0.431, -0.153, -0.889)),
 	}
 	-- The right palm faces hand -X: moving the hand frame along its own +X takes the wrist back from the palm.
 	-- OPEN_ITEMS: the items Rig.FACETED_HAND holds on the open hand (keep the two lists the same).

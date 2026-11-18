@@ -1295,9 +1295,18 @@ local function eventLine(now: number): (string?, boolean)
 	if shrinking then
 		return ThreatLine.line({ name = "Border", action = toSpire, seconds = math.max(0, shrinkEnd - elapsed) / ts }, short), false
 	end
+	-- this round's ring may first move before shrinkStart (a big ring creeps in early: ThreatLine.borderMovesAt); it
+	-- is the final closing at shrinkStart that sends everyone to the centre
 	local lead = tonumber(Config.Border.WarningLeadTime) or 30
-	if elapsed < shrinkStart and elapsed >= shrinkStart - lead then
-		return ThreatLine.line({ name = "Border", verb = "moves", action = toSpire, seconds = (shrinkStart - elapsed) / ts }, short), false
+	local movesAt = shrinkStart
+	if type(ThreatLine.borderMovesAt) == "function" then
+		movesAt = math.min(shrinkStart, tonumber(ThreatLine.borderMovesAt()) or shrinkStart)
+	end
+	-- (a head start of under 20 s is announced as the final closing itself, as ArenaService does)
+	local creeping = movesAt < shrinkStart - 20
+	if elapsed < movesAt and elapsed >= movesAt - lead then
+		return ThreatLine.line({ name = "Border", verb = "moves", action = if creeping then nil else toSpire,
+			seconds = (movesAt - elapsed) / ts }, short), false
 	end
 	if GameState:GetAttribute("ArenaEvent") == "Feast" then
 		return ThreatLine.line({ name = "Offering", action = Lore.cap("Spire") .. " is restocked" }, short), false
@@ -1313,7 +1322,8 @@ local function eventLine(now: number): (string?, boolean)
 	elseif beat.key == "Offering" then
 		return ThreatLine.line({ name = "Offering", action = "Fresh gear at " .. Lore.Spire, seconds = seconds }, short), dim
 	elseif beat.key == "BorderMoves" then
-		return ThreatLine.line({ name = "Border", verb = "moves", action = if dim then nil else toSpire, seconds = seconds }, short), dim
+		return ThreatLine.line({ name = "Border", verb = "moves", action = if dim or creeping then nil else toSpire,
+			seconds = seconds }, short), dim
 	end
 	return nil, false
 end

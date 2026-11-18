@@ -6,7 +6,8 @@
 	Four arm styles (Config.Viewmodel.ArmStyle), posed with the same two-bone IK on the same hand frames:
 	- "Blocky" (default): Roblox block arms built from Parts by the sibling module Blocky (Rig.Blocky; no meshes, no
 	  uploads) on the Faceted skeleton and frames, so they are driven by the Faceted code below (rig.faceted holds their
-	  pieces, rig.blocky their settings) and take every Faceted pose. One block per hand (variant A) or a palm, a
+	  pieces, rig.blocky their settings) and take every Faceted pose. Their rig holds the arm blocks, the bandage band
+	  and the held item only (no part-built arms, no key light, no Highlight). One block per hand (variant A) or a palm, a
 	  four-finger block and a thumb (variant B, swapped per shape by rig:setHands). Matte, lit by the engine only: no
 	  key light, no Highlight (rig:setExposure works on their colours), no shade layer.
 	- "Faceted": bare hands and forearms built from chunky flat facets with a charcoal sleeve, the Blender kit
@@ -53,6 +54,7 @@
 	                                      Config.Viewmodel.Blocky's (Variant, Sleeve, ...)
 	rig:setSkin(color, leftColor?)                  the Classic fists, the Faceted and Blocky skin (each side its arm colour)
 	rig:setHands(right?, left?)                     (Faceted, Blocky) the hand shapes: "Relaxed" | "Fist" | "Grip" | "Open"
+	rig:setFloor(floor)                             (Blocky) dark arm colours lifted to at least this (night, open sky)
 	rig:itemHand() -> "Grip" | "Open" | nil         (Faceted) the hand mesh the held item wants
 	rig:setAvatar(character?) -> "Avatar" | "Standard" | "Classic"   (Avatar style) the arms from that character
 	Rig.avatarSignature(character?) -> string       changes when its arms, shirt or arm colours change
@@ -65,7 +67,8 @@
 	rig:setDraw(studs)                              pulls the bow string back (moves the Nock attachment)
 	rig:arrowFrame(handleFrame) -> CFrame?          the nocked arrow's Grip frame (nock on the string, on the shelf)
 	rig:pose(frame)   frame = { right, left = hand frames (world), shoulderRight, shoulderLeft, poleRight, poleLeft,
-	                            up = Vector3, arrow = CFrame? (arrow Grip frame, world) }
+	                            up = Vector3, arrow = CFrame? (arrow Grip frame, world), eye = Vector3? (the camera's
+	                            position: the block arms' upper arm fades out when its elbow is right beside it) }
 	rig:updateView(cameraCFrame, fieldOfView, viewportHeight)   after pose: sizes the bow string for the camera
 	Rig.solveArm(shoulder, target, pole) -> (elbow, wrist)       the two-bone IK the arms use
 	Rig.straightWrist(hand, pivot, up, strictUp, shoulder, pole) -> CFrame   see above
@@ -188,7 +191,9 @@ function Rig.useStyle(style: string, spec: { [string]: any }?)
 		Rig.WRIST = Vector3.zero
 		Rig.HOOK = spec.hook
 		Rig.POLE.Right, Rig.POLE.Left = Rig.FACETED_POLE.Right, Rig.FACETED_POLE.Left
-		Rig.POLE.BowRight, Rig.POLE.BowRightDrawn = Rig.FACETED_POLE.BowRight, Rig.FACETED_POLE.BowRightDrawn
+		-- (the block arms bring their own pole for the string arm at the low ready: Blocky.BOW_POLE)
+		Rig.POLE.BowRight = if typeof(spec.bowPole) == "Vector3" then spec.bowPole else Rig.FACETED_POLE.BowRight
+		Rig.POLE.BowRightDrawn = Rig.FACETED_POLE.BowRightDrawn
 		Rig.GRIP.Right, Rig.GRIP.Left = spec.grip.Right, spec.grip.Left
 		Rig.GRIP_POINT.Right, Rig.GRIP_POINT.Left = spec.grip.Right.Position, spec.grip.Left.Position
 		Rig.BOW_GRIP = spec.bowGrip
@@ -810,55 +815,65 @@ function Rig.new(skin: Color3?, style: string?, armOptions: { [string]: any }?)
 	self.itemHidden = false
 	self.arrowHidden = false
 	self.draw = 0
+	-- The block arms are built whole by Blocky.build, which cannot fail, so they need nothing the older styles keep
+	-- at hand: not the part-built arms (the other styles' fallback), not the lamp, not the Highlight. Their viewmodel
+	-- holds the arm blocks, the bandage band and the held item, and nothing else.
+	local blockArms = self.style == "Blocky"
 	for _, side in ipairs({ "Right", "Left" }) do
 		local s = if side == "Right" then 1 else -1
 		local arm = { side = side, hand = {}, solved = CFrame.identity }
-		arm.upper = newPart(self.model, side .. "UpperArm", Enum.PartType.Cylinder, Vector3.new(Rig.UPPER_ARM, 0.44, 0.44), SLEEVE, Enum.Material.Fabric)
-		arm.elbow = newPart(self.model, side .. "Elbow", Enum.PartType.Ball, Vector3.new(0.43, 0.43, 0.43), SLEEVE, Enum.Material.Fabric)
-		arm.fore = newPart(self.model, side .. "Forearm", Enum.PartType.Cylinder, Vector3.new(Rig.FOREARM, 0.38, 0.38), SLEEVE, Enum.Material.Fabric)
-		arm.cuff = newPart(self.model, side .. "Cuff", Enum.PartType.Cylinder, Vector3.new(0.14, 0.42, 0.42), CUFF, Enum.Material.Fabric)
-		for _, spec in ipairs(HAND_PARTS) do
-			local p = newPart(self.model, side .. spec.name, Enum.PartType.Block, spec.size, self.skin, Enum.Material.SmoothPlastic)
-			local offset = CFrame.new(spec.x * s, spec.y, spec.z) * CFrame.Angles(0, math.rad((spec.yaw or 0) * s), 0)
-			table.insert(arm.hand, { part = p, offset = offset, shade = spec.shade })
+		if not blockArms then
+			arm.upper = newPart(self.model, side .. "UpperArm", Enum.PartType.Cylinder, Vector3.new(Rig.UPPER_ARM, 0.44, 0.44), SLEEVE, Enum.Material.Fabric)
+			arm.elbow = newPart(self.model, side .. "Elbow", Enum.PartType.Ball, Vector3.new(0.43, 0.43, 0.43), SLEEVE, Enum.Material.Fabric)
+			arm.fore = newPart(self.model, side .. "Forearm", Enum.PartType.Cylinder, Vector3.new(Rig.FOREARM, 0.38, 0.38), SLEEVE, Enum.Material.Fabric)
+			arm.cuff = newPart(self.model, side .. "Cuff", Enum.PartType.Cylinder, Vector3.new(0.14, 0.42, 0.42), CUFF, Enum.Material.Fabric)
+			for _, spec in ipairs(HAND_PARTS) do
+				local p = newPart(self.model, side .. spec.name, Enum.PartType.Block, spec.size, self.skin, Enum.Material.SmoothPlastic)
+				local offset = CFrame.new(spec.x * s, spec.y, spec.z) * CFrame.Angles(0, math.rad((spec.yaw or 0) * s), 0)
+				table.insert(arm.hand, { part = p, offset = offset, shade = spec.shade })
+			end
 		end
 		self.arms[side] = arm
 	end
 	self:setSkin(self.skin)
-	-- (Avatar arms) the light ViewmodelController.Shade puts on them: a key light above the arms (moved with them,
-	-- frame.key) and the exposure, the whole viewmodel darkened toward the scene's level (Rig:setExposure). The key's
-	-- part lives in the workspace while the arms are shown (rig:setKeyParent): a light inside the camera gives no light.
-	self.keyAnchor = newPart(self.model, "ViewmodelKeyLight", Enum.PartType.Block, Vector3.new(0.05, 0.05, 0.05), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic)
-	self.keyAnchor.Transparency = 1
-	self.keyAnchor.Parent = nil
-	local key = Instance.new("SpotLight")
-	key.Name = "Key"
-	key.Face = Enum.NormalId.Front
-	key.Shadows = false
-	key.Brightness = 0
-	key.Enabled = false
-	key.Parent = self.keyAnchor
-	self.key = key
-	local exposure = Instance.new("Highlight")
-	exposure.Name = "Exposure"
-	exposure.FillColor = Color3.new(0, 0, 0)
-	exposure.FillTransparency = 1
-	exposure.OutlineTransparency = 1
-	exposure.DepthMode = Enum.HighlightDepthMode.Occluded
-	exposure.Enabled = false
-	exposure.Adornee = self.model
-	exposure.Parent = self.model
-	self.exposure = exposure
+	self.keyAnchor = nil
+	self.key = nil
+	self.exposure = nil
+	if not blockArms then
+		-- (Avatar arms) the light ViewmodelController.Shade puts on them: a key light above the arms (moved with them,
+		-- frame.key) and the exposure, the whole viewmodel darkened toward the scene's level (Rig:setExposure). The key's
+		-- part lives in the workspace while the arms are shown (rig:setKeyParent): a light inside the camera gives no light.
+		self.keyAnchor = newPart(self.model, "ViewmodelKeyLight", Enum.PartType.Block, Vector3.new(0.05, 0.05, 0.05), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic)
+		self.keyAnchor.Transparency = 1
+		self.keyAnchor.Parent = nil
+		local key = Instance.new("SpotLight")
+		key.Name = "Key"
+		key.Face = Enum.NormalId.Front
+		key.Shadows = false
+		key.Brightness = 0
+		key.Enabled = false
+		key.Parent = self.keyAnchor
+		self.key = key
+		local exposure = Instance.new("Highlight")
+		exposure.Name = "Exposure"
+		exposure.FillColor = Color3.new(0, 0, 0)
+		exposure.FillTransparency = 1
+		exposure.OutlineTransparency = 1
+		exposure.DepthMode = Enum.HighlightDepthMode.Occluded
+		exposure.Enabled = false
+		exposure.Adornee = self.model
+		exposure.Parent = self.model
+		self.exposure = exposure
+	end
 	self.exposureLevel = 1
 	-- (Avatar arms) the bandage wound onto the left forearm while bandaging (Rig:setWrap)
 	self.wrapBand = newPart(self.model, "WrapBand", Enum.PartType.Block, Vector3.new(0.5, 0.05, 0.5), Color3.fromRGB(236, 232, 222), Enum.Material.Fabric)
 	self.wrapLength = 0
-	if self.style == "Blocky" and Blocky then
+	if blockArms then
 		-- block arms built from Parts, in the shape buildFaceted returns: the Faceted code below drives them. Nothing is
-		-- laid over them and no lamp is lit for them: the Highlight is taken out of the viewmodel, the key light's part
-		-- never enters the workspace (ViewmodelController) and rig:setExposure works on their colours.
+		-- laid over them and no lamp is lit for them: their rig has no Highlight and no key light at all, and
+		-- rig:setExposure works on their colours.
 		self.faceted, self.facetedSpec, self.blocky = Blocky.build(self.model, armOptions or Rig.Options.Blocky)
-		exposure.Parent = nil
 	end
 	if self.style == "Faceted" then
 		local arms, spec = buildFaceted(self.model)
@@ -929,6 +944,9 @@ end
 
 -- Where the key light's part lives (the workspace while the arms are shown, nil otherwise; nil also switches it off).
 function Rig:setKeyParent(parent: Instance?)
+	if not self.keyAnchor then
+		return -- (the block arms have no lamp)
+	end
 	self.keyAnchor.Parent = parent
 	if not parent then
 		self.key.Enabled = false
@@ -948,6 +966,13 @@ function Rig:setExposure(level: number)
 	end
 	self.exposure.Enabled = level < 0.995
 	self.exposure.FillTransparency = level
+end
+
+-- (Blocky) dark arm colours lifted to at least `floor` in their brightest channel (0: as they are): Blocky.setFloor.
+function Rig:setFloor(floor: number)
+	if self.blocky and Blocky then
+		Blocky.setFloor(self.faceted, self.blocky, floor)
+	end
 end
 
 -- (Avatar arms) how much bandage is wound onto the left forearm, studs along it from just behind the wrist (0: none).
@@ -1261,7 +1286,9 @@ function Rig:_rebuild()
 			table.insert(parts, p)
 		end
 	end
-	table.insert(parts, self.keyAnchor)
+	if self.keyAnchor then
+		table.insert(parts, self.keyAnchor)
+	end
 	table.insert(parts, self.wrapBand)
 	self.parts = parts
 	self.cframes = table.create(#parts, PARKED)
@@ -1289,7 +1316,9 @@ function Rig:setItem(itemId: string?, hand: string?)
 	if itemId then
 		local ok, model = pcall(Rig.ItemModels.build, itemId, "view")
 		if ok and typeof(model) == "Instance" and model:IsA("Model") and model.PrimaryPart then
-			local info = prepareItem(model, ITEM_SCALE[itemId])
+			-- (the block arms have their own scale and place for a few things: Blocky.ITEM_SCALE, PALM_HOLD, ITEM_HOLD)
+			local own = if self.blocky then Blocky else nil
+			local info = prepareItem(model, (own and own.ITEM_SCALE[itemId]) or ITEM_SCALE[itemId])
 			info.itemId = itemId
 			info.hand = if hand == "Left" then "Left" else "Right"
 			if self.faceted then
@@ -1297,9 +1326,10 @@ function Rig:setItem(itemId: string?, hand: string?)
 				local shape = Rig.FACETED_HAND[itemId] or "Grip"
 				info.handShape = shape
 				if shape == "Open" then
-					info.hold = Rig.GRIP[info.hand]:Inverse() * Rig.PALM[info.hand] * (Rig.FACETED_PALM_HOLD[itemId] or CFrame.identity)
+					local onPalm = (own and own.PALM_HOLD[itemId]) or Rig.FACETED_PALM_HOLD[itemId] or CFrame.identity
+					info.hold = Rig.GRIP[info.hand]:Inverse() * Rig.PALM[info.hand] * onPalm
 				else
-					info.hold = Rig.FACETED_ITEM_HOLD[itemId] or CFrame.identity
+					info.hold = (own and own.ITEM_HOLD[itemId]) or Rig.FACETED_ITEM_HOLD[itemId] or CFrame.identity
 				end
 			else
 				info.hold = (if Rig.STYLE == "Avatar" then Rig.AVATAR_ITEM_HOLD[itemId] else nil) or ITEM_HOLD[itemId] or CFrame.identity
@@ -1487,6 +1517,19 @@ function Rig:pose(frame: { [string]: any })
 			zU = if zU.Magnitude > 1e-4 then zU.Unit else zF
 			local upperCF = CFrame.fromMatrix(from, upper:Cross(zU), upper, zU)
 			local foreCF = CFrame.fromMatrix(elbow, fore:Cross(zF), fore, zF)
+			if self.blocky and Blocky and frame.eye then
+				-- (block arms) an upper arm right beside the eye (a high wind-up, a high cut with the elbow out) would
+				-- fill the side of the view with one flat sleeve face: it fades out as its elbow comes close to the eye
+				local d = (elbow - frame.eye).Magnitude
+				local hide = math.clamp((Blocky.NEAR_SHOW - d) / math.max(Blocky.NEAR_SHOW - Blocky.NEAR_HIDE, 0.01), 0, 1)
+				hide = math.floor(hide * 20 + 0.5) / 20
+				if hide ~= fa.upperHide then
+					fa.upperHide = hide
+					for _, p in ipairs(fa.upper.parts) do
+						p.LocalTransparencyModifier = hide
+					end
+				end
+			end
 			if not right then
 				local centre = wrist - fore * (Rig.WRAP_FROM + self.wrapLength / 2)
 				if self.blocky then
@@ -1586,8 +1629,10 @@ function Rig:pose(frame: { [string]: any })
 			cframes[i] = handle * offset
 		end
 	end
-	i += 1
-	cframes[i] = if typeof(frame.key) == "CFrame" then frame.key else PARKED
+	if self.keyAnchor then
+		i += 1
+		cframes[i] = if typeof(frame.key) == "CFrame" then frame.key else PARKED
+	end
 	i += 1
 	cframes[i] = wrapAt or PARKED
 	workspace:BulkMoveTo(self.parts, cframes, Enum.BulkMoveMode.FireCFrameChanged)
@@ -1635,8 +1680,12 @@ end
 
 function Rig:destroy()
 	self.model:Destroy()
-	self.keyAnchor:Destroy()
-	self.exposure:Destroy() -- (the block arms keep it outside the model)
+	if self.keyAnchor then
+		self.keyAnchor:Destroy() -- (it may be in the workspace)
+	end
+	if self.exposure then
+		self.exposure:Destroy()
+	end
 end
 
 return Rig

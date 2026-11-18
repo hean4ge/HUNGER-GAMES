@@ -4,9 +4,10 @@
 	Visible only in first person, in the arena, alive and not spectating. The arms (Config.Viewmodel.ArmStyle) are the
 	block arms ("Blocky", the default: a Roblox character's arms, square blocks built from Parts by the child module
 	Blocky, the hands in the avatar's own arm colours, a plain sleeve; matte and lit by the engine alone: no lamp, no
-	Highlight, no Shade. Config.Viewmodel.Blocky picks the hand, one block or a palm with a finger block and a thumb,
-	and the sleeve. They stand on the faceted arms' skeleton and take their poses, with their own rest, guard and
-	open-hand frames, Blocky.poses), the
+	Highlight, no layer over them. Config.Viewmodel.Blocky picks the hand, one block or a palm with a finger block and a
+	thumb, and the sleeve; its Shade values bring pale arm colours down toward the scene's level at dusk, at night and
+	under trees, by colour alone. They stand on the faceted arms' skeleton and take their poses, with their own rest,
+	guard and open-hand frames, Blocky.poses), the
 	faceted Blender arms ("Faceted": bare skin in the avatar's arm colours, a charcoal sleeve; one hand mesh
 	per side at a time, Rig:setHands: relaxed when the hands are empty, a fist only while punching (raised on Attack,
 	held as a guard Config.Viewmodel.GuardHold seconds after the last punch, then lowered out of view and relaxed),
@@ -37,9 +38,12 @@
 	climbing, mantling or swimming. The spear rests in a low guard across the body with the left hand on the shaft.
 	Empty hands: relaxed and low; the fists come up only for a punch and the short guard after it (Blocky, Faceted; the
 	older styles keep the fists up).
-	V zoom (ClientState.zoomAlpha, written by CameraController): free hands and whatever they hold sink out of the
-	bottom of the view early in the zoom and come back as it lets go (a zoomed view would draw them several times
-	larger); a hand that is busy stays up.
+	V zoom (ClientState.zoomAlpha and zoomMag, written by CameraController): free hands and whatever they hold sink out
+	of the bottom of the view early in the zoom and come back as it lets go (a zoomed view would draw them several
+	times larger); a hand that is busy stays up, except that a swing, a throw, a use or a draw begun under the zoom
+	keeps the hands down until the view has eased most of the way back (ZOOM_BUSY_MAG).
+	Field of view setting: the holds are drawn for Config.Camera.BaseFov. At another setting each arm is moved as one
+	piece so that its hand keeps its place on screen, clear of the hotbar and the vitals (fovFit).
 
 	API
 	  ViewmodelController.setArms(style?, options?) -> string   rebuilds the arms: another style, or (Blocky) other
@@ -91,6 +95,24 @@ local ZOOM_SINK_FROM = 0.04
 local ZOOM_SINK_BY = 0.3
 local ZOOM_SINK_RATE = 20 -- 1/s: how fast the hands go down ...
 local ZOOM_RISE_RATE = 12 -- ... and come back
+-- A swing, a throw, a use or a draw ends the zoom (CameraController), but the view takes a moment to ease back out.
+-- Hands that came up at once showed two times too large for those frames (a sword swung under the zoom). So busy
+-- hands that are down stay down while the zoom still magnifies more than this, and rise from there.
+local ZOOM_BUSY_MAG = 1.2
+-- The field-of-view setting. Every hold is drawn for BASE_FOV (72): the hand frames are fixed in camera space while the
+-- HUD is fixed on screen, so at a wider setting the hands slid in over the hotbar and the vitals (at 100 the bow arm
+-- covered most of the hotbar) and at 55 the resting hands left the view. Each arm (its hand, shoulder and what it
+-- holds) is therefore moved sideways and up or down as one piece, by (k - 1) x its hand's own x and y in camera space,
+-- k = tan(setting / 2) / tan(BASE_FOV / 2): the hand then sits where it does at the base setting, and only looks
+-- smaller or larger, as the world does. Hands that work together move together, by the leading hand's offset (the bow
+-- hand and the hand on its string; the hand forward on a spear's shaft; the forearm a bandage is wound round).
+-- At a narrower setting the hands draw larger, and a hand held at its place would grow over the HUD beside it: there it
+-- keeps its outer, lower side instead, FIT_EDGE studs out from its frame. Measured on a 16:9 screen with the HUD's own
+-- boxes: at 90 and 100 every resting hold is as clear of the hotbar and the vitals as at 72; at 55 the hands stay in
+-- view and off the hotbar (the bow and the spear touch the vitals' end there).
+local BASE_FOV = (Config.Camera and tonumber(Config.Camera.BaseFov)) or 72
+local FIT_EDGE = 0.4
+local FIT_LEAD_RATE = 14 -- 1/s: how fast an arm passes from its own offset to the leading hand's and back
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
 local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
 local USE_STYLE: { [string]: string } = {
@@ -118,7 +140,7 @@ local springs = {
 	kick = Spring.new(0, 18, 0.55), -- push back along the view
 	string = Spring.new(0, 42, 0.3), -- bow string snap with a little overshoot
 }
-local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0, zoom = 0 }
+local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0, zoom = 0, lead = 0 }
 local lastPunchAt = -10 -- (Blocky, Faceted) when the last punch started (the guard is held GUARD_HOLD after it)
 
 local equipStart = -10
@@ -160,6 +182,22 @@ end
 
 local function about(pivot: Vector3, rotation: CFrame): CFrame
 	return CFrame.new(pivot) * rotation * CFrame.new(-pivot)
+end
+
+-- How much wider (or narrower) the view is than the one the holds are drawn for: tan(setting / 2) / tan(BASE_FOV / 2).
+local function fovFit(): number
+	local settings = ClientState.settings
+	local fov = math.clamp(tonumber(settings and settings.fov) or BASE_FOV, 40, 110)
+	return math.tan(math.rad(fov) / 2) / math.tan(math.rad(BASE_FOV) / 2)
+end
+
+-- How far an arm moves (camera space) for its hand at `position` to keep its place on screen at fit k (fovFit).
+local function fitOffset(position: Vector3, k: number): Vector3
+	local offset = Vector3.new(position.X, position.Y, 0) * (k - 1)
+	if k < 1 then
+		offset += Vector3.new(math.sign(position.X) * FIT_EDGE, -FIT_EDGE, 0) * (1 - k)
+	end
+	return offset
 end
 
 local function holdKindFor(def: any): string
@@ -499,9 +537,16 @@ local function update(dt: number)
 	-- V zoom: free hands sink out of view as the zoom comes on and come back as it goes (ZOOM_SINK_*), and whatever
 	-- still shows moves less (the zoomed view draws every movement larger)
 	local zoom = math.clamp(tonumber(ClientState.zoomAlpha) or 0, 0, 1)
-	local sink = if busy then 0 else Poses.smooth(math.clamp((zoom - ZOOM_SINK_FROM) / (ZOOM_SINK_BY - ZOOM_SINK_FROM), 0, 1))
+	-- (CameraController publishes the zoom's magnification, 1 = none; without it, a guess from the alpha)
+	local zoomMag = tonumber((ClientState :: any).zoomMag)
+	local sink = Poses.smooth(math.clamp((zoom - ZOOM_SINK_FROM) / (ZOOM_SINK_BY - ZOOM_SINK_FROM), 0, 1))
+	if busy then
+		-- busy hands come up, but not into a view that is still magnified (ZOOM_BUSY_MAG): there they stay as they are
+		local mag = if zoomMag and zoomMag >= 1 then zoomMag else 1 + 1.5 * zoom
+		sink = if mag > ZOOM_BUSY_MAG then alpha.zoom else 0
+	end
 	approach("zoom", sink, if sink > alpha.zoom then ZOOM_SINK_RATE else ZOOM_RISE_RATE, dt)
-	local zoomCalm = 1 - 0.7 * zoom
+	local zoomCalm = if zoomMag and zoomMag >= 1 then 1 / zoomMag else 1 - 0.7 * zoom
 	approach("sprint", if moveState == "Sprint" and grounded and not busy then 1 else 0, 9, dt)
 	approach("slide", if moveState == "Slide" then 1 else 0, 10, dt)
 	approach("lower", if LOWER_MOVES[moveState] then 1 else 0, 8, dt)
@@ -569,6 +614,7 @@ local function update(dt: number)
 
 	-- The spear is held in both hands until it's raised to throw (the avatar arms let go with the left for a stab:
 	-- Poses.spearLetGo)
+	local onShaft = 0 -- (how far the left hand is on the spear's shaft, 0..1)
 	if heldKind == "Spear" and raised < 1 and not rig.itemHidden then
 		local shaft = Poses.spearLeft(right * Rig.GRIP.Right, Poses.SPEAR_REACH or SPEAR_REACH, Rig.GRIP_POINT.Left, Poses.SPEAR_LEFT)
 		local free = Poses.spearRaiseLetGo(raised)
@@ -576,6 +622,7 @@ local function update(dt: number)
 			free = math.max(free, Poses.spearLetGo(anim.t, anim.windup, anim.strike, anim.total))
 		end
 		left = shaft:Lerp(left, free)
+		onShaft = 1 - free
 	end
 
 	-- Eating, drinking, bandaging, putting on armor (Poses.applyUse: the use poses, their blend from the hold, the wrists)
@@ -803,15 +850,30 @@ local function update(dt: number)
 		rig:setHands(rightShape, leftShape)
 	end
 
+	-- The field-of-view setting (fovFit): each arm moved as one piece so that its hand keeps its place on screen; the
+	-- right arm goes with the left hand where the left hand leads (the bow, the spear's shaft, the bandage wrap)
+	local fitRight, fitLeft = Vector3.zero, Vector3.zero
+	local fit = fovFit()
+	local lead = if heldKind == "Bow" then (if bowHooked then 1 else 0)
+		elseif heldKind == "Spear" then onShaft
+		elseif style == "Wrap" then Poses.smooth(alpha.use)
+		else 0
+	approach("lead", lead, FIT_LEAD_RATE, dt)
+	if math.abs(fit - 1) > 0.004 then
+		fitLeft = fitOffset(left.Position, fit)
+		fitRight = fitOffset(right.Position, fit):Lerp(fitLeft, alpha.lead)
+	end
+
 	local frame = {
-		right = camCF * (M * right),
-		left = camCF * (M * left),
-		shoulderRight = camCF * (M * Rig.SHOULDER.Right),
-		shoulderLeft = camCF * (M * Rig.SHOULDER.Left),
+		right = camCF * (M * (right + fitRight)),
+		left = camCF * (M * (left + fitLeft)),
+		shoulderRight = camCF * (M * (Rig.SHOULDER.Right + fitRight)),
+		shoulderLeft = camCF * (M * (Rig.SHOULDER.Left + fitLeft)),
 		poleRight = camCF:VectorToWorldSpace(M:VectorToWorldSpace(poleRight)),
 		poleLeft = camCF:VectorToWorldSpace(M:VectorToWorldSpace(leftPole)),
 		up = camCF.UpVector,
-		arrow = if arrowCam then camCF * (M * arrowCam) else nil,
+		eye = camCF.Position,
+		arrow = if arrowCam then camCF * (M * (arrowCam + fitLeft)) else nil,
 		lock = lock,
 		key = key,
 	}
@@ -837,8 +899,10 @@ function ViewmodelController.Init(registry)
 end
 
 -- Builds the arms (a Rig of that style) with their poses and their light. The avatar and faceted arms keep Shade. The
--- block arms are lit by the engine alone: no Shade and no lamp. Only if Config.Viewmodel.Blocky.Shade is given does
--- Shade run for them, with those values and KeyBrightness forced to 0, darkening them by colour (Rig:setExposure).
+-- block arms are lit by the engine alone: no lamp, no Highlight, no layer. With Config.Viewmodel.Blocky.Shade (a table
+-- of Shade's darkening values; armOptions.Shade replaces it, false switches it off) Shade's look at the light round the
+-- eye runs for them too, but all it does is bring their own colours down (Rig:setExposure -> Blocky.setExposure):
+-- KeyBrightness is forced to 0 and Shade returns before its key light for block arms.
 local function makeRig(style: string, armOptions: { [string]: any }?)
 	local skin, skinLeft = skinColor()
 	rig = Rig.new(skin, style, armOptions)
@@ -850,7 +914,13 @@ local function makeRig(style: string, armOptions: { [string]: any }?)
 		Poses.STYLES.Blocky = Rig.Blocky.poses(Poses, rig.blocky) -- (Poses.FACETED with the block arms' changes)
 	end
 	Poses.useStyle(Rig.STYLE)
-	local blockyShade = if rig.blocky then (armOptions and armOptions.Shade) or (VIEWMODEL.Blocky or {}).Shade else nil
+	local blockyShade: any = nil
+	if rig.blocky then
+		blockyShade = armOptions and armOptions.Shade
+		if blockyShade == nil then
+			blockyShade = (VIEWMODEL.Blocky or {}).Shade
+		end
+	end
 	if rig.style == "Avatar" or rig.style == "Faceted" then
 		Shade.Options = VIEWMODEL.Shade or {}
 		shade = Shade.new(rig)

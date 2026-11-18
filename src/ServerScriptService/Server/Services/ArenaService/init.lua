@@ -23,6 +23,19 @@
 	    (FinalSpireGap studs past the Spire's base, open plaza, picked per round); outside the Last Stand ring the
 	    damage rises with every second spent outside, and the border never takes the last contender standing (outside
 	    practice). GameState.LastStand = true while the finale runs.
+	  * The arena's own numbers (docs/design/Map1Build.md, decisions 11 and 14) come from Config (laid over it from
+	    Config.Maps[Config.Map]) and from Shared.ArenaLayout, never from constants here:
+	    - The wall never moves faster than Config.Border.MaxShrinkSpeed (studs a second of round time, the slide of its
+	      centre included). The shrink always ends at ShrinkStartTime + ShrinkDuration; a ring too big to close in
+	      ShrinkDuration at that speed starts earlier, as early as it must. Each round's own times are published at
+	      the Countdown as GameState BorderShrinkStart / BorderShrinkEnd (round-schedule seconds; ThreatLine and the
+	      HUD's event line read them). GameState.BorderShrinking keeps its meaning and its time: it turns true at
+	      ShrinkStartTime, the final closing (music, the wall's pulse, the event line, a list-only Roll Call). A ring
+	      that started earlier is only creeping until then: BorderRadius falls, a warning says so, nothing else changes.
+	    - Where the Last Stand closes: one of the layout's LastStandPoints when it names them; else, when the layout
+	      has Heart.mouths (Map 1), a point 90 to 100 studs out on the centre line of a mouth's open lane; else the
+	      classic rule above (PlazaRadius, AssetInfo.Spire.r, FinalSpireGap).
+	    - A layout whose Map field is not Config.Map gets one warning at start-up.
 	API:
 	  ArenaService.isInsideBorder(position: Vector3) -> boolean   (always true outside Active)
 	  ArenaService.getFallen() -> { string }                       this round's fallen, in order
@@ -78,6 +91,7 @@ local BorderCfg = Config.Border
 local EventsCfg = Config.Events
 
 local TICK = 0.2 -- border, events and time-base checks per second: 5 (clients animate the clock every frame)
+local EARLY_START = 20 -- seconds before ShrinkStartTime from which a ring's first movement gets its own "slowly" warnings
 
 local ArenaService = {}
 
@@ -91,6 +105,8 @@ local trackedRound = nil
 local borderCenter = Vector3.new(ArenaLayout.Center.X, ArenaLayout.BaseHeight, ArenaLayout.Center.Z)
 local baseCenter = borderCenter -- the Spire: where the ring starts
 local finalCenter: Vector3? = nil -- QW14: where it closes (beside the Spire, picked once per round)
+local shrinkStartAt = BorderCfg.ShrinkStartTime -- this round's first movement, round-schedule seconds (<= ShrinkStartTime)
+local shrinkRound: any = nil -- the RoundId shrinkStartAt was worked out for (nil outside a round)
 local borderRadius = BorderCfg.StartRadius
 local warned = {}
 local clockKey = nil -- identifies the published time base (avoids re-publishing an identical one)
@@ -101,6 +117,7 @@ local rollCallSeq = 0
 local function newEvents()
 	return {
 		borderWarned = false,
+		borderCreeping = false, -- a big ring's early, slow start has been announced
 		borderMoving = false,
 		borderClosed = false,
 		feastWarned = false,
@@ -264,11 +281,54 @@ local function startRadius(): number
 	return BorderCfg.StartRadius
 end
 
+-- Where the layout says the Last Stand may close (Map1Build.md decision 11: on turf, never on the platform):
+--   LastStandPoints   Vector3 points on open ground, when the layout names them;
+--   Heart.mouths      (Map 1) the open lane in front of each of the Horn's mouths: a point LAST_STAND_LANE studs out on
+--                     the lane's centre line, clear of the platform, the steps and the flower beds.
+-- nil when the layout has neither: pickFinalCenter then keeps the classic rule.
+local LAST_STAND_LANE = { 90, 100 }
+
+local function layoutLastStandPoints(center: Vector3): { Vector3 }?
+	local layout = ArenaLayout :: any
+	local list = {}
+	if type(layout.LastStandPoints) == "table" then
+		for _, p in ipairs(layout.LastStandPoints) do
+			if typeof(p) == "Vector3" then
+				table.insert(list, Vector3.new(p.X, center.Y, p.Z))
+			end
+		end
+	end
+	if #list > 0 then
+		return list
+	end
+	local mouths = if type(layout.Heart) == "table" then layout.Heart.mouths else nil
+	if type(mouths) == "table" then
+		for _, mouth in ipairs(mouths) do
+			local bearing = if type(mouth) == "table" then tonumber(mouth.bearing) else nil
+			if bearing then
+				local lane = if type(mouth.lane) == "table" then mouth.lane else {}
+				local low = math.max(LAST_STAND_LANE[1], (tonumber(lane.fromR) or 0) + 4)
+				local high = math.min(LAST_STAND_LANE[2], (tonumber(lane.toR) or math.huge) - 4)
+				if high >= low then
+					local d = rng:NextNumber(low, high)
+					local a = math.rad(bearing)
+					table.insert(list, Vector3.new(center.X + math.sin(a) * d, center.Y, center.Z - math.cos(a) * d))
+				end
+			end
+		end
+	end
+	return if #list > 0 then list else nil
+end
+
 -- QW14: close it beside the Spire, not on it: open, level plaza ground FinalSpireGap studs past the Spire's base, so
--- nobody can circle the monolith in the last fight.
+-- nobody can circle the monolith in the last fight. A layout that says where (above) is followed instead.
 local function pickFinalCenter(center: Vector3): Vector3
 	if not lastStandOn() then
 		return center
+	end
+	local points = layoutLastStandPoints(center)
+	if points then
+		return points[rng:NextInteger(1, #points)]
 	end
 	local info = ArenaLayout.AssetInfo and ArenaLayout.AssetInfo.Spire
 	local spireR = tonumber(info and info.r) or 20
@@ -309,23 +369,63 @@ local function ensureFinalCenter(): Vector3
 	return finalCenter :: Vector3
 end
 
+-- The shrink as Config times it: (ShrinkStartTime, the second it has closed), round-schedule seconds.
+local function nominalShrink(): (number, number)
+	local start = BorderCfg.ShrinkStartTime
+	return start, start + math.max(1, BorderCfg.ShrinkDuration)
+end
+
+-- Map1Build.md decision 11: the wall never moves faster than Config.Border.MaxShrinkSpeed. The shrink ends when Config
+-- says; a ring too big to close in ShrinkDuration at that speed starts earlier, as early as it must (never later than
+-- ShrinkStartTime, never before the horn). The distance is the radius it loses plus the slide of its centre to the
+-- Last Stand point: the far side of the wall moves by both.
+local function computeShrinkStart(): number
+	local nominalStart, closeAt = nominalShrink()
+	local speed = tonumber(BorderCfg.MaxShrinkSpeed)
+	if not speed or speed <= 0 then
+		return nominalStart
+	end
+	local travel = math.max(0, startRadius() - BorderCfg.FinalRadius)
+	if lastStandOn() then
+		local final = ensureFinalCenter()
+		travel += Vector3.new(final.X - baseCenter.X, 0, final.Z - baseCenter.Z).Magnitude
+	end
+	return math.clamp(closeAt - travel / speed, 0, nominalStart)
+end
+
+-- This round's shrink: (first movement, closed). Equal to nominalShrink() unless the ring had to start early.
+local function shrinkWindow(): (number, number)
+	local _, closeAt = nominalShrink()
+	return math.min(shrinkStartAt, closeAt - 1), closeAt
+end
+
+-- Works out this round's shrink and publishes it (the Countdown, once the start radius and the Last Stand point are
+-- known; clients count down to GameState.BorderShrinkStart).
+local function planShrink()
+	shrinkStartAt = computeShrinkStart()
+	shrinkRound = trackedRound
+	local _, closeAt = nominalShrink()
+	setAttr("BorderShrinkStart", math.floor(shrinkStartAt * 10 + 0.5) / 10)
+	setAttr("BorderShrinkEnd", closeAt)
+end
+
 local function centerAt(elapsed: number): Vector3
 	if not lastStandOn() then
 		return baseCenter
 	end
-	local t = math.clamp((elapsed - BorderCfg.ShrinkStartTime) / math.max(1, BorderCfg.ShrinkDuration), 0, 1)
+	local start, closeAt = shrinkWindow()
+	local t = math.clamp((elapsed - start) / math.max(1, closeAt - start), 0, 1)
 	return baseCenter:Lerp(ensureFinalCenter(), t)
 end
 
 local function radiusAt(elapsed: number): number
 	local r0 = startRadius()
-	local start = BorderCfg.ShrinkStartTime
+	local start, closeAt = shrinkWindow()
 	if elapsed <= start then
 		return r0
 	end
-	local closeAt = start + math.max(1, BorderCfg.ShrinkDuration)
 	if elapsed <= closeAt or not lastStandOn() then
-		local t = math.clamp((elapsed - start) / math.max(1, BorderCfg.ShrinkDuration), 0, 1)
+		local t = math.clamp((elapsed - start) / math.max(1, closeAt - start), 0, 1)
 		return r0 + (BorderCfg.FinalRadius - r0) * t
 	end
 	-- the Last Stand: from FinalRadius to nothing (to the practice floor in a practice round)
@@ -351,6 +451,14 @@ local function resetBorder()
 	borderCenter = baseCenter
 	if getPhase() == "Countdown" then
 		ensureFinalCenter()
+		planShrink()
+	else
+		-- no round: Config's own times
+		local nominalStart, closeAt = nominalShrink()
+		shrinkStartAt = nominalStart
+		shrinkRound = nil
+		setAttr("BorderShrinkStart", nominalStart)
+		setAttr("BorderShrinkEnd", closeAt)
 	end
 	local r0 = startRadius()
 	publishBorder(r0, r0, false)
@@ -358,26 +466,44 @@ local function resetBorder()
 end
 
 local function updateBorder(elapsed: number)
+	if shrinkRound ~= trackedRound then
+		planShrink() -- (a round whose Countdown this loop never saw)
+	end
 	local scale = timeScale()
-	local shrinkStart = BorderCfg.ShrinkStartTime
-	local shrinkEnd = shrinkStart + BorderCfg.ShrinkDuration
+	-- finalStart: Config.Border.ShrinkStartTime, the final closing (GameState.BorderShrinking). shrinkStart: when this
+	-- round's ring first moves; earlier than finalStart only for a ring too big to close in time at MaxShrinkSpeed.
+	local finalStart = BorderCfg.ShrinkStartTime
+	local shrinkStart, shrinkEnd = shrinkWindow()
+	-- "early" only for a real head start: a ring that begins a few seconds before finalStart is announced as usual
+	-- (its own "moves" warning, then "is moving" at finalStart), not with three warnings in half a minute
+	local early = shrinkStart < finalStart - EARLY_START
+	local slowly = "Slowly at first · keep inside the ring"
 	if not ev.borderWarned and elapsed >= shrinkStart - BorderCfg.WarningLeadTime and elapsed < shrinkStart then
 		ev.borderWarned = true
 		local seconds = math.max(1, math.ceil((shrinkStart - elapsed) / scale))
-		local toSpire = "Head for " .. lore("Spire", "the Spire")
-		local title, sub = headline({ name = "Border", verb = "moves", action = toSpire, seconds = seconds },
-			string.format("THE BORDER MOVES IN %d SECONDS", seconds), toSpire)
+		local action = if early then slowly else "Head for " .. lore("Spire", "the Spire")
+		local title, sub = headline({ name = "Border", verb = "moves", action = action, seconds = seconds },
+			string.format("THE BORDER MOVES IN %d SECONDS", seconds), action)
 		announce({ style = "Warning", text = title, sub = sub, duration = 6 })
 		Sfx.play("BorderWarning")
 	end
+	if early and not ev.borderCreeping and elapsed >= shrinkStart and elapsed < finalStart then
+		ev.borderCreeping = true
+		ev.borderWarned = true
+		local title, sub = headline({ name = "Border", verb = "is moving", action = slowly }, "THE BORDER IS MOVING", slowly)
+		announce({ style = "Warning", text = title, sub = sub, duration = 5 })
+		Sfx.play("BorderWarning")
+	end
 	local lastStand = lastStandOn()
-	local shrinking = elapsed >= shrinkStart
+	local shrinking = elapsed >= finalStart
 		and elapsed < (if lastStand then shrinkEnd + (BorderCfg.LastStandDuration or 55) else shrinkEnd)
 	if shrinking and not ev.borderMoving then
 		ev.borderMoving = true
 		ev.borderWarned = true
 		local toSpire = "Head for " .. lore("Spire", "the Spire") .. " and stay inside the ring"
-		local title, sub = headline({ name = "Border", verb = "is moving", action = toSpire }, "THE BORDER IS MOVING", toSpire)
+		-- a ring that has been creeping in for minutes "closes in" now; one that starts here "is moving", as before
+		local title, sub = headline({ name = "Border", verb = if early then "closes in" else "is moving", action = toSpire },
+			if early then "THE BORDER CLOSES IN" else "THE BORDER IS MOVING", toSpire)
 		announce({ style = "Warning", text = title, sub = sub, duration = 5 })
 		Sfx.play("BorderWarning")
 	end
@@ -730,6 +856,17 @@ end
 function ArenaService.Init(registry)
 	Services = registry
 	borderCenter = computeCenter()
+	-- one switch (Map1Build.md decision 14): Config.Map and the layout in the place must be the same arena's. The classic
+	-- forest layout (v2) carries no Map field.
+	local layoutMap = (ArenaLayout :: any).Map
+	if type(layoutMap) ~= "string" then
+		layoutMap = "ClassicForest"
+	end
+	if layoutMap ~= Config.Map then
+		warnOnce("map", string.format(
+			"Config.Map is %q but Shared.ArenaLayout is the %q arena's: the border, the head count and the timings are another arena's. Set Config.Map (docs/design/Map1Build.md, decision 14).",
+			tostring(Config.Map), layoutMap))
+	end
 end
 
 function ArenaService.Start()

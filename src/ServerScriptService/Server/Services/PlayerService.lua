@@ -35,6 +35,12 @@ Attribute Regen (QW5, every survival tick, alive contenders in Active): why heal
 	"zero": a meter is empty and you are losing StarveDamagePerSecond per empty meter (causes "Starvation" /
 	"Dehydration"); "" nothing to say (full health, the RegenDelayAfterDamage window after a hit, or not in a round).
 
+	The lobby (docs/design/Map1Build.md, decision 3): players spawn on the enabled SpawnLocations under workspace.Lobby,
+	wherever the island stands. Its place is Shared.ArenaLayout.LobbyPosition (the top of the island: (2600, 160, 0) on
+	the forest arena, (8800, 160, 0) on Map 1), read here for the fall rescue (Config.Round.LobbyFallDepth under it) and
+	for the fallback ground when the lobby has no spawn; a layout without the field is answered from the spawns
+	themselves. A spawn with no direction faces the arena's centre. No position is written in this script.
+
 	Characters: Players.CharacterAutoLoads is off. Every load goes through loadIntoLobby: the avatar is loaded from a copy of
 	the player's HumanoidDescription exactly as they have it (body scales and proportions included - movement, camera and
 	body IK measure each rig), forced to R15 where possible, and the default Health regen script is removed (survival rules
@@ -60,12 +66,13 @@ local RoundCfg = Config.Round
 
 local MAX_STAT = 100
 local MAX_HEALTH = Survival.MaxHealth or 100
-local VOID_HEIGHT = Survival.VoidHeight or (ArenaLayout.WaterLevel - 90) -- contenders below this fell out of the world
+-- contenders below this fell out of the world (Config's line, else 90 under the layout's water or its base height)
+local VOID_HEIGHT = tonumber(Survival.VoidHeight)
+	or ((tonumber((ArenaLayout :: any).WaterLevel) or tonumber((ArenaLayout :: any).BaseHeight) or 0) - 90)
 local LOBBY_FALL_DEPTH = RoundCfg.LobbyFallDepth or 80 -- lobby players this far below the lobby surface are put back
 local TICK = 1
 local NAMETAG_ARENA = Enum.HumanoidDisplayDistanceType.None
 local NAMETAG_LOBBY = Enum.HumanoidDisplayDistanceType.Viewer
-local LOBBY_FACING = Vector3.new(-1, 0, 0) -- the lobby island sits east of the arena; face toward it
 
 local PlayerService = {}
 PlayerService.died = Signal.new()
@@ -170,9 +177,48 @@ local function lobbySpawns(): { SpawnLocation }
 	return list
 end
 
+-- Where the lobby is: the layout's LobbyPosition (the top of the lobby island). A layout without one is answered from
+-- the lobby's own SpawnLocations (their mean position); nil when there is neither.
+local function lobbyAnchor(): Vector3?
+	local fromLayout = (ArenaLayout :: any).LobbyPosition
+	if typeof(fromLayout) == "Vector3" then
+		return fromLayout
+	end
+	local spawns = lobbySpawns()
+	if #spawns > 0 then
+		local sum = Vector3.zero
+		for _, s in ipairs(spawns) do
+			sum += s.Position
+		end
+		return sum / #spawns
+	end
+	return nil
+end
+
+-- A lobby spawn that gives no direction faces the arena: from the lobby toward the arena's centre (the island stands
+-- east of the arena on both maps, so this is -X).
+local function lobbyFacing(): Vector3
+	local anchor = lobbyAnchor()
+	local centre = (ArenaLayout :: any).Center
+	if anchor and typeof(centre) == "Vector3" then
+		local flat = Vector3.new(centre.X - anchor.X, 0, centre.Z - anchor.Z)
+		if flat.Magnitude > 1 then
+			return flat.Unit
+		end
+	end
+	return Vector3.new(-1, 0, 0)
+end
+
 -- Ground at the lobby centre when no lobby SpawnLocations exist. Builds a temporary pad if there's nothing there at all.
 local function fallbackLobbyGround(offset: Vector3): Vector3
-	local center = ArenaLayout.LobbyPosition
+	local center = lobbyAnchor()
+	if not center then
+		-- no layout position and no spawn: a pad high over the arena's centre keeps players out of the round
+		warnOnce("NoLobbyPosition", "The layout has no LobbyPosition and workspace.Lobby has no SpawnLocation.")
+		local arenaCentre = (ArenaLayout :: any).Center
+		local base = if typeof(arenaCentre) == "Vector3" then arenaCentre else Vector3.zero
+		center = Vector3.new(base.X, (tonumber((ArenaLayout :: any).BaseHeight) or base.Y) + 1200, base.Z)
+	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = characterList()
@@ -215,13 +261,13 @@ local function pickLobbySpot(): (CFrame, SpawnLocation?)
 		local look = s.CFrame.LookVector
 		look = Vector3.new(look.X, 0, look.Z)
 		if look.Magnitude < 0.05 then
-			look = LOBBY_FACING
+			look = lobbyFacing()
 		end
 		return CFrame.lookAt(point, point + look.Unit), s
 	end
 	local offset = Vector3.new(math.random(-12, 12), 0, math.random(-12, 12))
 	local ground = fallbackLobbyGround(offset)
-	return CFrame.lookAt(ground, ground + LOBBY_FACING), nil
+	return CFrame.lookAt(ground, ground + lobbyFacing()), nil
 end
 
 local function placeCharacter(player: Player, ground: CFrame): boolean
@@ -835,7 +881,9 @@ local function contenderTick(player: Player, st, humanoid: Humanoid, root: BaseP
 end
 
 local function lobbyTick(player: Player, root: BasePart)
-	if root.Position.Y < ArenaLayout.LobbyPosition.Y - LOBBY_FALL_DEPTH then
+	-- fell off the lobby island: back onto a spawn (the island's height is the layout's, or its spawns')
+	local anchor = lobbyAnchor()
+	if anchor and root.Position.Y < anchor.Y - LOBBY_FALL_DEPTH then
 		placeCharacter(player, (pickLobbySpot()))
 	end
 end

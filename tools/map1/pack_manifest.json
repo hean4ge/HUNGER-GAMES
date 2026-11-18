@@ -1,0 +1,400 @@
+{
+ "pack": "map1_data",
+ "contract": "docs/design/Map1Build.md 3.3",
+ "grid": {
+  "cells": 1376,
+  "cellStuds": 4,
+  "origin": -2752,
+  "rowOrder": "row 0 = north (z = -2752)",
+  "maskCells": 688,
+  "heightUnit": "value / 32"
+ },
+ "blobs": [
+  {
+   "name": "Height",
+   "bytes": 3786752,
+   "fnv": "bb2439aa",
+   "content": "1376 x 1376 uint16 LE, y = value / 32 (water repairs applied)"
+  },
+  {
+   "name": "Material",
+   "bytes": 1893376,
+   "fnv": "0244613c",
+   "content": "1376 x 1376 uint8, slot ids 1..10 of Terrain.materialSlots"
+  },
+  {
+   "name": "Region",
+   "bytes": 1893376,
+   "fnv": "b6404fbd",
+   "content": "1376 x 1376 uint8, region ids 1..10 of Terrain.regions"
+  },
+  {
+   "name": "WaterLevel",
+   "bytes": 3786752,
+   "fnv": "9df27642",
+   "content": "1376 x 1376 uint16 LE, y = value / 32, 0 = dry (repaired)"
+  },
+  {
+   "name": "Mask_Conifer",
+   "bytes": 473344,
+   "fnv": "1d495358",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Broadleaf",
+   "bytes": 473344,
+   "fnv": "998e89aa",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Gorse",
+   "bytes": 473344,
+   "fnv": "a6f9fb67",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Heather",
+   "bytes": 473344,
+   "fnv": "d5fcec13",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Boulders",
+   "bytes": 473344,
+   "fnv": "fd607b53",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Crags",
+   "bytes": 473344,
+   "fnv": "3aa7ebdd",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_TallGrass",
+   "bytes": 473344,
+   "fnv": "bf643bc5",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Mask_Wildflowers",
+   "bytes": 473344,
+   "fnv": "e643ab6b",
+   "content": "688 x 688 uint8, density 0..255, 8-stud cells"
+  },
+  {
+   "name": "Terrain",
+   "bytes": 11365,
+   "fnv": "880215e4",
+   "content": "Map1_Terrain.json as text (LF line endings, like every text blob)"
+  },
+  {
+   "name": "Layout",
+   "bytes": 49445,
+   "fnv": "6d337737",
+   "content": "Map1_Layout.json as text"
+  },
+  {
+   "name": "Manifest_Landmarks",
+   "bytes": 106032,
+   "fnv": "69f7ebef",
+   "content": "Map1_Landmarks.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)"
+  },
+  {
+   "name": "Manifest_Plants",
+   "bytes": 17288,
+   "fnv": "dbe55fed",
+   "content": "Map1_Plants.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)"
+  },
+  {
+   "name": "Manifest_Skyline",
+   "bytes": 155589,
+   "fnv": "37ff6cf0",
+   "content": "Map1_SkylineCut.manifest.json as text"
+  },
+  {
+   "name": "Manifest_FarValley",
+   "bytes": 57477,
+   "fnv": "ee956eed",
+   "content": "Map1_FarValley.manifest.json as text"
+  }
+ ],
+ "missing": [],
+ "sources": {
+  "Map1_Height.png": {
+   "bytes": 3355055,
+   "sha256": "bc9b751905d7644713609f7cfe5ec8f114296d80e97a57c9e3365b4eb5bdfa30"
+  },
+  "Map1_Material.png": {
+   "bytes": 78607,
+   "sha256": "2d80e97e39afd6813a1d88f57214cb37b6b290e38360e4cdd595c832f6872f61"
+  },
+  "Map1_Region.png": {
+   "bytes": 15447,
+   "sha256": "fff7abd628dd4f61c5d805f8957dd7278b79039f16960b573d19042488ae27b9"
+  },
+  "Map1_WaterMask.png": {
+   "bytes": 2977,
+   "sha256": "427161bbce994a2770a7fb4c3f946f0ddfac8683863111368505e5d6e696a19f"
+  },
+  "Map1_WaterLevel.png": {
+   "bytes": 4979,
+   "sha256": "6b6ea1795bb88dadc324af6fca5d7f4dc48f9558a9a318866632cd7b75f5b8d4"
+  },
+  "Map1_Mask_Conifer.png": {
+   "bytes": 153710,
+   "sha256": "59ae04e8e1576862005abcedafc6db8e93d32e58a346e39af62dcff6d032f245"
+  },
+  "Map1_Mask_Broadleaf.png": {
+   "bytes": 12113,
+   "sha256": "81adaa38df24ae0e2d0d9c6a60ee5696810f1d337cd2cbbba5828c0365de88bd"
+  },
+  "Map1_Mask_Gorse.png": {
+   "bytes": 54668,
+   "sha256": "7dbe57d64f1eeaa6c1f442e01e51627a03b423e9d9f46f0f7b77d53efe812cb0"
+  },
+  "Map1_Mask_Heather.png": {
+   "bytes": 285795,
+   "sha256": "4ec7ee07548abceebac91ba712aa001c0c544a58b2eaa8881aea0754046f1d59"
+  },
+  "Map1_Mask_Boulders.png": {
+   "bytes": 125507,
+   "sha256": "a3f18e86b28b8a0190d67523c6cc327af5114cc29b1136ac716264a6a3190db1"
+  },
+  "Map1_Mask_Crags.png": {
+   "bytes": 58908,
+   "sha256": "5cbaa9fb784f7beb2116192f1c7ecd443baf2e8d62c7a68e86612598a9ddc229"
+  },
+  "Map1_Mask_TallGrass.png": {
+   "bytes": 3114,
+   "sha256": "d019a25c35bc11c1bfa9e4199adaf38a93b729a2a1946fe6c0615be8fef7c968"
+  },
+  "Map1_Mask_Wildflowers.png": {
+   "bytes": 2238,
+   "sha256": "5311547012c1d9e35262da0ba6cc9b499f00d270795bfb3068e08aba1f2bbc59"
+  },
+  "Map1_Terrain.json": {
+   "bytes": 12488,
+   "sha256": "6fd98911247d763f9175f4f5059beb4026474255942727901ddc198a5af83e97"
+  },
+  "Map1_Layout.json": {
+   "bytes": 52545,
+   "sha256": "e2fd2bcf1b1d56e6399681f440ab86e21a534840eeaf347e221f81b9c314ddd2"
+  },
+  "Map1_Landmarks.manifest.json": {
+   "bytes": 110662,
+   "sha256": "26908d71fe75aa9844ead24cb2e19a8c097594ad09bc5baa113b316a586781eb"
+  },
+  "art/manifests/Map1_Landmarks.manifest.json": {
+   "bytes": 111668,
+   "sha256": "6e1bc4b37adc41b0a5a6013e443c3008baa2fbc21960ead84bd41d71edb2feda"
+  },
+  "Map1_Plants.manifest.json": {
+   "bytes": 17210,
+   "sha256": "731535ff5127ab6337e094a466d67aeff177151882dc0049578d9dca7c22610a"
+  },
+  "art/manifests/Map1_Plants.manifest.json": {
+   "bytes": 18205,
+   "sha256": "716aba45f919b1b104b0b68d7a063e51c8b0bef473aa9fb23ddc2567ff3a20c0"
+  },
+  "Map1_SkylineCut.manifest.json": {
+   "bytes": 163902,
+   "sha256": "e37c43c7a0c206c2fc0be69d560f1fa04c3e0101b1deefb71f2010f1b9b6e493"
+  },
+  "Map1_FarValley.manifest.json": {
+   "bytes": 60666,
+   "sha256": "d0fb921930b9b34c8b47b21a7658a0cdb33b939312dc984214fc7b5912873dff"
+  },
+  "Map1_BiomeGrid16.json": {
+   "bytes": 129214,
+   "sha256": "bc4a9aec27d2cd9ebc81b23bac0379dadc401b3117fe677295af013923c6de59"
+  }
+ },
+ "water": {
+  "neighbourhood": 8,
+  "sillRise": 0.3125,
+  "exportFaults": {
+   "4": {
+    "badLevelCells": 0,
+    "stepPairs": 18,
+    "leakPairs": 20,
+    "leakCells": 16,
+    "worstLeak": 1.84375
+   },
+   "8": {
+    "badLevelCells": 0,
+    "stepPairs": 40,
+    "leakPairs": 58,
+    "leakCells": 30,
+    "worstLeak": 9.9375
+   }
+  },
+  "afterRepairs": {
+   "4": {
+    "badLevelCells": 0,
+    "stepPairs": 0,
+    "leakPairs": 0,
+    "leakCells": 0,
+    "worstLeak": 0.0
+   },
+   "8": {
+    "badLevelCells": 0,
+    "stepPairs": 0,
+    "leakPairs": 0,
+    "leakCells": 0,
+    "worstLeak": 0.0
+   }
+  },
+  "cellsDried": 20,
+  "banksRaised": 22,
+  "heightsRaised": 42,
+  "margin": false,
+  "marginCells": 0,
+  "marginDepth": 0.25,
+  "wetCells": 9104,
+  "levels": [
+   34.0,
+   37.4375,
+   38.0,
+   40.90625,
+   41.0,
+   42.0,
+   45.0625,
+   49.75,
+   60.65625
+  ],
+  "hollowsLeft": [
+   {
+    "level": 34.0,
+    "cells": 249,
+    "xFrom": 186.0,
+    "xTo": 274.0,
+    "zFrom": 766.0,
+    "zTo": 846.0,
+    "lowestGround": 32.0625,
+    "deepest": 1.9375
+   }
+  ]
+ },
+ "module": {
+  "bytes": 123655,
+  "fnv": "a4f669da",
+  "regionGrid": [
+   240,
+   240
+  ],
+  "regionCell": 16,
+  "heightNodes": [
+   173,
+   173
+  ],
+  "heightCell": 32,
+  "heightBase": 19,
+  "heightStep": 0.35,
+  "accuracyInsideR1800": {
+   "points": 200000,
+   "mean": 0.5383110978926664,
+   "p50": 0.31808335990722725,
+   "p95": 1.4063785914182332,
+   "p99": 3.0366214312761,
+   "max": 85.62582777754972,
+   "within6": 0.995855
+  },
+  "file": "src/ReplicatedStorage/Shared/Map1Regions.lua",
+  "packHeight": "bb2439aa",
+  "packRegion": "b6404fbd"
+ },
+ "notes": [],
+ "build": 2,
+ "history": [
+  {
+   "build": 1,
+   "date": "2026-11-15 18:39",
+   "changes": [
+    "first build"
+   ]
+  },
+  {
+   "build": 2,
+   "date": "2026-11-15 19:21",
+   "changes": [
+    "changed Manifest_Skyline (ac035fe8 -> 37ff6cf0): now Map1_SkylineCut.manifest.json as text",
+    "added Manifest_FarValley (57477 bytes, ee956eed)"
+   ],
+   "blobs": {
+    "Height": [
+     3786752,
+     "bb2439aa"
+    ],
+    "Material": [
+     1893376,
+     "0244613c"
+    ],
+    "Region": [
+     1893376,
+     "b6404fbd"
+    ],
+    "WaterLevel": [
+     3786752,
+     "9df27642"
+    ],
+    "Mask_Conifer": [
+     473344,
+     "1d495358"
+    ],
+    "Mask_Broadleaf": [
+     473344,
+     "998e89aa"
+    ],
+    "Mask_Gorse": [
+     473344,
+     "a6f9fb67"
+    ],
+    "Mask_Heather": [
+     473344,
+     "d5fcec13"
+    ],
+    "Mask_Boulders": [
+     473344,
+     "fd607b53"
+    ],
+    "Mask_Crags": [
+     473344,
+     "3aa7ebdd"
+    ],
+    "Mask_TallGrass": [
+     473344,
+     "bf643bc5"
+    ],
+    "Mask_Wildflowers": [
+     473344,
+     "e643ab6b"
+    ],
+    "Terrain": [
+     11365,
+     "880215e4"
+    ],
+    "Layout": [
+     49445,
+     "6d337737"
+    ],
+    "Manifest_Landmarks": [
+     106032,
+     "69f7ebef"
+    ],
+    "Manifest_Plants": [
+     17288,
+     "dbe55fed"
+    ],
+    "Manifest_Skyline": [
+     155589,
+     "37ff6cf0"
+    ],
+    "Manifest_FarValley": [
+     57477,
+     "ee956eed"
+    ]
+   }
+  }
+ ]
+}

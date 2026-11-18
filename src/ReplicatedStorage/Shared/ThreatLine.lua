@@ -20,6 +20,14 @@
 	                              seconds after the horn (divide by the time scale for real seconds)
 	ThreatLine.nextBeat(elapsed, keys?) -> (beat?, scheduleSecondsUntil?)   the first beat still to come (keys: a set
 	                              { [key] = true } to consider; default all)
+	The border's first movement is the round's own (docs/design/Map1Build.md decision 11: a big ring starts closing
+	before Config.Border.ShrinkStartTime, so that it never moves faster than MaxShrinkSpeed):
+	ThreatLine.borderMovesAt() -> seconds     this round's start: GameState.BorderShrinkStart (ArenaService), else
+	                              Config.Border.ShrinkStartTime. beats() puts "BorderMoves" there.
+	ThreatLine.fullRingMovesAt() -> seconds   when a full round's ring first moves, from Config alone (for text written
+	                              outside a round; the slide of the ring's centre, under half a minute, is left out)
+	ThreatLine.dayPart(seconds) -> "the second morning" | "the first evening" | ...   that moment of the round in
+	                              words, from Config.Round.DaySchedule
 ]]
 local Shared = script.Parent
 local Config = require(Shared:WaitForChild("Config"))
@@ -117,10 +125,78 @@ local function secondsAtClock(clock: number): number?
 	return nil
 end
 
+-- The clock (unwrapped hours) Config.Round.DaySchedule reaches at a round-schedule second.
+local function clockAtSeconds(seconds: number): number?
+	local s = Config.Round.DaySchedule
+	if type(s) ~= "table" or #s == 0 then
+		return nil
+	end
+	if seconds <= s[1][1] then
+		return s[1][2]
+	end
+	for i = 1, #s - 1 do
+		local a, b = s[i], s[i + 1]
+		if seconds <= b[1] then
+			return a[2] + (seconds - a[1]) / math.max(1e-6, b[1] - a[1]) * (b[2] - a[2])
+		end
+	end
+	return s[#s][2]
+end
+
+local ORDINALS = { "first", "second", "third", "fourth" }
+
+-- "the second morning": the day and the part of it the round's clock shows at `seconds` (round-schedule seconds).
+function ThreatLine.dayPart(seconds: number): string
+	local clock = clockAtSeconds(tonumber(seconds) or 0)
+	if not clock then
+		return "later in the round"
+	end
+	local day = math.floor(clock / 24) + 1
+	local hour = clock % 24
+	if hour < 5 and day > 1 then
+		day -= 1 -- the small hours belong to the night that began the evening before ("the first night")
+	end
+	local part = if hour >= 5 and hour < 12 then "morning"
+		elseif hour >= 12 and hour < 17 then "afternoon"
+		elseif hour >= 17 and hour < 21 then "evening"
+		else "night"
+	return "the " .. (ORDINALS[day] or "last") .. " " .. part
+end
+
+-- When a full round's ring first moves, from Config alone: ShrinkStartTime, or earlier when the ring is too big to
+-- close in ShrinkDuration at MaxShrinkSpeed (ArenaService's rule, without the slide of the ring's centre).
+function ThreatLine.fullRingMovesAt(): number
+	local border = Config.Border
+	local start = tonumber(border.ShrinkStartTime) or 0
+	local speed = tonumber(border.MaxShrinkSpeed)
+	if speed and speed > 0 then
+		local closeAt = start + (tonumber(border.ShrinkDuration) or 0)
+		local travel = math.max(0, (tonumber(border.StartRadius) or 0) - (tonumber(border.FinalRadius) or 0))
+		return math.clamp(closeAt - travel / speed, 0, start)
+	end
+	return start
+end
+
+-- When this round's ring first moves: ArenaService publishes it at the Countdown; Config's time otherwise.
+function ThreatLine.borderMovesAt(): number?
+	local nominal = tonumber(Config.Border.ShrinkStartTime)
+	if not nominal then
+		return nil
+	end
+	local state = game:GetService("ReplicatedStorage"):FindFirstChild("GameState")
+	local own = if state then tonumber(state:GetAttribute("BorderShrinkStart")) else nil
+	if own and own >= 0 and own < nominal then
+		return own
+	end
+	return nominal
+end
+
 local cachedBeats: { { [string]: any } }? = nil
+local cachedMoves: number? = nil -- the BorderMoves time cachedBeats was built with
 
 function ThreatLine.beats(): { { [string]: any } }
-	if cachedBeats then
+	local moves = ThreatLine.borderMovesAt()
+	if cachedBeats and cachedMoves == moves then
 		return cachedBeats
 	end
 	local list = {}
@@ -135,10 +211,11 @@ function ThreatLine.beats(): { { [string]: any } }
 	if offering then
 		table.insert(list, { key = "Offering", at = offering })
 	end
-	local moves = tonumber(Config.Border.ShrinkStartTime)
-	if moves then
+	local finalStart = tonumber(Config.Border.ShrinkStartTime)
+	if moves and finalStart then
+		-- it first moves at the round's own time; it has closed when Config says, whenever it started
 		table.insert(list, { key = "BorderMoves", at = moves })
-		table.insert(list, { key = "BorderCloses", at = moves + (tonumber(Config.Border.ShrinkDuration) or 0) })
+		table.insert(list, { key = "BorderCloses", at = finalStart + (tonumber(Config.Border.ShrinkDuration) or 0) })
 	end
 	local limit = tonumber(Config.Round.MaxRoundTime)
 	if limit then
@@ -148,6 +225,7 @@ function ThreatLine.beats(): { { [string]: any } }
 		return a.at < b.at
 	end)
 	cachedBeats = list
+	cachedMoves = moves
 	return list
 end
 

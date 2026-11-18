@@ -12,14 +12,19 @@
 	       Still alone when their practice round ends, a player goes again after a PracticeIntermissionTime s Intermission
 	       (no second wait); a contender arriving during it makes it a normal Intermission.
 	       Practice rounds add no Wins and no RoundsPlayed.
-	  QW3  GameState.BorderStartRadius at each Countdown: 500 + 140 * sqrt((N - 1) / 23) for N contenders (500 alone,
-	       640 at 24; Config.Border.MinStartRadius, StartRadius, FullContenders) (set before LootService.populate;
-	       ArenaService and the wall start from it).
+	  QW3  GameState.BorderStartRadius at each Countdown: MinStartRadius + (StartRadius - MinStartRadius) *
+	       sqrt((N - 1) / (FullContenders - 1)) for N contenders, from Config.Border (the forest arena: 500 alone, 640 at
+	       24; Map 1: 520 alone, 1,800 at 48) (set before LootService.populate; ArenaService and the wall start from it).
 	       Practice results rank nobody who fell (placement 0: the result card shows no "#1" for a lone player's death).
 	  Q1   player attribute NewPlayer at each Countdown: RoundsPlayed < Config.Guidance.NewPlayerRounds.
 	  QW6  no banner at the horn of a real round (it covered the first sprint); practice rounds keep PRACTICE ROUND.
 	  QW14 a timeout with two or more alive goes to the healthiest, then the most kills (Config.Round.LastStand);
 	       the epilogue Roll Call (ArenaService.startEpilogue) plays behind the winner card and Ending grows to fit it.
+	The arena (docs/design/Map1Build.md, decision 14): the plates are the instances in workspace.Arena.Plinths, in name
+	order (24 round the Spire on the forest arena; Plinth01..Plinth48 at radius 150 on Map 1). Head counts and the
+	border come from Config (Config.Maps[Config.Map] laid over it), the fallback ring from Shared.ArenaLayout (its Plates,
+	else PlinthCount / PlinthRingRadius / PlinthOffsetDeg): no arena's numbers are written here. The start signal's word
+	in text is Shared.Lore.StartSignal ("the horn", but not on a map whose centre is called the Horn).
 
 	API:
 	  RoundService.getPhase() -> string
@@ -48,6 +53,8 @@ local Net = require(Shared:WaitForChild("Net"))
 local Signal = require(Shared:WaitForChild("Signal"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
+local LoreModule = Shared:FindFirstChild("Lore")
+local Lore = if LoreModule and LoreModule:IsA("ModuleScript") then require(LoreModule) :: any else nil
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 local RoundCfg = Config.Round
@@ -125,6 +132,17 @@ local function playerService()
 	return Services and Services.PlayerService
 end
 
+-- The start signal as text says it: "the horn", or Shared.Lore.StartSignal (another word on a map whose centre is
+-- called the Horn). bare = without the article ("the final horn").
+local function startSignal(bare: boolean?): string
+	local value = Lore and Lore.StartSignal
+	local text = if type(value) == "string" and value ~= "" then value else "the horn"
+	if bare then
+		return string.match(text, "^[Tt]he%s+(.+)$") or text
+	end
+	return text
+end
+
 -- QW1: lone players get practice rounds on servers that need more than one player to start
 local function soloEnabled(): boolean
 	return RoundCfg.SoloPractice ~= false and minPlayers() > 1
@@ -137,17 +155,18 @@ local function practiceAgain(): boolean
 		and player:GetAttribute("Alive") ~= true
 end
 
--- QW3: the border's starting radius for n contenders: MinStartRadius for a lone contender (500 since wave 2: a practice
--- round's ring takes in the caves, the hunter's cabin and the watchtower), growing with the headcount to StartRadius
--- at FullContenders
+-- QW3: the border's starting radius for n contenders: MinStartRadius for a lone contender (on the forest arena 500: a
+-- practice round's ring takes in the caves, the hunter's cabin and the watchtower; on Map 1 520), growing with the
+-- headcount to StartRadius at FullContenders. Every number is Config.Border's; a missing one falls back to the layout's
+-- field (PlayRadius), to no scaling (MinStartRadius) or to the round's own head count limit (FullContenders).
 local function startRadiusFor(n: number): number
 	local border = Config.Border
-	local full = border.StartRadius or 640
+	local full = tonumber(border.StartRadius) or tonumber((ArenaLayout :: any).PlayRadius) or 640
 	if border.ScaleWithContenders == false then
 		return full
 	end
-	local solo = math.min(tonumber(border.MinStartRadius) or 500, full)
-	local most = math.max(2, tonumber(border.FullContenders) or 24)
+	local solo = math.min(tonumber(border.MinStartRadius) or full, full)
+	local most = math.max(2, tonumber(border.FullContenders) or tonumber(RoundCfg.MaxContenders) or 24)
 	local t = math.sqrt(math.clamp((n - 1) / (most - 1), 0, 1))
 	return math.floor(solo + (full - solo) * t + 0.5)
 end
@@ -301,12 +320,37 @@ local function getPlinthSpots(): { CFrame }
 		end
 	end
 	if #spots == 0 then
-		warnOnce("plinths", "workspace.Arena.Plinths is missing or empty; using a fallback ring around the Spire.")
-		local count = ArenaLayout.PlinthCount or 24
-		for i = 1, count do
-			local ring = ArenaLayout.polar((i - 1) * 360 / count, ArenaLayout.PlinthRingRadius, ArenaLayout.BaseHeight)
-			local ground = raycastDown(ring + Vector3.new(0, 60, 0), 140) or ring
+		-- No plinth in the place: the layout's own ring, on the ground. Its Plates when it lists them (v2: a CFrame on
+		-- the plaza; v3: { position on the turf, stand, bearing }), else PlinthCount spots at PlinthRingRadius, the
+		-- first at PlinthOffsetDeg (0 on the forest arena, 3.75 degrees on Map 1), at RingHeight (else BaseHeight).
+		warnOnce("plinths", "workspace.Arena.Plinths is missing or empty; using the layout's ring of plates, on the ground.")
+		local layout = ArenaLayout :: any
+		local points: { Vector3 } = {}
+		if type(layout.Plates) == "table" then
+			for _, plate in ipairs(layout.Plates) do
+				local point = if typeof(plate) == "CFrame" then plate.Position
+					elseif type(plate) == "table" then (plate.position or plate.stand)
+					else nil
+				if typeof(point) == "Vector3" then
+					table.insert(points, point)
+				end
+			end
+		end
+		local ringRadius = tonumber(layout.PlinthRingRadius)
+		if #points == 0 and ringRadius and type(layout.polar) == "function" then
+			local count = math.max(1, math.floor(tonumber(layout.PlinthCount) or tonumber(RoundCfg.MaxContenders) or 24))
+			local first = tonumber(layout.PlinthOffsetDeg) or 0
+			local y = tonumber(layout.RingHeight) or tonumber(layout.BaseHeight) or center.Y
+			for i = 1, count do
+				table.insert(points, layout.polar(first + (i - 1) * 360 / count, ringRadius, y))
+			end
+		end
+		for _, point in ipairs(points) do
+			local ground = raycastDown(point + Vector3.new(0, 60, 0), 140) or point
 			table.insert(spots, faceSpire(ground, center))
+		end
+		if #spots == 0 then
+			warnOnce("noRing", "the layout names no plates (Plates, or PlinthCount and PlinthRingRadius): no round can start.")
 		end
 	end
 	return spots
@@ -420,7 +464,7 @@ local function endRound(winner: Player?, reason: string)
 	if winner then
 		text = winnerName
 		sub = if practice then "survived the practice round"
-			elseif reason == "tiebreak" then "wins at the final horn · the healthiest left standing"
+			elseif reason == "tiebreak" then "wins at the final " .. startSignal(true) .. " · the healthiest left standing"
 			else "is the last one standing"
 	elseif reason == "timeout" and #alive > 1 then
 		text = "TIME'S UP"
@@ -475,7 +519,7 @@ local function countdownTick(t: number)
 		announce({
 			style = "Toast",
 			text = if practice then "Practice cancelled" else "Round cancelled",
-			sub = if practice then "You left your plate before the horn" else "Every contender left",
+			sub = if practice then "You left your plate before " .. startSignal() else "Every contender left",
 			duration = 3,
 		})
 		finishRound(true)
@@ -540,7 +584,7 @@ local function enterCountdown()
 	local candidates = ps.getLobbyPlayers()
 	shuffle(candidates)
 	local spots = getPlinthSpots()
-	local count = math.min(#candidates, RoundCfg.MaxContenders or 24, #spots)
+	local count = math.min(#candidates, tonumber(RoundCfg.MaxContenders) or #spots, #spots) -- one per plate at most
 	if count <= 0 then
 		setPhase("Lobby")
 		return

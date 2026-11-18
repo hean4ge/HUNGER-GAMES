@@ -15,12 +15,21 @@
 	and you look around freely from then on; while you ride, your own root is only moved and keeps the facing your
 	camera gives it. With the launch intro (LaunchIntroController, ClientState.launchShot) that turn waits until the
 	intro hands the camera back on your plate.
+	The arena (docs/design/Map1Build.md): nothing here is one arena's number. The centre is workspace.Arena's Center
+	attribute, else Shared.ArenaLayout.Center; the plate ring's radius is ArenaLayout.PlinthRingRadius (52 on the forest
+	arena, 150 on Map 1), else measured from the plates in the place; "on the ring" is within RING_TOLERANCE of it.
+	Map 1's plinths stand on the turf with no bore under them (decision 6), so they stay up: tubeDepth finds the ground
+	under the plinth, the free space is under 2.5 studs, the depth is 0, and every later step skips a plate or a rider
+	whose depth is 0 (offsetFor returns 0 and placePlate is never called; no rig, no whir, no lock sound, no camera
+	kick; the rider's root is never written). The countdown then runs with everyone standing in the open.
 	Frozen on the plate and trying to step off - a move or jump key, a jump request, or the move input of any device
 	(a touch thumbstick, a stick) - the countdown caption answers (NotificationController.pulseCountdown). Looking round
 	never does (the arrow keys turn the camera, a touch drag looks), and nothing does during the intro.
 	API:
 	  LaunchController.isLaunching() -> boolean
 	  LaunchController.getRise() -> number   0..1 progress of the rise (1 when done or idle)
+	  LaunchController.getRing() -> (centre: Vector3, radius: number?)   the plate ring (radius nil when unknown)
+	  LaunchController.onRing(position: Vector3) -> boolean             within RING_TOLERANCE of the plate ring
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -43,6 +52,7 @@ local SETTLE = 0.32 -- seconds of settle bounce after a plate locks
 local RIDER_RADIUS = 4.5 -- a contender this close (flat) to a plate's stand point rides it
 local NEAR_EFFECTS = 140 -- other plates within this range get sound / light / dust
 local MAX_ASSUMED_PLATE = 4 -- a plate model taller than this is assumed to be a column reaching into the tube
+local RING_TOLERANCE = 8 -- studs either side of the plate ring's radius that still count as standing on the ring
 local DUST_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
 local LIGHT_COLOR = Color3.fromRGB(255, 226, 188)
 local FACE_PITCH = -6 -- degrees: on your plate the view looks a little down, at the Spire and the crates at its foot
@@ -150,7 +160,62 @@ local function bottomOf(plate: Instance): number
 	return part.Position.Y - part.Size.Y / 2
 end
 
--- How far a plate can sink: the free space between its underside and the tube floor (0 = no tube).
+-- The plate ring ------------------------------------------------------------------------------------------------------------
+
+-- the centre the server faces every contender toward (RoundService.faceSpire)
+local function arenaCentre(): Vector3
+	local arena = workspace:FindFirstChild("Arena")
+	local centre = arena and arena:GetAttribute("Center")
+	if typeof(centre) == "Vector3" then
+		return centre
+	end
+	return ArenaLayout.Center or Vector3.zero
+end
+
+-- The ring's radius: the layout's PlinthRingRadius; a layout without one is measured from the plates in the place
+-- (the mean flat distance of their stand points from the centre: any plates that have streamed in will do, they all
+-- stand on one circle). nil while neither is known: nothing is on the ring then.
+local measuredRing: number? = nil
+local function ringRadius(): number?
+	local fromLayout = tonumber((ArenaLayout :: any).PlinthRingRadius)
+	if fromLayout then
+		return fromLayout
+	end
+	if measuredRing then
+		return measuredRing
+	end
+	local folder = platesFolder()
+	if folder then
+		local centre = arenaCentre()
+		local sum, n = 0, 0
+		for _, plate in ipairs(folder:GetChildren()) do
+			if plate:IsA("Model") or plate:IsA("BasePart") then
+				local stand = standPoint(plate)
+				if stand then
+					sum += Vector2.new(stand.X - centre.X, stand.Z - centre.Z).Magnitude
+					n += 1
+				end
+			end
+		end
+		if n > 0 then
+			measuredRing = sum / n
+		end
+	end
+	return measuredRing
+end
+
+local function onRing(position: Vector3): boolean
+	local ring = ringRadius()
+	if not ring then
+		return false
+	end
+	local centre = arenaCentre()
+	local flat = Vector2.new(position.X - centre.X, position.Z - centre.Z).Magnitude
+	return math.abs(flat - ring) <= RING_TOLERANCE
+end
+
+-- How far a plate can sink: the free space between its underside and the tube floor (0 = no tube: a plate standing on
+-- the ground, as Map 1's plinths do, stays where it is).
 local function tubeDepth(stand: Vector3, plateBottom: number?, exclude: { Instance }): number
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -424,10 +489,7 @@ local function assignRider(rider)
 		rider.depth = plate.depth
 		return
 	end
-	local centre = ArenaLayout.Center or Vector3.zero
-	local ring = ArenaLayout.PlinthRingRadius or 52
-	local flat = Vector2.new(position.X - centre.X, position.Z - centre.Z).Magnitude
-	if math.abs(flat - ring) <= 8 then
+	if onRing(position) then
 		rider.depth = tubeDepth(position - Vector3.new(0, 3, 0), nil, characterList())
 	end
 end
@@ -606,14 +668,10 @@ local function faceSpire()
 		return
 	end
 	-- the centre the server faces you toward (RoundService.faceSpire)
-	local arena = workspace:FindFirstChild("Arena")
-	local centre = arena and arena:GetAttribute("Center")
-	if typeof(centre) ~= "Vector3" then
-		centre = ArenaLayout.Center or Vector3.zero
-	end
+	local centre = arenaCentre()
 	local position = root.Position
 	local toSpire = Vector3.new(centre.X - position.X, 0, centre.Z - position.Z)
-	if math.abs(toSpire.Magnitude - (ArenaLayout.PlinthRingRadius or 52)) > 8 then
+	if not onRing(position) then
 		return
 	end
 	facedRound = GameState:GetAttribute("RoundId")
@@ -695,6 +753,15 @@ function LaunchController.getRise(): number
 		return 1
 	end
 	return math.clamp((now() - state.launchAt) / math.max(0.05, state.riseEnd - state.launchAt), 0, 1)
+end
+
+-- The plate ring as this client knows it (LaunchIntroController asks, so the two never disagree).
+function LaunchController.getRing(): (Vector3, number?)
+	return arenaCentre(), ringRadius()
+end
+
+function LaunchController.onRing(position: Vector3): boolean
+	return typeof(position) == "Vector3" and onRing(position)
 end
 
 -- Lifecycle -----------------------------------------------------------------------------------------------------------------

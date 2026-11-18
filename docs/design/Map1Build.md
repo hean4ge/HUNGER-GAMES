@@ -77,6 +77,7 @@ It must load on the server and on every client without yielding and without touc
 | `PlinthRingRadius`, `PlinthCount`, `PlinthOffsetDeg` | 150, 48, 3.75 |
 | `Plates[i]` | 48 entries in ring order: position on the turf, stand point, bearing |
 | `PlazaRadius`, `AssetInfo.Spire.r` | Chosen so the last stand lands on turf 90 to 100 studs out (the old names stay; they are what the game reads) |
+| `LastStandPoints` | Optional: Vector3 points on open turf that the Last Stand closes on. Without it `ArenaService` takes a point 90 to 100 studs out on a mouth lane (`Heart.mouths[i].bearing` and `.lane`), and without those the two names above |
 | `LobbyPosition` | Vector3 (8800, 160, 0) |
 | `WaterLevel`, `Lake` | 34; the lake's level, centre and semi-axes |
 | `Sectors` | No marsh |

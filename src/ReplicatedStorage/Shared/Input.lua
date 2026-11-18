@@ -10,7 +10,8 @@
 	                Layout defaults come from Theme.TouchLayout[name]. Toggle buttons send Begin when switched on, End when off.
 	  opts.priority ContextActionService priority value (default 2000)
 	Input.unbind(name)
-	Input.setTouchVisible(name, visible)   -- e.g. show DRINK only near water
+	Input.setTouchVisible(name, visible)   -- e.g. show DRINK only near water. A button shows only on a touch screen; its
+	                                       -- attribute ShowOnTouch says what the game asked for (for checks on a PC)
 	Input.setTouchLabel(name, text)        -- relabel a touch button (ATTACK -> EAT, DRINK -> FILL)
 	Input.setToggle(name, on)              -- update a toggle button's state/look without calling the handler
 	Input.getTouchButton(name) -> GuiButton?
@@ -23,13 +24,16 @@
 	                                       -- else the engine's last input type; a pad with no keyboard or touch is a pad)
 	Input.device() -> "KeyboardMouse" | "Gamepad" | "Touch"     Input.deviceChanged: Signal(device)
 	Input.getTouchLayout(name) -> (UDim2, number, string)  -- where a touch button sits (position, size, label) on this screen
-	Input.setLookSpeed(device, k)          -- "Gamepad" | "Touch" | "Mouse": scale the default camera's look speed for that
-	                                       -- device (the IAS CameraRotationAction bindings). Kept when Roblox's own camera
-	                                       -- settings change (sensitivity, invert). nil clears it. Returns whether the
-	                                       -- bindings exist; Input.lookBindingsReady() says the same without changing them.
+	Input.setLookSpeed(device, k)          -- "Gamepad" | "Touch" | "Mouse" | "Keys" (the arrow keys' turn): scale the
+	                                       -- default camera's look speed for that device (the IAS CameraRotationAction
+	                                       -- bindings). Kept when Roblox's own camera settings change (sensitivity,
+	                                       -- invert). nil clears it. Returns whether the bindings exist;
+	                                       -- Input.lookBindingsReady() says the same without changing them.
 	Every binding is also mirrored onto LocalPlayer.InputBindings (attribute per action) for ServerStorage.Dev.InputCheck.
 	Studio only: the LocalPlayer attribute LS_InputOverride = "Touch" | "Gamepad" | "KeyboardMouse" pretends that device
 	is in use (hints and settings rows follow it), for checking every device's text from a PC.
+	Studio only: Input.testTouch(name, down?) acts as a touch on an action's button, for checking a touch control from
+	a PC, where the buttons are hidden and a script can't send a real touch (a toggle flips; a hold goes down or up).
 
 	Action names are a contract (see docs/GameDesign.md, section 7).
 ]]
@@ -269,6 +273,7 @@ local function makeTouchButton(name: string, entry)
 	end)
 
 	button.Visible = UserInputService.TouchEnabled and touchOpts.visible ~= false
+	button:SetAttribute("ShowOnTouch", touchOpts.visible ~= false)
 	button.Parent = getTouchGui()
 	return button
 end
@@ -351,6 +356,7 @@ function Input.setTouchVisible(name: string, visible: boolean)
 	local entry = bound[name]
 	if entry and entry.button then
 		entry.button.Visible = UserInputService.TouchEnabled and visible
+		entry.button:SetAttribute("ShowOnTouch", visible)
 	end
 end
 
@@ -376,6 +382,39 @@ end
 function Input.getTouchButton(name: string): GuiButton?
 	local entry = bound[name]
 	return entry and entry.button
+end
+
+-- Studio only: act as a touch on an action's button, as the button's own InputBegan does (see makeTouchButton). A
+-- toggle button flips; a hold button goes down (down ~= false) or up (down == false). Returns whether it was done.
+function Input.testTouch(name: string, down: boolean?): boolean
+	local entry = bound[name]
+	if not RunService:IsStudio() or not (entry and entry.touchOpts) then
+		return false
+	end
+	local io: any = { UserInputType = Enum.UserInputType.Touch, KeyCode = Enum.KeyCode.Unknown }
+	local function paint()
+		if entry.paint then
+			entry.paint()
+		end
+	end
+	if entry.touchOpts.toggle then
+		if down ~= false then
+			entry.toggled = not entry.toggled
+			paint()
+			entry.handler(if entry.toggled then Enum.UserInputState.Begin else Enum.UserInputState.End, io)
+		end
+	elseif down ~= false then
+		if not entry.pressed then
+			entry.pressed = true
+			paint()
+			entry.handler(Enum.UserInputState.Begin, io)
+		end
+	elseif entry.pressed then
+		entry.pressed = false
+		paint()
+		entry.handler(Enum.UserInputState.End, io)
+	end
+	return true
 end
 
 function Input.isBound(name: string): boolean
@@ -441,6 +480,7 @@ local LOOK_BINDINGS: { [string]: { string } } = {
 	Gamepad = { "GamepadBinding", "MicroGamepadBinding" },
 	Touch = { "TouchBinding" },
 	Mouse = { "MouseBinding", "TrackpadBinding" },
+	Keys = { "KeyboardBinding" }, -- the left and right arrow keys turn the view too (2 radians a second)
 }
 local lookSpeeds: { [string]: number } = {}
 local baseScales: { [Instance]: Vector2 } = {}
@@ -523,7 +563,8 @@ function Input.setLookSpeed(device: string, k: number?): boolean
 		return false
 	end
 	if type(k) == "number" and k == k and k > 0 then
-		lookSpeeds[device] = math.clamp(k, 0.05, 10)
+		-- (the floor is under the slowest real case: the lowest mouse sensitivity, 0.2, at the closest zoom, 4x = 0.05)
+		lookSpeeds[device] = math.clamp(k, 0.02, 10)
 	else
 		lookSpeeds[device] = nil
 	end
