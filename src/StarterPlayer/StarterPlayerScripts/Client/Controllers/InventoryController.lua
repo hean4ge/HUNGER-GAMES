@@ -162,7 +162,9 @@ local function sanitize(data: any)
 		for i = 1, SLOTS do
 			local s = data.slots[i]
 			if type(s) == "table" and type(s.id) == "string" and ItemDefs.get(s.id) then
-				inv.slots[i] = { id = s.id, count = math.max(1, math.floor(tonumber(s.count) or 1)) }
+				-- stars: the copy's 1..5 stars (Shared.Stars) for a starred weapon, nil otherwise
+				local stars = if ItemDefs.isStarred(s.id) then math.clamp(math.floor(tonumber(s.stars) or 1), 1, 5) else nil
+				inv.slots[i] = { id = s.id, count = math.max(1, math.floor(tonumber(s.count) or 1)), stars = stars }
 			end
 		end
 	end
@@ -182,7 +184,7 @@ local function cloneInventory(source: any)
 	local copy = emptyInventory()
 	for i = 1, SLOTS do
 		local s = source.slots[i]
-		copy.slots[i] = if s then { id = s.id, count = s.count } else false
+		copy.slots[i] = if s then { id = s.id, count = s.count, stars = s.stars } else false
 	end
 	copy.equipped = source.equipped or 0
 	copy.armor = source.armor or ""

@@ -10,7 +10,23 @@
 	                              (Config.Loot.SpireRefillRadius) and empty Tier-3 Ground markers there may get an item
 	  LootService.spawnGroundItem(itemId, count, position, velocity?) -> Model?
 	                              a takeable ground item resting on the ground below `position`; with `velocity` it is
-	                              tossed from `position` first and settles where the arc meets the ground
+	                              tossed from `position` first and settles where the arc meets the ground.
+	                              stars? (5th argument): a starred weapon keeps its stars (default 1): model attribute
+	                              Stars, its matte finish, the glint in the stars' rarity colour, the prompt
+	                              "Twin-Bit Axe ★★★★"
+	  LootService.openFixed(model, items, player) -> number
+	                              spills a fixed list { { id, count, stars? } } from a container that is not a crate
+	                              (KitService's parcel) exactly as a crate spills, with Take all for `player`; the
+	                              model is then this service's (clearAll removes it)
+	  LootService.getBows() -> { { position, where, stars } }   this round's placed Recurve Bows
+	Weapons_v2 (18 Nov):
+	  Stars  every starred weapon out of a crate or on a marker gets 1..5 stars from Shared.Stars' odds for its source:
+	         Tier1 / Tier2 (runner's caches too) / Tier3; the Offering's restocked crates use "Offering".
+	  Bows   the Recurve Bow is in no random table. populate() places this round's budget (ItemDefs.BowBudget: 3 under
+	         16 contenders, else 4): one in a tier-3 crate at the Horn, the rest in tier-2 crates at least minSpacing
+	         apart, one per site (marker attribute Source "Map1:<group>:<id>"), each with its arrows. If only the small
+	         budget was placed, refillSpire (the Offering) adds one. GameState attribute BowsThisRound = how many.
+	  Caps   ItemDefs.RoundCaps (Short Bow 6): random rolls never give more than that in one round.
 	Markers: Parts tagged LootSpawn (attributes Tier 1|2|3, Kind "Crate"|"Ground") in ServerStorage.ArenaData.LootSpawns.
 	  A crate stands on the marker's floor (its bottom face, confirmed by a short downward ray), its front facing the
 	  marker's LookVector, with a small random yaw.
@@ -61,6 +77,7 @@ local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Signal = require(Shared:WaitForChild("Signal"))
+local Stars = require(Shared:WaitForChild("Stars"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local Util = require(Shared:WaitForChild("Util"))
 
@@ -94,6 +111,7 @@ type GroundState = {
 	id: string,
 	def: any,
 	count: number,
+	stars: number?,
 	ready: boolean,
 	taken: boolean,
 	position: Vector3,
@@ -114,13 +132,21 @@ type CrateState = {
 	spilled: { GroundState },
 	takeAll: ProximityPrompt?,
 	spot: Vector3, -- where it stands (the floor under it): crates keep Config.Loot.CrateSpacing apart
+	source: string?, -- the star odds of what comes out ("Tier1".."Tier3", "Offering"; nil = by tier)
+	extra: { Loot }?, -- always spilled as well (a placed bow and its arrows)
+	fixed: { Loot }?, -- spilled instead of a roll (a kit parcel)
 }
+
+type Loot = { id: string, count: number, stars: number? }
 
 local groundItems: { [Model]: GroundState } = {}
 local crates: { [Model]: CrateState } = {}
 local crateAtMarker: { [BasePart]: Model } = {}
 local itemAtMarker: { [BasePart]: Model } = {}
 local lastToast: { [Player]: number } = {}
+local rolledThisRound: { [string]: number } = {} -- ItemDefs.RoundCaps: how many of each capped item came out of rolls
+local bowsPlaced: { { position: Vector3, where: string, stars: number } } = {}
+local bowTopUpDone = false
 
 local RARITY_RANK: { [string]: number } = {}
 for index, name in ipairs(ItemDefs.RarityOrder) do
@@ -339,9 +365,12 @@ local function unclip(model: Model, pivot: CFrame, params: RaycastParams): CFram
 	return moved
 end
 
-local function objectText(def: any, count: number): string
+local function objectText(def: any, count: number, stars: number?): string
 	if count > 1 then
 		return string.format("%s  \u{00D7}%d", def.name, count)
+	end
+	if stars and def.starred then
+		return Stars.label(def.id, stars)
 	end
 	return def.name
 end
@@ -362,8 +391,27 @@ local function rollCount(entry: any): number
 	return rng:NextInteger(low, high)
 end
 
+-- An item a roll may still give this round (ItemDefs.RoundCaps; retired and never-random items never).
+local function rollable(id: string): boolean
+	local def = ItemDefs.get(id)
+	if not def or def.hidden or def.retired or id == ItemDefs.BowBudget.itemId then
+		return false
+	end
+	local cap = ItemDefs.RoundCaps[id]
+	return cap == nil or (rolledThisRound[id] or 0) < cap
+end
+
+-- The stars a starred weapon gets from a source (nil for everything else).
+local function starsFor(id: string, source: any): number?
+	if not ItemDefs.isStarred(id) then
+		return nil
+	end
+	return Stars.roll(source, rng)
+end
+
 -- n picks from the tier's table (re-rolling duplicates a few times for variety), plus each pick's lootBundle.
-local function rollItems(tier: number, n: number): { { id: string, count: number } }
+-- source: the star odds ("Tier1".."Tier3", "Offering"; default the tier's).
+local function rollItems(tier: number, n: number, source: string?): { Loot }
 	local list = ItemDefs.LootTables[tier] or ItemDefs.LootTables[1]
 	local out = {}
 	if type(list) ~= "table" or #list == 0 then
@@ -372,16 +420,19 @@ local function rollItems(tier: number, n: number): { { id: string, count: number
 	local seen = {}
 	for _ = 1, n do
 		local entry = Util.weightedPick(list, rng)
-		for _ = 1, 3 do
-			if not seen[entry.id] then
+		for _ = 1, 4 do
+			if not seen[entry.id] and rollable(entry.id) then
 				break
 			end
 			entry = Util.weightedPick(list, rng)
 		end
 		local def = ItemDefs.get(entry.id)
-		if def and not def.hidden then
+		if def and rollable(def.id) then
 			seen[entry.id] = true
-			table.insert(out, { id = def.id, count = rollCount(entry) })
+			if ItemDefs.RoundCaps[def.id] then
+				rolledThisRound[def.id] = (rolledThisRound[def.id] or 0) + 1
+			end
+			table.insert(out, { id = def.id, count = rollCount(entry), stars = starsFor(def.id, source or tier) })
 			local bundle = def.lootBundle
 			if type(bundle) == "table" and ItemDefs.get(bundle.id) then
 				table.insert(out, { id = bundle.id, count = rollCount(bundle) })
@@ -419,7 +470,7 @@ local function onTake(state: GroundState, player: Player)
 		end
 		return
 	end
-	local ok, result = pcall(inventory.give, player, state.id, state.count)
+	local ok, result = pcall(inventory.give, player, state.id, state.count, state.stars)
 	if not ok then
 		warn("[LootService] InventoryService.give failed: " .. tostring(result))
 		return
@@ -437,7 +488,7 @@ local function onTake(state: GroundState, player: Player)
 	end
 	state.model:SetAttribute("Count", state.count)
 	if state.prompt then
-		state.prompt.ObjectText = objectText(state.def, state.count)
+		state.prompt.ObjectText = objectText(state.def, state.count, state.stars)
 	end
 	inventoryFull(player)
 end
@@ -456,8 +507,10 @@ local function finalizeGroundItem(state: GroundState)
 	holder.Parent = handle
 	holder.WorldPosition = center + Vector3.new(0, 0.15, 0)
 
-	local rank = RARITY_RANK[state.def.rarity] or 1
-	local color = Theme.Rarity[state.def.rarity] or Color3.new(1, 1, 1)
+	-- a weapon's glint is the colour of its stars (1 Common .. 5 Legendary), everything else its rarity
+	local rarity = if state.stars then Stars.rarity(state.stars) else state.def.rarity
+	local rank = RARITY_RANK[rarity] or 1
+	local color = Theme.Rarity[rarity] or Color3.new(1, 1, 1)
 	local light = Instance.new("PointLight")
 	light.Name = "RarityLight"
 	light.Color = color
@@ -492,7 +545,7 @@ local function finalizeGroundItem(state: GroundState)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "TakePrompt"
 	prompt.ActionText = "Take"
-	prompt.ObjectText = objectText(state.def, state.count)
+	prompt.ObjectText = objectText(state.def, state.count, state.stars)
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = LootCfg.ItemPromptDistance or 7
 	prompt.RequiresLineOfSight = false -- loot in bushes and grass must stay takeable
@@ -592,7 +645,7 @@ local function toss(state: GroundState, origin: Vector3, velocity: Vector3, fold
 	end)
 end
 
-local function spawnGround(itemId: string, count: number?, position: Vector3, velocity: Vector3?, ignore: { Instance }?): Model?
+local function spawnGround(itemId: string, count: number?, position: Vector3, velocity: Vector3?, ignore: { Instance }?, stars: number?): Model?
 	if type(itemId) ~= "string" then
 		return nil
 	end
@@ -621,12 +674,17 @@ local function spawnGround(itemId: string, count: number?, position: Vector3, ve
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	model:SetAttribute("ItemId", itemId)
 	model:SetAttribute("Count", n)
+	local starred = Stars.of(itemId, stars)
+	if starred then
+		Stars.applyFinish(model, starred) -- also sets the model's Stars attribute
+	end
 	CollectionService:AddTag(model, GROUND_TAG)
 	local state: GroundState = {
 		model = model,
 		id = itemId,
 		def = def,
 		count = n,
+		stars = starred,
 		ready = false,
 		taken = false,
 		position = position,
@@ -650,8 +708,8 @@ local function spawnGround(itemId: string, count: number?, position: Vector3, ve
 	return model
 end
 
-function LootService.spawnGroundItem(itemId: string, count: number?, position: Vector3, velocity: Vector3?): Model?
-	local model = spawnGround(itemId, count, position, velocity, nil)
+function LootService.spawnGroundItem(itemId: string, count: number?, position: Vector3, velocity: Vector3?, stars: number?): Model?
+	local model = spawnGround(itemId, count, position, velocity, nil, stars)
 	-- QW8: whoever just dropped it (it left from where they stand) doesn't auto-pick it straight back up
 	local state = model and groundItems[model]
 	if state and velocity ~= nil and Util.isFiniteVector(position) then
@@ -759,7 +817,7 @@ local function rollRunner(): { { id: string, count: number } }
 		local def = entry and ItemDefs.get(entry.id)
 		if def and not def.hidden and not seen[def.id] then
 			seen[def.id] = true
-			table.insert(out, { id = def.id, count = rollCount(entry) })
+			table.insert(out, { id = def.id, count = rollCount(entry), stars = starsFor(def.id, "Tier2") })
 		end
 	end
 	if type(spec.weapon) == "table" and #spec.weapon > 0 then
@@ -852,9 +910,17 @@ local function spill(state: CrateState, player: Player?): number
 	local model = state.model
 	local base = model.PrimaryPart :: BasePart
 	local low, high = LootCfg.CrateItemsMin or 2, LootCfg.CrateItemsMax or 4
-	local items = if state.runner
-		then rollRunner()
-		else rollItems(state.tier, rng:NextInteger(math.min(low, high), math.max(low, high)))
+	local items: { Loot }
+	if state.fixed then
+		items = table.clone(state.fixed)
+	elseif state.runner then
+		items = rollRunner()
+	else
+		items = rollItems(state.tier, rng:NextInteger(math.min(low, high), math.max(low, high)), state.source)
+	end
+	for _, item in ipairs(state.extra or {}) do
+		table.insert(items, 1, item) -- a placed bow comes out first
+	end
 	local origin = base.Position + base.CFrame.UpVector * (base.Size.Y / 2 + 0.9)
 	local toward = Util.flat(base.CFrame.LookVector)
 	local root = player and rootOf(player)
@@ -880,7 +946,7 @@ local function spill(state: CrateState, player: Player?): number
 		end
 		task.delay(0.12 + (i - 1) * (LootCfg.SpillDelay or 0.09), function()
 			if gen == generation and model.Parent then
-				local spawned = spawnGround(item.id, item.count, origin, velocity, ignore)
+				local spawned = spawnGround(item.id, item.count, origin, velocity, ignore, item.stars)
 				local ground = spawned and groundItems[spawned]
 				if ground then
 					table.insert(state.spilled, ground)
@@ -910,7 +976,7 @@ local function takeAll(state: CrateState, player: Player)
 	local got, left = 0, 0
 	for _, item in ipairs(state.spilled) do
 		if not item.taken and item.model.Parent then
-			local ok, result = pcall(inventory.give, player, item.id, item.count)
+			local ok, result = pcall(inventory.give, player, item.id, item.count, item.stars)
 			local added = if ok then math.clamp(math.floor(tonumber(result) or 0), 0, item.count) else 0
 			if not ok then
 				warn("[LootService] InventoryService.give failed: " .. tostring(result))
@@ -923,7 +989,7 @@ local function takeAll(state: CrateState, player: Player)
 				else
 					item.model:SetAttribute("Count", item.count)
 					if item.prompt then
-						item.prompt.ObjectText = objectText(item.def, item.count)
+						item.prompt.ObjectText = objectText(item.def, item.count, item.stars)
 					end
 					left += 1
 				end
@@ -1349,7 +1415,7 @@ local function spawnAtGroundMarker(marker: BasePart, tier: number): Model?
 		return nil
 	end
 	local bottom = (marker.CFrame * CFrame.new(0, -marker.Size.Y / 2, 0)).Position
-	local model = spawnGround(first.id, first.count, bottom + Vector3.new(0, 0.3, 0), nil, nil)
+	local model = spawnGround(first.id, first.count, bottom + Vector3.new(0, 0.3, 0), nil, nil, first.stars)
 	if model then
 		local state = groundItems[model]
 		if state then
@@ -1359,14 +1425,136 @@ local function spawnAtGroundMarker(marker: BasePart, tier: number): Model?
 	end
 	for i = 2, #items do
 		local offset = Vector3.new(rng:NextNumber(-0.9, 0.9), 0.3, rng:NextNumber(-0.9, 0.9))
-		spawnGround(items[i].id, items[i].count, bottom + offset, nil, nil)
+		spawnGround(items[i].id, items[i].count, bottom + offset, nil, nil, items[i].stars)
 	end
 	return model
 end
 
 --------------------------------------------------------------------------------------------------------------------
+-- The bow budget (the owner's 12 Nov rule: 3 to 4 bows a round, placed on purpose)
+--------------------------------------------------------------------------------------------------------------------
+
+local function giveBow(state: CrateState, where: string)
+	local budget = ItemDefs.BowBudget
+	local source = state.source or ({ "Tier1", "Tier2", "Tier3" })[state.tier] or "Tier2"
+	local stars = Stars.roll(source, rng)
+	state.extra = state.extra or {}
+	table.insert(state.extra :: { Loot }, { id = "arrow", count = budget.arrows or 5 })
+	table.insert(state.extra :: { Loot }, { id = budget.itemId, count = 1, stars = stars })
+	state.model:SetAttribute("HasBow", true)
+	table.insert(bowsPlaced, { position = state.spot, where = where, stars = stars })
+	GameState:SetAttribute("BowsThisRound", #bowsPlaced)
+end
+
+-- "Map1:<group>:<id>" -> "<group>:<id>" (one bow per site); markers with no Source count as their own site.
+local function siteOf(state: CrateState): string
+	local source = state.marker and state.marker:GetAttribute("Source")
+	if type(source) == "string" then
+		local rest = string.match(source, "^[^:]+:(.+)$")
+		return rest or source
+	end
+	return tostring(state.model)
+end
+
+local function bowBudget(): number
+	local budget = ItemDefs.BowBudget
+	local n = tonumber(GameState:GetAttribute("StartedCount")) or #Players:GetPlayers()
+	return if n >= (budget.fullFrom or 16) then budget.full or 4 else budget.small or 3
+end
+
+local function placeBows()
+	local budget = ItemDefs.BowBudget
+	local want = bowBudget()
+	local hornRadius = budget.hornRadius or 120
+	local horn, sites = {}, {}
+	for _, state in pairs(crates) do
+		if not state.opened and not state.fixed and not state.runner then
+			local d = ArenaLayout.flatDistance(state.spot)
+			if state.tier == 3 and d <= hornRadius then
+				table.insert(horn, state)
+			elseif state.tier == 2 and d > hornRadius then
+				table.insert(sites, state)
+			end
+		end
+	end
+	local chosen: { CrateState } = {}
+	if #horn > 0 then
+		local pick = horn[rng:NextInteger(1, #horn)]
+		giveBow(pick, "Horn")
+		table.insert(chosen, pick)
+	end
+	-- shuffled, then the first that keep minSpacing from every bow so far (relaxed if the map is too small for it)
+	for i = #sites, 2, -1 do
+		local j = rng:NextInteger(1, i)
+		sites[i], sites[j] = sites[j], sites[i]
+	end
+	local usedSite = {}
+	for _, spacing in ipairs({ budget.minSpacing or 300, 200, 120, 0 }) do
+		for _, state in ipairs(sites) do
+			if #chosen >= want then
+				break
+			end
+			local site = siteOf(state)
+			if not usedSite[site] and not state.extra then
+				local clear = true
+				for _, other in ipairs(chosen) do
+					if Util.flat(other.spot - state.spot).Magnitude < spacing then
+						clear = false
+						break
+					end
+				end
+				if clear then
+					usedSite[site] = true
+					giveBow(state, "Site " .. site)
+					table.insert(chosen, state)
+				end
+			end
+		end
+		if #chosen >= want then
+			break
+		end
+	end
+end
+
+--------------------------------------------------------------------------------------------------------------------
 -- Public API
 --------------------------------------------------------------------------------------------------------------------
+
+function LootService.getBows()
+	local out = {}
+	for _, bow in ipairs(bowsPlaced) do
+		table.insert(out, { position = bow.position, where = bow.where, stars = bow.stars })
+	end
+	return out
+end
+
+-- A container that is not a crate (KitService's parcel) spills a fixed list as a crate does, with Take all for the
+-- opener. The model needs a PrimaryPart (its body); it becomes this service's (clearAll removes it).
+function LootService.openFixed(model: Model, items: { Loot }, player: Player?): number
+	local base = model.PrimaryPart
+	if not base then
+		return 0
+	end
+	local state: CrateState = {
+		model = model,
+		tier = 1,
+		marker = nil,
+		opened = true,
+		prompt = nil,
+		runner = false,
+		opener = player,
+		spilled = {},
+		takeAll = nil,
+		spot = base.Position - Vector3.new(0, base.Size.Y / 2, 0),
+		fixed = items,
+	}
+	crates[model] = state
+	local count = spill(state, player)
+	if player then
+		offerTakeAll(state, player, 0.12 + math.max(0, count - 1) * (LootCfg.SpillDelay or 0.09) + 0.05)
+	end
+	return count
+end
 
 function LootService.inventoryFull(player: Player)
 	inventoryFull(player)
@@ -1385,6 +1573,10 @@ function LootService.clearAll()
 	table.clear(groundItems)
 	table.clear(crateAtMarker)
 	table.clear(itemAtMarker)
+	table.clear(rolledThisRound)
+	table.clear(bowsPlaced)
+	bowTopUpDone = false
+	GameState:SetAttribute("BowsThisRound", 0)
 	local arena = workspace:FindFirstChild("Arena")
 	local loot = arena and arena:FindFirstChild("Loot")
 	if loot then
@@ -1453,8 +1645,15 @@ function LootService.populate()
 				task.wait()
 			end
 		end
-		print(string.format("[LootService] %d crates and %d ground items from %d markers (%d skipped outside r %d; %d crates moved aside and %d left out to keep them %s studs apart)",
-			crateCount, itemCount, #markers, skipped, math.floor(limit), moved, crowded, tostring(LootCfg.CrateSpacing or 5)))
+		if gen ~= generation then
+			return
+		end
+		local okBows, bowErr = pcall(placeBows)
+		if not okBows then
+			warn("[LootService] placing the bows failed: " .. tostring(bowErr))
+		end
+		print(string.format("[LootService] %d crates and %d ground items from %d markers (%d skipped outside r %d; %d crates moved aside and %d left out to keep them %s studs apart); %d bows placed",
+			crateCount, itemCount, #markers, skipped, math.floor(limit), moved, crowded, tostring(LootCfg.CrateSpacing or 5), #bowsPlaced))
 	end)
 end
 
@@ -1462,18 +1661,32 @@ function LootService.refillSpire()
 	local radius = LootCfg.SpireRefillRadius or 90
 	local params = placementParams({ getFolder("Crates") })
 	local crateCount, itemCount = 0, 0
+	local restocked: { CrateState } = {}
 	for _, marker in ipairs(collectMarkers()) do
 		if marker.Parent and tierOf(marker) == 3 and ArenaLayout.flatDistance(marker.Position) <= radius then
 			local ok, err = pcall(function()
 				if marker:GetAttribute("Kind") == "Crate" then
 					local old = crateAtMarker[marker]
+					-- an unopened crate's placed bow goes into its restocked crate (it is still one of this round's)
+					local carried = nil
 					if old then
+						local oldState = crates[old]
+						carried = if oldState and not oldState.opened then oldState.extra else nil
 						destroyCrate(old)
 					end
 					-- DropIn = false (the Spire's niche markers, Populate v2): restocked in place, not dropped through the Spire
 					local frame = spacedCrateFrame(marker, params)
 					if frame then
-						spawnCrate(marker, 3, frame, marker:GetAttribute("DropIn") ~= false, crateCount * 0.18)
+						local model = spawnCrate(marker, 3, frame, marker:GetAttribute("DropIn") ~= false, crateCount * 0.18)
+						local state = crates[model]
+						if state then
+							state.source = "Offering" -- Weapons_v2 2.5: the Offering's crates roll 3 to 5 stars
+							state.extra = carried
+							if carried then
+								model:SetAttribute("HasBow", true)
+							end
+							table.insert(restocked, state)
+						end
 						crateCount += 1
 					end
 				else
@@ -1488,6 +1701,22 @@ function LootService.refillSpire()
 			if not ok then
 				warn("[LootService] refill " .. marker:GetFullName() .. " failed: " .. tostring(err))
 			end
+		end
+	end
+	-- the bow top-up: a round that was given the small budget gets one more here, so it ends with the full one at most
+	local budget = ItemDefs.BowBudget
+	if budget.offeringTopUp and not bowTopUpDone and #bowsPlaced < (budget.full or 4) and #restocked > 0 then
+		bowTopUpDone = true
+		local free = {}
+		for _, state in ipairs(restocked) do
+			if not state.extra then
+				table.insert(free, state)
+			end
+		end
+		if #free > 0 then
+			local state = free[rng:NextInteger(1, #free)]
+			state.source = "Offering"
+			giveBow(state, "Offering")
 		end
 	end
 	if crateCount == 0 and itemCount == 0 and not warnedNoSpireMarkers then
@@ -1571,7 +1800,7 @@ local function autoPickupTick()
 							else
 								state.model:SetAttribute("Count", state.count)
 								if state.prompt then
-									state.prompt.ObjectText = objectText(state.def, state.count)
+									state.prompt.ObjectText = objectText(state.def, state.count, state.stars)
 								end
 							end
 						end

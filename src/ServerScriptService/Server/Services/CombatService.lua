@@ -50,6 +50,12 @@
 	Template: ServerStorage.Dev.TrainingDummy (built by ServerStorage.WorldGen.DummyBuilder).
 	Melee reach: honest reach plus half a stud, plus what the target moved on the server in the last quarter second and
 	the attacker in the last tenth (meleeFront, recentTravel), never more than range + MeleeLagTolerance + MeleeHitRadius.
+	The target's own body (never its held item or anything worn) must lie within that front (bodyDistance), and the
+	sweep ball is the client's (2.04) plus 0.15, wider by the target's recent travel up to MeleeHitRadius.
+	Weapons v2 (18 Nov): every weapon reads its stats at its stars through Shared.CombatStats (which uses Shared.Stars);
+	no single hit over 95 (applyHit); each weapon's one rule (CombatStats.Rules): the knife's unseen hit, the machete's
+	second contender in the arc, the spear weak inside 4 studs, the Twin-Bit Axe through half the armour. Bow shots carry
+	their on-target range, distance falloff and the 90 head cap to ProjectileService.
 	Defeat: a body at zero health stays in one piece (BreakJointsOnDeath off, set here as characters load), topples, fades
 	on every client and is removed here DEFEAT_FALL + DEFEAT_FADE seconds after it fell (watchDefeat).
 	Melee cooldown: the same rule as the attacker's client (CombatController: nextActionAt = start + total). The next swing
@@ -64,6 +70,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
+local CombatStats = require(Shared:WaitForChild("CombatStats"))
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local Net = require(Shared:WaitForChild("Net"))
@@ -95,9 +102,19 @@ local MELEE_FACING_DOT = -0.2 -- flat swing direction vs. character facing; leni
 -- client reported.)
 -- MELEE_REACH_ALLOWANCE was 1: with it a sword (range 8) standing still was confirmed on a still target 11 studs away,
 -- root to root, a full stud past what an honest client's trace can touch (10).
+-- The body check (18 Nov, wave 8): whatever the trace touched, the swing lands only when the target's BODY (its own body
+-- parts, never a held item or anything worn) has a point within the front of the sweep. Before it, a modified client
+-- landed raw sword claims on a player standing still 11 and 12 studs away: the server's ball (2.4) was wider than the
+-- client's (2.04) and anything inside the target counted. The ball itself is now the client's radius plus
+-- MELEE_BALL_SLACK, widened by what the target moved lately (a strafing target's side, as the server sees it, is up to
+-- that far from where the attacker saw it), never past MeleeHitRadius.
+-- MELEE_REACH_ALLOWANCE was 0.5 until 18 Nov: with it a modified client still landed a sword on a still player holding
+-- a weapon 11 and 11.5 studs away (root to root), whose raised hand an honest client's ball could not touch (Studio run,
+-- wave 8). The honest client's own front is range + 2.04 - 0.5 from the head; the server's is now 0.15 past it.
 local MELEE_PREDICT_RADIUS = 0.85
 local MELEE_CAMERA_BEHIND = 0.5
-local MELEE_REACH_ALLOWANCE = 0.5
+local MELEE_REACH_ALLOWANCE = 0.15
+local MELEE_BALL_SLACK = 0.1
 local MELEE_LAG_TIME = 0.25
 local MELEE_OWN_LAG = 0.1
 local TRAVEL_STEP = 0.05 -- seconds between the position samples recentTravel reads
@@ -249,6 +266,40 @@ local function meleeDefFor(itemId: string?)
 		return def
 	end
 	return nil
+end
+
+-- The star count (1..5) of the item in hand: InventoryService.getEquippedStars when it has one, else the `stars` field
+-- of the equipped slot (slots { id, count, stars? }, Weapons_v2 9.2), else 1.
+local function equippedStars(player: Player): number
+	local inventory = Services.InventoryService
+	if not inventory then
+		return 1
+	end
+	if type(inventory.getEquippedStars) == "function" then
+		local ok, value = pcall(inventory.getEquippedStars, player)
+		if ok and type(value) == "number" then
+			return CombatStats.clampStars(value)
+		end
+	end
+	if type(inventory.getEquipped) == "function" and type(inventory.getSnapshot) == "function" then
+		local ok, _, slot = pcall(inventory.getEquipped, player)
+		local okSnap, snap = pcall(inventory.getSnapshot, player)
+		local slots = okSnap and type(snap) == "table" and snap.slots
+		local entry = ok and type(slot) == "number" and type(slots) == "table" and slots[slot]
+		if type(entry) == "table" then
+			return CombatStats.clampStars(entry.stars)
+		end
+	end
+	return 1
+end
+
+-- The swing's stats at the star count of the weapon in hand (CombatStats.melee), or nil for items that never swing.
+local function meleeStatsFor(player: Player, itemId: string?)
+	local def = meleeDefFor(itemId)
+	if not def then
+		return nil
+	end
+	return CombatStats.melee(def, if def == FISTS then 1 else equippedStars(player))
 end
 
 local function hasItem(player: Player, itemId: string, count: number): boolean
@@ -882,6 +933,9 @@ end
 -- Hits
 --------------------------------------------------------------------------------------------------------------------
 
+-- When each body last took damage from anything here (weak keys: gone with the body).
+local lastHurtAt: { [Humanoid]: number } = setmetatable({}, { __mode = "k" }) :: any
+
 function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamage: number, info: { [string]: any }?): (number, boolean)
 	if typeof(humanoid) ~= "Instance" or not humanoid:IsA("Humanoid") then
 		return 0, false
@@ -900,6 +954,9 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 	local hit = if type(info) == "table" then table.clone(info) else {}
 	hit.attacker = attacker
 	hit.cause = hit.cause or "Combat"
+	if hit.cause == "Combat" then
+		baseDamage = math.min(baseDamage, CombatStats.hitCap()) -- no single weapon hit over 95, whatever the stars
+	end
 
 	local victim = Players:GetPlayerFromCharacter(model)
 	local dealt, killed = 0, false
@@ -914,6 +971,10 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 			if ok and Util.isFiniteNumber(value) then
 				multiplier = math.clamp(value, 0, 1)
 			end
+		end
+		local pierce = hit.armourPierce
+		if type(pierce) == "number" and pierce == pierce then
+			multiplier = 1 - (1 - multiplier) * (1 - math.clamp(pierce, 0, 1)) -- Twin-Bit Axe: armour stops half as much
 		end
 		local playerService = Services.PlayerService
 		if not playerService or type(playerService.damage) ~= "function" then
@@ -936,6 +997,9 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 		end
 	end
 
+	if dealt > 0 then
+		lastHurtAt[humanoid] = os.clock() -- (the knife's unseen hit needs 5 s unhurt)
+	end
 	if attacker and dealt > 0 then
 		HitConfirm:FireClient(attacker, {
 			damage = math.floor(dealt + 0.5),
@@ -981,11 +1045,36 @@ end
 -- Only living bodies count (one that just fell neither takes the swing nor blocks it). `only` (the body the attacker's
 -- own trace touched): that body is checked and no other, so a bystander in the path never takes the hit.
 -- worldOnly skips the characters (the attacker's own trace missed them) and keeps the world sound.
-local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, worldOnly: boolean?, only: Instance?): MeleeHit?
+-- The shortest distance (studs) from `point` to the body of `model`: its own body parts (direct BasePart children that
+-- can be queried), never a held item, a tool or anything worn. math.huge when it has none.
+local function bodyDistance(model: Instance?, point: Vector3): number
+	if not model then
+		return math.huge
+	end
+	local best = math.huge
+	for _, part in ipairs(model:GetChildren()) do
+		if part:IsA("BasePart") and part.CanQuery then
+			local half = part.Size * 0.5
+			local rel = part.CFrame:PointToObjectSpace(point)
+			local closest = Vector3.new(math.clamp(rel.X, -half.X, half.X), math.clamp(rel.Y, -half.Y, half.Y), math.clamp(rel.Z, -half.Z, half.Z))
+			local d = (rel - closest).Magnitude
+			if d < best then
+				best = d
+			end
+		end
+	end
+	return best
+end
+
+-- bodyLimit (optional): a body is only taken when bodyDistance from the origin is within it (see MELEE_BALL_SLACK).
+local function meleeTrace(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, worldOnly: boolean?, only: Instance?, bodyLimit: number?): MeleeHit?
 	local world = worldParams(CombatService.getTargets(character), character) -- (no body, living or not, is world)
 	local targets = if worldOnly then {} else CombatService.getTargets(character, true)
 	if only ~= nil then
 		targets = if table.find(targets, only) then { only } else {} -- (it just fell, or was never a target: nobody)
+	end
+	local function inReach(model: Instance?): boolean
+		return bodyLimit == nil or bodyDistance(model, origin) <= bodyLimit
 	end
 	if #targets > 0 then
 		local params = RaycastParams.new()
@@ -995,7 +1084,7 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 		local aimed = workspace:Raycast(origin, direction * (reach + radius), params)
 		if aimed then
 			local humanoid, model, bodyPart = bodyFromPart(aimed.Instance, targets)
-			if humanoid and humanoid.Health > 0 then
+			if humanoid and humanoid.Health > 0 and inReach(model) then
 				candidate = { humanoid = humanoid, model = model, part = bodyPart, position = aimed.Position }
 			end
 		end
@@ -1014,7 +1103,7 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 		local swept = workspace:Spherecast(origin, radius, direction * reach, params)
 		if swept then
 			local humanoid, model, bodyPart = bodyFromPart(swept.Instance, targets)
-			if humanoid and humanoid.Health > 0 then
+			if humanoid and humanoid.Health > 0 and inReach(model) then
 				candidate = { humanoid = humanoid, model = model, part = bodyPart, position = swept.Position }
 			end
 		end
@@ -1025,7 +1114,7 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 			local bestDistance = math.huge
 			for _, part in ipairs(workspace:GetPartBoundsInRadius(origin + direction * radius, radius, overlap)) do
 				local humanoid, model, bodyPart = bodyFromPart(part, targets)
-				if humanoid and humanoid.Health > 0 then
+				if humanoid and humanoid.Health > 0 and inReach(model) then
 					local offset = part.Position - origin
 					local distance = offset.Magnitude
 					if offset:Dot(direction) > -0.5 and distance < bestDistance then
@@ -1143,6 +1232,70 @@ local function meleeFront(def: any, character: Model, origin: Vector3, direction
 	return math.min(still + own + theirs, cap), still, cap, own, theirs
 end
 
+-- A swing's damage on the body it landed on, with its weapon's one rule (CombatStats.Rules, Weapons_v2 1.2): the spear
+-- is weak inside its shaft (insideRange, flat root to root), the knife's first hit on someone facing away and unhurt for
+-- CombatStats.UnseenWindow seconds is its unseen hit.
+local function meleeDamage(def: any, ctx: Context, hit: MeleeHit): number
+	local damage = def.damage or 0
+	local model = hit.model
+	local root = model and model:FindFirstChild("HumanoidRootPart")
+	if not (root and root:IsA("BasePart")) then
+		return damage
+	end
+	local toAttacker = Util.flat(ctx.root.Position - root.Position)
+	if def.insideRange and def.insideShare and toAttacker.Magnitude < def.insideRange then
+		damage *= def.insideShare
+	end
+	if def.unseenDamage and hit.humanoid and toAttacker.Magnitude > 0.01 then
+		local look = Util.flat(root.CFrame.LookVector)
+		local unhurt = os.clock() - (lastHurtAt[hit.humanoid] or -math.huge) >= CombatStats.UnseenWindow
+		if look.Magnitude > 0.01 and look.Unit:Dot(toAttacker.Unit) < 0 and unhurt then
+			damage = math.max(damage, def.unseenDamage)
+		end
+	end
+	return damage
+end
+
+-- The machete's wide cut: the nearest other living body inside the arc (sweepAngle either side of the swing, flat), its
+-- body within the same front and in the open, takes sweepShare of the damage. One at most.
+local function sweepSecond(player: Player, def: any, ctx: Context, origin: Vector3, direction: Vector3, front: number, primary: Instance)
+	local flatDir = Util.flat(direction)
+	if flatDir.Magnitude < 0.1 then
+		return
+	end
+	flatDir = flatDir.Unit
+	local cosLimit = math.cos(math.rad(def.sweepAngle or 55))
+	local world: RaycastParams? = nil
+	local best, bestDistance = nil, math.huge
+	for _, model in ipairs(CombatService.getTargets(ctx.character, true)) do
+		if model ~= primary then
+			local root = model:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				local offset = Util.flat(root.Position - origin)
+				local distance = bodyDistance(model, origin)
+				if offset.Magnitude > 0.1 and offset.Unit:Dot(flatDir) >= cosLimit and distance <= front and distance < bestDistance then
+					world = world or worldParams(CombatService.getTargets(ctx.character), ctx.character)
+					local toRoot = root.Position - origin
+					local blocked = workspace:Raycast(origin, toRoot, world)
+					if blocked == nil or blocked.Distance >= toRoot.Magnitude - 0.75 then
+						best, bestDistance = model, distance
+					end
+				end
+			end
+		end
+	end
+	local humanoid = best and best:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		local root = best:FindFirstChild("HumanoidRootPart") :: BasePart
+		local dealt = CombatService.applyHit(player, humanoid, (def.damage or 0) * def.sweepShare, {
+			cause = "Combat", weaponId = def.id, position = origin, hitPosition = root.Position, melee = true, sweep = true,
+		})
+		if dealt > 0 then
+			playSound("Hit_Flesh", root.Position, player)
+		end
+	end
+end
+
 --------------------------------------------------------------------------------------------------------------------
 -- Remotes
 --------------------------------------------------------------------------------------------------------------------
@@ -1159,7 +1312,7 @@ local function onMeleeStart(player: Player, variant: any)
 	if not ctx then
 		return
 	end
-	local def = meleeDefFor(equippedItemId(player))
+	local def = meleeStatsFor(player, equippedItemId(player))
 	if not def then
 		return
 	end
@@ -1201,7 +1354,7 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	if not ctx then
 		return
 	end
-	local def = meleeDefFor(equippedItemId(player))
+	local def = meleeStatsFor(player, equippedItemId(player)) -- (the weapon's stats at its stars: CombatStats.melee)
 	if not def then
 		return
 	end
@@ -1229,10 +1382,12 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
 	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE past the front of the attacker's own, plus what the
 	-- attacker and the target moved, on the server, in the last MELEE_LAG_TIME seconds (meleeFront)
-	local radius = CombatConfig.MeleeHitRadius
 	local claimed = if typeof(target) == "Instance" and target:IsA("Model") then target else nil
-	local front = meleeFront(def, ctx.character, origin, direction, predictedHit == true, claimed)
-	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true, claimed)
+	local front, _, _, _, theirs = meleeFront(def, ctx.character, origin, direction, predictedHit == true, claimed)
+	-- the client's ball plus a little, wider by what the target moved lately (its side moved that far since the
+	-- attacker saw it), never wider than MeleeHitRadius; the body itself must be within the front (bodyDistance)
+	local radius = math.min(CombatConfig.MeleeHitRadius, CombatConfig.MeleeHitRadius * MELEE_PREDICT_RADIUS + MELEE_BALL_SLACK + theirs)
+	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true, claimed, front)
 	if not hit then
 		if predictedHit == true then
 			refuse(player, "MeleeNoTarget") -- (the attacker's screen showed a hit; the server found nobody there)
@@ -1240,15 +1395,21 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 		return
 	end
 	if hit.humanoid then
-		local dealt = CombatService.applyHit(player, hit.humanoid, def.damage or 0, {
+		local damage = meleeDamage(def, ctx, hit)
+		local dealt = CombatService.applyHit(player, hit.humanoid, damage, {
 			cause = "Combat",
 			weaponId = def.id,
 			position = origin,
 			hitPosition = hit.position,
 			melee = true,
+			armourPierce = def.armourPierce,
+			stars = def.stars,
 		})
 		if dealt > 0 then
 			playSound("Hit_Flesh", hit.position, player)
+		end
+		if def.sweepShare and hit.model then
+			sweepSecond(player, def, ctx, origin, direction, front, hit.model)
 		end
 	else
 		if predictedHit == true then
@@ -1360,7 +1521,8 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 			refuse(player, "BowNoDraw")
 			return
 		end
-		local drawTime = math.max(def.drawTime or 1, 0.05)
+		local bow = CombatStats.bow(def, equippedStars(player)) -- (draw time, speed, damage and range at its stars)
+		local drawTime = bow.drawTime
 		local began = math.max(drawStart, st.bowFree)
 		amount = math.min(amount, math.clamp((now - began + CHARGE_JITTER) / drawTime, 0, 1))
 		if amount < (CombatConfig.MinBowCharge or 0.2) - 1e-3 then
@@ -1374,12 +1536,16 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 			return
 		end
 		st.bowFree = math.max(now, began + amount * drawTime) + BOW_RECOVER
-		local speed = Util.lerp(def.speedMin or 90, def.speedMax or 240, amount)
-		local damage = Util.lerp(def.damageMin or 10, def.damageMax or 40, amount)
-		local fired = projectiles.fire(player, ammo, start, aim * speed, def.gravity or 50, damage, {
+		local speed = Util.lerp(bow.speedMin, bow.speedMax, amount)
+		local damage = Util.lerp(bow.damageMin, bow.damageMax, amount)
+		local fired = projectiles.fire(player, ammo, start, aim * speed, bow.gravity, damage, {
 			shotId = shotId,
 			weaponId = itemId,
-			headshotMultiplier = def.headshotMultiplier,
+			headshotMultiplier = bow.headshotMultiplier,
+			headCap = bow.headCap, -- a bow headshot never over 90 (the owner's number)
+			onTarget = bow.onTarget, -- full damage within its on-target range, then less with distance
+			falloffBeyond = bow.falloffBeyond,
+			falloffMin = bow.falloffMin,
 			recoverItem = ammo, -- it stays where it ends up (ProjectileService.WorldProjectiles)
 		})
 		if not fired then
@@ -1393,7 +1559,9 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 
 	-- Throw
 	local speed, gravity, damage
+	local thrownStars, pierce, headMultiplier = nil, nil, nil
 	if def.kind == "Throwable" then
+		headMultiplier = CombatStats.throwable(def).headshotMultiplier
 		if not tryCooldown(st, "nextThrow", def.cooldown or 0.5, now) then
 			return
 		end
@@ -1402,7 +1570,8 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		end
 		speed, gravity, damage = def.speed, def.gravity, def.damage
 	elseif def.kind == "Melee" and def.throwable then
-		if not tryCooldown(st, "nextThrow", def.cooldown or 0.8, now) then
+		local stats = CombatStats.melee(def, equippedStars(player)) -- (read before the weapon leaves the hand)
+		if not tryCooldown(st, "nextThrow", stats.cooldown or 0.8, now) then
 			return
 		end
 		local inventory = Services.InventoryService
@@ -1412,15 +1581,18 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		if inventory.removeEquipped(player) ~= itemId then
 			return
 		end
-		speed, gravity, damage = def.throwSpeed, def.throwGravity, def.throwDamage
+		speed, gravity, damage = stats.throwSpeed, stats.throwGravity, stats.throwDamage
+		thrownStars, pierce, headMultiplier = stats.stars, stats.armourPierce, stats.throwHeadMultiplier
 	else
 		return
 	end
 	local fired = projectiles.fire(player, itemId :: string, start, aim * (speed or 120), gravity or 40, damage or 0, {
 		shotId = shotId,
 		weaponId = itemId,
-		headshotMultiplier = CombatConfig.DefaultHeadshotMultiplier,
+		headshotMultiplier = headMultiplier or CombatConfig.DefaultHeadshotMultiplier,
+		armourPierce = pierce,
 		recoverItem = itemId, -- it stays where it ends up, like an arrow
+		recoverStars = thrownStars, -- (a thrown weapon keeps its stars where it lands: see ProjectileService)
 	})
 	if not fired then
 		refund(player, itemId :: string)
@@ -1451,6 +1623,16 @@ CombatService._stateOf = function(player: Player): PlayerState? -- (the swing an
 	return playerState[player]
 end
 CombatService._meleeFront = meleeFront -- (def, character, origin, direction, predicted, claimed) -> front, still, cap, own, theirs
+CombatService._bodyDistance = bodyDistance -- (model, point) -> studs to its body (not held items or anything worn)
+CombatService._equippedStars = equippedStars
+-- the two remotes' handlers, for a test script on the server that plays a (modified) client: same arguments as the
+-- remotes after the player
+CombatService._meleeSwing = function(player: Player, ...: any)
+	onMeleeSwing(player, ...)
+end
+CombatService._rangedRelease = function(player: Player, ...: any)
+	onRangedRelease(player, ...)
+end
 CombatService._recentTravel = function(model: Instance?, window: number?): number
 	return recentTravel(model, os.clock(), window or MELEE_LAG_TIME)
 end

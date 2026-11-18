@@ -1,0 +1,11426 @@
+{
+ "category": "WeaponsV2",
+ "glbs": {
+  "near": "WeaponsV2.glb",
+  "far": "WeaponsV2_Far.glb",
+  "props": "WeaponsV2_Props.glb"
+ },
+ "generator": "weapons_v2.py (+ wv2_geo.py)",
+ "units": "studs (1 Blender unit = 1 stud)",
+ "axes": "Roblox (x, y, z) = Blender (x, z, -y). Front = Roblox -Z. Held items: Grip at the origin, look = item axis (Roblox +Y), up = edge / front (Roblox -Z), as ItemsReal.",
+ "textures": "none: one flat colour per part, no vertex colours. The importer drops colours, so set Material and Color from this manifest.",
+ "stars": {
+  "names": [
+   "Worn",
+   "Sound",
+   "Fine",
+   "Superior",
+   "Masterwork"
+  ],
+  "rule": "Same mesh at every star; only Role colours/materials change. ItemModels.build(id, stars) sets each part from parts[].stars[stars-1]. Etch parts are the blade/limb colour below 5 stars and show as a darker steel band or brass inlay at 5.",
+  "roles": {
+   "Blade": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      148,
+      148,
+      144
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      96,
+      102,
+      112
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      100,
+      105,
+      114
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      108,
+      112,
+      120
+     ]
+    }
+   ],
+   "Edge": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      180,
+      180,
+      176
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      166,
+      170,
+      176
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      172,
+      176,
+      182
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      186,
+      188,
+      192
+     ]
+    }
+   ],
+   "Fitting": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      96,
+      94,
+      92
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      62,
+      62,
+      64
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      118,
+      64
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      160,
+      126,
+      68
+     ]
+    }
+   ],
+   "Wood": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      168,
+      138,
+      100
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      144,
+      108,
+      74
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      76,
+      52
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      92,
+      64,
+      44
+     ]
+    }
+   ],
+   "Grip": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      100,
+      72,
+      50
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      78,
+      54,
+      38
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      70,
+      48,
+      34
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Leather",
+     "rgb": [
+      62,
+      42,
+      30
+     ]
+    }
+   ],
+   "Cord": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      86,
+      80,
+      72
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      58,
+      56,
+      54
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      58,
+      56,
+      54
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      50,
+      48,
+      46
+     ]
+    }
+   ],
+   "EtchSteel": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      148,
+      148,
+      144
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      96,
+      102,
+      112
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      100,
+      105,
+      114
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      72,
+      76,
+      86
+     ]
+    }
+   ],
+   "EtchWood": [
+    {
+     "stars": 1,
+     "finish": "Worn",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ]
+    },
+    {
+     "stars": 2,
+     "finish": "Sound",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      168,
+      138,
+      100
+     ]
+    },
+    {
+     "stars": 3,
+     "finish": "Fine",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      144,
+      108,
+      74
+     ]
+    },
+    {
+     "stars": 4,
+     "finish": "Superior",
+     "robloxMaterial": "Wood",
+     "rgb": [
+      108,
+      76,
+      52
+     ]
+    },
+    {
+     "stars": 5,
+     "finish": "Masterwork",
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      124,
+      68
+     ]
+    }
+   ]
+  }
+ },
+ "fixedRoles": {
+  "Rope": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    214,
+    206,
+    184
+   ]
+  },
+  "Rawhide": {
+   "robloxMaterial": "Leather",
+   "rgb": [
+    172,
+    148,
+    112
+   ]
+  },
+  "Brass": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    150,
+    120,
+    70
+   ]
+  },
+  "Shaft": {
+   "robloxMaterial": "Wood",
+   "rgb": [
+    176,
+    150,
+    112
+   ]
+  },
+  "Fletch": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    200,
+    194,
+    180
+   ]
+  },
+  "FletchCock": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    176,
+    92,
+    52
+   ]
+  },
+  "Wire": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    156,
+    156,
+    152
+   ]
+  },
+  "Stake": {
+   "robloxMaterial": "Wood",
+   "rgb": [
+    128,
+    100,
+    72
+   ]
+  },
+  "Star": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    196,
+    166,
+    98
+   ]
+  },
+  "Canvas": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    178,
+    176,
+    168
+   ]
+  },
+  "Tube": {
+   "robloxMaterial": "Plastic",
+   "rgb": [
+    226,
+    224,
+    216
+   ]
+  },
+  "Strap": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    104,
+    98,
+    88
+   ]
+  },
+  "Card": {
+   "robloxMaterial": "Cardboard",
+   "rgb": [
+    188,
+    98,
+    56
+   ]
+  },
+  "ChuteEmber": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    180,
+    92,
+    52
+   ]
+  },
+  "ChuteCharcoal": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    64,
+    62,
+    60
+   ]
+  },
+  "Line": {
+   "robloxMaterial": "Fabric",
+   "rgb": [
+    196,
+    190,
+    176
+   ]
+  },
+  "Rig": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    70,
+    68,
+    66
+   ]
+  },
+  "Body": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    80,
+    84,
+    90
+   ]
+  },
+  "Lid": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    80,
+    84,
+    90
+   ]
+  },
+  "Metal": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    54,
+    54,
+    56
+   ]
+  },
+  "LidMetal": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    54,
+    54,
+    56
+   ]
+  },
+  "MBody": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    58,
+    64,
+    76
+   ]
+  },
+  "MLid": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    58,
+    64,
+    76
+   ]
+  },
+  "MMetal": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    160,
+    126,
+    68
+   ]
+  },
+  "MLidMetal": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    160,
+    126,
+    68
+   ]
+  },
+  "StandWood": {
+   "robloxMaterial": "Wood",
+   "rgb": [
+    86,
+    58,
+    42
+   ]
+  },
+  "StandIron": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    60,
+    58,
+    58
+   ]
+  },
+  "Plaque": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    156,
+    124,
+    70
+   ]
+  },
+  "Pointer": {
+   "robloxMaterial": "Leather",
+   "rgb": [
+    92,
+    58,
+    38
+   ]
+  },
+  "Backing": {
+   "robloxMaterial": "Wood",
+   "rgb": [
+    70,
+    48,
+    36
+   ]
+  },
+  "Rim": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    156,
+    124,
+    70
+   ]
+  },
+  "Peg": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    170,
+    138,
+    80
+   ]
+  },
+  "Hub": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    156,
+    124,
+    70
+   ]
+  },
+  "SegCream": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    222,
+    208,
+    178
+   ]
+  },
+  "SegOat": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    192,
+    172,
+    136
+   ]
+  },
+  "SegOxblood": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    118,
+    42,
+    38
+   ]
+  },
+  "SegCharcoal": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    58,
+    56,
+    56
+   ]
+  },
+  "SegBrass": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    168,
+    134,
+    74
+   ]
+  },
+  "MarkCream": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    226,
+    214,
+    186
+   ]
+  },
+  "MarkCharcoal": {
+   "robloxMaterial": "SmoothPlastic",
+   "rgb": [
+    52,
+    50,
+    50
+   ]
+  },
+  "MarkBrass": {
+   "robloxMaterial": "Metal",
+   "rgb": [
+    150,
+    118,
+    62
+   ]
+  }
+ },
+ "import": [
+  "Every held item and far model: CanCollide/CanQuery/CanTouch off, CollisionFidelity Box, Massless; viewmodel copies CastShadow off.",
+  "Far models (<id>_Far) share the near model's Grip and attachments; swap at about 40 studs or use them for other players' third-person weapons.",
+  "Bows: hide <bow>_Rope while drawing and draw Beams between StringTop, the Nock and StringBottom.",
+  "KitParcel colliding parts: Canvas only (Box). KitChute and KitChuteFolded are visual only.",
+  "Strongbox: Lid and LidMetal parts rotate about LidHinge (+X).",
+  "PrizeWheel: place the Stand, put the Disc's origin on Stand.Axle and spin it about the axle (Roblox Z). OddsPlaque takes a SurfaceGui (Face Front) with the odds.",
+  "Nothing is Neon. Metal parts stay matte (Metal material, no reflectance)."
+ ],
+ "assets": [
+  {
+   "name": "knife",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Hunting Knife. Clip-point blade with a honed bevel strip, oval guard, leather handle, iron pommel. Grip at the origin, blade +Y (Roblox), edge Roblox -Z.",
+   "origin": [
+    0.0517,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.103,
+    1.365,
+    0.25
+   ],
+   "boundsMin": [
+    -0.0517,
+    -0.345,
+    -0.155
+   ],
+   "boundsMax": [
+    0.0517,
+    1.02,
+    0.095
+   ],
+   "tris": 294,
+   "parts": [
+    {
+     "name": "knife_Blade",
+     "role": "Blade",
+     "tris": 52,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Edge",
+     "role": "Edge",
+     "tris": 38,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Grip",
+     "role": "Grip",
+     "tris": 60,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Fitting",
+     "role": "Fitting",
+     "tris": 132,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.02,
+      -0.03
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "knife_Far"
+  },
+  {
+   "name": "machete",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Machete. Long single-edged blade widening to a clipped tip, slab leather-wrapped handle with three rivets, iron bolster and butt.",
+   "origin": [
+    3.056,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.112,
+    2.55,
+    0.325
+   ],
+   "boundsMin": [
+    -0.056,
+    -0.47,
+    -0.25
+   ],
+   "boundsMax": [
+    0.056,
+    2.08,
+    0.075
+   ],
+   "tris": 294,
+   "parts": [
+    {
+     "name": "machete_Blade",
+     "role": "Blade",
+     "tris": 52,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Edge",
+     "role": "Edge",
+     "tris": 38,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Grip",
+     "role": "Grip",
+     "tris": 44,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Fitting",
+     "role": "Fitting",
+     "tris": 148,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      2.08,
+      -0.19
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "machete_Far"
+  },
+  {
+   "name": "hatchet",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Axe",
+    "Thrown",
+    "Tool"
+   ],
+   "notes": "Hatchet. Eight-sided haft with a flared butt, leather grip band, wedge head with a flared bit and a honed edge, short poll, iron collar.",
+   "origin": [
+    6.065,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.13,
+    2.1,
+    0.675
+   ],
+   "boundsMin": [
+    -0.065,
+    -0.4,
+    -0.505
+   ],
+   "boundsMax": [
+    0.065,
+    1.7,
+    0.17
+   ],
+   "tris": 262,
+   "parts": [
+    {
+     "name": "hatchet_Wood",
+     "role": "Wood",
+     "tris": 88,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Grip",
+     "role": "Grip",
+     "tris": 28,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Fitting",
+     "role": "Fitting",
+     "tris": 44,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Blade",
+     "role": "Blade",
+     "tris": 78,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Edge",
+     "role": "Edge",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.47,
+      -0.5
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "far": "hatchet_Far"
+  },
+  {
+   "name": "spear",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Polearm",
+    "Thrown"
+   ],
+   "notes": "Spear. Pale stave shaft (the trailer's training staves), leather grip, cord binding, iron socket and butt cap, leaf-shaped double-edged head.",
+   "origin": [
+    9.0693,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.139,
+    7.02,
+    0.28
+   ],
+   "boundsMin": [
+    -0.0693,
+    -2.62,
+    -0.14
+   ],
+   "boundsMax": [
+    0.0693,
+    4.4,
+    0.14
+   ],
+   "tris": 272,
+   "parts": [
+    {
+     "name": "spear_Wood",
+     "role": "Wood",
+     "tris": 28,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Fitting",
+     "role": "Fitting",
+     "tris": 88,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Grip",
+     "role": "Grip",
+     "tris": 28,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Cord",
+     "role": "Cord",
+     "tris": 28,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        142,
+        132,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        86,
+        80,
+        72
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        50,
+        48,
+        46
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Blade",
+     "role": "Blade",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Edge",
+     "role": "Edge",
+     "tris": 52,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      4.4,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "spear_Far"
+  },
+  {
+   "name": "sword",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Longsword, new look (from the training-hall blades): long narrow straight single-edged blade with a raised back spine, small square crossguard, grip of stacked rings, flat disc pommel.",
+   "origin": [
+    12.065,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.13,
+    3.712,
+    0.44
+   ],
+   "boundsMin": [
+    -0.065,
+    -0.5116,
+    -0.23
+   ],
+   "boundsMax": [
+    0.065,
+    3.2,
+    0.21
+   ],
+   "tris": 624,
+   "parts": [
+    {
+     "name": "sword_Blade",
+     "role": "Blade",
+     "tris": 56,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Edge",
+     "role": "Edge",
+     "tris": 32,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Fitting",
+     "role": "Fitting",
+     "tris": 104,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Grip",
+     "role": "Grip",
+     "tris": 420,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      3.2,
+      -0.003
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "sword_Far"
+  },
+  {
+   "name": "twin_axe",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Axe",
+    "Thrown",
+    "Heavy"
+   ],
+   "notes": "Twin-Bit Axe (new; from the thrown double-bit axe in the trailer, our own design): long straight pale ash haft, dark leather band at the grip, steel collar, broad symmetrical head of two mirrored flared bits with honed 3-facet arcs. Spins end over end when thrown.",
+   "origin": [
+    15.09,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.18,
+    3.656,
+    1.56
+   ],
+   "boundsMin": [
+    -0.09,
+    -0.68,
+    -0.78
+   ],
+   "boundsMax": [
+    0.09,
+    2.9763,
+    0.78
+   ],
+   "tris": 440,
+   "parts": [
+    {
+     "name": "twin_axe_Wood",
+     "role": "Wood",
+     "tris": 88,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Grip",
+     "role": "Grip",
+     "tris": 28,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Fitting",
+     "role": "Fitting",
+     "tris": 104,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Blade",
+     "role": "Blade",
+     "tris": 112,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Edge",
+     "role": "Edge",
+     "tris": 84,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 24,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      2.5,
+      -0.78
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Spin": {
+     "position": [
+      0,
+      1.4,
+      0.0
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "throw": {
+    "spinAxis": "Roblox +X through Spin (end over end)"
+   },
+   "far": "twin_axe_Far"
+  },
+  {
+   "name": "ring_blade",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "Ring Blade (new; a flat steel hoop, our own design): 16-segment hoop 2.2 across with a honed outer bevel over the front two thirds, a leather-wrapped back arc as a knuckle guard, a steel grip bar across the inside wrapped in cord with brass ferrules. Held at the bar; flies flat.",
+   "origin": [
+    18.0536,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.107,
+    2.22,
+    2.2
+   ],
+   "boundsMin": [
+    -0.0536,
+    -1.11,
+    -1.91
+   ],
+   "boundsMax": [
+    0.0536,
+    1.11,
+    0.29
+   ],
+   "tris": 428,
+   "parts": [
+    {
+     "name": "ring_blade_Blade",
+     "role": "Blade",
+     "tris": 166,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Edge",
+     "role": "Edge",
+     "tris": 62,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Grip",
+     "role": "Grip",
+     "tris": 36,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Fitting",
+     "role": "Fitting",
+     "tris": 28,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Cord",
+     "role": "Cord",
+     "tris": 60,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        142,
+        132,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        86,
+        80,
+        72
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        50,
+        48,
+        46
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Brass",
+     "role": "Brass",
+     "tris": 56,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      120,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      0,
+      -1.91
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Spin": {
+     "position": [
+      0,
+      0,
+      -0.8
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "throw": {
+    "spinAxis": "Roblox +X through Spin (flat spin, hoop stays level)"
+   },
+   "far": "ring_blade_Far"
+  },
+  {
+   "name": "climb_pick",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Tool",
+    "Climbing"
+   ],
+   "notes": "Climbing Pick (new; the alpine valley): six-sided hickory haft, leather grip, rawhide wrist loop, iron foot spike, socket head with a curved 4-segment pick and a square adze.",
+   "origin": [
+    21.182,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.364,
+    2.371,
+    0.98
+   ],
+   "boundsMin": [
+    -0.182,
+    -0.8706,
+    -0.6346
+   ],
+   "boundsMax": [
+    0.182,
+    1.5,
+    0.345
+   ],
+   "tris": 286,
+   "parts": [
+    {
+     "name": "climb_pick_Wood",
+     "role": "Wood",
+     "tris": 20,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Grip",
+     "role": "Grip",
+     "tris": 20,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Fitting",
+     "role": "Fitting",
+     "tris": 94,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Blade",
+     "role": "Blade",
+     "tris": 48,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Edge",
+     "role": "Edge",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Rawhide",
+     "role": "Rawhide",
+     "tris": 80,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      172,
+      148,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_EtchSteel",
+     "role": "EtchSteel",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        72,
+        76,
+        86
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.16,
+      -0.63
+     ],
+     "look": [
+      0,
+      -0.83,
+      -0.55
+     ],
+     "up": [
+      0,
+      0.55,
+      -0.83
+     ]
+    }
+   },
+   "far": "climb_pick_Far"
+  },
+  {
+   "name": "bow",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Ranged",
+    "Bow"
+   ],
+   "notes": "Recurve Bow (3 to 4 a round; never owned). Wooden riser with an arrow window on the -X side, leather grip, tapered limbs that recurve at the tips, horn tip overlays, linen string. v1 attachments kept exactly (Nock, StringTop, StringBottom, ArrowRest). Hide bow_Rope while drawing.",
+   "origin": [
+    24.085,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.17,
+    4.569,
+    0.54
+   ],
+   "boundsMin": [
+    -0.085,
+    -2.0846,
+    -0.115
+   ],
+   "boundsMax": [
+    0.085,
+    2.4846,
+    0.4246
+   ],
+   "tris": 476,
+   "parts": [
+    {
+     "name": "bow_Wood",
+     "role": "Wood",
+     "tris": 296,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Grip",
+     "role": "Grip",
+     "tris": 44,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Fitting",
+     "role": "Fitting",
+     "tris": 100,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Rope",
+     "role": "Rope",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      214,
+      206,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_EtchWood",
+     "role": "EtchWood",
+     "tris": 24,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        156,
+        124,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0.2,
+      0.4168
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0,
+      2.32,
+      0.4168
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0,
+      -1.92,
+      0.4168
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.04,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "far": "bow_Far"
+  },
+  {
+   "name": "short_bow",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Ranged",
+    "Bow",
+    "Kit"
+   ],
+   "notes": "Short Bow (new; the Archer kit's bow): plain flat-limbed self bow, limbs two tapered slabs, tan leather grip block, no recurve. Same attachment names as the bow; hide short_bow_Rope while drawing.",
+   "origin": [
+    27.075,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.15,
+    3.67,
+    0.445
+   ],
+   "boundsMin": [
+    -0.075,
+    -1.635,
+    -0.075
+   ],
+   "boundsMax": [
+    0.075,
+    2.035,
+    0.37
+   ],
+   "tris": 284,
+   "parts": [
+    {
+     "name": "short_bow_Wood",
+     "role": "Wood",
+     "tris": 116,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Grip",
+     "role": "Grip",
+     "tris": 44,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Fitting",
+     "role": "Fitting",
+     "tris": 88,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Rope",
+     "role": "Rope",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      214,
+      206,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_EtchWood",
+     "role": "EtchWood",
+     "tris": 24,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        156,
+        124,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0.2,
+      0.36
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0,
+      2.0,
+      0.36
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0,
+      -1.6,
+      0.36
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.035,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "far": "short_bow_Far"
+  },
+  {
+   "name": "throwing_knife",
+   "kind": "Weapon",
+   "starred": false,
+   "tags": [
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "Throwing Knife (stack 6, no stars): one-piece double-edged spear point, cord-wrapped tang, ring pommel. Uses the 1-star colours.",
+   "origin": [
+    30.0191,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.038,
+    1.102,
+    0.152
+   ],
+   "boundsMin": [
+    -0.0191,
+    -0.442,
+    -0.076
+   ],
+   "boundsMax": [
+    0.0191,
+    0.66,
+    0.076
+   ],
+   "tris": 164,
+   "parts": [
+    {
+     "name": "throwing_knife_Blade",
+     "role": "Blade",
+     "tris": 40,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Edge",
+     "role": "Edge",
+     "tris": 40,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Cord",
+     "role": "Cord",
+     "tris": 20,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Fitting",
+     "role": "Fitting",
+     "tris": 64,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      0.66,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "throwing_knife_Far"
+  },
+  {
+   "name": "arrow",
+   "kind": "Ammo",
+   "starred": false,
+   "tags": [
+    "Ammo"
+   ],
+   "notes": "Arrow (ammunition, no stars): pale shaft, iron nock, leaf head, three vanes (one cock vane in ember). Origin = Nock (v1 convention); +Y along the string side.",
+   "origin": [
+    33.0665,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.133,
+    3.0,
+    0.133
+   ],
+   "boundsMin": [
+    -0.0665,
+    0.0,
+    -0.075
+   ],
+   "boundsMax": [
+    0.0665,
+    3.0,
+    0.058
+   ],
+   "tris": 124,
+   "parts": [
+    {
+     "name": "arrow_Shaft",
+     "role": "Shaft",
+     "tris": 20,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      176,
+      150,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Fitting",
+     "role": "Fitting",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Blade",
+     "role": "Blade",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Edge",
+     "role": "Edge",
+     "tris": 28,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_FletchCock",
+     "role": "FletchCock",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      176,
+      92,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Fletch",
+     "role": "Fletch",
+     "tris": 24,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      200,
+      194,
+      180
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      3.0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "arrow_Far"
+  },
+  {
+   "name": "wire_snare",
+   "kind": "Trap",
+   "starred": false,
+   "tags": [
+    "Trap",
+    "Kit"
+   ],
+   "notes": "Wire Snare (Trapper kit, stack 2, no stars): a sharpened stake with a coil of wire and a running noose, cord tie. Grip = middle of the stake. Glint is game-side, not in the mesh.",
+   "origin": [
+    36.168,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.535,
+    0.64,
+    0.416
+   ],
+   "boundsMin": [
+    -0.168,
+    -0.34,
+    -0.208
+   ],
+   "boundsMax": [
+    0.367,
+    0.3,
+    0.208
+   ],
+   "tris": 310,
+   "parts": [
+    {
+     "name": "wire_snare_Stake",
+     "role": "Stake",
+     "tris": 22,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      128,
+      100,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "wire_snare_Wire",
+     "role": "Wire",
+     "tris": 268,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      156,
+      152
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "wire_snare_Cord",
+     "role": "Cord",
+     "tris": 20,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "far": "wire_snare_Far"
+  },
+  {
+   "name": "knife_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Hunting Knife. Clip-point blade with a honed bevel strip, oval guard, leather handle, iron pommel. Grip at the origin, blade +Y (Roblox), edge Roblox -Z.",
+   "origin": [
+    0.056,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.101,
+    1.365,
+    0.25
+   ],
+   "boundsMin": [
+    -0.056,
+    -0.345,
+    -0.155
+   ],
+   "boundsMax": [
+    0.0453,
+    1.02,
+    0.095
+   ],
+   "tris": 122,
+   "parts": [
+    {
+     "name": "knife_Far_Blade",
+     "role": "Blade",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Far_Edge",
+     "role": "Edge",
+     "tris": 26,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Far_Grip",
+     "role": "Grip",
+     "tris": 16,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "knife_Far_Fitting",
+     "role": "Fitting",
+     "tris": 44,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.02,
+      -0.03
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "knife"
+  },
+  {
+   "name": "machete_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Machete. Long single-edged blade widening to a clipped tip, slab leather-wrapped handle with three rivets, iron bolster and butt.",
+   "origin": [
+    3.055,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.11,
+    2.55,
+    0.325
+   ],
+   "boundsMin": [
+    -0.055,
+    -0.47,
+    -0.25
+   ],
+   "boundsMax": [
+    0.055,
+    2.08,
+    0.075
+   ],
+   "tris": 98,
+   "parts": [
+    {
+     "name": "machete_Far_Blade",
+     "role": "Blade",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Far_Edge",
+     "role": "Edge",
+     "tris": 26,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Far_Grip",
+     "role": "Grip",
+     "tris": 12,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "machete_Far_Fitting",
+     "role": "Fitting",
+     "tris": 24,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      2.08,
+      -0.19
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "machete"
+  },
+  {
+   "name": "hatchet_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Axe",
+    "Thrown",
+    "Tool"
+   ],
+   "notes": "Hatchet. Eight-sided haft with a flared butt, leather grip band, wedge head with a flared bit and a honed edge, short poll, iron collar.",
+   "origin": [
+    6.065,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.13,
+    2.1,
+    0.675
+   ],
+   "boundsMin": [
+    -0.065,
+    -0.4,
+    -0.505
+   ],
+   "boundsMax": [
+    0.065,
+    1.7,
+    0.17
+   ],
+   "tris": 118,
+   "parts": [
+    {
+     "name": "hatchet_Far_Wood",
+     "role": "Wood",
+     "tris": 32,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Far_Grip",
+     "role": "Grip",
+     "tris": 16,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Far_Fitting",
+     "role": "Fitting",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Far_Blade",
+     "role": "Blade",
+     "tris": 46,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "hatchet_Far_Edge",
+     "role": "Edge",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.47,
+      -0.5
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "nearOf": "hatchet"
+  },
+  {
+   "name": "spear_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Polearm",
+    "Thrown"
+   ],
+   "notes": "Spear. Pale stave shaft (the trailer's training staves), leather grip, cord binding, iron socket and butt cap, leaf-shaped double-edged head.",
+   "origin": [
+    9.075,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.136,
+    7.02,
+    0.28
+   ],
+   "boundsMin": [
+    -0.075,
+    -2.62,
+    -0.14
+   ],
+   "boundsMax": [
+    0.0607,
+    4.4,
+    0.14
+   ],
+   "tris": 168,
+   "parts": [
+    {
+     "name": "spear_Far_Wood",
+     "role": "Wood",
+     "tris": 16,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Far_Fitting",
+     "role": "Fitting",
+     "tris": 32,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Far_Grip",
+     "role": "Grip",
+     "tris": 16,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Far_Cord",
+     "role": "Cord",
+     "tris": 16,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        142,
+        132,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        86,
+        80,
+        72
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        50,
+        48,
+        46
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Far_Blade",
+     "role": "Blade",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "spear_Far_Edge",
+     "role": "Edge",
+     "tris": 52,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      4.4,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "spear"
+  },
+  {
+   "name": "sword_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Blade"
+   ],
+   "notes": "Longsword, new look (from the training-hall blades): long narrow straight single-edged blade with a raised back spine, small square crossguard, grip of stacked rings, flat disc pommel.",
+   "origin": [
+    12.065,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.13,
+    3.699,
+    0.44
+   ],
+   "boundsMin": [
+    -0.065,
+    -0.499,
+    -0.23
+   ],
+   "boundsMax": [
+    0.065,
+    3.2,
+    0.21
+   ],
+   "tris": 118,
+   "parts": [
+    {
+     "name": "sword_Far_Blade",
+     "role": "Blade",
+     "tris": 48,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Far_Edge",
+     "role": "Edge",
+     "tris": 26,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Far_Fitting",
+     "role": "Fitting",
+     "tris": 28,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "sword_Far_Grip",
+     "role": "Grip",
+     "tris": 16,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      3.2,
+      -0.003
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "sword"
+  },
+  {
+   "name": "twin_axe_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Axe",
+    "Thrown",
+    "Heavy"
+   ],
+   "notes": "Twin-Bit Axe (new; from the thrown double-bit axe in the trailer, our own design): long straight pale ash haft, dark leather band at the grip, steel collar, broad symmetrical head of two mirrored flared bits with honed 3-facet arcs. Spins end over end when thrown.",
+   "origin": [
+    15.09,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.18,
+    3.656,
+    1.56
+   ],
+   "boundsMin": [
+    -0.09,
+    -0.68,
+    -0.78
+   ],
+   "boundsMax": [
+    0.09,
+    2.9763,
+    0.78
+   ],
+   "tris": 240,
+   "parts": [
+    {
+     "name": "twin_axe_Far_Wood",
+     "role": "Wood",
+     "tris": 32,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Far_Grip",
+     "role": "Grip",
+     "tris": 16,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Far_Fitting",
+     "role": "Fitting",
+     "tris": 28,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Far_Blade",
+     "role": "Blade",
+     "tris": 80,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "twin_axe_Far_Edge",
+     "role": "Edge",
+     "tris": 84,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      2.5,
+      -0.78
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Spin": {
+     "position": [
+      0,
+      1.4,
+      0.0
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "throw": {
+    "spinAxis": "Roblox +X through Spin (end over end)"
+   },
+   "nearOf": "twin_axe"
+  },
+  {
+   "name": "ring_blade_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "Ring Blade (new; a flat steel hoop, our own design): 16-segment hoop 2.2 across with a honed outer bevel over the front two thirds, a leather-wrapped back arc as a knuckle guard, a steel grip bar across the inside wrapped in cord with brass ferrules. Held at the bar; flies flat.",
+   "origin": [
+    18.058,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.105,
+    2.22,
+    2.19
+   ],
+   "boundsMin": [
+    -0.058,
+    -1.11,
+    -1.91
+   ],
+   "boundsMax": [
+    0.0469,
+    1.11,
+    0.28
+   ],
+   "tris": 292,
+   "parts": [
+    {
+     "name": "ring_blade_Far_Blade",
+     "role": "Blade",
+     "tris": 166,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Far_Edge",
+     "role": "Edge",
+     "tris": 62,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Far_Fitting",
+     "role": "Fitting",
+     "tris": 16,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Far_Cord",
+     "role": "Cord",
+     "tris": 16,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        142,
+        132,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        86,
+        80,
+        72
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        58,
+        56,
+        54
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Fabric",
+       "rgb": [
+        50,
+        48,
+        46
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "ring_blade_Far_Brass",
+     "role": "Brass",
+     "tris": 32,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      120,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      0,
+      -1.91
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Spin": {
+     "position": [
+      0,
+      0,
+      -0.8
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "throw": {
+    "spinAxis": "Roblox +X through Spin (flat spin, hoop stays level)"
+   },
+   "nearOf": "ring_blade"
+  },
+  {
+   "name": "climb_pick_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Melee",
+    "Tool",
+    "Climbing"
+   ],
+   "notes": "Climbing Pick (new; the alpine valley): six-sided hickory haft, leather grip, rawhide wrist loop, iron foot spike, socket head with a curved 4-segment pick and a square adze.",
+   "origin": [
+    21.09,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.18,
+    2.3,
+    0.98
+   ],
+   "boundsMin": [
+    -0.09,
+    -0.8,
+    -0.6346
+   ],
+   "boundsMax": [
+    0.09,
+    1.5,
+    0.345
+   ],
+   "tris": 138,
+   "parts": [
+    {
+     "name": "climb_pick_Far_Wood",
+     "role": "Wood",
+     "tris": 20,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Far_Grip",
+     "role": "Grip",
+     "tris": 20,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Far_Fitting",
+     "role": "Fitting",
+     "tris": 38,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Far_Blade",
+     "role": "Blade",
+     "tris": 48,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        120,
+        118,
+        112
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        148,
+        148,
+        144
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        102,
+        112
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        100,
+        105,
+        114
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        108,
+        112,
+        120
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "climb_pick_Far_Edge",
+     "role": "Edge",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        142,
+        140,
+        134
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        180,
+        180,
+        176
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        166,
+        170,
+        176
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        172,
+        176,
+        182
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        186,
+        188,
+        192
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      1.16,
+      -0.63
+     ],
+     "look": [
+      0,
+      -0.83,
+      -0.55
+     ],
+     "up": [
+      0,
+      0.55,
+      -0.83
+     ]
+    }
+   },
+   "nearOf": "climb_pick"
+  },
+  {
+   "name": "bow_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Ranged",
+    "Bow"
+   ],
+   "notes": "Recurve Bow (3 to 4 a round; never owned). Wooden riser with an arrow window on the -X side, leather grip, tapered limbs that recurve at the tips, horn tip overlays, linen string. v1 attachments kept exactly (Nock, StringTop, StringBottom, ArrowRest). Hide bow_Rope while drawing.",
+   "origin": [
+    24.085,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.17,
+    4.559,
+    0.542
+   ],
+   "boundsMin": [
+    -0.085,
+    -2.0794,
+    -0.115
+   ],
+   "boundsMax": [
+    0.085,
+    2.4794,
+    0.4267
+   ],
+   "tris": 180,
+   "parts": [
+    {
+     "name": "bow_Far_Wood",
+     "role": "Wood",
+     "tris": 120,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Far_Grip",
+     "role": "Grip",
+     "tris": 12,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Far_Fitting",
+     "role": "Fitting",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "bow_Far_Rope",
+     "role": "Rope",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      214,
+      206,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0.2,
+      0.4168
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0,
+      2.32,
+      0.4168
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0,
+      -1.92,
+      0.4168
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.04,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "nearOf": "bow"
+  },
+  {
+   "name": "short_bow_Far",
+   "kind": "Weapon",
+   "starred": true,
+   "tags": [
+    "Ranged",
+    "Bow",
+    "Kit"
+   ],
+   "notes": "Short Bow (new; the Archer kit's bow): plain flat-limbed self bow, limbs two tapered slabs, tan leather grip block, no recurve. Same attachment names as the bow; hide short_bow_Rope while drawing.",
+   "origin": [
+    27.075,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.15,
+    3.67,
+    0.445
+   ],
+   "boundsMin": [
+    -0.075,
+    -1.635,
+    -0.075
+   ],
+   "boundsMax": [
+    0.075,
+    2.035,
+    0.37
+   ],
+   "tris": 100,
+   "parts": [
+    {
+     "name": "short_bow_Far_Wood",
+     "role": "Wood",
+     "tris": 52,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      158,
+      140,
+      114
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        158,
+        140,
+        114
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        168,
+        138,
+        100
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        144,
+        108,
+        74
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        108,
+        76,
+        52
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Wood",
+       "rgb": [
+        92,
+        64,
+        44
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Far_Grip",
+     "role": "Grip",
+     "tris": 12,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      122,
+      100,
+      78
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        122,
+        100,
+        78
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        100,
+        72,
+        50
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        78,
+        54,
+        38
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        70,
+        48,
+        34
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Leather",
+       "rgb": [
+        62,
+        42,
+        30
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Far_Fitting",
+     "role": "Fitting",
+     "tris": 24,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "stars": [
+      {
+       "stars": 1,
+       "finish": "Worn",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        82,
+        78,
+        74
+       ]
+      },
+      {
+       "stars": 2,
+       "finish": "Sound",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        96,
+        94,
+        92
+       ]
+      },
+      {
+       "stars": 3,
+       "finish": "Fine",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        62,
+        62,
+        64
+       ]
+      },
+      {
+       "stars": 4,
+       "finish": "Superior",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        150,
+        118,
+        64
+       ]
+      },
+      {
+       "stars": 5,
+       "finish": "Masterwork",
+       "robloxMaterial": "Metal",
+       "rgb": [
+        160,
+        126,
+        68
+       ]
+      }
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "short_bow_Far_Rope",
+     "role": "Rope",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      214,
+      206,
+      184
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0.2,
+      0.36
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "StringTop": {
+     "position": [
+      0,
+      2.0,
+      0.36
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "StringBottom": {
+     "position": [
+      0,
+      -1.6,
+      0.36
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "ArrowRest": {
+     "position": [
+      -0.035,
+      0.2,
+      -0.035
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "nearOf": "short_bow"
+  },
+  {
+   "name": "throwing_knife_Far",
+   "kind": "Weapon",
+   "starred": false,
+   "tags": [
+    "Thrown",
+    "Blade"
+   ],
+   "notes": "Throwing Knife (stack 6, no stars): one-piece double-edged spear point, cord-wrapped tang, ring pommel. Uses the 1-star colours.",
+   "origin": [
+    30.0156,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.031,
+    1.102,
+    0.152
+   ],
+   "boundsMin": [
+    -0.0156,
+    -0.442,
+    -0.076
+   ],
+   "boundsMax": [
+    0.0156,
+    0.66,
+    0.076
+   ],
+   "tris": 156,
+   "parts": [
+    {
+     "name": "throwing_knife_Far_Blade",
+     "role": "Blade",
+     "tris": 40,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Far_Edge",
+     "role": "Edge",
+     "tris": 40,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Far_Cord",
+     "role": "Cord",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "throwing_knife_Far_Fitting",
+     "role": "Fitting",
+     "tris": 64,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      0.66,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "throwing_knife"
+  },
+  {
+   "name": "arrow_Far",
+   "kind": "Ammo",
+   "starred": false,
+   "tags": [
+    "Ammo"
+   ],
+   "notes": "Arrow (ammunition, no stars): pale shaft, iron nock, leaf head, three vanes (one cock vane in ember). Origin = Nock (v1 convention); +Y along the string side.",
+   "origin": [
+    33.0665,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.133,
+    3.0,
+    0.133
+   ],
+   "boundsMin": [
+    -0.0665,
+    0.0,
+    -0.075
+   ],
+   "boundsMax": [
+    0.0665,
+    3.0,
+    0.058
+   ],
+   "tris": 108,
+   "parts": [
+    {
+     "name": "arrow_Far_Shaft",
+     "role": "Shaft",
+     "tris": 12,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      176,
+      150,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Far_Fitting",
+     "role": "Fitting",
+     "tris": 12,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      82,
+      78,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Far_Blade",
+     "role": "Blade",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      120,
+      118,
+      112
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Far_Edge",
+     "role": "Edge",
+     "tris": 28,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      142,
+      140,
+      134
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Far_FletchCock",
+     "role": "FletchCock",
+     "tris": 12,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      176,
+      92,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "arrow_Far_Fletch",
+     "role": "Fletch",
+     "tris": 24,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      200,
+      194,
+      180
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Nock": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Tip": {
+     "position": [
+      0,
+      3.0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "arrow"
+  },
+  {
+   "name": "wire_snare_Far",
+   "kind": "Trap",
+   "starred": false,
+   "tags": [
+    "Trap",
+    "Kit"
+   ],
+   "notes": "Wire Snare (Trapper kit, stack 2, no stars): a sharpened stake with a coil of wire and a running noose, cord tie. Grip = middle of the stake. Glint is game-side, not in the mesh.",
+   "origin": [
+    36.168,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.535,
+    0.64,
+    0.416
+   ],
+   "boundsMin": [
+    -0.168,
+    -0.34,
+    -0.208
+   ],
+   "boundsMax": [
+    0.367,
+    0.3,
+    0.208
+   ],
+   "tris": 310,
+   "parts": [
+    {
+     "name": "wire_snare_Far_Stake",
+     "role": "Stake",
+     "tris": 22,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      128,
+      100,
+      72
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "wire_snare_Far_Wire",
+     "role": "Wire",
+     "tris": 268,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      156,
+      152
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "wire_snare_Far_Cord",
+     "role": "Cord",
+     "tris": 20,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      142,
+      132,
+      114
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Grip": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   },
+   "nearOf": "wire_snare"
+  },
+  {
+   "name": "StarIcon",
+   "kind": "Icon",
+   "starred": false,
+   "tags": [],
+   "notes": "Small matte star (1 stud across) for hotbar/plaque/wheel marks. Faces Roblox -Z (front), top point Roblox +Y. Pivot = centre of the back face. Recolour from Theme (4-5 stars: matte Theme.Colors.Gold). Never Neon.",
+   "origin": [
+    0.4755,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.951,
+    0.905,
+    0.2
+   ],
+   "boundsMin": [
+    -0.4755,
+    -0.4045,
+    -0.2
+   ],
+   "boundsMax": [
+    0.4755,
+    0.5,
+    0.0
+   ],
+   "tris": 40,
+   "parts": [
+    {
+     "name": "StarIcon_Star",
+     "role": "Star",
+     "tris": 40,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      196,
+      166,
+      98
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {}
+  },
+  {
+   "name": "KitParcel",
+   "kind": "Crate",
+   "starred": false,
+   "tags": [
+    "Kit",
+    "Loot"
+   ],
+   "notes": "The kit parcel (midpoint sponsor drop): pale grey canvas block with a white tube strapped to the front, cord tied in a cross, a small ember card tag. Pivot = floor centre. Opens like a crate: Prompt in front, items spill at LootPoint. ChuteRig on top takes KitChute's origin.",
+   "origin": [
+    3.9711,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.04,
+    1.44,
+    1.77
+   ],
+   "boundsMin": [
+    -1.02,
+    -0.02,
+    -1.05
+   ],
+   "boundsMax": [
+    1.02,
+    1.42,
+    0.72
+   ],
+   "tris": 424,
+   "parts": [
+    {
+     "name": "KitParcel_Canvas",
+     "role": "Canvas",
+     "tris": 88,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      178,
+      176,
+      168
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": []
+    },
+    {
+     "name": "KitParcel_Strap",
+     "role": "Strap",
+     "tris": 216,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      104,
+      98,
+      88
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitParcel_Tube",
+     "role": "Tube",
+     "tris": 76,
+     "robloxMaterial": "Plastic",
+     "rgb": [
+      226,
+      224,
+      216
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitParcel_Card",
+     "role": "Card",
+     "tris": 44,
+     "robloxMaterial": "Cardboard",
+     "rgb": [
+      188,
+      98,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "ChuteRig": {
+     "position": [
+      0,
+      1.38,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0,
+      0.7,
+      -1.2
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "LootPoint": {
+     "position": [
+      0,
+      0.0,
+      -1.8
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Smoke": {
+     "position": [
+      0,
+      1.4,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   }
+  },
+  {
+   "name": "KitChute",
+   "kind": "Chute",
+   "starred": false,
+   "tags": [
+    "Kit"
+   ],
+   "notes": "Open chute for the parcel's 7 s fall: an 8-panel canopy in alternating ember and charcoal canvas (never silver), 7.2 across, 8 lines to a small iron rig ring. Origin = the rig ring: put it on KitParcel.ChuteRig. Panels are thin closed shells, so the canopy reads from below too. Visual only (no collision).",
+   "origin": [
+    10.5911,
+    0.0,
+    0.0
+   ],
+   "size": [
+    7.2,
+    7.65,
+    7.2
+   ],
+   "boundsMin": [
+    -3.6,
+    0.0,
+    -3.6
+   ],
+   "boundsMax": [
+    3.6,
+    7.65,
+    3.6
+   ],
+   "tris": 444,
+   "parts": [
+    {
+     "name": "KitChute_ChuteEmber",
+     "role": "ChuteEmber",
+     "tris": 144,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      180,
+      92,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitChute_Line",
+     "role": "Line",
+     "tris": 96,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      196,
+      190,
+      176
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitChute_ChuteCharcoal",
+     "role": "ChuteCharcoal",
+     "tris": 144,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      64,
+      62,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitChute_Rig",
+     "role": "Rig",
+     "tris": 60,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      70,
+      68,
+      66
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Rig": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   }
+  },
+  {
+   "name": "KitChuteFolded",
+   "kind": "Chute",
+   "starred": false,
+   "tags": [
+    "Kit"
+   ],
+   "notes": "The chute after landing, folded over on the ground beside the parcel. Pivot = floor centre. Visual only.",
+   "origin": [
+    18.3985,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.107,
+    0.5,
+    2.41
+   ],
+   "boundsMin": [
+    -2.2075,
+    0.0,
+    -1.4105
+   ],
+   "boundsMax": [
+    1.9,
+    0.5,
+    1.0
+   ],
+   "tris": 78,
+   "parts": [
+    {
+     "name": "KitChuteFolded_ChuteEmber",
+     "role": "ChuteEmber",
+     "tris": 14,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      180,
+      92,
+      52
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitChuteFolded_ChuteCharcoal",
+     "role": "ChuteCharcoal",
+     "tris": 16,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      64,
+      62,
+      60
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "KitChuteFolded_Line",
+     "role": "Line",
+     "tris": 48,
+     "robloxMaterial": "Fabric",
+     "rgb": [
+      196,
+      190,
+      176
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {}
+  },
+  {
+   "name": "Strongbox",
+   "kind": "Crate",
+   "starred": false,
+   "tags": [
+    "Strongbox",
+    "Lobby"
+   ],
+   "notes": "Strongbox: plain dark steel case with iron bands, corner caps and three latches. Sits on the prize counter in the train. Pivot = floor centre. Body + Lid (+ LidMetal, tagged Lid) rotate about LidHinge (+X axis) about 100 degrees to open; three latch clicks first.",
+   "origin": [
+    23.3885,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.18,
+    1.31,
+    1.405
+   ],
+   "boundsMin": [
+    -1.09,
+    -0.01,
+    -0.715
+   ],
+   "boundsMax": [
+    1.09,
+    1.3,
+    0.69
+   ],
+   "tris": 720,
+   "parts": [
+    {
+     "name": "Strongbox_Body",
+     "role": "Body",
+     "tris": 44,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      80,
+      84,
+      90
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": []
+    },
+    {
+     "name": "Strongbox_Lid",
+     "role": "Lid",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      80,
+      84,
+      90
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ]
+    },
+    {
+     "name": "Strongbox_Metal",
+     "role": "Metal",
+     "tris": 484,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      54,
+      54,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "Strongbox_LidMetal",
+     "role": "LidMetal",
+     "tris": 172,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      54,
+      54,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ]
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0,
+      0.9,
+      0.67
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0,
+      0.8,
+      -1.0
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "PrizeRise": {
+     "position": [
+      0,
+      0.95,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   }
+  },
+  {
+   "name": "MasterworkStrongbox",
+   "kind": "Crate",
+   "starred": false,
+   "tags": [
+    "Strongbox",
+    "Lobby"
+   ],
+   "notes": "Masterwork Strongbox: blued steel with brass bands, corners and latches. Sits on the prize counter in the train. Pivot = floor centre. Body + Lid (+ LidMetal, tagged Lid) rotate about LidHinge (+X axis) about 100 degrees to open; three latch clicks first.",
+   "origin": [
+    27.5685,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.18,
+    1.31,
+    1.405
+   ],
+   "boundsMin": [
+    -1.09,
+    -0.01,
+    -0.715
+   ],
+   "boundsMax": [
+    1.09,
+    1.3,
+    0.69
+   ],
+   "tris": 720,
+   "parts": [
+    {
+     "name": "MasterworkStrongbox_Body",
+     "role": "MBody",
+     "tris": 44,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      58,
+      64,
+      76
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": []
+    },
+    {
+     "name": "MasterworkStrongbox_Lid",
+     "role": "MLid",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      58,
+      64,
+      76
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ]
+    },
+    {
+     "name": "MasterworkStrongbox_Metal",
+     "role": "MMetal",
+     "tris": 484,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      160,
+      126,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "MasterworkStrongbox_LidMetal",
+     "role": "MLidMetal",
+     "tris": 172,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      160,
+      126,
+      68
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": [
+      "Lid"
+     ]
+    }
+   ],
+   "attachments": {
+    "LidHinge": {
+     "position": [
+      0,
+      0.9,
+      0.67
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0,
+      0.8,
+      -1.0
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "PrizeRise": {
+     "position": [
+      0,
+      0.95,
+      0.0
+     ],
+     "look": [
+      0,
+      1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   }
+  },
+  {
+   "name": "PrizeWheel_Stand",
+   "kind": "Lobby",
+   "starred": false,
+   "tags": [
+    "Wheel",
+    "Lobby"
+   ],
+   "notes": "The prize wheel's stand for the train: a dark-wood plinth with a brass odds plaque on its front (OddsPlaque: SurfaceGui with the odds), an iron post and braces, the axle housing and a bracket over the top that holds the leather pointer tongue. 4.6 wide, 1.9 deep, 8.4 tall: fits a 6.5 stud wall panel beside a car's end door, under the 10.5 ceiling. Pivot = floor centre, front Roblox -Z. Put PrizeWheel_Disc's origin on Axle.",
+   "origin": [
+    32.9585,
+    0.0,
+    0.0
+   ],
+   "size": [
+    4.6,
+    8.4,
+    1.945
+   ],
+   "boundsMin": [
+    -2.3,
+    0.0,
+    -0.845
+   ],
+   "boundsMax": [
+    2.3,
+    8.4,
+    1.1
+   ],
+   "tris": 328,
+   "parts": [
+    {
+     "name": "PrizeWheel_Stand_StandWood",
+     "role": "StandWood",
+     "tris": 88,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      86,
+      58,
+      42
+     ],
+     "collide": true,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": true,
+     "canTouch": true,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Stand_Plaque",
+     "role": "Plaque",
+     "tris": 44,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      124,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Stand_StandIron",
+     "role": "StandIron",
+     "tris": 148,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      60,
+      58,
+      58
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Stand_Hub",
+     "role": "Hub",
+     "tris": 36,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      124,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Stand_Pointer",
+     "role": "Pointer",
+     "tris": 12,
+     "robloxMaterial": "Leather",
+     "rgb": [
+      92,
+      58,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Axle": {
+     "position": [
+      0,
+      5.0,
+      0.0
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "PointerPivot": {
+     "position": [
+      0,
+      8.12,
+      -0.26
+     ],
+     "look": [
+      1,
+      0,
+      0.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "OddsPlaque": {
+     "position": [
+      0,
+      0.6,
+      -0.85
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Prompt": {
+     "position": [
+      0,
+      1.5,
+      -1.4
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    },
+    "Lamp": {
+     "position": [
+      0,
+      8.6,
+      -1.6
+     ],
+     "look": [
+      0,
+      -1,
+      0.0
+     ],
+     "up": [
+      0,
+      0,
+      -1.0
+     ]
+    }
+   }
+  },
+  {
+   "name": "PrizeWheel_Disc",
+   "kind": "Lobby",
+   "starred": false,
+   "tags": [
+    "Wheel",
+    "Lobby",
+    "Spinner"
+   ],
+   "notes": "The spinning disc, 5.6 across: dark wood backing, 10 matte enamel segments drawn at their true odds (Weapons_v2 5.2), a brass rim with a brass peg at every segment boundary for the tongue to click over, a brass hub. Marks are our own: Gold segments carry 1/2/3 small ingots (40/80/200), weapon segments 3/4/1 small stars (3/4/5 stars). No lights, no casino imagery. Origin = axle centre; spin about Roblox Z (the axle). 'segments' lists each segment's angles, measured from the pointer (Roblox +Y) toward Roblox +X; to land on a segment, turn the disc so its centreDeg sits under the pointer.",
+   "origin": [
+    40.0585,
+    0.0,
+    0.0
+   ],
+   "size": [
+    5.6,
+    5.6,
+    0.58
+   ],
+   "boundsMin": [
+    -2.8,
+    -2.8,
+    -0.36
+   ],
+   "boundsMax": [
+    2.8,
+    2.8,
+    0.22
+   ],
+   "tris": 2276,
+   "parts": [
+    {
+     "name": "PrizeWheel_Disc_Backing",
+     "role": "Backing",
+     "tris": 156,
+     "robloxMaterial": "Wood",
+     "rgb": [
+      70,
+      48,
+      36
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_SegCream",
+     "role": "SegCream",
+     "tris": 320,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      222,
+      208,
+      178
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_SegOxblood",
+     "role": "SegOxblood",
+     "tris": 232,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      118,
+      42,
+      38
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_SegOat",
+     "role": "SegOat",
+     "tris": 184,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      192,
+      172,
+      136
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_SegCharcoal",
+     "role": "SegCharcoal",
+     "tris": 84,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      58,
+      56,
+      56
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_SegBrass",
+     "role": "SegBrass",
+     "tris": 20,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      168,
+      134,
+      74
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_Rim",
+     "role": "Rim",
+     "tris": 384,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      124,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_Peg",
+     "role": "Peg",
+     "tris": 200,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      170,
+      138,
+      80
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_Hub",
+     "role": "Hub",
+     "tris": 136,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      156,
+      124,
+      70
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_MarkBrass",
+     "role": "MarkBrass",
+     "tris": 120,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      150,
+      118,
+      62
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_MarkCream",
+     "role": "MarkCream",
+     "tris": 400,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      226,
+      214,
+      186
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    },
+    {
+     "name": "PrizeWheel_Disc_MarkCharcoal",
+     "role": "MarkCharcoal",
+     "tris": 40,
+     "robloxMaterial": "SmoothPlastic",
+     "rgb": [
+      52,
+      50,
+      50
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": true,
+     "canQuery": false,
+     "canTouch": false,
+     "tags": []
+    }
+   ],
+   "attachments": {
+    "Axle": {
+     "position": [
+      0,
+      0,
+      0.0
+     ],
+     "look": [
+      0,
+      0,
+      -1.0
+     ],
+     "up": [
+      0,
+      1,
+      0.0
+     ]
+    }
+   },
+   "segments": [
+    {
+     "prize": "Gold40",
+     "percent": 10,
+     "startDeg": 0.0,
+     "endDeg": 36.0,
+     "centreDeg": 18.0
+    },
+    {
+     "prize": "Weapon3",
+     "percent": 14,
+     "startDeg": 36.0,
+     "endDeg": 86.4,
+     "centreDeg": 61.2
+    },
+    {
+     "prize": "Gold80",
+     "percent": 11,
+     "startDeg": 86.4,
+     "endDeg": 126.0,
+     "centreDeg": 106.2
+    },
+    {
+     "prize": "Gold40",
+     "percent": 10,
+     "startDeg": 126.0,
+     "endDeg": 162.0,
+     "centreDeg": 144.0
+    },
+    {
+     "prize": "Weapon4",
+     "percent": 10,
+     "startDeg": 162.0,
+     "endDeg": 198.0,
+     "centreDeg": 180.0
+    },
+    {
+     "prize": "Gold200",
+     "percent": 8,
+     "startDeg": 198.0,
+     "endDeg": 226.8,
+     "centreDeg": 212.4
+    },
+    {
+     "prize": "Weapon3",
+     "percent": 14,
+     "startDeg": 226.8,
+     "endDeg": 277.2,
+     "centreDeg": 252.0
+    },
+    {
+     "prize": "Gold80",
+     "percent": 11,
+     "startDeg": 277.2,
+     "endDeg": 316.8,
+     "centreDeg": 297.0
+    },
+    {
+     "prize": "Gold40",
+     "percent": 10,
+     "startDeg": 316.8,
+     "endDeg": 352.8,
+     "centreDeg": 334.8
+    },
+    {
+     "prize": "Weapon5",
+     "percent": 2,
+     "startDeg": 352.8,
+     "endDeg": 360.0,
+     "centreDeg": 356.4
+    }
+   ]
+  }
+ ],
+ "warnings": []
+}

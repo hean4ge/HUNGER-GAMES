@@ -385,7 +385,9 @@ end
 local function syncItem(now: number)
 	local id = ClientState.getEquippedItemId()
 	local inventory = ClientState.inventory
-	local key = tostring(if inventory then inventory.equipped else 0) .. ":" .. tostring(id)
+	local slot = inventory and inventory.slots and inventory.slots[inventory.equipped]
+	local stars = if type(slot) == "table" then tonumber(slot.stars) else nil
+	local key = tostring(if inventory then inventory.equipped else 0) .. ":" .. tostring(id) .. ":" .. tostring(stars)
 	if initialized and key == heldKey then
 		return
 	end
@@ -397,7 +399,7 @@ local function syncItem(now: number)
 	local shown = heldDef ~= nil and not heldDef.hidden
 	rig:setItemHidden(false)
 	useHidItem = false
-	rig:setItem(if shown then id else nil, if heldKind == "Bow" then "Left" else "Right")
+	rig:setItem(if shown then id else nil, if heldKind == "Bow" then "Left" else "Right", stars)
 	rig:setArrow(heldKind == "Bow")
 	itemHiddenUntil = 0
 	arrowHiddenUntil = 0

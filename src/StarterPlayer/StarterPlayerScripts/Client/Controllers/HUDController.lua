@@ -11,7 +11,9 @@
 	  * Hotbar: Config.Inventory.Slots cells with no boxes: the item's own 3D picture (ItemModels.build(id, "world")
 	    framed by its bounding box, text fallback), the cell's number, the stack count. The cell in hand has a bigger
 	    picture and a line under it, and its name shows above the hotbar for a moment. An empty cell is a small
-	    ring. With a keyboard or a gamepad the cells you do not hold dim a few seconds after the last change. Tap to
+	    ring. A starred weapon (Shared.Stars) shows its stars small and matte at the foot of its picture (4 and 5 in the
+	    matte gold), its picture carries the copy's finish, and the name above the hotbar reads "Machete  ★★★".
+	    With a keyboard or a gamepad the cells you do not hold dim a few seconds after the last change. Tap to
 	    select on touch. On touch screens it slides left so it never overlaps the action buttons (Theme.TouchLayout /
 	    Shared.Input).
 	  * Compass line from the camera yaw with a Spire marker (its distance under it when facing it) and, when you're
@@ -80,6 +82,7 @@ local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
+local Stars = require(Shared:WaitForChild("Stars"))
 local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local Lore = require(Shared:WaitForChild("Lore"))
 local ThreatLine = require(Shared:WaitForChild("ThreatLine"))
@@ -741,10 +744,13 @@ local function clearViewport(viewport: ViewportFrame)
 end
 
 -- Puts the item's world model in the viewport, longest axis on the diagonal, framed by its bounding box.
-local function frameIcon(viewport: ViewportFrame, itemId: string): boolean
+local function frameIcon(viewport: ViewportFrame, itemId: string, stars: number?): boolean
 	local ok, model = pcall(ItemModels.build, itemId, "world")
 	if not ok or typeof(model) ~= "Instance" or not model:IsA("Model") then
 		return false
+	end
+	if stars then
+		pcall(Stars.applyFinish, model, stars) -- the picture shows the copy's finish (Worn .. Masterwork)
 	end
 	local framed = pcall(function()
 		local cf, size = model:GetBoundingBox()
@@ -852,14 +858,22 @@ local function setSlot(i: number, data: any): boolean
 	end
 	local id = if type(data) == "table" and type(data.id) == "string" then data.id else nil
 	local count = if id then math.max(1, math.floor(tonumber(data.count) or 1)) else 0
-	local changed = id ~= r.itemId or count ~= r.amount
-	if id ~= r.itemId then
+	local stars = if id then Stars.of(id, data.stars) else nil
+	local changed = id ~= r.itemId or count ~= r.amount or stars ~= r.starCount
+	if id ~= r.itemId or stars ~= r.starCount then
 		r.itemId = id
+		r.starCount = stars
 		clearViewport(r.viewport)
 		local def = ItemDefs.get(id)
-		local hasIcon = id ~= nil and frameIcon(r.viewport, id)
+		local hasIcon = id ~= nil and frameIcon(r.viewport, id, stars)
 		r.fallback.Visible = id ~= nil and not hasIcon
 		r.fallback.Text = if def then def.name elseif id then id else ""
+		-- Weapons_v2 2.4: a row of small matte stars under the picture; 4 and 5 stars in the matte gold
+		if r.stars then
+			r.stars.Text = if stars then Stars.text(stars) else ""
+			r.stars.TextColor3 = if stars and stars >= 4 then C.Gold else C.Ink
+			QuietUI.textTransparency(r.stars, if stars then 0.3 else 1)
+		end
 	end
 	r.amount = count
 	-- (no rarity colours on the HUD: one ink. The cell's Rarity line stays hidden.)
@@ -884,7 +898,10 @@ local function flashItemName(itemId: string?)
 		return
 	end
 	wakeHotbar()
-	R.itemTitle.Text = def.name
+	-- the copy in hand's stars: "Machete  ★★★"
+	local held = slotRefs[equippedSlot]
+	local stars = if held and held.itemId == def.id then held.starCount else nil
+	R.itemTitle.Text = if stars then Stars.label(def.id, stars) else def.name
 	R.itemSub.Text = KIND_LABEL[def.kind] or ""
 	-- QW2: what it's for, the first few times each item shows (Guidance)
 	local showDesc = false
@@ -2654,6 +2671,13 @@ function HUDController.Start()
 			ring = card:FindFirstChild("Ring"), -- the small ring of an empty cell
 			ringInk = nil :: UIStroke?,
 			itemId = nil,
+			starCount = nil :: number?,
+			-- Weapons_v2 2.4: the copy's stars, small and matte, at the foot of the picture (made here, not by UIBuilder)
+			stars = QuietUI.label({
+				Name = "Stars", Text = "", Font = "Medium", TextSize = Theme.TextSize.Small,
+				AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 2), Size = UDim2.new(1, 8, 0, 14),
+				TextXAlignment = Enum.TextXAlignment.Center, TextTransparency = 1, ZIndex = 6, Parent = card,
+			}),
 		}
 		local ring = slotRefs[n].ring
 		local ink = ring and ring:FindFirstChild("Ink")

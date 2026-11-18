@@ -164,6 +164,35 @@ listen("Sfx", function(key)
 	return k
 end)
 
+-- the prompts the engine shows on this client now (ProximityPromptService)
+local shownPrompts: { [Instance]: boolean } = {}
+do
+	local pps = game:GetService("ProximityPromptService")
+	pps.PromptShown:Connect(function(p)
+		shownPrompts[p] = true
+		if p.Name == "KitPrompt" or p.Name == "TakeAllPrompt" then
+			L("PROMPT-SHOWN " .. p:GetFullName() .. string.format(" hold=%.2f", p.HoldDuration))
+		end
+	end)
+	pps.PromptHidden:Connect(function(p)
+		shownPrompts[p] = nil
+	end)
+end
+-- the weapons build (19 Nov, mp-weapons): the wheel, the boxes and the round's Gold as this client is told them
+task.spawn(function()
+	local ev = Remotes:WaitForChild("Rewards", 20)
+	if not (ev and ev:IsA("RemoteEvent")) then
+		L("no remote Rewards")
+		return
+	end
+	ev.OnClientEvent:Connect(function(kind, data)
+		if kind == "state" and type(data) == "table" then
+			L("REMOTE Rewards state " .. fmt({ gold = data.gold, freeLeft = data.freeLeft, armoury = data.armoury, bring = data.bring, loaded = data.loaded }))
+		else
+			L("REMOTE Rewards " .. tostring(kind) .. " " .. fmt(data))
+		end
+	end)
+end)
 for _, n in ipairs({ "Phase", "LobbyCount", "AliveCount", "StartedCount", "Practice", "WinnerName", "WinnerUserId", "RoundId", "LaunchCut",
 	"MinPlayers", "PrivateServer", "ArenaEvent", "BorderStartRadius" }) do
 	GS:GetAttributeChangedSignal(n):Connect(function()
@@ -1104,6 +1133,23 @@ local function runSeq(steps: { any }): string
 				L("SEQ touch " .. tostring(step[2]) .. " " .. tostring(step[3]) .. " -> " .. tostring(touch(step[2], step[3])))
 			elseif kind == "aimerr" then
 				L(string.format("SEQ aimerr %s = %.2f deg", fmt(step[2]), aimError(step[2])))
+			elseif kind == "aimset" then
+				-- the touch Aim button is a toggle: put it in the wanted state (set the opposite, then one press)
+				if Input and Input.setToggle then
+					Input.setToggle("Aim", not step[2])
+				end
+				L("SEQ aimset " .. tostring(step[2]) .. " -> " .. tostring(touch("Aim", true)))
+			elseif kind == "aimpt" then
+				-- the point under the crosshair now (the rendered camera's look, as CombatController's bow release reads it;
+				-- own character left out)
+				local cf = workspace.CurrentCamera.CFrame
+				local params = RaycastParams.new()
+				params.FilterType = Enum.RaycastFilterType.Exclude
+				params.FilterDescendantsInstances = { lp.Character, workspace.CurrentCamera }
+				local hit = workspace:Raycast(cf.Position, cf.LookVector * 400, params)
+				local hp = if hit then hit.Position else cf.Position + cf.LookVector * 400
+				L(string.format("AIMPT %.3f,%.3f,%.3f on=%s from=%.3f,%.3f,%.3f", hp.X, hp.Y, hp.Z, if hit then hit.Instance:GetFullName() else "nothing",
+					cf.Position.X, cf.Position.Y, cf.Position.Z))
 			elseif kind == "note" then
 				L("SEQ ---- " .. tostring(step[2]))
 			elseif kind == "remote" then
@@ -1594,6 +1640,156 @@ local function probe(arg: any): any
 	elseif kind == "seat" then
 		return { moveState = ClientState and ClientState.moveState, sit = hum and hum.Sit, seat = hum and hum.SeatPart and hum.SeatPart:GetFullName(),
 			attackBound = Input and Input.isBound and Input.isBound("Attack") }
+	end
+	-- the weapons build (19 Nov, mp-weapons) ------------------------------------------------------------------------
+	if kind == "weap" then
+		-- stars as this client draws them: its own first-person item, and every other player's held model
+		local out: { [string]: any } = { vm = {}, held = {} }
+		local function steel(m: Instance): string
+			local cols = {}
+			for _, d in ipairs(m:GetDescendants()) do
+				if d:IsA("BasePart") and d.Transparency < 1 and (d:GetAttribute("Role") == "Steel" or d.Material == Enum.Material.Metal) then
+					table.insert(cols, string.format("%s:%s:%s:r%.2f", d.Name, rgb(d.Color), d.Material.Name, d.Reflectance))
+					if #cols >= 3 then
+						break
+					end
+				end
+			end
+			return table.concat(cols, ",")
+		end
+		for _, d in ipairs(cam:GetDescendants()) do
+			if d:IsA("Model") and d:GetAttribute("Stars") ~= nil then
+				table.insert(out.vm, string.format("%s stars=%s finish=%s steel=[%s]", d.Name, tostring(d:GetAttribute("Stars")), tostring(d:GetAttribute("Finish")), steel(d)))
+			end
+		end
+		for _, p in ipairs(Players:GetPlayers()) do
+			local c = p.Character
+			local em = c and c:FindFirstChild("EquippedModel", true)
+			if c and p ~= lp then
+				out.held[p.Name] = string.format("item=%s charStars=%s modelStars=%s finish=%s steel=[%s]", tostring(c:GetAttribute("EquippedItem")),
+					tostring(c:GetAttribute("EquippedStars")), tostring(em and em:GetAttribute("Stars")), tostring(em and em:GetAttribute("Finish")),
+					if em then steel(em) else "")
+			end
+		end
+		local inv = ClientState and ClientState.inventory
+		if type(inv) == "table" and type(inv.slots) == "table" then
+			local s = {}
+			for i, e in ipairs(inv.slots) do
+				if type(e) == "table" then
+					table.insert(s, string.format("%d:%sx%s*%s", i, tostring(e.id), tostring(e.count), tostring(e.stars)))
+				end
+			end
+			out.inv = table.concat(s, " ") .. " equipped=" .. tostring(inv.equipped)
+		end
+		out.hotbar = guiTexts("★")
+		return out
+	elseif kind == "parcels" then
+		local out = {}
+		for _, m in ipairs(CollectionService:GetTagged("KitParcel")) do
+			if m:IsA("Model") then
+				local prompt = m:FindFirstChild("KitPrompt", true)
+				local pos = m:GetPivot().Position
+				table.insert(out, string.format("owner=%s landed=%s opened=%s at=%.1f,%.1f,%.1f dist=%.1f prompt=%s hold=%s enabled=%s chute=%s",
+					tostring(m:GetAttribute("OwnerUserId")), tostring(m:GetAttribute("Landed")), tostring(m:GetAttribute("Opened")), pos.X, pos.Y, pos.Z,
+					if root then (pos - root.Position).Magnitude else -1, tostring(prompt ~= nil),
+					if prompt and prompt:IsA("ProximityPrompt") then string.format("%.2f", prompt.HoldDuration) else "-",
+					if prompt and prompt:IsA("ProximityPrompt") then tostring(prompt.Enabled) else "-", tostring(m:FindFirstChild("Chute") ~= nil)))
+			end
+		end
+		return out
+	elseif kind == "kithold" then
+		-- holds the Open prompt of the parcel owned by arg.owner (a UserId) for arg.seconds; arg.force sets this client's
+		-- HoldDuration first (a modified client trying the owner's short hold on someone else's parcel)
+		for _, m in ipairs(CollectionService:GetTagged("KitParcel")) do
+			if m:IsA("Model") and m:GetAttribute("OwnerUserId") == arg.owner and m:GetAttribute("Opened") ~= true and m:FindFirstChild("KitPrompt", true) then
+				local prompt = m:FindFirstChild("KitPrompt", true)
+				if not (prompt and prompt:IsA("ProximityPrompt")) then
+					return "no prompt"
+				end
+				local was = prompt.HoldDuration
+				if arg.force then
+					prompt.HoldDuration = arg.force
+				end
+				local fired, began = false, false
+				local conn = prompt.Triggered:Connect(function()
+					fired = true
+				end)
+				local conn2 = prompt.PromptButtonHoldBegan:Connect(function()
+					began = true
+				end)
+				local holder = prompt.Parent
+				local at = if holder and holder:IsA("Attachment") then holder.WorldPosition elseif holder and holder:IsA("BasePart") then holder.Position else nil
+				L(string.format("KITHOLD owner=%s hold %.2f s (prompt's own %.2f, now %.2f) shown=%s enabled=%s maxDist=%.1f dist=%s style=%s service=%s",
+					tostring(arg.owner), arg.seconds, was, prompt.HoldDuration, tostring(shownPrompts[prompt] == true), tostring(prompt.Enabled),
+					prompt.MaxActivationDistance, if at and root then string.format("%.1f", (at - root.Position).Magnitude) else "?", prompt.Style.Name,
+					tostring(game:GetService("ProximityPromptService").Enabled)))
+				local others = {}
+				for sp in pairs(shownPrompts) do
+					if sp:IsA("ProximityPrompt") then
+						local h = sp.Parent
+						local pos = if h and h:IsA("Attachment") then h.WorldPosition elseif h and h:IsA("BasePart") then h.Position else nil
+						table.insert(others, string.format("%s key=%s excl=%s dist=%s", sp:GetFullName(), sp.KeyboardKeyCode.Name, sp.Exclusivity.Name,
+							if pos and root then string.format("%.1f", (pos - root.Position).Magnitude) else "?"))
+					end
+				end
+				L("KITHOLD prompts shown now: " .. table.concat(others, " ; ") .. string.format(" | max visible %d | the parcel's key=%s excl=%s los=%s parent=%s",
+					game:GetService("ProximityPromptService").MaxPromptsVisible, prompt.KeyboardKeyCode.Name, prompt.Exclusivity.Name,
+					tostring(prompt.RequiresLineOfSight), prompt.Parent and prompt.Parent:GetFullName() or "nil"))
+				prompt:InputHoldBegin()
+				task.wait(arg.seconds)
+				prompt:InputHoldEnd()
+				task.wait(0.3)
+				conn:Disconnect()
+				conn2:Disconnect()
+				if arg.force then
+					prompt.HoldDuration = was
+				end
+				return string.format("held %.2f s; prompt's hold was %.2f; shown on this client=%s; hold began on this client=%s; triggered on this client=%s", arg.seconds,
+					was, tostring(shownPrompts[prompt] == true), tostring(began), tostring(fired))
+			end
+		end
+		return "no parcel of " .. tostring(arg.owner)
+	elseif kind == "watchboard" then
+		-- logs the Armoury board's and the Gold line's words whenever they change, for arg.seconds
+		task.spawn(function()
+			local t0 = os.clock()
+			local last = ""
+			while os.clock() - t0 < (arg.seconds or 10) do
+				local parts = {}
+				for _, line in ipairs(guiTexts()) do
+					if string.find(line, "ArmouryLive/", 1, true) or string.find(line, "GoldLine/", 1, true) then
+						table.insert(parts, line)
+					end
+				end
+				table.sort(parts)
+				local now_ = table.concat(parts, " ; ")
+				if now_ ~= last then
+					last = now_
+					L("BOARD " .. string.sub(now_, 1, 1500))
+				end
+				task.wait(0.1)
+			end
+			L("BOARD end")
+		end)
+		return true
+	elseif kind == "yourgold" then
+		local out = {}
+		for _, face in ipairs(CollectionService:GetTagged("ResultsBoard")) do
+			for _, d in ipairs(face:GetDescendants()) do
+				if d:IsA("TextLabel") and d.Name == "YourGold" then
+					table.insert(out, string.gsub(d.Text, "%s+", " ") .. " visible=" .. tostring(d.Visible))
+				end
+			end
+		end
+		local pg = lp:FindFirstChildOfClass("PlayerGui")
+		if pg then
+			for _, d in ipairs(pg:GetDescendants()) do
+				if d:IsA("TextLabel") and d.Name == "YourGold" then
+					table.insert(out, "pg:" .. string.gsub(d.Text, "%s+", " ") .. " visible=" .. tostring(d.Visible))
+				end
+			end
+		end
+		return out
 	end
 	return "unknown probe " .. tostring(kind)
 end

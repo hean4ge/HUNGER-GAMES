@@ -193,10 +193,12 @@ local function lines(action: string, def: any, device: string, ctx: { [string]: 
 			string.format("[%s] · [%s] AIM", attack, aim)
 	elseif action == "Spear" then
 		local aim = ActionHints.keyOf("Aim", device)
+		-- every throwable melee weapon shares this line; only the spear stabs (the axes and the Ring Blade swing)
+		local verb = if def == nil or def.id == "spear" then "STAB" else "SWING"
 		if touch then
-			return string.format("[ATTACK] STAB · [%s] THEN [THROW]", aim), string.format("[%s] [THROW]", aim)
+			return string.format("[ATTACK] %s · [%s] THEN [THROW]", verb, aim), string.format("[%s] [THROW]", aim)
 		end
-		return string.format("[%s] STAB · HOLD [%s] + [%s] THROW", attack, aim, attack), string.format("[%s] + [%s]", aim, attack)
+		return string.format("[%s] %s · HOLD [%s] + [%s] THROW", attack, verb, aim, attack), string.format("[%s] + [%s]", aim, attack)
 	elseif action == "Knife" then
 		if touch then
 			return "[THROW] · PICK IT UP AFTER", "[THROW]"

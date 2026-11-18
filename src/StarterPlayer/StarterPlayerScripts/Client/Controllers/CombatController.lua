@@ -27,6 +27,12 @@
 	    tightens the spread. The server is told when a draw starts and stops (RangedRelease "Draw" / "Cancel").
 	    The arrow lands where the crosshair points: the release is lifted just enough that the arc (speed, gravity)
 	    passes through the point under the crosshair (Config.Combat.BowAimOnTarget, BowZeroDistance).
+	    Weapons v2 (the owner's bow, 18 Nov): only within the bow's on-target range (Shared.CombatStats: recurve 60, short
+	    bow 40, +5 a star); beyond it the shot is zeroed at that range and drops below the crosshair along its real arc,
+	    the same every time. No random spread standing still; moving, jumping and holding a full draw past
+	    HoldSteadyTime widen it (the hold also drains stamina and lets the string down when it runs out). Writes
+	    ClientState.drawFull (the full-draw moment, also a soft click) and ClientState.bowAim (nil on target, else
+	    { distance, onTarget, drop, degrees } for a drop mark under the crosshair). Stats at the item's stars.
 	  Throwing knife: Attack throws. Spear: Attack stabs, Aim + Attack throws (RangedRelease "Throw"). A throw is lifted
 	    onto the crosshair point the same way, with its own speed and gravity (Config.Combat.ThrowAimOnTarget).
 	  Food, drink, healing and armor: Attack is forwarded to ClientState.useRequested(state) instead.
@@ -62,6 +68,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local CombatStats = require(Shared:WaitForChild("CombatStats"))
 local Config = require(Shared:WaitForChild("Config"))
 local Input = require(Shared:WaitForChild("Input"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
@@ -98,6 +105,10 @@ local MELEE_STYLE: { [string]: { style: string, weight: string, strike: number }
 	hatchet = { style = "Chop", weight = "Medium", strike = 0.1 },
 	spear = { style = "Stab", weight = "Medium", strike = 0.1 },
 	mace = { style = "Smash", weight = "Heavy", strike = 0.13 },
+	-- Weapons v2 (18 Nov): until their own swing sets exist, each borrows the nearest style
+	twin_axe = { style = "Smash", weight = "Heavy", strike = 0.13 }, -- slow, wide, heavy; others read the wind-up
+	ring_blade = { style = "Slash", weight = "Light", strike = 0.08 }, -- a close slash through the hoop
+	climb_pick = { style = "Chop", weight = "Medium", strike = 0.1 }, -- a short overhead peck
 }
 local DEFAULT_STYLE = { style = "Slash", weight = "Medium", strike = 0.1 }
 
@@ -188,11 +199,24 @@ local function equipKind(): string
 	return "Melee"
 end
 
+-- The stars (1..5) of the item in hand: the equipped slot's `stars` in the inventory copy (1 when it has none).
+local function equippedStars(): number
+	local inventory = ClientState.inventory
+	local slots = inventory and inventory.slots
+	local slot = type(slots) == "table" and slots[inventory.equipped]
+	return CombatStats.clampStars(if type(slot) == "table" then slot.stars else nil)
+end
+
+-- The swing's stats at the stars of the weapon in hand (CombatStats.melee: the server reads the same numbers).
 local function meleeDef(): any
 	if equippedDef.kind == "Melee" then
-		return equippedDef
+		return CombatStats.melee(equippedDef, equippedStars())
 	end
-	return FISTS
+	return CombatStats.melee(FISTS, 1)
+end
+
+local function bowStats(): any
+	return CombatStats.bow(equippedDef, equippedStars())
 end
 
 local function isAiming(): boolean
@@ -294,12 +318,15 @@ local function spreadDegrees(kind: string): number
 	local move = moveFactor()
 	local air = if ClientState.grounded == false then 1 else 0
 	if kind == "Bow" then
-		local fatigue = 0
+		-- The owner's bow (Weapons_v2 6): standing, the arrow goes exactly where the crosshair says, at any draw: no
+		-- random spread. Moving or in the air widens it (the crosshair's lines show it), and so does holding a full draw
+		-- past HoldSteadyTime: a sway growing to HoldSwayMax degrees over 3 s.
+		local sway = 0
 		if fullDrawSince then
-			fatigue = math.clamp((os.clock() - fullDrawSince - 2.5) / 2, 0, 1) * 1.6 -- arms tire at full draw
+			local steady = CombatStats.config("HoldSteadyTime") or 2
+			sway = math.clamp((os.clock() - fullDrawSince - steady) / 3, 0, 1) * (CombatStats.config("HoldSwayMax") or 1.2)
 		end
-		local hip = 2.6 * (1 - 0.65 * drawAlpha) + 1.8 * move + 2.5 * air
-		return hip * (1 - 0.9 * aimAlpha) + fatigue
+		return (1.8 * move + 2.5 * air) * (1 - 0.6 * aimAlpha) + sway
 	end
 	return (1.1 + 1.4 * move + 2 * air) * (1 - 0.5 * aimAlpha)
 end
@@ -398,7 +425,7 @@ end
 -- Where the crosshair points for a bow shot: the first character part or solid surface along the camera ray
 -- (non-collidable foliage is skipped, as the server's arrow flies through it), else BowZeroDistance out.
 local AIM_RANGE = 900
-local function crosshairPoint(cf: CFrame): Vector3
+local function crosshairPoint(cf: CFrame, onTarget: number?): Vector3?
 	local origin, look = cf.Position, cf.LookVector
 	local targets = targetModels()
 	local distance: number? = nil
@@ -415,28 +442,18 @@ local function crosshairPoint(cf: CFrame): Vector3
 	if world then
 		distance = world.Distance
 	end
+	if distance == nil and onTarget then
+		return nil -- (sky: the shot is zeroed at its on-target range)
+	end
 	return origin + look * (distance or CombatConfig.BowZeroDistance or 100)
 end
 
--- The release direction whose arc (speed, gravity) passes through `target`: the low solution, or the camera look
--- when the target is out of range for this speed or would need more than BowMaxLiftDegrees of lift.
-local function ballisticDirection(origin: Vector3, target: Vector3, speed: number, gravity: number, look: Vector3): Vector3
-	local delta = target - origin
-	local flat = Vector3.new(delta.X, 0, delta.Z)
-	local x = flat.Magnitude
-	if x < 1 or gravity <= 0 or speed <= 0 then
-		return look
-	end
-	local v2 = speed * speed
-	local disc = v2 * v2 - gravity * (gravity * x * x + 2 * delta.Y * v2)
-	if disc < 0 then
-		return look
-	end
-	local angle = math.atan((v2 - math.sqrt(disc)) / (gravity * x))
-	local dir = flat.Unit * math.cos(angle) + Vector3.yAxis * math.sin(angle)
-	if math.deg(math.acos(math.clamp(dir:Dot(look), -1, 1))) > (CombatConfig.BowMaxLiftDegrees or 25) then
-		return look
-	end
+-- The release direction (CombatStats.aimDirection, the same solver the tests read): the arc passes exactly through the
+-- point under the crosshair when it is within `onTarget` studs; further away (or nothing under it) the shot is zeroed at
+-- onTarget along the look and drops below the crosshair from there, the same every time. onTarget nil: on the crosshair
+-- at any range (the old rule). The look itself when the arc can't reach, or would need more than BowMaxLiftDegrees.
+local function ballisticDirection(origin: Vector3, look: Vector3, crosshair: Vector3?, speed: number, gravity: number, onTarget: number?): Vector3
+	local dir = CombatStats.aimDirection(origin, look, crosshair, speed, gravity, onTarget, CombatConfig.BowMaxLiftDegrees or 25)
 	return dir
 end
 
@@ -710,7 +727,8 @@ local function startDraw(now: number)
 		end
 		return
 	end
-	local rec = { kind = "Draw", itemId = def.id, def = def, t0 = now, drawTime = math.max(def.drawTime or 1, 0.05), shotId = newShotId() }
+	local stats = bowStats() -- (draw time, speed, damage and on-target range at its stars: the server's numbers)
+	local rec = { kind = "Draw", itemId = def.id, def = def, stats = stats, t0 = now, drawTime = stats.drawTime, shotId = newShotId(), full = false }
 	CombatController.current = rec
 	fullDrawSince = nil
 	stopSprint()
@@ -735,14 +753,17 @@ local function releaseDraw(now: number)
 	end
 	stopDrawSound()
 	local def = rec.def
+	local stats = rec.stats or bowStats()
 	local ammo = def.ammo or "arrow"
 	local cf = camera.CFrame
-	local speed = Util.lerp(def.speedMin or 90, def.speedMax or 240, charge)
-	local gravity = def.gravity or 50
+	local speed = Util.lerp(stats.speedMin, stats.speedMax, charge)
+	local gravity = stats.gravity
 	local aimCF = cf
 	if CombatConfig.BowAimOnTarget ~= false then
-		-- lift the release so the arc comes down on the crosshair point; the spread is applied around that
-		local lifted = ballisticDirection(cf.Position, crosshairPoint(cf), speed, gravity, cf.LookVector)
+		-- lift the release so the arc comes down exactly on the crosshair point within the bow's on-target range
+		-- (60 studs, +5 a star; the short bow 40); beyond it the bow is zeroed there and the arrow drops below the
+		-- crosshair along its real arc. Any spread (moving, a long hold) is applied around that.
+		local lifted = ballisticDirection(cf.Position, cf.LookVector, crosshairPoint(cf, stats.onTarget), speed, gravity, stats.onTarget)
 		aimCF = CFrame.lookAt(cf.Position, cf.Position + lifted)
 	end
 	local direction = applySpread(aimCF, spreadDegrees("Bow"))
@@ -783,7 +804,7 @@ local function startThrow(now: number, spear: boolean)
 	}
 	CombatController.current = rec
 	nextActionAt = now + total
-	spendStamina(def.staminaCost or 0.05)
+	spendStamina((if spear then def.throwStaminaCost else nil) or def.staminaCost or 0.05)
 	stopSprint()
 	CombatController.action:Fire("ThrowStart", rec)
 end
@@ -801,11 +822,14 @@ local function releaseThrow(rec: any, now: number)
 	end
 	local speed = if rec.spear then def.throwSpeed or 150 else def.speed or 150
 	local gravity = if rec.spear then def.throwGravity or 45 else def.gravity or 40
+	-- a weapon with its own on-target throw range (the Ring Blade: 45 studs) is zeroed there like a bow; any other
+	-- throw lands on the crosshair at any range the lift allows, as before
+	local onTarget = if rec.spear then CombatStats.melee(def, 1).throwOnTarget else CombatStats.throwable(def).onTarget
 	local aimCF = cf
 	if CombatConfig.ThrowAimOnTarget ~= false then
 		-- like the bow: lift the release so this throw's arc (its speed and gravity) comes down on the crosshair point;
 		-- thrown along the look, a knife landed about 1.1 studs low at 40 studs (combat QA)
-		local lifted = ballisticDirection(cf.Position, crosshairPoint(cf), speed, gravity, cf.LookVector)
+		local lifted = ballisticDirection(cf.Position, cf.LookVector, crosshairPoint(cf, onTarget), speed, gravity, onTarget)
 		aimCF = CFrame.lookAt(cf.Position, cf.Position + lifted)
 	end
 	local direction = applySpread(aimCF, spreadDegrees("Throw"))
@@ -1154,14 +1178,49 @@ local function update(dt: number)
 
 	-- Bow draw
 	rec = CombatController.current
+	local drawFull = false
 	if rec and rec.kind == "Draw" then
 		drawAlpha = math.clamp((now - rec.t0) / rec.drawTime, 0, 1)
 		if drawAlpha >= 1 and not fullDrawSince then
+			-- the full-draw moment: a soft creak-stop and a tiny settle of the view, and ClientState.drawFull for the HUD
+			-- (its draw ticks meet on the crosshair). From here the arrow has all its speed and damage.
 			fullDrawSince = now
+			rec.full = true
+			Sfx.play("UIClick", { volume = 0.35, pitch = 0.55 })
+			kick(Vector3.new(-0.002, 0, 0), 0)
+		end
+		drawFull = fullDrawSince ~= nil
+		-- holding a full draw past HoldSteadyTime tires the arms: the sway grows (spreadDegrees) and stamina drains; at
+		-- empty stamina the string is let down
+		if fullDrawSince and now - fullDrawSince > (CombatStats.config("HoldSteadyTime") or 2) then
+			spendStamina((CombatStats.config("HoldStaminaDrain") or 0.04) * dt)
+			if (tonumber(ClientState.stamina) or 1) <= 0.001 then
+				cancelDraw()
+				drawAlpha = 0
+				drawFull = false
+			end
 		end
 	else
 		drawAlpha = 0
 	end
+	ClientState.drawFull = drawFull
+	-- Where this arrow would land relative to the crosshair (for the HUD's drop mark): nil within the bow's on-target
+	-- range (it lands on the crosshair), else { distance, onTarget, drop (studs below), degrees (below the crosshair) }.
+	-- Two rays a frame, only while drawing.
+	local aimInfo = nil
+	if rec and rec.kind == "Draw" and rec.stats and drawAlpha >= (CombatConfig.MinBowCharge or 0.2) then
+		local cf = camera.CFrame
+		local stats = rec.stats
+		local point = crosshairPoint(cf, stats.onTarget)
+		local distance = if point then (point - cf.Position).Magnitude else nil
+		if distance == nil or distance > stats.onTarget then
+			local d = distance or math.max(stats.onTarget * 2.5, 150) -- (sky: shown for a far shot)
+			local speed = Util.lerp(stats.speedMin, stats.speedMax, drawAlpha)
+			local drop = CombatStats.dropAt(d, stats.onTarget, speed, stats.gravity)
+			aimInfo = { distance = d, onTarget = stats.onTarget, drop = drop, degrees = math.deg(math.atan2(drop, d)) }
+		end
+	end
+	ClientState.bowAim = aimInfo
 
 	-- Aim
 	local aiming = isAiming()
@@ -1200,6 +1259,16 @@ end
 
 CombatController.canAimWith = canAimWith
 CombatController.countItem = countItem
+
+-- Test hook: the release a bow shot from `cf` at `charge` would send, with no spread: (direction, speed, gravity, the
+-- stats used). Reads the bow in hand (or `def` when given) exactly as releaseDraw does.
+function CombatController._bowRelease(cf: CFrame, charge: number, def: any?): (Vector3, number, number, any)
+	local d = def or equippedDef
+	local stats = CombatStats.bow(d, if def then 1 else equippedStars())
+	local speed = Util.lerp(stats.speedMin, stats.speedMax, math.clamp(charge, 0, 1))
+	local dir = ballisticDirection(cf.Position, cf.LookVector, crosshairPoint(cf, stats.onTarget), speed, stats.gravity, stats.onTarget)
+	return dir, speed, stats.gravity, stats
+end
 
 -- The bow is drawn: MovementController keeps sprint blocked for the whole draw (stopSprint alone only ends a sprint
 -- as the draw starts; combat QA ran at 21 studs/s at full draw).

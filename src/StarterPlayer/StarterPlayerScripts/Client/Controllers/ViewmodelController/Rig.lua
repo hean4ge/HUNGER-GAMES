@@ -80,6 +80,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Config = require(Shared:WaitForChild("Config"))
+local Stars = require(Shared:WaitForChild("Stars"))
 
 -- The "Blocky" arms' builder, colours and pose style: the sibling module ViewmodelController.Blocky (a Rig cloned on its
 -- own, without its parent, has none: it then builds the older arms)
@@ -1308,7 +1309,7 @@ local function setHidden(info: any, hidden: boolean)
 	end
 end
 
-function Rig:setItem(itemId: string?, hand: string?)
+function Rig:setItem(itemId: string?, hand: string?, stars: number?)
 	if self.item then
 		self.item.model:Destroy()
 		self.item = nil
@@ -1316,6 +1317,9 @@ function Rig:setItem(itemId: string?, hand: string?)
 	if itemId then
 		local ok, model = pcall(Rig.ItemModels.build, itemId, "view")
 		if ok and typeof(model) == "Instance" and model:IsA("Model") and model.PrimaryPart then
+			if stars and Stars.of(itemId, stars) then
+				pcall(Stars.applyFinish, model, stars) -- the held copy's matte finish, as the third-person model has it
+			end
 			-- (the block arms have their own scale and place for a few things: Blocky.ITEM_SCALE, PALM_HOLD, ITEM_HOLD)
 			local own = if self.blocky then Blocky else nil
 			local info = prepareItem(model, (own and own.ITEM_SCALE[itemId]) or ITEM_SCALE[itemId])

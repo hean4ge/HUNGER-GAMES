@@ -815,7 +815,9 @@ local function take(player: Player, entry: Entry, walking: boolean): string?
 	if not inventory or type(inventory.give) ~= "function" then
 		return nil
 	end
-	local ok, result = pcall(inventory.give, player, entry.itemId, 1)
+	-- a thrown weapon keeps its stars (ProjectileService sets the model's "Stars" attribute)
+	local stars = entry.model and tonumber(entry.model:GetAttribute("Stars")) or nil
+	local ok, result = pcall(inventory.give, player, entry.itemId, 1, stars)
 	if not ok then
 		warn("[WorldProjectiles] InventoryService.give failed: " .. tostring(result))
 		return nil

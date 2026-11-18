@@ -9,6 +9,11 @@
 	    headshotMultiplier: number?  default Config.Combat.DefaultHeadshotMultiplier
 	    recoverItem: string?         the item that stays in the world where the shot ends up (./WorldProjectiles)
 	    lifetime: number?            default Config.Combat.ProjectileMaxLifetime
+	    headCap: number?             a headshot never does more than this (bows: 90, Config.Bow.HeadshotCap)
+	    onTarget: number?            full damage within this many studs of the origin; beyond it the damage falls off
+	    falloffBeyond, falloffMin    ... linearly to falloffMin at onTarget + falloffBeyond (CombatStats.falloff)
+	    armourPierce: number?        0..1, how much of the victim's armour it ignores (Twin-Bit Axe 0.5)
+	    recoverStars: number?        the stars of a thrown weapon, kept on what it leaves in the world
 	  }
 	Simulated on Heartbeat with raycasts from the previous to the next position (gravity per item), excluding the
 	shooter. Characters get a precise per-part ray; the world ray ignores non-collidable foliage, so arrows fly
@@ -30,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local CombatStats = require(Shared:WaitForChild("CombatStats"))
 local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
 local World = require(script:WaitForChild("WorldProjectiles"))
@@ -63,6 +69,12 @@ type Projectile = {
 	recoverItem: string?,
 	lifetime: number,
 	age: number,
+	headCap: number?,
+	onTarget: number?,
+	falloffBeyond: number?,
+	falloffMin: number?,
+	armourPierce: number?,
+	recoverStars: number?,
 }
 
 local active: { [number]: Projectile } = {}
@@ -112,7 +124,7 @@ local function drop(p: Projectile, position: Vector3, velocity: Vector3?): boole
 		end
 		return false
 	end
-	local ok, result = pcall(loot.spawnGroundItem, itemId, 1, position, velocity)
+	local ok, result = pcall(loot.spawnGroundItem, itemId, 1, position, velocity, p.recoverStars)
 	if not ok then
 		warn("[ProjectileService] spawnGroundItem failed: " .. tostring(result))
 		return false
@@ -128,6 +140,10 @@ local function leave(p: Projectile, position: Vector3, place: (...any) -> any, .
 	end
 	local ok, entry = pcall(place, p, ...)
 	if ok then
+		if entry and p.recoverStars and typeof(entry.model) == "Instance" then
+			-- a thrown weapon keeps its stars (the "Stars" attribute ground items carry, Weapons_v2 9.2)
+			entry.model:SetAttribute("Stars", p.recoverStars)
+		end
 		if entry or place == World.land then
 			return entry
 		end
@@ -164,13 +180,23 @@ local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: H
 	local headshot = alive and bodyPart ~= nil and bodyPart.Name == "Head"
 	local combat = Services.CombatService
 	if alive and combat and type(combat.applyHit) == "function" then
-		local damage = p.damage * (if headshot then p.headshotMultiplier else 1)
+		-- distance falloff past the on-target range, then the headshot, then its cap (a bow: never over 90)
+		local travelled = (result.Position - p.origin).Magnitude
+		local damage = p.damage * CombatStats.falloff(travelled, p.onTarget, p.falloffBeyond, p.falloffMin)
+		if headshot then
+			damage *= p.headshotMultiplier
+			if p.headCap then
+				damage = math.min(damage, p.headCap)
+			end
+		end
 		local ok, err = pcall(combat.applyHit, p.shooter, humanoid, damage, {
 			cause = "Combat",
 			weaponId = p.weaponId,
 			position = p.origin,
 			headshot = headshot,
 			hitPosition = result.Position,
+			armourPierce = p.armourPierce,
+			distance = travelled,
 		})
 		if not ok then
 			warn("[ProjectileService] applyHit failed: " .. tostring(err))
@@ -321,6 +347,12 @@ function ProjectileService.fire(
 		recoverItem = if type(o.recoverItem) == "string" then o.recoverItem else nil,
 		lifetime = if Util.isFiniteNumber(o.lifetime) then o.lifetime else CombatConfig.ProjectileMaxLifetime,
 		age = 0,
+		headCap = if Util.isFiniteNumber(o.headCap) then o.headCap else nil,
+		onTarget = if Util.isFiniteNumber(o.onTarget) then o.onTarget else nil,
+		falloffBeyond = if Util.isFiniteNumber(o.falloffBeyond) then o.falloffBeyond else nil,
+		falloffMin = if Util.isFiniteNumber(o.falloffMin) then o.falloffMin else nil,
+		armourPierce = if Util.isFiniteNumber(o.armourPierce) then o.armourPierce else nil,
+		recoverStars = if Util.isFiniteNumber(o.recoverStars) then o.recoverStars else nil,
 	}
 	active[id] = p
 	activeCount += 1

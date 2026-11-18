@@ -1,15 +1,21 @@
 --[[
 	InventoryService - every player's inventory. The server is the only source of truth.
-	  slots[1..Config.Inventory.Slots] = { id, count } | false, an equipped slot (0 = fists) and worn armor ("" = none).
+	  slots[1..Config.Inventory.Slots] = { id, count, stars? } | false, an equipped slot (0 = fists) and worn armor ("" = none).
+	  stars (1..5, Shared.Stars) is on every copy of a starred weapon (ItemDefs.isStarred); copies with different stars
+	  never stack. It travels with drops, pickups, the death scatter and the client's InventoryUpdate copy.
 
 	API (docs/GameDesign.md section 8)
-	  give(player, itemId, count) -> number added   tops up stacks (def.stack), then fills empty slots; 0 unless the player
-	                                                is an alive contender (the lobby inventory is always empty)
+	  give(player, itemId, count, stars?) -> number added   tops up stacks (def.stack), then fills empty slots; 0 unless
+	                                                the player is an alive contender (the lobby inventory is always
+	                                                empty). stars: for a starred weapon (default 1)
+	  getEquippedStars(player) -> number?           the held copy's stars (nil: nothing starred in hand)
+	  getEquippedDef(player) -> def?                the held item's def with its stars applied (Stars.def): the stats
+	                                                CombatService should read
 	  take(player, itemId, count) -> boolean        all or nothing; stacks you aren't holding are used first
 	  consume(...)                                  same as take
 	  has(player, itemId, count) -> boolean         count(player, itemId) -> number
 	  getEquipped(player) -> (itemId?, slot)        (nil, 0) = fists
-	  removeEquipped(player) -> itemId?             removes one of the held item (a thrown spear)
+	  removeEquipped(player) -> (itemId?, stars?)   removes one of the held item (a thrown spear)
 	  getArmorMultiplier(player) -> number          the worn armor's damageMultiplier (1 = no armor)
 	  clear(player)                                 empty everything, no drops
 	  dropAll(player, position)                     every stack and the worn armor scatter as ground items around position
@@ -30,7 +36,9 @@
 	  InventoryUpdate { slots (false = empty), equipped, armor } goes to the owner after every change and on spawn.
 
 	Visuals: the equipped item's "world" model is welded to the character's RightHand (Grip on RightGripAttachment) as
-	  Character.EquippedModel (attribute ItemId); the character's EquippedItem attribute is the id or "".
+	  Character.EquippedModel (attribute ItemId, Stars); the character's EquippedItem attribute is the id or "" and its
+  EquippedStars attribute the held copy's stars (0 = none). The model carries the stars' matte finish
+  (Stars.applyFinish), so others see a 5-star blade as better made, never glowing.
 	  Melee weapons and throwables also play Roblox's R15 "toolnone" hold pose (right arm raised, Idle priority) so the
 	  blade points forward like a held Tool; food, bottles, kits and armor hang naturally from the hand. The bow is welded
 	  to the LeftHand instead (LeftGripAttachment, turned by BOW_GRIP so its top limb lies along the hand's forward), as in
@@ -47,6 +55,7 @@ local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Signal = require(Shared:WaitForChild("Signal"))
+local Stars = require(Shared:WaitForChild("Stars"))
 local Util = require(Shared:WaitForChild("Util"))
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
@@ -65,7 +74,7 @@ local Services: { [string]: any } = {}
 local InventoryUpdate: RemoteEvent
 local rng = Random.new()
 
-type Slot = { id: string, count: number }
+type Slot = { id: string, count: number, stars: number? }
 type Use = { slot: number, itemId: string, startedAt: number }
 type Inventory = {
 	slots: { any },
@@ -75,8 +84,9 @@ type Inventory = {
 	lastDrink: number,
 	model: Model?,
 	modelItemId: string?,
+	modelStars: number?,
 	modelCharacter: Model?,
-	sendPending: boolean,
+	sendPending: number?,
 	equipKey: string,
 	charConnections: { RBXScriptConnection },
 	lastToast: number,
@@ -110,8 +120,9 @@ local function newInventory(): Inventory
 		lastDrink = 0,
 		model = nil,
 		modelItemId = nil,
+		modelStars = nil,
 		modelCharacter = nil,
-		sendPending = false,
+		sendPending = nil,
 		equipKey = "0:",
 		charConnections = {},
 		lastToast = 0,
@@ -209,12 +220,14 @@ local function hasAnything(inv: Inventory): boolean
 	return false
 end
 
--- Puts items into stacks / free slots (no checks, no auto-equip). Returns how many didn't fit.
-local function place(inv: Inventory, itemId: string, count: number): number
+-- Puts items into stacks / free slots (no checks, no auto-equip). Returns how many didn't fit. A starred weapon's
+-- copies carry `stars` (default 1) and only stack with copies of the same stars.
+local function place(inv: Inventory, itemId: string, count: number, stars: number?): number
 	local def = ItemDefs.get(itemId)
 	if not def then
 		return count
 	end
+	local starred = Stars.of(itemId, stars)
 	local stack = math.max(1, math.floor(def.stack or 1))
 	local remaining = count
 	for i = 1, SLOTS do
@@ -222,7 +235,7 @@ local function place(inv: Inventory, itemId: string, count: number): number
 			break
 		end
 		local s = inv.slots[i]
-		if s and s.id == itemId and s.count < stack then
+		if s and s.id == itemId and s.count < stack and s.stars == starred then
 			local add = math.min(stack - s.count, remaining)
 			s.count += add
 			remaining -= add
@@ -234,7 +247,7 @@ local function place(inv: Inventory, itemId: string, count: number): number
 		end
 		if not inv.slots[i] then
 			local add = math.min(stack, remaining)
-			inv.slots[i] = { id = itemId, count = add }
+			inv.slots[i] = { id = itemId, count = add, stars = starred }
 			remaining -= add
 		end
 	end
@@ -259,8 +272,8 @@ local function rootOf(player: Player): BasePart?
 	return nil
 end
 
--- Something that didn't fit anywhere (armor swap, filled bottle) lands at the player's feet.
-local function dropNear(player: Player, itemId: string, count: number)
+-- Something that didn't fit anywhere (armor swap, filled bottle, a kit item) lands at the player's feet.
+local function dropNear(player: Player, itemId: string, count: number, stars: number?)
 	local root = rootOf(player)
 	local loot = Services.LootService
 	if not root or not loot or type(loot.spawnGroundItem) ~= "function" then
@@ -269,7 +282,7 @@ local function dropNear(player: Player, itemId: string, count: number)
 	end
 	local look = Util.flat(root.CFrame.LookVector)
 	look = if look.Magnitude > 1e-3 then look.Unit else Vector3.new(0, 0, -1)
-	local ok, err = pcall(loot.spawnGroundItem, itemId, count, root.Position + look * 1.5, look * 4 + Vector3.new(0, 8, 0))
+	local ok, err = pcall(loot.spawnGroundItem, itemId, count, root.Position + look * 1.5, look * 4 + Vector3.new(0, 8, 0), stars)
 	if not ok then
 		warn("[InventoryService] spawnGroundItem failed: " .. tostring(err))
 	end
@@ -283,7 +296,7 @@ local function snapshot(inv: Inventory)
 	local slots = table.create(SLOTS, false)
 	for i = 1, SLOTS do
 		local s = inv.slots[i]
-		slots[i] = if s then { id = s.id, count = s.count } else false
+		slots[i] = if s then { id = s.id, count = s.count, stars = s.stars } else false
 	end
 	return { slots = slots, equipped = inv.equipped, armor = inv.armor }
 end
@@ -297,12 +310,15 @@ end
 
 -- One snapshot per frame however many changes an action makes.
 local function scheduleSnapshot(player: Player, inv: Inventory)
-	if inv.sendPending then
+	-- (a time, not a flag: if the deferred send is ever lost, e.g. the calling script is destroyed, the next change
+	-- a second later sends again instead of the bag never syncing to the client again)
+	local pending = inv.sendPending
+	if type(pending) == "number" and os.clock() - pending < 1 then
 		return
 	end
-	inv.sendPending = true
+	inv.sendPending = os.clock()
 	task.defer(function()
-		inv.sendPending = false
+		inv.sendPending = nil
 		sendSnapshot(player)
 	end)
 end
@@ -321,6 +337,7 @@ local function destroyModel(inv: Inventory)
 	end
 	inv.model = nil
 	inv.modelItemId = nil
+	inv.modelStars = nil
 	inv.modelCharacter = nil
 end
 
@@ -367,7 +384,7 @@ local function setHoldPose(inv: Inventory, character: Model?, on: boolean)
 end
 
 -- Builds and welds the held item; returns its def when attached.
-local function attachModel(inv: Inventory, character: Model, itemId: string): any
+local function attachModel(inv: Inventory, character: Model, itemId: string, stars: number?): any
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if not humanoid or humanoid.Health <= 0 then
 		return nil
@@ -400,6 +417,9 @@ local function attachModel(inv: Inventory, character: Model, itemId: string): an
 	local c1 = if grip and grip:IsA("Attachment") then grip.CFrame else CFrame.identity
 	model.Name = "EquippedModel"
 	model:SetAttribute("ItemId", itemId)
+	if stars then
+		Stars.applyFinish(model, stars) -- the matte finish of its stars (sets the model's Stars attribute)
+	end
 	model:PivotTo(hand.CFrame * c0 * c1:Inverse())
 	local weld = Instance.new("Weld")
 	weld.Name = "GripWeld"
@@ -411,6 +431,7 @@ local function attachModel(inv: Inventory, character: Model, itemId: string): an
 	model.Parent = character
 	inv.model = model
 	inv.modelItemId = itemId
+	inv.modelStars = stars
 	inv.modelCharacter = character
 	return ItemDefs.get(itemId)
 end
@@ -420,14 +441,17 @@ local function refreshModel(player: Player, inv: Inventory)
 	local character = player.Character
 	local entry = equippedEntry(inv)
 	local itemId = if entry then entry.id else nil
-	if inv.model and inv.model.Parent and inv.modelItemId == itemId and inv.modelCharacter == character then
+	local stars = if entry then entry.stars else nil
+	if inv.model and inv.model.Parent and inv.modelItemId == itemId and inv.modelStars == stars
+		and inv.modelCharacter == character then
 		return
 	end
 	destroyModel(inv)
 	if character and character.Parent then
 		character:SetAttribute("EquippedItem", itemId or "")
+		character:SetAttribute("EquippedStars", stars or 0)
 	end
-	local def = if itemId and character then attachModel(inv, character, itemId) else nil
+	local def = if itemId and character then attachModel(inv, character, itemId, stars) else nil
 	setHoldPose(inv, character, def ~= nil and HOLD_POSE_KINDS[def.kind] == true)
 end
 
@@ -454,7 +478,7 @@ local function commit(player: Player, inv: Inventory)
 	end
 	refreshModel(player, inv)
 	local entry = equippedEntry(inv)
-	local key = tostring(inv.equipped) .. ":" .. (if entry then entry.id else "")
+	local key = tostring(inv.equipped) .. ":" .. (if entry then entry.id .. "#" .. tostring(entry.stars or 0) else "")
 	if key ~= inv.equipKey then
 		inv.equipKey = key
 		InventoryService.equippedChanged:Fire(player, if entry then entry.id else nil, inv.equipped)
@@ -467,7 +491,7 @@ end
 -- Public API
 --------------------------------------------------------------------------------------------------------------------
 
-function InventoryService.give(player: Player, itemId: string, count: number?): number
+function InventoryService.give(player: Player, itemId: string, count: number?, stars: number?): number
 	if type(itemId) ~= "string" then
 		return 0
 	end
@@ -487,7 +511,7 @@ function InventoryService.give(player: Player, itemId: string, count: number?): 
 	for i = 1, SLOTS do
 		wasEmpty[i] = not inv.slots[i]
 	end
-	local added = n - place(inv, itemId, n)
+	local added = n - place(inv, itemId, n, stars)
 	if added <= 0 then
 		return 0
 	end
@@ -564,19 +588,35 @@ function InventoryService.getEquipped(player: Player): (string?, number)
 	return entry.id, inv.equipped
 end
 
-function InventoryService.removeEquipped(player: Player): string?
+function InventoryService.getEquippedStars(player: Player): number?
+	local inv = inventories[player]
+	local entry = inv and equippedEntry(inv)
+	return if entry then entry.stars else nil
+end
+
+-- The held item's stats with its stars applied (nil = fists). CombatService reads this instead of ItemDefs.get.
+function InventoryService.getEquippedDef(player: Player): any
+	local inv = inventories[player]
+	local entry = inv and equippedEntry(inv)
+	if not entry then
+		return nil
+	end
+	return Stars.def(entry.id, entry.stars)
+end
+
+function InventoryService.removeEquipped(player: Player): (string?, number?)
 	local inv = inventories[player]
 	local entry = inv and equippedEntry(inv)
 	if not inv or not entry then
-		return nil
+		return nil, nil
 	end
-	local itemId = entry.id
+	local itemId, stars = entry.id, entry.stars
 	entry.count -= 1
 	if entry.count <= 0 then
 		inv.slots[inv.equipped] = false
 	end
 	commit(player, inv)
-	return itemId
+	return itemId, stars
 end
 
 function InventoryService.getArmorMultiplier(player: Player): number
@@ -616,7 +656,7 @@ function InventoryService.dropAll(player: Player, position: Vector3?)
 	for i = 1, SLOTS do
 		local s = inv.slots[i]
 		if s then
-			table.insert(drops, { id = s.id, count = s.count })
+			table.insert(drops, { id = s.id, count = s.count, stars = s.stars })
 			inv.slots[i] = false
 		end
 	end
@@ -650,7 +690,7 @@ function InventoryService.dropAll(player: Player, position: Vector3?)
 		local flight = (up + math.sqrt(up * up + 2 * gravity * 4.2)) / gravity -- about the time to reach the ground
 		local speed = scatter * rng:NextNumber(0.45, 1) / flight
 		local velocity = Vector3.new(math.cos(angle) * speed, up, math.sin(angle) * speed)
-		local ok, err = pcall(loot.spawnGroundItem, drop.id, drop.count, start, velocity)
+		local ok, err = pcall(loot.spawnGroundItem, drop.id, drop.count, start, velocity, drop.stars)
 		if not ok then
 			warn("[InventoryService] dropAll spawnGroundItem failed: " .. tostring(err))
 		end
@@ -1013,7 +1053,7 @@ local function onDropSlot(player: Player, slot: any, count: any)
 		start = wall.Position - look * 0.45 -- don't toss it through a wall you're facing
 	end
 	local velocity = look * (InvCfg.DropForwardSpeed or 8) + Vector3.new(0, InvCfg.DropUpSpeed or 10, 0)
-	local ok, model = pcall(loot.spawnGroundItem, entry.id, n, start, velocity)
+	local ok, model = pcall(loot.spawnGroundItem, entry.id, n, start, velocity, entry.stars)
 	if not ok or not model then
 		-- nothing is ever lost: nothing yielded since we took them out, so they still fit
 		if partial then
@@ -1021,7 +1061,7 @@ local function onDropSlot(player: Player, slot: any, count: any)
 		elseif not inv.slots[s] then
 			inv.slots[s] = entry
 		else
-			place(inv, entry.id, entry.count)
+			place(inv, entry.id, entry.count, entry.stars)
 		end
 		commit(player, inv)
 		if not ok then

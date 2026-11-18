@@ -18,6 +18,12 @@
 	            evening build (18 Nov): the train lobby, the personal intro skip (A in round one, B in round two), squirrels
 	            (flee, climb, a hunt), sticks at a climbable trunk, a campfire A lights and B cooks on, a butterfly swarm
 	            and its smoke escape, a tree climb and a seat, a rockfall, the "You won" line, the results board
+	            | "W" the weapons build (19 Nov): Gold per player through a fake store and a rejoin, A's wheel spin and
+	            Strongbox watched by B (the prize A's only, A's board holds until the reveal), the Armoury and BRING, the
+	            kit pick, the midpoint parcel (lands 15 to 25 studs out, B steals A's, A opens its own and takes all),
+	            stars (damage, the finish on B's screen and in A's first person), throws, the Twin-Bit Axe on armour, the
+	            bow on a moving player at 60/100/150, the head cap, raw sword claims, the hotbar under load, the round's
+	            Gold and board line, round two with Kits.Delivery = "Start"
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
@@ -65,6 +71,9 @@ function MPTest.start(args: { [string]: any }?): string
 	elseif a.batch == "H" then
 		a.cut = a.cut or "Full"
 		a.failsafe = a.failsafe or 600
+	elseif a.batch == "W" then
+		a.cut = a.cut or "Short"
+		a.failsafe = a.failsafe or 840
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil

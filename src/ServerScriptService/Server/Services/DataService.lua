@@ -21,6 +21,29 @@
 	same deltas are never written twice. A player whose leave save failed keeps their unsaved stats on this server
 	(orphans): the autosave loop and the shutdown save try again, and they get them back if they rejoin this server.
 	In Studio without API access (or an unpublished place) it logs once and keeps session-only defaults.
+
+	Gold and the Armoury (Weapons_v2 sections 4 and 5; CurrencyService and RewardsService use them):
+	  Gold is a fourth stat beside Wins, TotalKills and RoundsPlayed: written as a delta like them (earning adds,
+	  spending subtracts), mirrored to the player attribute Gold, never below 0 in the store.
+	  Econ (stored key "Econ", Version 2) = {
+	    Armoury = { [weaponId] = stars 1..5 },   the best star of each weapon won or bought; merged by the higher star
+	    Pity = { box4, box5, wheel4 },           draws since the last 4-star-or-better box / 5-star box / 4-star spin
+	    Daily = { day = "YYYY-MM-DD" (UTC), free, paid (spins used), roundGold, firstRound, firstWin },
+	    LastKit = string, Bring = string,        the kit and the owned weapon picked for the next round ("" = none)
+	    Draws = number,                          wheel spins and boxes opened, ever
+	  }
+	  Econ is written like Settings: only once the profile has loaded, and whole except the Armoury, which is merged
+	  by the higher star with what is stored. A save from before Gold existed (no Gold, no Econ, Version 1) loads as
+	  Gold 0 and an empty Econ, and is written back as Version 2.
+	  DataService.isLoaded(player) -> boolean     the profile answered (or DataStores are off): Gold can be spent
+	  DataService.spendGold(player, n) -> boolean only when loaded and the balance covers n
+	  DataService.getEcon(player) -> Econ?        a deep copy
+	  DataService.updateEcon(player, fn)          fn(econ) edits the live table; it is sanitized and marked to save
+	  DataService.saveSoon(player)                a save within a few seconds (after a purchase)
+	  DataService.saveNow(player) -> boolean      a save now (yields); true once everything pending is written
+	  Studio only, for tests (DataStores are off in Studio): DataService.useTestStore(store) swaps in a stand-in with
+	  GetAsync / UpdateAsync; DataService.testRejoin(player) saves and drops the player's session, then loads it again
+	  from the store, as a leave and a rejoin would.
 ]]
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -39,8 +62,10 @@ local LOAD_RETRY_INTERVAL = 30 -- seconds between later tries for a profile that
 local SAVE_ATTEMPTS = 3
 local SAVE_WAIT = 90 -- seconds a save waits for the store call already running for that session before it gives up
 local ORPHAN_TRIES = 10 -- autosave rounds a departed player's unsaved stats are retried for (20 minutes)
-local STATS = { "Wins", "TotalKills", "RoundsPlayed" }
-local IS_STAT = { Wins = true, TotalKills = true, RoundsPlayed = true }
+local STATS = { "Wins", "TotalKills", "RoundsPlayed", "Gold" }
+local IS_STAT = { Wins = true, TotalKills = true, RoundsPlayed = true, Gold = true }
+local ECON_VERSION = 2
+local SAVE_SOON_DELAY = 4
 local SETTING_LIMITS = {
 	fov = { 50, 120 },
 	sensitivity = { 0.05, 5 },
@@ -107,11 +132,74 @@ local function keyFor(userId: number): string
 	return "Player_" .. tostring(userId)
 end
 
+-- Econ (see the header): a clean copy of whatever is stored, with every field present
+local function sanitizeEcon(raw: any)
+	local src = if type(raw) == "table" then raw else {}
+	local out = {
+		Armoury = {},
+		Pity = { box4 = 0, box5 = 0, wheel4 = 0 },
+		Daily = { day = "", free = 0, paid = 0, roundGold = 0, firstRound = false, firstWin = false },
+		LastKit = "",
+		Bring = "",
+		Draws = 0,
+	}
+	local function count(v: any, max: number): number
+		return if Util.isFiniteNumber(v) then math.clamp(math.floor(v), 0, max) else 0
+	end
+	if type(src.Armoury) == "table" then
+		for id, stars in pairs(src.Armoury) do
+			if type(id) == "string" and #id <= 32 and Util.isFiniteNumber(stars) then
+				local s = math.clamp(math.floor(stars), 0, 5)
+				if s > 0 then
+					out.Armoury[id] = s
+				end
+			end
+		end
+	end
+	if type(src.Pity) == "table" then
+		for _, k in ipairs({ "box4", "box5", "wheel4" }) do
+			out.Pity[k] = count(src.Pity[k], 1000)
+		end
+	end
+	if type(src.Daily) == "table" then
+		local d = src.Daily
+		out.Daily.day = if type(d.day) == "string" and #d.day <= 10 then d.day else ""
+		out.Daily.free = count(d.free, 100)
+		out.Daily.paid = count(d.paid, 1000)
+		out.Daily.roundGold = count(d.roundGold, 1e7)
+		out.Daily.firstRound = d.firstRound == true
+		out.Daily.firstWin = d.firstWin == true
+	end
+	if type(src.LastKit) == "string" and #src.LastKit <= 24 then
+		out.LastKit = src.LastKit
+	end
+	if type(src.Bring) == "string" and #src.Bring <= 32 then
+		out.Bring = src.Bring
+	end
+	out.Draws = count(src.Draws, 1e9)
+	return out
+end
+
+local function deepCopy(t: any): any
+	if type(t) ~= "table" then
+		return t
+	end
+	local c = {}
+	for k, v in pairs(t) do
+		c[k] = deepCopy(v)
+	end
+	return c
+end
+
 local function newSession(userId: number)
 	return {
 		userId = userId,
-		base = { Wins = 0, TotalKills = 0, RoundsPlayed = 0 }, -- last values known to be stored
-		pending = { Wins = 0, TotalKills = 0, RoundsPlayed = 0 }, -- not yet saved
+		base = { Wins = 0, TotalKills = 0, RoundsPlayed = 0, Gold = 0 }, -- last values known to be stored
+		pending = { Wins = 0, TotalKills = 0, RoundsPlayed = 0, Gold = 0 }, -- not yet saved
+		econ = sanitizeEcon(nil),
+		econVersion = 0,
+		savedEconVersion = 0,
+		saveSoon = false,
 		settings = {},
 		changed = {}, -- [key] = true: settings this session changed (only these are written, merged into the stored ones)
 		settingsVersion = 0,
@@ -163,7 +251,8 @@ local function hasChanges(session): boolean
 			return true
 		end
 	end
-	return session.loaded and session.settingsVersion ~= session.savedSettingsVersion
+	return session.loaded and (session.settingsVersion ~= session.savedSettingsVersion
+		or session.econVersion ~= session.savedEconVersion)
 end
 
 local function applySettings(player: Player, session, values: { [string]: number })
@@ -213,6 +302,27 @@ local function fetchProfile(player: Player, session): (boolean, any)
 			merged[k] = session.settings[k]
 		end
 		session.settings = merged
+		-- Econ: a save from before Gold (Version 1, no Econ) loads as an empty one. Anything this session already holds
+		-- (nothing can be won before the load, but keep the higher star to be safe) is merged in.
+		local econ = sanitizeEcon(result.Econ)
+		if session.carryEcon then
+			-- back on the server they left before their Econ was saved: what they had here is newer than the store
+			local stored = econ
+			econ = session.carryEcon
+			session.carryEcon = nil
+			for id, stars in pairs(stored.Armoury) do
+				if stars > (econ.Armoury[id] or 0) then
+					econ.Armoury[id] = stars
+				end
+			end
+			session.econVersion += 1
+		end
+		for id, stars in pairs(session.econ.Armoury) do
+			if stars > (econ.Armoury[id] or 0) then
+				econ.Armoury[id] = stars
+			end
+		end
+		session.econ = econ
 	end
 	session.loaded = true
 	return true, nil
@@ -228,6 +338,11 @@ local function loadPlayer(player: Player)
 		for _, stat in ipairs(STATS) do
 			session.pending[stat] += orphan.session.pending[stat]
 			orphan.session.pending[stat] = 0
+		end
+		local o = orphan.session
+		if o.loaded and o.econVersion ~= o.savedEconVersion then
+			session.carryEcon = deepCopy(o.econ)
+			o.savedEconVersion = o.econVersion
 		end
 	end
 	mirror(player, session, false)
@@ -308,6 +423,10 @@ local function savePlayer(player: Player, session): boolean
 	for k in pairs(session.changed) do
 		changedSettings[k] = session.settings[k]
 	end
+	-- Econ only once loaded (a failed load must not overwrite the Armoury), as a snapshot taken now
+	local econVersion = session.econVersion
+	local econDirty = session.loaded and econVersion ~= session.savedEconVersion
+	local econSnapshot = if econDirty then deepCopy(session.econ) else nil
 	local key = keyFor(session.userId)
 	local success = false
 	for attempt = 1, SAVE_ATTEMPTS do
@@ -328,7 +447,20 @@ local function savePlayer(player: Player, session): boolean
 				elseif type(data.Settings) ~= "table" then
 					data.Settings = {}
 				end
-				data.Version = 1
+				if econSnapshot then
+					-- whole, except the Armoury: the higher star of what is stored and what this session has wins
+					local stored = sanitizeEcon(data.Econ)
+					local out = deepCopy(econSnapshot)
+					for id, stars in pairs(stored.Armoury) do
+						if stars > (out.Armoury[id] or 0) then
+							out.Armoury[id] = stars
+						end
+					end
+					data.Econ = out
+				elseif type(data.Econ) ~= "table" then
+					data.Econ = sanitizeEcon(nil)
+				end
+				data.Version = ECON_VERSION
 				return data
 			end)
 		end)
@@ -341,6 +473,9 @@ local function savePlayer(player: Player, session): boolean
 			end
 			if settingsDirty then
 				session.savedSettingsVersion = math.max(session.savedSettingsVersion, settingsVersion)
+			end
+			if econDirty then
+				session.savedEconVersion = math.max(session.savedEconVersion, econVersion)
 			end
 			break
 		end
@@ -368,7 +503,13 @@ local function keepReplaced(userId: number, earlier)
 		waited += 0.25
 	end
 	local left = earlier.session.pending
-	if left.Wins == 0 and left.TotalKills == 0 and left.RoundsPlayed == 0 then
+	local any = false
+	for _, stat in ipairs(STATS) do
+		if left[stat] ~= 0 then
+			any = true
+		end
+	end
+	if not any then
 		return -- that write went through
 	end
 	local current = orphans[userId]
@@ -434,6 +575,104 @@ function DataService.setSettings(player: Player, settings: { [string]: any })
 	if next(values) ~= nil then
 		applySettings(player, session, values)
 	end
+end
+
+-- Gold and Econ (CurrencyService, RewardsService) ---------------------------------------------------------------------
+
+function DataService.isLoaded(player: Player): boolean
+	local session = sessions[player]
+	return session ~= nil and session.loaded == true
+end
+
+-- Spends n Gold if the profile has loaded and the balance covers it (a balance not yet known is never spent).
+function DataService.spendGold(player: Player, n: number): boolean
+	local session = sessions[player]
+	if not session or not session.loaded or not Util.isFiniteNumber(n) then
+		return false
+	end
+	local amount = math.floor(n)
+	if amount < 0 then
+		return false
+	end
+	local balance = session.base.Gold + session.pending.Gold
+	if balance < amount then
+		return false
+	end
+	session.pending.Gold -= amount
+	mirror(player, session, false)
+	return true
+end
+
+function DataService.getEcon(player: Player): { [string]: any }?
+	local session = sessions[player]
+	if not session then
+		return nil
+	end
+	return deepCopy(session.econ)
+end
+
+-- fn(econ) edits the session's Econ in place; the result is sanitized and saved with the next write.
+-- Refused (false) until the profile has loaded, so a failed load never writes over the stored Armoury.
+function DataService.updateEcon(player: Player, fn: (any) -> ()): boolean
+	local session = sessions[player]
+	if not session or not session.loaded then
+		return false
+	end
+	local working = deepCopy(session.econ)
+	local ok, err = pcall(fn, working)
+	if not ok then
+		warn("[DataService] updateEcon failed: " .. tostring(err))
+		return false
+	end
+	session.econ = sanitizeEcon(working)
+	session.econVersion += 1
+	return true
+end
+
+-- A save in a few seconds (after a purchase or a prize), coalesced per player.
+function DataService.saveSoon(player: Player)
+	local session = sessions[player]
+	if not session or session.saveSoon or not store or not available then
+		return
+	end
+	session.saveSoon = true
+	task.delay(SAVE_SOON_DELAY, function()
+		session.saveSoon = false
+		if sessions[player] == session then
+			savePlayer(player, session)
+		end
+	end)
+end
+
+-- A save now (yields); true once everything pending is written. For a Robux receipt before it is acknowledged.
+function DataService.saveNow(player: Player): boolean
+	local session = sessions[player]
+	if not session or not store or not available then
+		return false
+	end
+	return savePlayer(player, session)
+end
+
+-- Studio only: a stand-in store (GetAsync / UpdateAsync), since DataStores are off in Studio.
+function DataService.useTestStore(testStore: any): boolean
+	if not Config.IsStudio or type(testStore) ~= "table" then
+		return false
+	end
+	store = testStore
+	available = true
+	return true
+end
+
+-- Studio only: save and drop the player's session, then load it again from the store (a leave and a rejoin).
+function DataService.testRejoin(player: Player): boolean
+	if not Config.IsStudio then
+		return false
+	end
+	local session = sessions[player]
+	local saved = if session then savePlayer(player, session) else true
+	sessions[player] = nil
+	loadPlayer(player)
+	return saved
 end
 
 local function onSaveSettings(player: Player, payload: any)

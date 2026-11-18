@@ -89,8 +89,17 @@ local Feedback = require(Shared:WaitForChild("Feedback"))
 local TreeClimb = require(Shared:WaitForChild("TreeClimb"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 
 local MovementController = {}
+
+-- The held item's climbing help (the Climbing Pick, Weapons_v2: climbSpeedMultiplier / climbDrainMultiplier).
+local function heldClimb(field: string): number
+	local ok, id = pcall(ClientState.getEquippedItemId)
+	local def = ok and id and ItemDefs.get(id)
+	local v = def and tonumber(def[field])
+	return if v and v > 0 then v else 1
+end
 
 local player = Players.LocalPlayer
 
@@ -1561,7 +1570,7 @@ local function stepClimb(c, dt: number)
 	-- hand-over-hand: each stroke pulls hard through the middle and pauses as the hands change grip
 	local s = math.sin(math.pi * cl.phase)
 	local pulse = (1 - CL.Pulse) + 2 * CL.Pulse * s * s
-	local speed = SPD.Climb * pulse * (if exhausted then 0.7 else 1)
+	local speed = SPD.Climb * pulse * (if exhausted then 0.7 else 1) * heldClimb("climbSpeedMultiplier")
 	local target = hit.Position + cl.normal * CL.StandOff
 	local correction = Vector3.new(target.X - pos.X, 0, target.Z - pos.Z)
 	local tangent = Vector3.yAxis:Cross(cl.normal)
@@ -2223,7 +2232,7 @@ local function update(dt: number)
 			crouchPressedAt = -math.huge
 			exitClimb(c, "Fall") -- let go
 		else
-			stamina -= STA.ClimbDrain * (if climb.moving then 1 else 0.4) * dt
+			stamina -= STA.ClimbDrain * (if climb.moving then 1 else 0.4) * heldClimb("climbDrainMultiplier") * dt
 			lastDrainAt = t
 			updateExhaustion()
 			if stamina <= 0 then
@@ -2468,7 +2477,7 @@ local function update(dt: number)
 	-- Target speed for this frame
 	local targetSpeed
 	if nativeClimb then
-		targetSpeed = SPD.Climb * 1.25
+		targetSpeed = SPD.Climb * 1.25 * heldClimb("climbSpeedMultiplier")
 	elseif swimming then
 		targetSpeed = if wantsSprint and stamina > 0.05 and not exhausted then SWM.Sprint else SWM.Speed
 	elseif crouchActive then
@@ -2611,7 +2620,7 @@ local function update(dt: number)
 		drained = true
 		working = 0.75 + 0.25 * uphill
 	elseif nativeClimb and actualSpeed + math.abs(av.Y) > 1 then
-		stamina -= STA.ClimbDrain * dt
+		stamina -= STA.ClimbDrain * heldClimb("climbDrainMultiplier") * dt
 		drained = true
 		working = 0.7
 	elseif swimming and targetSpeed > SWM.Speed + 0.5 and inputMag > 0.3 then

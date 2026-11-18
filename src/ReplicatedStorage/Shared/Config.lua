@@ -508,6 +508,18 @@ Config.Loot = {
 	RunnerCaches = true,
 }
 
+-- Weapons v2 (docs/design/Weapons_v2.md). Any key left out takes its default in Shared.Kits / Shared.Rewards.
+-- THE KIT SWITCH: Delivery = "Midpoint" (the kit comes down near the player at the middle of the round) or "Start"
+-- (the kit goes into the bag at the launch).
+Config.Kits = {
+	Delivery = "Midpoint",
+}
+-- Gold for Robux stays OFF until the owner says yes (developer products, maturity questionnaire: rules.md section 4).
+-- While it is off Gold can never be bought, so the wheel and the Strongboxes are not paid random items.
+Config.Economy = {
+	RobuxGold = false,
+}
+
 -- Help for new players (PlayabilityPlan Q1). Mode: "Auto" = players with fewer than NewPlayerRounds real rounds
 -- (the RoundsPlayed attribute, read at the Countdown) get the extra help, which fades as they learn; "Always"; "Off".
 -- A player's own Guidance setting (ClientState.settings.guidance, when it exists) overrides Mode.

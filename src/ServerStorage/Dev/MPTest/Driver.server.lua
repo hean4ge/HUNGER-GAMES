@@ -162,6 +162,69 @@ local Round = req(Services, "RoundService")
 local Arena = req(Services, "ArenaService")
 local Loot = req(Services, "LootService")
 local Data = req(Services, "DataService")
+-- the weapons build (19 Nov, mp-weapons)
+local Stars = req(Shared, "Stars")
+local Kits = req(Shared, "Kits")
+local KitSvc = req(Services, "KitService")
+local RewardsSvc = req(Services, "RewardsService")
+local Currency = req(Services, "CurrencyService")
+local Projectiles = SSS.Server.Services:FindFirstChild("ProjectileService") and req(Services, "ProjectileService")
+-- a melee weapon's damage at its stars (Shared.Stars: the game's own numbers)
+local function dmgOf(id: string, stars: number?): number
+	local d = Stars and Stars.def(id, stars or 1) or ItemDefs.get(id)
+	return if d and d.damage then d.damage else 0
+end
+-- a stand-in DataStore (DataStores are off in Studio): every save of this test server goes here, so Gold, the Armoury
+-- and the daily bonuses really load and save (DataService.testRejoin reads it back)
+local fakeData: { [string]: any } = {}
+local fakeWrites = 0
+local function deep(t: any): any
+	if type(t) ~= "table" then
+		return t
+	end
+	local c = {}
+	for k, v in pairs(t) do
+		c[k] = deep(v)
+	end
+	return c
+end
+local fakeStore: any = nil
+if ARGS.batch == "W" or ARGS.fakeStore then
+	local fake = {}
+	fakeStore = fake
+	function fake:GetAsync(k)
+		return deep(fakeData[k])
+	end
+	function fake:UpdateAsync(k, fn)
+		local new = fn(deep(fakeData[k]))
+		if new ~= nil then
+			fakeData[k] = deep(new)
+			fakeWrites += 1
+		end
+		return deep(new)
+	end
+	function fake:SetAsync(k, v)
+		fakeData[k] = deep(v)
+		fakeWrites += 1
+	end
+	L("FAKESTORE installed=" .. tostring(Data and Data.useTestStore(fake)))
+end
+-- every projectile the server fires: where from, how fast, what gravity (the bow checks rebuild its arc from this)
+local fires: { { t: number, shooter: string, item: string, origin: Vector3, velocity: Vector3, gravity: number, damage: number, opts: any } } = {}
+if Projectiles and type(Projectiles.fire) == "function" then
+	local origFire = Projectiles.fire
+	Projectiles.fire = function(shooter, itemId, origin, velocity, gravity, damage, opts, ...)
+		local id = origFire(shooter, itemId, origin, velocity, gravity, damage, opts, ...)
+		if id and typeof(origin) == "Vector3" and typeof(velocity) == "Vector3" then
+			table.insert(fires, { t = os.clock(), shooter = if shooter then shooter.Name else "?", item = tostring(itemId), origin = origin, velocity = velocity,
+				gravity = tonumber(gravity) or 0, damage = tonumber(damage) or 0, opts = opts })
+			L(string.format("FIRED %s %s origin=%s vel=%s speed=%.1f g=%.1f dmg=%.2f onTarget=%s headCap=%s stars=%s pierce=%s", if shooter then shooter.Name else "?",
+				tostring(itemId), v3(origin), v3(velocity), velocity.Magnitude, tonumber(gravity) or 0, tonumber(damage) or 0, tostring(opts and opts.onTarget),
+				tostring(opts and opts.headCap), tostring(opts and opts.recoverStars), tostring(opts and opts.armourPierce)))
+		end
+		return id
+	end
+end
 
 -- remotes for the bots ---------------------------------------------------------------------------------------------------
 local callFn = Instance.new("RemoteFunction")
@@ -308,6 +371,7 @@ end
 local diedAt: { [string]: number } = {} -- os.clock() of each player's last death
 local hitsBy: { [string]: number } = {} -- hits the server applied, per attacker
 local claimsBy: { [string]: number } = {} -- strikes a client sent with "my screen shows a hit", per attacker
+local maxDealt = { n = 0, what = "none" } -- the biggest single hit a player dealt in this test
 if PS and PS.died then
 	PS.died:Connect(function(victim, killer, cause)
 		diedAt[victim.Name] = os.clock()
@@ -341,6 +405,10 @@ if Combat and type(Combat.applyHit) == "function" then
 		local dealt, killed = orig(attacker, humanoid, base, info)
 		if attacker and (tonumber(dealt) or 0) > 0 then
 			hitsBy[attacker.Name] = (hitsBy[attacker.Name] or 0) + 1
+			if (tonumber(dealt) or 0) > maxDealt.n then
+				maxDealt.n, maxDealt.what = tonumber(dealt) or 0, string.format("%s weapon=%s base=%s headshot=%s", attacker.Name, tostring(info and info.weaponId),
+					tostring(base), tostring(info and info.headshot))
+			end
 		end
 		L(string.format("APPLYHIT %s -> %s base=%s dealt=%s killed=%s weapon=%s melee=%s headshot=%s hp %.1f -> %.1f", if attacker then attacker.Name else "nil",
 			if isHum and humanoid.Parent then humanoid.Parent.Name else "?", tostring(base), tostring(dealt), tostring(killed),
@@ -924,6 +992,7 @@ local function trainChecks(tag: string, players: { Player })
 end
 
 -- batches ---------------------------------------------------------------------------------------------------------------
+local lobbyExtra: (() -> ())? = nil -- (batch W: the wheel, the boxes and the Armoury, before the round is released)
 local function lobbyChecks()
 	local ok = waitFor(function()
 		local list = Players:GetPlayers()
@@ -982,6 +1051,12 @@ local function lobbyChecks()
 	shot("train_lobby", 1.0)
 	chatCheck("lobby.chatClosed", { A, B }, true)
 	plusLobbyChecks(A, B)
+	if lobbyExtra then
+		local okX, errX = pcall(lobbyExtra)
+		if not okX then
+			L("DRIVER ERROR in the lobby part: " .. tostring(errX))
+		end
+	end
 	-- the lobby countdown as each client shows it
 	release()
 	waitFor(function()
@@ -1312,8 +1387,8 @@ local function combatChecks()
 	L(duel(A, B, 7))
 	local r = attack("sword@7", { { "select", sword }, { "wait", 0.7 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
 	local seen = r.tAct ~= nil and r.tDmg ~= nil and r.tAct < r.tDmg
-	check("melee.sword.damage", math.abs(r.dealt - 40) < 0.6 and r.tConfirm ~= nil, string.format(
-		"sword at 7 studs: B lost %.1f on the server (expected 40); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
+	check("melee.sword.damage", math.abs(r.dealt - dmgOf("sword")) < 0.6 and r.tConfirm ~= nil, string.format(
+		"sword at 7 studs: B lost %.1f on the server (expected " .. dmgOf("sword") .. ", the Longsword at 1 star); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
 		tostring(r.tSeeHp ~= nil)))
 	check("melee.sword.victimSeesSwingFirst", seen, string.format(
 		"on B's client the swing message arrived %s s before the damage message (swing start on A %.3f, B told %s, B plays the swing %s, B damage %s, server health drop %s); message: %s",
@@ -1328,7 +1403,7 @@ local function combatChecks()
 	setHealth(B)
 	L(duel(A, B, 10))
 	r = attack("sword@10", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
-	check("melee.sword.reach10", math.abs(r.dealt - 40) < 0.6, string.format("sword at 10 studs: B lost %.1f (the reach is 10 root to root)", r.dealt))
+	check("melee.sword.reach10", math.abs(r.dealt - dmgOf("sword")) < 0.6, string.format("sword at 10 studs: B lost %.1f (the reach is 10 root to root)", r.dealt))
 	setHealth(B)
 	L(duel(A, B, 11.5))
 	r = attack("sword@11.5", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
@@ -1344,12 +1419,12 @@ local function combatChecks()
 	r = attack("knife then switch to sword, attack during the switch",
 		{ { "select", knife }, { "wait", 0.8 }, { "face", target }, { "wait", 0.3 }, { "click" }, { "wait", 0.25 }, { "select", sword }, { "wait", 0.05 }, { "click" },
 			{ "wait", 1.0 } }, 1.0)
-	check("melee.switch.firstSwingLands", math.abs(r.dealt - 62) < 0.6, string.format(
-		"knife hit (22), switch to the sword and attack during the switch (40): B lost %.1f in all (expected 62); refusals: %s", r.dealt, refusals()))
+	check("melee.switch.firstSwingLands", math.abs(r.dealt - (dmgOf("knife") + dmgOf("sword"))) < 0.6, string.format(
+		"knife hit (" .. dmgOf("knife") .. "), switch to the sword and attack during the switch (" .. dmgOf("sword") .. "): B lost %.1f in all (expected " .. (dmgOf("knife") + dmgOf("sword")) .. "); refusals: %s", r.dealt, refusals()))
 	setHealth(B)
 	r = attack("sword then switch to mace", { { "face", target }, { "wait", 0.2 }, { "click" }, { "wait", 0.3 }, { "select", mace }, { "wait", 0.05 }, { "click" },
 		{ "wait", 1.6 } }, 1.0)
-	check("melee.switch.swordToMace", math.abs(r.dealt - 86) < 0.6, string.format("sword hit (40), switch to the mace and attack (46): B lost %.1f (expected 86); refusals: %s",
+	check("melee.switch.swordToMace", math.abs(r.dealt - (dmgOf("sword") + dmgOf("mace"))) < 0.6, string.format("sword hit (" .. dmgOf("sword") .. "), switch to the mace and attack (" .. dmgOf("mace") .. "): B lost %.1f (expected " .. (dmgOf("sword") + dmgOf("mace")) .. "); refusals: %s",
 		r.dealt, refusals()))
 
 	-- bow
@@ -1379,8 +1454,8 @@ local function combatChecks()
 	L(duel(A, B, 14))
 	local tkBefore = Inv.count(A, "throwing_knife")
 	r = attack("throwing knife@14", { { "select", tk }, { "wait", 0.9 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" }, { "wait", 1.0 } }, 1.0)
-	check("throw.knife.damage", math.abs(r.dealt - 28) < 0.6 and r.tConfirm ~= nil, string.format(
-		"a thrown knife at 14 studs: B lost %.1f (expected 28); knives %d -> %d; A got HitConfirm=%s; B's messages: %s", r.dealt, tkBefore, Inv.count(A, "throwing_knife"),
+	check("throw.knife.damage", (math.abs(r.dealt - ItemDefs.get("throwing_knife").damage) < 0.6 or math.abs(r.dealt - ItemDefs.get("throwing_knife").headDamage) < 0.6) and r.tConfirm ~= nil, string.format(
+		"a thrown knife at 14 studs: B lost %.1f (expected " .. ItemDefs.get("throwing_knife").damage .. " body or " .. ItemDefs.get("throwing_knife").headDamage .. " head, Weapons_v2 1.2); knives %d -> %d; A got HitConfirm=%s; B's messages: %s", r.dealt, tkBefore, Inv.count(A, "throwing_knife"),
 		tostring(r.tConfirm ~= nil), tostring(r.act)))
 	setHealth(B)
 	L("refusals after combat: " .. refusals())
@@ -1423,8 +1498,8 @@ local function swordChecks()
 	setHealth(B)
 	L(duel(A, B, 7))
 	local r = attack("sword@7", { { "select", sword }, { "wait", 0.7 }, { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
-	check("melee.sword.damage", math.abs(r.dealt - 40) < 0.6 and r.tConfirm ~= nil, string.format(
-		"sword at 7 studs: B lost %.1f on the server (expected 40); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
+	check("melee.sword.damage", math.abs(r.dealt - dmgOf("sword")) < 0.6 and r.tConfirm ~= nil, string.format(
+		"sword at 7 studs: B lost %.1f on the server (expected " .. dmgOf("sword") .. ", the Longsword at 1 star); A got HitConfirm=%s; A's own screen shows B's health drop=%s", r.dealt, tostring(r.tConfirm ~= nil),
 		tostring(r.tSeeHp ~= nil)))
 	check("melee.sword.victimSeesSwingFirst", r.tAct ~= nil and r.tDmg ~= nil and r.tAct < r.tDmg, string.format(
 		"B's client: swing message %s s before the damage message (A starts %s, B told %s, B plays it %s, B damage %s, server drop %s); %s",
@@ -1433,7 +1508,7 @@ local function swordChecks()
 	setHealth(B)
 	L(duel(A, B, 10))
 	r = attack("sword@10", { { "face", target }, { "wait", 0.4 }, { "aimerr", target }, { "click" } })
-	check("melee.sword.reach10", math.abs(r.dealt - 40) < 0.6, string.format("sword at 10 studs: B lost %.1f (expected 40: the reach is 10 root to root); A predicted %s",
+	check("melee.sword.reach10", math.abs(r.dealt - dmgOf("sword")) < 0.6, string.format("sword at 10 studs: B lost %.1f (expected " .. dmgOf("sword") .. ": the reach is 10 root to root); A predicted %s",
 		r.dealt, tostring(r.strike and string.match(r.strike, "hit=%S+"))))
 	setHealth(B)
 	L(duel(A, B, 11.5))
@@ -2738,6 +2813,772 @@ local function batchH()
 	workspace:SetAttribute("WildlifeTest", "scare")
 end
 
+-- batch W: the weapons build (19 Nov, mp-weapons) ------------------------------------------------------------------------
+-- kits (the pick, the midpoint parcel, the steal, Take all with a brought weapon), stars (damage, the finish on other
+-- screens and in first person, kept through a throw), the new weapons between players, the bow on a moving player, the
+-- wheel, the Strongbox and the Armoury (whose prize, what the board shows when), Gold per player through a fake store
+-- and a rejoin, a real round's Gold, the hotbar under load, and Kits.Delivery = "Start" in round two.
+local W: { [string]: any } = {}
+local function goldOf(p: Player): number
+	local g = Currency and Currency.balance(p)
+	return tonumber(g) or tonumber(p:GetAttribute("Gold")) or -1
+end
+local function econOf(p: Player): any
+	return (Data and Data.getEcon(p)) or {}
+end
+local function armStr(t: any): string
+	local out = {}
+	for id, s in pairs(type(t) == "table" and t or {}) do
+		table.insert(out, tostring(id) .. ":" .. tostring(s))
+	end
+	table.sort(out)
+	return table.concat(out, ",")
+end
+local function spotOf(name: string): BasePart?
+	local lobby = workspace:FindFirstChild("Lobby")
+	local c = lobby and lobby:FindFirstChild("Rewards")
+	local o = c and c:FindFirstChild(name)
+	local s = o and o:FindFirstChild("PromptSpot", true)
+	return if s and s:IsA("BasePart") then s else nil
+end
+-- stands p on the train's floor at (x, z) (a ray from under the roof), facing `look`
+local function trainStand(p: Player, x: number, z: number, look: Vector3)
+	local hum, root = parts(p)
+	if not (hum and root and p.Character) then
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore = {}
+	for _, q in ipairs(Players:GetPlayers()) do
+		if q.Character then
+			table.insert(ignore, q.Character)
+		end
+	end
+	params.FilterDescendantsInstances = ignore
+	local hit = workspace:Raycast(Vector3.new(x, 206, z), Vector3.new(0, -20, 0), params)
+	local y = (if hit then hit.Position.Y else 200) + hum.HipHeight + root.Size.Y / 2 + 0.1
+	root.AssemblyLinearVelocity = Vector3.zero
+	p.Character:PivotTo(CFrame.lookAt(Vector3.new(x, y, z), Vector3.new(look.X, y, look.Z)))
+end
+local function slotWith(p: Player, itemId: string, stars: number?): number?
+	local snap = Inv.getSnapshot(p)
+	for i, s in ipairs(snap.slots) do
+		if type(s) == "table" and s.id == itemId and (stars == nil or s.stars == stars) then
+			return i
+		end
+	end
+	return nil
+end
+local function bagStr(p: Player): string
+	local snap = Inv.getSnapshot(p)
+	local out = {}
+	for i, s in ipairs(snap.slots) do
+		if type(s) == "table" then
+			table.insert(out, string.format("%d:%sx%s*%s", i, tostring(s.id), tostring(s.count), tostring(s.stars)))
+		end
+	end
+	return table.concat(out, " ") .. " equipped=" .. tostring(snap.equipped)
+end
+local function lineTime(line: string?): number?
+	return line and tonumber(string.match(line, "^([%d%.]+)"))
+end
+local function num(line: string?, key: string): number?
+	return line and tonumber(string.match(line, key .. "=(%-?[%d%.]+)"))
+end
+-- the board's words on `p` since `from`: (first line, time of the first change after it, every change)
+local function boardChanges(p: Player, from: number): (string?, number?, { string })
+	local store = clientLines[p.Name] or {}
+	local first, tChange, all = nil, nil, {}
+	for i = from + 1, #store do
+		local line = store[i]
+		if string.find(line, "BOARD ", 1, true) and not string.find(line, "BOARD end", 1, true) then
+			if not first then
+				first = line
+			else
+				tChange = tChange or lineTime(line)
+				table.insert(all, string.sub(line, 1, 260))
+			end
+		end
+	end
+	return first, tChange, all
+end
+
+-- one draw by A at the wheel or the case, watched by B; returns the line A's client was told
+local function drawCheck(tag: string, msg: { any }, kind: string)
+	local eA0, eB0, gA0, gB0 = econOf(A), econOf(B), goldOf(A), goldOf(B)
+	local mA, mB = mark(A), mark(B)
+	call(A, "probe", { kind = "watchboard", seconds = 13 })
+	task.wait(0.5)
+	call(A, "fire", { name = "Rewards", a = msg[1], b = msg[2] })
+	local lineB = waitFor(function()
+		return (clientFind(B, "REMOTE Rewards " .. kind .. " ", mB))
+	end, 5)
+	task.wait(13)
+	local lineA = clientFind(A, "REMOTE Rewards " .. kind .. " ", mA)
+	local eA1, eB1 = econOf(A), econOf(B)
+	local startAt = num(lineA, "startAt")
+	local duration = num(lineA, "duration") or (if kind == "box" then 0 else 3.6)
+	local stop = if startAt then (startAt % 100000) + duration else nil
+	local first, tChange, all = boardChanges(A, mA)
+	L(string.format("DRAW %s: A told %s | B told %s | A gold %d -> %d, B gold %d -> %d | A armoury %s -> %s, B armoury %s -> %s | board first: %s | changes: %s", tag,
+		tostring(lineA), tostring(lineB), gA0, goldOf(A), gB0, goldOf(B), armStr(eA0.Armoury), armStr(eA1.Armoury), armStr(eB0.Armoury), armStr(eB1.Armoury),
+		tostring(first), table.concat(all, " || ")))
+	check("w." .. tag .. ".othersSee", lineB ~= nil and string.find(lineB, "userId=" .. A.UserId, 1, true) ~= nil,
+		"B's client was told of A's draw (others in the car watch it): " .. tostring(lineB and string.sub(lineB, 1, 300)))
+	check("w." .. tag .. ".prizeIsAsOnly", lineA ~= nil and (eA1.Draws or 0) == (eA0.Draws or 0) + 1 and armStr(eB0.Armoury) == armStr(eB1.Armoury) and gB0 == goldOf(B)
+		and (eB1.Draws or 0) == (eB0.Draws or 0), string.format("A's draws %s -> %s, A's armoury %s -> %s, A's Gold %d -> %d | B's draws %s -> %s, armoury '%s' -> '%s', Gold %d -> %d",
+		tostring(eA0.Draws), tostring(eA1.Draws), armStr(eA0.Armoury), armStr(eA1.Armoury), gA0, goldOf(A), tostring(eB0.Draws), tostring(eB1.Draws), armStr(eB0.Armoury),
+		armStr(eB1.Armoury), gB0, goldOf(B)))
+	-- the board holds its pre-draw Gold and rows until the reveal ends (the wheel stops at startAt + duration; the reveal
+	-- runs about 2.4 to 3.2 s after the prize rises)
+	local ok = first ~= nil and (tChange == nil or (stop ~= nil and tChange >= stop + 1.5))
+	check("w." .. tag .. ".boardWaitsForReveal", ok, string.format(
+		"A's Armoury board and Gold line: first change %s s after the %s (draw sent at %s, %s at %s); the board %s",
+		if tChange and stop then string.format("%.2f", tChange - stop) else "?", if kind == "spin" then "wheel stopped" else "box opened",
+		tostring(startAt and startAt % 100000), if kind == "spin" then "stops" else "opens", tostring(stop), if tChange then "changed" else "did not change in 13 s"))
+	return lineA
+end
+
+local function wLobby()
+	-- a player who joined before this driver ran loaded from Studio's own (switched off) DataStore, whose failure can
+	-- mark the stores unavailable after the stand-in went in: put it in again and load everyone from it
+	if fakeStore then
+		task.wait(1.0)
+		Data.useTestStore(fakeStore)
+		for _, p in ipairs(Players:GetPlayers()) do
+			Data.testRejoin(p)
+		end
+		L("FAKESTORE again, every player loaded from it")
+	end
+	local okLoad = waitFor(function()
+		return Data.isLoaded(A) and Data.isLoaded(B)
+	end, 25)
+	local gA0, gB0 = goldOf(A), goldOf(B)
+	Data.increment(A, "Gold", 5000)
+	Data.increment(B, "Gold", 700)
+	task.wait(1.0)
+	check("w.gold.perPlayer", okLoad ~= nil and goldOf(A) == gA0 + 5000 and goldOf(B) == gB0 + 700, string.format(
+		"profiles loaded=%s (fake store); A %d -> %d (+5000), B %d -> %d (+700); attributes A.Gold=%s B.Gold=%s", tostring(okLoad ~= nil), gA0, goldOf(A), gB0, goldOf(B),
+		tostring(A:GetAttribute("Gold")), tostring(B:GetAttribute("Gold"))))
+	local wheel = spotOf("Wheel")
+	if not wheel then
+		check("w.lobby.rewards", false, "no workspace.Lobby.Rewards.Wheel PromptSpot")
+		return
+	end
+	trainStand(A, 8800, 80, wheel.Position)
+	trainStand(B, 8800, 72, wheel.Position)
+	task.wait(1.5)
+	shot("w_lobby_wheel", 0.6)
+	drawCheck("spin", { "spin" }, "spin")
+	drawCheck("strongbox", { "box", "strongbox" }, "box")
+	-- the Armoury: a Machete at 3 stars (unless a draw already gave one), brought to the next round
+	local owned = (econOf(A).Armoury or {}).machete or 0
+	local g0 = goldOf(A)
+	if owned < 3 then
+		call(A, "fire", { name = "Rewards", a = "buy", b = "machete" })
+		task.wait(1.5)
+	end
+	local now3 = (econOf(A).Armoury or {}).machete or 0
+	check("w.armoury.buy", now3 >= 3 and (owned >= 3 or goldOf(A) == g0 - 800), string.format("A owned machete at %s stars, now %s; Gold %d -> %d (a buy is 800)",
+		tostring(owned), tostring(now3), g0, goldOf(A)))
+	call(A, "fire", { name = "Rewards", a = "bring", b = "machete" })
+	call(A, "fire", { name = "KitPick", a = "archer" })
+	call(B, "fire", { name = "KitPick", a = "forager" })
+	task.wait(1.5)
+	W.macheteStars = now3
+	check("w.kit.pick", A:GetAttribute("Kit") == "archer" and B:GetAttribute("Kit") == "forager" and A:GetAttribute("KitBring") == "machete"
+		and econOf(A).Bring == "machete" and string.find(tostring(A:GetAttribute("KitArmoury")), "machete:" .. now3, 1, true) ~= nil and (B:GetAttribute("KitBring") or "") == "",
+		string.format("A Kit=%s KitBring=%s Econ.Bring=%s KitArmoury=%s | B Kit=%s KitBring=%s", tostring(A:GetAttribute("Kit")), tostring(A:GetAttribute("KitBring")),
+			tostring(econOf(A).Bring), tostring(A:GetAttribute("KitArmoury")), tostring(B:GetAttribute("Kit")), tostring(B:GetAttribute("KitBring"))))
+	-- a leave and a rejoin (DataService.testRejoin: save, drop the session, load it again from the store)
+	task.wait(1.0)
+	local before = { goldA = goldOf(A), goldB = goldOf(B), armA = armStr(econOf(A).Armoury), armB = armStr(econOf(B).Armoury), bring = econOf(A).Bring }
+	local savedA = Data.testRejoin(A)
+	local savedB = Data.testRejoin(B)
+	local okRe = waitFor(function()
+		return Data.isLoaded(A) and Data.isLoaded(B)
+	end, 15)
+	task.wait(0.5)
+	check("w.gold.rejoin", okRe ~= nil and savedA and savedB and goldOf(A) == before.goldA and goldOf(B) == before.goldB and armStr(econOf(A).Armoury) == before.armA
+		and armStr(econOf(B).Armoury) == before.armB and econOf(A).Bring == before.bring, string.format(
+		"saved A=%s B=%s, loaded again=%s, store writes %d | A Gold %d -> %d, armoury %s -> %s, bring %s -> %s | B Gold %d -> %d, armoury '%s' -> '%s'", tostring(savedA),
+		tostring(savedB), tostring(okRe ~= nil), fakeWrites, before.goldA, goldOf(A), before.armA, armStr(econOf(A).Armoury), tostring(before.bring), tostring(econOf(A).Bring),
+		before.goldB, goldOf(B), before.armB, armStr(econOf(B).Armoury)))
+	W.goldBeforeRound = { [A] = goldOf(A), [B] = goldOf(B) }
+	if P3 then
+		W.gold3 = goldOf(P3)
+	end
+end
+
+-- what the server's parcel prompts receive (hold began / ended / triggered), logged as it happens
+local function watchPrompt(prompt: Instance)
+	if not prompt:IsA("ProximityPrompt") then
+		return
+	end
+	local t0 = os.clock()
+	L(string.format("SRV-PROMPT %s added hold=%.2f", prompt:GetFullName(), prompt.HoldDuration))
+	prompt.PromptButtonHoldBegan:Connect(function(who)
+		L(string.format("SRV-PROMPT %s HoldBegan by %s at +%.2f", prompt.Name, who.Name, os.clock() - t0))
+	end)
+	prompt.PromptButtonHoldEnded:Connect(function(who)
+		L(string.format("SRV-PROMPT %s HoldEnded by %s at +%.2f", prompt.Name, who.Name, os.clock() - t0))
+	end)
+	prompt.Triggered:Connect(function(who)
+		L(string.format("SRV-PROMPT %s Triggered by %s at +%.2f", prompt.Name, who.Name, os.clock() - t0))
+	end)
+end
+CollectionService:GetInstanceAddedSignal("KitParcel"):Connect(function(m)
+	m.DescendantAdded:Connect(function(d)
+		if d:IsA("ProximityPrompt") then
+			watchPrompt(d)
+		end
+	end)
+end)
+
+-- the parcel of `owner` (unopened, landed when `landed`), newest first
+local function parcelOf(owner: Player, landed: boolean?): Model?
+	local best = nil
+	for _, m in ipairs(CollectionService:GetTagged("KitParcel")) do
+		if m:IsA("Model") and m:GetAttribute("OwnerUserId") == owner.UserId and m:GetAttribute("Opened") ~= true and (not landed or m:GetAttribute("Landed") == true) then
+			best = m
+		end
+	end
+	return best
+end
+
+-- the midpoint drop now (Studio switch KitDropNow); returns where each player stood when their spot was picked
+local function dropNow(tag: string): { [Player]: Vector3 }
+	local at: { [Player]: Vector3 } = {}
+	for _, p in ipairs({ A, B }) do
+		p:SetAttribute("KitIncoming", nil)
+	end
+	GS:SetAttribute("KitDropNow", true)
+	waitFor(function()
+		for _, p in ipairs({ A, B }) do
+			if not at[p] and p:GetAttribute("KitIncoming") ~= nil then
+				local _, r = parts(p)
+				at[p] = if r then r.Position else Vector3.zero
+			end
+		end
+		return at[A] and at[B]
+	end, 12)
+	L(string.format("DROP %s: KitIncoming A=%s B=%s", tag, tostring(A:GetAttribute("KitIncoming")), tostring(B:GetAttribute("KitIncoming"))))
+	waitFor(function()
+		return parcelOf(A, true) and parcelOf(B, true)
+	end, 16)
+	task.wait(0.8)
+	return at
+end
+
+local function kitChecks()
+	Kits.Settings.Stagger = 1 -- (both parcels within a second: the test's own number)
+	setupDuel()
+	L(duel(A, B, 30))
+	task.wait(0.6)
+	local mA, mB = mark(A), mark(B)
+	local at = dropNow("first")
+	local pa, pb = parcelOf(A, true), parcelOf(B, true)
+	local function landDist(p: Player, m: Model?): number
+		return if m and at[p] then flatDist(m:GetPivot().Position, at[p]) else -1
+	end
+	local dA, dB = landDist(A, pa), landDist(B, pb)
+	check("w.kit.landsNear", dA >= 14.5 and dA <= 25.5 and dB >= 14.5 and dB <= 25.5, string.format(
+		"each parcel landed this far (flat) from where its owner stood when the warning came: A %.1f, B %.1f (design 15 to 25)", dA, dB))
+	local comingA = clientFind(A, "KitIncoming", mA)
+	local guiA = call(A, "gui", "kit") or {}
+	L("KIT A's screen: " .. table.concat(guiA, " ; ") .. " | A's line: " .. tostring(comingA))
+	local seenB = call(B, "probe", { kind = "parcels" }) or {}
+	local seenA = call(A, "probe", { kind = "parcels" }) or {}
+	L("PARCELS on A: " .. table.concat(seenA, " | ") .. " || on B: " .. table.concat(seenB, " | "))
+	local bSeesA, aHold, bHoldOnA = false, nil, nil
+	for _, s in ipairs(seenB) do
+		if string.find(s, "owner=" .. A.UserId .. " landed=true", 1, true) then
+			bSeesA = true
+			bHoldOnA = tonumber(string.match(s, "hold=([%d%.]+)"))
+		end
+	end
+	for _, s in ipairs(seenA) do
+		if string.find(s, "owner=" .. A.UserId .. " landed=true", 1, true) then
+			aHold = tonumber(string.match(s, "hold=([%d%.]+)"))
+		end
+	end
+	check("w.kit.otherSeesLanding", bSeesA, "B's client has A's parcel landed (chute folded): " .. table.concat(seenB, " | "))
+	check("w.kit.holdTimes", aHold ~= nil and math.abs(aHold - 0.6) < 0.01 and bHoldOnA ~= nil and math.abs(bHoldOnA - 2.5) < 0.01, string.format(
+		"A's own parcel's Open prompt holds %s s on A's screen (0.6); on B's screen %s s (2.5)", tostring(aHold), tostring(bHoldOnA)))
+	shot("w_kit_landed", 0.6)
+	-- B steals A's parcel: a modified client's short hold first, then the honest 2.5 s
+	if pa then
+		local p = pa:GetPivot().Position
+		local _, ra = parts(A)
+		local away = if ra then flat(ra.Position - p) else Vector3.xAxis
+		away = if away.Magnitude > 0.1 then away.Unit else Vector3.xAxis
+		standAt(B, p.X - away.X * 3.5, p.Z - away.Z * 3.5, p, p.Y)
+		task.wait(0.6)
+		call(B, "face", { x = p.X, y = p.Y, z = p.Z })
+		task.wait(0.6)
+		local quick = call(B, "probe", { kind = "kithold", owner = A.UserId, seconds = 0.75, force = 0.6 }, 6)
+		task.wait(0.5)
+		local openedQuick = pa:GetAttribute("Opened") == true
+		check("w.kit.stealShortHoldRefused", not openedQuick, "B (not the owner) holds A's parcel for 0.75 s with its client's hold set to 0.6: " .. tostring(quick)
+			.. "; opened on the server=" .. tostring(openedQuick))
+		local before = bagStr(B)
+		local full = call(B, "probe", { kind = "kithold", owner = A.UserId, seconds = 2.75 }, 8)
+		task.wait(1.2)
+		local opened = pa:GetAttribute("Opened") == true
+		check("w.kit.stealByHold", opened, "B holds A's parcel 2.75 s with the engine's own prompt: " .. tostring(full) .. "; opened on the server=" .. tostring(opened))
+		if not opened then
+			pa:SetAttribute("TestOpenBy", B.UserId) -- (Studio switch: opens it as B, so the rest can be checked)
+			task.wait(1.2)
+			opened = pa:GetAttribute("Opened") == true
+			L("KIT A's parcel opened as B by the test switch: " .. tostring(opened))
+		end
+		local take = call(B, "prompt", { match = "take all", radius = 12 }, 8)
+		task.wait(1.2)
+		local want = W.macheteStars or 3
+		check("w.kit.steal", opened and slotWith(B, "machete", want) ~= nil and Inv.count(B, "arrow") == 8 and Inv.count(B, "apple") >= 1, string.format(
+			"B holds A's parcel 2.75 s: %s; opened=%s; B's Take all: %s; B's bag %s -> %s (A's Archer kit with its brought Machete %d stars)", tostring(full), tostring(opened),
+			tostring(take), before, bagStr(B), want))
+		shot("w_kit_stolen", 0.6)
+	else
+		check("w.kit.steal", false, "A's parcel never landed")
+	end
+	-- the second drop: A opens its own with the owner's short hold and takes all
+	Inv.clear(A)
+	Inv.clear(B)
+	local oldItems: { [Instance]: boolean } = {}
+	for _, m in ipairs(CollectionService:GetTagged("GroundItem")) do
+		oldItems[m] = true
+	end
+	local _, ra = parts(A)
+	if ra then
+		standAt(A, ra.Position.X, ra.Position.Z, nil)
+	end
+	task.wait(0.4)
+	at = dropNow("second")
+	local pa2 = parcelOf(A, true)
+	if not pa2 then
+		check("w.kit.ownerOpens", false, "A's second parcel did not land")
+		return
+	end
+	local p2 = pa2:GetPivot().Position
+	standAt(A, p2.X + 3.5, p2.Z, p2, p2.Y)
+	task.wait(0.6)
+	call(A, "face", { x = p2.X, y = p2.Y, z = p2.Z })
+	task.wait(0.6)
+	local own = call(A, "probe", { kind = "kithold", owner = A.UserId, seconds = 0.8 }, 6)
+	task.wait(1.2)
+	local opened = pa2:GetAttribute("Opened") == true
+	check("w.kit.ownerOpens", opened, "A holds its own parcel 0.8 s (its prompt's own hold): " .. tostring(own) .. "; opened=" .. tostring(opened))
+	if not opened then
+		pa2:SetAttribute("TestOpenBy", A.UserId)
+		task.wait(1.2)
+		L("KIT A's second parcel opened as A by the test switch: " .. tostring(pa2:GetAttribute("Opened")))
+	end
+	local take = call(A, "prompt", { match = "take all", radius = 12 }, 8)
+	task.wait(1.5)
+	local want = W.macheteStars or 3
+	local spilled = {}
+	for _, m in ipairs(CollectionService:GetTagged("GroundItem")) do
+		if not oldItems[m] and m:IsDescendantOf(workspace) and (m:GetPivot().Position - p2).Magnitude < 16 then
+			table.insert(spilled, tostring(m:GetAttribute("ItemId")) .. "x" .. tostring(m:GetAttribute("Count")) .. "*" .. tostring(m:GetAttribute("Stars")))
+		end
+	end
+	local macheteSlots = 0
+	for _, s in ipairs(Inv.getSnapshot(A).slots) do
+		if type(s) == "table" and s.id == "machete" then
+			macheteSlots += s.count
+		end
+	end
+	check("w.kit.takeAllBringsOwned", slotWith(A, "machete", want) ~= nil and macheteSlots == 1 and Inv.count(A, "short_bow") == 0 and Inv.count(A, "arrow") == 8
+		and Inv.count(A, "apple") == 1 and #spilled == 0, string.format("A's Take all: %s; A's bag: %s; left on the ground by the parcel: [%s] (want Machete %d stars once, Arrow x8, Apple; no Short Bow)",
+		tostring(take), bagStr(A), table.concat(spilled, ", "), want))
+	shot("w_kit_taken", 0.6)
+end
+
+local function starChecks()
+	setupDuel()
+	Inv.clear(A)
+	Inv.clear(B)
+	setHealth(A)
+	setHealth(B)
+	L(string.format("give A: machete1 %d machete5 %d twin_axe1 %d hatchet4 %d ring_blade1 %d", Inv.give(A, "machete", 1, 1), Inv.give(A, "machete", 1, 5),
+		Inv.give(A, "twin_axe", 1, 1), Inv.give(A, "hatchet", 1, 4), Inv.give(A, "ring_blade", 1, 1)))
+	task.wait(0.6)
+	L("bag A " .. bagStr(A))
+	local s1, s5 = slotWith(A, "machete", 1), slotWith(A, "machete", 5)
+	L(duel(A, B, 5))
+	local r1 = attack("machete 1 star@5", { { "select", s1 }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" } })
+	setHealth(B)
+	task.wait(0.8)
+	local r5 = attack("machete 5 stars@5", { { "select", s5 }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" } })
+	local e1, e5 = dmgOf("machete", 1), dmgOf("machete", 5)
+	check("w.stars.damage", math.abs(r1.dealt - e1) < 0.3 and math.abs(r5.dealt - e5) < 0.3, string.format(
+		"A's machete on B at 5 studs: 1 star B lost %.2f (expected %.2f), 5 stars B lost %.2f (expected %.2f); refusals %s", r1.dealt, e1, r5.dealt, e5, refusals()))
+	setHealth(B)
+	call(B, "face", A.Name)
+	task.wait(1.0)
+	local wB, wA = call(B, "probe", { kind = "weap" }) or {}, call(A, "probe", { kind = "weap" }) or {}
+	local heldB = tostring((wB.held or {})[A.Name])
+	L("WEAP B sees A: " .. heldB .. " | A's viewmodel: " .. table.concat(wA.vm or {}, " ; ") .. " | A's hotbar stars: " .. table.concat(wA.hotbar or {}, " ; ")
+		.. " | A's client bag " .. tostring(wA.inv))
+	check("w.stars.otherScreen", string.find(heldB, "item=machete", 1, true) ~= nil and string.find(heldB, "modelStars=5", 1, true) ~= nil
+		and string.find(heldB, "finish=Masterwork", 1, true) ~= nil, "B's client, A's held machete: " .. heldB)
+	local vm = table.concat(wA.vm or {}, " ; ")
+	check("w.stars.firstPerson", string.find(vm, "stars=5", 1, true) ~= nil and string.find(vm, "Masterwork", 1, true) ~= nil,
+		"A's own first-person item: " .. vm .. " | the steel colour B draws: " .. heldB)
+	check("w.stars.hotbar", #(wA.hotbar or {}) > 0, "A's screen, texts with a star: " .. table.concat(wA.hotbar or {}, " ; "))
+	shot("w_machete5", 0.8)
+
+	-- throws: the Hatchet at 4 stars keeps its stars where it lands and when it is picked up again
+	local function throwAt(tag: string, slot: number?, dist: number, expectBody: number, headMult: number): { [string]: any }
+		setHealth(B)
+		L(duel(A, B, dist))
+		local nF = #fires
+		local r = attack(tag, { { "select", slot }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.3 }, { "aimset", true }, { "wait", 0.4 }, { "face", B.Name },
+			{ "wait", 0.1 }, { "click" }, { "wait", 0.25 }, { "aimset", false }, { "wait", 1.2 } }, 1.0)
+		local f = fires[nF + 1]
+		local okDmg = math.abs(r.dealt - expectBody) < 0.6 or math.abs(r.dealt - math.min(expectBody * headMult, 95)) < 0.6
+		check("w.throw." .. tag, f ~= nil and okDmg, string.format("%s at %d studs: fired=%s (%s stars=%s); B lost %.2f (body %.2f, head %.2f); A got HitConfirm=%s", tag, dist,
+			tostring(f ~= nil), if f then f.item else "-", tostring(f and f.opts and f.opts.recoverStars), r.dealt, expectBody, math.min(expectBody * headMult, 95),
+			tostring(r.tConfirm ~= nil)))
+		return r
+	end
+	local hd = Stars.def("hatchet", 4)
+	throwAt("hatchet4", slotWith(A, "hatchet", 4), 12, hd.throwDamage, hd.throwHeadMultiplier or 1.6)
+	task.wait(0.8)
+	-- the 4-star one is in B's body now: its world copy carries the stars
+	local stuck = nil
+	for _, m in ipairs(CollectionService:GetTagged("WorldProjectile")) do
+		if m:GetAttribute("ItemId") == "hatchet" then
+			stuck = m
+		end
+	end
+	L("STUCK hatchet " .. tostring(stuck and stuck:GetFullName()) .. " Stars=" .. tostring(stuck and stuck:GetAttribute("Stars")) .. " Host=" .. tostring(stuck and stuck:GetAttribute("Host")))
+	-- a second Hatchet, 3 stars, thrown at the ground 9 studs to the side, then taken back with E
+	Inv.give(A, "hatchet", 1, 3)
+	task.wait(0.4)
+	local _, ra0 = parts(A)
+	local _, rb0 = parts(B)
+	local ground = if ra0 and rb0 then ra0.Position + (flat(rb0.Position - ra0.Position).Unit:Cross(Vector3.yAxis)) * 9 - Vector3.new(0, 3, 0) else Vector3.zero
+	local gp = { x = ground.X, y = ground.Y, z = ground.Z }
+	local nF = #fires
+	call(A, "seq", { { "select", slotWith(A, "hatchet", 3) }, { "wait", 0.8 }, { "face", gp }, { "wait", 0.3 }, { "aimset", true },
+		{ "wait", 0.4 }, { "face", gp }, { "click" }, { "wait", 0.25 }, { "aimset", false } }, 10)
+	task.wait(2.5)
+	L("THROWN at the ground: " .. tostring(fires[nF + 1] and fires[nF + 1].item) .. " stars " .. tostring(fires[nF + 1] and fires[nF + 1].opts and fires[nF + 1].opts.recoverStars))
+	local loose, wid = nil, nil
+	for _, m in ipairs(CollectionService:GetTagged("LooseProjectile")) do
+		if m:GetAttribute("ItemId") == "hatchet" then
+			loose, wid = m, m:GetAttribute("WorldId")
+		end
+	end
+	local seenOnB = call(B, "items", { radius = 400 }) or {}
+	L("B's client world items: " .. table.concat(seenOnB, " ; "))
+	if loose then
+		local p = if loose:IsA("Model") then loose:GetPivot().Position else (loose :: any).Position
+		standAt(A, p.X + 2, p.Z, p, p.Y)
+		task.wait(0.8)
+		call(A, "fire", { name = "TakeWorldItem", a = wid })
+		task.wait(1.0)
+	end
+	check("w.throw.hatchetKeepsStars", stuck ~= nil and stuck:GetAttribute("Stars") == 4 and loose ~= nil and slotWith(A, "hatchet", 3) ~= nil, string.format(
+		"the Hatchet 4 stars stuck in B: Stars attribute %s | the Hatchet 3 stars thrown at the ground: %s (Stars attribute %s, WorldId %s); A took it back with E: bag %s",
+		tostring(stuck and stuck:GetAttribute("Stars")), tostring(loose and loose:GetFullName()), tostring(loose and loose:GetAttribute("Stars")), tostring(wid), bagStr(A)))
+	local rb = Stars.def("ring_blade", 1)
+	throwAt("ringBlade1", slotWith(A, "ring_blade", 1), 25, rb.throwDamage, rb.throwHeadMultiplier or 1.6)
+	local ta = Stars.def("twin_axe", 1)
+	throwAt("twinAxe1", slotWith(A, "twin_axe", 1), 12, ta.throwDamage, 1.6)
+
+	-- the Twin-Bit Axe against padded armour (and a machete against the same armour)
+	Inv.give(A, "twin_axe", 1, 1)
+	Inv.give(B, "padded_armor", 1)
+	task.wait(0.5)
+	L(duel(A, B, 5))
+	call(B, "seq", { { "select", slotWith(B, "padded_armor") }, { "wait", 0.8 }, { "down" }, { "wait", 2.9 }, { "up" }, { "wait", 0.4 } }, 10)
+	task.wait(0.5)
+	local mult = Inv.getArmorMultiplier(B)
+	L("ARMOUR B wears " .. tostring(B:GetAttribute("Armor")) .. " multiplier " .. tostring(mult))
+	setHealth(B)
+	L(duel(A, B, 5))
+	local rA = attack("twin axe vs padded@5", { { "aimset", false }, { "select", slotWith(A, "twin_axe", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" }, { "wait", 0.4 } }, 1.0)
+	setHealth(B)
+	task.wait(1.0)
+	local rM = attack("machete vs padded@5", { { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" } })
+	local eAxe = dmgOf("twin_axe", 1) * (1 - (1 - mult) * 0.5)
+	local eMac = dmgOf("machete", 1) * mult
+	check("w.twinAxe.armour", B:GetAttribute("Armor") == "padded_armor" and math.abs(rA.dealt - eAxe) < 0.4 and math.abs(rM.dealt - eMac) < 0.4, string.format(
+		"B wears %s (x%.2f): Twin-Bit Axe B lost %.2f (expected %.2f, armour stops half as much), machete B lost %.2f (expected %.2f)", tostring(B:GetAttribute("Armor")),
+		mult, rA.dealt, eAxe, rM.dealt, eMac))
+	setHealth(B)
+end
+
+-- the arc of a fired projectile against a point: the closest it passes (studs)
+local function arcMiss(f: any, point: Vector3): number
+	local best = math.huge
+	for i = 0, 1500 do
+		local t = i * 0.002
+		local p = f.origin + f.velocity * t + Vector3.new(0, -0.5 * f.gravity * t * t, 0)
+		best = math.min(best, (p - point).Magnitude)
+	end
+	return best
+end
+
+local function bowChecks()
+	setupDuel()
+	Inv.clear(A)
+	Inv.clear(B)
+	Inv.give(A, "bow", 1, 1)
+	Inv.give(A, "arrow", 24)
+	Inv.give(A, "bow", 1, 5)
+	task.wait(0.5)
+	local perp = Vector3.new(-duelDir.Z, 0, duelDir.X)
+	local up = Vector3.new(0, 1.5, 0)
+	local bow1 = slotWith(A, "bow", 1)
+	for _, dd in ipairs({ -55, 55, 100, 150 }) do
+		local still = dd < 0
+		local d = math.abs(dd)
+		setHealth(B)
+		L(duel(A, B, d))
+		call(A, "seq", { { "aimset", false }, { "select", bow1 }, { "wait", 0.6 } }, 4)
+		local _, rb = parts(B)
+		if rb and not still then
+			call(B, "move", { seconds = 3.4, face = rb.Position + perp * 80 + up })
+		end
+		task.wait(0.7)
+		local nF, mA = #fires, mark(A)
+		local r = attack("bow@" .. d .. " on B walking across", { { "track", B.Name, 3.0 }, { "wait", 0.2 }, { "down" }, { "wait", 1.0 }, { "aimpt" }, { "up" }, { "wait", 0.4 } }, 1.4)
+		call(B, "move", {})
+		local f = fires[nF + 1]
+		local aim = clientFind(A, "AIMPT ", mA)
+		local x, y, z = string.match(aim or "", "AIMPT ([%-%d%.]+),([%-%d%.]+),([%-%d%.]+)")
+		local point = if x then Vector3.new(tonumber(x) :: number, tonumber(y) :: number, tonumber(z) :: number) else nil
+		local miss = if f and point then arcMiss(f, point) else -1
+		local onB = aim and string.find(aim, "on=Workspace." .. B.Name, 1, true) ~= nil
+		local dist = if f and point then (point - f.origin).Magnitude else -1
+		local id = "w.bow.crosshair@" .. d .. (if still then "Standing" else "")
+		local detail = string.format("B " .. (if still then "standing" else "walking across A's view") .. " %d studs away, A standing and tracking: the crosshair was on %s (%.1f studs from the arrow's start) at the release; the arrow's arc passes %.2f studs from that point; B lost %.1f; arrow speed %.0f",
+			d, tostring(aim and string.match(aim, "on=(%S+)")), dist, miss, r.dealt, if f then f.velocity.Magnitude else -1)
+		if d <= 60 then
+			-- (moving: the camera follows B every frame, so the logged point and the release are up to one frame apart)
+			check(id, f ~= nil and point ~= nil and miss >= 0 and miss < (if still then 0.15 else 0.5), detail)
+		else
+			check(id, nil, detail .. " (beyond the on-target range the arrow drops below the crosshair by design)")
+		end
+		task.wait(0.4)
+	end
+	-- a headshot with the 5-star bow: capped at 90, no red, no words
+	setHealth(B)
+	L(duel(A, B, 30))
+	call(B, "move", {})
+	local mB, mAh = mark(B), mark(A)
+	local r = attack("bow 5 stars head@30", { { "select", slotWith(A, "bow", 5) }, { "wait", 0.8 }, { "track", B.Name .. ":Head", 2.4 }, { "wait", 0.3 }, { "down" },
+		{ "wait", 1.2 }, { "up" }, { "wait", 0.5 } }, 1.4)
+	local bd = Stars.def("bow", 5)
+	task.wait(1.0)
+	local guiB = call(B, "gui") or {}
+	check("w.bow.headshotCap", math.abs(r.dealt - 90) < 0.6, string.format("5-star Recurve (full draw body %.1f, head x2 = %.1f) at B's head from 30 studs: B lost %.1f (cap 90); damage line on B: %s; A's sounds: %s",
+		bd.damageMax, bd.damageMax * 2, r.dealt, tostring(r.dmg), "A: " .. sfxSince(A, mAh) .. " | B: " .. sfxSince(B, mB)))
+	redCheck("w.bow.headshotNoRed", B, mB)
+	L("GUI B after the headshot: " .. string.sub(table.concat(guiB, " ; "), 1, 1200))
+	setHealth(B)
+end
+
+local function rawClaimChecks()
+	Inv.clear(A)
+	Inv.give(A, "sword", 1, 1)
+	task.wait(0.4)
+	call(A, "seq", { { "select", slotWith(A, "sword") }, { "wait", 0.8 } }, 4)
+	for _, d in ipairs({ 11, 11, 12 }) do
+		setHealth(B)
+		L(duel(A, B, d))
+		task.wait(0.6)
+		local hA = A.Character and A.Character:FindFirstChild("Head")
+		local bestPart, best = "?", math.huge
+		if hA and hA:IsA("BasePart") and B.Character then
+			for _, part in ipairs(B.Character:GetChildren()) do
+				if part:IsA("BasePart") and part.CanQuery then
+					local half = part.Size * 0.5
+					local rel = part.CFrame:PointToObjectSpace(hA.Position)
+					local c = Vector3.new(math.clamp(rel.X, -half.X, half.X), math.clamp(rel.Y, -half.Y, half.Y), math.clamp(rel.Z, -half.Z, half.Z))
+					if (rel - c).Magnitude < best then
+						best, bestPart = (rel - c).Magnitude, part.Name
+					end
+				end
+			end
+		end
+		local range = (Stars.def("sword", 1) :: any).range
+		L(string.format("BODYDIST at %.1f: from A's head to B's body %.2f (%s); the server's front for a still pair %.2f; B holds %s", d, best, bestPart,
+			range + Config.Combat.MeleeHitRadius * 0.85 - 0.5 + 0.15, tostring(B.Character and B.Character:GetAttribute("EquippedItem"))))
+		local honest = attack("sword honest@" .. d, { { "face", B.Name }, { "wait", 0.4 }, { "click" }, { "wait", 0.7 } })
+		L(string.format("HONEST sword at %.1f: B lost %.1f; A's own screen: %s", d, honest.dealt, tostring(honest.strike)))
+		setHealth(B)
+		task.wait(0.4)
+		local before = refusals()
+		local r = attack("sword raw claim@" .. d, { { "face", B.Name }, { "wait", 0.3 }, { "remote", "MeleeSwing", "raw", B.Name } })
+		-- a claim is a cheat only beyond what an honest swing reaches: at the same spot the honest click came first
+		check("w.melee.rawClaim@" .. d, r.dealt < 0.5 or honest.dealt > 0.5, string.format(
+			"a modified client claiming a Longsword (1 star) hit from %d studs on a player standing still: B lost %.1f; an honest click from the same spot took %.1f (A's screen %s); A's head to B's nearest body part %.2f (%s), the server's front %.2f; refusals before [%s] after [%s]",
+			d, r.dealt, honest.dealt, tostring(honest.strike and string.match(honest.strike, "hit=%S+") or "showed a miss"), best, bestPart,
+			range + Config.Combat.MeleeHitRadius * 0.85 - 0.5 + 0.15, before, refusals()))
+	end
+	setHealth(B)
+end
+
+local function hotbarChecks()
+	Inv.clear(A)
+	Inv.clear(B)
+	for _, p in ipairs({ A, B }) do
+		Inv.give(p, "apple", 5)
+		Inv.give(p, "bandage", 4)
+		Inv.give(p, "berries", 8)
+		Inv.give(p, "knife", 1, 2)
+	end
+	L(duel(A, B, 6))
+	task.wait(0.8)
+	-- both at once: drop one apple, equip, drop a berry, take whatever is in reach, again and again
+	local done = 0
+	for _, p in ipairs({ A, B }) do
+		task.spawn(function()
+			for i = 1, 5 do
+				call(p, "fire", { name = "DropSlot", a = 1, b = 1 }, 2)
+				call(p, "fire", { name = "EquipSlot", a = (i % 4) + 1 }, 2)
+				call(p, "fire", { name = "DropSlot", a = 3, b = 1 }, 2)
+				task.wait(0.12)
+				call(p, "prompt", { radius = 9 }, 3)
+			end
+			done += 1
+		end)
+	end
+	waitFor(function()
+		return done >= 2
+	end, 40)
+	task.wait(1.5)
+	local ok, detail = true, {}
+	for _, p in ipairs({ A, B }) do
+		local w = call(p, "probe", { kind = "weap" }) or {}
+		local server = bagStr(p)
+		ok = ok and w.inv == server
+		table.insert(detail, string.format("%s server [%s] client [%s]", p.Name, server, tostring(w.inv)))
+	end
+	check("w.hotbar.syncUnderLoad", ok, table.concat(detail, " | "))
+end
+
+-- three players: the machete's second contender in the arc (60%), and the third player's own Gold and Armoury untouched
+local function sweepChecks()
+	if not P3 then
+		return
+	end
+	setupDuel()
+	Inv.clear(A)
+	Inv.clear(B)
+	Inv.clear(P3)
+	Inv.give(A, "machete", 1, 1)
+	setHealth(B)
+	setHealth(P3)
+	L(duel(A, B, 4.5))
+	local _, ra = parts(A)
+	local _, rb = parts(B)
+	if ra and rb then
+		-- P3 beside B, 2.5 studs to its side: inside the 55-degree arc at about 5 studs
+		local side = Vector3.new(-duelDir.Z, 0, duelDir.X)
+		local q = rb.Position + side * 2.5
+		standAt(P3, q.X, q.Z, ra.Position, rb.Position.Y)
+	end
+	task.wait(0.8)
+	local h3 = health(P3)
+	local r = attack("machete with two in the arc", { { "aimset", false }, { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 },
+		{ "click" }, { "wait", 0.5 } })
+	local d3 = h3 - health(P3)
+	local def = Stars.def("machete", 1)
+	check("w.machete.secondTarget", math.abs(r.dealt - def.damage) < 0.3 and math.abs(d3 - def.damage * (def.sweepShare or 0.6)) < 0.3, string.format(
+		"A's machete at B (4.5 studs) with %s beside B: B lost %.2f (expected %.2f), %s lost %.2f (expected %.2f, the second in the arc)", P3.Name, r.dealt, def.damage,
+		P3.Name, d3, def.damage * (def.sweepShare or 0.6)))
+	setHealth(B)
+	setHealth(P3)
+	local e3 = econOf(P3)
+	check("w.thirdPlayer.untouched", (e3.Draws or 0) == 0 and armStr(e3.Armoury) == "" and goldOf(P3) == (W.gold3 or goldOf(P3)), string.format(
+		"%s (no draws of its own): draws %s, armoury '%s', Gold %d (at the start of the round %s)", P3.Name, tostring(e3.Draws), armStr(e3.Armoury), goldOf(P3),
+		tostring(W.gold3)))
+end
+
+local function batchW()
+	check("w.kit.notAtHorn", Inv.count(A, "machete") == 0 and Inv.count(A, "short_bow") == 0 and Inv.count(A, "arrow") == 0 and Inv.count(B, "knife") == 0,
+		"Kits.Delivery=" .. tostring(KitSvc and KitSvc.deliveryMode()) .. ": nothing of the kit in the bag at the horn: A " .. bagStr(A) .. " | B " .. bagStr(B))
+	-- they have to move to take part (the round's Gold): a walk each
+	call(A, "move", { seconds = 3 })
+	call(B, "move", { seconds = 3 })
+	task.wait(3.2)
+	local steps = {
+		{ "kits", kitChecks },
+		{ "stars", starChecks },
+		{ "sweep", sweepChecks },
+		{ "bow", bowChecks },
+		{ "raw", rawClaimChecks },
+		{ "hotbar", hotbarChecks },
+	}
+	local only = if type(ARGS.wsteps) == "string" then "," .. ARGS.wsteps .. "," else nil
+	for _, s in ipairs(steps) do
+		if only and not string.find(only, "," .. s[1] .. ",", 1, true) then
+			continue
+		end
+		local ok, err = pcall(s[2])
+		if not ok then
+			L("DRIVER ERROR in " .. s[1] .. ": " .. string.gsub(tostring(err), "\n", " | "))
+		end
+	end
+	if only and not string.find(only, ",round,", 1, true) then
+		return
+	end
+	check("w.hitCap", maxDealt.n <= 95, string.format("the biggest single hit in the test: %.2f (%s); cap 95", maxDealt.n, maxDealt.what))
+	-- the round's Gold: A defeats B
+	Kits.Settings.Delivery = "Start" -- round two: the one-line switch
+	Inv.clear(A)
+	Inv.give(A, "sword", 1, 1)
+	local mA, mB = killB("w")
+	if not waitPhase("Ending", 8) then
+		check("w.round.ended", false, "phase " .. phase())
+	end
+	task.wait(3.0)
+	local gA = clientFind(A, "REMOTE Rewards round", mA)
+	local gB = clientFind(B, "REMOTE Rewards round", mB)
+	local before = W.goldBeforeRound or {}
+	check("w.round.gold", gA ~= nil and gB ~= nil and string.find(gA, "firstWin=", 1, true) ~= nil and string.find(gA, "firstRound=", 1, true) ~= nil
+		and string.find(gB, "firstRound=", 1, true) ~= nil and string.find(gB, "firstWin=", 1, true) == nil and goldOf(A) > (before[A] or 0) and goldOf(B) > (before[B] or 0),
+		string.format("A (won, 1 defeat) told: %s | B (2nd) told: %s | Gold A %s -> %d, B %s -> %d", tostring(gA and string.sub(gA, 1, 500)), tostring(gB and string.sub(gB, 1, 500)),
+			tostring(before[A]), goldOf(A), tostring(before[B]), goldOf(B)))
+	backToLobby("w", { A, B })
+	task.wait(2.0)
+	local yA, yB = call(A, "probe", { kind = "yourgold" }) or {}, call(B, "probe", { kind = "yourgold" }) or {}
+	local goldA, goldB = num(gA, "gold"), num(gB, "gold")
+	local okBoard = #yA > 0 and #yB > 0 and goldA ~= nil and goldB ~= nil and string.find(table.concat(yA, " "), "+" .. tostring(goldA), 1, true) ~= nil
+		and string.find(table.concat(yB, " "), "+" .. tostring(goldB), 1, true) ~= nil
+	check("w.round.boardLine", okBoard, string.format("A's board: [%s] (A got %s) | B's board: [%s] (B got %s)", table.concat(yA, " ; "), tostring(goldA), table.concat(yB, " ; "),
+		tostring(goldB)))
+	shot("w_board_gold", 0.8)
+	local dA, dB = (econOf(A).Daily or {}), (econOf(B).Daily or {})
+	local gBefore = goldOf(B)
+	Data.testRejoin(B)
+	waitFor(function()
+		return Data.isLoaded(B)
+	end, 10)
+	check("w.round.dailySaved", dA.firstRound == true and dA.firstWin == true and dB.firstRound == true and dB.firstWin ~= true and goldOf(B) == gBefore, string.format(
+		"A daily %s | B daily %s | B rejoined: Gold %d -> %d", fmt(dA), fmt(dB), gBefore, goldOf(B)))
+	-- round two with Kits.Delivery = "Start": the kit and the brought weapon in the bag at the horn
+	if roundStartChecks("round2") then
+		task.wait(1.0)
+		local want = W.macheteStars or 3
+		check("w.kit.deliveryStart", slotWith(A, "machete", want) ~= nil and Inv.count(A, "arrow") == 8 and Inv.count(A, "apple") >= 1 and Inv.count(A, "short_bow") == 0
+			and slotWith(B, "knife", 1) ~= nil and Inv.count(B, "apple") >= 3, string.format("Kits.Delivery=%s at the horn: A %s | B %s", tostring(KitSvc and KitSvc.deliveryMode()),
+			bagStr(A), bagStr(B)))
+		local wA = call(A, "probe", { kind = "weap" }) or {}
+		L("round2 A's client bag " .. tostring(wA.inv))
+	end
+end
+if ARGS.batch == "W" then
+	lobbyExtra = wLobby
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
@@ -2770,6 +3611,8 @@ local function run()
 		batchD()
 	elseif batch == "H" then
 		batchH()
+	elseif batch == "W" then
+		batchW()
 	end
 end
 
