@@ -526,7 +526,13 @@ local function enterActive(t: number)
 	announce({ style = "Countdown", text = "GO", duration = 1.2 })
 	setPhase("Active", RoundCfg.MaxRoundTime / timeScale())
 	local ps = playerService()
+	-- the full launch shot has played to its end: these contenders have seen it this session (launchCut). Marked here,
+	-- at the horn, so a Countdown that was cancelled part-way through the shot leaves them unmarked.
+	local sawFullCut = GameState:GetAttribute("LaunchCut") == "Full"
 	for player in pairs(contenders) do
+		if sawFullCut and player.Parent == Players then
+			player:SetAttribute("Launched", true)
+		end
 		if player.Parent == Players and ps.isAlive(player) then
 			ps.setFrozen(player, false)
 			if not practice then -- new-player help counts real rounds only (QW1)
@@ -723,11 +729,6 @@ local function enterCountdown()
 	local countdownTime, riseAt = RoundCfg.CountdownTime, RoundCfg.LaunchDelay or 0.8
 	if cut ~= "" then
 		countdownTime, riseAt = launchTiming(cut)
-		if cut == "Full" then
-			for player in pairs(contenders) do
-				player:SetAttribute("Launched", true) -- has seen the full shot this session
-			end
-		end
 	end
 	GameState:SetAttribute("LaunchCut", cut)
 	GameState:SetAttribute("LaunchCallAt", callAt)

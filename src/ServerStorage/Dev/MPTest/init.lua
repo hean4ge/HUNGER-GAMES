@@ -13,12 +13,17 @@
 	  batch     "A" combat (bow, thrown knife, weapon switches) | "B" sword reach, poses, loot, eating, the border,
 	            a kill, the result, the Roll Call, round two | "B2" poses, eating, loot | "C" three clients: a kill,
 	            spectating, the dusk Roll Call, a contender leaves | "D" loot, a client joins mid-round, a contender
-	            leaves, the next round takes the late joiner | "E" a contender leaves during the Countdown
+	            leaves, the next round takes the late joiner | "E" a contender leaves during the Countdown | "G" the fill
+	            rule: a third client joins during a 45-second lobby countdown, which starts again (fill = true)
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
 	  timeScale Config.Round.StudioTimeScale (batch "C" uses 6: dusk comes 57 s after the horn)
 	  failsafe  seconds after which the test ends itself whatever happens (default 330)
+	  respawn   Config.Round.RespawnDelay on the test server (default 4, the live value; Studio's own is 2)
+	  quality   an Enum.QualityLevel name ("Level21"): asks each test window for that render quality (an unfocused Studio
+	            window draws at its lowest, without small far parts); handed back before the test ends
+	  plus      false leaves the PLUS member mark checks out (they use the Studio switch Workspace.PlusTestMember)
 	  lock      the QA_Lock label to take (default "mp-test")
 
 	Reading the result: every line starts with "[MPT]"; checks are "[MPT] nnnn t [CHECK] <id> PASS|FAIL|NOTE ...".
@@ -50,6 +55,10 @@ function MPTest.start(args: { [string]: any }?): string
 		a.cut = a.cut or "Short"
 	elseif a.batch == "D" or a.batch == "B2" then
 		a.cut = a.cut or "Short"
+	elseif a.batch == "G" then
+		a.cut = a.cut or "Short"
+		a.fill = true
+		a.intermission = a.intermission or 45
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil

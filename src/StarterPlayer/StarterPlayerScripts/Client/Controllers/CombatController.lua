@@ -443,8 +443,8 @@ end
 type Prediction = { character: boolean, position: Vector3, normal: Vector3?, material: Enum.Material?, target: Instance? }
 
 -- What this swing touches, as the server will check it (CombatService.meleeTrace). First a thin ray along the look:
--- whoever is under the crosshair, out to the ball's front. Only when the crosshair is on nobody, the forgiving ball
--- (the first body it touches), then a point-blank overlap check. (The ball alone took the first body it touched: a
+-- whoever is under the crosshair, out to the ball's front. Only when the crosshair is on nobody (or on a body behind
+-- cover), the forgiving ball (the first body it touches), then a point-blank overlap check. (The ball alone took the first body it touched: a
 -- bystander's arm beside the line, or the next practice dummy's hand, instead of the one aimed at.) Only living bodies
 -- count: one that just fell neither takes the swing nor blocks it.
 local function predictMelee(def: any, cf: CFrame): Prediction?
@@ -474,7 +474,18 @@ local function predictMelee(def: any, cf: CFrame): Prediction?
 				candidate, body = aimed.Position, model
 			end
 		end
-		local swept = if candidate then nil else workspace:Spherecast(origin, radius, direction * reach, params)
+		if candidate then
+			-- the body under the crosshair, if the way to that point is clear; if it is not (the ray above passes
+			-- through cover), the ball below still gets its turn (CombatService.meleeTrace does the same)
+			local offset = candidate - origin
+			local distance = offset.Magnitude
+			local blocked = if distance > 0.5 then workspace:Raycast(origin, offset, world) else nil
+			if blocked == nil or blocked.Distance >= distance - 0.75 then
+				return { character = true, position = candidate, target = body }
+			end
+			candidate, body = nil, nil
+		end
+		local swept = workspace:Spherecast(origin, radius, direction * reach, params)
 		if swept then
 			local humanoid, model = humanoidOf(swept.Instance, targets)
 			if humanoid and humanoid.Health > 0 then

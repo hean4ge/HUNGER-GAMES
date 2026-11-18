@@ -16,7 +16,8 @@
 	(47 contenders run to the horn together): only the nearest LOD.ikMax other characters get foot IK and the air pose
 	(three rays each), only the nearest LOD.poseMax get the twist and lean, and one behind the camera (further than
 	LOD.behindNear) counts as far; the rest keep only what must be seen at any distance, stances (crouch, slide,
-	climb) and swings, and cost nothing while they do neither. Ranked every LOD.rank seconds; phones and tablets use
+	climb) and swings, and cost nothing while they do neither. Ranked every LOD.rank seconds (the living only; one
+	that has foot IK keeps it two places past the cap, so two at the edge don't swap it); phones and tablets use
 	the smaller LOD_TOUCH numbers. CharacterVisuals._poseStats has the measured cost.
 	  1. Stance poses: Crouch (bent hips and knees that exactly absorb the hitbox drop, slight forward lean), Slide
 	     (lean back, leading leg forward, trailing leg folded) and Climb (arms up, diagonal reach cycle). Remote
@@ -52,6 +53,21 @@
 	     the torso leads the arm, the neck keeps the head on the target and the other arm counters. 0.36 / 0.42 / 0.5 s by
 	     the weapon's weight (fists 0.4), and every swing a little different (size, path, length). A swing that cuts into
 	     another blends from where the body was. Config.Combat.ThirdPersonSwings = false turns it off.
+	  8. The bow. The server welds it into the LEFT hand (InventoryService), as in first person. While a character holds
+	     one (the replicated character attribute EquippedItem) the bow arm is raised with the forearm level, the bow
+	     upright in front of the body and clear of the ground, a little higher while crouched (the Animator's arm swing is
+	     replaced, by weight). A draw
+	     ("Draw" on the CombatAction remote for other players, CombatController.action for your own body) lifts the bow
+	     arm straight out at the target and turns the chest side-on (not on your own first-person body), while the right
+	     hand reaches for the string and pulls it back to the cheek over the bow's own draw time: a two-bone solve onto
+	     a point that runs from the bow's Nock to an anchor beside the jaw, the elbow kept out and back. On other
+	     players the straight string mesh is swapped for two Beams through the pulling hand while it is drawn. "Release":
+	     the string snaps back at once, the hand stays at the cheek a moment and both arms settle; a let-down (cancelled)
+	     rides the string forward again. It shows at any distance inside LOD.poseRange, like stances and swings.
+	Defeat (the game's age rating: clearly unrealistic). A body at zero health stays in one piece (the server turns
+	BreakJointsOnDeath off), topples over (your own client tips your own body back), and DEFEAT_FALL seconds later
+	fades out over DEFEAT_FADE on this client (LocalTransparencyModifier); the server then removes it for everyone
+	(CombatService). Roblox's default "Died" voice sound is muted on every character: there is no cry.
 	IK reach, pelvis drop and the landing dip scale with each rig's leg length (any avatar size).
 	First person (local body only): the eye is placed from the root, not from the animated head, so in the air under a
 	downward view the own body keeps the jump clip's root lift and forward trunk pitch at most at the bind pose (the clip
@@ -73,6 +89,9 @@
 	  CharacterVisuals._lod   test hook: the caps (LOD), to compare costs live in a playtest.
 	  CharacterVisuals._swingOf(character) -> { shape, style, variant, u, duration }?   test hook: the swing it plays.
 	  CharacterVisuals._swingShapes   test hook: the shape table (radians), to try new angles live in a playtest.
+	  CharacterVisuals._bow   test hook: the bow pose's numbers (radians, studs), to tune live in a playtest.
+	  CharacterVisuals._bowEvent(character, "Draw" | "Release", cancelled?)   test hook: a draw on any tracked character.
+	  CharacterVisuals._bowOf(character) -> { bow, hold, aim, arm, pull, drawing, string }?   test hook: its bow state.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -82,6 +101,7 @@ local UserInputService = game:GetService("UserInputService")
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local Net = require(Shared:WaitForChild("Net"))
 
 local CharacterVisuals = {}
@@ -243,6 +263,30 @@ local SWING_ANGLE_JITTER = 4 -- the striking arm's path (+-4 degrees up or down 
 local SWING_TIME_JITTER = 0.05 -- and its length (+-5 %)
 local SWING_LEAD = 0.04 -- the torso leads the arm by this share of the swing
 local SWING_FADE = 0.07 -- seconds: a swing that cuts into another blends from where the body was
+-- The bow (item 8 above). Angles in radians: `raise` swings the hanging arm forward (pi / 2 = level), `elbow` bends it,
+-- `yaw` turns the raised arm toward the body's left (+) or right (-).
+local BOW = {
+	holdRaise = math.rad(34), -- held: the upper arm a third of the way up,
+	holdElbow = math.rad(56), -- the forearm level (raise + elbow = 90 degrees keeps the bow upright),
+	holdYaw = math.rad(-14), -- the hand a little in front of the body
+	crouchRaise = math.rad(24), -- crouched: the bow arm that much higher, so the lower limb stays off the ground
+	aimRaise = math.rad(86), -- drawn: the bow arm straight out at shoulder height
+	aimElbow = math.rad(6),
+	turn = math.rad(-36), -- the chest turns side-on (to the right), the neck keeps the head on the target
+	anchor = Vector3.new(0.48, -0.5, 0.06), -- the string hand's wrist at full draw, in the head's frame (x rig scale)
+	reach = 0.22, -- where the pull starts, as a share of the way from the bow's Nock to the anchor (the wrist sits
+	-- a hand's length behind the fingers on the string)
+	pole = Vector3.new(0.75, 0.3, 0.6), -- the string arm's elbow points this way in the root's frame: out, up, back
+	follow = 0.35, -- seconds the pose is held after the arrow leaves
+	limit = 90, -- seconds: a draw that never ended (its Release never reached this client) is let down
+	stringWidth = 0.035,
+	stringColor = Color3.fromRGB(160, 132, 92),
+}
+-- Defeat (see the header): a body is seen falling for DEFEAT_FALL seconds, then fades over DEFEAT_FADE. CombatService
+-- has the same two numbers and removes the body when they have passed.
+local DEFEAT_FALL = 1.8
+local DEFEAT_FADE = 1.0
+local DEFEAT_TIP = 2.6 -- radians/s: your own client tips your own body over backward as it falls
 
 local BODY_PARTS = {
 	UpperTorso = true, LowerTorso = true, LeftUpperLeg = true, LeftLowerLeg = true, LeftFoot = true,
@@ -292,7 +336,7 @@ local DEFAULT_SLIDE_POSE = {
 	trailAnkle = SLIDE_TRAIL_ANKLE,
 }
 
-local poseStats = { ms = 0, last = 0, peak = 0, entries = 0, posed = 0, ik = 0 }
+local poseStats = { ms = 0, last = 0, peak = 0, entries = 0, posed = 0, ik = 0, slideSolves = 0 }
 local ikCount = 0 -- characters given foot IK this frame
 
 local function movement()
@@ -333,6 +377,8 @@ function CharacterVisuals.headLean(rig, crouchW: number, slideW: number): (numbe
 end
 
 local LEAD_FOOT_WORLD = math.rad(50) -- the leading foot slides heel-first, toes up
+local slidePoseCache: { [string]: any } = {} -- solved slide poses by the leg's measures (solveSlidePose); never changed once stored
+local slidePoseCount = 0
 
 -- Slide leg angles for this rig (world swing angles), solved with forward kinematics so that from the lowered
 -- slide hip line the leading heel and the folded leg rest on the ground instead of clipping into it.
@@ -351,6 +397,30 @@ local function solveSlidePose(rig)
 	if not (hipJ and kneeJ and ankleJ and foot and foot:IsA("BasePart")) then
 		return pose
 	end
+	-- The solve below is about 1,900 leg poses (0.9 ms on a desktop, several on a phone) and runs in the frame a
+	-- character first slides: at the horn many do so within seconds. Its result depends only on the leg's measures,
+	-- so it is kept by those: avatars of one build share a solve, and so does the same contender round after round.
+	local key: string? = nil
+	pcall(function()
+		local shin = kneeJ.Parent
+		local n = { rig.hip, rig.slideDrop, rig.shin, foot.Size.Y, foot.Size.Z }
+		if shin and shin:IsA("BasePart") then
+			table.insert(n, shin.Size.Y)
+			table.insert(n, shin.Size.Z)
+		end
+		for _, cf in ipairs({ hipJ.C1, kneeJ.C0, kneeJ.C1, ankleJ.C0, ankleJ.C1 }) do
+			table.move({ cf:GetComponents() }, 1, 12, #n + 1, n)
+		end
+		for i, v in ipairs(n) do
+			n[i] = string.format("%.3f", v)
+		end
+		key = table.concat(n, " ")
+	end)
+	local known = if key then slidePoseCache[key] else nil
+	if known then
+		return known
+	end
+	poseStats.slideSolves += 1
 	local ok = pcall(function()
 		local hipLine = rig.hip - rig.slideDrop -- the hip joints sit on the root's pitch axis, at the hip line
 		local fs = foot.Size
@@ -408,6 +478,13 @@ local function solveSlidePose(rig)
 	if not ok then
 		pose.leadThigh, pose.leadAnkle = math.rad(72), SLIDE_LEAD_ANKLE
 		pose.trailThigh, pose.trailShin, pose.trailAnkle = SLIDE_TRAIL_THIGH, SLIDE_TRAIL_SHIN, SLIDE_TRAIL_ANKLE
+	elseif key then
+		if slidePoseCount >= 64 then
+			table.clear(slidePoseCache) -- (far more builds than one server holds: start again rather than grow)
+			slidePoseCount = 0
+		end
+		slidePoseCache[key] = pose
+		slidePoseCount += 1
 	end
 	return pose
 end
@@ -427,6 +504,96 @@ local function legInfo(j, side: string)
 		ankleName = side .. "Ankle", soleDrop = soleDrop }
 end
 
+-- The bow's drawn string (item 8) ---------------------------------------------------------------------------------------
+
+-- Back to the bow's own straight string mesh.
+local function removeBowString(entry)
+	local drawn = entry.bowString
+	if not drawn then
+		return
+	end
+	entry.bowString = nil
+	for _, inst in ipairs(drawn.made) do
+		inst:Destroy()
+	end
+	for _, part in ipairs(drawn.hidden) do
+		if part.Parent then
+			part.LocalTransparencyModifier = 0
+		end
+	end
+end
+
+-- The string drawn by the right hand: the world bow's string is a straight mesh, so while it is drawn it is hidden
+-- (on this client) and two Beams run from the limb tips to the pulling hand. Everything made here is local.
+local function showBowString(entry)
+	if entry.bowString then
+		return
+	end
+	local character = entry.character
+	local model = character:FindFirstChild("EquippedModel")
+	local handle = model and model:FindFirstChild("Handle")
+	local top = handle and handle:FindFirstChild("StringTop")
+	local bottom = handle and handle:FindFirstChild("StringBottom")
+	local hand = character:FindFirstChild("RightHand")
+	if not (model and handle and top and bottom and hand and top:IsA("Attachment") and bottom:IsA("Attachment") and hand:IsA("BasePart")) then
+		return
+	end
+	local grip = hand:FindFirstChild("RightGripAttachment")
+	local pull = Instance.new("Attachment")
+	pull.Name = "LS_StringPull"
+	pull.Position = if grip and grip:IsA("Attachment") then grip.Position else Vector3.new(0, -hand.Size.Y / 2, 0)
+	pull.Parent = hand
+	local drawn = { made = { pull }, hidden = {} }
+	for _, tip in ipairs({ top, bottom }) do
+		local beam = Instance.new("Beam")
+		beam.Name = "LS_String"
+		beam.Attachment0 = tip
+		beam.Attachment1 = pull
+		beam.Width0 = BOW.stringWidth
+		beam.Width1 = BOW.stringWidth
+		beam.FaceCamera = true
+		beam.Segments = 1
+		beam.LightInfluence = 1
+		beam.Color = ColorSequence.new(BOW.stringColor)
+		beam.Transparency = NumberSequence.new(0)
+		beam.Parent = handle
+		table.insert(drawn.made, beam)
+	end
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("BasePart") and d:GetAttribute("String") then
+			d.LocalTransparencyModifier = 1
+			table.insert(drawn.hidden, d)
+		end
+	end
+	entry.bowString = drawn
+end
+
+-- A draw starts ("Draw") or ends ("Release": the arrow left, or with `cancelled` the string was let down).
+local function bowEvent(entry, action: string, cancelled: boolean?)
+	if not entry then
+		return
+	end
+	local now = os.clock()
+	if action == "Draw" then
+		entry.bowT0 = now
+		entry.bowLoosedAt = nil
+	elseif action == "Release" then
+		if entry.bowT0 and not cancelled then
+			entry.bowLoosedAt = now
+		end
+		entry.bowT0 = nil
+		removeBowString(entry) -- (the string is straight again at once)
+	end
+end
+
+-- Roblox's default character sounds give every character a voice sound, "Died", played at zero health: muted (the
+-- game has no cry of pain; see the header). The sounds are made on this client, so this is local.
+local function muteDefeatSound(inst: Instance)
+	if inst.Name == "Died" and inst:IsA("Sound") then
+		inst.Volume = 0
+	end
+end
+
 -- Entries ---------------------------------------------------------------------------------------------------------------
 
 local function untrack(character: Model)
@@ -436,6 +603,7 @@ local function untrack(character: Model)
 	end
 	entries[character] = nil
 	filterDirty = true
+	removeBowString(entry)
 	for _, conn in ipairs(entry.conns) do
 		conn:Disconnect()
 	end
@@ -484,6 +652,16 @@ local function track(character: Model, isLocal: boolean)
 		floorAt = -math.huge,
 		lift = 0, -- 0..1 rising off the ground (releases the landing dip)
 		nearHidden = {}, -- first-person body parts hidden because they are at the camera
+		bow = false, -- a bow is in hand (the character attribute EquippedItem)
+		bowDrawTime = 0.9, -- that bow's draw time (seconds)
+		bowT0 = nil, -- os.clock() when the draw in progress began
+		bowLoosedAt = nil, -- os.clock() when the last arrow left
+		bowHold = 0, -- 0..1 the bow arm's hold pose
+		bowAim = 0, -- 0..1 the bow arm raised at the target
+		bowArm = 0, -- 0..1 the string arm on the string
+		bowPull = 0, -- 0..1 how far back the string hand is
+		bowString = nil, -- the drawn string's Beams (showBowString)
+		defeatAt = nil, -- os.clock() when this client saw the body fall (defeatStep)
 	}
 	entries[character] = entry
 	filterDirty = true
@@ -494,7 +672,25 @@ local function track(character: Model, isLocal: boolean)
 		local v = character:GetAttribute("Stance")
 		entry.stance = if type(v) == "string" then v else "Stand"
 	end))
+	local function readHeld()
+		local id = character:GetAttribute("EquippedItem")
+		local def = if type(id) == "string" and id ~= "" then ItemDefs.get(id) else nil
+		entry.bow = def ~= nil and def.kind == "Bow"
+		if entry.bow then
+			entry.bowDrawTime = math.max(tonumber(def.drawTime) or 0.9, 0.05)
+		else
+			entry.bowT0 = nil
+			entry.bowLoosedAt = nil
+			removeBowString(entry)
+		end
+	end
+	readHeld()
+	table.insert(entry.conns, character:GetAttributeChangedSignal("EquippedItem"):Connect(readHeld))
+	for _, d in ipairs(character:GetDescendants()) do
+		muteDefeatSound(d)
+	end
 	table.insert(entry.conns, character.DescendantAdded:Connect(function(d)
+		muteDefeatSound(d)
 		if d:IsA("Motor6D") or d:IsA("AnimationConstraint") then
 			entry.rigDirty = true
 		end
@@ -813,7 +1009,11 @@ end
 CharacterVisuals._swingShapes = SWING_SHAPES -- (test hook: the shapes, radians, for tuning in a playtest)
 
 local function onCombatAction(payload: any)
-	if type(payload) ~= "table" or payload.action ~= "Swing" or Config.Combat.ThirdPersonSwings == false then
+	if type(payload) ~= "table" then
+		return
+	end
+	local action = payload.action
+	if action ~= "Swing" and action ~= "Draw" and action ~= "Release" then
 		return
 	end
 	local userId = tonumber(payload.userId)
@@ -823,11 +1023,43 @@ local function onCombatAction(payload: any)
 		return
 	end
 	local character = attacker.Character
-	if character then
-		-- lead: seconds until the strike (the swing's start was relayed); 0 or missing: the strike is now
-		CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant,
-			tonumber(payload.lead) or 0)
+	if not character then
+		return
 	end
+	if action == "Swing" then
+		if Config.Combat.ThirdPersonSwings ~= false then
+			-- lead: seconds until the strike (the swing's start was relayed); 0 or missing: the strike is now
+			CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant,
+				tonumber(payload.lead) or 0)
+		end
+	else
+		bowEvent(entries[character], action, payload.cancelled == true) -- (item 8: another player's draw)
+	end
+end
+
+-- Your own draws (the server tells only the others): your body takes the same pose, for anyone watching it here.
+local function onOwnCombat(name: string)
+	if name == "DrawStart" then
+		bowEvent(localEntry, "Draw")
+	elseif name == "Release" then
+		bowEvent(localEntry, "Release")
+	elseif name == "DrawCancel" then
+		bowEvent(localEntry, "Release", true)
+	end
+end
+
+-- Test hooks (item 8).
+CharacterVisuals._bow = BOW
+function CharacterVisuals._bowEvent(character: Model, action: string, cancelled: boolean?)
+	bowEvent(entries[character], action, cancelled)
+end
+function CharacterVisuals._bowOf(character: Model): { [string]: any }?
+	local entry = entries[character]
+	if not entry then
+		return nil
+	end
+	return { bow = entry.bow, hold = entry.bowHold, aim = entry.bowAim, arm = entry.bowArm, pull = entry.bowPull,
+		drawing = entry.bowT0 ~= nil, string = entry.bowString ~= nil, defeatAt = entry.defeatAt }
 end
 
 -- The swing's timeline (shares of its length): wind up to W, accelerate to the cut (M), slow into the follow-through
@@ -968,9 +1200,108 @@ local function solveLeg(lowerCF: CFrame, leg, hipT: CFrame, kneeT: CFrame, targe
 	return hipR, kneeR
 end
 
+-- Two-bone arm solve (the bow's string arm). Given the upper torso's world frame and a starting pose with the elbow
+-- bent (shoulderT, elbowT: absolute joint transforms), returns the shoulder and elbow transforms that put the wrist on
+-- `target` with the elbow pointing along `pole` (world). wristC0: the wrist's pivot in the lower arm's frame.
+local function solveArm(upperCF: CFrame, shoulderJ: any, elbowJ: any, wristC0: CFrame, shoulderT: CFrame, elbowT: CFrame,
+	target: Vector3, pole: Vector3): (CFrame, CFrame)
+	local shoulderFrame = upperCF * shoulderJ.C0
+	local upperArm = shoulderFrame * shoulderT * shoulderJ.C1:Inverse()
+	local elbowFrame = upperArm * elbowJ.C0
+	local lowerArm = elbowFrame * elbowT * elbowJ.C1:Inverse()
+	local S = shoulderFrame.Position
+	local E = elbowFrame.Position
+	local W = (lowerArm * wristC0).Position
+	local L1 = (E - S).Magnitude
+	local L2 = (W - E).Magnitude
+	if L1 < 1e-3 or L2 < 1e-3 then
+		return shoulderT, elbowT
+	end
+	local d0 = math.clamp((W - S).Magnitude, math.abs(L1 - L2) + 1e-3, L1 + L2)
+	local d1 = math.clamp((target - S).Magnitude, math.abs(L1 - L2) + 0.05, L1 + L2 - 0.005)
+	local denom = 2 * L1 * L2
+	local inner0 = math.acos(math.clamp((L1 * L1 + L2 * L2 - d0 * d0) / denom, -1, 1))
+	local inner1 = math.acos(math.clamp((L1 * L1 + L2 * L2 - d1 * d1) / denom, -1, 1))
+	-- elbow flexion is a positive rotation about the hinge (X) axis
+	local elbowFinal = CFrame.Angles(inner0 - inner1, 0, 0) * elbowT
+	local W2 = (elbowFrame * elbowFinal * elbowJ.C1:Inverse() * wristC0).Position
+	local from, to = W2 - S, target - S
+	if from.Magnitude < 1e-4 or to.Magnitude < 1e-4 then
+		return shoulderT, elbowFinal
+	end
+	local axis = to.Unit
+	local world = rotationBetween(from.Unit, axis)
+	-- swivel about the shoulder-to-wrist line until the elbow points along the pole
+	local elbowOut = world * (E - S)
+	elbowOut -= axis * elbowOut:Dot(axis)
+	local poleOut = pole - axis * pole:Dot(axis)
+	if elbowOut.Magnitude > 1e-3 and poleOut.Magnitude > 1e-3 then
+		local eu, pu = elbowOut.Unit, poleOut.Unit
+		world = CFrame.fromAxisAngle(axis, math.atan2(axis:Dot(eu:Cross(pu)), eu:Dot(pu))) * world
+	end
+	local shoulderR = shoulderFrame.Rotation:Inverse() * world * shoulderFrame.Rotation
+	return shoulderR * shoulderT, elbowFinal
+end
+
+-- The wrist's pivot in the right lower arm's frame (not one of the rig's posed joints), found once per rig.
+local function stringWrist(entry): CFrame
+	local found = entry.bowWristC0
+	if found then
+		return found
+	end
+	local hand = entry.character:FindFirstChild("RightHand")
+	local wrist = hand and hand:FindFirstChild("RightWrist")
+	local c0 = CFrame.new(0, -0.55, 0)
+	if wrist and (wrist:IsA("Motor6D") or wrist:IsA("AnimationConstraint")) then
+		c0 = (wrist :: any).C0
+	end
+	entry.bowWristC0 = c0
+	return c0
+end
+
+-- Where the bow's string rests (world): the held bow's Nock attachment, as the last frame left it.
+local function bowNock(entry): Vector3?
+	local nock = entry.bowNock
+	if not (nock and nock.Parent and nock:IsDescendantOf(entry.character)) then
+		local model = entry.character:FindFirstChild("EquippedModel")
+		local handle = model and model:FindFirstChild("Handle")
+		local found = handle and handle:FindFirstChild("Nock")
+		nock = if found and found:IsA("Attachment") then found else nil
+		entry.bowNock = nock
+	end
+	return if nock then nock.WorldPosition else nil
+end
+
+-- This frame's bow weights for an entry (item 8): returns the hold weight. `allow`: 0 while sliding or climbing.
+local function bowWeights(entry, dt: number, allow: number): number
+	local now = os.clock()
+	if entry.bowT0 and (not entry.bow or now - entry.bowT0 > BOW.limit) then
+		entry.bowT0 = nil -- (the bow left the hand, or the draw's end never arrived: let down)
+		removeBowString(entry)
+	end
+	local drawing = entry.bowT0 ~= nil
+	entry.bowHold += ((if entry.bow then allow else 0) - entry.bowHold) * expAlpha(10, dt)
+	local loosed = entry.bow and entry.bowLoosedAt ~= nil and now - entry.bowLoosedAt < BOW.follow
+	local aim = if drawing or loosed then 1 else 0
+	entry.bowAim += (aim - entry.bowAim) * expAlpha(if aim > entry.bowAim then 12 else 6, dt)
+	if drawing then
+		entry.bowPull = smooth01((now - entry.bowT0) / entry.bowDrawTime)
+		entry.bowArm += (1 - entry.bowArm) * expAlpha(16, dt)
+	else
+		-- the arrow left: the hand stays at the cheek and the arm lets go of the pose; let down: it rides the string forward
+		if not loosed then
+			entry.bowPull += (0 - entry.bowPull) * expAlpha(9, dt)
+		end
+		entry.bowArm += (0 - entry.bowArm) * expAlpha(if loosed then 7 else 5, dt)
+	end
+	return entry.bowHold
+end
+
 -- Per-frame scratch tables (reused)
 local B: { [string]: CFrame } = {}
 local P: { [string]: CFrame } = {}
+local OVER: { [string]: CFrame } = {} -- absolute arm poses that replace the Animator's (the bow), with their weights
+local OVER_W: { [string]: number } = {}
 
 local function poseEntry(entry, dt: number, camPos: Vector3)
 	if not ensureRig(entry) then
@@ -1049,8 +1380,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		land = smooth01(entry.land)
 	end
 	entry.prevVy = vel.Y
-	if lod == 0 and not entry.posed and entry.swing == nil and c < 0.002 and s < 0.002 and k < 0.002 then
-		return -- far, unseen or beyond the crowd cap, and neither in a stance nor swinging: the Animator's pose as it is
+	if lod == 0 and not entry.posed and entry.swing == nil and c < 0.002 and s < 0.002 and k < 0.002 and not entry.bow
+		and entry.bowHold < 0.002 then
+		return -- far, unseen or beyond the crowd cap, and neither in a stance, swinging nor holding a bow: the Animator's pose
 	end
 
 	-- Ground under the body: grounded estimate and the reference plane the animation's feet stand on
@@ -1158,9 +1490,12 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 
 	-- Melee swing (#90): this frame's joint angles, or nil (a finished swing is dropped here)
 	local swingAngles = swingPose(entry, os.clock())
+	-- The bow (item 8): how much of the hold pose this frame (the draw's own weights are on the entry)
+	local bow = bowWeights(entry, dt, 1 - math.max(s, k))
 
 	local trivial = c < 0.002 and s < 0.002 and k < 0.002 and math.abs(twist) < 0.004 and math.abs(leanX) < 0.002
 		and math.abs(leanZ) < 0.002 and land < 0.002 and w < 0.002 and entry.air < 0.002 and swingAngles == nil
+		and bow < 0.002
 	if trivial then
 		if entry.posed then
 			clearPose(entry)
@@ -1382,10 +1717,51 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 			end
 		end
 	end
+	-- The bow (item 8): the bow arm's hold and aim, the chest side-on, the string arm solved onto the string
+	OVER.LeftShoulder, OVER.LeftElbow, OVER.RightShoulder, OVER.RightElbow = nil, nil, nil, nil
+	if bow > 0.002 then
+		local aim = entry.bowAim
+		-- (your own first-person body keeps its chest square: the view looks down on it)
+		local turn = if isLocal then 0 else BOW.turn * aim * bow
+		if turn ~= 0 then
+			P.Waist = CFrame.Angles(0, turn, 0) * P.Waist
+			P.Neck = CFrame.Angles(0, -0.9 * turn, 0) * P.Neck
+		end
+		-- the arm is posed in the chest's frame: take out the chest's own pitch and turn so it stays level and on target
+		local raise = BOW.holdRaise + (BOW.aimRaise - BOW.holdRaise) * aim - (rootX + waistX) + BOW.crouchRaise * c * (1 - aim)
+		local bend = BOW.holdElbow + (BOW.aimElbow - BOW.holdElbow) * aim
+		local yaw = BOW.holdYaw * (1 - aim) - turn
+		OVER.LeftShoulder = CFrame.Angles(0, yaw, 0) * CFrame.Angles(raise, 0, 0)
+		OVER.LeftElbow = CFrame.Angles(bend, 0, 0)
+		OVER_W.LeftShoulder, OVER_W.LeftElbow = bow, bow
+		local arm = entry.bowArm * bow
+		local shoulderJ, elbowJ = j.RightShoulder, j.RightElbow
+		if arm > 0.01 and shoulderJ and elbowJ and j.Waist and j.Neck then
+			local lowerCF = rootFrame * rootT * rootC1Inv
+			local upperCF = lowerCF * j.Waist.C0 * (P.Waist * B.Waist) * j.Waist.C1:Inverse()
+			local headCF = upperCF * j.Neck.C0 * (P.Neck * B.Neck) * j.Neck.C1:Inverse()
+			local anchor = headCF * (BOW.anchor * (rig.scale or 1))
+			local nock = bowNock(entry) or (rootCF * Vector3.new(-0.3, 0.9, -1.5))
+			local target = nock:Lerp(anchor, BOW.reach + (1 - BOW.reach) * entry.bowPull)
+			local shoulderT, elbowT = solveArm(upperCF, shoulderJ, elbowJ, stringWrist(entry), CFrame.Angles(math.rad(75), 0, math.rad(25)),
+				CFrame.Angles(math.rad(95), 0, 0), target, rootCF:VectorToWorldSpace(BOW.pole))
+			OVER.RightShoulder, OVER.RightElbow = shoulderT, elbowT
+			OVER_W.RightShoulder, OVER_W.RightElbow = arm, arm
+		end
+		-- other players' bows show the string drawn (your own arms and bow are hidden in first person)
+		if entry.bowT0 and entry.bowArm > 0.6 and (not entry.isLocal or poseAsRemote) then
+			showBowString(entry)
+		end
+	end
 	for _, name in ipairs(UPPER_JOINTS) do
 		local joint = j[name]
 		if joint and joint.Parent then
-			writeJoint(entry, joint, B[name], P[name] * B[name])
+			local pose = P[name] * B[name]
+			local over = OVER[name]
+			if over then
+				pose = pose:Lerp(over, OVER_W[name])
+			end
+			writeJoint(entry, joint, B[name], pose)
 		end
 	end
 	entry.posed = true
@@ -1394,6 +1770,7 @@ end
 -- Ranks the other characters by distance from the camera and gives each its share of the pose (entry.lod, see LOD).
 local ranked: { any } = {}
 local rankAt = -math.huge
+local IK_KEEP = 2 -- places past LOD.ikMax at which a character that has foot IK keeps it
 local function byRankDistance(a: any, b: any): boolean
 	return a.rankDistance < b.rankDistance
 end
@@ -1405,9 +1782,12 @@ local function rankEntries(camCF: CFrame?)
 		if entry.isLocal then
 			entry.lod = 2
 		else
+			entry.hadIK = entry.lod == 2
 			entry.lod = 0
 			local root = entry.root
-			if root and root.Parent then
+			local humanoid = entry.humanoid
+			-- (a body that has fallen is not posed, poseEntry: it takes no place in the ranking from the living)
+			if root and root.Parent and not (humanoid and humanoid.Health <= 0) then
 				local offset = root.Position - camPos
 				local d = offset.Magnitude
 				-- (behind: more than about 100 degrees off the look, outside any field of view)
@@ -1421,7 +1801,11 @@ local function rankEntries(camCF: CFrame?)
 	end
 	table.sort(ranked, byRankDistance)
 	for i, entry in ipairs(ranked) do
-		entry.lod = if i <= LOD.ikMax and entry.rankDistance <= LOD.ikRange then 2 elseif i <= LOD.poseMax then 1 else 0
+		-- A character that has foot IK keeps it IK_KEEP places past the cap. By plain rank, two about equally far from
+		-- the camera swapped the last place every ranking, and the one that lost it had its foot offsets and pelvis
+		-- drop cut in one frame: the hips jumped, four times a second.
+		local ik = entry.rankDistance <= LOD.ikRange and (i <= LOD.ikMax or (entry.hadIK and i <= LOD.ikMax + IK_KEEP))
+		entry.lod = if ik then 2 elseif i <= LOD.poseMax then 1 else 0
 	end
 end
 
@@ -1544,6 +1928,61 @@ local function firstPersonBody(dt: number)
 	end
 end
 
+-- Defeat (see the header) ----------------------------------------------------------------------------------------------
+
+-- Runs in the render step, after the default TransparencyController. A body this client has just seen at zero health:
+-- its default voice sound is silenced, and your own (this client simulates it) is tipped over backward so it never
+-- stays standing. DEFEAT_FALL seconds later every part and face fades out over DEFEAT_FADE (local transparency: the
+-- server's copy is untouched until it removes the body itself, CombatService).
+local function defeatStep(now: number)
+	for character, entry in pairs(entries) do
+		local at = entry.defeatAt
+		if not at then
+			local humanoid = entry.humanoid
+			if not (humanoid and humanoid.Parent == character) then
+				humanoid = character:FindFirstChildOfClass("Humanoid")
+			end
+			if humanoid and humanoid.Health <= 0 then
+				entry.defeatAt = now
+				entry.bowT0 = nil
+				removeBowString(entry)
+				local root = character:FindFirstChild("HumanoidRootPart")
+				if root and root:IsA("BasePart") then
+					local cry = root:FindFirstChild("Died")
+					if cry and cry:IsA("Sound") then
+						cry.Volume = 0
+						cry:Stop()
+					end
+					if entry.isLocal and not root.Anchored then
+						local cf = root.CFrame
+						root.AssemblyAngularVelocity += cf.RightVector * DEFEAT_TIP
+						root.AssemblyLinearVelocity -= cf.LookVector * 2
+					end
+				end
+			end
+		else
+			local k = (now - at - DEFEAT_FALL) / DEFEAT_FADE
+			if k > 0 and not (entry.defeatGone and not entry.isLocal) then
+				local parts = entry.defeatParts
+				if not parts then
+					parts = {}
+					for _, d in ipairs(character:GetDescendants()) do
+						if d:IsA("BasePart") or d:IsA("Decal") or d:IsA("Texture") then
+							table.insert(parts, d)
+						end
+					end
+					entry.defeatParts = parts
+				end
+				local fade = smooth01(k)
+				for _, d in ipairs(parts) do
+					d.LocalTransparencyModifier = fade
+				end
+				entry.defeatGone = k >= 1
+			end
+		end
+	end
+end
+
 function CharacterVisuals.Init(registry)
 	Controllers = registry
 end
@@ -1561,11 +2000,19 @@ function CharacterVisuals.Start()
 	player:GetAttributeChangedSignal("LS_PoseAsRemote"):Connect(readHook)
 	RunService:BindToRenderStep("LS_FirstPersonBody", Enum.RenderPriority.Camera.Value + 2, function(dt)
 		local ok, err = pcall(firstPersonBody, dt)
+		if ok then
+			ok, err = pcall(defeatStep, os.clock())
+		end
 		if not ok and os.clock() - errorAt > 5 then
 			errorAt = os.clock()
 			warn("[CharacterVisuals] body error: " .. tostring(err))
 		end
 	end)
+	-- your own bow draws (item 8)
+	local combat = Controllers and Controllers.CombatController
+	if combat and type(combat.action) == "table" and type(combat.action.Connect) == "function" then
+		combat.action:Connect(onOwnCombat)
+	end
 	RunService.PreSimulation:Connect(preSimulation)
 	Players.PlayerAdded:Connect(watchPlayer)
 	Players.PlayerRemoving:Connect(function(p)

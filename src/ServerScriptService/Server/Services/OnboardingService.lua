@@ -234,6 +234,11 @@ end
 
 -- Step 9 when the round is decided (everyone picked for it who is still here).
 local function onRoundEnded()
+	-- a Countdown that was cancelled also fires roundEnded, with its contenders still listed: no round was played
+	-- (RoundStartedAt is 0 until the horn), so nobody finished one
+	if (tonumber(GameState:GetAttribute("RoundStartedAt")) or 0) <= 0 then
+		return
+	end
 	for _, player in ipairs(contenders()) do
 		OnboardingService.step(player, "FinishedRound")
 		finishedBy[player] = true

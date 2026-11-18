@@ -32,7 +32,9 @@
 	Visuals: the equipped item's "world" model is welded to the character's RightHand (Grip on RightGripAttachment) as
 	  Character.EquippedModel (attribute ItemId); the character's EquippedItem attribute is the id or "".
 	  Melee weapons and throwables also play Roblox's R15 "toolnone" hold pose (right arm raised, Idle priority) so the
-	  blade points forward like a held Tool; the bow, food, bottles, kits and armor hang naturally from the hand.
+	  blade points forward like a held Tool; food, bottles, kits and armor hang naturally from the hand. The bow is welded
+	  to the LeftHand instead (LeftGripAttachment, turned by BOW_GRIP so its top limb lies along the hand's forward), as in
+	  first person; its hold and draw poses are CharacterVisuals' (client).
 	Attributes: Player.Armor (worn armor id or ""), Player.UsingItem (item being used or "").
 ]]
 local Players = game:GetService("Players")
@@ -85,6 +87,12 @@ type Inventory = {
 local inventories: { [Player]: Inventory } = {}
 
 local HOLD_POSE_KINDS = { Melee = true, Throwable = true }
+-- The bow in the hand: a hand's grip points an item's LookVector down the hand, toward the ground when the arm hangs (a
+-- blade is then raised by the hold pose). A bow's LookVector is its top limb and its UpVector the way it shoots, so held
+-- like a blade its top limb went into the ground. Turned half a turn about the diagonal of those two axes, the top limb
+-- lies along the hand's forward and the bow shoots down the hand: upright and shooting forward on a forearm held level
+-- (CharacterVisuals' bow hold), level at the hip and off the ground on an arm that hangs.
+local BOW_GRIP = CFrame.fromMatrix(Vector3.zero, Vector3.new(-1, 0, 0), Vector3.new(0, 0, -1), Vector3.new(0, -1, 0))
 local holdAnimation = Instance.new("Animation")
 holdAnimation.Name = "HoldPose"
 holdAnimation.AnimationId = "rbxassetid://507768375" -- Roblox's R15 "toolnone": right arm raised to hold an item
@@ -364,7 +372,11 @@ local function attachModel(inv: Inventory, character: Model, itemId: string): an
 	if not humanoid or humanoid.Health <= 0 then
 		return nil
 	end
-	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+	-- the bow goes in the left hand, as in first person (the right hand draws the string): CharacterVisuals poses both arms
+	local def = ItemDefs.get(itemId)
+	local leftHand = if def and def.kind == "Bow" then character:FindFirstChild("LeftHand") else nil
+	local bowHand = leftHand ~= nil and leftHand:IsA("BasePart")
+	local hand = if bowHand then leftHand else (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
 	if not (hand and hand:IsA("BasePart")) then
 		return nil
 	end
@@ -378,10 +390,13 @@ local function attachModel(inv: Inventory, character: Model, itemId: string): an
 		return nil
 	end
 	local grip = handle:FindFirstChild("Grip")
-	local handGrip = hand:FindFirstChild("RightGripAttachment")
+	local handGrip = hand:FindFirstChild(if bowHand then "LeftGripAttachment" else "RightGripAttachment")
 	local c0 = if handGrip and handGrip:IsA("Attachment")
 		then handGrip.CFrame
 		else CFrame.new(0, -hand.Size.Y / 2, 0) * CFrame.Angles(-math.pi / 2, 0, 0)
+	if bowHand then
+		c0 *= BOW_GRIP
+	end
 	local c1 = if grip and grip:IsA("Attachment") then grip.CFrame else CFrame.identity
 	model.Name = "EquippedModel"
 	model:SetAttribute("ItemId", itemId)

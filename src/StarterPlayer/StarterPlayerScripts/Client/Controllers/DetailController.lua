@@ -70,6 +70,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+local ArenaLayout = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("ArenaLayout"))
 
 local DetailController = {}
 
@@ -106,6 +107,16 @@ DetailController.FLORA = FLORA
 local FAR_HIDE, FAR_SHOW = 450, 650
 local FAR_ROLE = "FarCanopy"
 local farParts = {} -- { part, x0, x1, z0, z1, k (the modifier written) }
+
+-- The skyline from the lobby: workspace.Arena.Skyline is Persistent, so the lobby (8,800 studs east of the horn and
+-- 500 studs under the feet of the east tiles) drew the outer slopes of the east mountains as grey shells hanging in
+-- its western sky (seen at full quality, 18 Nov). The skyline and the far valley (Persistent too, hidden with it as
+-- a precaution) are hidden on this client (LocalTransparencyModifier) while the camera is within SKYLINE_LOBBY
+-- studs (flat) of ArenaLayout.LobbyPosition. Every camera in the arena, a spectator's included, is 6,900 studs or
+-- more from the lobby, so nothing changes there. Still drawn from the lobby, and left alone: the Peak (a hazy cone)
+-- and, once the arena has been visited, the rim of its terrain (a thin band on the horizon).
+local SKYLINE_LOBBY = 3000
+local skylineHidden: boolean? = nil
 
 local cells = {} -- key -> { x, z, [class] = { parts }, shown = { [class] = bool } }
 local modelCell = {} -- model -> { k, groups = { [class] = { parts } } }
@@ -268,6 +279,9 @@ local function watchFar(holder: Instance)
 end
 
 local function refreshFar(p: Vector3)
+	if skylineHidden then
+		return -- the camera is at the lobby: the whole far valley is hidden there (refreshSkyline)
+	end
 	for i = #farParts, 1, -1 do
 		local e = farParts[i]
 		if not e.part.Parent then
@@ -283,6 +297,46 @@ local function refreshFar(p: Vector3)
 				e.part.LocalTransparencyModifier = k
 			end
 		end
+	end
+end
+
+-- The skyline is hidden while the camera is at the lobby (see SKYLINE_LOBBY). `again` writes the hidden state once
+-- more, for skyline parts that arrived after the last pass.
+local function refreshSkyline(arena: Instance, again: boolean)
+	local camera = workspace.CurrentCamera
+	local holder = arena:FindFirstChild("Skyline")
+	if not camera or not holder then
+		return
+	end
+	local p = camera.CFrame.Position
+	local lobby = ArenaLayout.LobbyPosition
+	local dx, dz = p.X - lobby.X, p.Z - lobby.Z
+	local hide = dx * dx + dz * dz < SKYLINE_LOBBY * SKYLINE_LOBBY
+	if hide == skylineHidden and not (hide and again) then
+		return
+	end
+	skylineHidden = hide
+	local v = if hide then 1 else 0
+	for _, d in ipairs(holder:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.LocalTransparencyModifier = v
+		end
+	end
+	-- the far valley's tiles are Persistent too: hidden with the skyline
+	local far = arena:FindFirstChild("FarValley")
+	if far then
+		for _, d in ipairs(far:GetDescendants()) do
+			if d:IsA("BasePart") then
+				d.LocalTransparencyModifier = v
+			end
+		end
+	end
+	if not hide then
+		-- back at the arena: the canopy shells take their distance rule again at once
+		for _, e in ipairs(farParts) do
+			e.k = -1
+		end
+		refreshFar(p)
 	end
 end
 
@@ -537,6 +591,12 @@ function DetailController.Start()
 	end
 	applyTier()
 	DetailController.refresh()
+	refreshSkyline(arena, true)
+	-- every frame (a distance test; parts are written only when the answer changes): a camera cut between the lobby
+	-- and the arena never shows a frame with the wrong skyline
+	RunService.RenderStepped:Connect(function()
+		refreshSkyline(arena, false)
+	end)
 
 	-- the frame-rate step: live clients on Automatic only (Studio's unfocused window is throttled to ~15 fps)
 	local frames, elapsed, lowFor, highFor = 0, 0, 0, 0
@@ -573,6 +633,9 @@ function DetailController.Start()
 			end
 		end
 		DetailController.refresh()
+		if tick % 4 == 0 then
+			refreshSkyline(arena, true)
+		end
 	end
 end
 

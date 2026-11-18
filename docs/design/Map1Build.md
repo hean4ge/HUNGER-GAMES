@@ -3,6 +3,9 @@
 *15 November 2026. The owner looked at the Blender renders and answered "Yes, build it". This page is the contract
 for the agents building it. Where it and an older design page disagree, this page wins for the beta.*
 
+*Updated 18 November 2026 (afternoon): Map 1 is installed. The plan below is kept as it was written; section 7
+lists where the place now differs from it.*
+
 Sources: the Blender exports (`%USERPROFILE%\OneDrive\Documents\LastStanding\BlenderExports\Map1`, pass 3, every
 check passed), [TwoArenas.md](TwoArenas.md) section 3, and three reports written today in the session's scratch
 area (`wave3\consumers\report.md`, `wave3\worldgen\report.md`, `wave3\mp\report.md`).
@@ -49,7 +52,7 @@ area (`wave3\consumers\report.md`, `wave3\worldgen\report.md`, `wave3\mp\report.
    signal's text changes; its sound does not.
 10. **Contenders.** 48 a round, one per plinth (`MaxContenders` and `FullContenders` 48).
 11. **The border.** Start radius 1,800 at 48 contenders, scaled by head count with the existing square-root rule from
-    a lone-player radius of 520. The wall never moves faster than 3.5 studs a second: the shrink ends when it ends
+    a lone-player radius of 520 (700 since 18 November, section 7). The wall never moves faster than 3.5 studs a second: the shrink ends when it ends
     today and starts as early as it must. Final radius 60, closing on turf 90 to 100 studs from the centre, not on
     the platform. The wall is tall enough for ground up to y 640.
 12. **The Edge** (the cliff in the north, inside the border) is a real drop. The invisible Boundary at radius 1,900
@@ -86,8 +89,8 @@ It must load on the server and on every client without yielding and without touc
 | `getBiome(position)` | From the replicated region grid (`Shared.Map1Regions`), today's biome names |
 | `heightAt(x, z)` | A terrain raycast first; the coarse grid in `Shared.Map1Regions` as the fallback |
 
-Until the install, the Map 1 layout lives in `src/ReplicatedStorage/Shared/ArenaLayout_GreenLand.lua`. The install
-moves the old layout to the vault and puts the new one in `ArenaLayout`'s place.
+Since the install (18 November) `src/ReplicatedStorage/Shared/ArenaLayout.lua` is this Map 1 layout, and the old
+layout is in the vault. `ArenaLayout_GreenLand.lua` no longer exists.
 
 ### 3.2 Instances
 
@@ -100,7 +103,7 @@ moves the old layout to the vault and puts the new one in `ArenaLayout`'s place.
 | `workspace.Arena.Boundary` | The invisible backstop at radius 1,900 |
 | `ServerStorage.ArenaData.LootSpawns` | Markers with `Kind`, `Tier`, `Runner`, `DropIn`. A tier-3 marker within 90 studs of the centre. `DropIn = false` under the sails |
 | `ReplicatedStorage.Shared.WaterPoints` | Regenerated for Map 1 |
-| `ServerStorage.WorldGen.Map1` | The new builders: `init` (runs the steps), `Data`, `Terrain`, `Assets`, `Scatter`, `Loot`, `Audit` |
+| `ServerStorage.WorldGen.Map1` | The new builders: `Data`, `Terrain`, `Assets`, `Scatter`, `Loot`, `Water`, `Audit`. As built it is a folder: no `init` runs the steps, each builder is called by hand (section 7) |
 
 ### 3.3 The data pack
 
@@ -157,3 +160,59 @@ agent can pick the work up if it is cut off.
 - A lone player's round: launch, loot, drink, fight the dummies, the border closes, the round ends, the next begins.
 - Frame time and memory on the mid quality level are within ArenaV3 section 7's budgets.
 - SyntaxCheck and InputCheck pass. Nothing is left in the Edit data model by a test.
+
+## 7. What the install and the 18 November fixes changed
+
+*Added 18 November 2026 (afternoon). Place version 404, commit `e2226af`. Lines marked **†** are from the afternoon
+round: in `src/` and the open Studio session, not yet committed or in a saved version.*
+
+### 7.1 As installed (18 November, morning)
+
+- **The switch.** `Config.Map` is "GreenLand", `Shared.ArenaLayout` is the Map 1 layout (version 3), and the lobby
+  stands at (8800, 160, 0). The vault holds the classic arena as decided.
+- **Counts.** 42,583 plants in 1,753 cells (the dry plan said 42,634). 446 loot markers were planned and 443 are
+  placed: the three under the Peak are left out. 87 water points (40 on the stream, 47 on the lake) and 26 ambience
+  emitters.
+- **The stream** shows 92 % of the designed water: the packer gives it a wet margin (commit `310f2bb`).
+- **The far valley was out of place** on the first played round: 1,580 studs off the centre and tilted 3.46 degrees,
+  showing as shards across the sky. It was put back at the map centre. The far meshes are now `Locked`, so a click in
+  Studio's 3D view can't drag them, and the audit fails if `Skyline` or `FarValley` is off the centre or turned. If it
+  happens again: `workspace.Arena.FarValley:PivotTo(CFrame.identity)`.
+- **The old style-test diorama** moved from `Workspace.StyleTest` to `ServerStorage.StyleTest.Diorama`.
+
+### 7.2 Changed against the contract
+
+| Contract | Now | Why |
+|---|---|---|
+| Decision 11: a lone player's border starts at radius 520 | `MinStartRadius` 700. Two players get 860, 24 get 1,469, 48 keep 1,800. The 3.5 studs a second cap and the 13:50 close are unchanged; a lone ring starts moving at 10:00, two players' at 9:32. Loot is placed out to the start radius less 10 | At 520 a lone tester could not reach the forest (radius 570 to 630). The lake (about 800) is still outside a lone ring |
+| Decision 11: the border wall | Neon panels instead of ForceField, which showed only as thin seams by day. Each panel thins with its distance from the camera, because a full sheet dyed the whole valley at full graphics quality. **†** A ground line and a low skirt mark the ring from afar ([GameDesign.md](../GameDesign.md) section 4) | Seen in play at full quality |
+| Decision 7: the far view | The far-valley parts are repainted by role in duskier tones (`Map1.Assets.applyLookColors()`), and far blur is off on this map. On each client the far-valley canopy shells fade out when the camera is within 450 to 650 studs of their footprint (`DetailController`), so they don't lie over real trees. A whole tile (1,900 studs wide) loses its canopy at once | The canopy layer showed as dark slabs over streamed-in trees |
+| Not in the contract: the Peak | It is a hollow shell, and players could walk in under it. `Map1.Terrain.fillUnder()` raised the ground under it (about 72,000 voxels), and `surveyUnder()` and the audit's new `peak` check watch it. **Run `fillUnder()` again after any terrain write and after the landmarks are placed.** `Map1.Terrain.verify()` was not changed and reports the raised columns as off the grid | Found in play |
+| Section 3.2: loot markers | `Map1.Loot.build` leaves out blocked scattered markers and never seats one on a plant or a stone. One marker (`Site:C6:Crate3`) sat on a boulder and was moved by hand onto turf at (-3.4, 37.1, 775.6). A dry run of the builder reproduces the place's 443 | Review and play findings |
+| Streaming: the classic arena's numbers | `StreamOutBehavior` is Opportunistic, in the place and in `Map1.Terrain.applyStreaming`. It works only partly: 8,600 to 9,000 plants beyond 1,100 studs stayed loaded for the 40 s watched | Nothing streamed out at all before |
+| Decision 4: the look | `Shared.DayCycle` holds one lighting look per arena, picked by `Config.Map`. For Map 1: clear air, grass length 0.1, and the water colour, which `Map1.Terrain.applyLook` now takes from the lighting look. To re-apply in Edit: `Map1.Assets.applyLookColors()`, then `WorldGen.LightingRig.apply()` | The lighting pass |
+| Decisions 6 and 10: 48 plinths, one launch | The launch intro's hall holds at most 24 glass cases, so two neighbouring plinths share one. The full cut with two contenders was played by two clients; no picture was taken | 48 cases put the neighbours inside the camera's path |
+| Decision 9: names | Player-facing text says "the Horn" for the centre and "the signal" for the start. The lobby's two notice boards were re-worded for Map 1, in the place and in `WorldGen/AssetBuilder/Props.lua` | The final check found the old arena's words on the boards |
+| Decision 10: 48 contenders | `FallenSnapshots` keeps 48, the Roll Call is capped at 45 s, and the pick takes whoever played least recently when more than 48 wait. **The place's server size still read 60 on 18 November; it should be 48** | Review findings |
+
+Left as they are, on purpose or for later:
+- **Heather on limestone.** 175 of the 11,808 heather mats lie on bare limestone (seen at the Edge); `Scatter` keeps
+  Limestone as allowed ground for the hedge hollow's rim.
+- **No minimum distance between trunks.** Two firs 2.75 studs apart held a tester for 24 s at (64, -796).
+- **Ragged far ridge below about engine quality level 13 of 21.** It is what the engine makes of the far meshes at
+  reduced quality; no property change cures it. The cure is one mesh per far-valley tile from Blender.
+
+### 7.3 Where the section 6 checks stand
+
+| Check | State on 18 November |
+|---|---|
+| Plinths | Pass (audit) |
+| Terrain and water | Pass (audit); drinking at the stream and swimming in the lake seen in play |
+| Loot markers reachable and inside the start ring | Pass (audit); in a lone round the loot service skipped 286 markers outside radius 690 and placed none beyond the ring |
+| The Boundary | Pass (audit); in play it stopped a sprinting, jumping player at radius 1,899.4 |
+| A lone player's round | Pass, many times, the last five runs focused at full quality |
+| Frame time and memory within ArenaV3 section 7 | **Not measured.** Instances, streamed plants, terrain and texture memory are inside the budgets. Real frame rate and client memory need a focused window or a device; one focused reading at the heart gave 3.76 ms render CPU and 2.43 ms GPU |
+| SyntaxCheck, InputCheck, nothing left behind | Pass: 136 scripts compile, 17 actions each in Plate and Arena, no leftovers |
+
+`Map1.Audit.run()` ended the day at 13 pass, 0 fail, 1 manual (checks: switch, layout, plinths, terrain, water, loot,
+boundary, peak, instances, lobby, ambience, scripts, leftovers, manual).

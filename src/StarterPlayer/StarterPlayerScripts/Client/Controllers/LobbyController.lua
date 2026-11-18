@@ -8,7 +8,10 @@
 	    and Countdown.
 	  * How-to-play panel: the goal in one line (from Shared.Lore), the tips, and the controls for the current device
 	    (keyboard, gamepad or touch). Open by default only until you've played a round (RoundsPlayed 0, larger screens;
-	    QW6), a toggle on phones and afterwards.
+	    QW6), a toggle on phones and afterwards. On a PC or console it is as tall as its rows need and, on a short
+	    screen, shrinks as a whole so no row needs scrolling from 720 px of height up (fitHowTo).
+	  * Roblox's chat window never sits on the status line: it is kept narrower than the gap beside the line while the
+	    lobby shows, and the line waits when even that is not enough (updateChat).
 	  * SETTINGS opens the menu (SettingsController).
 	Shown while you're not in the arena and not spectating, and once the death card or the round's result card
 	(NotificationController.isCardUp) has gone: the two never draw text over text (round-flow QA pt2/pt3).
@@ -19,6 +22,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -47,6 +52,7 @@ local spectateBound = false
 local visible = nil :: boolean?
 local howToTouched = false -- the player opened or closed HOW TO PLAY themselves: leave it as they set it
 local howToYield, statusYield = false, false -- hidden for a headline or the Roll Call (updateYield)
+local chatYield = false -- Roblox's chat window is open over the status line and cannot be made narrower (updateChat)
 local soloBar = { at = 0, total = 1 } -- QW1: the practice countdown on show (its SoloStartAt) and its bar's full length
 
 local function settingsController()
@@ -96,7 +102,7 @@ local function howToByDefault(): boolean
 end
 
 -- QW4: the longest the next horn can be away while a round runs: what's left of it, then Ending (grown to fit the
--- epilogue Roll Call, QW14), Intermission and Countdown
+-- epilogue Roll Call, QW14), Intermission (as long as joins can make it) and Countdown
 local function nextRoundIn(remaining: number): number
 	local ending = tonumber(Config.Round.EndingTime) or 10
 	if GameState:GetAttribute("Practice") ~= true and Config.Round.Epilogue ~= false then
@@ -114,7 +120,16 @@ local function nextRoundIn(remaining: number): number
 	if type(launch) == "table" and launch.Intro ~= false then
 		countdown = math.max(tonumber(launch.FullCountdown) or 22, tonumber(launch.ShortCountdown) or 12)
 	end
-	return remaining + ending + (tonumber(Config.Round.IntermissionTime) or 25) + countdown
+	-- the Intermission at its longest: where joins restart it (RoundService.fillRule: a live public server, or Studio
+	-- with GameState.FillTest) it can run to FillMaxTime, and the pick can then wait StartHoldTime for a second ready
+	-- player ("AT MOST" came up to 75 s short on a filling server)
+	local intermission = tonumber(Config.Round.IntermissionTime) or 25
+	if Config.Round.FillExtendOnJoin ~= false and GameState:GetAttribute("PrivateServer") ~= true
+		and (not Config.IsStudio or GameState:GetAttribute("FillTest") ~= nil) then
+		intermission = math.max(intermission, tonumber(Config.Round.FillMaxTime) or 90)
+	end
+	local hold = math.max(0, tonumber(Config.Round.StartHoldTime) or 0)
+	return remaining + ending + intermission + hold + countdown
 end
 
 local function setHowTo(on: boolean, animate: boolean?)
@@ -149,6 +164,124 @@ LobbyController.setHowToVisible = function(on: boolean)
 	end
 end
 
+-- HOW TO PLAY on a PC or console: every row on the panel without scrolling, from a 720-high screen up (16:9 and
+-- 16:10; it used to stop 70 px short of the top and bottom edges, 560 px at most, and cut the last two rows). The
+-- panel is as tall as its text needs. It keeps its old place (70 px from the top) while it fits there, then takes the
+-- room down to the bottom edge (nothing else lives at the lobby's bottom right), then up; and when the whole height is
+-- still not enough (a 720-high screen: Roblox's top bar takes 58 px of it) the panel shrinks as a whole (UIScale
+-- "Fit", never under HOWTO_MIN_SCALE; below that the body scrolls, as before). Sizes are the root's design pixels.
+local HOWTO_WIDTH, HOWTO_MARGIN, HOWTO_CHROME, HOWTO_MIN_SCALE = 330, 70, 48, 0.8 -- (chrome: the header and divider)
+local HOWTO_GROW_STEP = 0.08
+local function fitHowTo()
+	local how, root, body = R.howTo, R.root, R.howToBody
+	if not how or not root or not body or not howToOpen or UserInputService.TouchEnabled then
+		return
+	end
+	local rootScale = R.rootScale
+	local s = if rootScale and rootScale.Scale > 0 then rootScale.Scale else 1
+	local safePad = root:FindFirstChild("SafePad")
+	local pad = if safePad and safePad:IsA("UIPadding") then safePad.PaddingTop.Offset + safePad.PaddingBottom.Offset else 0
+	local inner = root.AbsoluteSize.Y / s - pad
+	if inner < 100 then
+		return
+	end
+	local fit = how:FindFirstChild("Fit")
+	if not fit or not fit:IsA("UIScale") then
+		local made = Instance.new("UIScale")
+		made.Name = "Fit"
+		made.Parent = how
+		fit = made
+	end
+	local f = if fit.Scale > 0 then fit.Scale else 1
+	local total, count = 0, 0
+	for _, child in ipairs(body:GetChildren()) do
+		if child:IsA("GuiObject") and child.Visible then
+			total += child.AbsoluteSize.Y / (s * f)
+			count += 1
+		end
+	end
+	if count == 0 or total <= 0 then
+		return
+	end
+	local bodyPad = body:FindFirstChild("Pad")
+	local listLayout = body:FindFirstChild("Layout")
+	local padY = if bodyPad and bodyPad:IsA("UIPadding") then bodyPad.PaddingTop.Offset + bodyPad.PaddingBottom.Offset else 28
+	local gap = if listLayout and listLayout:IsA("UIListLayout") then listLayout.Padding.Offset else 10
+	local needed = math.ceil(HOWTO_CHROME + padY + total + gap * (count - 1) + 2)
+	local scale = math.clamp(inner / needed, HOWTO_MIN_SCALE, 1)
+	-- Text wraps a little differently at each scale, so the size it needs changes with the scale it is given: left
+	-- alone, the panel hopped between three sizes ten times a second. It shrinks as soon as it must and grows back
+	-- only for a real gain (a shorter list, a taller window).
+	if scale > f and scale < f + HOWTO_GROW_STEP then
+		scale = f
+	end
+	-- the panel's own height before its scale: all it needs, or (at the smallest scale) what the screen has
+	local height = math.min(needed, math.floor(inner / scale))
+	local top = math.max(0, math.floor(math.min(HOWTO_MARGIN, inner - height * scale)))
+	local constraint = how:FindFirstChildOfClass("UISizeConstraint")
+	if constraint and constraint.MaxSize.Y < height then
+		constraint.MaxSize = Vector2.new(constraint.MaxSize.X, height) -- (UIBuilder's 560 cap is for the touch layouts)
+	end
+	if math.abs(fit.Scale - scale) > 0.004 then
+		fit.Scale = scale
+	end
+	if how.Size.Y.Offset ~= height or how.Position.Y.Offset ~= top or how.Size.Y.Scale ~= 0 then
+		how.AnchorPoint = Vector2.new(1, 0)
+		how.Position = UDim2.new(1, 0, 0, top)
+		how.Size = UDim2.fromOffset(HOWTO_WIDTH, height)
+	end
+end
+
+-- Roblox's chat window (top left; closed by default, HUDController) and the status line (top centre). At window
+-- widths under about 1,400 px an open chat window reached the left end of the line (a late joiner's first view).
+-- While the lobby screen shows, the chat window is kept narrower than the gap beside the line (its WidthScale, down
+-- to CHAT_MIN_SCALE); if it is open and still over the line at that size (a very narrow window), the line waits
+-- until the chat closes (updateYield). Outside the lobby the chat window has its full width back.
+local CHAT_MIN_SCALE, CHAT_GAP, STATUS_MAX_WIDTH = 0.6, 12, 450 -- (the longest line with its SPECTATE button, design px)
+local function updateChat(lobbyShown: boolean)
+	local window = TextChatService:FindFirstChildOfClass("ChatWindowConfiguration")
+	if not window then
+		chatYield = false
+		return
+	end
+	if not lobbyShown then
+		-- (a closed window reports no size, so this does not wait for one)
+		chatYield = false
+		pcall(function()
+			if window.WidthScale ~= 1 then
+				window.WidthScale = 1
+			end
+		end)
+		return
+	end
+	local ok, x, width, scale = pcall(function()
+		return window.AbsolutePosition.X, window.AbsoluteSize.X, window.WidthScale
+	end)
+	if not ok or type(width) ~= "number" or width <= 0 or scale <= 0 then
+		chatYield = false
+		return
+	end
+	local want, hide = 1, false
+	local status, pill = R.status, R.pill
+	if lobbyShown and status and pill then
+		local rootScale = R.rootScale
+		local s = if rootScale and rootScale.Scale > 0 then rootScale.Scale else 1
+		local centre = status.AbsolutePosition.X + status.AbsoluteSize.X / 2
+		local base = width / scale
+		want = math.clamp((centre - STATUS_MAX_WIDTH / 2 * s - CHAT_GAP - x) / base, CHAT_MIN_SCALE, 1)
+		local okActive, active = pcall(function()
+			return StarterGui:GetCore("ChatActive") == true and StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Chat)
+		end)
+		hide = okActive and active == true and x + base * want + 4 > pill.AbsolutePosition.X
+	end
+	if math.abs(want - scale) > 0.01 then
+		pcall(function()
+			window.WidthScale = want
+		end)
+	end
+	chatYield = hide
+end
+
 local function applyLayout()
 	local brand, how = R.brand, R.howTo
 	if UserInputService.TouchEnabled then
@@ -173,9 +306,7 @@ local function applyLayout()
 		R.brandLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 		R.title.TextSize = 34
 		R.title.Size = UDim2.new(1, 0, 0, 40)
-		how.AnchorPoint = Vector2.new(1, 0.5)
-		how.Position = UDim2.fromScale(1, 0.5)
-		how.Size = UDim2.new(0, 330, 1, -140)
+		fitHowTo() -- the right edge, as tall as its text needs
 	end
 end
 
@@ -319,7 +450,7 @@ local function updateYield()
 		end
 	end
 	local small = phone()
-	local hideStatus = small and (headline or roll)
+	local hideStatus = (small and (headline or roll)) or chatYield
 	local hideHowTo = roll or (small and headline)
 	if R.status and hideStatus ~= statusYield then
 		statusYield = hideStatus
@@ -388,9 +519,12 @@ function LobbyController.Start()
 	gui = lobby
 	Theme.bindRoot(lobby)
 	local root = lobby:WaitForChild("Root") :: any
+	R.root = root
+	R.rootScale = root:FindFirstChild("Scale")
 	local status = root:WaitForChild("Status")
 	R.status = status
 	local pill = status:WaitForChild("Pill")
+	R.pill = pill
 	R.pillPad = pill:WaitForChild("Pad")
 	R.dot = pill:WaitForChild("Dot")
 	R.statusText = pill:WaitForChild("Text")
@@ -410,6 +544,7 @@ function LobbyController.Start()
 	R.howTo = root:WaitForChild("HowTo")
 	R.howToClose = R.howTo:WaitForChild("Header"):WaitForChild("Close")
 	local body = R.howTo:WaitForChild("Body")
+	R.howToBody = body
 	R.controlsHeader = body:WaitForChild("ControlsHeader")
 	R.controls = body:WaitForChild("Controls")
 	R.steps = body:FindFirstChild("Steps")
@@ -492,9 +627,11 @@ function LobbyController.Start()
 
 	while true do
 		updateVisibility() -- it also waits for the death and result cards
+		updateChat(visible == true)
 		if visible then
 			updateStatus()
 			updateYield()
+			fitHowTo() -- its rows arrive a frame after they are filled, and change with the device
 		end
 		task.wait(0.1)
 	end

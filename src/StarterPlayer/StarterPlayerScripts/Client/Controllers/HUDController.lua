@@ -48,6 +48,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -84,9 +85,11 @@ local STUD_TO_METERS = 0.28
 local COMPASS_WIDTH = 360 -- design px (UIBuilder)
 local COMPASS_SPAN = 150 -- degrees visible across the ribbon
 local LOW_HEALTH = tonumber(Config.Feedback and Config.Feedback.LowHealth) or 0.35 -- also the vignette and heartbeat
+local NEUTRAL_EDGE = Color3.fromRGB(12, 12, 14) -- the hurt flash and the low-health edge: dark, never red
 local LOW = { Health = LOW_HEALTH, Hunger = 0.25, Thirst = 0.25 }
 local REGEN_MIN = tonumber(Config.Survival.RegenMinStat) or 55 -- health only comes back above this on both meters
 local HINT_HOLD = 0.25 -- hints stay up this long after their source goes, so they never flicker (P8)
+local DRINK_HINT_MAX = 95 -- the "Drink" hint is not drawn at or above this thirst (a swimmer at 97 had it on screen)
 local WATER_THIRST = 50 -- Guidance: the water marker shows below this thirst
 local WATER_REARM_DROP = 5 -- after a drink that leaves you under WATER_THIRST, the marker returns this much thirstier
 local DRAW_GAUGE_X = 32 -- the bow's draw gauge stands this far right of the crosshair (design px), clear of a far target
@@ -167,6 +170,7 @@ local actionState = { sig = nil :: string?, token = 0, ref = nil :: any, refText
 	sigFor = nil :: { any }?, sigText = nil :: string? } -- sigFor / sigText: the segments the signature was last built from
 local actionPool = { keys = {} :: { any }, texts = {} :: { any }, used = {} :: { any } }
 local flashHint: { segments: { any }, untilT: number }? = nil -- a short HUD-side hint, e.g. [SHIFT] SPRINT at the horn
+local lastCardUp: boolean? = nil -- a death, result or victory card had the screen last frame (update)
 
 --------------------------------------------------------------------------------------------------------------------
 -- Helpers
@@ -1451,7 +1455,7 @@ local function showHit(info: any)
 	local token = hitToken
 	local killed = info.killed == true
 	local headshot = info.headshot == true
-	local color = if killed then C.Danger elseif headshot then C.AccentSoft else C.Text
+	local color = if killed then C.Gold elseif headshot then C.AccentSoft else C.Text -- (a kill was red: no red hit effects)
 	local length = if killed then 13 elseif headshot then 10 else 8
 	local from = if killed then 7 else 6
 	local to = if killed then 13 else 9
@@ -1590,11 +1594,17 @@ end
 local function updateInteract(show: boolean): boolean
 	local hint = ClientState.interactHint
 	local text = if show and type(hint) == "table" and type(hint.text) == "string" and hint.text ~= "" then hint.text else nil
+	local full = false
+	if text == "Drink" and (tonumber(player:GetAttribute("Thirst")) or 0) >= DRINK_HINT_MAX then
+		-- nothing to gain from a drink (a swimmer at thirst 97 had "E Drink" over the whole lake): no hint. The key
+		-- itself still drinks (InventoryController); "Fill bottle" is unaffected.
+		text, full = nil, true
+	end
 	local rawKey = if text then hint.key else nil
 	local now = os.clock()
 	if text then
 		interactSeen = { text = text, key = rawKey, at = now }
-	elseif show and interactSeen and now - interactSeen.at < HINT_HOLD then
+	elseif show and not full and interactSeen and now - interactSeen.at < HINT_HOLD then
 		text, rawKey = interactSeen.text, interactSeen.key
 	end
 	local key = if text then hintKeyFor(rawKey) else nil
@@ -1865,12 +1875,29 @@ local function update(dt: number)
 	local phase = GameState:GetAttribute("Phase") or "Lobby"
 	local spectating = ClientState.spectating ~= nil
 	local combat = ClientState.inArena and ClientState.alive and not spectating
-	local showTop = (phase == "Countdown" or phase == "Active") and (ClientState.inArena or spectating) and next(topSuppressed) == nil
+	-- A death, result or victory card has the screen (NotificationController.isCardUp): nothing of the round's HUD
+	-- shows through it. The winner is still a living contender in the arena while VICTORY is up, so "combat" alone
+	-- left the hotbar, the vitals, the crosshair, the hints and Roblox's own Take / Open prompts under the table.
+	local card = false
+	local notifications = Controllers and Controllers.NotificationController
+	if notifications and notifications.isCardUp then
+		local ok, up = pcall(notifications.isCardUp)
+		card = ok and up == true
+	end
+	if card ~= lastCardUp then
+		lastCardUp = card
+		ProximityPromptService.Enabled = not card -- this client only; back on the moment the card goes
+	end
+	local showHud = combat and not card
+	local showTop = (phase == "Countdown" or phase == "Active") and (ClientState.inArena or spectating)
+		and next(topSuppressed) == nil and not card
 
 	updateBorderState(phase)
 	setVisible(R.top, showTop)
-	setVisible(R.vitals, combat)
-	setVisible(R.hotbar, combat)
+	setVisible(R.vitals, showHud)
+	setVisible(R.hotbar, showHud)
+	-- on touch layouts the kill feed sits at the left, where the cards are: it waits for them (a PC's is in the corner)
+	setVisible(R.killFeed, not (card and layoutKey ~= "Desktop"))
 	if showTop then
 		updateCompass(camCF, phase)
 		infoClock -= dt
@@ -1886,14 +1913,14 @@ local function update(dt: number)
 	updateReason(combat)
 	updateShimmer(dt, combat)
 
-	local showCenter = combat and not ClientState.menuOpen
+	local showCenter = showHud and not ClientState.menuOpen
 	updateCrosshair(showCenter)
 	updateUse(showCenter)
 	updateDraw(showCenter)
 	local interacting = updateInteract(showCenter)
 	updateAction(showCenter and not interacting)
 	updateDamage(camCF)
-	updateVignettes(dt, t, combat)
+	updateVignettes(dt, t, showHud)
 	updateCore(combat)
 end
 
@@ -1938,6 +1965,41 @@ function HUDController.Start()
 	-- Roblox's player list opens by itself on a PC, in the corner the kill feed uses (one row per player, up to 48): off.
 	-- The Roblox menu keeps its own players page for muting and reporting.
 	setCoreGui(Enum.CoreGuiType.PlayerList, false)
+	-- Roblox's chat window opens by itself on a PC, over the top left (a late joiner's covered the left end of the
+	-- lobby's status line): closed until the player opens it with the chat button in Roblox's top bar or the / key.
+	-- Chat itself stays on; the button shows when there is something new.
+	setCore("ChatActive", false)
+	-- Roblox's chat opens its window again a moment after it has loaded (two real clients, 18 Nov: open 0.2 s after the
+	-- close above, and it stayed open in the lobby). For the first seconds it is closed again whenever it reads open,
+	-- until it has stayed closed for 3 s; from then on (8 s after chat first answered at the latest) it is the player's.
+	task.spawn(function()
+		local firstAnswer: number? = nil
+		local closedSince: number? = nil
+		for _ = 1, 400 do
+			local ok, active = pcall(function()
+				return StarterGui:GetCore("ChatActive")
+			end)
+			local t = os.clock()
+			if ok then
+				firstAnswer = firstAnswer or t
+				if active == true then
+					closedSince = nil
+					pcall(function()
+						StarterGui:SetCore("ChatActive", false)
+					end)
+				else
+					closedSince = closedSince or t
+					if t - closedSince >= 3 then
+						return
+					end
+				end
+				if t - firstAnswer > 8 then
+					return
+				end
+			end
+			task.wait(0.15)
+		end
+	end)
 
 	local pg = player:WaitForChild("PlayerGui") :: PlayerGui
 	playerGui = pg
@@ -1995,6 +2057,15 @@ function HUDController.Start()
 	R.vLow = vignette:WaitForChild("LowHealth")
 	R.vBorder = vignette:WaitForChild("Border")
 	R.vHurt = vignette:WaitForChild("Hurt")
+	-- No red hit effects (the age rating's "Mild" condition): the hurt flash and the low-health edge are built dark
+	-- red (UIBuilder); here they become a neutral dark edge. The Border vignette keeps the wall's own colour.
+	for _, holder in ipairs({ R.vLow, R.vHurt }) do
+		for _, edge in ipairs(holder:GetChildren()) do
+			if edge:IsA("GuiObject") then
+				edge.BackgroundColor3 = NEUTRAL_EDGE
+			end
+		end
+	end
 	R.cross = center:WaitForChild("Crosshair")
 	R.crossDot = R.cross:WaitForChild("Dot")
 	R.lines = { Up = R.cross.Up, Down = R.cross.Down, Left = R.cross.Left, Right = R.cross.Right }
@@ -2053,6 +2124,7 @@ function HUDController.Start()
 			for _, seg in ipairs(holder:GetChildren()) do
 				local bar = seg:FindFirstChild("Bar")
 				if bar then
+					bar.BackgroundColor3 = C.Warning -- amber, not the built red (no red hit effects)
 					table.insert(bars, { bar = bar, weight = tonumber(bar:GetAttribute("Weight")) or 1 })
 				end
 			end
@@ -2204,7 +2276,9 @@ function HUDController.Start()
 	end)
 	Net.event("KillFeed").OnClientEvent:Connect(addKill)
 
-	UserInputService.LastInputTypeChanged:Connect(refreshDeviceHints)
+	-- (the device kind, not every switch between keys and mouse: that one fires many times a second in a fight and
+	-- each time made the interaction hint tween again)
+	Input.deviceChanged:Connect(refreshDeviceHints)
 	glyphFor(Enum.KeyCode.E, "E")
 	if glyphs and glyphs.changed and type(glyphs.changed.Connect) == "function" then
 		glyphs.changed:Connect(refreshDeviceHints) -- a PlayStation pad was plugged in: the key caps follow

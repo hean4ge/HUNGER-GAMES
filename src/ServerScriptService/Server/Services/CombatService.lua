@@ -48,6 +48,10 @@
 	on screen (DUMMY_BAR_SIZE) and hide while the contender stands within DUMMY_BAR_HIDE studs, where they would sit on
 	the HUD's compass.
 	Template: ServerStorage.Dev.TrainingDummy (built by ServerStorage.WorldGen.DummyBuilder).
+	Melee reach: honest reach plus half a stud, plus what the target moved on the server in the last quarter second and
+	the attacker in the last tenth (meleeFront, recentTravel), never more than range + MeleeLagTolerance + MeleeHitRadius.
+	Defeat: a body at zero health stays in one piece (BreakJointsOnDeath off, set here as characters load), topples, fades
+	on every client and is removed here DEFEAT_FALL + DEFEAT_FADE seconds after it fell (watchDefeat).
 	Melee cooldown: the same rule as the attacker's client (CombatController: nextActionAt = start + total). The next swing
 	may START once the cooldown of the weapon that swung last has passed since that swing started, whatever is in hand
 	now (trySwing). Refusals are counted by reason in CombatService._refusals (and printed in Studio).
@@ -78,24 +82,33 @@ local FISTS = ItemDefs.get("fists")
 local MELEE_FACING_DOT = -0.2 -- flat swing direction vs. character facing; lenient because the server's view lags
 -- Melee reach. The attacker's screen shows a hit when CombatController's sphere (MeleeHitRadius * MELEE_PREDICT_RADIUS)
 -- swept `range` studs from the first-person camera (MELEE_CAMERA_BEHIND behind the head) touches someone. The server
--- sweeps from the head and reaches MELEE_REACH_ALLOWANCE studs further for latency, plus what the attacker closes in
--- MELEE_LAG_TIME (the server sees a running attacker up to about 0.25 s behind where their screen had them). A target
--- that can move (a player) was on the attacker's screen up to interpolation plus ping ago and may have backed off
--- several studs since, so a hit seen on one is checked out to range + MeleeLagTolerance + MeleeHitRadius. The front
--- never passes that, since the attacker's speed is reported by their own client.
+-- sweeps from the head and reaches MELEE_REACH_ALLOWANCE studs further (the small difference between the server's head
+-- and the client's camera), plus a lag allowance the server measures itself (recentTravel): how far the target moved,
+-- on the server, in the last MELEE_LAG_TIME seconds (the attacker's screen showed it where it was up to interpolation
+-- plus ping ago), and how far the attacker moved in the last MELEE_OWN_LAG (the server sees the attacker only a moment
+-- behind their own screen: their position and their swing travel together). Neither can differ from what the attacker
+-- saw by more than the body moved in that time. Two players standing still get no lag allowance at all: honest reach
+-- plus MELEE_REACH_ALLOWANCE, whatever the client claims (a sword, range 8: 10.5 studs root to root; 11 is refused).
+-- The allowance never passes the old flat one (range + MeleeLagTolerance + MeleeHitRadius), which a target walking
+-- away already uses up. (It was flat: any claimed hit on a player was checked out to that front, so a modified client
+-- landed a sword from about 15 studs on a player who had not moved. The attacker's part used to be the speed their own
+-- client reported.)
 -- MELEE_REACH_ALLOWANCE was 1: with it a sword (range 8) standing still was confirmed on a still target 11 studs away,
--- root to root, a full stud past what an honest client's trace can touch (10). Half a stud keeps the slack for the
--- small difference between the server's head and the client's camera, and 11 is refused whatever the client claims.
+-- root to root, a full stud past what an honest client's trace can touch (10).
 local MELEE_PREDICT_RADIUS = 0.85
 local MELEE_CAMERA_BEHIND = 0.5
 local MELEE_REACH_ALLOWANCE = 0.5
 local MELEE_LAG_TIME = 0.25
+local MELEE_OWN_LAG = 0.1
+local TRAVEL_STEP = 0.05 -- seconds between the position samples recentTravel reads
 local RANGED_FACING_DOT = -0.35
 local HEAVY_SWING_COOLDOWN = 0.75 -- weapons at least this slow use the heavy swing sound
 local BOW_RECOVER = 0.32 -- seconds after a shot before the next draw can begin (CombatController's BOW_RECOVER)
 local CHARGE_JITTER = 0.15 -- seconds of draw time forgiven for network jitter (not banked from shot to shot)
 local SWING_LATE = 0.35 -- seconds a swing may arrive late and still be timed from when its client says it started
 local START_MIN_GAP = 0.3 -- seconds between two swing starts relayed for one attacker
+local DEFEAT_FALL = 1.8 -- seconds a defeated body is seen falling before it fades (CharacterVisuals has the same two)
+local DEFEAT_FADE = 1.0 -- seconds the fade takes; after it the body is gone
 local ACTION_RANGE = 220 -- studs: CombatAction reaches the clients listening this close to the attacker
 local SOUND_MARGIN = 30 -- studs past a sound's roll-off distance that still get it (the listener may be moving)
 
@@ -110,10 +123,12 @@ type PlayerState = {
 	nextSwingStart: number, -- server time (workspace:GetServerTimeNow) from which the next swing may start (trySwing)
 	startAt: number?, -- when the last swing start was relayed (MeleeSwing "Start"), and for which weapon
 	startItem: string?,
+	startGap: number?, -- seconds before another start is relayed if no strike follows that one (onMeleeStart)
 	nextThrow: number,
 	bowFree: number, -- os.clock() from which the next draw may count (the last shot + BOW_RECOVER)
 	drawStart: number?,
 	drawItem: string?,
+	drawShown: boolean?, -- the players near were told of the draw on record ("Draw" on CombatAction)
 }
 local playerState: { [Player]: PlayerState } = {}
 
@@ -172,7 +187,9 @@ end
 local function trySwing(st: PlayerState, def: any, now: number, claimedStart: any): boolean
 	local latest = now - (def.windup or 0.1)
 	local start = latest
-	if Util.isFiniteNumber(claimedStart) then
+	-- (not Util.isFiniteNumber: server time is Unix time, about 1.8e9, past that check's 1e9 limit, so every claim was
+	-- thrown away; the clamp bounds whatever is sent, infinity included, and NaN is kept out here)
+	if type(claimedStart) == "number" and claimedStart == claimedStart then
 		start = math.clamp(claimedStart, latest - SWING_LATE, latest)
 	end
 	if start < st.nextSwingStart - (CombatConfig.CooldownJitter or 0.12) then
@@ -452,11 +469,45 @@ local function bodyOnlyPart(inst: Instance)
 	end
 end
 
+-- Defeat, kept clearly unrealistic (the game's age rating): the body stays in one piece (no limbs coming off), topples
+-- over, fades out on every client (CharacterVisuals: DEFEAT_FALL seconds after it fell, over DEFEAT_FADE) and is then
+-- gone for good here too: invisible, held still, and out of every ray, sweep and touch, so nothing sticks in or bumps
+-- into a body nobody can see. Nothing is left lying. The Roll Call's figure is a copy taken the moment they fell
+-- (ArenaService.FallenSnapshots), not this body. PlayerService loads the next character RespawnDelay after the fall.
+local function removeFallenBody(character: Model)
+	if not character.Parent then
+		return
+	end
+	for _, inst in ipairs(character:GetDescendants()) do
+		if inst:IsA("BasePart") then
+			inst.Anchored = true
+			inst.CanCollide = false
+			inst.CanQuery = false
+			inst.CanTouch = false
+			inst.Transparency = 1
+		elseif inst:IsA("Decal") or inst:IsA("Texture") then
+			inst.Transparency = 1
+		end
+	end
+end
+
+local function watchDefeat(character: Model)
+	local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+	if not (humanoid and humanoid:IsA("Humanoid")) then
+		return
+	end
+	humanoid.BreakJointsOnDeath = false
+	humanoid.Died:Once(function()
+		task.delay(DEFEAT_FALL + DEFEAT_FADE, removeFallenBody, character)
+	end)
+end
+
 local function watchHitBox(character: Model)
 	for _, inst in ipairs(character:GetDescendants()) do
 		bodyOnlyPart(inst)
 	end
 	character.DescendantAdded:Connect(bodyOnlyPart) -- (accessories arrive after the body; gone with the character)
+	task.spawn(watchDefeat, character)
 end
 
 local function watchPlayerHitBox(player: Player)
@@ -924,9 +975,9 @@ local function bodyFromPart(part: Instance, targets: { Instance }): (Humanoid?, 
 end
 
 -- What the swing lands on. First a thin ray along the look: whoever is under the crosshair, out to the sweep's front.
--- Only when that touches nobody, the forgiving sphere sweep (first body touched), then a point-blank overlap check
--- (Spherecast skips parts that already overlap its start). A line-of-sight check so nobody is hit through a wall, then
--- a thin ray for the world sound. `reach` is the sweep's length: its front is reach + radius from the origin.
+-- Only when that touches nobody it can see, the forgiving sphere sweep (first body touched), then a point-blank overlap
+-- check (Spherecast skips parts that already overlap its start). A line-of-sight check on each so nobody is hit through
+-- a wall, then a thin ray for the world sound. `reach` is the sweep's length: its front is reach + radius from the origin.
 -- Only living bodies count (one that just fell neither takes the swing nor blocks it). `only` (the body the attacker's
 -- own trace touched): that body is checked and no other, so a bystander in the path never takes the hit.
 -- worldOnly skips the characters (the attacker's own trace missed them) and keeps the world sound.
@@ -948,7 +999,19 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 				candidate = { humanoid = humanoid, model = model, part = bodyPart, position = aimed.Position }
 			end
 		end
-		local swept = if candidate then nil else workspace:Spherecast(origin, radius, direction * reach, params)
+		if candidate then
+			-- the body under the crosshair, if the way to that point is clear. If it is not (the ray above passes
+			-- through cover and found a hidden part of them), the ball below still gets its turn: it may touch an arm
+			-- that is in the open, or somebody else. (Going straight to the world ray made such a swing hit the tree.)
+			local offset = candidate.position - origin
+			local distance = offset.Magnitude
+			local blocked = if distance > 0.5 then workspace:Raycast(origin, offset, world) else nil
+			if blocked == nil or blocked.Distance >= distance - 0.75 then
+				return candidate
+			end
+			candidate = nil
+		end
+		local swept = workspace:Spherecast(origin, radius, direction * reach, params)
 		if swept then
 			local humanoid, model, bodyPart = bodyFromPart(swept.Instance, targets)
 			if humanoid and humanoid.Health > 0 then
@@ -992,19 +1055,92 @@ local function meleeTrace(character: Model, origin: Vector3, direction: Vector3,
 	return nil
 end
 
--- Whether a target that can move (a player; training dummies are anchored) is in front of the swing.
-local function movableTargetAhead(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number): boolean
-	for _, target in ipairs(CombatService.getTargets(character)) do
+-- Where every body that can be hit was over the last MELEE_LAG_TIME seconds, as the server saw it (a sample every
+-- TRAVEL_STEP while a round is Active). The lag allowance of a swing is read from this, never from what a client reports.
+type Trail = { times: { number }, points: { Vector3 } }
+local trails: { [Instance]: Trail } = {}
+local trailAt = 0
+
+local function sampleTrails(now: number)
+	if now - trailAt < TRAVEL_STEP then
+		return
+	end
+	trailAt = now
+	if not phaseActive() then
+		if next(trails) ~= nil then
+			table.clear(trails)
+		end
+		return
+	end
+	local keep: { [Instance]: Trail } = {}
+	local oldest = now - MELEE_LAG_TIME - TRAVEL_STEP
+	for _, model in ipairs(CombatService.getTargets(nil)) do
+		local root = model:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			local trail = trails[model] or { times = {}, points = {} }
+			while #trail.times > 0 and trail.times[1] < oldest do
+				table.remove(trail.times, 1)
+				table.remove(trail.points, 1)
+			end
+			table.insert(trail.times, now)
+			table.insert(trail.points, root.Position)
+			keep[model] = trail
+		end
+	end
+	trails = keep
+end
+
+-- How far a body is now from where the server had it at any moment of the last `window` seconds (at most
+-- MELEE_LAG_TIME; studs; 0 for one that stood still, or that the server has only just met).
+local function recentTravel(model: Instance?, now: number, window: number): number
+	local trail = if model then trails[model] else nil
+	local root = if model then model:FindFirstChild("HumanoidRootPart") else nil
+	if not trail or not (root and root:IsA("BasePart")) then
+		return 0
+	end
+	local at = root.Position
+	local oldest = now - window - TRAVEL_STEP
+	local far = 0
+	for i, t in ipairs(trail.times) do
+		if t >= oldest then
+			far = math.max(far, (trail.points[i] - at).Magnitude)
+		end
+	end
+	return if Util.isFiniteNumber(far) then far else 0
+end
+
+-- The most any body in front of the swing moved lately (for a client that names no target).
+local function travelAhead(character: Model, origin: Vector3, direction: Vector3, reach: number, radius: number, now: number): number
+	local most = 0
+	for _, target in ipairs(CombatService.getTargets(character, true)) do
 		local root = target:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") and not root.Anchored then
+		if root and root:IsA("BasePart") then
 			local offset = root.Position - origin
 			local along = offset:Dot(direction)
 			if along > 0 and along < reach + 3 and (offset - direction * along).Magnitude < radius + 3 then
-				return true
+				most = math.max(most, recentTravel(target, now, MELEE_LAG_TIME))
 			end
 		end
 	end
-	return false
+	return most
+end
+
+-- The front of the server's sweep for one swing (studs from the attacker's head): honest reach plus
+-- MELEE_REACH_ALLOWANCE, plus (only for a swing the attacker's screen showed hitting) what the attacker and the target
+-- moved lately, never past the old flat allowance. Returns (front, honest + allowance, the cap, attacker's travel,
+-- target's travel).
+local function meleeFront(def: any, character: Model, origin: Vector3, direction: Vector3, predicted: boolean, claimed: Instance?): (number, number, number, number, number)
+	local range = def.range or 5
+	local radius = CombatConfig.MeleeHitRadius
+	local cap = range + CombatConfig.MeleeLagTolerance + radius
+	local still = math.min(range + radius * MELEE_PREDICT_RADIUS - MELEE_CAMERA_BEHIND + MELEE_REACH_ALLOWANCE, cap)
+	if not predicted then
+		return still, still, cap, 0, 0
+	end
+	local now = os.clock()
+	local own = recentTravel(character, now, MELEE_OWN_LAG)
+	local theirs = if claimed then recentTravel(claimed, now, MELEE_LAG_TIME) else travelAhead(character, origin, direction, cap, radius, now)
+	return math.min(still + own + theirs, cap), still, cap, own, theirs
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -1013,8 +1149,8 @@ end
 
 -- MeleeSwing("Start", variant): a swing began on the attacker's client. The others near them are told now, so they see
 -- it wind up before the blow lands (told at the strike, the victim was hurt first and saw the swing afterwards). Cheap:
--- no trace, one small message to the players in range, at most one every START_MIN_GAP per attacker, and not while the
--- swing gate is closed.
+-- no trace, one small message to the players in range, at most one per swing (per weapon cooldown when no strike
+-- follows, never more often than START_MIN_GAP), and not while the swing gate is closed.
 local function onMeleeStart(player: Player, variant: any)
 	if not Net.rateLimit(player, "MeleeStart", 5, 3) then
 		return
@@ -1032,11 +1168,15 @@ local function onMeleeStart(player: Player, variant: any)
 	if now < st.nextSwingStart - (CombatConfig.CooldownJitter or 0.12) then
 		return -- (the strike, if it is accepted after all, announces the swing itself)
 	end
-	if st.startAt and now - st.startAt < START_MIN_GAP then
+	-- One relayed start per swing: an accepted strike clears startAt, so an honest attacker never waits here. A start
+	-- with no strike after it (a modified client showing wind-ups it never swings) holds the next one back for that
+	-- weapon's cooldown, not START_MIN_GAP: a fake mace wind-up every 1 s instead of three a second.
+	if st.startAt and now - st.startAt < (st.startGap or START_MIN_GAP) then
 		return
 	end
 	st.startAt = now
 	st.startItem = def.id
+	st.startGap = math.max(START_MIN_GAP, (def.cooldown or 0.5) - (CombatConfig.CooldownJitter or 0.12))
 	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), def.windup or 0.1)
 end
 
@@ -1087,19 +1227,11 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	end
 
 	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
-	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE, plus lag, past the front of the attacker's own
-	local range = def.range or 5
+	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE past the front of the attacker's own, plus what the
+	-- attacker and the target moved, on the server, in the last MELEE_LAG_TIME seconds (meleeFront)
 	local radius = CombatConfig.MeleeHitRadius
-	local maxFront = range + CombatConfig.MeleeLagTolerance + radius
-	local closing = ctx.root.AssemblyLinearVelocity:Dot(direction)
-	closing = if Util.isFiniteNumber(closing) then math.clamp(closing, 0, Config.Movement.SprintSpeed or 21) else 0
-	local front = range + radius * MELEE_PREDICT_RADIUS - MELEE_CAMERA_BEHIND + MELEE_REACH_ALLOWANCE
-		+ closing * MELEE_LAG_TIME
-	if predictedHit == true and movableTargetAhead(ctx.character, origin, direction, maxFront, radius) then
-		front = maxFront
-	end
-	front = math.min(front, maxFront)
 	local claimed = if typeof(target) == "Instance" and target:IsA("Model") then target else nil
+	local front = meleeFront(def, ctx.character, origin, direction, predictedHit == true, claimed)
 	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true, claimed)
 	if not hit then
 		if predictedHit == true then
@@ -1147,7 +1279,12 @@ local function validOrigin(ctx: Context, origin: any, targets: { Instance }): Ve
 end
 
 local function onRangedRelease(player: Player, shotId: any, origin: any, direction: any, charge: any, mode: any)
-	if not Net.rateLimit(player, "RangedRelease", 8, 4) then
+	-- A "Draw" over the limit is still put on record (below), only not relayed: quick clicks send Draw and Cancel in
+	-- pairs, 10 to 12 messages a second, and when the limiter dropped the Draw of the click that was then held, the
+	-- full-draw shot after it was refused (BowNoDraw) while the archer saw their own arrow fly. Recording a draw is
+	-- two assignments and can only restart the sender's own charge.
+	local limited = not Net.rateLimit(player, "RangedRelease", 8, 4)
+	if limited and mode ~= "Draw" then
 		return
 	end
 	if mode ~= "Fire" and mode ~= "Throw" and mode ~= "Draw" and mode ~= "Cancel" then
@@ -1164,9 +1301,17 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 
 	if mode == "Draw" then
 		if def and def.kind == "Bow" and hasItem(player, def.ammo or "arrow", 1) then
+			-- told once per draw: a "Draw" sent again while the others already see this bow drawn (a modified client
+			-- restarting the creak eight times a second, or an honest one whose "Cancel" the limiter dropped) only
+			-- restarts the charge
+			local shown = st.drawStart ~= nil and st.drawItem == itemId and st.drawShown == true
 			st.drawStart = now
 			st.drawItem = itemId
-			broadcastAction(player, "Draw", itemId)
+			if not shown and not limited then
+				broadcastAction(player, "Draw", itemId)
+				shown = true
+			end
+			st.drawShown = shown
 		end
 		return
 	elseif mode == "Cancel" then
@@ -1302,6 +1447,13 @@ CombatService._trace = meleeTrace
 CombatService._swingVariant = swingVariant
 CombatService._trySwing = trySwing
 CombatService._refusals = refusals
+CombatService._stateOf = function(player: Player): PlayerState? -- (the swing and draw record of one player, to read)
+	return playerState[player]
+end
+CombatService._meleeFront = meleeFront -- (def, character, origin, direction, predicted, claimed) -> front, still, cap, own, theirs
+CombatService._recentTravel = function(model: Instance?, window: number?): number
+	return recentTravel(model, os.clock(), window or MELEE_LAG_TIME)
+end
 
 --------------------------------------------------------------------------------------------------------------------
 -- Lifecycle
@@ -1339,6 +1491,9 @@ function CombatService.Start()
 		end)
 	end
 	RunService.Heartbeat:Connect(updateDummies)
+	RunService.Heartbeat:Connect(function()
+		sampleTrails(os.clock())
+	end)
 	refreshDummies()
 end
 

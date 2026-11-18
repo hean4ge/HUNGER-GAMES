@@ -135,8 +135,9 @@ function FallenSnapshots.capture(player: Player, character: Model?): string
 			description = desc
 		end
 	end
-	-- the live character may be gone in a moment (death, leaving): copy it now as the fallback
-	local fallback = if description then nil else cloneLive(character)
+	-- the live character may be gone in a moment (death, and at once when the contender is leaving the game): copy it
+	-- now, while it exists, as the fallback for a build that fails
+	local fallback = cloneLive(character)
 	local userId = player.UserId
 	task.spawn(function()
 		local model: Model? = nil
@@ -164,7 +165,13 @@ function FallenSnapshots.capture(player: Player, character: Model?): string
 			model = fallback or cloneLive(character)
 		end
 		if not model then
-			warn("[FallenSnapshots] couldn't snapshot " .. player.Name)
+			-- A contender who left with the character already gone has nothing to copy: the Roll Call names them
+			-- without a figure, and that is not worth a warning on every leave. (The short wait lets a leave that is
+			-- still being handled finish, so the check below sees it.)
+			task.wait(0.5)
+			if player.Parent == Players then
+				warn("[FallenSnapshots] couldn't snapshot " .. player.Name)
+			end
 			return
 		end
 		finish(model, name, player, seq)

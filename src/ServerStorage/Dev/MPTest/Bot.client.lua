@@ -194,6 +194,91 @@ UIS.WindowFocusReleased:Connect(function()
 	L("WINDOW focus released")
 end)
 
+-- a defeated body as THIS client draws it: one line per sample for 4 s from the moment its humanoid died here.
+-- eff = the transparency this client draws a part with (its own and the local modifier together): 0 solid, 1 gone;
+-- the range is over the body's parts (the root part and a held item are left out). upY = the root's up vector (1 =
+-- upright, 0 = lying flat). motors = joints still holding the body in one piece.
+local function bodyLine(c: Model): string
+	local root = c:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local head = c:FindFirstChild("Head") :: BasePart?
+	local n, vis, motors, collide, query = 0, 0, 0, 0, 0
+	local effMin, effMax = 1, 0
+	local playing = {}
+	local died = "none"
+	-- one piece: how far the farthest body part is from the chest (an R15 body: about 3 studs; limbs coming off: more),
+	-- and the joints of every kind that hold it (newer avatars use AnimationConstraints and ball sockets, not Motor6Ds)
+	local chest = (c:FindFirstChild("UpperTorso") or root) :: BasePart?
+	local spread, anim, socket = 0, 0, 0
+	for _, d in ipairs(c:GetDescendants()) do
+		if d:IsA("AnimationConstraint") then
+			anim += 1
+		elseif d:IsA("BallSocketConstraint") then
+			socket += 1
+		end
+		if d:IsA("BasePart") then
+			if d.Name ~= "HumanoidRootPart" and d:FindFirstAncestor("EquippedModel") == nil then
+				if chest then
+					spread = math.max(spread, (d.Position - chest.Position).Magnitude)
+				end
+				n += 1
+				local eff = 1 - (1 - d.Transparency) * (1 - d.LocalTransparencyModifier)
+				effMin, effMax = math.min(effMin, eff), math.max(effMax, eff)
+				if eff < 0.95 then
+					vis += 1
+				end
+				if d.CanCollide then
+					collide += 1
+				end
+				if d.CanQuery then
+					query += 1
+				end
+			end
+		elseif d:IsA("Motor6D") then
+			if d.Part0 and d.Part1 and d.Enabled then
+				motors += 1
+			end
+		elseif d:IsA("Sound") then
+			if d.Name == "Died" then
+				died = string.format("vol=%.2f playing=%s", d.Volume, tostring(d.IsPlaying))
+			end
+			if d.IsPlaying and d.Volume > 0.01 then
+				table.insert(playing, d.Name)
+			end
+		end
+	end
+	return string.format("inWorld=%s parts=%d visible=%d eff=%.2f..%.2f upY=%.2f headAboveRoot=%.2f rootY=%.1f anchored=%s spread=%.2f joints=%d/%d/%d collide=%d query=%d diedSound=[%s] playing=[%s]",
+		tostring(c:IsDescendantOf(workspace)), n, vis, effMin, effMax, if root then root.CFrame.UpVector.Y else -9,
+		if root and head then head.Position.Y - root.Position.Y else -9, if root then root.Position.Y else -9, tostring(root and root.Anchored), spread, motors,
+		anim, socket, collide, query, died, table.concat(playing, ","))
+end
+local function watchBody(name: string, c: Model)
+	task.spawn(function()
+		local t0 = os.clock()
+		for _, at in ipairs({ 0.05, 0.4, 0.8, 1.2, 1.7, 2.1, 2.4, 2.7, 3.0, 3.4, 3.9 }) do
+			local w = at - (os.clock() - t0)
+			if w > 0 then
+				task.wait(w)
+			end
+			L(string.format("BODY %s +%.2f %s", name, os.clock() - t0, bodyLine(c)))
+		end
+	end)
+end
+local function hookOwn(c: Model)
+	task.spawn(function()
+		local hum = c:WaitForChild("Humanoid", 10) :: Humanoid?
+		if hum then
+			hum.Died:Connect(function()
+				L("ME-DIED")
+				watchBody(lp.Name, c)
+			end)
+		end
+	end)
+end
+lp.CharacterAdded:Connect(hookOwn)
+if lp.Character then
+	hookOwn(lp.Character)
+end
+
 -- what this client sees of the other players ---------------------------------------------------------------------------
 local function hookCharacter(p: Player, c: Model)
 	L("SEE-CHAR+ " .. p.Name)
@@ -211,7 +296,11 @@ local function hookCharacter(p: Player, c: Model)
 		end)
 		hum.Died:Connect(function()
 			L("SEE-DIED " .. p.Name)
+			watchBody(p.Name, c)
 		end)
+		task.wait(1.5)
+		local cry = c:FindFirstChild("Died", true)
+		L(string.format("SEE-DIEDSOUND %s %s", p.Name, if cry and cry:IsA("Sound") then string.format("vol=%.2f", cry.Volume) else "no Died sound"))
 	end)
 	for _, n in ipairs({ "Stance", "EquippedItem" }) do
 		c:GetAttributeChangedSignal(n):Connect(function()
@@ -260,8 +349,26 @@ if ClientState and ClientState.hitConfirmed then
 	end)
 end
 local swingOn: { [Player]: boolean } = {}
+local bowKey: { [Player]: string } = {}
 local lastShot, lastSpec, lastCamType, lastSubject = false, nil :: any, "", nil :: any
 RunService.Heartbeat:Connect(function()
+	-- the bow this client draws on other bodies (CharacterVisuals._bowOf): a line whenever it changes (pull in tenths)
+	if Visuals and Visuals._bowOf then
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= lp and p.Character then
+				local ok, b = pcall(Visuals._bowOf, p.Character)
+				if ok and b then
+					local pull = tonumber(b.pull) or 0
+					local key = string.format("%s|%s|%s|%d", tostring(b.bow), tostring(b.drawing), tostring(b.string), math.floor(pull * 10 + 0.001))
+					if bowKey[p] ~= key then
+						bowKey[p] = key
+						L(string.format("SEE-BOW %s bow=%s drawing=%s string=%s pull=%.2f arm=%.2f aim=%.2f hold=%.2f", p.Name, tostring(b.bow), tostring(b.drawing),
+							tostring(b.string), pull, tonumber(b.arm) or -1, tonumber(b.aim) or -1, tonumber(b.hold) or -1))
+					end
+				end
+			end
+		end
+	end
 	if Visuals and Visuals._swingOf then
 		for _, p in ipairs(Players:GetPlayers()) do
 			if p ~= lp and p.Character then
@@ -468,6 +575,363 @@ local function guiTexts(filter: string?): { string }
 			end
 		end
 	end
+	return out
+end
+
+-- red on this client's screen (the age rating: no red hit effects): every shown thing of the game's own GUI whose
+-- colour is red (strong red, green and blue under half of it), with what it is. Sampled by itself a moment after
+-- this client is hurt, lands a hit, dies or gets a kill feed line.
+local function isRed(c: Color3): boolean
+	return c.R >= 0.35 and c.G < c.R * 0.5 and c.B < c.R * 0.5
+end
+local function rgb(c: Color3): string
+	return string.format("rgb(%d,%d,%d)", c.R * 255 + 0.5, c.G * 255 + 0.5, c.B * 255 + 0.5)
+end
+local function redScan(): { string }
+	local out = {}
+	local pg = lp:FindFirstChildOfClass("PlayerGui")
+	if not pg then
+		return out
+	end
+	for _, d in ipairs(pg:GetDescendants()) do
+		local hit: string? = nil
+		local holder: Instance = d
+		if d:IsA("GuiObject") then
+			if (d:IsA("ImageLabel") or d:IsA("ImageButton")) and d.Image ~= "" and d.ImageTransparency < 0.97 and isRed(d.ImageColor3) then
+				hit = string.format("image %s a=%.2f", rgb(d.ImageColor3), 1 - d.ImageTransparency)
+			elseif (d:IsA("TextLabel") or d:IsA("TextButton")) and d.Text ~= "" and d.TextTransparency < 0.9 then
+				if isRed(d.TextColor3) then
+					hit = string.format("text '%s' %s", string.sub(d.Text, 1, 28), rgb(d.TextColor3))
+				elseif d.RichText then
+					for hex in string.gmatch(d.Text, 'color="#(%x%x%x%x%x%x)"') do
+						local okHex, col = pcall(Color3.fromHex, hex)
+						if okHex and isRed(col) then
+							hit = "rich text #" .. hex .. " in '" .. string.sub((string.gsub(d.Text, "<[^>]+>", "")), 1, 40) .. "'"
+							break
+						end
+					end
+				end
+			end
+			if not hit and d.BackgroundTransparency < 0.97 and isRed(d.BackgroundColor3) then
+				hit = string.format("fill %s a=%.2f", rgb(d.BackgroundColor3), 1 - d.BackgroundTransparency)
+			end
+		elseif d:IsA("UIStroke") and d.Transparency < 0.9 and isRed(d.Color) and d.Parent then
+			hit = string.format("stroke %s a=%.2f", rgb(d.Color), 1 - d.Transparency)
+			holder = d.Parent
+		end
+		if hit and shown(holder) then
+			local layer = holder:FindFirstAncestorWhichIsA("LayerCollector")
+			if not (layer and layer.Name == "MPT") then
+				table.insert(out, (if layer then layer.Name else "?") .. "/" .. (if holder.Parent then holder.Parent.Name .. "/" else "") .. holder.Name .. " " .. hit)
+				if #out >= 14 then
+					break
+				end
+			end
+		end
+	end
+	return out
+end
+-- the screen-edge effects as drawn right now (HUDFX.Vignette: Hurt, LowHealth, Border), with their colour
+local function vignetteNow(): string
+	local pg = lp:FindFirstChildOfClass("PlayerGui")
+	local v = pg and pg:FindFirstChild("HUDFX") and pg.HUDFX:FindFirstChild("Vignette")
+	if not v then
+		return "no vignette"
+	end
+	local out = {}
+	for _, holder in ipairs(v:GetChildren()) do
+		if holder:IsA("GuiObject") then
+			local strongest, colour = 0, nil
+			for _, edge in ipairs(holder:GetChildren()) do
+				if edge:IsA("GuiObject") and 1 - edge.BackgroundTransparency > strongest then
+					strongest, colour = 1 - edge.BackgroundTransparency, edge.BackgroundColor3
+				end
+			end
+			local group = if holder:IsA("CanvasGroup") then 1 - holder.GroupTransparency else 1
+			if holder.Visible and strongest * group > 0.02 and colour then
+				table.insert(out, string.format("%s %s strength=%.2f", holder.Name, rgb(colour), strongest * group))
+			end
+		end
+	end
+	return if #out > 0 then table.concat(out, ", ") else "none showing"
+end
+local function redAt(tag: string, delays: { number })
+	for _, dl in ipairs(delays) do
+		task.delay(dl, function()
+			local list = redScan()
+			L(string.format("RED[%s +%.2f] n=%d %s | edges: %s", tag, dl, #list, table.concat(list, " ; "), vignetteNow()))
+		end)
+	end
+end
+for name, spec in pairs({ DamageTaken = { "hurt", { 0.08, 0.35 } }, HitConfirm = { "hit", { 0.08, 0.3 } }, YouDied = { "died", { 0.3, 1.5, 3.0 } },
+	KillFeed = { "killfeed", { 0.4 } } } :: { [string]: any }) do
+	local ev = Remotes:FindFirstChild(name)
+	if ev and ev:IsA("RemoteEvent") then
+		ev.OnClientEvent:Connect(function()
+			redAt(spec[1], spec[2])
+		end)
+	end
+end
+
+-- the round's HUD against the death, result and victory cards
+local Notifications = req(Controllers, "NotificationController")
+local Recap = req(Controllers, "FallenRecapController")
+local function hudInfo(): { [string]: any }
+	local pg = lp:FindFirstChildOfClass("PlayerGui")
+	local out: { [string]: any } = { pps = game:GetService("ProximityPromptService").Enabled }
+	if Notifications and Notifications.isCardUp then
+		local ok, up = pcall(Notifications.isCardUp)
+		out.card = ok and up == true
+	end
+	if not pg then
+		return out
+	end
+	local hudRoot = pg:FindFirstChild("HUD") and pg.HUD:FindFirstChild("Root")
+	if hudRoot then
+		for _, n in ipairs({ "Hotbar", "Vitals", "Top", "KillFeed" }) do
+			local g = hudRoot:FindFirstChild(n)
+			out[n] = g ~= nil and shown(g)
+		end
+	end
+	local centre = pg:FindFirstChild("HUDFX") and pg.HUDFX:FindFirstChild("Root") and pg.HUDFX.Root:FindFirstChild("Center")
+	local names = {}
+	if centre then
+		for _, g in ipairs(centre:GetChildren()) do
+			if g:IsA("GuiObject") and shown(g) then
+				table.insert(names, g.Name)
+			end
+		end
+	end
+	table.sort(names)
+	out.centre = table.concat(names, ",")
+	out.edges = vignetteNow()
+	-- Take / Open prompts in reach of this character (they draw only while the prompt service is on)
+	local _, root = myParts()
+	local near = 0
+	if root then
+		for _, tag in ipairs({ "LootPrompt", "TakeAllPrompt" }) do
+			for _, d in ipairs(game:GetService("CollectionService"):GetTagged(tag)) do
+				if d:IsA("ProximityPrompt") and d.Enabled and d:IsDescendantOf(workspace) then
+					local holder = d.Parent
+					local pos = if holder and holder:IsA("BasePart") then holder.Position elseif holder and holder:IsA("Attachment") then holder.WorldPosition
+						elseif holder and holder:IsA("Model") then holder:GetPivot().Position else nil
+					if pos and (pos - root.Position).Magnitude <= d.MaxActivationDistance then
+						near += 1
+					end
+				end
+			end
+		end
+	end
+	out.promptsInReach = near
+	return out
+end
+
+-- Roblox's chat window and the lobby's status line. `open` true or false opens or closes the window first.
+local function chatInfo(open: boolean?): { [string]: any }
+	local SG = game:GetService("StarterGui")
+	local TCS = game:GetService("TextChatService")
+	if open ~= nil then
+		pcall(function()
+			SG:SetCore("ChatActive", open)
+		end)
+		task.wait(0.8)
+	end
+	local out: { [string]: any } = {}
+	local ok, active = pcall(function()
+		return SG:GetCore("ChatActive")
+	end)
+	out.active = if ok then active else "error: " .. tostring(active)
+	out.coreEnabled = SG:GetCoreGuiEnabled(Enum.CoreGuiType.Chat)
+	local w = TCS:FindFirstChildOfClass("ChatWindowConfiguration")
+	if w then
+		out.windowEnabled = w.Enabled
+		pcall(function()
+			out.winX, out.winW, out.widthScale = w.AbsolutePosition.X, w.AbsoluteSize.X, w.WidthScale
+		end)
+	end
+	local bar = TCS:FindFirstChildOfClass("ChatInputBarConfiguration")
+	out.barEnabled = bar and bar.Enabled
+	local pg = lp:FindFirstChildOfClass("PlayerGui")
+	local lobby = pg and pg:FindFirstChild("Lobby")
+	local status = lobby and lobby:FindFirstChild("Root") and lobby.Root:FindFirstChild("Status")
+	local pill = status and status:FindFirstChild("Pill")
+	if pill and pill:IsA("GuiObject") then
+		out.lineShown = shown(pill)
+		out.lineX, out.lineW = pill.AbsolutePosition.X, pill.AbsoluteSize.X
+		out.overLine = out.active == true and out.lineShown == true and type(out.winX) == "number" and (out.winW or 0) > 0 and out.winX + out.winW > out.lineX
+	end
+	local cam = workspace.CurrentCamera
+	out.view = if cam then cam.ViewportSize.X else -1
+	return out
+end
+
+-- Studio draws an unfocused window at its lowest quality, which leaves out small far parts (the Roll Call's points in
+-- the sky). `level` (an Enum.QualityLevel name) asks for that quality in this test process; nil hands the old one back.
+local qualityWas: any = nil
+local function setQuality(level: string?): string
+	local ok, res = pcall(function()
+		local rendering = (settings() :: any).Rendering
+		local before = rendering.QualityLevel
+		if level then
+			qualityWas = qualityWas or before
+			rendering.QualityLevel = (Enum.QualityLevel :: any)[level]
+		elseif qualityWas then
+			rendering.QualityLevel = qualityWas
+		end
+		return "was " .. tostring(before) .. ", now " .. tostring(rendering.QualityLevel)
+	end)
+	L("QUALITY " .. tostring(level) .. ": " .. tostring(ok) .. " " .. tostring(res))
+	return tostring(ok) .. " " .. tostring(res)
+end
+
+-- the chat window's open state, logged whenever it changes (it is polled: there is no signal for it)
+task.spawn(function()
+	local SG = game:GetService("StarterGui")
+	local last: any = "?"
+	local t0 = os.clock()
+	while true do
+		local ok, active = pcall(function()
+			return SG:GetCore("ChatActive")
+		end)
+		local nowState: any = if ok then active else "not ready"
+		if nowState ~= last then
+			last = nowState
+			L(string.format("CHATWINDOW open=%s (%.1f s after the bot started, uptime %.1f, phase %s)", tostring(nowState), os.clock() - t0, time(),
+				tostring(GS:GetAttribute("Phase"))))
+		end
+		task.wait(0.2)
+	end
+end)
+
+-- the PLUS marks this client keeps (PlusController: PlusMark_<UserId> in PlayerGui), per player
+local function plusInfo(): { [string]: string }
+	local pg = lp:FindFirstChildOfClass("PlayerGui")
+	local out = {}
+	local cam = workspace.CurrentCamera
+	for _, p in ipairs(Players:GetPlayers()) do
+		local g = pg and pg:FindFirstChild("PlusMark_" .. tostring(p.UserId))
+		local on = "-"
+		if g and g:IsA("BillboardGui") and g.Adornee and g.Adornee:IsA("BasePart") and cam then
+			local _, vis = cam:WorldToViewportPoint(g.Adornee.Position + g.StudsOffsetWorldSpace)
+			on = tostring(vis)
+		end
+		out[p.Name] = string.format("member=%s mark=%s enabled=%s adornee=%s onScreen=%s", tostring(p:GetAttribute("PlusMember")), tostring(g ~= nil),
+			tostring(g ~= nil and g:IsA("BillboardGui") and g.Enabled), if g and g:IsA("BillboardGui") and g.Adornee then g.Adornee:GetFullName() else "nil", on)
+	end
+	return out
+end
+
+-- the Roll Call's sky show as this client draws it (workspace.FallenRecap: glowing points 170 studs from the camera)
+local recapSizes: { [BasePart]: Vector3 } = {} -- (points this test made bigger, with their own size)
+local function recapInfo(arg: any): { [string]: any }
+	local cam = workspace.CurrentCamera
+	local f = workspace:FindFirstChild("FallenRecap")
+	local n, lit, sum = 0, 0, Vector3.zero
+	local solid, pointSize = 0, 0
+	if arg and arg.restore then
+		for part, size in pairs(recapSizes) do
+			if part.Parent then
+				part.Size = size
+			end
+		end
+		table.clear(recapSizes)
+	end
+	if f and cam then
+		for _, d in ipairs(f:GetChildren()) do
+			if d:IsA("BasePart") then
+				n += 1
+				if d.Transparency < 0.95 and (d.Position - cam.CFrame.Position).Magnitude < 420 then
+					lit += 1
+					sum += d.Position
+					pointSize = d.Size.X
+					if d.Transparency < 0.05 then
+						solid += 1
+					end
+					-- test only: an unfocused Studio window draws at its lowest quality and leaves such small far parts
+					-- out, so for one picture the lit points are made `enlarge` times bigger where the game put them
+					if arg and type(arg.enlarge) == "number" and not recapSizes[d] then
+						recapSizes[d] = d.Size
+						d.Size = d.Size * arg.enlarge
+					end
+				end
+			end
+		end
+	end
+	local centroid = if lit > 0 then sum / lit else nil
+	if arg and arg.face and centroid then
+		tracking = { target = centroid, untilT = os.clock() + (arg.seconds or 6) }
+		face(centroid)
+	end
+	local on, screen = false, "-"
+	if centroid and cam then
+		local v, vis = cam:WorldToViewportPoint(centroid)
+		on, screen = vis, string.format("%d,%d", v.X, v.Y)
+	end
+	local snaps = RS:FindFirstChild("FallenSnapshots")
+	local names = {}
+	if snaps then
+		for _, s in ipairs(snaps:GetChildren()) do
+			table.insert(names, s.Name)
+		end
+	end
+	return {
+		showing = if Recap and Recap.isShowing then Recap.isShowing() else nil, bearing = if Recap and Recap.getBearing then Recap.getBearing() else nil,
+		points = n, lit = lit, solid = solid, pointSize = pointSize, centre = centroid, onScreen = on, screen = screen,
+		elevation = if centroid and cam then math.deg(math.asin(math.clamp((centroid - cam.CFrame.Position).Unit.Y, -1, 1))) else nil,
+		snapshots = table.concat(names, ","), freeze = GS:GetAttribute("DevRecapFreeze"),
+	}
+end
+
+-- another player's bow as this client draws it: CharacterVisuals' own state and where things are
+local function bowInfo(name: string): { [string]: any }
+	local p = Players:FindFirstChild(name)
+	local c = p and p:IsA("Player") and p.Character
+	local root = c and c:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (c and root) then
+		return { error = "no character" }
+	end
+	local out: { [string]: any } = {}
+	if Visuals and Visuals._bowOf then
+		local ok, b = pcall(Visuals._bowOf, c)
+		if ok and b then
+			out.bow, out.drawing, out.string, out.pull, out.arm, out.aim, out.hold = b.bow, b.drawing, b.string, b.pull, b.arm, b.aim, b.hold
+		end
+	end
+	local lh, rh, head = c:FindFirstChild("LeftHand") :: BasePart?, c:FindFirstChild("RightHand") :: BasePart?, c:FindFirstChild("Head") :: BasePart?
+	local lf, rf = c:FindFirstChild("LeftFoot") :: BasePart?, c:FindFirstChild("RightFoot") :: BasePart?
+	local floorY = if lf and rf then math.min(lf.Position.Y - lf.Size.Y / 2, rf.Position.Y - rf.Size.Y / 2) else root.Position.Y - 3
+	local em = c:FindFirstChild("EquippedModel", true)
+	if em then
+		out.item = em:GetAttribute("ItemId")
+		local low, high, count, sum = math.huge, -math.huge, 0, Vector3.zero
+		for _, d in ipairs(em:GetDescendants()) do
+			if d:IsA("BasePart") then
+				local cf, s = d.CFrame, d.Size / 2
+				local ext = math.abs(cf.RightVector.Y) * s.X + math.abs(cf.UpVector.Y) * s.Y + math.abs(cf.LookVector.Y) * s.Z
+				low, high = math.min(low, d.Position.Y - ext), math.max(high, d.Position.Y + ext)
+				count += 1
+				sum += d.Position
+			end
+		end
+		if count > 0 then
+			local mid = sum / count
+			out.lowAboveFeet, out.highAboveFeet = low - floorY, high - floorY
+			out.inHand = if lh and rh then (if (mid - lh.Position).Magnitude < (mid - rh.Position).Magnitude then "Left" else "Right") else "?"
+			out.bowFromRoot = root.CFrame:PointToObjectSpace(mid)
+		end
+	end
+	local beams = 0
+	for _, d in ipairs(c:GetDescendants()) do
+		if d:IsA("Beam") and d.Enabled then
+			beams += 1
+		end
+	end
+	out.beams = beams
+	out.leftHand = if lh then root.CFrame:PointToObjectSpace(lh.Position) else nil
+	out.rightHand = if rh then root.CFrame:PointToObjectSpace(rh.Position) else nil
+	out.head = if head then root.CFrame:PointToObjectSpace(head.Position) else nil
+	out.rightHandToHead = if rh and head then (rh.Position - head.Position).Magnitude else nil
+	out.handsApart = if rh and lh then (rh.Position - lh.Position).Magnitude else nil
 	return out
 end
 
@@ -811,6 +1275,20 @@ callFn.OnClientInvoke = function(cmd: string, arg: any): any
 				return true
 			end
 			return false
+		elseif cmd == "quality" then
+			return setQuality(if type(arg) == "table" then arg.level else nil)
+		elseif cmd == "hud" then
+			return hudInfo()
+		elseif cmd == "red" then
+			return { list = redScan(), edges = vignetteNow() }
+		elseif cmd == "chat" then
+			return chatInfo(if type(arg) == "table" then arg.open else nil)
+		elseif cmd == "plus" then
+			return plusInfo()
+		elseif cmd == "recap" then
+			return recapInfo(arg)
+		elseif cmd == "bow" then
+			return bowInfo(arg)
 		elseif cmd == "leave" then
 			local sts = game:GetService("StudioTestService")
 			L("LEAVE CanLeaveTest=" .. tostring(sts:CanLeaveTest()))

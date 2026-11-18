@@ -3,14 +3,15 @@
 
 	What it does, and nothing more:
 	  * Reads Player.HasRobloxSubscription on join and whenever it changes, and publishes it as the Player attribute
-	    "PlusMember" (boolean). That attribute is the whole member perk's switch: PlusController writes a small PLUS
-	    mark beside a member's name in the lobby. It is cosmetic. Nothing in a round reads it.
+	    "PlusMember" (boolean). That attribute is the whole member perk's switch: PlusController shows a small PLUS
+	    mark over a member's character in the lobby. It is cosmetic. Nothing in a round reads it.
 	  * Tells each client, and only that client, whether the lobby may show its quiet "ROBLOX PLUS" button:
 	    the API exists, the player is not a member already, and PolicyService says they may buy subscriptions
 	    (IsEligibleToPurchaseSubscription; a failed policy call counts as no).
 	  * Opens Roblox's own subscription window (MarketplaceService:PromptRobloxSubscriptionPurchase) when, and only
 	    when, the player presses SUBSCRIBE in the panel they opened themselves. At most once per PROMPT_COOLDOWN
-	    seconds per player, never for a contender in the arena.
+	    seconds per player, never for a contender in the arena, and never in the Countdown or the last ROUND_NEAR
+	    seconds before the lobby's players are picked (the window would sit over the launch).
 
 	Rules this file keeps (launch research, 18 Nov 2026: Roblox states no rule on where or how often the window may be
 	shown, so the game carries the care itself, with young players in mind):
@@ -26,7 +27,11 @@
 	  client -> server  "subscribe"   the player pressed SUBSCRIBE
 	  server -> client  "state", offer: boolean
 
-	Studio only: Workspace attribute PlusTestOffer = true makes the offer show for a tester who is a member already.
+	Studio only (both are ignored on a live server):
+	  Workspace attribute PlusTestOffer = true   the offer shows for a tester who is a member already
+	  Workspace attribute PlusTestMember = true  every player counts as a member, so the lobby mark can be looked at
+	                                     = false every player counts as a non-member, so a tester who is a member
+	                                             can look at the button and the panel
 ]]
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -40,6 +45,7 @@ local PlusService = {}
 
 local REMOTE_NAME = "PlusSubscribe"
 local PROMPT_COOLDOWN = 10 -- seconds between two windows for one player (Roblox's own sample uses 5)
+local ROUND_NEAR = 10 -- no window in the Countdown or this close to the pick (PlusController.ROUND_NEAR is 12)
 local POLICY_RETRY = { 5, 15 } -- a failed policy call is tried again after these waits, then left as "no"
 
 type State = {
@@ -69,6 +75,12 @@ local function readMember(player: Player): boolean?
 	end)
 	if not ok then
 		return nil
+	end
+	if isStudio then
+		local test = workspace:GetAttribute("PlusTestMember") -- the Studio test switch: never read on a live server
+		if type(test) == "boolean" then
+			return test
+		end
 	end
 	return value == true
 end
@@ -149,6 +161,33 @@ local function setup(player: Player)
 	task.spawn(checkPolicy, player)
 end
 
+-- The Countdown is on, or the Intermission (or a lone player's practice countdown, GameState.SoloStartAt) has less
+-- than ROUND_NEAR seconds left: the lobby's players are about to be picked.
+local function roundNear(): boolean
+	local gameState = ReplicatedStorage:FindFirstChild("GameState")
+	if not gameState then
+		return false
+	end
+	local phase = gameState:GetAttribute("Phase")
+	if phase == "Countdown" then
+		return true
+	end
+	local t = workspace:GetServerTimeNow()
+	if phase == "Intermission" then
+		local endsAt = tonumber(gameState:GetAttribute("PhaseEndsAt")) or 0
+		if endsAt - t < ROUND_NEAR then
+			return true
+		end
+	end
+	if phase == "Intermission" or phase == "Lobby" then
+		local soloAt = tonumber(gameState:GetAttribute("SoloStartAt")) or 0
+		if soloAt > 0 and soloAt - t < ROUND_NEAR then
+			return true
+		end
+	end
+	return false
+end
+
 local function onSubscribe(player: Player, st: State)
 	local now = os.clock()
 	if now - st.lastPrompt < PROMPT_COOLDOWN then
@@ -159,6 +198,11 @@ local function onSubscribe(player: Player, st: State)
 	end
 	-- never during a match: the lobby screen is hidden then, so a request from the arena did not come from the button
 	if player:GetAttribute("InArena") == true or player:GetAttribute("Alive") == true then
+		return
+	end
+	-- nor when a round is about to take the lobby's players to their plates: Roblox's window cannot be closed from
+	-- here, and it would sit over the launch and the round (PlusController hides the button a little earlier)
+	if roundNear() then
 		return
 	end
 	st.lastPrompt = now
@@ -220,6 +264,13 @@ function PlusService.Start()
 	end)
 	for _, player in ipairs(Players:GetPlayers()) do
 		setup(player)
+	end
+	if isStudio then
+		workspace:GetAttributeChangedSignal("PlusTestMember"):Connect(function()
+			for _, player in ipairs(Players:GetPlayers()) do
+				refreshMember(player)
+			end
+		end)
 	end
 end
 

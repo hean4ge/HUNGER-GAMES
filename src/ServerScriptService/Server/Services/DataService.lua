@@ -358,6 +358,36 @@ local function savePlayer(player: Player, session): boolean
 	return success
 end
 
+-- An orphan that lost its place in the list while its retry was writing (the player came back and left again with a
+-- second failed save): once that write has answered, whatever it left unsaved joins the entry now in the list, or goes
+-- back in the list itself. Without this a failed retry's stats were out of reach of every later save.
+local function keepReplaced(userId: number, earlier)
+	local waited = 0
+	while earlier.session.saving and waited < SAVE_WAIT * 2 do
+		task.wait(0.25)
+		waited += 0.25
+	end
+	local left = earlier.session.pending
+	if left.Wins == 0 and left.TotalKills == 0 and left.RoundsPlayed == 0 then
+		return -- that write went through
+	end
+	local current = orphans[userId]
+	if current == earlier then
+		return
+	end
+	if current == nil then
+		orphans[userId] = earlier -- nothing took its place for good (they rejoined, or the newer entry was saved)
+	elseif not earlier.session.saving then
+		for _, stat in ipairs(STATS) do
+			current.session.pending[stat] += left[stat]
+			left[stat] = 0
+		end
+	else
+		warn(string.format("[DataService] Could not keep user %d's earlier unsaved stats (Wins +%d, TotalKills +%d, RoundsPlayed +%d).",
+			userId, left.Wins, left.TotalKills, left.RoundsPlayed))
+	end
+end
+
 -- Public API ---------------------------------------------------------------------------------------------------------
 
 function DataService.increment(player: Player, key: string, n: number?)
@@ -467,6 +497,9 @@ function DataService.Init(_registry)
 					session.pending[stat] += earlier.session.pending[stat]
 					earlier.session.pending[stat] = 0
 				end
+			elseif earlier and earlier.session ~= session then
+				-- its retry is writing right now and this entry is about to take its place in the list
+				task.spawn(keepReplaced, session.userId, earlier)
 			end
 			orphans[session.userId] = { session = session, player = player, tries = 0 }
 			warn(string.format(

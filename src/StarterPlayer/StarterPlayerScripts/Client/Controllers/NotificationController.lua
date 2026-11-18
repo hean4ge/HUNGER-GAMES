@@ -243,7 +243,17 @@ local function playHeadline(item: { [string]: any })
 end
 
 nextHeadline = function()
+	if deathVisible then
+		-- the death card has the middle of the screen and a headline's sub line reached its top line (a 720-high
+		-- screen): headlines wait for the card to go (hideDeath lets them in)
+		suppressTop("Headline", false)
+		return
+	end
 	local item = table.remove(headlineQueue, 1)
+	-- one that waited behind the death card for longer than it would have shown is old news ("chosen in 6 seconds")
+	while item and item.heldAt and os.clock() - item.heldAt > math.clamp(tonumber(item.duration) or 3.5, 1.5, 12) do
+		item = table.remove(headlineQueue, 1)
+	end
 	if item then
 		playHeadline(item)
 	else
@@ -267,11 +277,14 @@ local function pushHeadline(item: { [string]: any })
 	if victoryVisible then
 		return -- the victory screen owns the stage
 	end
+	if deathVisible then
+		item.heldAt = os.clock() -- it waits for the death card (nextHeadline)
+	end
 	table.insert(headlineQueue, item)
 	while #headlineQueue > 3 do
 		table.remove(headlineQueue, 1)
 	end
-	if not headlineCurrent then
+	if not headlineCurrent and not deathVisible then
 		nextHeadline()
 	end
 end
@@ -1035,6 +1048,12 @@ local function hideDeath()
 	if pendingVictory then
 		task.defer(flushVictory) -- the round's result, now that the death card has had its say
 	end
+	-- headlines that waited behind the card (nextHeadline) come in now, unless the result card took the stage
+	task.defer(function()
+		if not deathVisible and not victoryVisible and not headlineCurrent then
+			nextHeadline()
+		end
+	end)
 end
 NotificationController.hideDeathScreen = hideDeath
 
@@ -1095,6 +1114,7 @@ local function showDeath(data: any)
 		R.dTip.Text = if tip then string.format("<font color=\"%s\">TIP</font>   %s", Theme.hex(C.TextDim), tip) else ""
 	end
 	deathVisible = true
+	clearHeadlines() -- a headline on show would sit on the card's top line; later ones wait for the card (nextHeadline)
 	R.dSpectate.Visible = false
 	refreshDeathButtons()
 	R.death.Visible = true

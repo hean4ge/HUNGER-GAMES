@@ -407,7 +407,9 @@ local function buildUi()
 	local skip = Instance.new("TextButton")
 	skip.Name = "Skip"
 	skip.AnchorPoint = Vector2.new(1, 1)
-	skip.Position = UDim2.new(1, -18, 1, -14)
+	-- (this screen is drawn edge to edge, ScreenInsets None: the button stays in from a phone's rounded corner,
+	-- camera cut-out and bottom gesture strip; it was 18 and 14 px from the physical edge)
+	skip.Position = UDim2.new(1, -64, 1, -34)
 	skip.Size = UDim2.fromOffset(136, 40)
 	skip.AutoButtonColor = false
 	skip.BackgroundColor3 = Theme.Colors.Panel
@@ -570,12 +572,26 @@ local function releaseGuis(s)
 		end)
 	end
 	if s.coreGuis then
+		local chatBack = false
 		for _, kind in ipairs(s.coreGuis) do
 			pcall(function()
 				StarterGui:SetCoreGuiEnabled(kind, true)
 			end)
+			chatBack = chatBack or kind == Enum.CoreGuiType.Chat
 		end
 		s.coreGuis = nil
+		if chatBack then
+			-- Switching chat back on reopened its window over the top left at every hand-off, and its system line stayed
+			-- into the round. It comes back closed: the chat button in Roblox's top bar (or the / key) opens it.
+			task.spawn(function()
+				for _ = 1, 3 do
+					pcall(function()
+						StarterGui:SetCore("ChatActive", false)
+					end)
+					task.wait(0.2)
+				end
+			end)
+		end
 	end
 end
 
