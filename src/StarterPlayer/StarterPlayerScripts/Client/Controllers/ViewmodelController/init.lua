@@ -108,10 +108,24 @@ local ZOOM_BUSY_MAG = 1.2
 -- hand and the hand on its string; the hand forward on a spear's shaft; the forearm a bandage is wound round).
 -- At a narrower setting the hands draw larger, and a hand held at its place would grow over the HUD beside it: there it
 -- keeps its outer, lower side instead, FIT_EDGE studs out from its frame. Measured on a 16:9 screen with the HUD's own
--- boxes: at 90 and 100 every resting hold is as clear of the hotbar and the vitals as at 72; at 55 the hands stay in
--- view and off the hotbar (the bow and the spear touch the vitals' end there).
+-- boxes, in play on Map 1: at 90 and 100 every resting hold is as clear of the hotbar and the vitals as at 72; at 55
+-- the hands stay in view and off the hotbar (the bow hand covers about 3 % of the vitals' end there).
 local BASE_FOV = (Config.Camera and tonumber(Config.Camera.BaseFov)) or 72
 local FIT_EDGE = 0.4
+-- (the hand that leads a two-handed hold, the bow hand and the hand on a spear's shaft, is the one beside the vitals:
+-- at a narrower setting it keeps this much instead, so it grows toward the middle of the gap and not over the bars.
+-- At 55 with the bow: 0.4 covered 9 % of the vitals, 0.2 4 %, 0 put it on the first hotbar slot)
+local FIT_LEAD_EDGE = 0.15
+-- A screen narrower than 16:10 (a 4:3 tablet): the HUD keeps its size while the view loses its sides, so the vitals
+-- reach in under the resting left hand (16 % of their box at 4:3). There is no room beside them (the gap to the hotbar
+-- is 73 px, the hand 170), so the empty hands rest lower there, NARROW_DROP studs at 4:3 and nothing at 16:10 or wider.
+-- Only the rest: the guard and the punches are as on every screen. (0.10 leaves 1 % of the vitals' box under the hand
+-- and the hands' tops still in view; 0.13 clears the box and all but hides them.)
+local NARROW_FROM = 1.6
+local NARROW_FULL = 4 / 3
+local NARROW_DROP = 0.10
+-- (the three numbers a look test may change while the game runs)
+ViewmodelController.Fit = { Edge = FIT_EDGE, LeadEdge = FIT_LEAD_EDGE, NarrowDrop = NARROW_DROP }
 local FIT_LEAD_RATE = 14 -- 1/s: how fast an arm passes from its own offset to the leading hand's and back
 local HIT_STOP: { [string]: number } = { Light = 0.045, Medium = 0.06, Heavy = 0.085 }
 local LOWER_MOVES: { [string]: boolean } = { Climb = true, Mantle = true, Swim = true }
@@ -192,12 +206,20 @@ local function fovFit(): number
 end
 
 -- How far an arm moves (camera space) for its hand at `position` to keep its place on screen at fit k (fovFit).
-local function fitOffset(position: Vector3, k: number): Vector3
+local function fitOffset(position: Vector3, k: number, edge: number?): Vector3
 	local offset = Vector3.new(position.X, position.Y, 0) * (k - 1)
 	if k < 1 then
-		offset += Vector3.new(math.sign(position.X) * FIT_EDGE, -FIT_EDGE, 0) * (1 - k)
+		offset += Vector3.new(math.sign(position.X) * (edge or ViewmodelController.Fit.Edge), -ViewmodelController.Fit.Edge, 0) * (1 - k)
 	end
 	return offset
+end
+
+-- How narrow the screen is: 0 at 16:10 and wider, 1 at 4:3 (NARROW_*). setViewShape replaces the window's own shape.
+local viewShape: number? = nil
+local function narrowFit(cam: Camera): number
+	local size = cam.ViewportSize
+	local shape = viewShape or size.X / math.max(size.Y, 1)
+	return math.clamp((NARROW_FROM - shape) / (NARROW_FROM - NARROW_FULL), 0, 1.3)
 end
 
 local function holdKindFor(def: any): string
@@ -860,8 +882,18 @@ local function update(dt: number)
 		else 0
 	approach("lead", lead, FIT_LEAD_RATE, dt)
 	if math.abs(fit - 1) > 0.004 then
-		fitLeft = fitOffset(left.Position, fit)
+		local own = fitOffset(left.Position, fit)
+		fitLeft = own:Lerp(fitOffset(left.Position, fit, ViewmodelController.Fit.LeadEdge), alpha.lead)
 		fitRight = fitOffset(right.Position, fit):Lerp(fitLeft, alpha.lead)
+	end
+	-- A narrow screen (narrowFit): the empty hands rest lower, clear of the vitals; the guard is where it always is
+	if heldKind == "Fists" and rig.faceted then
+		local narrow = narrowFit(cam)
+		if narrow > 0 then
+			local drop = Vector3.new(0, -ViewmodelController.Fit.NarrowDrop * narrow * (1 - alpha.guard), 0)
+			fitRight += drop
+			fitLeft += drop
+		end
 	end
 
 	local frame = {
@@ -932,6 +964,12 @@ local function makeRig(style: string, armOptions: { [string]: any }?)
 	else
 		shade = nil
 	end
+end
+
+-- The screen's shape (width / height) to fit the resting hands to, in place of the window's own; nil gives the window
+-- back. For a look test of a narrow screen inside a wide window.
+function ViewmodelController.setViewShape(shape: number?)
+	viewShape = if shape and shape > 0.2 then shape else nil
 end
 
 function ViewmodelController.setArms(style: string?, options: { [string]: any }?): string

@@ -104,6 +104,11 @@ local DEFS = {
 	{ key = "crouchModePad", label = "Crouch", device = "Gamepad", min = 0, max = 1, step = 1, format = words(MODE2) },
 	{ key = "crouchModeTouch", label = "Crouch", device = "Touch", min = 0, max = 1, step = 1, format = words(MODE2) },
 	{ key = "guidance", label = "Guidance for new players", min = 0, max = 2, step = 1, format = words({ "Off", "Auto", "Always" }) },
+	-- The lighting look (Shared.DayCycle.Tiers, picked by DetailController): Off = plain Roblox lighting with the same
+	-- sun and clock, Auto = fitted to the device, Full = everything on any device. The engine's own shadow and distance
+	-- scaling follows Roblox's Graphics Quality slider; this row does not change that.
+	{ section = "GRAPHICS" },
+	{ key = "shaders", label = "Shaders", min = 0, max = 2, step = 1, format = words({ "Off", "Auto", "Full" }) },
 	{ section = "AUDIO" },
 	{ key = "musicVolume", label = "Music volume", min = 0, max = 1, step = 0.05, format = percent },
 	{ key = "sfxVolume", label = "Effects volume", min = 0, max = 1, step = 0.05, format = percent },

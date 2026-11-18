@@ -6,8 +6,11 @@
 	Tuned for Lighting.LightingStyle = Realistic with PrioritizeLightingQuality on (set in the Edit datamodel or the
 	Properties panel; game scripts can't change them at runtime). It still reads on Soft and at low quality levels,
 	where shadows switch off: the sky light (EnvironmentDiffuseScale) and the Atmosphere carry the shape then.
-	It also owns the look's extra tracks: DepthOfField far blur, Terrain.Clouds (Cover / Density / Color) and the base
-	Workspace.GlobalWind (the client adds gusts).
+	It also owns the look's extra tracks: DepthOfField far blur, Terrain.Clouds (Cover / Density / Color), the base
+	Workspace.GlobalWind (the client adds gusts) and the water's reflectance and wave size.
+	Per arena (Shared.DayCycle.Static, picked by Config.Map): the water's colour, clarity and wave speed, the grass
+	length, the sun's and moon's size, and whether the far blur exists at all. These are saved with the place; no
+	running script writes them. Map1.Terrain.applyLook takes its water colour from the same table.
 
 	LightingRig.apply(opts?) -> string report
 	  opts.clock      hour to write (default Config.Round.LobbyClockTime)
@@ -42,7 +45,6 @@ LightingRig.Static = {
 	Bloom = { Enabled = true },
 	SunRays = { Enabled = true },
 	DepthOfField = {
-		Enabled = true,
 		FarIntensity = 0.07,
 		FocusDistance = 200,
 		InFocusRadius = 420, -- only blurs beyond ~620 studs (the far mountains); never the Roll Call display
@@ -126,6 +128,23 @@ function LightingRig.apply(opts: { [string]: any }?): string
 	setProps(rays, static.SunRays, report)
 	setProps(dof, static.DepthOfField, report)
 	setProps(grade, static.ArenaGrade, report)
+	-- the arena's own fixed values (DayCycle.Static): water, grass, sun and moon size
+	local map = DayCycle.Static or {}
+	local terrain = workspace.Terrain
+	local terrainProps = {}
+	for _, prop in ipairs({ "WaterColor", "WaterTransparency", "WaterWaveSpeed", "GrassLength" }) do
+		if map[prop] ~= nil then
+			terrainProps[prop] = map[prop]
+		end
+	end
+	setProps(terrain, terrainProps, report)
+	local skyProps = {}
+	for _, prop in ipairs({ "SunAngularSize", "MoonAngularSize" }) do
+		if map[prop] ~= nil then
+			skyProps[prop] = map[prop]
+		end
+	end
+	setProps(sky, skyProps, report)
 
 	if setClock then
 		Lighting.ClockTime = clock % 24
@@ -141,9 +160,17 @@ function LightingRig.apply(opts: { [string]: any }?): string
 		dof = dof,
 		clouds = clouds,
 		wind = workspace,
+		terrain = terrain,
+		interiorLight = DayCycle.findInteriorLight(),
 	})
-	table.insert(report, 1, string.format("LightingRig: look for %.2f h applied (Brightness %.2f, Exposure %.2f, OutdoorAmbient %s, EnvDiffuse %.2f, Atmosphere %.2f, wind %.1f,%.1f)",
-		clock % 24, look.Brightness, look.Exposure, tostring(look.Outdoor), look.EnvDiffuse, look.AtmDensity, look.WindX, look.WindZ))
+	if map.FarBlur == false then
+		dof.Enabled = false -- no far blur on this arena: the mountains are the view (its keyframes hold DofFar at 0)
+	end
+	if tostring(Lighting.LightingStyle) ~= "Enum.LightingStyle.Realistic" then
+		table.insert(report, "NOTE: Lighting.LightingStyle is not Realistic (set it in the Properties panel): the look is tuned for it")
+	end
+	table.insert(report, 1, string.format("LightingRig: %s look for %.2f h applied (Brightness %.2f, Exposure %.2f, OutdoorAmbient %s, EnvDiffuse %.2f, Atmosphere %.2f, wind %.1f,%.1f)",
+		tostring(DayCycle.LookSet), clock % 24, look.Brightness, look.Exposure, tostring(look.Outdoor), look.EnvDiffuse, look.AtmDensity, look.WindX, look.WindZ))
 	return table.concat(report, "\n")
 end
 

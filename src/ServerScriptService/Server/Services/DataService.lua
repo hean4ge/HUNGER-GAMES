@@ -44,6 +44,7 @@ local SETTING_LIMITS = {
 	ambienceVolume = { 0, 1 },
 	-- PlayabilityPlan Q1 / QW2 / QW13 (SettingsController)
 	guidance = { 0, 2 }, -- 0 Off, 1 Auto, 2 Always
+	shaders = { 0, 2 }, -- the lighting look: 0 Off, 1 Auto, 2 Full
 	hintsSeen = { 0, 2 ^ 30 - 1 }, -- action-hint use counters, 3 bits per action (Shared.ActionHints)
 	sprintMode = { 0, 2 }, -- 0 Hold, 1 Toggle, 2 Auto (keyboard; Pad = gamepad, Touch = touch)
 	sprintModePad = { 0, 2 },

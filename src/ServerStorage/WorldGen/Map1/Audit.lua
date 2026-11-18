@@ -924,6 +924,23 @@ function checks.instances(ctx)
 						bad.add(string.format("%s is not a Persistent model", model:GetFullName()))
 					end
 				end
+				-- Their meshes are modelled in world space: the holder and every asset in it pivot at the map centre,
+				-- unturned. (18 Nov: the whole far valley was found 1,580 studs off and tilted 3.5 degrees, dragged by a
+				-- stray click in the 3D view; it showed as shards across the sky. Its parts are Locked since.)
+				local holders = { inst }
+				for _, child in ipairs(inst:GetChildren()) do
+					table.insert(holders, child)
+				end
+				for _, holder in ipairs(holders) do
+					if holder:IsA("Model") then
+						local pivot = holder:GetPivot()
+						local _, angle = pivot:ToAxisAngle()
+						if pivot.Position.Magnitude > 0.05 or math.abs(angle) > 1e-4 then
+							bad.add(string.format("%s is out of place: pivot (%.1f, %.1f, %.1f), turned %.2f degrees; it belongs at the map centre, unturned (PivotTo(CFrame.identity))",
+								holder:GetFullName(), pivot.X, pivot.Y, pivot.Z, math.deg(angle)))
+						end
+					end
+				end
 			end
 		end
 	end

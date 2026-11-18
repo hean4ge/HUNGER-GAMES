@@ -92,6 +92,15 @@ Assets.MATERIALS = {
 Assets.FALLBACK_MATERIAL = Enum.Material.Plaster
 -- A role's own material, when it should differ from its manifest material's row above.
 Assets.ROLE_MATERIALS = {}
+-- The look's own colours, by role, laid over the manifest's rgb (the lighting pass, 18 Nov 2026). The Blender palette's
+-- heather is a strong mauve: as small plants on the ground it is right, but as whole flat faces of the far valley
+-- and the peak it read as purple polygons on the hillsides. These duskier tones sit in the distance as heath.
+-- Assets.build and Assets.verify use them; Assets.applyLookColors() repaints what is already built and placed.
+Assets.LOOK_COLORS = {
+	FarHeather = Color3.fromRGB(110, 96, 98),
+	PeakHeath = Color3.fromRGB(106, 92, 92),
+	FarDryGrass = Color3.fromRGB(120, 124, 78),
+}
 
 -- Seen from far away (the horn across the valley, the peak, the far range): always the full mesh, never a reduced one.
 local PRECISE_ASSETS = { M1_Horn = true, M1_Platform = true, M1_Peak = true }
@@ -122,7 +131,10 @@ local STAIR = { topTread = 2.4, tread = 2.0, rise = 1.5, inset = 0.1, bury = 1.5
 -- The light inside the horn: one soft warm PointLight under the apex, where the Blender scene has its render-only fill
 -- (24 over the deck). It casts shadows, so it cannot shine through the walls and sails, and it sits on an attachment:
 -- no glowing part, nothing to bloom.
-local HORN_LIGHT = { height = 22, range = 44, brightness = 1, color = Color3.fromRGB(255, 232, 204), shadows = true }
+-- Brightness 0.5 (was 1): the night's exposure (+0.65) made the inside at 21:00 as bright as by day, a lit lantern
+-- in a dark valley. At 0.5 it is a soft warm fill by day, and the day cycle (Shared.DayCycle, look key InteriorLight)
+-- takes it down to 0.45 of that at night: a dim, readable room.
+local HORN_LIGHT = { height = 22, range = 44, brightness = 0.5, color = Color3.fromRGB(255, 232, 204), shadows = true }
 
 -- Invisible blocks inside the sealed space under the north sail (bearing 0), in the horn's own space, as
 -- { cx, cy, cz, sx, sy, sz }; the other two sails get the same blocks turned 120 and 240 degrees. Each block stays
@@ -213,6 +225,10 @@ local function setKeys(opts: any): { string }
 		table.insert(keys, key)
 	end
 	return keys
+end
+
+local function colorOf(info: any): Color3
+	return Assets.LOOK_COLORS[info.role] or Color3.fromRGB(info.rgb[1], info.rgb[2], info.rgb[3])
 end
 
 local function materialOf(info: any): Enum.Material
@@ -496,7 +512,7 @@ local function buildAsset(a: any, index: { [string]: MeshPart }, pivot: CFrame, 
 		end)
 		part.Material = materialOf(info)
 		part.MaterialVariant = ""
-		part.Color = rgb(info.rgb)
+		part.Color = colorOf(info)
 		part.Reflectance = 0
 		part.Transparency = if info.hidden then 1 else 0
 		part.CastShadow = info.shadow and not info.hidden
@@ -712,7 +728,7 @@ function Assets.verify(opts: any): string
 					end
 				end
 				check("Anchored", true)
-				check("Color", rgb(info.rgb))
+				check("Color", colorOf(info))
 				check("Material", materialOf(info))
 				check("MaterialVariant", "")
 				check("Reflectance", 0)
@@ -972,6 +988,7 @@ function Assets.placeHeart(parent: Instance, offset: Vector3?, opts: any): strin
 						light.Name = "HornLight"
 						light.Color = HORN_LIGHT.color
 						light.Brightness = HORN_LIGHT.brightness
+						light:SetAttribute("BaseBrightness", HORN_LIGHT.brightness) -- Shared.DayCycle dims it at night from this
 						light.Range = HORN_LIGHT.range
 						light.Shadows = HORN_LIGHT.shadows
 						light.Parent = at
@@ -1172,6 +1189,9 @@ local function placeFar(parent: Instance, setKey: string, modelName: string, off
 				d.CanQuery = false
 				d.CanTouch = false
 				d.CastShadow = false
+				-- Locked: a click in Studio's 3D view can't pick it up. These meshes surround the whole map, so any stray
+				-- click-and-drag in Edit mode moved the entire far valley (found 1,580 studs off and tilted, 18 Nov).
+				d.Locked = true
 				local role = d:GetAttribute("Role")
 				if colors and role and colors[role] then
 					d.Color = colors[role]
@@ -1199,6 +1219,37 @@ end
 
 function Assets.placeFarValley(parent: Instance, offset: Vector3?, opts: any): string
 	return placeFar(parent, "FarValley", "FarValley", offset, opts)
+end
+
+-- Repaints, by role, the templates and everything already placed under `parent` (default workspace.Arena) with
+-- Assets.LOOK_COLORS, and sets the horn's light to HORN_LIGHT. Nothing is rebuilt or moved. Safe to re-run.
+function Assets.applyLookColors(parent: Instance?): string
+	local painted, lights = 0, 0
+	local function paint(root: Instance?)
+		if not root then
+			return
+		end
+		for _, d in ipairs(root:GetDescendants()) do
+			if d:IsA("BasePart") then
+				local role = d:GetAttribute("Role")
+				local color = role and Assets.LOOK_COLORS[role]
+				if color and d.Color ~= color then
+					d.Color = color
+					painted += 1
+				end
+			elseif d:IsA("PointLight") and d.Name == "HornLight" then
+				d.Brightness = HORN_LIGHT.brightness
+				d:SetAttribute("BaseBrightness", HORN_LIGHT.brightness)
+				d.Range = HORN_LIGHT.range
+				d.Color = HORN_LIGHT.color
+				lights += 1
+			end
+		end
+	end
+	local wa = ServerStorage:FindFirstChild("WorldAssets")
+	paint(wa and wa:FindFirstChild("Map1"))
+	paint(parent or workspace:FindFirstChild("Arena"))
+	return string.format("look colours: %d parts repainted, %d horn lights set", painted, lights)
 end
 
 -- Takes out what the place functions made under `parent` (group nil = all of them). Folders we made stay.

@@ -41,6 +41,14 @@
 	The chosen tier is published as LocalPlayer attributes DetailTier and DetailTierWhy, and DetailSources says which
 	of the sources above this client can read (this client only).
 
+	The shader tier (what the lighting look adds on top of the engine: Shared.DayCycle.Tiers) rides on the same choice
+	and is published as LocalPlayer attributes ShaderTier and ShaderDevice, which ArenaController.Sky reads:
+	  scenery Low -> Phone, Medium -> Mid, High -> High; a touch-only device on automatic graphics is Phone
+	  the player's own choice, the Menu's "Shaders: Off / Auto / Full" row (ClientState.settings.shaders 0 / 1 / 2,
+	  saved with the other settings): Off = plain Roblox lighting with the same sun and clock, Full = High anywhere
+	  in Studio, the workspace attribute DevShaders = "Off" | "Phone" | "Mid" | "High" forces it (tests, captures)
+	ShaderDevice is the tier the device would have on Auto (Off keeps that tier's haze).
+
 	Bookkeeping: models are bucketed into 40-stud cells as they stream in (ChildAdded on the Flora and Forest biome
 	folders and on Map 1's Scatter cells) and dropped as they stream out. Every 0.25 s, once the camera has moved
 	6 studs or the tier changed, only the cells whose distance band changed are flipped.
@@ -50,6 +58,8 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+
+local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
 local DetailController = {}
 
@@ -320,18 +330,51 @@ function DetailController.stats()
 			end
 		end
 	end
-	return { tier = tierName, why = tierWhy, models = nModels, cells = nCells, hidden = hidden }
+	return { tier = tierName, why = tierWhy, models = nModels, cells = nCells, hidden = hidden, shaders = shaderName, shaderDevice = shaderDevice }
+end
+
+-- The shader tier and the tier this device has on Auto (see the header).
+local SHADER_OF = { Low = "Phone", Medium = "Mid", High = "High" }
+local SHADER_TIERS = { Off = true, Phone = true, Mid = true, High = true }
+local shaderName, shaderDevice = "", ""
+local function chooseShaders(): (string, string)
+	local device = SHADER_OF[tierName] or "High"
+	local touchOnly = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+	if touchOnly and savedLevel() == nil and workspace:GetAttribute("DetailTier") == nil then
+		device = "Phone" -- a phone on automatic graphics: the planned low look until its player asks for more
+	end
+	if RunService:IsStudio() then
+		local dev = workspace:GetAttribute("DevShaders")
+		if type(dev) == "string" and SHADER_TIERS[dev] then
+			return dev, if dev == "Off" then device else dev
+		end
+	end
+	local setting = tonumber(ClientState.settings and ClientState.settings.shaders) or 1
+	if setting <= 0 then
+		return "Off", device
+	elseif setting >= 2 then
+		return "High", device
+	end
+	return device, device
 end
 
 local function applyTier()
 	local name, why = chooseTier()
+	local lp = Players.LocalPlayer
 	if name ~= tierName or why ~= tierWhy then
 		tierName, tierWhy = name, why
 		forceRefresh = true
-		local lp = Players.LocalPlayer
 		if lp then
 			lp:SetAttribute("DetailTier", tierName)
 			lp:SetAttribute("DetailTierWhy", tierWhy)
+		end
+	end
+	local shader, device = chooseShaders()
+	if shader ~= shaderName or device ~= shaderDevice then
+		shaderName, shaderDevice = shader, device
+		if lp then
+			lp:SetAttribute("ShaderTier", shader)
+			lp:SetAttribute("ShaderDevice", device)
 		end
 	end
 end
@@ -384,6 +427,8 @@ function DetailController.Start()
 		end
 	end)
 	workspace:GetAttributeChangedSignal("DetailTier"):Connect(applyTier)
+	workspace:GetAttributeChangedSignal("DevShaders"):Connect(applyTier)
+	ClientState.settingsChanged:Connect(applyTier)
 	pcall(function()
 		UserSettings():GetService("UserGameSettings"):GetPropertyChangedSignal("SavedQualityLevel"):Connect(applyTier)
 	end)

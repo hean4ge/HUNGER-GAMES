@@ -66,6 +66,7 @@ local ClientState = {
 		-- PlayabilityPlan Q1 / QW13 (SettingsController rows; DataService saves them):
 		guidance = ({ Off = 0, Auto = 1, Always = 2 } :: any)[(Config.Guidance or {}).Mode or "Auto"] or 1, -- 0 Off, 1 Auto, 2 Always
 		hintsSeen = 0, -- action-hint use counters, 3 bits per action (Shared.ActionHints.ACTIONS)
+		shaders = 1, -- the lighting look: 0 Off, 1 Auto (fitted to the device), 2 Full (DetailController, Shared.DayCycle.Tiers)
 		sprintMode = 0, -- keyboard: 0 Hold, 1 Toggle, 2 Auto (a full push forward sprints)
 		sprintModePad = 1, -- gamepad (L3): Toggle
 		sprintModeTouch = 2, -- touch: Auto (RUN hides)

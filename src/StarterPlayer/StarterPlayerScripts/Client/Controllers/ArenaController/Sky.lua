@@ -10,16 +10,22 @@
 	  * Players in the lobby (not in the arena and not spectating) keep the lobby hour (Config.Round.LobbyClockTime).
 	  * Held while the launch intro lights its own set (ClientState.launchShot, LaunchIntroController); the whole look is
 	    written again the frame after.
-	  * Low mist sheets over the marsh and the lake at night and dawn (client-local particles, DayCycle look "Mist").
+	  * The shader tier (LocalPlayer attribute ShaderTier: Off / Phone / Mid / High, decided by DetailController) scales
+    the look through DayCycle.applyTier: bloom, sun rays, haze, fill, the water's tracks, how often the sun and the
+    look are written, and how many mist sheets emit. A phone never pays for a full-screen pass it can't afford.
+  * Studio only: the workspace attribute DevLookHour (a number) pins the hour on this client, for captures.
+  * Low mist sheets over the marsh and the lake at night and dawn (client-local particles, DayCycle look "Mist").
+    The sheets are lit by the scene only (no glow of their own); the nearest ones emit, up to the tier's cap.
 	    Zones come from ArenaLayout.Lake (shore polygon, or centre + radiusX/radiusZ) and ArenaLayout.Marsh (outline
 	    polygon, pools, or centre + radius), else the Swamp/Marsh sector. Each sheet settles on the real water or
 	    ground surface (a terrain raycast once that terrain has streamed in), so it follows whichever terrain is built.
-	API (through ArenaController): Sky.start(ClientState), Sky.getClock() -> (clock, arenaView), Sky.getLook() -> look
+	API (through ArenaController): Sky.start(ClientState), Sky.getClock() -> (clock, arenaView), Sky.getLook() -> look,
+Sky.getTier() -> (tier name, device tier name)
 ]]
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -41,10 +47,13 @@ local nextTargetScan = 0
 local mist = { parts = {}, emitters = {}, built = false, nextUpdate = 0 }
 local wind = { nextWrite = 0, x = 0, z = 0 }
 local held = false -- the launch intro holds the day cycle (ClientState.launchShot)
+local tierName, deviceTier = "High", "High" -- the shader tier (DetailController publishes it)
+local tier = DayCycle.Tiers.High
+local nextClockWrite, nextLookWrite = 0, 0
+local IS_STUDIO = RunService:IsStudio()
 
 local MIST_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
 local MIST_SPACING = 56 -- studs between mist sheets over water
-local MIST_RANGE = 460 -- sheets farther than this from the camera are switched off
 local MIST_RATE = 0.85 -- particles per second per sheet at full mist
 local MIST_MAX = 150 -- sheets in all
 local MIST_LIFT = 2.6 -- studs above the surface
@@ -76,6 +85,8 @@ local function findTargets()
 	targets.sky = child("Sky", "Sky")
 	targets.clouds = workspace.Terrain:FindFirstChildOfClass("Clouds")
 	targets.wind = workspace
+	targets.terrain = workspace.Terrain
+	targets.interiorLight = DayCycle.findInteriorLight() -- the horn's fill light (it streams in with the horn)
 	table.clear(cache) -- objects may be new: write everything once
 end
 
@@ -230,19 +241,22 @@ local function mistSpots()
 	return spots
 end
 
-local function quality(): number
-	local q = 0
-	pcall(function()
-		q = UserSettings():GetService("UserGameSettings").SavedQualityLevel.Value
-	end)
-	local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-	local k = if touch then 0.5 else 1
-	if q >= 1 and q <= 3 then
-		k *= 0.5
-	elseif q >= 4 and q <= 6 then
-		k *= 0.8
+-- The shader tier this client runs: DetailController's choice (LocalPlayer attributes ShaderTier / ShaderDevice).
+local function readTier()
+	local lp = Players.LocalPlayer
+	local name = lp and lp:GetAttribute("ShaderTier")
+	local device = lp and lp:GetAttribute("ShaderDevice")
+	if type(name) ~= "string" or not DayCycle.Tiers[name] then
+		name = "High"
 	end
-	return k
+	if type(device) ~= "string" or not DayCycle.Tiers[device] then
+		device = name
+	end
+	if name ~= tierName then
+		table.clear(cache) -- a tier switches effects on and off: write everything once
+	end
+	tierName, deviceTier = name, device
+	tier = DayCycle.Tiers[name]
 end
 
 local function buildMist()
@@ -292,8 +306,8 @@ local function buildMist()
 		})
 		e.Color = ColorSequence.new(Color3.fromRGB(206, 214, 226))
 		e.LightInfluence = 1
-		e.LightEmission = 0.08 -- a hint of its own glow so it still reads under the moon
-		e.Brightness = 1.2
+		e.LightEmission = 0 -- lit by the scene only: mist never glows
+		e.Brightness = 1
 		e.Rotation = NumberRange.new(0, 360)
 		e.RotSpeed = NumberRange.new(-5, 5)
 		e.Enabled = false
@@ -323,6 +337,8 @@ local function settle(entry): boolean
 	return true
 end
 
+local mistNear = {} -- reused: the sheets in range this update
+
 local function updateMist()
 	if not mist.built then
 		buildMist()
@@ -333,18 +349,42 @@ local function updateMist()
 	end
 	local camera = workspace.CurrentCamera
 	local camPos = if camera then camera.CFrame.Position else Vector3.zero
-	local q = quality()
+	local range = tier.mistRange
 	local budget = 8 -- surface raycasts per update
+	-- the sheets in range, nearest first, up to the tier's cap
+	table.clear(mistNear)
+	if level * tier.mistRate > 0.02 and tier.mistMax > 0 then
+		for _, entry in ipairs(mist.emitters) do
+			local dx, dz = entry.x - camPos.X, entry.z - camPos.Z
+			local d2 = dx * dx + dz * dz
+			entry.d2 = d2
+			entry.want = false
+			if d2 <= range * range then
+				table.insert(mistNear, entry)
+			end
+		end
+		if #mistNear > tier.mistMax then
+			table.sort(mistNear, function(a, b)
+				return a.d2 < b.d2
+			end)
+		end
+		for i = 1, math.min(#mistNear, tier.mistMax) do
+			mistNear[i].want = true
+		end
+	else
+		for _, entry in ipairs(mist.emitters) do
+			entry.want = false
+		end
+	end
 	for _, entry in ipairs(mist.emitters) do
 		local e = entry.emitter
-		local dx, dz = entry.x - camPos.X, entry.z - camPos.Z
-		local near = dx * dx + dz * dz <= MIST_RANGE * MIST_RANGE
-		local rate = MIST_RATE * level * entry.strength * q
-		if near and rate > 0.02 and not entry.settled and budget > 0 then
+		local rate = MIST_RATE * level * entry.strength * tier.mistRate
+		local on = entry.want and rate > 0.02
+		if on and not entry.settled and budget > 0 then
 			budget -= 1
 			entry.settled = settle(entry)
 		end
-		if near and rate > 0.02 and entry.settled then
+		if on and entry.settled then
 			if math.abs(e.Rate - rate) > 0.01 then
 				e.Rate = rate
 			end
@@ -395,11 +435,22 @@ local function step()
 	else
 		clock = Config.Round.LobbyClockTime
 	end
-	local hour = clock % 24
-	if math.abs(Lighting.ClockTime - hour) > 1e-4 then
-		Lighting.ClockTime = hour
+	if IS_STUDIO then
+		local pin = workspace:GetAttribute("DevLookHour")
+		if type(pin) == "number" then
+			clock = pin
+		end
 	end
+	local hour = clock % 24
 	local t = os.clock()
+	readTier()
+	-- the sun's position: every frame, or a few times a second on the low tiers (nobody can see 0.1 of a degree)
+	if tier.clockHz <= 0 or t >= nextClockWrite or math.abs(Lighting.ClockTime - hour) > 0.05 then
+		nextClockWrite = t + (if tier.clockHz > 0 then 1 / tier.clockHz else 0)
+		if math.abs(Lighting.ClockTime - hour) > 1e-4 then
+			Lighting.ClockTime = hour
+		end
+	end
 	if t >= nextTargetScan or not (targets.grade and targets.grade.Parent) then
 		nextTargetScan = t + 5
 		findTargets()
@@ -413,7 +464,11 @@ local function step()
 	else
 		look.WindX, look.WindZ = wind.x, wind.z
 	end
-	DayCycle.applyLook(look, targets, cache)
+	DayCycle.applyTier(look, tierName, deviceTier)
+	if tier.lookHz <= 0 or t >= nextLookWrite or next(cache) == nil then
+		nextLookWrite = t + (if tier.lookHz > 0 then 1 / tier.lookHz else 0)
+		DayCycle.applyLook(look, targets, cache)
+	end
 	if t >= mist.nextUpdate then
 		mist.nextUpdate = t + 0.25
 		updateMist()
@@ -428,18 +483,23 @@ function Sky.getLook()
 	return look
 end
 
+function Sky.getTier(): (string, string)
+	return tierName, deviceTier
+end
+
 function Sky.start(clientState)
 	ClientState = clientState
 	readBase()
 	GameState:GetAttributeChangedSignal("Clock"):Connect(readBase)
 	findTargets()
-	local warned = false
+	local warnedAt = -math.huge
 	-- every frame: the next rendered frame shows the new sun, sky and grade. Heartbeat (not a render step) so
 	-- ClockTime stays right for anything that reads it even while the window isn't rendering.
 	RunService.Heartbeat:Connect(function()
 		local ok, err = pcall(step)
-		if not ok and not warned then
-			warned = true
+		-- a broken keyframe would freeze the sky: once in a live game, every 5 s in Studio so it can't be missed
+		if not ok and (warnedAt == -math.huge or (IS_STUDIO and os.clock() - warnedAt >= 5)) then
+			warnedAt = os.clock()
 			warn("[ArenaController] sky update failed: " .. tostring(err))
 		end
 	end)

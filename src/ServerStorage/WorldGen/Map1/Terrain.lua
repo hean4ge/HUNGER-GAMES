@@ -1102,8 +1102,9 @@ function Writer.restoreLook(snapshot: any?): string
 end
 
 -- One colour per base material from the Blender palette, the lake's water colour, and Roblox's own textures on
--- every material the writer uses (the classic arena's LS_ overrides come off those materials). The other water
--- properties, the grass and the lighting are left as they are. This changes the whole place, the lobby island
+-- every material the writer uses (the classic arena's LS_ overrides come off those materials). The water colour is
+-- the lighting look's when Shared.DayCycle has one for this map (else the export's). The other water properties,
+-- the grass and the lighting are left as they are: WorldGen.LightingRig.apply() writes those. This changes the whole place, the lobby island
 -- included. opts.pack, opts.overrides = false (leave the overrides alone), opts.remember = true (keep what was
 -- there in the Terrain attribute Map1LookBefore, for restoreLook() with no argument: a look put on for a test).
 function Writer.applyLook(opts: any?): string
@@ -1137,6 +1138,25 @@ function Writer.applyLook(opts: any?): string
 		table.sort(removed)
 	end
 	local water = spec.lake and spec.lake.waterColor
+	-- the lighting look owns the water (Shared.DayCycle.StaticSets.GreenLand, written by WorldGen.LightingRig): its
+	-- colour wins over the Blender export's, so the two never disagree
+	do
+		local shared = game:GetService("ReplicatedStorage"):FindFirstChild("Shared")
+		local module = shared and shared:FindFirstChild("DayCycle")
+		if module then
+			local ok, DayCycle = pcall(function()
+				local copy = module:Clone()
+				local result = require(copy)
+				copy:Destroy()
+				return result
+			end)
+			local static = ok and type(DayCycle) == "table" and DayCycle.StaticSets and DayCycle.StaticSets.GreenLand
+			local c = static and static.WaterColor
+			if typeof(c) == "Color3" then
+				water = { floor(c.R * 255 + 0.5), floor(c.G * 255 + 0.5), floor(c.B * 255 + 0.5) }
+			end
+		end
+	end
 	if water then
 		terrain.WaterColor = Color3.fromRGB(water[1], water[2], water[3])
 	end
