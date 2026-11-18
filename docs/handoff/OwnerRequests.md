@@ -19,6 +19,13 @@ You sent these while the beta update was being built. They override the rows bel
 | **Zoom:** "v should have a better zoom then it has now" | A much stronger zoom on V than the slight one built first. |
 | **Multiplayer and launch:** "also make the game multiplayer and playable bug test and launch for beta testing" | <ul><li>The game is built for many players, but every test so far was one player against dummies. A real test with two or more players comes before launch.</li><li>Then a bug hunt on the new map, then the launch.</li></ul> |
 
+### Added on 18 November
+
+| You said | What it changes |
+|---|---|
+| **The launch:** "after you're done with everything publish the game for all ages" | <ul><li>Claude publishes once the two-player test and the bug hunt are done.</li><li>Roblox sets the age label from a questionnaire that has to describe the game as it is. So the game ships with **no blood and no wounds**. This replaces the "13+ gore" decision in section 2.</li><li>The exact label and who can play by default are being checked against Roblox's current rules (18 Nov).</li></ul> |
+| **Roblox Plus:** "i have roblox plus now so all the benefits with game dev r there utilise them" | <ul><li>Paid private servers switched on at launch (Roblox pays creators when Plus members play in them).</li><li>A quiet, opt-in Roblox Plus sign-up button in the lobby, if Roblox's current rules allow it (creators earn a bonus per sign-up).</li><li>No fighting advantage for Plus members.</li></ul> |
+
 ---
 
 ## 1. Being built now (the beta update)
@@ -45,7 +52,7 @@ You answered "do it yourself" to the open questions on 15 Nov, so these defaults
 | Map 2's size ("recreated 3 x bigger", 14 Nov) | <ul><li>About **1.75 km across** (radius about 3,100 studs), which is 3× Map 1's area.</li><li>A literal 3× the film's clock would be about 4.4 km. That's too big for 24 players to meet in a 15-minute round, or for the border to bring them together.</li><li>The Blender design so far is 1.46 km.</li></ul> |
 | Map 1's challenges ("the challenges of the first movie with a few mix ups each time", 14 Nov) | The upcoming film's hazards, with some of the first film's challenges mixed in, and different mix-ups each round. |
 | The ore cableway (yes, "built last", 12 Nov) | It was dropped when the maps changed, and you weren't told. It comes back on Map 1, across the canyon. |
-| How much gore | **13+:** wounds you can see, light blood and limping. No severing. A 17+ mode would need age-verified players. |
+| How much gore | **None (18 Nov):** you asked for the game to be published for all ages, so there is no blood and no wounds. Before that the decision was 13+ (wounds, light blood, limping). |
 | Names inside the game | Our own names for now: the Spire, contenders and so on. The experience's title is HUNGER GAMES (BETA). |
 | The lobby title | It stays LAST STANDING inside the game. |
 
