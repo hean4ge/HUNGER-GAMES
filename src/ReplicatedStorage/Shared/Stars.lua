@@ -204,6 +204,18 @@ local ROLE_BY_MATERIAL = {
 	[Enum.Material.Fabric] = "Rope",
 }
 
+-- Shared.TierLooks, loaded on first use (a missing module leaves the plain finish)
+local tierLooksModule: any = false
+local function TierLooks(): any
+	if tierLooksModule == false then
+		local ok, mod = pcall(function()
+			return require(script.Parent:WaitForChild("TierLooks", 2) :: ModuleScript)
+		end)
+		tierLooksModule = if ok and type(mod) == "table" then mod else nil
+	end
+	return tierLooksModule
+end
+
 function Stars.applyFinish(model: Instance?, n: any)
 	if not model then
 		return
@@ -211,9 +223,19 @@ function Stars.applyFinish(model: Instance?, n: any)
 	local s = Stars.clamp(n)
 	model:SetAttribute("Stars", s)
 	model:SetAttribute("Finish", FINISH[s])
+	-- Combat_v3 5: detail grows with stars (Shared.TierLooks). The mesh swap, when that id's _t1.._t5 meshes ship,
+	-- carries its own colours, so there is nothing to tint; otherwise the stand-in trims go on after the tint.
+	local tierLooks = TierLooks()
+	if tierLooks then
+		tierLooks.clear(model)
+		local okSwap, swapped = pcall(tierLooks.apply, model, s)
+		if okSwap and swapped then
+			return
+		end
+	end
 	local table_ = FINISH_COLORS[s]
 	for _, d in ipairs(model:GetDescendants()) do
-		if d:IsA("BasePart") and d.Transparency < 1 then
+		if d:IsA("BasePart") and d.Transparency < 1 and not d:GetAttribute("TierTrim") then
 			local original = d:GetAttribute("BaseColor")
 			if typeof(original) ~= "Color3" then
 				original = d.Color
@@ -226,6 +248,12 @@ function Stars.applyFinish(model: Instance?, n: any)
 			local pull = table_ and role and table_[role]
 			d.Color = if pull then (original :: Color3):Lerp(pull[1], pull[2]) else original
 			d.Reflectance = 0
+		end
+	end
+	if tierLooks then
+		local ok, err = pcall(tierLooks.trim, model, s)
+		if not ok then
+			warn("[Stars] tier trims: " .. tostring(err))
 		end
 	end
 end

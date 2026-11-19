@@ -428,6 +428,37 @@ local function attachModel(inv: Inventory, character: Model, itemId: string, sta
 	weld.C0 = c0
 	weld.C1 = c1
 	weld.Parent = handle
+	-- Off-hand items (Paired Blades, Combat_v3 5.4): the second blade, the same build at the same stars, welded to the
+	-- left hand's grip. It is a child Model "OffHand" of EquippedModel, so it goes and hides with the main one.
+	local leftGripHand = if def and def.offHand then character:FindFirstChild("LeftHand") else nil
+	if leftGripHand and leftGripHand:IsA("BasePart") then
+		local okL, left = pcall(ItemModels.build, itemId, "world")
+		if okL and left and left.PrimaryPart then
+			left:SetAttribute("OffHand", true) -- (before the finish: the 5-star pair's second tassel is charcoal)
+			if stars then
+				Stars.applyFinish(left, stars)
+			end
+			local leftAttach = leftGripHand:FindFirstChild("LeftGripAttachment")
+			local lc0 = if leftAttach and leftAttach:IsA("Attachment")
+				then leftAttach.CFrame
+				else CFrame.new(0, -leftGripHand.Size.Y / 2, 0) * CFrame.Angles(-math.pi / 2, 0, 0)
+			local lGrip = left.PrimaryPart:FindFirstChild("Grip")
+			local lc1 = if lGrip and lGrip:IsA("Attachment") then lGrip.CFrame else CFrame.identity
+			left.Name = "OffHand"
+			left:SetAttribute("OffHand", true)
+			left:PivotTo(leftGripHand.CFrame * lc0 * lc1:Inverse())
+			local lw = Instance.new("Weld")
+			lw.Name = "GripWeld"
+			lw.Part0 = leftGripHand
+			lw.Part1 = left.PrimaryPart
+			lw.C0 = lc0
+			lw.C1 = lc1
+			lw.Parent = left.PrimaryPart
+			left.Parent = model
+		elseif left then
+			left:Destroy()
+		end
+	end
 	model.Parent = character
 	inv.model = model
 	inv.modelItemId = itemId

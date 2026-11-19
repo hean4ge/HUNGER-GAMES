@@ -92,6 +92,23 @@
 	  CharacterVisuals._bow   test hook: the bow pose's numbers (radians, studs), to tune live in a playtest.
 	  CharacterVisuals._bowEvent(character, "Draw" | "Release", cancelled?)   test hook: a draw on any tracked character.
 	  CharacterVisuals._bowOf(character) -> { bow, hold, aim, arm, pull, drawing, string }?   test hook: its bow state.
+
+	Combat v3 (19 Nov, docs/design/Combat_v3.md sections 1 and 7): "rogue and choppy" was the three keys of item 7.
+	  Swings are now sampled through nine keys on a Hermite curve with time-fitted tangents (rest, coil, wound up past
+	  W, half way, M, an overshoot past F, F, the settle, rest), so the velocity is continuous: the cut accelerates
+	  out of the anticipation, overshoots, settles and returns. A swing's length is its move's (Shared.Moves: the
+	  chain step, the heavy, the counter), its shape from the step's first-person set. Over the swing layer:
+	  the guard (a held pose per family, CombatAction "Guard"), the heavy's hold ("Charge": the wind-up held, coiled),
+	  upper-body reactions ("React": additive, 0.08 s in, 0.25 s out, the owner's numbers; the legs keep walking),
+	  and a full-body layer (root pitch, turn and roll, the pelvis, both hips and knees; foot IK lets go while it
+	  plays) for the kick, the dodges ("Dodge": a back step, side hops, a forward roll), the stagger and heavy
+	  stagger, the knockdown and get-up, and the skills ("Skill": Whirl's turn, Vault Kick, Running Cut, Head Kick,
+	  the chained strikes, a breath for Concentration, Second Wind and Brace). Hit-stop: the two bodies of a hit within
+	  Moves.reactions.HitStopViewRange of the camera hold their swing for the hit-stop. A dummy's swing (payload.model)
+	  shows the same way. When the clip player exists (Controllers.ClipPlayer.applyTP(character, clipName, t, weight)
+	  -> boolean) and has the move's clip (Moves.clipName), it poses the joints instead, family by family.
+	  CharacterVisuals.playBody(character, kind) / react(character, tier, from) / setGuard(character, on, itemId)
+	  are the hooks (test rigs too); _bodyMoves holds the full-body keys (degrees, studs) for tuning.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -102,6 +119,7 @@ local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
+local Moves = require(Shared:WaitForChild("Moves"))
 local Net = require(Shared:WaitForChild("Net"))
 
 local CharacterVisuals = {}
@@ -894,7 +912,17 @@ local swingRng = Random.new()
 
 -- Starts a third-person swing on a character (item 7 in the header): itemId gives the style and weight, variant (1-8)
 -- the attacker's swing set.
-function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: number?, lead: number?): boolean
+-- (Combat v3: defined further down, used by the swings and the CombatAction handler above them)
+local scaled: (v: { number }, k: number) -> { number }
+local entryFor: (character: Instance?) -> any
+local SKILL_BODY: { [string]: string }
+local clipPlay: (model: Instance, name: string?, opts: { [string]: any }?) -> any
+local clipPlayer: () -> any
+local CLIP_BODY: { [string]: string }
+local CLIP_SKILL: { [string]: string }
+local FAMILY_CHARGE: { [string]: string }
+
+function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: number?, lead: number?, moveId: string?): boolean
 	if typeof(character) ~= "Instance" or not character:IsA("Model") or not character:IsDescendantOf(workspace) then
 		return false
 	end
@@ -911,6 +939,37 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	end
 	local style, weight = meleeStyle(itemId)
 	local v = validVariant(variant)
+	-- Combat v3: the move gives the set (a chain step's own cut), its weight and its length
+	local move = nil
+	local kind = Moves.parse(moveId)
+	if kind then
+		local def = ItemDefs.get(itemId) or ItemDefs.get("fists")
+		local stats = { id = itemId, damage = def.damage, windup = def.windup, cooldown = def.cooldown, staminaCost = def.staminaCost }
+		local _, index = Moves.parse(moveId)
+		if kind == "Heavy" then
+			move = Moves.heavy(stats, itemId, 1)
+		elseif kind == "Counter" then
+			move = Moves.counter(stats, itemId)
+		elseif kind == "Kick" then
+			CharacterVisuals.playBody(character, "Kick")
+			return true
+		elseif kind == "Skill" then
+			move = Moves.skillStrike(stats, itemId, moveId :: string)
+			if move and move.style == "Kick" then
+				CharacterVisuals.playBody(character, "HeadKick")
+				return true
+			end
+		else
+			move = Moves.step(stats, itemId, index)
+		end
+		if move and move.style and move.style ~= "Kick" then
+			style = move.style
+			v = move.variant
+			if move.heavyHit then
+				weight = "Heavy"
+			end
+		end
+	end
 	if not v then
 		entry.swingCount = (entry.swingCount or 0) % 8 + 1 -- (no set from the server: alternate per attacker)
 		v = entry.swingCount
@@ -943,6 +1002,14 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	end
 	local duration = math.clamp((SWING_TIME_STYLE[style] or SWING_TIME[weight] or 0.42)
 		* (1 + (swingRng:NextNumber() * 2 - 1) * SWING_TIME_JITTER), 0.35, 0.5)
+	if move and move.total then
+		-- (the move's own length: a Twin-Bit Axe recovers for longer than a knife; a heavy's cut is bigger)
+		duration = math.clamp(move.total * (1 + (swingRng:NextNumber() * 2 - 1) * SWING_TIME_JITTER), 0.35, 1.1)
+		if move.heavyHit then
+			W = scaled(W, 1.18)
+			F = scaled(F, 1.12)
+		end
+	end
 	-- The cut crosses when the damage lands. With `lead` seconds to the strike (the swing's start was relayed), the
 	-- wind-up takes what the lead leaves before the cut and the rest of the swing keeps its length. With no lead left
 	-- (announced at the strike) the swing starts already wound up and blends in over SWING_FADE.
@@ -976,6 +1043,19 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	elseif startU > 0 then
 		from = table.create(SWING_N, 0) -- (starting wound up: blend from the body as the Animator has it)
 	end
+	-- the Blender clip of this move, fitted to the server's strike (lead) and the move's length (total); the
+	-- procedural swing stays underneath it (and is the swing when the clip player has no clip for the move)
+	if moveId and not (kind == "Skill" and moveId ~= "S1") then
+		local clip = if kind == "Skill" then "shortblade_skill_chained" else Moves.clipName(itemId, moveId)
+		if entry.chargeTrack then
+			local cp = clipPlayer()
+			if cp then
+				pcall(cp.stopTrack, entry.chargeTrack, 0.06)
+			end
+			entry.chargeTrack = nil
+		end
+		clipPlay(character, clip, { lead = math.max(tonumber(lead) or 0, 0), total = duration })
+	end
 	entry.swing = {
 		name = name,
 		style = style,
@@ -985,6 +1065,9 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 		F = F,
 		settle = settle,
 		from = from,
+		startU = startU,
+		move = moveId,
+		itemId = itemId,
 		at = now, -- when it began to show here (the blend from `from` runs from this)
 		t0 = now - startU * duration,
 		duration = duration,
@@ -1013,32 +1096,129 @@ local function onCombatAction(payload: any)
 		return
 	end
 	local action = payload.action
-	if action ~= "Swing" and action ~= "Draw" and action ~= "Release" then
+	-- Combat v3: what happened to a body (a player's or a dummy's: payload.target)
+	if action == "React" or action == "Block" or action == "Parry" or action == "GuardBreak" then
+		local target = payload.target
+		if typeof(target) == "Instance" and target:IsA("Model") and (target ~= player.Character or poseAsRemote) then
+			if action == "React" then
+				CharacterVisuals.react(target, payload.tier, payload.from)
+			elseif action == "GuardBreak" then
+				CharacterVisuals.setGuard(target, false)
+				if not clipPlay(target, "guard_break") then
+					CharacterVisuals.react(target, "Stagger", nil)
+				end
+			else
+				local entry = entryFor(target)
+				if entry and not clipPlay(target, if action == "Parry" then "parry" else "block_hit") then
+					entry.react = { t0 = os.clock(), side = if action == "Parry" then -1 else 1, amp = if action == "Parry" then 0.5 else 0.35 }
+				end
+			end
+		end
+		-- hit-stop: the two bodies of the hit hold a moment when they are near the camera
+		local hold = tonumber(payload.hitStop) or (if action == "Parry" then 0.08 else 0)
+		local cam = workspace.CurrentCamera
+		if hold > 0 and cam then
+			local range = Moves.reactions.HitStopViewRange or 30
+			local function stop(model: any)
+				local entry = if typeof(model) == "Instance" then entries[model] else nil
+				if entry and entry.root and (entry.root.Position - cam.CFrame.Position).Magnitude <= range then
+					entry.stopUntil = os.clock() + hold
+					local cp = clipPlayer()
+					if cp and type(cp.hitStop) == "function" and entry.clipClaimed then
+						pcall(cp.hitStop, model, hold)
+					end
+				end
+			end
+			stop(target)
+			local attackerId = tonumber(payload.attackerId)
+			local by = if attackerId then Players:GetPlayerByUserId(attackerId) else nil
+			stop(if by then by.Character else payload.attacker)
+		end
+		return
+	end
+	if action ~= "Swing" and action ~= "Draw" and action ~= "Release" and action ~= "Guard" and action ~= "Charge"
+		and action ~= "Dodge" and action ~= "Skill" and action ~= "Throw" then
 		return
 	end
 	local userId = tonumber(payload.userId)
 	local attacker = if userId then Players:GetPlayerByUserId(userId) else nil
-	-- (your own swings are first person; with the test hook LS_PoseAsRemote your body shows them too)
-	if not attacker or (attacker == player and not poseAsRemote) then
+	local character = if attacker then attacker.Character else nil
+	if not attacker and typeof(payload.model) == "Instance" and payload.model:IsA("Model") then
+		character = payload.model -- (a dummy's swing: CombatService._npcStrike)
+	elseif not attacker or (attacker == player and not poseAsRemote) then
+		-- (your own swings are first person; with the test hook LS_PoseAsRemote your body shows them too)
 		return
 	end
-	local character = attacker.Character
 	if not character then
 		return
 	end
+	local itemId = if type(payload.itemId) == "string" then payload.itemId else nil
 	if action == "Swing" then
 		if Config.Combat.ThirdPersonSwings ~= false then
 			-- lead: seconds until the strike (the swing's start was relayed); 0 or missing: the strike is now
-			CharacterVisuals.playSwing(character, if type(payload.itemId) == "string" then payload.itemId else nil, payload.variant,
-				tonumber(payload.lead) or 0)
+			CharacterVisuals.setCharge(character, false, itemId)
+			CharacterVisuals.setGuard(character, false, itemId)
+			CharacterVisuals.playSwing(character, itemId, payload.variant, tonumber(payload.lead) or 0,
+				if type(payload.move) == "string" then payload.move else nil)
 		end
+	elseif action == "Guard" then
+		CharacterVisuals.setGuard(character, payload.cancelled ~= true, itemId)
+	elseif action == "Charge" then
+		CharacterVisuals.setCharge(character, payload.cancelled ~= true, itemId)
+	elseif action == "Dodge" then
+		local entry = entryFor(character)
+		local dir = payload.direction
+		local kind = "DodgeBack"
+		if entry and entry.root and typeof(dir) == "Vector3" and dir.Magnitude > 0.1 then
+			local rel = entry.root.CFrame:VectorToObjectSpace(dir)
+			kind = if rel.Z < -0.5 then "DodgeRoll" elseif rel.Z > 0.5 then "DodgeBack" elseif rel.X < 0 then "DodgeLeft" else "DodgeRight"
+		end
+		CharacterVisuals.setGuard(character, false, itemId)
+		CharacterVisuals.playBody(character, kind)
+	elseif action == "Skill" then
+		local skill = payload.skill
+		if type(skill) == "string" and clipPlay(character, CLIP_SKILL[skill]) then
+			return -- (the Blender clip plays it)
+		end
+		if skill == "chained_strikes" then
+			-- five quick strikes that grow (Moves.skills.Weapon.ShortBlade)
+			local S = Moves.skills.Weapon.ShortBlade
+			local held = character:GetAttribute("EquippedItem")
+			for i = 1, #S.Mults do
+				task.delay(if i == 1 then 0 else S.First + (i - 1) * S.Gap - 0.04, function()
+					CharacterVisuals.playSwing(character, if type(held) == "string" then held else "knife", nil, 0.04, "S" .. i)
+				end)
+			end
+		elseif type(skill) == "string" and SKILL_BODY[skill] then
+			CharacterVisuals.playBody(character, SKILL_BODY[skill])
+		end
+	elseif action == "Throw" then
+		-- the Throwing family's Blender clip (throw_knife, throw_dagger, throw_ring, throw_hatchet, throw_spear,
+		-- throw_twinaxe; Shared.FightClips): the throw was released on the server just now
+		CharacterVisuals.setGuard(character, false, itemId)
+		CharacterVisuals.playThrow(character, itemId)
 	else
 		bowEvent(entries[character], action, payload.cancelled == true) -- (item 8: another player's draw)
+		if action == "Release" and payload.cancelled ~= true then
+			clipPlay(character, "bow_release") -- the bow's follow-through after the arrow leaves (upper body)
+		end
 	end
 end
 
+-- A throw's body (Combat_v3 7.2 Throwing): the Blender clip for the thrown item, from its release.
+function CharacterVisuals.playThrow(character: Model, itemId: string?): boolean
+	local okFc, FightClips = pcall(require, ReplicatedStorage.Shared:FindFirstChild("FightClips") :: ModuleScript)
+	local name = if okFc and type(itemId) == "string" then FightClips.forMove(itemId, "Throw") else nil
+	-- (the release is the server's moment: start the clip at its release frame so the arm is already going through)
+	return clipPlay(character, name, { lead = 0 }) ~= nil
+end
+
 -- Your own draws (the server tells only the others): your body takes the same pose, for anyone watching it here.
-local function onOwnCombat(name: string)
+local function onOwnCombat(name: string, data: any)
+	if name == "Swing" and type(data) == "table" and data.style == "Kick" and localEntry and localEntry.character then
+		CharacterVisuals.playBody(localEntry.character, if data.moveId == "HK" then "HeadKick" else "Kick")
+		return
+	end
 	if name == "DrawStart" then
 		bowEvent(localEntry, "Draw")
 	elseif name == "Release" then
@@ -1066,26 +1246,73 @@ end
 -- (F), hold it while it settles back a little, recover.
 local swingArm = table.create(SWING_N, 0)
 local swingBody = table.create(SWING_N, 0)
+
+-- Combat v3: a key curve. ts: key times (increasing), ps: key values (n numbers each); a cubic Hermite through the keys
+-- with each key's tangent taken from its neighbours (Catmull-Rom on uneven times), flat at both ends, so the motion
+-- has no corners: it eases out of a key and into the next at the speed the keys around it ask for.
+local function sampleKeys(ts: { number }, ps: { { number } }, n: number, u: number, out: { number })
+	local m = #ts
+	if u <= ts[1] then
+		table.move(ps[1], 1, n, 1, out)
+		return
+	elseif u >= ts[m] then
+		table.move(ps[m], 1, n, 1, out)
+		return
+	end
+	local k = 1
+	while k < m - 1 and u > ts[k + 1] do
+		k += 1
+	end
+	local t0, t1 = ts[k], ts[k + 1]
+	local h = math.max(t1 - t0, 1e-4)
+	local x = (u - t0) / h
+	local x2, x3 = x * x, x * x * x
+	local h00, h10, h01, h11 = 2 * x3 - 3 * x2 + 1, x3 - 2 * x2 + x, -2 * x3 + 3 * x2, x3 - x2
+	local p0, p1, pa, pb = ps[k], ps[k + 1], ps[k - 1], ps[k + 2]
+	local ta, tb = ts[k - 1], ts[k + 2]
+	for i = 1, n do
+		local m0 = if pa then (p1[i] - pa[i]) / (t1 - ta) else 0
+		local m1 = if pb then (pb[i] - p0[i]) / (tb - t0) else 0
+		out[i] = h00 * p0[i] + h10 * h * m0 + h01 * p1[i] + h11 * h * m1
+	end
+end
+
+function scaled(v: { number }, k: number): { number }
+	local out = table.create(#v, 0)
+	for i = 1, #v do
+		out[i] = v[i] * k
+	end
+	return out
+end
+
+local function mix(a: { number }, b: { number }, k: number): { number }
+	local out = table.create(#a, 0)
+	for i = 1, #a do
+		out[i] = a[i] + (b[i] - a[i]) * k
+	end
+	return out
+end
+
+-- The nine keys of a swing (see the header) on its own timeline.
+local function swingKeys(swing: any)
+	local zero = table.create(SWING_N, 0)
+	local W, M, F = swing.W, swing.M, swing.F
+	local uW, uM, uF, uH = swing.uW, swing.uM, swing.uF, swing.uH
+	swing.ts = { 0, uW * 0.55, uW, (uW + uM) * 0.5, uM, uF, uH, uH + (1 - uH) * 0.45, 1 }
+	swing.ps = { swing.from or zero, scaled(W, 0.72), scaled(W, 1.06), mix(W, M, 0.55), M, scaled(F, 1.1), scaled(F, 0.97),
+		scaled(F, 0.4), zero }
+	if swing.startU and swing.startU > 0 then
+		-- (announced at the strike: it starts wound up, from where the body was)
+		swing.ts = { 0, uW, (uW + uM) * 0.5, uM, uF, uH, uH + (1 - uH) * 0.45, 1 }
+		swing.ps = { swing.from or zero, scaled(W, 1.02), mix(W, M, 0.55), M, scaled(F, 1.1), scaled(F, 0.97), scaled(F, 0.4), zero }
+	end
+end
+
 local function sampleSwing(swing: any, u: number, out: { number })
-	local a: { number }?, b: { number }?, k: number
-	if u < swing.uW then
-		a, b, k = nil, swing.W, smooth01(u / swing.uW)
-	elseif u < swing.uM then
-		local x = (u - swing.uW) / (swing.uM - swing.uW)
-		a, b, k = swing.W, swing.M, x * x
-	elseif u < swing.uF then
-		local x = (u - swing.uM) / (swing.uF - swing.uM)
-		a, b, k = swing.M, swing.F, 1 - (1 - x) * (1 - x)
-	elseif u < swing.uH then
-		a, b, k = swing.F, swing.settle, smooth01((u - swing.uF) / (swing.uH - swing.uF))
-	else
-		a, b, k = swing.settle, nil, smooth01((u - swing.uH) / (1 - swing.uH))
+	if not swing.ts then
+		swingKeys(swing)
 	end
-	for i = 1, SWING_N do
-		local from = if a then a[i] else 0
-		local to = if b then b[i] else 0
-		out[i] = from + (to - from) * k
-	end
+	sampleKeys(swing.ts, swing.ps, SWING_N, u, out)
 end
 
 -- This frame's swing angles for an entry (nil without one; a finished swing is dropped here). The torso runs
@@ -1095,6 +1322,12 @@ local function swingPose(entry, now: number): { number }?
 	if not swing then
 		return nil
 	end
+	-- hit-stop: the body holds its swing for a moment on contact (only its clock slows; the server never pauses)
+	local last = swing.lastNow or now
+	if now < (entry.stopUntil or -math.huge) then
+		swing.t0 += (now - last) * 0.88
+	end
+	swing.lastNow = now
 	local u = (now - swing.t0) / swing.duration
 	if u >= 1 then
 		entry.swing = nil
@@ -1120,6 +1353,373 @@ local function swingPose(entry, now: number): { number }?
 	table.move(swingArm, 1, SWING_N, 1, out)
 	entry.swingOutAt = now
 	return out
+end
+
+-- Combat v3: guard, charge, reactions and the full-body layer -------------------------------------------------------
+
+local function deg(v: { number }): { number }
+	local out = table.create(#v, 0)
+	for i = 1, #v do
+		out[i] = math.rad(v[i])
+	end
+	return out
+end
+-- Held poses over the Animator (the 11 swing angles, degrees): the guard per family, the fists' guard.
+local GUARD_POSE = {
+	Blade = deg({ 2, -12, 0, 70, -38, 12, 72, 42, -22, -10, 82 }),
+	Spear = deg({ 4, -18, 0, 25, -12, 10, 62, 48, -30, -12, 40 }),
+	Fists = deg({ 0, -6, 0, 62, 8, 4, 118, 64, -8, -4, 116 }),
+}
+local GUARD_FAMILY = { Fists = "Fists", Spear = "Spear" }
+
+-- The full-body layer: keys { u (share of the move), body = { rootPitch (+ back), rootYaw, rootRoll, drop (studs),
+-- hipL, hipR (+ thigh forward), kneeL, kneeR (- bent) }, upper = the 11 swing angles? } in degrees; duration in seconds;
+-- legs = foot IK lets go while it plays.
+local BODY_N = 8
+local function bk(u: number, body: { number }, upper: { number }?)
+	return { u = u, body = body, upper = upper }
+end
+local Z8 = { 0, 0, 0, 0, 0, 0, 0, 0 }
+local ARMS_OUT = { 0, 0, 0, 25, 0, 28, 30, 25, 0, -28, 30 }
+local BODY_MOVES: { [string]: { duration: number, legs: boolean, keys: { any } } } = {
+	Kick = { duration = 0.59, legs = true, keys = { -- a front kick: chamber, snap out at 0.16 s, recoil, set down
+		bk(0, Z8), bk(0.15, { 6, 0, 0, 0.05, -4, 62, -6, -95 }, ARMS_OUT), bk(0.27, { 14, 0, 0, 0.1, -6, 88, -10, -8 }, ARMS_OUT),
+		bk(0.45, { 8, 0, 0, 0.05, -4, 60, -6, -80 }, ARMS_OUT), bk(1, Z8) } },
+	HeadKick = { duration = 0.7, legs = true, keys = { -- a high round kick, the hips turning over
+		bk(0, Z8), bk(0.18, { 10, -20, 8, 0.1, -6, 70, -10, -100 }, ARMS_OUT), bk(0.32, { 22, -45, 20, 0.15, -8, 105, -12, -10 }, ARMS_OUT),
+		bk(0.55, { 12, -25, 10, 0.1, -6, 70, -10, -90 }, ARMS_OUT), bk(1, Z8) } },
+	DodgeBack = { duration = 0.55, legs = true, keys = {
+		bk(0, Z8), bk(0.25, { -6, 0, 0, 0.35, 30, 18, -50, -30 }), bk(0.55, { 10, 0, 0, 0.2, -10, 20, -20, -40 }), bk(1, Z8) } },
+	DodgeLeft = { duration = 0.55, legs = true, keys = {
+		bk(0, Z8), bk(0.25, { -4, 10, -14, 0.4, 25, 20, -55, -40 }), bk(0.6, { 0, 6, 10, 0.25, 10, 15, -30, -30 }), bk(1, Z8) } },
+	DodgeRight = { duration = 0.55, legs = true, keys = {
+		bk(0, Z8), bk(0.25, { -4, -10, 14, 0.4, 20, 25, -40, -55 }), bk(0.6, { 0, -6, -10, 0.25, 15, 10, -30, -30 }), bk(1, Z8) } },
+	DodgeRoll = { duration = 0.6, legs = true, keys = { -- a forward roll: tuck and go over
+		bk(0, Z8), bk(0.2, { -30, 0, 0, 0.8, 70, 70, -110, -110 }), bk(0.45, { -200, 0, 0, 1.6, 100, 100, -130, -130 }),
+		bk(0.7, { -330, 0, 0, 0.9, 80, 80, -120, -120 }), bk(0.85, { -360, 0, 0, 0.3, 30, 30, -50, -50 }), bk(1, { -360, 0, 0, 0, 0, 0, 0, 0 }) } },
+	Stagger = { duration = 0.6, legs = true, keys = { -- the torso turns into the blow, one foot steps back
+		bk(0, Z8), bk(0.18, { 10, 6, 4, 0.1, 6, -22, -10, -28 }, { 12, 8, 4, 18, 0, 10, 20, 18, 0, -10, 20 }),
+		bk(0.5, { 5, 3, 2, 0.05, 2, -10, -5, -14 }, { 6, 4, 2, 8, 0, 5, 10, 8, 0, -5, 10 }), bk(1, Z8) } },
+	HeavyStagger = { duration = 0.9, legs = true, keys = {
+		bk(0, Z8), bk(0.15, { 18, 14, 6, 0.2, 10, -34, -14, -40 }, { 20, 14, 6, 30, 0, 18, 30, 30, 0, -18, 30 }),
+		bk(0.45, { 10, 8, 3, 0.15, 6, -20, -10, -26 }, { 10, 8, 3, 15, 0, 9, 15, 15, 0, -9, 15 }), bk(1, Z8) } },
+	Knockdown = { duration = 1.6, legs = true, keys = { -- down for a second, up in 0.6
+		bk(0, Z8), bk(0.12, { 40, 0, 0, 0.8, 30, 40, -20, -30 }), bk(0.25, { 82, 0, 0, 2.3, 40, 50, -10, -20 }),
+		bk(0.62, { 80, 0, 0, 2.3, 40, 50, -15, -20 }), bk(0.8, { 30, 0, 0, 1.2, 80, 40, -120, -60 }), bk(1, Z8) } },
+	Whirl = { duration = 1.15, legs = true, keys = { -- pull across the body (readable), one full turn, settle
+		bk(0, Z8, nil), bk(0.3, { -6, 40, 0, 0.3, 20, 15, -30, -25 }, { 4, 30, 0, 70, 55, 10, 30, 40, 0, -10, 40 }),
+		bk(0.44, { -8, -150, 0, 0.35, 20, 15, -30, -25 }, { 0, 0, 0, 80, -20, 30, 10, 40, 0, -10, 30 }),
+		bk(0.57, { -6, -320, 0, 0.3, 15, 15, -25, -25 }, { 0, -20, 0, 70, -60, 20, 15, 30, 0, -10, 30 }),
+		bk(1, { 0, -360, 0, 0, 0, 0, 0, 0 }) } },
+	VaultKick = { duration = 1.25, legs = true, keys = { -- plant the spear, vault, both feet out at 0.75 s, land
+		bk(0, Z8), bk(0.22, { -18, 0, 0, 0.5, 30, 30, -60, -60 }, { 0, 0, 0, 60, -10, 10, 20, 60, 10, -10, 20 }),
+		bk(0.45, { 20, 0, 0, -0.6, 70, 70, -90, -90 }, { 0, 0, 0, 30, -10, 10, 10, 30, 10, -10, 10 }),
+		bk(0.6, { 30, 0, 0, -0.8, 85, 85, -5, -5 }, ARMS_OUT), bk(0.8, { 8, 0, 0, 0.3, 30, 30, -50, -50 }), bk(1, Z8) } },
+	RunningCut = { duration = 0.9, legs = true, keys = { -- a low crouch, the dash with the blade out, the cut
+		bk(0, Z8), bk(0.22, { -16, 10, 0, 0.45, 40, 20, -70, -40 }, { -4, 20, 0, 30, -40, 15, 50, 20, 0, -10, 30 }),
+		bk(0.4, { -22, 0, 0, 0.3, 50, -10, -40, -20 }, { -6, 0, 0, 20, 30, 10, 20, 20, 0, -10, 30 }),
+		bk(0.6, { -14, -20, 0, 0.25, 30, 0, -40, -30 }, { -4, -30, 0, 10, 70, -6, 15, 15, 0, -10, 30 }), bk(1, Z8) } },
+	Breath = { duration = 0.5, legs = false, keys = { -- Concentration, Second Wind, Brace: a slow breath, a lower stance
+		bk(0, Z8), bk(0.45, { 3, 0, 0, 0.12, 0, 0, 0, 0 }, { 4, 0, 0, 10, 0, 4, 20, 10, 0, -4, 20 }), bk(1, Z8) } },
+}
+CharacterVisuals._bodyMoves = BODY_MOVES
+
+-- (converted to radians once: the drop stays in studs)
+for _, move in pairs(BODY_MOVES) do
+	local ts, bodies, uppers = {}, {}, {}
+	for _, key in ipairs(move.keys) do
+		table.insert(ts, key.u)
+		local b = table.create(BODY_N, 0)
+		for i = 1, BODY_N do
+			b[i] = if i == 4 then key.body[i] else math.rad(key.body[i])
+		end
+		table.insert(bodies, b)
+		table.insert(uppers, if key.upper then deg(key.upper) else table.create(SWING_N, 0))
+	end
+	(move :: any).ts, (move :: any).bodies, (move :: any).uppers = ts, bodies, uppers
+end
+
+SKILL_BODY = { whirl = "Whirl", vault_kick = "VaultKick", running_cut = "RunningCut", head_kick = "HeadKick",
+	concentration = "Breath", second_wind = "Breath", brace = "Breath" }
+
+function entryFor(character: Instance?): any
+	if typeof(character) ~= "Instance" or not character:IsA("Model") or not character:IsDescendantOf(workspace) then
+		return nil
+	end
+	local entry = entries[character]
+	if not entry and not Players:GetPlayerFromCharacter(character) then
+		track(character, false) -- (a dummy, a test rig)
+		entry = entries[character]
+	end
+	return entry
+end
+
+function CharacterVisuals.playBody(character: Model, kind: string): boolean
+	local entry = entryFor(character)
+	local move = BODY_MOVES[kind]
+	if not entry or not move then
+		return false
+	end
+	if clipPlay(character, CLIP_BODY[kind]) then
+		if kind == "Knockdown" then
+			task.delay(1.0, function()
+				clipPlay(character, "getup")
+			end)
+		end
+		return true -- (the Blender clip plays it)
+	end
+	local slow = if Config.IsStudio then tonumber(player:GetAttribute("LS_SwingSlowMo")) else nil
+	entry.body = { kind = kind, t0 = os.clock(), duration = move.duration * (if slow and slow > 1 then math.min(slow, 60) else 1) }
+	return true
+end
+
+-- An upper-body reaction (additive): rank 1 a flinch, 2+ with a full-body stagger too; `from`: where the blow came from.
+function CharacterVisuals.react(character: Model, tier: string?, from: Vector3?): boolean
+	local entry = entryFor(character)
+	if not entry or not entry.root then
+		return false
+	end
+	local rank = (Moves.TIERS[tier or ""] or Moves.TIERS.Flinch).rank
+	local side = 1
+	if typeof(from) == "Vector3" then
+		local rel = entry.root.CFrame:PointToObjectSpace(from)
+		side = if rel.X >= 0 then 1 else -1
+	end
+	if rank == 1 then
+		local dir = "F"
+		if typeof(from) == "Vector3" then
+			local rel = entry.root.CFrame:PointToObjectSpace(from)
+			dir = if math.abs(rel.X) > math.abs(rel.Z) then (if rel.X > 0 then "R" else "L") elseif rel.Z > 0 then "B" else "F"
+		end
+		if clipPlay(character, "react_light_" .. dir) then
+			return true -- (additive, over whatever the body does)
+		end
+	end
+	entry.react = { t0 = os.clock(), side = side, amp = 0.6 + 0.4 * rank }
+	if rank == 2 then
+		CharacterVisuals.playBody(character, "Stagger")
+	elseif rank == 3 then
+		CharacterVisuals.playBody(character, "HeavyStagger")
+	elseif rank >= 4 then
+		CharacterVisuals.playBody(character, "Knockdown")
+	end
+	return true
+end
+
+function CharacterVisuals.setGuard(character: Model, on: boolean, itemId: string?)
+	local entry = entryFor(character)
+	if entry then
+		local was = entry.guardOn == true
+		entry.guardOn = on
+		entry.guardFamily = GUARD_FAMILY[Moves.family(itemId)] or "Blade"
+		local cp = clipPlayer()
+		if cp and on and not was then
+			clipPlay(character, "guard_in")
+			entry.guardTrack = clipPlay(character, "guard_hold", { loop = true, blendIn = 0.12 })
+		elseif cp and not on and was then
+			if entry.guardTrack then
+				pcall(cp.stopTrack, entry.guardTrack, 0.12)
+				entry.guardTrack = nil
+				entry.clipUntil = os.clock() + 0.6
+			end
+		end
+	end
+end
+
+function CharacterVisuals.setCharge(character: Model, on: boolean, itemId: string?)
+	local entry = entryFor(character)
+	if entry then
+		entry.chargeOn = on
+		entry.chargeItem = itemId
+		entry.chargeAt = os.clock()
+		local cp = clipPlayer()
+		if cp and on then
+			entry.chargeTrack = clipPlay(character, FAMILY_CHARGE[Moves.family(itemId)], { loop = true })
+		elseif cp and entry.chargeTrack then
+			pcall(cp.stopTrack, entry.chargeTrack, 0.1)
+			entry.chargeTrack = nil
+			entry.clipUntil = os.clock() + 0.5
+		end
+	end
+end
+
+-- The full-body sample of an entry now: (body 8 values, upper 11 values, legs) or nil.
+local bodyOut = table.create(BODY_N, 0)
+local bodyUpper = table.create(SWING_N, 0)
+local function bodyPose(entry, now: number): ({ number }?, { number }?, boolean)
+	local b = entry.body
+	if not b then
+		return nil, nil, false
+	end
+	local move = BODY_MOVES[b.kind] :: any
+	if now < (entry.stopUntil or -math.huge) then
+		b.t0 += (now - (b.lastNow or now)) * 0.88
+	end
+	b.lastNow = now
+	local u = (now - b.t0) / b.duration
+	if not move or u >= 1 then
+		entry.body = nil
+		return nil, nil, false
+	end
+	sampleKeys(move.ts, move.bodies, BODY_N, math.max(u, 0), bodyOut)
+	sampleKeys(move.ts, move.uppers, SWING_N, math.max(u, 0), bodyUpper)
+	return bodyOut, bodyUpper, move.legs
+end
+
+-- Guard, charge and reaction angles added to the swing layer (nil when none of them shows).
+local fxOut = table.create(SWING_N, 0)
+local function combatLayer(entry, dt: number, now: number, swing: { number }?, upper: { number }?): { number }?
+	entry.guardW = (entry.guardW or 0) + ((if entry.guardOn and not entry.swing then 1 else 0) - (entry.guardW or 0))
+		* expAlpha(if entry.guardOn then 22 else 14, dt)
+	entry.chargeW = (entry.chargeW or 0) + ((if entry.chargeOn and not entry.swing then 1 else 0) - (entry.chargeW or 0))
+		* expAlpha(if entry.chargeOn then 12 else 20, dt)
+	local react = entry.react
+	local r = 0
+	if react then
+		local since = now - react.t0
+		-- the owner's numbers: 0.08 s in, 0.25 s out
+		if since < 0.08 then
+			r = smooth01(since / 0.08)
+		elseif since < 0.33 then
+			r = 1 - smooth01((since - 0.08) / 0.25)
+		else
+			entry.react = nil
+		end
+	end
+	local g, c = entry.guardW, entry.chargeW
+	if g < 0.002 and c < 0.002 and r < 0.002 and not swing and not upper then
+		return nil
+	end
+	for i = 1, SWING_N do
+		fxOut[i] = (if swing then swing[i] else 0) + (if upper then upper[i] else 0)
+	end
+	if g > 0.002 then
+		local pose = GUARD_POSE[entry.guardFamily or "Blade"] or GUARD_POSE.Blade
+		for i = 1, SWING_N do
+			fxOut[i] += pose[i] * g
+		end
+	end
+	if c > 0.002 then
+		-- the heavy's hold: its cut's wind-up, coiled further (the others read it coming)
+		local style = meleeStyle(entry.chargeItem)
+		local shape = SWING_SHAPES[shapeFor(style, 1)] or SWING_SHAPES.Left
+		local tremble = math.clamp((now - (entry.chargeAt or now)) / 0.5, 0, 1)
+		for i = 1, SWING_N do
+			fxOut[i] += shape.W[i] * 1.2 * c
+		end
+		fxOut[2] += math.rad(-8) * c * tremble
+		fxOut[4] += math.rad(1.5) * math.sin(now * 40) * tremble * c
+	end
+	if r > 0.002 then
+		local a = react.amp * r
+		fxOut[1] += math.rad(12) * a
+		fxOut[2] += math.rad(10) * react.side * a
+		fxOut[3] += math.rad(6) * react.side * a
+		fxOut[4] += math.rad(10) * a
+		fxOut[8] += math.rad(10) * a
+	end
+	return fxOut
+end
+
+-- The clip player (Combat_v3 7.1, Controllers.ClipPlayer: the Blender clips in Shared.FightClips). Hooked: each
+-- character that plays a clip is claimed once, and after this pass has posed it the clip's joints are blended over
+-- it (ClipPlayer.sample: the clip's Transform by its weight, additive reactions multiplied on), written through the
+-- same bookkeeping as every pose here so nothing accumulates. A move without a clip keeps the procedural pose.
+function clipPlayer(): any
+	local registry = Controllers
+	local cp = registry and registry.ClipPlayer
+	return if cp and type(cp.play) == "function" and type(cp.sample) == "function" and type(cp.has) == "function" then cp else nil
+end
+
+function clipPlay(model: Instance, name: string?, opts: { [string]: any }?): any
+	local cp = clipPlayer()
+	if not cp or not name or not (typeof(model) == "Instance" and model:IsA("Model")) then
+		return nil
+	end
+	local okHas, has = pcall(cp.has, name)
+	if not okHas or not has then
+		return nil
+	end
+	local entry = entryFor(model)
+	if not entry then
+		return nil
+	end
+	if not entry.clipClaimed then
+		entry.clipClaimed = true
+		pcall(cp.claim, model, true)
+	end
+	local ok, track = pcall(cp.play, model, name, opts)
+	if not ok or not track then
+		return nil
+	end
+	local info = if type(cp.info) == "function" then cp.info(name) else nil
+	local length = if info and type(info.len) == "number" then info.len else 1
+	local loop = (opts and opts.loop) or (info and info.loop)
+	entry.clipUntil = math.max(entry.clipUntil or 0, if loop then math.huge else os.clock() + length * 2 + 0.4)
+	return track
+end
+
+CLIP_BODY = {
+	Kick = "kick", HeadKick = "fists_skill_head_kick", DodgeBack = "dodge_back", DodgeLeft = "dodge_left",
+	DodgeRight = "dodge_right", DodgeRoll = "dodge_roll", Stagger = "stagger_F", HeavyStagger = "heavy_stagger_F",
+	Knockdown = "knockdown", Whirl = "axe_skill_whirl", VaultKick = "spear_skill_vault_kick", RunningCut = "sword_skill_running_cut",
+}
+CLIP_SKILL = {
+	whirl = "axe_skill_whirl", vault_kick = "spear_skill_vault_kick", running_cut = "sword_skill_running_cut",
+	head_kick = "fists_skill_head_kick", chained_strikes = "shortblade_skill_chained", concentration = "skill_concentration",
+	second_wind = "skill_second_wind", brace = "skill_brace",
+}
+FAMILY_CHARGE = { Fists = "fists_heavy_charge", ShortBlade = "shortblade_heavy_charge", Sword = "sword_heavy_charge",
+	Axe = "axe_heavy_charge", Spear = "spear_heavy_charge" }
+
+local clipOut: { [string]: CFrame } = {}
+local clipW: { [string]: number } = {}
+local clipAdd: { [string]: CFrame } = {}
+local function applyClips(entry, now: number)
+	local cp = clipPlayer()
+	if not cp or not entry.clipClaimed or not (entry.clipUntil and now < entry.clipUntil) then
+		return
+	end
+	table.clear(clipOut)
+	table.clear(clipW)
+	table.clear(clipAdd)
+	local ok, any = pcall(cp.sample, entry.character, now, clipOut, clipW, clipAdd)
+	if not ok or not any then
+		return
+	end
+	local joints = entry.clipJoints
+	if not joints then
+		joints = {}
+		for _, d in ipairs(entry.character:GetDescendants()) do
+			if d:IsA("Motor6D") or d:IsA("AnimationConstraint") then
+				if joints[d.Name] == nil or d:IsA("AnimationConstraint") then
+					joints[d.Name] = d
+				end
+			end
+		end
+		entry.clipJoints = joints
+	end
+	local function put(joint: any, final: CFrame)
+		local cur = joint.Transform
+		-- the base for the bookkeeping: what the Animator gave this frame (ours if we wrote this joint just now)
+		local base = if entry.written[joint] ~= nil and entry.written[joint] == cur then (entry.bases[joint] or cur) else cur
+		joint.Transform = final -- (as writeJoint, below)
+		entry.written[joint] = final
+		entry.bases[joint] = base
+	end
+	for name, cf in pairs(clipOut) do
+		local joint = joints[name]
+		if joint and joint.Parent then
+			put(joint, joint.Transform:Lerp(cf, math.clamp(clipW[name] or 1, 0, 1)))
+		end
+	end
+	for name, add in pairs(clipAdd) do
+		local joint = joints[name]
+		if joint and joint.Parent then
+			put(joint, add * joint.Transform)
+		end
+	end
+	entry.posed = true
 end
 
 -- Pose application ------------------------------------------------------------------------------------------------------
@@ -1398,7 +1998,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		ikParams.FilterDescendantsInstances = list
 		waterParams.FilterDescendantsInstances = list
 	end
-	local doIK = entry.legs ~= nil and lod >= 2 and distance <= LOD.ikRange
+	-- Combat v3: the full-body layer (a kick, a dodge, a stagger, a skill) owns the legs while it plays
+	local bodyB, bodyU, bodyLegs = bodyPose(entry, os.clock())
+	local doIK = entry.legs ~= nil and lod >= 2 and distance <= LOD.ikRange and not bodyLegs
 	if doIK then
 		ikCount += 1
 	end
@@ -1490,12 +2092,14 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 
 	-- Melee swing (#90): this frame's joint angles, or nil (a finished swing is dropped here)
 	local swingAngles = swingPose(entry, os.clock())
+	-- Combat v3: the guard, the heavy's hold and the reactions over it (and the full-body layer's arms)
+	swingAngles = combatLayer(entry, dt, os.clock(), swingAngles, bodyU)
 	-- The bow (item 8): how much of the hold pose this frame (the draw's own weights are on the entry)
 	local bow = bowWeights(entry, dt, 1 - math.max(s, k))
 
 	local trivial = c < 0.002 and s < 0.002 and k < 0.002 and math.abs(twist) < 0.004 and math.abs(leanX) < 0.002
 		and math.abs(leanZ) < 0.002 and land < 0.002 and w < 0.002 and entry.air < 0.002 and swingAngles == nil
-		and bow < 0.002
+		and bow < 0.002 and bodyB == nil and not (entry.clipUntil and os.clock() < entry.clipUntil)
 	if trivial then
 		if entry.posed then
 			clearPose(entry)
@@ -1576,6 +2180,9 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		B[name] = if joint and joint.Parent then readBase(entry, joint) else IDENTITY
 	end
 	local rootStance = CFrame.Angles(0, twist, 0) * CFrame.Angles(rootX, 0, 0)
+	if bodyB then
+		rootStance = rootStance * CFrame.Angles(0, bodyB[2], 0) * CFrame.Angles(bodyB[1], 0, bodyB[3])
+	end
 	P.Waist = CFrame.Angles(leanX * 0.5, 0, leanZ * 0.5) * CFrame.Angles(0, -twist * 0.85, 0) * CFrame.Angles(waistX, 0, 0)
 	-- the neck counters the lean so the head stays level
 	P.Neck = CFrame.Angles(-leanX * 0.8, 0, -leanZ * 0.8) * CFrame.Angles(0, -twist * 0.15, 0) * CFrame.Angles(neckX, 0, 0)
@@ -1589,6 +2196,12 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	P.RightShoulder = CFrame.Angles(shoulderRX, 0, shoulderRZ)
 	P.LeftElbow = CFrame.Angles(elbowL + airElbow, 0, 0)
 	P.RightElbow = CFrame.Angles(elbowR + airElbow, 0, 0)
+	if bodyB then
+		P.LeftHip = CFrame.Angles(bodyB[5], 0, 0) * P.LeftHip
+		P.RightHip = CFrame.Angles(bodyB[6], 0, 0) * P.RightHip
+		P.LeftKnee = CFrame.Angles(bodyB[7], 0, 0) * P.LeftKnee
+		P.RightKnee = CFrame.Angles(bodyB[8], 0, 0) * P.RightKnee
+	end
 	if swingAngles then
 		-- the swing over the stance pose: the torso turns into it, the neck keeps the head on the target
 		local a = swingAngles
@@ -1678,7 +2291,7 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 	end
 
 	-- Root: twist + stance + lean, lowered by the pelvis drop (world down, expressed in the joint frame)
-	local dropLocal = rootFrame:VectorToObjectSpace(Vector3.new(0, -pelvisDrop, 0))
+	local dropLocal = rootFrame:VectorToObjectSpace(Vector3.new(0, -pelvisDrop - (if bodyB then bodyB[4] * ls else 0), 0))
 	local rootT = CFrame.new(dropLocal) * rootLean * rootStance * baseRoot
 	writeJoint(entry, rootJ, B.Root, rootT)
 
@@ -1765,6 +2378,8 @@ local function poseEntry(entry, dt: number, camPos: Vector3)
 		end
 	end
 	entry.posed = true
+	-- the Blender clips over all of it (ClipPlayer, hooked)
+	applyClips(entry, os.clock())
 end
 
 -- Ranks the other characters by distance from the camera and gives each its share of the pose (entry.lod, see LOD).

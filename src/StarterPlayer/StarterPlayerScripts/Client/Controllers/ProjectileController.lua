@@ -19,6 +19,9 @@
 	hidden from your first-person view (attributes Host / HostPart) until they come out. A shot the server left nothing
 	for sticks for Config.Combat.ArrowStickTime (into other players for a few seconds), as before.
 	ArrowWhiz plays when someone else's projectile passes close to the camera.
+	Cosmetic trails (Combat_v3 section 4): each shot asks TrailController.attachProjectile for the shooter's arrow or
+	throw trail, moves it in render() and releases it when the shot sticks or goes (it fades where it is). With one, the
+	arrow's own faint trail is left off; without TrailController the arrow keeps it.
 
 	API (for the other combat controllers)
 	  ProjectileController.predict(shotId, itemId, origin, velocity, gravity, visualOrigin: Vector3?)
@@ -44,6 +47,7 @@ local player = Players.LocalPlayer
 local CombatConfig = Config.Combat
 
 local ProjectileController = {}
+local Controllers: any = nil -- (TrailController draws the shooter's cosmetic trail)
 
 local ARROW_LENGTH = 2.3
 local MAX_STUCK = 40
@@ -117,6 +121,7 @@ type Shot = {
 	worldId: number?,
 	mayFall: boolean, -- landed in water or a blade on stone: wait for the server's fall before handing over
 	fall: { from: CFrame, to: CFrame, t0: number, duration: number, sink: boolean }?,
+	fx: any?, -- the cosmetic trail (TrailController handle), released when the shot lands or goes
 }
 
 type StuckEntry = { model: Model, expires: number, part: BasePart?, rel: CFrame?, shot: Shot? }
@@ -506,7 +511,16 @@ local function setHidden(model: Model, reason: string, hidden: boolean)
 	end
 end
 
+local function releaseFx(shot: Shot)
+	local fx = shot.fx
+	if fx then
+		shot.fx = nil
+		pcall(fx.release, fx) -- it lets go and fades where it is
+	end
+end
+
 local function destroyVisual(shot: Shot)
+	releaseFx(shot)
 	shot.state = "Gone"
 	shot.fall = nil
 	if shot.model then
@@ -580,6 +594,9 @@ local function render(shot: Shot, tau: number, position: Vector3)
 		end
 	end
 	local look = CFrame.lookAt(display, display + facing, upFor(facing))
+	if shot.fx then
+		shot.fx:follow(display, facing)
+	end
 	if shot.spin ~= 0 then
 		look *= CFrame.Angles(-tau * shot.spin, 0, 0)
 	end
@@ -593,6 +610,7 @@ local function stickAt(shot: Shot, pivot: CFrame, part: BasePart?, duration: num
 		return
 	end
 	setTrails(model, false)
+	releaseFx(shot)
 	shot.trailOn = false
 	shot.fall = nil
 	model:PivotTo(pivot)
@@ -797,12 +815,28 @@ local function targetModels(): { Instance }
 	return list
 end
 
-local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravity: number, isLocal: boolean): Shot
+local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravity: number, isLocal: boolean, shooterId: number?): Shot
 	local model: Model?, offset, spin = nil, CFrame.identity, 0
 	if itemId == "arrow" then
 		model, offset = arrowVisual()
 	else
 		model, offset, spin = itemVisual(itemId)
+	end
+	-- the shooter's cosmetic trail (TrailController, Shared.Trails); it replaces the arrow's own faint trail
+	local fx = nil
+	local trails = Controllers and Controllers.TrailController
+	if shooterId and trails and type(trails.attachProjectile) == "function" then
+		local ok, handle = pcall(trails.attachProjectile, itemId, shooterId, isLocal, origin)
+		if ok and handle then
+			fx = handle
+			if model then
+				for _, inst in ipairs(model:GetDescendants()) do
+					if inst:IsA("Trail") then
+						inst:Destroy()
+					end
+				end
+			end
+		end
 	end
 	local now = os.clock()
 	local shot: Shot = {
@@ -837,6 +871,7 @@ local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravi
 		worldId = nil,
 		mayFall = false,
 		fall = nil,
+		fx = fx,
 	}
 	if model then
 		model:PivotTo(CFrame.new(0, -1000, 0)) -- out of sight until the first render
@@ -850,7 +885,7 @@ function ProjectileController.predict(shotId: string, itemId: string, origin: Ve
 	if type(shotId) ~= "string" or typeof(origin) ~= "Vector3" or typeof(velocity) ~= "Vector3" then
 		return
 	end
-	local shot = newShot(itemId, origin, velocity, gravity or 0, true)
+	local shot = newShot(itemId, origin, velocity, gravity or 0, true, player.UserId)
 	shot.shotId = shotId
 	shot.shooterCharacter = player.Character
 	if typeof(visualOrigin) == "Vector3" and (visualOrigin - origin).Magnitude < 6 then
@@ -885,7 +920,7 @@ local function onFired(data: any)
 		return -- nowhere near us (e.g. waiting in the lobby)
 	end
 	local gravity = tonumber(data.gravity) or 0
-	local shot = newShot(data.itemId, data.origin, data.velocity, gravity, false)
+	local shot = newShot(data.itemId, data.origin, data.velocity, gravity, false, shooterId)
 	shot.id = data.id
 	byId[data.id] = shot
 	byProjectile[data.id] = shot
@@ -1119,7 +1154,8 @@ local function update(_dt: number)
 	end
 end
 
-function ProjectileController.Init(_registry)
+function ProjectileController.Init(registry)
+	Controllers = registry
 end
 
 function ProjectileController.Start()

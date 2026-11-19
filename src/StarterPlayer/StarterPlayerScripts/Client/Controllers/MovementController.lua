@@ -2471,8 +2471,13 @@ local function update(dt: number)
 	local deepWade = W.depth > SWM.WadeFull * 0.55
 	local sprintAllowed = wantsSprint and not exhausted and stamina > 0 and inputMag > 0.35 and forwardness >= SPD.SprintCos
 		and not crouchInput and not crouchForced and not slide and not useBusy and not aiming and not drawing and not stumbling
-		and not deepWade
+		and not deepWade and ClientState.guarding ~= true and ClientState.staggered ~= true
 	local crouchActive = (crouchInput or crouchForced) and not slide and not swimming
+	-- Skills (Combat_v3 2.3; SkillService sets these in server time): Sprint Burst x1.25 with no drain, Quiet Step
+	-- crouch-walk x1.4. Both end when you attack (the server moves the attribute to now).
+	local serverNow = workspace:GetServerTimeNow()
+	local burst = sprintAllowed and serverNow < (tonumber(player:GetAttribute("SprintBurstUntil")) or 0)
+	local quietStep = crouchActive and serverNow < (tonumber(player:GetAttribute("QuietStepUntil")) or 0)
 
 	-- Target speed for this frame
 	local targetSpeed
@@ -2481,7 +2486,9 @@ local function update(dt: number)
 	elseif swimming then
 		targetSpeed = if wantsSprint and stamina > 0.05 and not exhausted then SWM.Sprint else SWM.Speed
 	elseif crouchActive then
-		targetSpeed = SPD.Crouch
+		targetSpeed = SPD.Crouch * (if quietStep then 1.4 else 1)
+	elseif burst then
+		targetSpeed = SPD.Sprint * 1.25
 	elseif sprintAllowed then
 		-- an almost empty tank slows the sprint down before it runs out
 		local tank = math.clamp(stamina / 0.3, 0, 1)
@@ -2507,6 +2514,11 @@ local function update(dt: number)
 	end
 	if aiming then
 		targetSpeed *= SPD.AimMult
+	end
+	-- guard x0.6, heavy charge x0.7, stagger x0.5 (CombatController sets it; Combat_v3 1.3, 1.8)
+	local combatMult = tonumber(ClientState.combatSpeedMult)
+	if combatMult and combatMult > 0 and combatMult < 1 and not swimming and not nativeClimb then
+		targetSpeed *= combatMult
 	end
 	if not swimming and firstPerson and inputMag > 0.02 then
 		-- people run forward fastest; side-steps and backpedalling are slower
@@ -2615,7 +2627,11 @@ local function update(dt: number)
 	local drained = false
 	local uphill = if grounded then math.max(0, G.alongSmooth) else 0
 	local working = 0
-	if newState == "Sprint" and actualSpeed > SPD.Walk + 0.5 then
+	if burst and newState == "Sprint" then
+		-- Sprint Burst: no drain, and no regen while it runs
+		drained = true
+		working = 0.75
+	elseif newState == "Sprint" and actualSpeed > SPD.Walk + 0.5 then
 		stamina -= STA.SprintDrain * SURF.effort * (1 + 2.5 * uphill) * dt
 		drained = true
 		working = 0.75 + 0.25 * uphill
@@ -3083,6 +3099,15 @@ end
 function MovementController.spendStamina(amount: number)
 	if type(amount) == "number" and amount == amount and amount > 0 then
 		spend(math.min(amount, 1), os.clock())
+		updateExhaustion()
+	end
+end
+
+-- Second Wind (SkillController): stamina back at once and Exhausted cleared.
+function MovementController.addStamina(amount: number)
+	if type(amount) == "number" and amount == amount and amount > 0 then
+		stamina = math.clamp(stamina + amount, 0, 1)
+		exhausted = false
 		updateExhaustion()
 	end
 end

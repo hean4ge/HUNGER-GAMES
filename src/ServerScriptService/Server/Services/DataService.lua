@@ -31,6 +31,7 @@
 	    Daily = { day = "YYYY-MM-DD" (UTC), free, paid (spins used), roundGold, firstRound, firstWin },
 	    LastKit = string, Bring = string,        the kit and the owned weapon picked for the next round ("" = none)
 	    Draws = number,                          wheel spins and boxes opened, ever
+	    Trails = { Owned = { [id] = true }, Swing, Arrow, Throw }  bought and equipped trails (TrailService; "" = default)
 	  }
 	  Econ is written like Settings: only once the profile has loaded, and whole except the Armoury, which is merged
 	  by the higher star with what is stored. A save from before Gold existed (no Gold, no Econ, Version 1) loads as
@@ -86,6 +87,7 @@ local SETTING_LIMITS = {
 	crouchModeTouch = { 0, 1 },
 	padLook = { 0.5, 2 }, -- controller look speed (x)
 	touchLook = { 0.5, 2 }, -- touch look speed (x)
+	othersTrails = { 0, 3 }, -- others' trails: 0 Auto (by device), 1 All, 2 Natural, 3 Off (Combat_v3 4.6)
 }
 
 local DataService = {}
@@ -177,6 +179,34 @@ local function sanitizeEcon(raw: any)
 		out.Bring = src.Bring
 	end
 	out.Draws = count(src.Draws, 1e9)
+	-- Trails (TrailService, Combat_v3 section 4): { Owned = { [id] = true }, Swing, Arrow, Throw } ("" = the default)
+	local trails = { Owned = {}, Swing = "", Arrow = "", Throw = "" }
+	if type(src.Trails) == "table" then
+		local t = src.Trails
+		if type(t.Owned) == "table" then
+			local n = 0
+			for id, owned in pairs(t.Owned) do
+				if type(id) == "string" and #id <= 24 and owned == true and n < 64 then
+					trails.Owned[id] = true
+					n += 1
+				end
+			end
+		end
+		for _, k in ipairs({ "Swing", "Arrow", "Throw" }) do
+			if type(t[k]) == "string" and #t[k] <= 24 then
+				trails[k] = t[k]
+			end
+		end
+	end
+	out.Trails = trails
+	-- The Loadout's skills (KitService, Combat_v3 3.2): { specialty (a family id), general (a general skill id) }
+	if type(src.Loadout) == "table" then
+		local l = src.Loadout
+		out.Loadout = {
+			specialty = if type(l.specialty) == "string" and #l.specialty <= 16 then l.specialty else nil,
+			general = if type(l.general) == "string" and #l.general <= 24 then l.general else nil,
+		}
+	end
 	return out
 end
 

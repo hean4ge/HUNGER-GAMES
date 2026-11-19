@@ -416,6 +416,20 @@ if Combat and type(Combat.applyHit) == "function" then
 		return dealt, killed
 	end
 end
+-- Combat v3 (mp-fight): every melee blow's outcome on a body ("Hit", "Blocked", "Parried", "Dodged", "None")
+local resolves: { { t: number, attacker: string, victim: string, result: string, dealt: number, move: string, kind: string, damage: number } } = {}
+if Combat and type(Combat.resolveHit) == "function" then
+	local origResolve = Combat.resolveHit
+	Combat.resolveHit = function(attacker, model, move, opts, ...)
+		local result, dealt = origResolve(attacker, model, move, opts, ...)
+		local rec = { t = os.clock(), attacker = if attacker then attacker.Name else "nil", victim = if typeof(model) == "Instance" then model.Name else "?",
+			result = tostring(result), dealt = tonumber(dealt) or 0, move = tostring(move and move.id), kind = tostring(move and move.kind),
+			damage = tonumber(opts and opts.damage) or tonumber(move and move.damage) or 0 }
+		table.insert(resolves, rec)
+		L(string.format("RESOLVE %s -> %s move=%s kind=%s damage=%.2f result=%s dealt=%.2f", rec.attacker, rec.victim, rec.move, rec.kind, rec.damage, rec.result, rec.dealt))
+		return result, dealt
+	end
+end
 if Net then
 	Net.event("MeleeSwing").OnServerEvent:Connect(function(p, a, predicted, variant, target, startTime)
 		if predicted == true then
@@ -1795,6 +1809,9 @@ local function killB(tag: string): (number, number)
 	local mA, mB = mark(A), mark(B)
 	diedAt[B.Name] = nil
 	for i = 1, 6 do
+		if i > 1 then
+			duel(A, B, 7) -- (Combat v3: each blow knocks B back out of reach; stand it in front of A again)
+		end
 		-- (the third blow is the last one when the first two land: a short settle, so the fall itself gets a picture)
 		attack(tag .. " blow " .. i, { { "select", sword }, { "wait", if i == 1 then 0.8 else 0.05 }, { "face", B.Name }, { "wait", 0.3 }, { "click" } },
 			if i >= 3 then 0.3 else 0.75)
@@ -3579,6 +3596,26 @@ if ARGS.batch == "W" then
 	lobbyExtra = wLobby
 end
 
+-- batch F: Combat v3 (mp-fight) lives in the child module MPT_Fight (this script's Source has a 200000-character limit)
+local batchF: (() -> ())? = nil
+if ARGS.batch == "F" then
+	lobbyExtra = function()
+		local mod = script:FindFirstChild("MPT_Fight")
+		if not mod then
+			L("DRIVER ERROR no MPT_Fight module")
+			return
+		end
+		local F = require(mod)({
+			L = L, check = check, call = call, mark = mark, linesWith = linesWith, clientFind = clientFind, parts = parts, setHealth = setHealth,
+			health = health, duel = duel, setupDuel = setupDuel, slotOf = slotOf, Inv = Inv, invLine = invLine, refusals = refusals, flatDist = flatDist,
+			Stars = Stars, dmgOf = dmgOf, movingChecks = movingChecks, resolves = resolves, Shared = Shared, Services = Services, req = req, ARGS = ARGS,
+			A = A, B = B, killB = killB, backToLobby = backToLobby,
+		})
+		batchF = F.run
+		F.lobby()
+	end
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
@@ -3613,6 +3650,12 @@ local function run()
 		batchH()
 	elseif batch == "W" then
 		batchW()
+	elseif batch == "F" then
+		if batchF then
+			batchF()
+		else
+			L("DRIVER ERROR batch F was not loaded in the lobby")
+		end
 	end
 end
 

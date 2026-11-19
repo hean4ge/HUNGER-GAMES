@@ -52,6 +52,31 @@ local Signal = require(script.Parent.Signal)
 local Input = {}
 Input.deviceChanged = Signal.new()
 
+-- The fighting actions of Combat v3 (docs/design/Combat_v3.md 1.2): one scheme for every melee weapon, the same
+-- buttons on every device. CombatController and SkillController bind them with these keys and touch layouts; an
+-- entry with `via` is not a binding of its own but a way of using another action (InputCheck: "via:<Action>").
+--   Heavy: hold Attack 0.25 s or more, release.     Parry: raise Guard just before a blow lands (its first 0.18 s).
+--   Counter: Attack within 0.45 s after a parry.     Kick: Guard + tap Attack.   Throw (throwable melee): Guard + hold.
+--   Guard: the Aim binding while a melee weapon is in hand (touch: AIM's button reads GUARD and is held, not toggled).
+--   Dodge: Q, or Jump while guarding (Space / A pass through to the jump unless the guard is up); touch DODGE beside
+--     GUARD, shown while guarding.   SkillWeapon: R, D-pad left.   SkillGeneral: F (a fire's F prompt wins while it
+--     shows), D-pad right; touch: two round buttons in an arc above ATTACK.
+Input.ACTIONS = {
+	Attack = { keys = { Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2 }, touch = true },
+	Guard = { keys = { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2 },
+		touch = { label = "GUARD", toggle = false, position = UDim2.new(1, -268, 1, -152), size = 60 } },
+	Heavy = { via = "Attack", hold = 0.25 },
+	Parry = { via = "Guard" },
+	Counter = { via = "Attack" },
+	Kick = { via = "Attack", with = "Guard" },
+	Dodge = { keys = { Enum.KeyCode.Q, Enum.KeyCode.Space, Enum.KeyCode.ButtonA }, passUnlessGuarding = { Space = true, ButtonA = true },
+		touch = { label = "DODGE", position = UDim2.new(1, -330, 1, -95), size = 56, visible = false } },
+	SkillWeapon = { keys = { Enum.KeyCode.R, Enum.KeyCode.DPadLeft },
+		touch = { label = "", position = UDim2.new(1, -262, 1, -228), size = 64 } },
+	SkillGeneral = { keys = { Enum.KeyCode.F, Enum.KeyCode.DPadRight },
+		touch = { label = "", position = UDim2.new(1, -170, 1, -262), size = 64 } },
+}
+
 local bound: { [string]: any } = {}
 local touchGui: ScreenGui? = nil
 local lastInputKind = "KeyboardMouse"
@@ -312,6 +337,9 @@ local function mirrorBinding(name: string)
 			local button = entry.button
 			local _, _, label = layoutFor(name, entry.touchOpts)
 			touch = if button and button:IsA("TextButton") then button.Text else label
+			if touch == "" then
+				touch = "(icon)" -- a button with a glyph and no words (the two skill rings): still a touch control
+			end
 		end
 		(mirrorFolder :: Instance):SetAttribute(name, "keys=" .. table.concat(keys, ",") .. ";touch=" .. touch)
 	end)

@@ -2,7 +2,9 @@
 	KitController - the kit pick in the lobby and the kit parcel in the arena (docs/design/Weapons_v2.md section 3;
 	KitService, Shared.Kits). Quiet style: thin text on the picture, no boxes, no pop-ups.
 
-	IN THE LOBBY (the red train), while the lobby shows:
+	IN THE LOBBY: since 19 Nov the Loadout screen (LoadoutController, docs/design/Combat_v3.md 3.2) does the pick; the
+	line below is off (LEGACY_LINE) and kept for one version.
+	(old) IN THE LOBBY (the red train), while the lobby shows:
 	  one thin line            KIT   ‹  Archer  ›
 	  its contents, dimmer     Short Bow, Arrow ×8, Apple
 	  and, once you own a weapon from the wheel or a Strongbox,
@@ -50,6 +52,7 @@ local PROMPT_TAG = "LootPrompt"
 local S = Kits.Settings
 local METERS = 0.28 -- studs to metres, as the HUD's distances
 local EDGE = 34 -- px from the screen edge for the off-screen mark
+local LEGACY_LINE = false -- the old KIT / BRING line; the Loadout screen (LoadoutController) replaces it
 
 local gui: ScreenGui? = nil
 local R: { [string]: any } = {}
@@ -130,16 +133,18 @@ local function refreshLines()
 	end
 	local kit = currentKit()
 	R.kit.value.Text = kit.name
-	R.contents.Text = Kits.summary(kit)
 	local owned = armouryList()
 	R.bring.row.Visible = #owned > 0
 	local bring = currentBring()
 	local text = "kit weapon"
+	local brought: string? = nil
 	for _, entry in ipairs(owned) do
 		if entry.id == bring then
 			text = Stars.label(entry.id, entry.stars)
+			brought = entry.id
 		end
 	end
+	R.contents.Text = Kits.summary(kit, brought, if brought then text else nil) -- what the parcel will hold
 	R.bring.value.Text = text
 end
 
@@ -442,7 +447,12 @@ function KitController.Start()
 	root.Parent = screen
 	screen.Parent = playerGui
 	gui = screen
-	buildLobby(root)
+	-- (19 Nov, Combat_v3 3.2: the KIT / BRING line and its K, B, L1 / R1 keys are replaced by the Loadout screen,
+	-- LoadoutController. buildLobby stays here, unused, for one version in case the Loadout has to be switched off:
+	-- set LEGACY_LINE to true.)
+	if LEGACY_LINE then
+		buildLobby(root)
+	end
 	buildArena(root)
 	task.spawn(pcall, QuietUI.bindRoot, screen) -- (never holds up the rest of Start)
 
@@ -481,7 +491,7 @@ function KitController.Start()
 	player:GetAttributeChangedSignal("KitIncoming"):Connect(onIncoming)
 
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if processed or not lobbyShowing() then
+		if processed or not LEGACY_LINE or not lobbyShowing() then
 			return
 		end
 		local shift = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)

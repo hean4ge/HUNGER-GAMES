@@ -61,6 +61,39 @@
 	Melee cooldown: the same rule as the attacker's client (CombatController: nextActionAt = start + total). The next swing
 	may START once the cooldown of the weapon that swung last has passed since that swing started, whatever is in hand
 	now (trySwing). Refusals are counted by reason in CombatService._refusals (and printed in Studio).
+
+	Combat v3 (19 Nov, docs/design/Combat_v3.md section 1; every number in Shared.Moves). The move set is timed and
+	checked here; the client predicts and shows at once.
+	  MeleeSwing strike: (look, predictedHit, variant, target, startTime, move, held). move = "L1".."L4" (a light chain
+	    step: a step only follows the one before it inside the chain window, else it counts as step 1), "H" (a heavy:
+	    needs the "Charge" on record; held is checked against the server's own timing, as bow draws are), "C" (a counter:
+	    only inside Counter.Window after this player parried), "K" (a kick: its own cooldown), "HK" / "S1".."S5"
+	    (skill strikes, gated by SkillService). No move: step 1, as before. Each move has its own windup and total,
+	    which the swing gate (trySwing) uses; the windup never changes with stars. A slash traces three rays across its
+	    arc (Moves.traceDirections), a stab one thinner ray; the reach caps, the body check and line of sight are the
+	    same for every ray. A hit can't land on a body twice from one swing.
+	  MeleeSwing("Start", variant, move): as before, with the move for the others' clients.
+	  MeleeSwing("Charge", clientTime | false): the heavy's hold began (the others see the charge) or was let go.
+	  MeleeSwing("Guard", on, clientTime): the guard is up from clientTime (believed within CooldownJitter). A melee
+	    strike from the guard's front Guard.Arc degrees is blocked (damage x (1 - the weapon's share), stamina drained;
+	    at none left the guard breaks: a heavy stagger); inside the guard's first Parry.Window seconds it is parried
+	    (no damage, the attacker staggers, the guard's owner may counter). A guard started inside the whiff lock of the
+	    last one has no parry window. Arrows and throws are never blocked.
+	  MeleeSwing("Dodge", direction, clientTime): melee strikes miss this body from Startup to Startup + Travel after
+	    it; Dodge.Cooldown between dodges, Stamina each (twice inside RepeatWindow).
+	  Reactions (Combat_v3 1.8): every hit has a tier (Flinch, Stagger, Heavy, Knockdown) from its move. Staggered:
+	    no attack and no guard for the tier's time, and a swing being wound up when it began is refused (Interrupted).
+	    Poise: after a stagger ends, new hits only flinch for Poise.AfterStagger. The victim's client gets CombatAction
+	    { action = "Reaction", tier, impulse (knockback by impulse, capped), hitStop }, the others within ACTION_RANGE
+	    { action = "React", userId?, target (the body), tier, from, hitStop, attackerId } and "Block" / "Parry". The
+	    attacker's HitConfirm carries tier, hitStop, blocked.
+	  Stamina: the server keeps its own combat ledger per player (spends from moves, guards, dodges and skills, the
+	    regen of Config.Movement.Stamina): it bounds what a modified client can do; it never knows about sprinting, so
+	    it is never stricter than the client's own bar.
+	  API for SkillService: CombatService.bodyState(model), spendStamina(player, amount), staminaOf(player),
+	    react(attacker, model, tier, opts), resolveHit(attacker, model, move, opts), lineOfSight(from, model, exclude),
+	    canAct(player). Test hooks: _npcStrike(attackerModel, victimModel, moveId) (a dummy's strike, for guard and parry
+	    tests), _bodyStates.
 ]]
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -73,6 +106,7 @@ local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local CombatStats = require(Shared:WaitForChild("CombatStats"))
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
+local Moves = require(Shared:WaitForChild("Moves"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sounds = require(Shared:WaitForChild("Sounds"))
 local Theme = require(Shared:WaitForChild("Theme"))
@@ -146,8 +180,17 @@ type PlayerState = {
 	drawStart: number?,
 	drawItem: string?,
 	drawShown: boolean?, -- the players near were told of the draw on record ("Draw" on CombatAction)
+	-- Combat v3 (server time, workspace:GetServerTimeNow, unless said)
+	chainItem: string?, chainStep: number?, chainEndsAt: number?, -- the light chain: the last step and when it ended
+	heavyStart: number?, heavyItem: string?, -- the heavy's hold on record ("Charge")
+	counterUntil: number?, kickReady: number?,
+	dodgeReady: number?, dodgeFrom: number?, dodgeUntil: number?, dodgeTimes: { number }?,
+	stamina: number?, staminaAt: number?, staminaClock: number?, -- the combat ledger
+	[string]: any, -- the body state (guard, stagger, poise, buffs): bodyState
 }
 local playerState: { [Player]: PlayerState } = {}
+-- Training dummies and other non-player bodies keep the same body fields (bodyState).
+local npcState: { [Instance]: { [string]: any } } = setmetatable({}, { __mode = "k" }) :: any
 
 type Context = { character: Model, humanoid: Humanoid, head: BasePart, root: BasePart }
 
@@ -369,10 +412,15 @@ local function playSound(key: string, position: Vector3, exclude: Player?, volum
 end
 
 -- To the other players within ACTION_RANGE of the attacker (everyone else, if the attacker has no body to measure from).
-local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?, variant: number?, lead: number?)
-	local payload = { userId = player.UserId, action = action, itemId = itemId or "fists", cancelled = cancelled == true }
+local function broadcastAction(player: Player, action: string, itemId: string?, cancelled: boolean?, variant: number?, lead: number?, extra: { [string]: any }?)
+	local payload: { [string]: any } = { userId = player.UserId, action = action, itemId = itemId or "fists", cancelled = cancelled == true }
 	payload.variant = variant -- (a Swing's set, when the attacker sent a valid one)
 	payload.lead = lead -- (a Swing: seconds until its strike)
+	if extra then
+		for key, value in pairs(extra) do
+			payload[key] = value -- (Combat v3: the move, a guard's state, a dodge's direction)
+		end
+	end
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local from = if root and root:IsA("BasePart") then root.Position else nil
@@ -843,7 +891,12 @@ local function onDummyHit(model: Model, info: { [string]: any })
 			end
 		end
 	end
-	data.wobble = math.min(1, data.wobble * 0.5 + 0.55)
+	-- (Combat v3: the wobble shows the hit's weight: a flinch rocks it a little, a heavy stagger a lot)
+	local weight = ({ Flinch = 0.55, Stagger = 0.85, Heavy = 1.15, Knockdown = 1.3 })[info.tier or ""] or 0.75
+	if info.blocked then
+		weight = 0.3
+	end
+	data.wobble = math.min(1.35, data.wobble * 0.5 + 0.55 * weight)
 	data.wobbleTime = 0
 end
 
@@ -1000,6 +1053,22 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 	if dealt > 0 then
 		lastHurtAt[humanoid] = os.clock() -- (the knife's unseen hit needs 5 s unhurt)
 	end
+	-- Combat v3: the hit's weight. Melee passes its own tier (resolveHit); a shot or a throw gets one here: arrows and
+	-- thrown weapons of 38 or more stagger, lighter throws flinch (Combat_v3 1.8).
+	local tierName: string? = if type(hit.tier) == "string" then hit.tier else nil
+	if dealt > 0 and not killed and hit.cause == "Combat" and hit.react ~= false and model:IsA("Model") then
+		if not tierName and hit.melee ~= true then
+			local def = ItemDefs.get(hit.weaponId)
+			local shot = def ~= nil and def.kind == "Bow"
+			tierName = if shot or baseDamage >= 38 then "Stagger" else "Flinch"
+			hit.knock = hit.knock or Moves.knockSpeed(if shot then "arrow" else "thrown")
+		end
+		if tierName then
+			local reaction = CombatService.react(attacker, model, tierName, hit)
+			tierName = reaction and reaction.tier or tierName
+			hit.hitStop = reaction and reaction.hitStop or hit.hitStop
+		end
+	end
 	if attacker and dealt > 0 then
 		HitConfirm:FireClient(attacker, {
 			damage = math.floor(dealt + 0.5),
@@ -1009,6 +1078,10 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 			target = if victim then "Player" else "Dummy",
 			weaponId = if type(hit.weaponId) == "string" then hit.weaponId else nil,
 			melee = hit.melee == true,
+			tier = tierName,
+			hitStop = if type(hit.hitStop) == "number" then hit.hitStop else nil,
+			blocked = hit.blocked == true,
+			move = if type(hit.move) == "string" then hit.move else nil,
 		})
 	end
 	return dealt, killed
@@ -1289,6 +1362,7 @@ local function sweepSecond(player: Player, def: any, ctx: Context, origin: Vecto
 		local root = best:FindFirstChild("HumanoidRootPart") :: BasePart
 		local dealt = CombatService.applyHit(player, humanoid, (def.damage or 0) * def.sweepShare, {
 			cause = "Combat", weaponId = def.id, position = origin, hitPosition = root.Position, melee = true, sweep = true,
+			tier = "Flinch", knock = Moves.knockSpeed(def.id) * 0.6,
 		})
 		if dealt > 0 then
 			playSound("Hit_Flesh", root.Position, player)
@@ -1297,14 +1371,418 @@ local function sweepSecond(player: Player, def: any, ctx: Context, origin: Vecto
 end
 
 --------------------------------------------------------------------------------------------------------------------
+-- Combat v3: body state, the stamina ledger, reactions, guard, parry and dodge (numbers: Shared.Moves)
+--------------------------------------------------------------------------------------------------------------------
+
+local MV = Moves.cfg
+local RX = Moves.reactions
+local JITTER = CombatConfig.CooldownJitter or 0.12
+local STAMINA = (Config.Movement and (Config.Movement :: any).Stamina) or {}
+-- (the client's regen, at its idle bonus: the ledger is never stricter than the client's own bar)
+local LEDGER_REGEN = (tonumber(STAMINA.Regen) or 0.2) * (tonumber(STAMINA.IdleRegenBonus) or 1.35)
+local LEDGER_DELAY = tonumber(STAMINA.RegenDelay) or 1.0
+local REACT_RANGE = ACTION_RANGE
+
+local function serverNow(): number
+	return workspace:GetServerTimeNow()
+end
+
+-- The combat state of a body: a player's PlayerState, or a table kept for a dummy or any other non-player body.
+function CombatService.bodyState(model: Instance?): { [string]: any }?
+	if typeof(model) ~= "Instance" then
+		return nil
+	end
+	local owner = Players:GetPlayerFromCharacter(model)
+	if owner then
+		return stateFor(owner)
+	end
+	local st = npcState[model]
+	if not st then
+		st = {}
+		npcState[model] = st
+	end
+	return st
+end
+
+local function ledger(st: { [string]: any }, now: number): number
+	local s = st.stamina or 1
+	local from = math.max(st.staminaClock or now, (st.staminaAt or -math.huge) + LEDGER_DELAY)
+	if now > from then
+		s = math.min(1, s + LEDGER_REGEN * (now - from))
+	end
+	st.stamina = s
+	st.staminaClock = now
+	return s
+end
+
+local function spendLedger(st: { [string]: any }, amount: number, now: number): number
+	local s = ledger(st, now)
+	if amount > 0 then
+		s = math.max(0, s - amount)
+		st.stamina = s
+		st.staminaAt = now
+	end
+	return s
+end
+
+function CombatService.spendStamina(player: Player, amount: number): number
+	return spendLedger(stateFor(player), math.max(0, tonumber(amount) or 0), serverNow())
+end
+
+function CombatService.staminaOf(player: Player): number
+	return ledger(stateFor(player), serverNow())
+end
+
+-- Sends one payload to every player listening within REACT_RANGE of `at` (but `exclude`).
+local function broadcastNear(at: Vector3?, payload: { [string]: any }, exclude: Player?)
+	for _, other in ipairs(Players:GetPlayers()) do
+		if other ~= exclude then
+			local where = if at then listenerPosition(other) else nil
+			if at == nil or (where ~= nil and (where - at).Magnitude <= REACT_RANGE) then
+				CombatAction:FireClient(other, payload)
+			end
+		end
+	end
+end
+
+local function rootOf(model: Instance?): BasePart?
+	local root = model and model:FindFirstChild("HumanoidRootPart")
+	return if root and root:IsA("BasePart") then root else nil
+end
+
+-- Is `from` inside the front `arc` degrees of the body (flat)?
+local function inFront(model: Instance, from: Vector3, arc: number): boolean
+	local root = rootOf(model)
+	if not root then
+		return false
+	end
+	local look = Util.flat(root.CFrame.LookVector)
+	local to = Util.flat(from - root.Position)
+	if look.Magnitude < 0.05 or to.Magnitude < 0.05 then
+		return true
+	end
+	return look.Unit:Dot(to.Unit) >= math.cos(math.rad(arc * 0.5))
+end
+
+local function regionMult(part: Instance?): number
+	local region = RX.Knockback.Region
+	if typeof(part) ~= "Instance" then
+		return region.Torso or 1
+	end
+	local name = part.Name
+	if name == "Head" then
+		return region.Head or 1.4
+	elseif name == "UpperTorso" or name == "LowerTorso" or name == "Torso" or name == "HumanoidRootPart" then
+		return region.Torso or 1
+	end
+	return region.Limbs or 0.7
+end
+
+-- (guarding, parry window open) for a body now. A dummy guards while its attribute Guard is true, from GuardAt
+-- (server time; the test hooks set them).
+local function guardOf(model: Instance, st: { [string]: any }, now: number): (boolean, boolean)
+	if now < (st.staggerUntil or -math.huge) then
+		return false, false
+	end
+	local on, start, parry = st.guardOn == true, st.guardStart, st.guardParry == true
+	if not Players:GetPlayerFromCharacter(model) and model:GetAttribute("Guard") == true then
+		on = true
+		start = tonumber(model:GetAttribute("GuardAt")) or -math.huge
+		parry = st.npcParryUsedAt ~= start
+	end
+	if not on or type(start) ~= "number" then
+		return false, false
+	end
+	local window = if now < (st.concentrationUntil or -math.huge) then MV.Parry.ConcentrationWindow else MV.Parry.Window
+	return true, parry and now - start <= window
+end
+
+-- A reaction on a body (Combat_v3 1.8): the tier after poise and Brace, the stagger it holds, the knockback impulse
+-- (the victim's own client applies it), the hit-stop. opts: position (where the blow came from), knock (studs/s),
+-- hitPart, staggerTime (a tier's time overridden: a parry's rebound, a guard break), force (ignore poise), lift
+-- (studs/s up: the knockdown), knockDir (a push that is not straight away from the blow: the running cut),
+-- hitStop. Returns { tier, hitStop, impulse } or nil.
+function CombatService.react(attacker: Player?, model: Instance, tierName: string, opts: { [string]: any }?): { [string]: any }?
+	local o = opts or {}
+	local st = CombatService.bodyState(model)
+	if not st then
+		return nil
+	end
+	local now = serverNow()
+	local rank = if Moves.TIERS[tierName] then Moves.TIERS[tierName].rank else 1
+	local braced = now < (st.braceUntil or -math.huge)
+	if not o.force then
+		if rank >= 2 and now < (st.poiseUntil or -math.huge) then
+			rank = 1 -- poise: no stun-lock in a crowd
+		end
+		if braced then
+			rank = math.max(1, rank - 1)
+		end
+	end
+	local name = Moves.TIER_BY_RANK[rank]
+	local tier = Moves.tier(name)
+	local time = if o.staggerTime and rank >= 2 then o.staggerTime else tier.time
+	if rank >= 2 then
+		st.staggerUntil = math.max(st.staggerUntil or -math.huge, now + time)
+		st.poiseUntil = st.staggerUntil + (if rank == 4 then RX.Poise.AfterKnockdown else RX.Poise.AfterStagger)
+		st.interruptAt = now -- (a swing being wound up now is refused: CombatService.onMeleeSwing)
+		st.guardOn = false
+		st.heavyStart = nil
+		if rank == 4 then
+			st.knockdownAt = now
+		end
+	end
+	local impulse = Vector3.zero
+	local root = rootOf(model)
+	local from = o.position
+	if root and typeof(from) == "Vector3" then
+		local away = Util.flat(root.Position - from)
+		if typeof(o.knockDir) == "Vector3" and Util.flat(o.knockDir).Magnitude > 0.05 then
+			away = Util.flat(o.knockDir)
+		end
+		if away.Magnitude < 0.05 then
+			away = -Util.flat(root.CFrame.LookVector)
+		end
+		local speed = (tonumber(o.knock) or Moves.knockSpeed(nil)) * regionMult(o.hitPart) * (if braced then 0.5 else 1)
+		speed = math.min(speed, RX.Knockback.Cap)
+		impulse = away.Unit * speed + Vector3.new(0, if rank == 4 then (tonumber(o.lift) or 0) else 0, 0)
+	end
+	local hitStop = tonumber(o.hitStop) or tier.hitStop
+	local victim = Players:GetPlayerFromCharacter(model)
+	if victim then
+		CombatAction:FireClient(victim, {
+			action = "Reaction", tier = name, impulse = impulse, hitStop = hitStop, time = time,
+			from = if typeof(from) == "Vector3" then from else nil, attackerId = if attacker then attacker.UserId else nil,
+			cap = RX.Knockback.Cap,
+		})
+	end
+	broadcastNear(if root then root.Position else nil, {
+		action = "React", userId = if victim then victim.UserId else nil, target = model, tier = name, hitStop = hitStop,
+		time = time, from = if typeof(from) == "Vector3" then from else nil, attackerId = if attacker then attacker.UserId else nil,
+	}, victim)
+	return { tier = name, hitStop = hitStop, impulse = impulse }
+end
+
+-- Is the way from `from` to the body clear of world geometry?
+function CombatService.lineOfSight(from: Vector3, model: Instance, exclude: Instance?): boolean
+	local root = rootOf(model)
+	if not root then
+		return false
+	end
+	local world = worldParams(CombatService.getTargets(exclude), exclude)
+	local offset = root.Position - from
+	if offset.Magnitude < 0.5 then
+		return true
+	end
+	local blocked = workspace:Raycast(from, offset, world)
+	return blocked == nil or blocked.Distance >= offset.Magnitude - 0.75
+end
+
+-- The player can fight this moment: alive in an Active round, not frozen, not staggered.
+function CombatService.canAct(player: Player): boolean
+	local ctx = getContext(player)
+	if not ctx then
+		return false
+	end
+	return serverNow() >= ((stateFor(player) :: any).staggerUntil or -math.huge) - JITTER
+end
+
+-- One melee blow on one body, with the guard, the parry and the dodge (Combat_v3 1.3, 1.9): "Hit" | "Blocked" |
+-- "Parried" | "Dodged" | "None", then the damage dealt. move: a Shared.Moves move. opts: damage (the blow's damage
+-- before the guard), position (where it came from: the attacker's head), hitPosition, hitPart, weaponId,
+-- armourPierce, attackerModel (its body: staggered by a parry), unblockable, guardBreak, staggerTime, knockDir, lift.
+function CombatService.resolveHit(attacker: Player?, model: Instance, move: { [string]: any }, opts: { [string]: any }): (string, number)
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then
+		return "None", 0
+	end
+	local st = CombatService.bodyState(model) :: { [string]: any }
+	local now = serverNow()
+	local root = rootOf(model)
+	local at = if root then root.Position else opts.hitPosition
+	if st.dodgeFrom and now >= st.dodgeFrom - 0.03 and now <= (st.dodgeUntil or 0) + 0.03 then
+		broadcastNear(at, { action = "Dodged", target = model, attackerId = if attacker then attacker.UserId else nil })
+		return "Dodged", 0
+	end
+	local damage = tonumber(opts.damage) or move.damage or 0
+	local tierName = move.tier
+	local staggerTime = opts.staggerTime
+	local blocked = false
+	local guarding, parryOpen = guardOf(model, st, now)
+	local from = opts.position
+	if guarding and typeof(from) == "Vector3" and inFront(model, from, MV.Guard.Arc) and not opts.unblockable then
+		if move.kind == "Kick" or opts.guardBreak then
+			-- the kick (and the pick's hook) breaks the guard
+			st.guardOn = false
+			if not Players:GetPlayerFromCharacter(model) then
+				model:SetAttribute("Guard", false)
+			end
+			if tierName ~= "Knockdown" and tierName ~= "Heavy" then
+				tierName = "Stagger"
+				staggerTime = opts.guardBreakTime or MV.Kick.GuardBreakStagger
+			end
+			broadcastNear(at, { action = "GuardBreak", target = model })
+		elseif parryOpen and not opts.noParry then
+			-- parried: nothing lands, the attacker's weapon rebounds, the guard's owner may counter
+			st.guardParry = false
+			st.parryLockUntil = -math.huge
+			st.npcParryUsedAt = tonumber(model:GetAttribute("GuardAt"))
+			st.counterUntil = now + MV.Parry.Window + MV.Counter.Window
+			local attackerModel = opts.attackerModel
+			if typeof(attackerModel) == "Instance" and root then
+				CombatService.react(nil, attackerModel, "Stagger", {
+					force = true, position = root.Position, knock = 10,
+					staggerTime = if move.heavyHit then MV.Parry.HeavyAttackerStagger else MV.Parry.AttackerStagger,
+				})
+			end
+			if at then
+				playSound("Hit_Metal", at, nil, 1.2, 1.45)
+			end
+			local owner = Players:GetPlayerFromCharacter(model)
+			local payload = { action = "Parry", target = model, attacker = attackerModel, position = at,
+				counterFor = MV.Counter.Window, attackerId = if attacker then attacker.UserId else nil }
+			broadcastNear(at, payload)
+			if attacker and attacker ~= owner then
+				HitConfirm:FireClient(attacker, { damage = 0, parried = true, melee = true, target = if owner then "Player" else "Dummy",
+					position = at, move = move.id })
+			end
+			return "Parried", 0
+		else
+			-- blocked: a share of it stops on the guard, the guard costs stamina, at none left it breaks
+			local owner = Players:GetPlayerFromCharacter(model)
+			local heldId = if owner then equippedItemId(owner) else nil
+			local share = Moves.guardShare(heldId or "sword")
+			local raw = damage
+			damage = raw * (1 - share)
+			blocked = true
+			local drain = MV.Guard.StaminaPerDamage * raw * (if move.heavyHit then MV.Guard.HeavyDrainMult else 1)
+			local left = spendLedger(st, drain, now)
+			if left <= 0.001 then
+				st.guardOn = false
+				blocked = false -- (a broken guard: the rest of the blow lands as a heavy stagger)
+				tierName = "Heavy"
+				staggerTime = MV.Guard.BreakStagger
+				broadcastNear(at, { action = "GuardBreak", target = model })
+			end
+			if at then
+				playSound("Hit_Metal", at, nil, 1.1, if move.heavyHit then 0.8 else 1.05)
+			end
+			if blocked then
+				broadcastNear(at, { action = "Block", target = model, position = opts.hitPosition or at, heavy = move.heavyHit == true })
+			end
+		end
+	end
+	local dealt = 0
+	if damage > 0 then
+		dealt = CombatService.applyHit(attacker, humanoid, damage, {
+			cause = "Combat",
+			weaponId = opts.weaponId,
+			position = from,
+			hitPosition = opts.hitPosition,
+			melee = true,
+			armourPierce = opts.armourPierce,
+			stars = opts.stars,
+			tier = if blocked then nil else tierName,
+			react = not blocked,
+			blocked = blocked,
+			knock = move.knock,
+			hitPart = opts.hitPart,
+			staggerTime = staggerTime,
+			hitStop = move.hitStop,
+			knockDir = opts.knockDir,
+			lift = opts.lift,
+			move = move.id,
+		})
+	end
+	return if blocked then "Blocked" else "Hit", dealt
+end
+
+-- The windup of the move a "Start" announces (the others' clients fit the swing so its cut lands at the strike).
+local function moveWindup(stats: any, moveId: any): number
+	local kind, index = Moves.parse(moveId)
+	if kind == "Heavy" then
+		return MV.Heavy.ReleaseWindup[Moves.weight(stats.id)] or 0.16
+	elseif kind == "Counter" then
+		return MV.Counter.Windup
+	elseif kind == "Kick" then
+		return MV.Kick.Windup
+	elseif kind == "Light" then
+		return Moves.step(stats, stats.id, index).windup
+	end
+	return stats.windup or 0.1
+end
+
+-- The move a strike claims, as the server allows it (see the header), or (nil, refusal reason).
+local function resolveMove(player: Player, st: PlayerState, stats: any, moveId: any, held: any, now: number): ({ [string]: any }?, string?)
+	local kind, index = Moves.parse(moveId)
+	local id = stats.id
+	if kind == "Heavy" then
+		local H = MV.Heavy
+		if st.heavyStart == nil or st.heavyItem ~= id then
+			return Moves.step(stats, id, 1), nil -- (no hold on record: the press counts as a tap)
+		end
+		local releaseWindup = H.ReleaseWindup[Moves.weight(id)] or 0.16
+		-- (the client sends "Charge" once Attack has been held MinHold, so the hold is that plus the time since)
+		local measured = (now - releaseWindup) - st.heavyStart + H.MinHold + JITTER
+		local claimed = tonumber(held) or 0
+		if claimed ~= claimed then
+			claimed = 0
+		end
+		local h = math.clamp(math.min(claimed, measured), 0, H.FullHold + H.MaxHoldAfterFull)
+		if h < H.MinHold - 0.03 then
+			return Moves.step(stats, id, 1), nil
+		end
+		local move = Moves.heavy(stats, id, h, now < (st.concentrationUntil or -math.huge))
+		move.held = h
+		if h > H.FullHold then
+			move.stamina += H.HoldDrain * (h - H.FullHold)
+		end
+		return move, nil
+	elseif kind == "Counter" then
+		if now <= (st.counterUntil or -math.huge) + JITTER then
+			return Moves.counter(stats, id), nil
+		end
+		return nil, "CounterWindow"
+	elseif kind == "Kick" then
+		if now < (st.kickReady or -math.huge) - JITTER then
+			return nil, "KickCooldown"
+		end
+		return Moves.kick(), nil
+	elseif kind == "Skill" then
+		local skills = Services.SkillService
+		if skills and type(skills.strikeMove) == "function" then
+			local ok, move = pcall(skills.strikeMove, player, moveId, now, stats)
+			if ok and type(move) == "table" then
+				return move, nil
+			end
+		end
+		return nil, "SkillStrike"
+	end
+	local i = if kind == "Light" and index then index else 1
+	if i < 1 or i > Moves.chainLength(id) then
+		i = 1
+	end
+	if i > 1 then
+		-- a step only follows the step before it, inside the chain window after that one ended (lag allowed)
+		local windup = Moves.step(stats, id, i).windup
+		local follows = st.chainItem == id and st.chainStep == i - 1 and st.chainEndsAt ~= nil
+			and now - windup <= st.chainEndsAt + MV.ChainWindow + JITTER + SWING_LATE
+		if not follows then
+			i = 1
+		end
+	end
+	return Moves.step(stats, id, i), nil
+end
+
+--------------------------------------------------------------------------------------------------------------------
 -- Remotes
 --------------------------------------------------------------------------------------------------------------------
 
--- MeleeSwing("Start", variant): a swing began on the attacker's client. The others near them are told now, so they see
--- it wind up before the blow lands (told at the strike, the victim was hurt first and saw the swing afterwards). Cheap:
--- no trace, one small message to the players in range, at most one per swing (per weapon cooldown when no strike
--- follows, never more often than START_MIN_GAP), and not while the swing gate is closed.
-local function onMeleeStart(player: Player, variant: any)
+-- MeleeSwing("Start", variant, move): a swing began on the attacker's client. The others near them are told now, so
+-- they see it wind up before the blow lands (told at the strike, the victim was hurt first and saw the swing
+-- afterwards). Cheap: no trace, one small message to the players in range, at most one per swing (per weapon
+-- cooldown when no strike follows, never more often than START_MIN_GAP), and not while the swing gate is closed.
+local function onMeleeStart(player: Player, variant: any, moveId: any)
 	if not Net.rateLimit(player, "MeleeStart", 5, 3) then
 		return
 	end
@@ -1330,15 +1808,144 @@ local function onMeleeStart(player: Player, variant: any)
 	st.startAt = now
 	st.startItem = def.id
 	st.startGap = math.max(START_MIN_GAP, (def.cooldown or 0.5) - (CombatConfig.CooldownJitter or 0.12))
-	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), def.windup or 0.1)
+	local move = if Moves.parse(moveId) then moveId else nil
+	broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), moveWindup(def, move), { move = move })
 end
 
-local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any, variant: any, target: any, startTime: any)
-	if lookDirection == "Start" then
-		onMeleeStart(player, predictedHit)
+-- MeleeSwing("Charge", clientTime | false): the heavy's hold, on record for its strike; the others see it wound.
+local function onCharge(player: Player, clientTime: any)
+	if not Net.rateLimit(player, "MeleeCharge", 4, 3) then
 		return
 	end
-	if not Net.rateLimit(player, "MeleeSwing", 5, 3) then
+	local st = stateFor(player)
+	if clientTime == false then
+		if st.heavyStart then
+			st.heavyStart = nil
+			broadcastAction(player, "Charge", st.heavyItem, true)
+		end
+		return
+	end
+	local ctx = getContext(player)
+	local def = ctx and meleeStatsFor(player, equippedItemId(player))
+	if not def then
+		return
+	end
+	local now = serverNow()
+	if now < st.nextSwingStart - JITTER or now < (st.staggerUntil or -math.huge) - JITTER then
+		return
+	end
+	local start = now
+	if type(clientTime) == "number" and clientTime == clientTime then
+		start = math.clamp(clientTime, now - JITTER, now)
+	end
+	st.heavyStart = start
+	st.heavyItem = def.id
+	st.guardOn = false
+	broadcastAction(player, "Charge", def.id)
+end
+
+-- MeleeSwing("Guard", on, clientTime)
+local function onGuard(player: Player, on: any, clientTime: any)
+	if not Net.rateLimit(player, "MeleeGuard", 8, 4) then
+		return
+	end
+	local st = stateFor(player)
+	local now = serverNow()
+	if on ~= true then
+		if st.guardOn then
+			st.guardOn = false
+			broadcastAction(player, "Guard", st.guardItem, true)
+		end
+		return
+	end
+	local ctx = getContext(player)
+	local def = ctx and meleeStatsFor(player, equippedItemId(player))
+	if not def or now < (st.staggerUntil or -math.huge) - JITTER then
+		return
+	end
+	local start = now
+	if type(clientTime) == "number" and clientTime == clientTime then
+		start = math.clamp(clientTime, now - JITTER, now)
+	end
+	local window = if now < (st.concentrationUntil or -math.huge) then MV.Parry.ConcentrationWindow else MV.Parry.Window
+	st.guardOn = true
+	st.guardStart = start
+	st.guardItem = def.id
+	-- a guard raised inside the last one's whiff lock has no parry window (pressing guard over and over earns nothing)
+	st.guardParry = start >= (st.parryLockUntil or -math.huge)
+	st.parryLockUntil = start + window + MV.Parry.WhiffLock
+	st.heavyStart = nil
+	broadcastAction(player, "Guard", def.id)
+end
+
+-- MeleeSwing("Dodge", direction, clientTime)
+local function onDodge(player: Player, direction: any, clientTime: any)
+	if not Net.rateLimit(player, "MeleeDodge", 3, 2) then
+		refuse(player, "DodgeRate")
+		return
+	end
+	local ctx = getContext(player)
+	if not ctx then
+		return
+	end
+	local st = stateFor(player)
+	local now = serverNow()
+	local D = MV.Dodge
+	local down = st.knockdownAt ~= nil and now - st.knockdownAt < (RX.Knockdown.Down or 1)
+	local rollOut = down and now - st.knockdownAt >= (RX.Knockdown.RollOutAfter or 0.5)
+	if now < (st.staggerUntil or -math.huge) - JITTER and not rollOut then
+		refuse(player, "DodgeStaggered")
+		return
+	end
+	if now < (st.dodgeReady or -math.huge) - JITTER then
+		refuse(player, "DodgeCooldown")
+		return
+	end
+	local times = st.dodgeTimes or {}
+	local recent = {}
+	for _, t in ipairs(times) do
+		if now - t < D.RepeatWindow then
+			table.insert(recent, t)
+		end
+	end
+	local cost = D.Stamina * (if #recent >= 2 then D.RepeatCostMult else 1)
+	if ledger(st, now) < D.Stamina - 1e-3 then
+		refuse(player, "DodgeStamina")
+		return
+	end
+	spendLedger(st, cost, now)
+	table.insert(recent, now)
+	st.dodgeTimes = recent
+	local start = now
+	if type(clientTime) == "number" and clientTime == clientTime then
+		start = math.clamp(clientTime, now - JITTER, now)
+	end
+	st.dodgeFrom = start + D.Startup
+	st.dodgeUntil = start + D.Startup + D.Travel
+	st.dodgeReady = start + D.Cooldown
+	st.guardOn = false
+	st.heavyStart = nil
+	local dir = if Util.isFiniteVector(direction) and (direction :: Vector3).Magnitude <= 1.1 then Util.flat(direction :: Vector3) else Vector3.zero
+	broadcastAction(player, "Dodge", nil, nil, nil, nil, { direction = dir })
+end
+
+local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: any, variant: any, target: any, startTime: any, moveId: any, held: any)
+	if lookDirection == "Start" then
+		onMeleeStart(player, predictedHit, variant)
+		return
+	elseif lookDirection == "Charge" then
+		onCharge(player, predictedHit)
+		return
+	elseif lookDirection == "Guard" then
+		onGuard(player, predictedHit, variant)
+		return
+	elseif lookDirection == "Dodge" then
+		onDodge(player, predictedHit, variant)
+		return
+	elseif type(lookDirection) == "string" then
+		return -- ("Skill": SkillService)
+	end
+	if not Net.rateLimit(player, "MeleeSwing", 7, 4) then
 		refuse(player, "MeleeRate")
 		return
 	end
@@ -1354,8 +1961,8 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	if not ctx then
 		return
 	end
-	local def = meleeStatsFor(player, equippedItemId(player)) -- (the weapon's stats at its stars: CombatStats.melee)
-	if not def then
+	local stats = meleeStatsFor(player, equippedItemId(player)) -- (the weapon's stats at its stars: CombatStats.melee)
+	if not stats then
 		return
 	end
 	if not facingOk(ctx.root, direction, MELEE_FACING_DOT) then
@@ -1364,52 +1971,132 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	end
 	local st = stateFor(player)
 	local now = workspace:GetServerTimeNow()
-	if not trySwing(st, def, now, startTime) then
-		refuse(player, "MeleeCooldown")
+	local move, why = resolveMove(player, st, stats, moveId, held, now)
+	if not move then
+		refuse(player, why or "MeleeMove")
 		return
+	end
+	-- staggered: no attack; a swing being wound up when the stagger began is cancelled (Interrupted)
+	if now < (st.staggerUntil or -math.huge) - JITTER then
+		refuse(player, "Staggered")
+		return
+	end
+	local began = now - (move.windup or 0.1)
+	if type(startTime) == "number" and startTime == startTime then
+		began = math.clamp(startTime, began - SWING_LATE, began)
+	end
+	if st.interruptAt and st.interruptAt > began + 0.02 and st.interruptAt <= now then
+		refuse(player, "Interrupted")
+		return
+	end
+	-- out of stamina: the recovery takes twice as long (the chain slows)
+	local total = move.total or stats.cooldown or 0.5
+	if ledger(st, now) <= 0.001 then
+		local w = move.windup or 0.1
+		total = w + (total - w) / MV.ExhaustedAttackSpeed
+	end
+	if move.kind ~= "Skill" then
+		if not trySwing(st, { windup = move.windup, cooldown = total }, now, startTime) then
+			refuse(player, "MeleeCooldown")
+			return
+		end
+	end
+	if move.kind == "Light" then
+		st.chainItem, st.chainStep, st.chainEndsAt = stats.id, move.index, began + total
+	elseif move.kind ~= "Skill" then
+		st.chainStep = nil
+	end
+	if move.kind == "Heavy" then
+		st.heavyStart = nil
+	elseif move.kind == "Counter" then
+		st.counterUntil = nil
+	elseif move.kind == "Kick" then
+		st.kickReady = now + MV.Kick.Cooldown
+	end
+	if st.guardOn then
+		st.guardOn = false -- (a strike lowers the guard; the client raises it again after)
+	end
+	local cost = (move.stamina or 0) * (if now < (st.concentrationUntil or -math.huge) then 0.7 else 1)
+	spendLedger(st, cost, now)
+	-- Sprint Burst and Quiet Step end when you attack (Combat_v3 2.3)
+	local skillsSvc = Services.SkillService
+	if skillsSvc and type(skillsSvc.onAttack) == "function" and move.kind ~= "Skill" then
+		pcall(skillsSvc.onAttack, player)
 	end
 
 	local origin = ctx.head.Position
-	local heavy = (def.cooldown or 0) >= HEAVY_SWING_COOLDOWN
-	playSound(if heavy then "Swing_Heavy" else "Swing_Light", origin, player)
+	local heavySound = move.heavyHit or (stats.cooldown or 0) >= HEAVY_SWING_COOLDOWN
+	playSound(if heavySound then "Swing_Heavy" else "Swing_Light", origin, player, nil, if move.heavyHit then 0.85 else nil)
 	-- the others saw this swing start (onMeleeStart); if its start never came, they are told now
-	local announced = st.startAt ~= nil and st.startItem == def.id and now - st.startAt < (def.windup or 0.1) + 0.6
+	local announced = st.startAt ~= nil and st.startItem == stats.id and now - st.startAt < (move.windup or 0.1) + 0.6
 	st.startAt = nil
-	if not announced then
-		broadcastAction(player, "Swing", def.id, nil, swingVariant(variant), 0)
+	if not announced and move.kind ~= "Skill" then
+		broadcastAction(player, "Swing", stats.id, nil, swingVariant(variant), 0, { move = move.id })
 	end
 
 	-- a swing the attacker's screen showed as a miss never lands; one it showed hitting is checked by a sweep whose
 	-- front (cast length + radius) is MELEE_REACH_ALLOWANCE past the front of the attacker's own, plus what the
-	-- attacker and the target moved, on the server, in the last MELEE_LAG_TIME seconds (meleeFront)
+	-- attacker and the target moved, on the server, in the last MELEE_LAG_TIME seconds (meleeFront). A slash sends
+	-- three such traces across its arc, a stab one thinner one (Moves.traceDirections): the same caps on each.
 	local claimed = if typeof(target) == "Instance" and target:IsA("Model") then target else nil
-	local front, _, _, _, theirs = meleeFront(def, ctx.character, origin, direction, predictedHit == true, claimed)
+	local reachDef = { range = (move.range or stats.range or 5) + (move.reach or 0) }
+	local front, _, _, _, theirs = meleeFront(reachDef, ctx.character, origin, direction, predictedHit == true, claimed)
 	-- the client's ball plus a little, wider by what the target moved lately (its side moved that far since the
 	-- attacker saw it), never wider than MeleeHitRadius; the body itself must be within the front (bodyDistance)
 	local radius = math.min(CombatConfig.MeleeHitRadius, CombatConfig.MeleeHitRadius * MELEE_PREDICT_RADIUS + MELEE_BALL_SLACK + theirs)
-	local hit = meleeTrace(ctx.character, origin, direction, math.max(front - radius, 0), radius, predictedHit ~= true, claimed, front)
+	if move.stab then
+		radius *= MV.StabRadius
+	end
+	local hit: MeleeHit? = nil
+	local worldHit: MeleeHit? = nil
+	for _, dir in ipairs(Moves.traceDirections(move, direction)) do
+		local found = meleeTrace(ctx.character, origin, dir, math.max(front - radius, 0), radius, predictedHit ~= true, claimed, front)
+		if found and found.humanoid then
+			hit = found
+			break
+		elseif found and not worldHit then
+			worldHit = found
+		end
+	end
+	hit = hit or worldHit
 	if not hit then
 		if predictedHit == true then
 			refuse(player, "MeleeNoTarget") -- (the attacker's screen showed a hit; the server found nobody there)
 		end
 		return
 	end
-	if hit.humanoid then
-		local damage = meleeDamage(def, ctx, hit)
-		local dealt = CombatService.applyHit(player, hit.humanoid, damage, {
-			cause = "Combat",
-			weaponId = def.id,
+	if hit.humanoid and hit.model then
+		local victimState = CombatService.bodyState(hit.model)
+		local guarding = victimState ~= nil and victimState.guardOn == true
+		local dmgDef = table.clone(stats)
+		dmgDef.damage = move.damage
+		if move.insideFull or move.kind ~= "Light" then
+			dmgDef.insideRange = nil -- (the butt swing, the heavy lunge: full damage inside the shaft)
+		end
+		if guarding or (move.kind ~= "Light" and move.kind ~= "Heavy") then
+			dmgDef.unseenDamage = nil -- (the knife's unseen hit never lands on a guard, nor on kicks and skills)
+		end
+		local damage = meleeDamage(dmgDef, ctx, hit)
+		local guardBreak = stats.id == "climb_pick" and move.kind == "Light" and move.last
+		local result, dealt = CombatService.resolveHit(player, hit.model, move, {
+			damage = damage,
 			position = origin,
 			hitPosition = hit.position,
-			melee = true,
-			armourPierce = def.armourPierce,
-			stars = def.stars,
+			hitPart = hit.part,
+			weaponId = stats.id,
+			armourPierce = stats.armourPierce,
+			stars = stats.stars,
+			attackerModel = ctx.character,
+			guardBreak = guardBreak,
+			guardBreakTime = if guardBreak then 0.3 else nil,
 		})
-		if dealt > 0 then
-			playSound("Hit_Flesh", hit.position, player)
+		if result == "Hit" and dealt > 0 then
+			playSound("Hit_Flesh", hit.position, player, nil, if move.heavyHit or move.kind == "Counter" then 0.78 elseif move.kind == "Kick" then 0.6 else nil)
 		end
-		if def.sweepShare and hit.model then
-			sweepSecond(player, def, ctx, origin, direction, front, hit.model)
+		if result == "Hit" and move.sweep and stats.sweepShare then
+			local sweepDef = table.clone(stats)
+			sweepDef.damage = move.damage
+			sweepSecond(player, sweepDef, ctx, origin, direction, front, hit.model)
 		end
 	else
 		if predictedHit == true then
@@ -1523,6 +2210,10 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		end
 		local bow = CombatStats.bow(def, equippedStars(player)) -- (draw time, speed, damage and range at its stars)
 		local drawTime = bow.drawTime
+		local skills = Services.SkillService
+		if skills and type(skills.hasBuff) == "function" and skills.hasBuff(player, "steady_hands") then
+			drawTime *= (Moves.skills.General.steady_hands.DrawMult or 0.85) -- (Steady Hands: a quicker draw)
+		end
 		local began = math.max(drawStart, st.bowFree)
 		amount = math.min(amount, math.clamp((now - began + CHARGE_JITTER) / drawTime, 0, 1))
 		if amount < (CombatConfig.MinBowCharge or 0.2) - 1e-3 then
@@ -1538,7 +2229,15 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		st.bowFree = math.max(now, began + amount * drawTime) + BOW_RECOVER
 		local speed = Util.lerp(bow.speedMin, bow.speedMax, amount)
 		local damage = Util.lerp(bow.damageMin, bow.damageMax, amount)
+		-- Piercing Shot (the bow's skill): the next full-draw arrow flies faster and passes through the first body
+		local pierce = nil
+		if amount >= 0.999 and skills and type(skills.consumeArmed) == "function" and skills.consumeArmed(player, "piercing_shot") then
+			local P = Moves.skills.Weapon.Bow
+			speed *= P.SpeedMult or 1.15
+			pierce = { secondShare = P.SecondShare or 0.7 }
+		end
 		local fired = projectiles.fire(player, ammo, start, aim * speed, bow.gravity, damage, {
+			pierce = pierce, -- (ProjectileService: pass through the first contender and hit a second at secondShare)
 			shotId = shotId,
 			weaponId = itemId,
 			headshotMultiplier = bow.headshotMultiplier,
@@ -1586,7 +2285,15 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 	else
 		return
 	end
+	-- Ricochet (the throwing family's skill): the next throw glances once toward the nearest other contender
+	local skills = Services.SkillService
+	local ricochet = nil
+	if skills and type(skills.consumeArmed) == "function" and skills.consumeArmed(player, "ricochet") then
+		local R = Moves.skills.Weapon.Throwing
+		ricochet = { share = R.Share or 0.7, range = R.Range or 20, cone = R.Cone or 120 }
+	end
 	local fired = projectiles.fire(player, itemId :: string, start, aim * (speed or 120), gravity or 40, damage or 0, {
+		ricochet = ricochet, -- (ProjectileService: on the first contact, one bounce at share of the damage)
 		shotId = shotId,
 		weaponId = itemId,
 		headshotMultiplier = headMultiplier or CombatConfig.DefaultHeadshotMultiplier,
@@ -1611,7 +2318,63 @@ local function onEquippedChanged(player: Player)
 		st.drawItem = nil
 		broadcastAction(player, "Release", was, true)
 	end
+	-- (Combat v3: a guard, a heavy's hold and a chain don't outlive the weapon in hand)
+	if st then
+		if st.guardOn then
+			st.guardOn = false
+			broadcastAction(player, "Guard", st.guardItem, true)
+		end
+		if st.heavyStart then
+			st.heavyStart = nil
+			broadcastAction(player, "Charge", st.heavyItem, true)
+		end
+		st.chainStep = nil
+	end
 end
+
+-- Test hook (server): a dummy or any other body strikes `victim` with a sword move ("L1".."L4", "H" at full charge,
+-- "K"), through the same guard, parry and dodge rules as a player's blow. Its swing shows on every client (CombatAction
+-- "Swing" with `model`). Returns (result, dealt).
+function CombatService._npcStrike(attackerModel: Model, victim: Model, moveId: string?, itemId: string?): (string, number)
+	local id = itemId or "sword"
+	local stats = CombatStats.melee(ItemDefs.get(id) or FISTS, 1)
+	local kind, index = Moves.parse(moveId or "L1")
+	local move = if kind == "Heavy" then Moves.heavy(stats, id, 2)
+		elseif kind == "Kick" then Moves.kick()
+		else Moves.step(stats, id, index or 1)
+	local root = rootOf(attackerModel)
+	local at = if root then root.Position + Vector3.new(0, 1.5, 0) else nil
+	broadcastNear(at, { action = "Swing", model = attackerModel, itemId = id, variant = move.variant, lead = 0, move = move.id })
+	return CombatService.resolveHit(nil, victim, move, {
+		damage = move.damage, position = at, hitPosition = rootOf(victim) and (rootOf(victim) :: BasePart).Position or nil,
+		weaponId = id, attackerModel = attackerModel,
+	})
+end
+CombatService._bodyStates = function(): { [Instance]: any }
+	local all = {}
+	for player, st in pairs(playerState) do
+		all[player] = st
+	end
+	for model, st in pairs(npcState) do
+		all[model] = st
+	end
+	return all
+end
+CombatService._resolveMove = resolveMove
+
+-- For SkillService: the player's fighting context ({ character, humanoid, head, root } or nil) and the melee stats of
+-- the weapon in hand at its stars (nil for a bow or a throwable).
+function CombatService.context(player: Player): { [string]: any }?
+	return getContext(player)
+end
+function CombatService.meleeStatsOf(player: Player): { [string]: any }?
+	return meleeStatsFor(player, equippedItemId(player))
+end
+function CombatService.heldItem(player: Player): string?
+	return equippedItemId(player)
+end
+CombatService.broadcastNear = broadcastNear
+CombatService.playSound = playSound
 
 -- Test hooks (server only): the server's melee trace, the check on MeleeSwing's variant, the swing gate, and the count
 -- of refused swings and shots by reason.

@@ -75,6 +75,7 @@ local ClientState = {
 		crouchModeTouch = 1, -- touch (CROUCH): Toggle
 		padLook = 1, -- controller look speed (x)
 		touchLook = 1, -- touch look speed (x)
+		othersTrails = 0, -- others' trails: 0 Auto, 1 All, 2 Natural, 3 Off (SettingsController; TrailController)
 	},
 
 	-- Mirrors of LocalPlayer attributes (kept in sync below):

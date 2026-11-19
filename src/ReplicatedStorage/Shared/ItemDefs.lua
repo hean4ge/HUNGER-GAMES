@@ -61,6 +61,20 @@ ItemDefs.Items = {
 		damage = 26, cooldown = 0.65, range = 5, windup = 0.14, staminaCost = 0.06,
 		climbSpeedMultiplier = 1.2, climbDrainMultiplier = 0.7, -- in hand while climbing (MovementController)
 		desc = "Climb faster and longer with it in hand.", equipSound = "Equip_Blade" },
+	-- Combat v3 (5.4, 5.5): our own pair after the owner's crossed-blades picture, and the leaf-shaped thrower
+	paired_blades = { name = "Paired Blades", kind = "Melee", rarity = "Epic", stack = 1, starred = true,
+		damage = 19, cooldown = 0.38, range = 5.5, windup = 0.07, staminaCost = 0.035, offHand = true,
+		desc = "Two short blades. Fast chains that finish hard.", equipSound = "Equip_Blade" },
+	leaf_dagger = { name = "Leaf Dagger", kind = "Melee", rarity = "Uncommon", stack = 1, starred = true,
+		damage = 18, cooldown = 0.42, range = 4.2, windup = 0.08, staminaCost = 0.035,
+		throwable = true, throwDamage = 40, throwSpeed = 150, throwGravity = 20, throwHeadMultiplier = 1.6,
+		throwOnTargetRange = 30, throwStaminaCost = 0.05, throwUnseenDamage = 50, quietThrow = 10,
+		desc = "A leaf blade with a ring. Throw it quietly, then fetch it.", equipSound = "Equip_Blade" },
+	-- the Paired Blades' fallback (Combat_v3 5.4): one single-edged sabre. Kept out of every roll (retired) until the
+	-- lead chooses it over the pair; the id, model, chain and clips stay ready.
+	wrapped_sabre = { name = "Wrapped Sabre", kind = "Melee", rarity = "Epic", stack = 1, starred = true, retired = true,
+		damage = 30, cooldown = 0.55, range = 7, windup = 0.13, staminaCost = 0.06,
+		desc = "A single-edged sabre with a round guard.", equipSound = "Equip_Blade" },
 	-- Ranged
 	bow = { name = "Recurve Bow", kind = "Bow", rarity = "Rare", stack = 1, starred = true, ammo = "arrow",
 		damageMin = 14, damageMax = 50, drawTime = 0.9, speedMin = 90, speedMax = 240, gravity = 55,
@@ -160,6 +174,7 @@ ItemDefs.LootTables = {
 		{ id = "spear", weight = 3, min = 1, max = 1 },
 		{ id = "ration", weight = 4, min = 1, max = 1 },
 		{ id = "herbs", weight = 4, min = 1, max = 2 },
+		{ id = "leaf_dagger", weight = 5, min = 1, max = 1 },
 	},
 	[3] = {
 		{ id = "sword", weight = 5, min = 1, max = 1 },
@@ -176,6 +191,8 @@ ItemDefs.LootTables = {
 		{ id = "water_bottle", weight = 8, min = 1, max = 1 },
 		{ id = "throwing_knife", weight = 6, min = 3, max = 5 },
 		{ id = "bandage", weight = 6, min = 2, max = 3 },
+		{ id = "paired_blades", weight = 5, min = 1, max = 1 }, -- at most 1 a round (RoundCaps)
+		{ id = "leaf_dagger", weight = 4, min = 1, max = 1 },
 	},
 }
 
@@ -223,6 +240,7 @@ end
 -- At most this many of an item come out of random rolls in one round (Weapons_v2: Short Bows at most 6).
 ItemDefs.RoundCaps = {
 	short_bow = (type(bowCfg) == "table" and tonumber(bowCfg.ShortBowPerRound)) or 6,
+	paired_blades = 1, -- Combat_v3 5.4: at most one pair a round, at the Horn
 }
 
 function ItemDefs.get(id: string?)

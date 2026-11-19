@@ -12,6 +12,19 @@
 	  KitBring): it replaces the kit's weapon in the drop (Medic: added), at its Armoury stars. Player attribute
 	  KitArmoury = "id:stars,..." lists the owned weapons KitController cycles through (refreshed at join, on a
 	  bring pick and after each round).
+	  KitPick stays accepted for one version (an old client); the Loadout screen sends LoadoutSet instead.
+
+	THE LOADOUT (docs/design/Combat_v3.md section 3.2; LoadoutController; Shared.LoadoutCatalog)
+	  Remote LoadoutSet { kit, bring, specialty, general, trails = { swing, arrow, throw } }: one save when the Loadout
+	  screen closes. Each value is checked (the kit exists; the weapon is in the Armoury and may be brought; the
+	  Specialty and the general skill exist; each trail fits its slot and is free or owned); a bad value keeps the old one.
+	  Player attributes (what the round's code reads):
+	    LoadoutSpecialty, LoadoutGeneral        the next round's choice (family id, general skill id)
+	    RoundSpecialty, RoundGeneral            locked at the call (RoundService.roundStarting) for that round's contenders
+	  The three trails go to TrailService.setLoadout (it owns TrailSwing / TrailArrow / TrailThrow, TrailsOwned and
+	  Econ.Trails; never locked: free to change in the train). Without TrailService they are kept for the session here.
+	  Remembered in Econ.Loadout = { specialty, general } (DataService keeps it once its sanitizeEcon knows the key;
+	  until then for the session only).
 
 	DELIVERY (Kits.Settings.Delivery; Config.Kits.Delivery overrides it: the one-line switch)
 	  "Start"     at the horn (RoundService.roundStarted) the kit goes into the bag; what does not fit lands at the feet.
@@ -52,6 +65,7 @@ local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local Kits = require(Shared:WaitForChild("Kits"))
+local LoadoutCatalog = require(Shared:WaitForChild("LoadoutCatalog"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Signal = require(Shared:WaitForChild("Signal"))
@@ -67,11 +81,13 @@ KitService.delivered = Signal.new()
 local PARCEL_TAG = "KitParcel"
 local PROMPT_TAG = "LootPrompt"
 local REMOTE = "KitPick"
+local LOADOUT_REMOTE = "LoadoutSet"
 
 local Services: { [string]: any } = {}
 local rng = Random.new()
 local picks: { [Player]: string } = {}
 local roundKits: { [Player]: string } = {} -- taken at the call
+local loadouts: { [Player]: any } = {} -- LoadoutCatalog.sanitize shape: specialty, general, trails
 local roundToken = 0
 local midpointDone = false
 
@@ -205,6 +221,108 @@ local function onPick(player: Player, kitId: any, bring: any)
 	end
 end
 
+--------------------------------------------------------------------------------------------------------------------
+-- The Loadout (Combat_v3 3.2): kit, bring, Specialty, general skill and trails in one LoadoutSet
+--------------------------------------------------------------------------------------------------------------------
+
+-- Trails belong to TrailService (Shared.Trails; Econ.Trails; the TrailSwing / TrailArrow / TrailThrow and TrailsOwned
+-- attributes). The Loadout only forwards the three slots to it. Without TrailService, this keeps them for the session.
+local function trailService(): any
+	local service = Services.TrailService
+	return if service and type(service.setLoadout) == "function" then service else nil
+end
+
+local function ownsTrail(player: Player, id: string): boolean
+	local service = trailService()
+	if service then
+		return call("TrailService", "owns", player, id) == true
+	end
+	return LoadoutCatalog.isFreeTrail(id)
+end
+
+local function equippedTrails(player: Player, fallback: any): { [string]: string }
+	local out = {}
+	for _, slot in ipairs(LoadoutCatalog.Slots) do
+		local attr = player:GetAttribute(LoadoutCatalog.SlotAttr[slot])
+		out[slot] = if type(attr) == "string" and attr ~= "" then attr else fallback[slot]
+	end
+	return out
+end
+
+local function publishLoadout(player: Player)
+	if player.Parent ~= Players then
+		return
+	end
+	local l = loadouts[player] or LoadoutCatalog.defaults(KitService.getKit(player))
+	player:SetAttribute("LoadoutSpecialty", l.specialty)
+	player:SetAttribute("LoadoutGeneral", l.general)
+	if not trailService() then
+		for _, slot in ipairs(LoadoutCatalog.Slots) do
+			player:SetAttribute(LoadoutCatalog.SlotAttr[slot], l.trails[slot])
+		end
+	end
+end
+
+function KitService.getLoadout(player: Player)
+	local l = loadouts[player] or LoadoutCatalog.defaults(KitService.getKit(player))
+	return { specialty = l.specialty, general = l.general, trails = equippedTrails(player, l.trails) }
+end
+
+-- Sets what a LoadoutSet carries; anything invalid keeps the player's current value. Returns the clean loadout.
+function KitService.setLoadout(player: Player, payload: any)
+	local p = if type(payload) == "table" then payload else {}
+	if p.kit ~= nil and Kits.get(p.kit) and p.kit ~= KitService.getKit(player) then
+		KitService.setKit(player, p.kit)
+	end
+	if p.bring ~= nil and type(p.bring) == "string" and p.bring ~= (player:GetAttribute("KitBring") or "") then
+		publishArmoury(player)
+		KitService.setBring(player, p.bring)
+	end
+	local current = KitService.getLoadout(player)
+	local clean = {
+		specialty = if LoadoutCatalog.specialty(p.specialty) then p.specialty else current.specialty,
+		general = if LoadoutCatalog.general(p.general) then p.general else current.general,
+		trails = table.clone(current.trails),
+	}
+	if type(p.trails) == "table" then
+		local wanted = {}
+		for _, slot in ipairs(LoadoutCatalog.Slots) do
+			local id = p.trails[slot]
+			if type(id) == "string" and #id <= 24 and id ~= current.trails[slot] then
+				wanted[slot] = id
+			end
+		end
+		if next(wanted) then
+			if trailService() then
+				call("TrailService", "setLoadout", player, wanted) -- each checked there; a bad one is left as it was
+				clean.trails = equippedTrails(player, current.trails)
+			else
+				for slot, id in pairs(wanted) do
+					if LoadoutCatalog.trailFits(id, slot) and ownsTrail(player, id) then
+						clean.trails[slot] = id
+					end
+				end
+			end
+		end
+	end
+	loadouts[player] = clean
+	publishLoadout(player)
+	call("DataService", "updateEcon", player, function(econ)
+		econ.Loadout = { specialty = clean.specialty, general = clean.general }
+	end)
+	return clean
+end
+
+local function onLoadoutSet(player: Player, payload: any)
+	if not Net.rateLimit(player, LOADOUT_REMOTE, 2, 4) then
+		return
+	end
+	if type(payload) ~= "table" then
+		return
+	end
+	KitService.setLoadout(player, payload)
+end
+
 local function loadPick(player: Player)
 	-- the profile loads after join: look for a saved kit for a while
 	for _ = 1, 30 do
@@ -220,6 +338,9 @@ local function loadPick(player: Player)
 			if type(econ) == "table" and type(econ.Bring) == "string" then
 				player:SetAttribute("KitBring", econ.Bring)
 			end
+			if type(econ) == "table" and type(econ.Loadout) == "table" and loadouts[player] == nil then
+				loadouts[player] = LoadoutCatalog.sanitize(econ.Loadout, nil, KitService.getKit(player))
+			end
 			break
 		end
 		task.wait(1)
@@ -227,6 +348,7 @@ local function loadPick(player: Player)
 	if player.Parent == Players then
 		player:SetAttribute("Kit", KitService.getKit(player))
 		publishArmoury(player)
+		publishLoadout(player)
 	end
 end
 
@@ -783,6 +905,10 @@ local function onRoundStarting()
 		if isAlive(player) then
 			roundKits[player] = KitService.getKit(player)
 			player:SetAttribute("KitIncoming", nil)
+			-- the skills lock at the call (Combat_v3 2.1): the round's code reads these two
+			local l = KitService.getLoadout(player)
+			player:SetAttribute("RoundSpecialty", l.specialty)
+			player:SetAttribute("RoundGeneral", l.general)
 		end
 	end
 end
@@ -817,10 +943,12 @@ end
 function KitService.Init(registry)
 	Services = registry
 	local remotes = ReplicatedStorage:FindFirstChild("Remotes")
-	if remotes and not remotes:FindFirstChild(REMOTE) then
-		local remote = Instance.new("RemoteEvent")
-		remote.Name = REMOTE
-		remote.Parent = remotes
+	for _, name in ipairs({ REMOTE, LOADOUT_REMOTE }) do
+		if remotes and not remotes:FindFirstChild(name) then
+			local remote = Instance.new("RemoteEvent")
+			remote.Name = name
+			remote.Parent = remotes
+		end
 	end
 	-- the new weapons' part-built looks, until their Blender meshes exist (Shared.WeaponLooks)
 	local ok, installed = pcall(WeaponLooks.install)
@@ -833,6 +961,7 @@ end
 
 function KitService.Start()
 	Net.event(REMOTE).OnServerEvent:Connect(onPick)
+	Net.event(LOADOUT_REMOTE).OnServerEvent:Connect(onLoadoutSet)
 	local round = Services.RoundService
 	if round then
 		round.roundStarting:Connect(onRoundStarting)
@@ -855,6 +984,7 @@ function KitService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		picks[player] = nil
 		roundKits[player] = nil
+		loadouts[player] = nil
 	end)
 	for _, player in ipairs(Players:GetPlayers()) do
 		task.spawn(loadPick, player)

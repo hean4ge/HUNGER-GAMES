@@ -58,7 +58,19 @@
 	  CombatController.swingJitter(seed) -> { pitch, yaw, roll, follow }   a swing's small variation, the same for one
 	    seed: angles in radians (each within +-3 degrees) and a timing scale (1 +- 4 %) for use inside the follow-through
 	    only (the recovery still ends at total, so the hit timing never changes)
-	Optional hooks used when present: MovementController.spendStamina(amount) (melee staminaCost),
+	Combat v3 moves (docs/design/Combat_v3.md section 1; numbers in Shared.Moves; the server checks every one):
+  Melee: tap Attack = the next light chain step (a tap during a swing's recovery is kept, so the chain flows; the
+    step after the last is the first again); hold Attack HoldToHeavy (0.25 s) = the heavy's hold ("Charge" to the
+    server), released (or by itself 1.5 s after full) it strikes with its charge; Aim (Mouse 2 / L2 / touch GUARD,
+    held) = the guard, raised whenever nothing else is going on (the server times the parry from its raise); guard +
+    tap = a kick; guard + hold with a throwable = the throw (aimed while wound); a press inside the counter window
+    after a parry = the counter, at once; Dodge (Q, or Space / A while guarding; touch DODGE) = the dodge, its travel
+    driven on our own body. CombatAction "Reaction" (the server's): the stagger, the knockback impulse, the hit-stop
+    (ClientState.hitStopUntil) and the camera's jolt. Writes ClientState.guarding, charging (0..1), staggered,
+    combatSpeedMult (for MovementController), nextSwing (the queued chain step, for the viewmodel). Actions:
+    "GuardUp", "GuardDown", "ChargeStart", "ChargeCancel", "Dodge", "Parry", "Block", "Parried", "GuardBreak",
+    "Reaction", "Skill" (SkillController). API for SkillController: canFight, playSkillMove, driveBody, holdAttacks.
+Optional hooks used when present: MovementController.spendStamina(amount) (melee staminaCost),
 	MovementController.stopSprint() (drawing and throwing), ViewmodelController.getMuzzle() -> Vector3?,
 	NotificationController.toast(text) ("No arrows").
 ]]
@@ -72,6 +84,7 @@ local CombatStats = require(Shared:WaitForChild("CombatStats"))
 local Config = require(Shared:WaitForChild("Config"))
 local Input = require(Shared:WaitForChild("Input"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
+local Moves = require(Shared:WaitForChild("Moves"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Signal = require(Shared:WaitForChild("Signal"))
@@ -109,6 +122,10 @@ local MELEE_STYLE: { [string]: { style: string, weight: string, strike: number }
 	twin_axe = { style = "Smash", weight = "Heavy", strike = 0.13 }, -- slow, wide, heavy; others read the wind-up
 	ring_blade = { style = "Slash", weight = "Light", strike = 0.08 }, -- a close slash through the hoop
 	climb_pick = { style = "Chop", weight = "Medium", strike = 0.1 }, -- a short overhead peck
+	-- Combat v3 (5.4, 5.5)
+	paired_blades = { style = "Slash", weight = "Light", strike = 0.07 },
+	leaf_dagger = { style = "Stab", weight = "Light", strike = 0.08 },
+	wrapped_sabre = { style = "Slash", weight = "Medium", strike = 0.1 },
 }
 local DEFAULT_STYLE = { style = "Slash", weight = "Medium", strike = 0.1 }
 
@@ -159,6 +176,26 @@ local aimAlpha = 0
 local drawAlpha = 0
 local spread = 0
 local actionPulse = 0
+
+-- Combat v3 (see the header's "Moves" part; numbers in Shared.Moves)
+local MV = Moves.cfg
+local RX = Moves.reactions
+local lastChainStep: number? = nil -- the light chain: the step the last light swing played
+local pressAt: number? = nil -- Attack went down with a melee weapon (tap or hold is decided from this)
+local pressGuard = false -- ...while the guard was held (a tap kicks, a hold throws a throwable)
+local charge: { [string]: any }? = nil -- the heavy's hold: { t0 (os.clock when it was told), sentAt }
+local throwWind = false -- a throwable melee weapon wound back to throw (guard + hold Attack)
+local guardHeld = false -- the Guard input (Aim's binding) is down with a melee weapon in hand
+local guardOn = false -- the guard is up (and the server was told)
+local guardSince = 0
+local counterUntil = 0 -- os.clock: a press now is a counter (after this player parried)
+local kickReadyAt = 0
+local dodgeReadyAt = 0
+local dodgeTimes: { number } = {}
+local drive: { [string]: any }? = nil -- a dodge, a dash or a vault moving our own body (driveBody)
+local staggerUntil = 0
+local hitStopUntil = 0
+local knockdownAt = -math.huge
 
 --------------------------------------------------------------------------------------------------------------------
 -- Helpers
@@ -220,6 +257,9 @@ local function bowStats(): any
 end
 
 local function isAiming(): boolean
+	if equippedDef.kind == "Melee" then
+		return throwWind and canAct() and movementAllows() -- (a throwable wound back: guard + hold Attack)
+	end
 	return aimHeld and canAimWith(equippedDef) and canAct() and movementAllows()
 end
 
@@ -464,11 +504,9 @@ type Prediction = { character: boolean, position: Vector3, normal: Vector3?, mat
 -- cover), the forgiving ball (the first body it touches), then a point-blank overlap check. (The ball alone took the first body it touched: a
 -- bystander's arm beside the line, or the next practice dummy's hand, instead of the one aimed at.) Only living bodies
 -- count: one that just fell neither takes the swing nor blocks it.
-local function predictMelee(def: any, cf: CFrame): Prediction?
+local function predictOne(cf: CFrame, reach: number, radius: number): Prediction?
 	local origin = cf.Position
 	local direction = cf.LookVector
-	local reach = def.range or 5
-	local radius = CombatConfig.MeleeHitRadius * 0.85
 	local everyone = targetModels()
 	local world = worldParams(everyone) -- (no body, living or not, is world)
 	local targets = {}
@@ -544,6 +582,24 @@ end
 --------------------------------------------------------------------------------------------------------------------
 -- Actions
 --------------------------------------------------------------------------------------------------------------------
+
+-- Combat v3: a slash traces three rays across its arc (-15, 0, +15 degrees), a stab one thinner ray, as the server
+-- does (CombatService, Moves.traceDirections); the first body any ray touches is the target. move nil: step 1.
+local function predictMelee(def: any, cf: CFrame, move: any?): Prediction?
+	local m = move or Moves.step(def, def.id, 1)
+	local reach = (m.range or def.range or 5) + (m.reach or 0)
+	local radius = CombatConfig.MeleeHitRadius * 0.85 * (if m.stab then MV.StabRadius else 1)
+	local world: Prediction? = nil
+	for _, dir in ipairs(Moves.traceDirections(m, cf.LookVector)) do
+		local found = predictOne(CFrame.lookAt(cf.Position, cf.Position + dir), reach, radius)
+		if found and found.character then
+			return found
+		elseif found and not world then
+			world = found
+		end
+	end
+	return world
+end
 
 local function stopDrawSound()
 	if drawSound then
@@ -642,59 +698,138 @@ local function swingKick(style: string, variant: number, base: Vector3): Vector3
 	return Vector3.new(base.X, base.Y * side, base.Z * side)
 end
 
-local function startMelee(now: number)
+local function serverNow(): number
+	return workspace:GetServerTimeNow()
+end
+
+local function concentrating(): boolean
+	local untilAt = tonumber(player:GetAttribute("ConcentrationUntil"))
+	return untilAt ~= nil and serverNow() < untilAt
+end
+
+-- The guard (Combat_v3 1.3): told to the server when it goes up or down; the server times the parry from here.
+local function setGuard(on: boolean)
+	if on == guardOn then
+		return
+	end
+	guardOn = on
+	guardSince = os.clock()
+	if MeleeSwing then
+		MeleeSwing:FireServer("Guard", on, serverNow())
+	end
+	Input.setTouchVisible("Dodge", on)
+	CombatController.action:Fire(if on then "GuardUp" else "GuardDown", { itemId = equippedDef.id })
+end
+
+local function cancelCharge(tell: boolean)
+	if charge then
+		charge = nil
+		if tell and MeleeSwing then
+			MeleeSwing:FireServer("Charge", false)
+		end
+		CombatController.action:Fire("ChargeCancel", {})
+	end
+end
+
+-- The light chain step the next tap plays: the next after the last one while the chain holds (inside the chain window
+-- after the last swing ended, or a press during its recovery), else the first. After the last step, the first again.
+local function nextStep(itemId: string, now: number): number
+	local n = Moves.chainLength(itemId)
+	local rec = CombatController.current
+	local chaining = lastSwingItem == itemId and lastChainStep ~= nil
+		and ((rec ~= nil and rec.kind == "Melee" and rec.itemId == itemId) or now - lastSwingEnd < MV.ChainWindow)
+	if chaining then
+		return (lastChainStep :: number) % n + 1
+	end
+	return 1
+end
+
+-- Starts a move (a Shared.Moves move: a chain step, a heavy, a counter, a kick, a skill strike's swing).
+local function startMove(now: number, move: { [string]: any }, held: number?)
 	local def = meleeDef()
 	local look = MELEE_STYLE[def.id] or DEFAULT_STYLE
-	local variant = pickVariant(def.id, look.style, now)
+	local windup = move.windup or def.windup or 0.1
+	local total = move.total or def.cooldown or 0.5
+	if (tonumber(ClientState.stamina) or 1) <= 0.001 then
+		total = windup + (total - windup) / MV.ExhaustedAttackSpeed -- (no stamina: the chain slows)
+	end
+	local style = move.style or look.style
+	local variant = move.variant or 1
+	if move.kind == "Light" then
+		lastChainStep = move.index
+	elseif move.kind ~= "Skill" then
+		lastChainStep = nil
+	end
 	swingSets[def.id] = variant
 	lastSwingItem = def.id
-	local windup = def.windup or 0.1
-	local total = math.max(def.cooldown or 0.5, windup + look.strike + 0.08)
 	local rec = {
 		kind = "Melee",
+		move = move,
+		moveId = move.id,
+		moveKind = move.kind,
+		held = held,
 		itemId = def.id,
 		def = def,
-		style = look.style,
-		weight = look.weight,
+		style = style,
+		weight = if move.heavyHit then "Heavy" else look.weight,
 		variant = variant,
 		seed = rng:NextInteger(1, 2147483646),
 		t0 = now,
 		windup = windup,
-		strike = look.strike,
-		total = total,
+		strike = if move.heavyHit then look.strike * 1.25 else look.strike,
+		total = math.max(total, windup + look.strike + 0.08),
 		struck = false,
 		hit = nil,
-		startedAt = workspace:GetServerTimeNow(), -- (sent with the strike: the server times its cooldown from here)
+		tier = move.tier,
+		startedAt = serverNow(), -- (sent with the strike: the server times its cooldown from here)
 	}
 	CombatController.current = rec
-	nextActionAt = now + total
-	spendStamina(def.staminaCost)
-	if MeleeSwing then
+	nextActionAt = now + rec.total
+	spendStamina((move.stamina or 0) * (if concentrating() then 0.7 else 1))
+	setGuard(false)
+	if MeleeSwing and move.kind ~= "Skill" then
 		-- the others see the swing from its start (the server relays it), not from the moment it lands
-		MeleeSwing:FireServer("Start", if variant <= 8 then variant else nil)
+		MeleeSwing:FireServer("Start", if variant <= 8 then variant else nil, move.id)
 	end
 	CombatController.action:Fire("Swing", rec)
+	return rec
+end
+
+local function startMelee(now: number)
+	local def = meleeDef()
+	startMove(now, Moves.step(def, def.id, nextStep(def.id, now)))
+end
+
+-- The hit-stop on our own view (ViewmodelController and CharacterVisuals read ClientState.hitStopUntil).
+local function hitStop(seconds: number)
+	if seconds > 0 then
+		hitStopUntil = math.max(hitStopUntil, os.clock() + seconds)
+		ClientState.hitStopUntil = hitStopUntil
+	end
 end
 
 local function strike(rec: any, now: number)
 	rec.struck = true
 	lastStrikeAt = now
 	local cf = baseCFrame()
-	local hit = predictMelee(rec.def, cf)
+	local hit = predictMelee(rec.def, cf, rec.move)
 	if MeleeSwing then
 		-- the server lands a swing only if this trace touched someone, so a hit you didn't see never counts, and it
 		-- checks the body this trace touched and no other; the set (1-8) lets the other players see this same swing;
-		-- the start time lets the server gate the swing by when it began here, however late this message arrives
+		-- the start time lets the server gate the swing by when it began here, however late this message arrives;
+		-- the move ("L2", "H", "K" ...) and, for a heavy, how long Attack was held
 		MeleeSwing:FireServer(cf.LookVector, hit ~= nil and hit.character, if rec.variant <= 8 then rec.variant else nil,
-			if hit and hit.character then hit.target else nil, rec.startedAt)
+			if hit and hit.character then hit.target else nil, rec.startedAt, rec.moveId, rec.held)
 	end
-	Sfx.play(if rec.weight == "Light" then "Swing_Light" else "Swing_Heavy")
+	Sfx.play(if rec.weight == "Light" then "Swing_Light" else "Swing_Heavy", if rec.move and rec.move.heavyHit then { pitch = 0.85 } else nil)
 
 	rec.hit = if hit then (if hit.character then "Character" else "World") else nil
 	if hit then
 		if hit.character then
 			lastPredictedHitAt = now
-			Sfx.play("Hit_Flesh", { position = hit.position })
+			Sfx.play("Hit_Flesh", { position = hit.position, pitch = if rec.move and rec.move.heavyHit then 0.8 else nil })
+			-- weight on contact: the view holds for the tier's hit-stop (Combat_v3 1.8)
+			hitStop(Moves.tier(rec.tier).hitStop)
 		else
 			Sfx.play(surfaceSound(hit.material), { position = hit.position })
 			local metal = rec.style ~= "Punch" and hit.material ~= nil
@@ -704,7 +839,13 @@ local function strike(rec: any, now: number)
 
 	local base = KICK[rec.style] or KICK.Slash
 	local strength = if hit and hit.character then 2.6 elseif hit then 2 else 1
+	if rec.move and rec.move.heavyHit then
+		strength *= 1.5
+	end
 	local shake = if hit and hit.character then HIT_SHAKE[rec.weight] or 0.2 elseif hit then (HIT_SHAKE[rec.weight] or 0.2) * 0.6 else 0
+	if hit and hit.character and rec.tier == "Heavy" then
+		shake = math.max(shake, (RX.Heavy.ShakeAttacker or { 0.25 })[1])
+	end
 	kick(swingKick(rec.style, rec.variant, base) * strength, shake)
 	actionPulse = 1
 	CombatController.action:Fire("Strike", {
@@ -713,6 +854,8 @@ local function strike(rec: any, now: number)
 		weight = rec.weight,
 		variant = rec.variant,
 		hit = rec.hit,
+		move = rec.moveId,
+		tier = rec.tier,
 	})
 end
 
@@ -848,16 +991,27 @@ local function releaseThrow(rec: any, now: number)
 	CombatController.action:Fire("ThrowRelease", { itemId = rec.itemId, spear = rec.spear, last = last })
 end
 
-local function tryStartAttack(now: number, fromPress: boolean)
+local queuedIntent: string? = nil
+
+-- intent: "Light" (a tap), "Kick" (a tap while guarding), "Counter" (a press after a parry), "Throw" (a throwable
+-- melee weapon released after guard + hold), nil (bows, throwing knives: as before).
+local function tryStartAttack(now: number, fromPress: boolean, intent: string?)
 	if not canAct() or not movementAllows() then
 		return
 	end
+	if now < staggerUntil then
+		return -- (staggered: no attack until it ends)
+	end
 	local busyUntil = math.max(nextActionAt, CombatController.equipBlockedUntil, awaitingInventoryUntil)
-	if CombatController.current ~= nil or now < busyUntil then
-		-- QW12: a press during the switch to a new item is kept for the whole switch (0.32 s, 0.44 s for the bow)
+	local rec = CombatController.current
+	if rec ~= nil or now < busyUntil then
+		-- QW12: a press during the switch to a new item is kept for the whole switch (0.32 s, 0.44 s for the bow);
+		-- Combat v3: a tap during a swing's recovery is kept too, so the chain flows into its next step
 		local switching = now < CombatController.equipBlockedUntil
-		if fromPress and (busyUntil - now < BUFFER_WINDOW or switching) then
+		local recovering = rec ~= nil and rec.kind == "Melee" and rec.struck
+		if fromPress and (busyUntil - now < BUFFER_WINDOW or switching or recovering) then
 			queuedAttack = true
+			queuedIntent = intent
 			queuedAt = math.max(now, busyUntil - BUFFER_WINDOW) -- it expires 0.4 s after this, so never mid-switch
 		end
 		return
@@ -868,11 +1022,66 @@ local function tryStartAttack(now: number, fromPress: boolean)
 	elseif kind == "Throwable" then
 		startThrow(now, false)
 	elseif kind == "Melee" then
-		if equippedDef.kind == "Melee" and equippedDef.throwable and isAiming() then
+		local def = meleeDef()
+		if intent == "Throw" and equippedDef.kind == "Melee" and equippedDef.throwable then
 			startThrow(now, true)
+		elseif intent == "Counter" then
+			startMove(now, Moves.counter(def, def.id))
+		elseif intent == "Kick" and now >= kickReadyAt then
+			kickReadyAt = now + MV.Kick.Cooldown
+			startMove(now, Moves.kick())
 		else
 			startMelee(now)
 		end
+	end
+end
+
+-- The heavy's hold begins (Attack held HoldToHeavy with a melee weapon, not guarding): the server is told, so it
+-- times the charge and the others see the weapon wound back.
+local function beginCharge(now: number)
+	if charge or not canAct() or not movementAllows() or now < staggerUntil then
+		return
+	end
+	if CombatController.current ~= nil or now < math.max(nextActionAt, CombatController.equipBlockedUntil, awaitingInventoryUntil) then
+		return
+	end
+	charge = { t0 = now }
+	setGuard(false)
+	stopSprint()
+	if MeleeSwing then
+		MeleeSwing:FireServer("Charge", serverNow())
+	end
+	CombatController.action:Fire("ChargeStart", { itemId = equippedDef.id, t0 = now })
+end
+
+-- Lets the heavy go: the hold so far (MinHold + the time since the server was told) sets its strength.
+local function releaseCharge(now: number)
+	local c = charge
+	if not c then
+		return
+	end
+	charge = nil
+	local held = MV.Heavy.MinHold + (now - c.t0)
+	local def = meleeDef()
+	startMove(now, Moves.heavy(def, def.id, held, concentrating()), held)
+end
+
+local guardMode: string? = nil -- how Aim's touch button is bound: "Guard" (held) or "Aim" (a toggle)
+
+local function bindAim(mode: string)
+	if guardMode == mode then
+		return
+	end
+	guardMode = mode
+	local spec = Input.ACTIONS and Input.ACTIONS.Guard
+	if mode == "Guard" then
+		local touch = if spec then table.clone(spec.touch) else { label = "GUARD", toggle = false }
+		Input.bind("Aim", CombatController._onAim, { keys = { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2 }, touch = touch })
+	else
+		Input.bind("Aim", CombatController._onAim, {
+			keys = { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2 },
+			touch = { toggle = true, visible = false },
+		})
 	end
 end
 
@@ -880,7 +1089,9 @@ local function refreshTouchButtons()
 	if not bound then
 		return
 	end
-	local aimable = canAimWith(equippedDef)
+	local melee = equipKind() == "Melee"
+	bindAim(if melee then "Guard" else "Aim")
+	local aimable = melee or canAimWith(equippedDef)
 	Input.setTouchVisible("Aim", aimable)
 	if not aimable then
 		Input.setToggle("Aim", false)
@@ -910,6 +1121,11 @@ local function onEquipChanged(itemId: string?)
 	equippedDef = ItemDefs.get(itemId) or FISTS
 	cancelDraw()
 	endUse()
+	cancelCharge(false) -- (the server drops the hold itself when the weapon changes)
+	setGuard(false)
+	throwWind = false
+	pressAt = nil
+	lastChainStep = nil
 	CombatController.current = nil
 	queuedAttack = false
 	attackArmed = false
@@ -941,6 +1157,7 @@ local function denyBlockedMove()
 end
 
 local function onAttack(state: Enum.UserInputState, _input: InputObject?): Enum.ContextActionResult?
+	local now = os.clock()
 	if state == Enum.UserInputState.Begin then
 		if ClientState.menuOpen then
 			return Enum.ContextActionResult.Pass
@@ -950,14 +1167,27 @@ local function onAttack(state: Enum.UserInputState, _input: InputObject?): Enum.
 		if canAct() and not movementAllows() then
 			denyBlockedMove()
 		end
-		if equipKind() == "Use" then
+		local kind = equipKind()
+		if kind == "Use" then
 			if canAct() and movementAllows() and not useActive then
 				useActive = true
 				ClientState.useRequested:Fire(Enum.UserInputState.Begin)
 			end
 			return nil
+		elseif kind == "Melee" then
+			-- Combat v3: a press after a parry is a counter, at once; otherwise a tap or a hold, decided by how long
+			-- Attack stays down (HoldToHeavy)
+			if now < counterUntil then
+				counterUntil = 0
+				pressAt = nil
+				tryStartAttack(now, true, "Counter")
+				return nil
+			end
+			pressAt = now
+			pressGuard = guardHeld
+			return nil
 		end
-		tryStartAttack(os.clock(), true)
+		tryStartAttack(now, true)
 		return nil
 	end
 	-- End or Cancel
@@ -965,19 +1195,114 @@ local function onAttack(state: Enum.UserInputState, _input: InputObject?): Enum.
 	endUse()
 	local rec = CombatController.current
 	if rec and rec.kind == "Draw" then
-		releaseDraw(os.clock())
+		releaseDraw(now)
 	end
+	if charge then
+		releaseCharge(now)
+	elseif throwWind then
+		throwWind = false
+		tryStartAttack(now, true, "Throw")
+	elseif pressAt then
+		tryStartAttack(now, true, if pressGuard then "Kick" else "Light")
+	end
+	pressAt = nil
 	return nil
 end
 
 local function onAim(state: Enum.UserInputState, _input: InputObject?): Enum.ContextActionResult?
+	local melee = equipKind() == "Melee"
 	if state == Enum.UserInputState.Begin then
+		if ClientState.menuOpen then
+			return Enum.ContextActionResult.Pass
+		end
+		if melee then
+			guardHeld = true -- (update raises the guard when nothing else is going on)
+			return nil
+		end
 		aimHeld = true
-		if ClientState.menuOpen or not canAimWith(equippedDef) then
+		if not canAimWith(equippedDef) then
 			return Enum.ContextActionResult.Pass
 		end
 	else
 		aimHeld = false
+		guardHeld = false
+	end
+	return nil
+end
+CombatController._onAim = onAim
+
+-- The dodge (Combat_v3 1.3): Q, or Jump while guarding. A 0.15 s start-up, then 8 studs in 0.25 s the way you move
+-- (a 6-stud backstep standing still); melee blows miss you during the travel (the server times it).
+local function tryDodge(): boolean
+	local now = os.clock()
+	local D = MV.Dodge
+	local downFor = now - knockdownAt
+	local rollOut = downFor < (RX.Knockdown.Down or 1) and downFor >= (RX.Knockdown.RollOutAfter or 0.5)
+	if not canAct() or not movementAllows() or (now < staggerUntil and not rollOut) or now < dodgeReadyAt or drive then
+		return false
+	end
+	if (tonumber(ClientState.stamina) or 1) < D.Stamina then
+		Feedback.deny("Tired")
+		return false
+	end
+	local recent = {}
+	for _, t in ipairs(dodgeTimes) do
+		if now - t < D.RepeatWindow then
+			table.insert(recent, t)
+		end
+	end
+	spendStamina(D.Stamina * (if #recent >= 2 then D.RepeatCostMult else 1))
+	table.insert(recent, now)
+	dodgeTimes = recent
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local move = if humanoid then Util.flat(humanoid.MoveDirection) else Vector3.zero
+	local distance = D.Distance
+	local look = Util.flat(camera.CFrame.LookVector)
+	if move.Magnitude < 0.2 then
+		move = if look.Magnitude > 0.05 then -look.Unit else Vector3.zero
+		distance = D.BackDistance
+	end
+	if move.Magnitude < 0.05 then
+		return false
+	end
+	move = move.Unit
+	dodgeReadyAt = now + D.Cooldown
+	cancelCharge(true)
+	cancelDraw()
+	setGuard(false)
+	throwWind = false
+	local rec = CombatController.current
+	if rec and rec.kind == "Melee" and not rec.struck then
+		CombatController.current = nil -- (a dodge cancels a swing still being wound up)
+		nextActionAt = now
+	end
+	if MeleeSwing then
+		MeleeSwing:FireServer("Dodge", move, serverNow())
+	end
+	local localDir = camera.CFrame:VectorToObjectSpace(move)
+	local kind = if localDir.Z < -0.5 then "Roll" elseif localDir.Z > 0.5 then "Back" elseif localDir.X < 0 then "Left" else "Right"
+	drive = { t0 = now + D.Startup, duration = D.Travel, dir = move, speed = distance / D.Travel, kind = "Dodge" }
+	nextActionAt = math.max(nextActionAt, now + D.Startup + D.Travel + D.Recovery)
+	kick(Vector3.new(-0.01, localDir.X * -0.01, localDir.X * 0.02), 0.04)
+	CombatController.action:Fire("Dodge", { kind = kind, dir = localDir, t0 = now, startup = D.Startup, travel = D.Travel })
+	return true
+end
+
+local function onDodge(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
+	local key = if io then io.KeyCode else nil
+	local jumpKey = key == Enum.KeyCode.Space or key == Enum.KeyCode.ButtonA
+	if state ~= Enum.UserInputState.Begin then
+		return if jumpKey then Enum.ContextActionResult.Pass else nil
+	end
+	if ClientState.menuOpen then
+		return Enum.ContextActionResult.Pass
+	end
+	if jumpKey and not guardOn and not guardHeld then
+		return Enum.ContextActionResult.Pass -- (Space / A jump unless the guard is up)
+	end
+	if not tryDodge() and jumpKey then
+		return Enum.ContextActionResult.Pass
 	end
 	return nil
 end
@@ -990,13 +1315,18 @@ local function bindInputs()
 	attackHeld = false
 	attackArmed = false
 	aimHeld = false
+	guardHeld = false
+	guardMode = nil
 	Input.bind("Attack", onAttack, {
 		keys = { Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2 },
 		touch = true,
 	})
-	Input.bind("Aim", onAim, {
-		keys = { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2 },
-		touch = { toggle = true, visible = false },
+	bindAim(if equipKind() == "Melee" then "Guard" else "Aim")
+	local dodgeSpec = Input.ACTIONS and Input.ACTIONS.Dodge
+	Input.bind("Dodge", onDodge, {
+		keys = if dodgeSpec then dodgeSpec.keys else { Enum.KeyCode.Q },
+		touch = if dodgeSpec then table.clone(dodgeSpec.touch) else { label = "DODGE", visible = false },
+		priority = 2100, -- (over the default jump's binding, which gets Space / A back through Pass)
 	})
 	refreshTouchButtons()
 end
@@ -1007,14 +1337,21 @@ local function unbindInputs()
 	end
 	cancelDraw()
 	endUse()
+	cancelCharge(true)
+	setGuard(false)
 	CombatController.current = nil
 	bound = false
 	attackHeld = false
 	attackArmed = false
 	aimHeld = false
+	guardHeld = false
+	throwWind = false
+	pressAt = nil
 	queuedAttack = false
+	guardMode = nil
 	Input.unbind("Attack")
 	Input.unbind("Aim")
+	Input.unbind("Dodge")
 end
 
 local function refreshBinding()
@@ -1043,6 +1380,20 @@ local function onHitConfirm(data: any)
 		weaponId = if type(data.weaponId) == "string" then data.weaponId else nil,
 		melee = data.melee == true,
 	}
+	-- Combat v3: our blow was parried (nothing landed; the Reaction that staggers us comes with it) or blocked
+	if data.parried == true then
+		Sfx.play("Hit_Metal", { pitch = 1.45, volume = 1.1 })
+		kick(Vector3.new(0.02, 0, 0.01), 0.15)
+		CombatController.action:Fire("Parried", { position = info.position })
+		return
+	end
+	if data.blocked == true then
+		CombatController.action:Fire("Blocked", { position = info.position })
+		kick(Vector3.new(0.012, 0, 0), 0.08)
+	end
+	if type(data.hitStop) == "number" and data.hitStop > 0 and not data.blocked then
+		hitStop(math.min(data.hitStop, 0.12) * 0.5) -- (the server's tier: a little more if our prediction missed it)
+	end
 	ClientState.hitConfirmed:Fire(info)
 	if info.killed then
 		Sfx.play("HitMarkerKill")
@@ -1101,6 +1452,89 @@ end
 -- Frame update
 --------------------------------------------------------------------------------------------------------------------
 
+-- Combat v3: what the server says happened to our own body (CombatAction "Reaction", "Parry", "GuardBreak").
+-- A reaction: the stagger (no attack, no guard, a swing being wound up is cancelled, as on the server), the
+-- knockback by impulse on our own body (we own it; MovementController's velocity takes it and lets it decay), the
+-- hit-stop and the camera's jolt along the blow (never red: Mild).
+local function onReaction(data: { [string]: any })
+	local now = os.clock()
+	local tierName = if type(data.tier) == "string" then data.tier else "Flinch"
+	local time = tonumber(data.time) or 0
+	local tier = Moves.tier(tierName)
+	if tier.rank >= 2 and time > 0 then
+		staggerUntil = math.max(staggerUntil, now + time)
+		cancelCharge(false)
+		setGuard(false)
+		throwWind = false
+		local rec = CombatController.current
+		if rec and rec.kind == "Melee" and not rec.struck then
+			CombatController.current = nil -- (Interrupted, as the server refuses it)
+			nextActionAt = now
+		end
+		if tier.rank == 4 then
+			knockdownAt = now
+		end
+	end
+	local impulse = data.impulse
+	local cap = tonumber(data.cap) or RX.Knockback.Cap
+	if typeof(impulse) == "Vector3" and impulse == impulse and impulse.Magnitude > 0.01 then
+		local flat = Util.flat(impulse)
+		if flat.Magnitude > cap then
+			flat = flat.Unit * cap
+		end
+		local movement = Controllers.MovementController
+		if movement and type(movement.addImpulse) == "function" then
+			pcall(movement.addImpulse, flat)
+		end
+		local lift = math.clamp(impulse.Y, 0, 20)
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if lift > 0.5 and root and root:IsA("BasePart") then
+			root.AssemblyLinearVelocity += Vector3.new(0, lift, 0)
+		end
+	end
+	hitStop(tonumber(data.hitStop) or tier.hitStop)
+	-- the view jolts along the blow: 2 degrees for a flinch, 6 for a stagger (the owner's numbers)
+	local jolt = math.rad(tier.jolt)
+	local pitch, yaw = jolt * 0.4, 0
+	if typeof(data.from) == "Vector3" then
+		local rel = camera.CFrame:PointToObjectSpace(data.from)
+		local flat = Vector3.new(rel.X, 0, rel.Z)
+		if flat.Magnitude > 0.1 then
+			yaw = -flat.Unit.X * jolt
+			pitch = jolt * (0.3 + 0.5 * math.max(0, -flat.Unit.Z))
+		end
+	end
+	local shake = if tier.rank >= 3 then ((RX.Heavy.ShakeVictim or { 0.4 })[1]) else tier.rank * 0.08
+	kick(Vector3.new(pitch, yaw, yaw * 0.6), shake)
+	CombatController.action:Fire("Reaction", { tier = tierName, time = time, from = data.from })
+end
+
+local function onCombatAction(data: any)
+	if type(data) ~= "table" then
+		return
+	end
+	local action = data.action
+	local character = player.Character
+	if action == "Reaction" then
+		onReaction(data)
+	elseif action == "Parry" and character and data.target == character then
+		-- we parried: the next press within the window is a counter
+		counterUntil = os.clock() + (tonumber(data.counterFor) or MV.Counter.Window)
+		Sfx.play("Hit_Metal", { pitch = 1.5, volume = 1.2 })
+		hitStop(0.06)
+		kick(Vector3.new(-0.01, 0, 0), 0.06)
+		CombatController.action:Fire("Parry", { position = data.position })
+	elseif action == "Block" and character and data.target == character then
+		Sfx.play("Hit_Metal", { pitch = if data.heavy then 0.8 else 1.05 })
+		kick(Vector3.new(0.01, 0, 0), if data.heavy then 0.15 else 0.06)
+		CombatController.action:Fire("Block", { heavy = data.heavy == true })
+	elseif action == "GuardBreak" and character and data.target == character then
+		setGuard(false)
+		CombatController.action:Fire("GuardBreak", {})
+	end
+end
+
 local function update(dt: number)
 	local now = os.clock()
 	local heldId = ClientState.getEquippedItemId()
@@ -1158,23 +1592,88 @@ local function update(dt: number)
 	if queuedAttack and now - queuedAt > 0.4 then
 		queuedAttack = false
 	end
+	local meleeKind = equipKind() == "Melee"
 	if active and CombatController.current == nil then
 		if queuedAttack then
 			if now >= math.max(nextActionAt, CombatController.equipBlockedUntil, awaitingInventoryUntil) then
 				queuedAttack = false
 				if attackHeld or equipKind() ~= "Bow" then
-					tryStartAttack(now, false)
+					tryStartAttack(now, false, queuedIntent)
 				end
 			end
-		elseif attackHeld and attackArmed then
+		elseif attackHeld and attackArmed and not meleeKind then
+			-- (melee: holding Attack charges a heavy instead of swinging again, below)
 			local kind = equipKind()
-			if kind == "Melee" or kind == "Throwable" or (kind == "Bow" and CombatController.current == nil) then
+			if kind == "Throwable" or (kind == "Bow" and CombatController.current == nil) then
 				if kind ~= "Bow" or now >= nextActionAt then
 					tryStartAttack(now, false)
 				end
 			end
 		end
 	end
+
+	-- Combat v3: the hold (a heavy, or a throwable's throw from the guard), the guard, our own body's drives
+	if meleeKind and active and attackHeld and pressAt and not charge and not throwWind and now - pressAt >= MV.HoldToHeavy then
+		if pressGuard and equippedDef.kind == "Melee" and equippedDef.throwable then
+			throwWind = true -- (released: thrown; ClientState.aiming zooms while it is wound)
+			setGuard(false)
+		else
+			beginCharge(now)
+		end
+		if charge or throwWind then
+			pressAt = nil
+		end
+	end
+	if charge then
+		local H = MV.Heavy
+		local held = H.MinHold + (now - charge.t0)
+		if not active or now < staggerUntil then
+			cancelCharge(true)
+		elseif held >= H.FullHold + H.MaxHoldAfterFull then
+			releaseCharge(now) -- (a full charge is held up to 1.5 s more, then it lets go by itself)
+		elseif held > H.FullHold then
+			spendStamina(H.HoldDrain * dt)
+		end
+	end
+	local wantGuard = guardHeld and meleeKind and active and movementAllows() and now >= staggerUntil
+		and CombatController.current == nil and charge == nil and not throwWind and drive == nil
+		and now >= CombatController.equipBlockedUntil
+	setGuard(wantGuard)
+	if drive then
+		local d = drive
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local movement = Controllers.MovementController
+		if now >= d.t0 + d.duration or not (root and root:IsA("BasePart")) then
+			drive = nil
+		elseif now >= d.t0 then
+			if not d.lifted and d.lift and d.lift > 0 then
+				d.lifted = true
+				root.AssemblyLinearVelocity += Vector3.new(0, d.lift, 0)
+			end
+			-- top the body's speed along the drive up to its own each frame (MovementController owns the velocity)
+			local current = Util.flat(root.AssemblyLinearVelocity):Dot(d.dir)
+			local deficit = d.speed - current
+			if deficit > 0 and movement and type(movement.addImpulse) == "function" then
+				pcall(movement.addImpulse, d.dir * deficit)
+			end
+		end
+	end
+	-- the chain's next step while a tap is queued: the viewmodel carries the cut on into its wind-up
+	if queuedAttack and meleeKind and (queuedIntent == nil or queuedIntent == "Light") then
+		local def = meleeDef()
+		local nextMove = Moves.step(def, def.id, nextStep(def.id, now))
+		ClientState.nextSwing = { style = nextMove.style, variant = nextMove.variant }
+	else
+		ClientState.nextSwing = nil
+	end
+	ClientState.guarding = guardOn
+	ClientState.charging = if charge then math.clamp((MV.Heavy.MinHold + now - charge.t0 - MV.Heavy.MinHold) / (MV.Heavy.FullHold - MV.Heavy.MinHold), 0, 1) else nil
+	ClientState.staggered = now < staggerUntil
+	-- (MovementController: walk x Guard.WalkMult while guarding, x Heavy.WalkMult while charging, x Stagger.WalkMult
+	-- while staggered; 1 otherwise)
+	ClientState.combatSpeedMult = if now < staggerUntil then RX.Stagger.WalkMult
+		elseif guardOn then MV.Guard.WalkMult elseif charge then MV.Heavy.WalkMult else 1
 
 	-- Bow draw
 	rec = CombatController.current
@@ -1274,8 +1773,48 @@ end
 -- as the draw starts; combat QA ran at 21 studs/s at full draw).
 function CombatController.isDrawing(): boolean
 	local rec = CombatController.current
-	return rec ~= nil and rec.kind == "Draw"
+	-- (Combat v3: a guard, a heavy's hold and a stagger keep you off a sprint too)
+	return (rec ~= nil and rec.kind == "Draw") or guardOn or charge ~= nil or os.clock() < staggerUntil
 end
+
+-- Combat v3, for SkillController and the views ------------------------------------------------------------------
+-- The guard: (up, os.clock when it changed). The heavy's hold: 0..1 or nil. Staggered now.
+function CombatController.guardState(): (boolean, number)
+	return guardOn, guardSince
+end
+function CombatController.chargeAlpha(): number?
+	return ClientState.charging
+end
+function CombatController.isStaggered(): boolean
+	return os.clock() < staggerUntil
+end
+function CombatController.canFight(): boolean
+	return canAct() and movementAllows() and os.clock() >= staggerUntil
+end
+-- A skill's own swing (Head Kick, a chained strike): plays it as a move and strikes at its windup, as any swing.
+function CombatController.playSkillMove(move: { [string]: any }): { [string]: any }?
+	if not CombatController.canFight() then
+		return nil
+	end
+	cancelCharge(true)
+	cancelDraw()
+	return startMove(os.clock(), move)
+end
+-- Moves our own body: `speed` studs/s along `dir` (flat) for `duration` s from `delay` s on, plus `lift` studs/s up
+-- once (the running cut, the vault).
+function CombatController.driveBody(dir: Vector3, speed: number, duration: number, delay: number?, lift: number?)
+	local flat = Util.flat(dir)
+	if flat.Magnitude < 0.05 then
+		return
+	end
+	drive = { t0 = os.clock() + (delay or 0), duration = duration, dir = flat.Unit, speed = speed, lift = lift, kind = "Skill" }
+end
+-- Holds attacks back for `seconds` (a skill owns the hands).
+function CombatController.holdAttacks(seconds: number)
+	nextActionAt = math.max(nextActionAt, os.clock() + seconds)
+	setGuard(false)
+end
+CombatController._predictMelee = predictMelee -- test hook: (def, cf, move?) -> what the local trace touches
 
 -- How a melee weapon swings, for an item id: (style, weight); an id without its own style swings like DEFAULT_STYLE.
 function CombatController.meleeStyle(itemId: string?): (string, string)
@@ -1308,6 +1847,12 @@ function CombatController.Start()
 	RangedRelease = Net.event("RangedRelease")
 	Net.event("HitConfirm").OnClientEvent:Connect(onHitConfirm)
 	Net.event("DamageTaken").OnClientEvent:Connect(onDamageTaken)
+	Net.event("CombatAction").OnClientEvent:Connect(function(payload)
+		local ok, err = pcall(onCombatAction, payload)
+		if not ok then
+			warn("[CombatController] " .. tostring(err))
+		end
+	end)
 	ClientState.lifeChanged:Connect(refreshBinding)
 	ClientState.spectateChanged:Connect(refreshBinding)
 	ClientState.equippedChanged:Connect(function(itemId)

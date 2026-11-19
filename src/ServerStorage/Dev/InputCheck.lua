@@ -82,6 +82,11 @@ InputCheck.EXPECTED = {
 		Drink = { optional = true }, -- bound only while you look at water
 		Sprint = { touch = "auto" },
 		Crouch = {},
+		-- Combat v3 (1.2): Dodge Q / Jump while guarding, touch DODGE beside GUARD; the two skills R / F, D-pad left /
+		-- right, touch the two round buttons above ATTACK
+		Dodge = {},
+		SkillWeapon = {},
+		SkillGeneral = {},
 	},
 	Spectating = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },

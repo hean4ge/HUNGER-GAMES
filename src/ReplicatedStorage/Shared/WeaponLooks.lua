@@ -199,6 +199,88 @@ LOOKS.short_bow = function(model, h)
 	attach(h, "ArrowRest", CF(0.1, 0.06, -0.1) * up)
 end
 
+-- Combat v3 5.4 / 5.5: the two new weapons (our own designs after the owner's pictures) and the pair's fallback.
+local BLUED = rgb(70, 68, 66) -- near-black matte steel (a touch warm: cool greys read navy under the sky light)
+local PALE_EDGE = rgb(178, 176, 168)
+local GUARD_STEEL = rgb(150, 148, 142)
+
+-- A single-edged, gently curved blade of `n` facets from z0 forward `len` studs, `h` tall at the base; a pale honed
+-- edge strip along the full cutting edge (-Y) and a clipped, angled tip.
+local function curvedBlade(model: Model, h: BasePart, z0: number, len: number, height: number, n: number, curve: number)
+	local seg = len / n
+	local y, z, a = 0, z0, 0
+	for i = 1, n do
+		local mid = CF(0, y, z) * CFrame.Angles(a, 0, 0) * CF(0, 0, -seg / 2)
+		local hh = height * (1 - 0.12 * (i - 1) / n)
+		part(model, h, { name = "Blade", size = V3(0.05, hh, seg + 0.02), cf = mid, color = BLUED, material = M.Metal, role = "Steel" })
+		part(model, h, { name = "Edge", size = V3(0.035, 0.035, seg + 0.02), cf = mid * CF(0, -hh / 2 - 0.012, 0), color = PALE_EDGE, material = M.Metal, role = "Steel" })
+		local nextFrame = CF(0, y, z) * CFrame.Angles(a, 0, 0) * CF(0, 0, -seg)
+		y, z = nextFrame.Position.Y, nextFrame.Position.Z
+		a += curve
+	end
+	-- the clipped tip: a short slab cut at 35 degrees from the spine down to the edge
+	local tip = CF(0, y, z) * CFrame.Angles(a, 0, 0)
+	part(model, h, { name = "Blade", size = V3(0.05, height * 0.55, 0.22), cf = tip * CF(0, -height * 0.18, -0.08) * CFrame.Angles(math.rad(-35), 0, 0), color = BLUED, material = M.Metal, role = "Steel" })
+	part(model, h, { name = "Edge", size = V3(0.035, 0.035, 0.2), cf = tip * CF(0, -height * 0.45, -0.1) * CFrame.Angles(math.rad(12), 0, 0), color = PALE_EDGE, material = M.Metal, role = "Steel" })
+	attach(h, "Tip", tip * CF(0, -height * 0.25, -0.2) * TIP_FWD)
+end
+
+-- A round guard (12 sides), a diamond-wrapped grip with raised windows and a small round pommel cap.
+local function roundGuardGrip(model: Model, h: BasePart, guardZ: number, gripLen: number, guardD: number, windows: number)
+	part(model, h, { name = "Guard", size = V3(0.07, guardD, guardD), cf = CF(0, 0, guardZ) * CFrame.Angles(0, math.rad(90), 0), color = GUARD_STEEL, material = M.Metal, role = "Steel", shape = Enum.PartType.Cylinder })
+	local gz = guardZ + 0.04 + gripLen / 2
+	part(model, h, { name = "Grip", size = V3(0.15, 0.17, gripLen), cf = CF(0, 0, gz), color = rgb(60, 60, 60), material = M.Fabric, role = "Cord" })
+	for i = 1, windows do
+		local z = guardZ + 0.04 + (i - 0.5) / windows * gripLen
+		part(model, h, { name = "Wrap", size = V3(0.165, 0.1, 0.1), cf = CF(0, 0, z) * CFrame.Angles(math.rad(45), 0, 0), color = CORD, material = M.Fabric, role = "Cord" })
+	end
+	part(model, h, { name = "Pommel", size = V3(0.08, 0.2, 0.2), cf = CF(0, 0, guardZ + 0.08 + gripLen) * CFrame.Angles(0, math.rad(90), 0), color = GUARD_STEEL, material = M.Metal, role = "Steel", shape = Enum.PartType.Cylinder })
+end
+
+-- Paired Blades: one of the pair (the server welds a second build to the left hand: InventoryService). 2.7 studs: a
+-- 2.0 blade of 3 facets, a 0.42 round guard, a 0.6 diamond-wrapped grip.
+LOOKS.paired_blades = function(model, h)
+	roundGuardGrip(model, h, -0.32, 0.6, 0.42, 5)
+	curvedBlade(model, h, -0.36, 1.85, 0.2, 3, math.rad(2.5))
+end
+
+-- Wrapped Sabre (the pair's fallback): one 3.4-stud sabre, the same blade, guard and wrap.
+LOOKS.wrapped_sabre = function(model, h)
+	roundGuardGrip(model, h, -0.32, 0.62, 0.46, 5)
+	curvedBlade(model, h, -0.36, 2.5, 0.23, 4, math.rad(2))
+end
+
+-- Leaf Dagger: 1.25 studs. A leaf blade 0.65 long, widest a third of the way up, with a central ridge; a 0.35 grip
+-- with a raised spiral wrap; a ring pommel 0.22 across (12 sides, the hole through the flat).
+LOOKS.leaf_dagger = function(model, h)
+	local z0 = -0.2
+	local widths = { 0.12, 0.2, 0.19, 0.15, 0.1, 0.05 }
+	local seg = 0.65 / #widths
+	for i, w in ipairs(widths) do
+		local z = z0 - (i - 0.5) * seg
+		part(model, h, { name = "Blade", size = V3(0.05, w, seg + 0.01), cf = CF(0, 0, z), color = BLUED, material = M.Metal, role = "Steel" })
+		for _, side in ipairs({ -1, 1 }) do
+			part(model, h, { name = "Edge", size = V3(0.03, 0.025, seg + 0.01), cf = CF(0, side * (w / 2 + 0.008), z), color = PALE_EDGE, material = M.Metal, role = "Steel" })
+		end
+	end
+	-- the diamond's ridge: a raised line on both faces
+	for _, side in ipairs({ -1, 1 }) do
+		part(model, h, { name = "Ridge", size = V3(0.02, 0.025, 0.6), cf = CF(side * 0.03, 0, z0 - 0.3), color = rgb(92, 90, 86), material = M.Metal, role = "Steel" })
+	end
+	part(model, h, { name = "Bolster", size = V3(0.08, 0.15, 0.05), cf = CF(0, 0, -0.18), color = BLUED, material = M.Metal, role = "Steel" })
+	part(model, h, { name = "Grip", size = V3(0.1, 0.11, 0.34), cf = CF(0, 0, 0), color = rgb(58, 56, 54), material = M.Fabric, role = "Cord" })
+	for i = 1, 5 do
+		part(model, h, { name = "Wrap", size = V3(0.115, 0.125, 0.03), cf = CF(0, 0, -0.14 + (i - 1) * 0.07) * CFrame.Angles(0, 0, math.rad(25)), color = CORD, material = M.Fabric, role = "Cord" })
+	end
+	local r, cz, n = 0.09, 0.28, 12
+	local s = 2 * r * math.tan(math.pi / n) + 0.012
+	for i = 0, n - 1 do
+		local a = (i + 0.5) / n * math.pi * 2
+		part(model, h, { name = "Ring", size = V3(0.04, 0.035, s), cf = CF(0, r * math.sin(a), cz + r * math.cos(a)) * CFrame.Angles(-(a + math.pi / 2), 0, 0), color = BLUED, material = M.Metal, role = "Steel" })
+	end
+	attach(h, "Tip", CF(0, 0, z0 - 0.66) * TIP_FWD)
+end
+
 -- Wire Snare (Trapper, later): a small coil of wire with a peg.
 LOOKS.wire_snare = function(model, h)
 	part(model, h, { name = "Coil", size = V3(0.12, 0.6, 0.6), cf = CF(0, 0, -0.3), color = SATIN, material = M.Metal, role = "Steel", shape = Enum.PartType.Cylinder })

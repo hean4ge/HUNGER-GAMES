@@ -59,6 +59,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
+local Moves = require(Shared:WaitForChild("Moves"))
 local Signal = require(Shared:WaitForChild("Signal"))
 local Spring = require(Shared:WaitForChild("Spring"))
 local Util = require(Shared:WaitForChild("Util"))
@@ -154,7 +155,8 @@ local springs = {
 	kick = Spring.new(0, 18, 0.55), -- push back along the view
 	string = Spring.new(0, 42, 0.3), -- bow string snap with a little overshoot
 }
-local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0, zoom = 0, lead = 0 }
+local alpha = { sprint = 0, slide = 0, lower = 0, tuck = 0, use = 0, air = 0, bob = 0, raise = 0, dip = 0, guard = 0, gdip = 0, zoom = 0, lead = 0,
+	fguard = 0, fcharge = 0 }
 local lastPunchAt = -10 -- (Blocky, Faceted) when the last punch started (the guard is held GUARD_HOLD after it)
 
 local equipStart = -10
@@ -174,7 +176,16 @@ local avatarCheckAt = 0
 local avatarBuilding = false
 local pendingArms: any = nil -- built arms waiting to be shown (false: the Classic arms)
 local lastRightCam = CFrame.identity
+local lastLeftCam = CFrame.identity
 local muzzle: Vector3? = nil
+-- Combat v3 (CombatController.action): the guard, the heavy's hold, a dodge, a skill (see onCombatAction)
+local fight: { [string]: any } = { guard = false, charge = nil, dodge = nil, skill = nil, lastSwingEnd = -10, viewUntil = -10,
+	viewTrack = nil, viewW = 0 }
+local FIGHT = {
+	guardIn = 22, guardOut = 14, -- 1/s: the guard comes up in about 0.1 s and goes down in about 0.12 (Moves.cfg.Guard)
+	chainGap = 0.12, -- s: a swing starting this soon after the last one ended (or during it) flows on from its hand
+	lead = 0.13, -- radians: how far the whole arm and shoulder turn with a cut (the body leads the blade)
+}
 
 local tuckParams = RaycastParams.new()
 tuckParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -440,7 +451,26 @@ local function onCombatAction(name: string, data: any)
 		if data.style == "Punch" then
 			lastPunchAt = now -- (Faceted) the fists come up and stay up as a guard for GUARD_HOLD
 		end
+		-- a chain flows: the next step starts from where the last one's hand is (Poses.swing chain.from)
+		local flowing = (anim ~= nil and anim.kind == "Swing") or now - fight.lastSwingEnd < FIGHT.chainGap
+		local side = if type(Poses.swingSide) == "function" then Poses.swingSide(data.style, data.variant or 1) else "Right"
+		local from = if flowing and data.style ~= "Kick" then (if side == "Left" then lastLeftCam else lastRightCam) else nil
+		fight.charge = nil
+		-- the move's Blender clip, when the clip player has it
+		local cp = Controllers.ClipPlayer
+		local clip = Moves.clipName(data.itemId, data.moveId)
+		if cp and clip and type(cp.playView) == "function" and type(cp.has) == "function" and cp.has(clip) then
+			local ok, track = pcall(cp.playView, clip, { lead = data.windup or 0.1, total = data.total or 0.5 })
+			if ok and track then
+				fight.viewTrack = track
+				fight.viewUntil = now + (data.total or 0.5) + 0.4
+			end
+		end
 		anim = {
+			clip = clip,
+			chainFrom = from,
+			side = side,
+			heavy = type(data.move) == "table" and data.move.heavyHit == true,
 			kind = "Swing",
 			t = 0,
 			style = data.style,
@@ -466,6 +496,19 @@ local function onCombatAction(name: string, data: any)
 		end
 	elseif name == "ThrowStart" then
 		anim = { kind = "Throw", t = 0, spear = data.spear == true, windup = data.windup or 0.1, total = data.total or 0.5 }
+		-- the Throwing family's Blender clip (FightClips: throw_knife, throw_dagger, throw_ring, throw_hatchet,
+		-- throw_spear, throw_twinaxe), fitted to the release; the procedural throw stays under it as the fallback
+		local cp = Controllers.ClipPlayer
+		local okFc, FightClips = pcall(require, ReplicatedStorage.Shared:FindFirstChild("FightClips") :: ModuleScript)
+		local throwId = if type(data.itemId) == "string" then data.itemId else heldId
+		local clip = if okFc and throwId then FightClips.forMove(throwId, "Throw") else nil
+		if cp and clip and type(cp.playView) == "function" and type(cp.has) == "function" and cp.has(clip) then
+			local ok, track = pcall(cp.playView, clip, { lead = data.windup or 0.1, total = data.total or 0.5 })
+			if ok and track then
+				fight.viewTrack = track
+				fight.viewUntil = now + (data.total or 0.5) + 0.4
+			end
+		end
 	elseif name == "ThrowRelease" then
 		rig:setItemHidden(true)
 		itemHiddenUntil = if data.last then math.huge else now + 0.3
@@ -480,6 +523,47 @@ local function onCombatAction(name: string, data: any)
 	elseif name == "DrawCancel" then
 		if anim and anim.kind ~= "Swing" then
 			anim = nil
+		end
+	-- Combat v3
+	elseif name == "GuardUp" then
+		fight.guard = true
+		lastPunchAt = now
+	elseif name == "GuardDown" then
+		fight.guard = false
+	elseif name == "ChargeStart" then
+		fight.charge = { t0 = now }
+	elseif name == "ChargeCancel" then
+		fight.charge = nil
+	elseif name == "Dodge" then
+		fight.dodge = { t0 = now, kind = data.kind or "Back", total = (data.startup or 0.15) + (data.travel or 0.25) + 0.15 }
+		if anim and anim.kind == "Swing" and anim.t < anim.windup then
+			anim = nil
+		end
+	elseif name == "Skill" then
+		fight.skill = { id = data.id, t0 = now, total = data.total or 0.6 }
+	elseif name == "Parry" then
+		-- a clean deflection: the blade flicks up and out, then settles
+		springs.recoil:impulse(Vector3.new(-1.3, 0.4, 0.7))
+		springs.kick:impulse(-1.2)
+		hitStop = 0.06
+	elseif name == "Block" then
+		springs.recoil:impulse(Vector3.new(if data.heavy then 1.2 else 0.7, 0.15, 0.25))
+		springs.kick:impulse(if data.heavy then 2.6 else 1.6)
+	elseif name == "Parried" then
+		-- our blow was turned: the weapon rebounds back toward us
+		springs.recoil:impulse(Vector3.new(1.6, -0.5, -0.6))
+		springs.kick:impulse(3)
+		anim = nil
+	elseif name == "GuardBreak" then
+		fight.guard = false
+		springs.recoil:impulse(Vector3.new(1.8, 0.3, 0.5))
+		springs.kick:impulse(3)
+	elseif name == "Reaction" then
+		local rank = ({ Flinch = 1, Stagger = 2, Heavy = 3, Knockdown = 4 })[data.tier or ""] or 1
+		springs.recoil:impulse(Vector3.new(0.35 * rank, 0.25 * rank * (if math.random() < 0.5 then -1 else 1), 0.2 * rank))
+		springs.kick:impulse(0.8 * rank)
+		if rank >= 2 and anim and anim.kind == "Swing" and anim.t < anim.windup then
+			anim = nil -- (staggered while winding up: the swing is gone, as the server refuses it)
 		end
 	end
 end
@@ -525,10 +609,14 @@ local function update(dt: number)
 	end
 
 	-- One-shot animation clock (slowed for a moment on impact: hit-stop)
+	local stopped = hitStop > 0 or now < (tonumber(ClientState.hitStopUntil) or 0)
 	if anim then
-		local rate = if hitStop > 0 then 0.12 else 1
+		local rate = if stopped then 0.12 else 1
 		anim.t += dt * rate
 		if anim.t >= anim.total then
+			if anim.kind == "Swing" then
+				fight.lastSwingEnd = now
+			end
 			anim = nil
 		end
 	end
@@ -622,7 +710,7 @@ local function update(dt: number)
 			-- GUARD_HOLD after the last one; then they are lowered, dipping out of view on the way down (where the fists
 			-- relax), back to the rest
 			local punching = anim ~= nil and anim.kind == "Swing" and anim.style == "Punch"
-			local guardUp = punching or now - lastPunchAt < GUARD_HOLD
+			local guardUp = punching or now - lastPunchAt < GUARD_HOLD or fight.guard or fight.charge ~= nil
 			approach("guard", if guardUp then 1 else 0, if guardUp then 22 else 3.2, dt)
 			approach("gdip", if guardUp then 0 else math.sin(math.pi * alpha.guard), 30, dt)
 			local restRight, restLeft = Poses.hold("Relaxed")
@@ -631,13 +719,65 @@ local function update(dt: number)
 		end
 	end
 
+	-- Combat v3: the guard (the weapon raised across the body; the fists up) and the heavy's hold (wound back past
+	-- the cut's own wind-up, trembling a little at full charge), blended in over the guard's raise time
+	approach("fguard", if fight.guard and anim == nil then 1 else 0, if fight.guard then FIGHT.guardIn else FIGHT.guardOut, dt)
+	local chargeA = 0
+	if fight.charge then
+		chargeA = math.clamp((now - fight.charge.t0) / 0.5, 0, 1)
+	end
+	approach("fcharge", if fight.charge and anim == nil then 1 else 0, if fight.charge then 14 else 20, dt)
+	if alpha.fguard > 0.001 and heldKind ~= "Bow" and heldKind ~= "Fists" then
+		local g = Poses.smooth(alpha.fguard)
+		local guardRight, guardLeft = Poses.guard(heldKind, right, left)
+		right, left = right:Lerp(guardRight, g), left:Lerp(guardLeft, g)
+	end
+	if alpha.fcharge > 0.001 and heldKind ~= "Bow" then
+		local c = Poses.smooth(alpha.fcharge)
+		local combat = Controllers.CombatController
+		local style = if combat and type(combat.meleeStyle) == "function" then (combat.meleeStyle(heldId)) else "Slash"
+		local woundRight, woundLeft = Poses.charged(style, right, left, chargeA, now)
+		right = right:Lerp(woundRight, c)
+		left = left:Lerp(woundLeft, c)
+	end
+
 	-- One-shot actions
 	if anim then
-		if anim.kind == "Swing" then
-			right, left = Poses.swing(anim.style, anim.variant, anim.t, anim.windup, anim.strike, anim.total, right, left, anim.jitter)
+		if anim.kind == "Swing" and anim.style == "Kick" then
+			-- a kick: the leg is out of view; the hands pull in to the chest and the view dips with the step
+			right, left = Poses.kickHands(anim.t, anim.windup, anim.total, right, left)
+		elseif anim.kind == "Swing" then
+			-- a chain flows: from the last cut's hand (chainFrom), and on toward the next step's wind-up while one is
+			-- queued (ClientState.nextSwing, CombatController)
+			local nextSwing = ClientState.nextSwing
+			local to, toSide = nil, nil
+			if type(nextSwing) == "table" and anim.t > anim.windup + anim.strike then
+				to, toSide = Poses.swingWound(nextSwing.style, nextSwing.variant)
+			end
+			local chain = if anim.chainFrom or to then { from = anim.chainFrom, fromSide = anim.side, to = to, toSide = toSide } else nil
+			-- the Blender clip for this move when the clip player has it (ClipPlayer.sampleFP(clip, t, right, left) ->
+			-- (right, left) in camera space, or nil), else the procedural swing
+			right, left = Poses.swing(anim.style, anim.variant, anim.t, anim.windup, anim.strike, anim.total, right, left, anim.jitter, chain)
 		elseif anim.kind == "Throw" then
 			right = Poses.throw(anim.spear, anim.t, anim.windup, anim.total, right)
 		end
+	end
+	-- the Blender clips (ClipPlayer: the first-person wrists of the move, fitted to the strike), blended over the
+	-- procedural pose by their weight; a move without a clip keeps the procedural one
+	local cp = Controllers.ClipPlayer
+	if cp and type(cp.sampleView) == "function" and now < fight.viewUntil then
+		if stopped then
+			pcall(cp.hitStopView, math.max(hitStop, (tonumber(ClientState.hitStopUntil) or 0) - now))
+		end
+		local ok, r, l, pr, pl, w = pcall(cp.sampleView, fight.viewTrack, now, right, left)
+		if ok and typeof(r) == "CFrame" and (w or 0) > 0.001 then
+			right, left = r, l
+			fight.viewPoleRight, fight.viewPoleLeft, fight.viewW = pr, pl, w
+		else
+			fight.viewW = 0
+		end
+	else
+		fight.viewW = 0
 	end
 
 	-- The spear is held in both hands until it's raised to throw (the avatar arms let go with the left for a stab:
@@ -757,6 +897,7 @@ local function update(dt: number)
 		fullDrawSince = nil
 	end
 	lastRightCam = right
+	lastLeftCam = left
 
 	-- Whole-viewmodel state transforms (rigid, so two-handed holds stay together)
 	local e = math.clamp((now - equipStart) / math.max(equipDuration, 0.01), 0, 1)
@@ -791,6 +932,51 @@ local function update(dt: number)
 	local crouch = math.clamp(ClientState.crouchAlpha or 0, 0, 1)
 	if crouch > 0 then
 		state *= CFrame.new(0, -0.035 * crouch, 0.03 * crouch)
+	end
+	-- Combat v3: the body leads the blade. Over a swing the whole arm turns about the shoulder the way the cut goes
+	-- (Poses.swingKick's direction): a small coil the other way in the windup, the turn through the cut, a settle back
+	if anim and anim.kind == "Swing" and anim.style ~= "Kick" and type(Poses.swingKick) == "function" then
+		local dir = Poses.swingKick(anim.style, anim.variant or 1)
+		if dir and dir.Magnitude > 1e-3 then
+			local u = dir.Unit
+			local w, sEnd = anim.windup, anim.windup + anim.strike
+			local e
+			if anim.t < w then
+				e = -0.35 * Poses.smooth(anim.t / math.max(w, 1e-3))
+			elseif anim.t < sEnd then
+				e = -0.35 + 1.35 * Poses.smooth((anim.t - w) / math.max(anim.strike, 1e-3))
+			else
+				e = 1 - Poses.smooth((anim.t - sEnd) / math.max(anim.total - sEnd, 1e-3))
+			end
+			local k = FIGHT.lead * e * (if anim.heavy or anim.weight == "Heavy" then 1.4 elseif anim.weight == "Light" then 0.75 else 1)
+			state *= about(PIVOT, CFrame.Angles(-u.X * k * 0.6, u.Y * k, u.Z * k * 0.5))
+		end
+	end
+	local dodge = fight.dodge
+	if dodge then
+		local u = (now - dodge.t0) / dodge.total
+		if u >= 1 then
+			fight.dodge = nil
+		else
+			local e = math.sin(math.clamp(u, 0, 1) * math.pi)
+			if dodge.kind == "Left" or dodge.kind == "Right" then
+				local side = if dodge.kind == "Left" then -1 else 1
+				state *= CFrame.new(-0.18 * side * e, -0.12 * e, 0) * about(PIVOT, CFrame.Angles(0, 0, 0.22 * side * e))
+			elseif dodge.kind == "Roll" then
+				state *= CFrame.new(0, -0.9 * e, 0.2 * e) * about(PIVOT, CFrame.Angles(-0.9 * e, 0, 0))
+			else
+				state *= CFrame.new(0, -0.08 * e, 0.22 * e) * about(PIVOT, CFrame.Angles(0.18 * e, 0, 0))
+			end
+		end
+	end
+	local skill = fight.skill
+	if skill then
+		local u = (now - skill.t0) / math.max(skill.total, 0.05)
+		if u >= 1 then
+			fight.skill = nil
+		else
+			state *= Poses.skillState(skill.id, u, PIVOT)
+		end
 	end
 
 	-- Motion: look sway, bob, lean, landing, breathing, recoil
@@ -834,6 +1020,14 @@ local function update(dt: number)
 		* about(PIVOT, CFrame.Angles(recoil.X + land * 0.05 + math.sin(now * 1.8 - 0.6) * 0.004 * calm, recoil.Y, recoil.Z - lean.X * 0.05))
 	local M = motion * state
 	-- (with a bow the right elbow goes out to the right, so the drawing forearm comes in from the lower right)
+	if (fight.viewW or 0) > 0.001 and heldKind ~= "Bow" then
+		if typeof(fight.viewPoleRight) == "Vector3" then
+			rightPole = (rightPole or Rig.POLE.Right):Lerp(fight.viewPoleRight, fight.viewW)
+		end
+		if typeof(fight.viewPoleLeft) == "Vector3" then
+			leftPole = leftPole:Lerp(fight.viewPoleLeft, fight.viewW)
+		end
+	end
 	local poleRight = if heldKind == "Bow" then bowPole else rightPole or Rig.POLE.Right
 	-- (Avatar arms) hands that must stay exactly where they are put: the bow and the hand on its string, a bottle at the
 	-- lips, the bandaging hands (Rig:pose frame.lock; "hand": the elbow may still turn toward the hand)

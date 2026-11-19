@@ -118,6 +118,9 @@ local DEFS = {
 	-- scaling follows Roblox's Graphics Quality slider; this row does not change that.
 	{ section = "GRAPHICS" },
 	{ key = "shaders", label = "Shaders", min = 0, max = 2, step = 1, format = words({ "Off", "Auto", "Full" }) },
+	-- Combat_v3 4.6: other players' bright trails (yours always show). Auto = All on PC and console, Natural on phones
+	-- and at the low detail tier; Natural draws others' bright trails as Draught (TrailController.othersMode).
+	{ key = "othersTrails", label = "Others' trails", min = 0, max = 3, step = 1, format = words({ "Auto", "All", "Natural", "Off" }) },
 	{ section = "AUDIO" },
 	{ key = "musicVolume", label = "Music volume", min = 0, max = 1, step = 0.05, format = percent },
 	{ key = "sfxVolume", label = "Effects volume", min = 0, max = 1, step = 0.05, format = percent },

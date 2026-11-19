@@ -79,7 +79,8 @@ Rewards.Defaults = {
 }
 
 -- the prize pool (never the Recurve Bow, throwing knives, arrows, armour or food)
-Rewards.Pool = { "knife", "machete", "hatchet", "spear", "sword", "twin_axe", "ring_blade", "climb_pick", "short_bow" }
+Rewards.Pool = { "knife", "machete", "hatchet", "spear", "sword", "twin_axe", "ring_blade", "climb_pick", "short_bow",
+	"paired_blades", "leaf_dagger" } -- (Combat_v3 5.4, 5.5: both in the wheel and Strongboxes, never in kits)
 Rewards.InPool = {}
 for _, id in ipairs(Rewards.Pool) do
 	Rewards.InPool[id] = true
@@ -88,6 +89,7 @@ end
 Rewards.FallbackNames = {
 	knife = "Hunting Knife", machete = "Machete", hatchet = "Hatchet", spear = "Spear", sword = "Longsword",
 	twin_axe = "Twin-Bit Axe", ring_blade = "Ring Blade", climb_pick = "Climbing Pick", short_bow = "Short Bow",
+	paired_blades = "Paired Blades", leaf_dagger = "Leaf Dagger",
 }
 
 -- The wheel: outcomes with the page's chances (percent), and the segments as drawn (their sizes add to each

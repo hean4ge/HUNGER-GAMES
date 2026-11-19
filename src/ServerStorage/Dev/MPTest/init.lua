@@ -24,6 +24,12 @@
 	            stars (damage, the finish on B's screen and in A's first person), throws, the Twin-Bit Axe on armour, the
 	            bow on a moving player at 60/100/150, the head cap, raw sword claims, the hotbar under load, the round's
 	            Gold and board line, round two with Kits.Delivery = "Start"
+	            | "F" Combat v3 (19 Nov, mp-fight): the loadouts per player (chosen, locked at the call, a change mid-round),
+	            the load-in on both screens, A's sword chain and heavy as B sees them (clips, smoothness, the hit against
+	            the clip's hit mark, A's swing trail), B's parry and counter, B's dodge, skills per player (Whirl, the
+	            cooldowns, Sprint Burst ending on an attack, Concentration), A's arrow and throw trails and clips, B's
+	            Others' trails setting, trails cosmetic, Paired Blades on B as A sees them, cheats, the moving checks.
+	            fsteps = "chain,parry,..." runs only those steps
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
@@ -74,6 +80,9 @@ function MPTest.start(args: { [string]: any }?): string
 	elseif a.batch == "W" then
 		a.cut = a.cut or "Short"
 		a.failsafe = a.failsafe or 840
+	elseif a.batch == "F" then
+		a.cut = a.cut or "Short"
+		a.failsafe = a.failsafe or 600
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil
@@ -103,6 +112,12 @@ function MPTest.start(args: { [string]: any }?): string
 	local bot = botSource:Clone()
 	bot.Name = "MPT_Bot"
 	bot.Parent = driver
+	local fight = script:FindFirstChild("Fight") -- (batch F: Combat v3, mp-fight)
+	if fight then
+		local f = fight:Clone()
+		f.Name = "MPT_Fight"
+		f.Parent = driver
+	end
 	driver.Parent = ServerScriptService
 	task.spawn(function()
 		local ok, result = pcall(function()

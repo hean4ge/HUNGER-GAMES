@@ -14,6 +14,11 @@
 	    falloffBeyond, falloffMin    ... linearly to falloffMin at onTarget + falloffBeyond (CombatStats.falloff)
 	    armourPierce: number?        0..1, how much of the victim's armour it ignores (Twin-Bit Axe 0.5)
 	    recoverStars: number?        the stars of a thrown weapon, kept on what it leaves in the world
+	    pierce: { secondShare }?     Piercing Shot: passes through the first contender (no impact there), then hits at
+	                                 secondShare of the damage (Combat_v3 2.2)
+	    ricochet: { share, range, cone }?  Ricochet: on the first contact (a contender or a hard surface) it glances once
+	                                 toward the nearest other living contender within range in a cone ahead of it, as a
+	                                 new projectile at share of the damage (no target in reach: an ordinary impact)
 	  }
 	Simulated on Heartbeat with raycasts from the previous to the next position (gravity per item), excluding the
 	shooter. Characters get a precise per-part ray; the world ray ignores non-collidable foliage, so arrows fly
@@ -75,6 +80,10 @@ type Projectile = {
 	falloffMin: number?,
 	armourPierce: number?,
 	recoverStars: number?,
+	pierce: { secondShare: number }?,
+	ricochet: { share: number, range: number, cone: number }?,
+	skip: { Instance }?,
+	opts: { [string]: any },
 }
 
 local active: { [number]: Projectile } = {}
@@ -174,12 +183,10 @@ local function impactPayload(p: Projectile, result: RaycastResult, hitCharacter:
 	}
 end
 
-local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: Humanoid, bodyPart: BasePart?, velocity: Vector3)
-	remove(p)
-	local alive = humanoid.Health > 0
-	local headshot = alive and bodyPart ~= nil and bodyPart.Name == "Head"
+local function hurt(p: Projectile, result: RaycastResult, humanoid: Humanoid, bodyPart: BasePart?): boolean
+	local headshot = humanoid.Health > 0 and bodyPart ~= nil and bodyPart.Name == "Head"
 	local combat = Services.CombatService
-	if alive and combat and type(combat.applyHit) == "function" then
+	if humanoid.Health > 0 and combat and type(combat.applyHit) == "function" then
 		-- distance falloff past the on-target range, then the headshot, then its cap (a bow: never over 90)
 		local travelled = (result.Position - p.origin).Magnitude
 		local damage = p.damage * CombatStats.falloff(travelled, p.onTarget, p.falloffBeyond, p.falloffMin)
@@ -202,12 +209,98 @@ local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: H
 			warn("[ProjectileService] applyHit failed: " .. tostring(err))
 		end
 	end
+	return headshot
+end
+
+-- Ricochet: the nearest living contender (not the shooter, not the one just hit) within range, inside the cone
+-- ahead of the flight. Returns its torso position, or nil.
+local function ricochetTarget(p: Projectile, at: Vector3, heading: Vector3, hitModel: Instance?): Vector3?
+	local r = p.ricochet
+	local combat = Services.CombatService
+	if not r or not combat or type(combat.getTargets) ~= "function" then
+		return nil
+	end
+	local flat = if heading.Magnitude > 1e-3 then heading.Unit else Vector3.zAxis
+	local cosHalf = math.cos(math.rad((r.cone or 120) / 2))
+	local best, bestD = nil, (r.range or 20)
+	for _, model in ipairs(combat.getTargets(p.shooterCharacter, true)) do
+		if model ~= hitModel and model:IsA("Model") then
+			local root = model:FindFirstChild("UpperTorso") or model:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				local to = root.Position - at
+				local d = to.Magnitude
+				if d > 0.5 and d < bestD and flat:Dot(to / d) >= cosHalf then
+					best, bestD = root.Position, d
+				end
+			end
+		end
+	end
+	return best
+end
+
+-- The glance: a new projectile from the contact toward the target, at share of the damage, same item and options.
+local function glance(p: Projectile, at: Vector3, target: Vector3, skipModel: Instance?): boolean
+	local r = p.ricochet :: any
+	local speed = math.max(p.velocity.Magnitude, 40)
+	local o = table.clone(p.opts)
+	o.ricochet = nil
+	o.shotId = nil
+	o.skip = if skipModel then { skipModel } else nil
+	-- aim a little above the torso for the drop over the short glance
+	local t = (target - at).Magnitude / speed
+	local aimAt = target + Vector3.new(0, 0.5 * p.gravity * t * t, 0)
+	local id = ProjectileService.fire(p.shooter, p.itemId, at, (aimAt - at).Unit * speed, p.gravity, p.damage * (r.share or 0.7), o)
+	return id ~= nil
+end
+
+local function impactCharacter(p: Projectile, result: RaycastResult, humanoid: Humanoid, bodyPart: BasePart?, velocity: Vector3): boolean
+	local model = humanoid.Parent
+	if p.pierce then
+		-- Piercing Shot: through the first contender; the flight goes on at secondShare (no impact message here, so the
+		-- clients' own flight of it carries on too)
+		hurt(p, result, humanoid, bodyPart)
+		p.damage *= p.pierce.secondShare or 0.7
+		p.pierce = nil
+		p.skip = p.skip or {}
+		table.insert(p.skip :: { Instance }, model :: Instance)
+		return false
+	end
+	if p.ricochet then
+		local target = ricochetTarget(p, result.Position, velocity, model)
+		if target then
+			remove(p)
+			local headshot = hurt(p, result, humanoid, bodyPart)
+			ProjectileImpact:FireAllClients(impactPayload(p, result, true, headshot, nil))
+			if not glance(p, result.Position, target, model) then
+				drop(p, result.Position + Vector3.new(0, 0.5, 0), nil)
+			end
+			return true
+		end
+	end
+	remove(p)
+	local headshot = hurt(p, result, humanoid, bodyPart)
 	-- it stays in the body part (a body that is already dead lets it fall straight out)
 	local entry = leave(p, result.Position, World.stick, result, bodyPart, humanoid, velocity)
 	ProjectileImpact:FireAllClients(impactPayload(p, result, true, headshot, entry))
+	return true
 end
 
 local function impactWorld(p: Projectile, result: RaycastResult, velocity: Vector3)
+	if p.ricochet and result.Material ~= Enum.Material.Water then
+		-- a hard surface: glance off it toward a contender ahead of the reflected heading
+		local n = result.Normal
+		local bounced = velocity - 2 * velocity:Dot(n) * n
+		local at = result.Position + n * 0.3
+		local target = ricochetTarget(p, at, bounced, nil)
+		if target then
+			remove(p)
+			ProjectileImpact:FireAllClients(impactPayload(p, result, false, false, nil))
+			if not glance(p, at, target, nil) then
+				drop(p, at, nil)
+			end
+			return
+		end
+	end
 	remove(p)
 	local water = result.Material == Enum.Material.Water
 	local entry = leave(p, result.Position + result.Normal * 0.5, if water then World.sink else World.embed, result, velocity)
@@ -246,6 +339,15 @@ local function step(p: Projectile, dt: number, targets: { Instance }): boolean
 
 	local characterHit: RaycastResult? = nil
 	local list = withoutShooter(targets, p.shooterCharacter)
+	if p.skip then
+		list = table.clone(list)
+		for _, skipped in ipairs(p.skip :: { Instance }) do
+			local index = table.find(list, skipped)
+			if index then
+				table.remove(list, index)
+			end
+		end
+	end
 	if #list > 0 then
 		characterParams.FilterDescendantsInstances = list
 		characterHit = workspace:Raycast(p.position, displacement, characterParams)
@@ -260,7 +362,12 @@ local function step(p: Projectile, dt: number, targets: { Instance }): boolean
 			humanoid, _, bodyPart = combat.characterFromPart(characterHit.Instance)
 		end
 		if humanoid then
-			impactCharacter(p, characterHit, humanoid, bodyPart, velocity) -- a dead body isn't hurt; it just holds it
+			-- a dead body isn't hurt; it just holds it (a piercing arrow goes on: impactCharacter returns false)
+			if not impactCharacter(p, characterHit, humanoid, bodyPart, velocity) then
+				p.position += displacement.Unit * (characterHit.Distance + 0.05)
+				p.velocity = velocity
+				return false
+			end
 		else
 			impactWorld(p, characterHit, velocity) -- something else in a target model: it just sticks
 		end
@@ -353,6 +460,12 @@ function ProjectileService.fire(
 		falloffMin = if Util.isFiniteNumber(o.falloffMin) then o.falloffMin else nil,
 		armourPierce = if Util.isFiniteNumber(o.armourPierce) then o.armourPierce else nil,
 		recoverStars = if Util.isFiniteNumber(o.recoverStars) then o.recoverStars else nil,
+		pierce = if type(o.pierce) == "table" then { secondShare = tonumber(o.pierce.secondShare) or 0.7 } else nil,
+		ricochet = if type(o.ricochet) == "table"
+			then { share = tonumber(o.ricochet.share) or 0.7, range = tonumber(o.ricochet.range) or 20, cone = tonumber(o.ricochet.cone) or 120 }
+			else nil,
+		skip = if type(o.skip) == "table" then o.skip else nil,
+		opts = o,
 	}
 	active[id] = p
 	activeCount += 1

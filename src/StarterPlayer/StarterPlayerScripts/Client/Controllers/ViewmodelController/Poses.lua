@@ -258,6 +258,8 @@ Poses.PUNCH = {
 -- back from F to the hold (each one frame or a list of frames, passed through in order), side = "Left" (a punch with
 -- the left fist; else the right hand), pole = the striking elbow's pole (Poses.swingPole), kick = the camera kick's
 -- direction (pitch, yaw, roll: Poses.swingKick), tp = the third-person shape (CharacterVisuals) }.
+-- Through the frames in order. Combat v3: the hand's position follows a Catmull-Rom curve through the waypoints (the
+-- arc is smooth through each one instead of turning a corner there), the rotation turns evenly between them.
 local function path(frames: { CFrame }, s: number): CFrame
 	local n = #frames - 1
 	if n <= 0 then
@@ -265,7 +267,17 @@ local function path(frames: { CFrame }, s: number): CFrame
 	end
 	local x = math.clamp(s, 0, 1) * n
 	local i = math.min(math.floor(x), n - 1)
-	return frames[i + 1]:Lerp(frames[i + 2], x - i)
+	local u = x - i
+	local a, b = frames[i + 1], frames[i + 2]
+	if n == 1 then
+		return a:Lerp(b, u)
+	end
+	local p0 = (frames[i] or a).Position
+	local p1, p2 = a.Position, b.Position
+	local p3 = (frames[i + 3] or b).Position
+	local u2, u3 = u * u, u * u * u
+	local pos = (p1 * 2 + (p2 - p0) * u + (p0 * 2 - p1 * 5 + p2 * 4 - p3) * u2 + (p1 * 3 - p0 - p2 * 3 + p3) * u3) * 0.5
+	return CFrame.new(pos) * a.Rotation:Lerp(b.Rotation, u)
 end
 
 -- first, the waypoints in `keys` (one frame or a list), then last
@@ -287,9 +299,15 @@ end
 -- The hand for a set at t s into an action of windup / strike / total s: the hold to W over the windup (easing out),
 -- W to M accelerating and M to F slowing over the strike, then back to the hold (by way of R, under the view, when the
 -- set has one). `follow` (about 1) stretches the first part of the way back a little (the swing's jitter).
-local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, set: any, follow: number?): CFrame
+-- Combat v3: `from` (a chain's next step): the windup starts from where the hand is (the last swing's end) instead of
+-- the hold; `to`: the way back goes to that frame (the next step's wound-up hand) instead of the hold, so a chain
+-- flows from one cut into the next without returning to rest between them.
+local function phases(t: number, windup: number, strike: number, total: number, rest: CFrame, set: any, follow: number?, from: CFrame?, to: CFrame?): CFrame
 	local W, M, F = set.W, set.M, set.F
 	if t <= windup then
+		if from then
+			return path(via(from, nil, W), smooth(math.clamp(t / math.max(windup, 1e-3), 0, 1)))
+		end
 		return path(via(rest, set.U, W), easeOut(math.clamp(t / math.max(windup, 1e-3), 0, 1)))
 	end
 	if t <= windup + strike then
@@ -303,6 +321,14 @@ local function phases(t: number, windup: number, strike: number, total: number, 
 		return path(via(W, set.A, F), easeInOut(u))
 	end
 	local u = math.clamp((t - windup - strike) / math.max(total - windup - strike, 1e-3), 0, 1)
+	if to then
+		-- (follow through and settle a moment, then on to the next step's wind-up)
+		local a = 0.3 * math.clamp(follow or 1, 0.8, 1.2)
+		if u < a then
+			return F
+		end
+		return F:Lerp(to, easeInOut((u - a) / (1 - a)))
+	end
 	local R = set.R
 	if R then
 		local first = if typeof(R) == "CFrame" then R else R[1]
@@ -431,16 +457,29 @@ local function jittered(set: any, side: string, jitter: any): any
 	}
 end
 
-function Poses.swing(style: string, variant: number, t: number, windup: number, strike: number, total: number, restRight: CFrame, restLeft: CFrame, jitter: any?): (CFrame, CFrame)
+-- The wound-up frame of a set (its W, for the striking hand): where a chain's recovery heads (Poses.swing `to`).
+function Poses.swingWound(style: string, variant: number): (CFrame?, string)
+	local set, side = setFor(style, variant)
+	return if set then set.W else nil, side
+end
+
+-- chain (optional): { from = CFrame? (where the striking hand starts), to = CFrame? (where it heads after the cut),
+-- side = "Left" | "Right" (the hand those are for) }. Combat v3: a light chain flows from step to step.
+function Poses.swing(style: string, variant: number, t: number, windup: number, strike: number, total: number, restRight: CFrame, restLeft: CFrame, jitter: any?, chain: any?): (CFrame, CFrame)
 	local set, side = setFor(style, variant)
 	if not set then
 		return restRight, restLeft
 	end
 	set = jittered(set, side, jitter)
 	local follow = if type(jitter) == "table" then tonumber(jitter.follow) else nil
+	local from, to = nil, nil
+	if type(chain) == "table" then
+		from = if chain.fromSide == side then chain.from else nil
+		to = if chain.toSide == side then chain.to else nil
+	end
 	if style == "Punch" then
 		local left = side == "Left"
-		local moving = phases(t, windup, strike, total, if left then restLeft else restRight, set, follow)
+		local moving = phases(t, windup, strike, total, if left then restLeft else restRight, set, follow, from, to)
 		-- the other fist tucks back a little while this one punches
 		local tuck = math.sin(math.clamp(t / math.max(total, 1e-3), 0, 1) * math.pi) * 0.12
 		if left then
@@ -449,7 +488,7 @@ function Poses.swing(style: string, variant: number, t: number, windup: number, 
 		return moving, restLeft + V(-0.02, -0.03, tuck)
 	end
 	-- (a thrust: from the guard the point comes round under the crosshair, then the thrust drives it forward)
-	return phases(t, windup, strike, total, restRight, set, follow), restLeft
+	return phases(t, windup, strike, total, restRight, set, follow, from, to), restLeft
 end
 
 -- Spear thrust (right hand): W the point brought round to the front at the hip, M half way, F full reach - the point
@@ -1322,6 +1361,82 @@ function Poses.useStyle(style: string)
 	if values then
 		applyStyle(values, true)
 	end
+end
+
+--------------------------------------------------------------------------------------------------------------------
+-- Combat v3 (docs/design/Combat_v3.md section 1): the guard, the heavy's hold, the kick and the skills in first
+-- person. Procedural, over the hold; the Blender clips (ClipPlayer, Shared.FightClips) take over per family as they
+-- arrive. Everything stays out of the crosshair's middle except the guard's blade, which crosses low.
+--------------------------------------------------------------------------------------------------------------------
+
+-- The guard: the weapon raised across the body, edge out, the free hand up behind it. kind: the hold kind.
+Poses.GUARD = {
+	Blade = { offset = V(-0.12, 0.1, -0.06), turn = CFrame.Angles(0.25, 0.28, 0.8), left = V(-0.32, -0.04, 0.12) },
+	Spear = { offset = V(-0.12, 0.2, 0.05), turn = CFrame.Angles(0.42, 0.05, 0.6), left = nil },
+	Item = { offset = V(-0.1, 0.18, 0), turn = CFrame.Angles(0.25, 0.2, 0.6), left = V(-0.3, -0.02, 0.1) },
+}
+function Poses.guard(kind: string, right: CFrame, left: CFrame): (CFrame, CFrame)
+	local g = Poses.GUARD[kind] or Poses.GUARD.Item
+	local r = CFrame.new(right.Position + g.offset) * g.turn * right.Rotation
+	local l = left
+	if g.left then
+		l = CFrame.new(r.Position + g.left) * left.Rotation
+	end
+	return r, l
+end
+
+-- The heavy's hold: the striking hand wound back past the cut's wind-up (the first set of the style, W), pulled a
+-- little further while the charge builds (a 0..1), with a slight tremble once it is full.
+function Poses.charged(style: string, right: CFrame, left: CFrame, a: number, now: number): (CFrame, CFrame)
+	local wound, side = Poses.swingWound(style, 1)
+	if not wound then
+		return right, left
+	end
+	local coil = 0.08 + 0.1 * a
+	-- (out from the eye: the wound hand sits a little further off than the cut's own W, so it never fills the view)
+	local back = CFrame.new(V(0.08, -0.04, -0.2) + V(0.04, 0.03, 0.02) * a) * CFrame.Angles(-coil * 0.5, coil, coil * 0.3)
+	local shake = if a >= 1 then V(math.noise(now * 9, 0.2), math.noise(0.4, now * 9), 0) * 0.008 else Vector3.zero
+	local held = CFrame.new(shake) * back * wound
+	if side == "Left" then
+		return right, held
+	end
+	return held, left
+end
+
+-- The kick (and the Head Kick): the hands come in to the chest for balance and the view's arms drop a little as the
+-- leg goes out, then return.
+function Poses.kickHands(t: number, windup: number, total: number, right: CFrame, left: CFrame): (CFrame, CFrame)
+	local u = math.clamp(t / math.max(total, 1e-3), 0, 1)
+	local e = math.sin(math.clamp(t / math.max(windup + 0.12, 1e-3), 0, 1) * math.pi * 0.5) * (1 - smooth(math.clamp((u - 0.5) / 0.5, 0, 1)))
+	local inward = V(0, -0.12, 0.18) * e
+	return CFrame.new(V(-0.12, 0.06, 0) * e + inward) * right, CFrame.new(V(0.12, 0.06, 0) * e + inward) * left
+end
+
+-- A skill's whole-arm motion (a transform for the viewmodel's state, about `pivot`), u = 0..1 through the skill.
+function Poses.skillState(id: string, u: number, pivot: Vector3): CFrame
+	local function about(rotation: CFrame): CFrame
+		return CFrame.new(pivot) * rotation * CFrame.new(-pivot)
+	end
+	if id == "whirl" then
+		-- pulled across the body (readable), one fast turn, back
+		local pull = smooth(math.clamp(u / 0.3, 0, 1))
+		local turn = smooth(math.clamp((u - 0.3) / 0.27, 0, 1))
+		local back = smooth(math.clamp((u - 0.6) / 0.4, 0, 1))
+		local yaw = (0.7 * pull - 2.6 * turn) * (1 - back)
+		return CFrame.new(0, -0.15 * (pull - back * pull), 0) * about(CFrame.Angles(0, yaw, -0.35 * turn * (1 - back)))
+	elseif id == "running_cut" then
+		local crouch = math.sin(math.clamp(u / 0.3, 0, 1) * math.pi)
+		local cut = math.sin(math.clamp((u - 0.2) / 0.4, 0, 1) * math.pi)
+		return CFrame.new(0.1 * cut, -0.18 * crouch, 0.1 * crouch) * about(CFrame.Angles(-0.1 * crouch, 0.5 * cut, 0.25 * cut))
+	elseif id == "vault_kick" then
+		local plant = math.sin(math.clamp(u / 0.45, 0, 1) * math.pi * 0.5) * (1 - smooth(math.clamp((u - 0.55) / 0.45, 0, 1)))
+		return CFrame.new(0, -0.5 * plant, -0.1 * plant) * about(CFrame.Angles(-0.5 * plant, 0, 0))
+	elseif id == "concentration" or id == "second_wind" or id == "brace" then
+		-- a breath: the hands lower and come in a little, then rise
+		local e = math.sin(u * math.pi)
+		return CFrame.new(0, -0.1 * e, 0.06 * e) * about(CFrame.Angles(0.06 * e, 0, 0))
+	end
+	return CFrame.identity
 end
 
 return Poses

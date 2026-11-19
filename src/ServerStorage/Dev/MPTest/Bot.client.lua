@@ -568,6 +568,229 @@ local function touch(name: string, down: boolean?): boolean
 	return ok and res == true
 end
 
+-- Combat v3 (19 Nov, mp-fight): what this client plays and draws -------------------------------------------------------
+-- CLIP <owner> <name>: every Blender clip ClipPlayer starts on a body (CLIPVIEW: on this client's first-person view);
+-- TRAIL-SWING / TRAIL-SHOT: every cosmetic trail TrailController makes (owner, id); LOADIN <owner>: the load-in swirl;
+-- SEE-MOTION: how another body moved while a clip played on it (per-frame steps of the right shoulder and the waist,
+-- frames where the upper body sat at the rest pose, the whole range: a snap, a T-pose, a frozen limb);
+-- SEE-HITAT: when this client's own health drops, where the attacker's clip was on this screen against its hit mark.
+local ClipPlayerM = req(Controllers, "ClipPlayer")
+local TrailM = req(Controllers, "TrailController")
+local LoadInM = req(Controllers, "LoadInController")
+local function ownerOf(inst: Instance?): string
+	local m = inst
+	while m and m ~= workspace do
+		if m:IsA("Model") then
+			local p = Players:GetPlayerFromCharacter(m)
+			if p then
+				return p.Name
+			end
+		end
+		m = m.Parent
+	end
+	if inst and inst:IsDescendantOf(workspace.CurrentCamera) then
+		return lp.Name .. "(view)"
+	end
+	return if inst then inst.Name else "nil"
+end
+if ClipPlayerM and type(ClipPlayerM.play) == "function" then
+	local origPlay = ClipPlayerM.play
+	ClipPlayerM.play = function(model, name, opts, ...)
+		local track = origPlay(model, name, opts, ...)
+		if type(track) == "table" then
+			track.__mpt = name
+		end
+		L(string.format("CLIP %s %s lead=%s total=%s ok=%s", ownerOf(model), tostring(name), fmt(opts and opts.lead), fmt(opts and opts.total), tostring(track ~= nil)))
+		return track
+	end
+	if type(ClipPlayerM.playView) == "function" then
+		local origView = ClipPlayerM.playView
+		ClipPlayerM.playView = function(name, opts, ...)
+			local track = origView(name, opts, ...)
+			L(string.format("CLIPVIEW %s lead=%s ok=%s", tostring(name), fmt(opts and opts.lead), tostring(track ~= nil)))
+			return track
+		end
+	end
+end
+if TrailM then
+	if type(TrailM.swingOn) == "function" then
+		local orig = TrailM.swingOn
+		TrailM.swingOn = function(part, b, t, id, onAt, offAt, ...)
+			L(string.format("TRAIL-SWING %s id=%s part=%s on=%.2f off=%.2f", ownerOf(part), tostring(id), if typeof(part) == "Instance" then part.Name else "?",
+				tonumber(onAt) or -1, tonumber(offAt) or -1))
+			return orig(part, b, t, id, onAt, offAt, ...)
+		end
+	end
+	if type(TrailM.attachProjectile) == "function" then
+		local orig = TrailM.attachProjectile
+		TrailM.attachProjectile = function(itemId, shooterId, isLocal, origin, forced, ...)
+			local h = orig(itemId, shooterId, isLocal, origin, forced, ...)
+			local shooter = if isLocal then lp else Players:GetPlayerByUserId(tonumber(shooterId) or 0)
+			L(string.format("TRAIL-SHOT %s item=%s local=%s id=%s", if shooter then shooter.Name else tostring(shooterId), tostring(itemId), tostring(isLocal),
+				tostring(type(h) == "table" and h.id or nil)))
+			return h
+		end
+	end
+end
+if LoadInM and type(LoadInM.play) == "function" then
+	local orig = LoadInM.play
+	LoadInM.play = function(character, opts, ...)
+		local r = orig(character, opts, ...)
+		L(string.format("LOADIN %s played=%s inArena=%s", ownerOf(character), tostring(r), tostring(lp:GetAttribute("InArena"))))
+		return r
+	end
+end
+local motion: { [Player]: any } = {}
+local function angleDeg(a: CFrame, b: CFrame): number
+	local _, ang = (a:Inverse() * b):ToAxisAngle()
+	return math.deg(math.abs(ang))
+end
+local function jointOf(c: Model, name: string): any
+	local j = c:FindFirstChild(name, true)
+	return if j and (j:IsA("Motor6D") or j:IsA("AnimationConstraint")) then j else nil
+end
+RunService.Heartbeat:Connect(function(dt)
+	if not ClipPlayerM or type(ClipPlayerM.playing) ~= "function" then
+		return
+	end
+	for _, p in ipairs(Players:GetPlayers()) do
+		local c = p.Character
+		if p ~= lp and c then
+			local ok, track = pcall(ClipPlayerM.playing, c)
+			local m = motion[p]
+			if ok and track and not track.done then
+				local rs, ls, waist = jointOf(c, "RightShoulder"), jointOf(c, "LeftShoulder"), jointOf(c, "Waist")
+				if rs and waist then
+					local nowR, nowW = rs.Transform, waist.Transform
+					if not m or m.track ~= track then
+						if m then
+							m.flush(m)
+						end
+						-- (a clip that follows another on the same body is measured from the last frame of the one before: a snap
+						-- between two chain steps counts)
+						m = { track = track, name = track.__mpt or "?", frames = 0, steps = {}, maxStep = 0, dtAtMax = 0, identity = 0,
+							lastR = if m then m.lastR else nowR, lastW = if m then m.lastW else nowW, first = nowR, range = 0 }
+						m.flush = function(s)
+							table.sort(s.steps)
+							local med = if #s.steps > 0 then s.steps[math.ceil(#s.steps / 2)] else 0
+							local second = if #s.steps >= 2 then s.steps[#s.steps - 1] else 0
+							L(string.format("SEE-MOTION %s clip=%s frames=%d maxStepDeg=%.1f dtAtMax=%.3f medianStepDeg=%.1f restPoseFrames=%d rangeDeg=%.1f atTau=%.3f atAge=%.3f atW=%.2f joint=%s second=%.1f prev=%.1f next=%.1f",
+								p.Name, s.name, s.frames, s.maxStep, s.dtAtMax, med, s.identity, s.range, s.tauAt or -1, s.ageAt or -1, s.wAt or -1, tostring(s.jointAt), second,
+								s.prevAt or -1, s.nextAt or -1))
+						end
+						motion[p] = m
+					end
+					m.frames += 1
+					local sr, sw = angleDeg(m.lastR, nowR), angleDeg(m.lastW, nowW)
+					local step = math.max(sr, sw)
+					table.insert(m.steps, step)
+					if m.waitNext then
+						m.nextAt, m.waitNext = step, false
+					end
+					if step > m.maxStep then
+						m.maxStep, m.dtAtMax = step, dt
+						m.tauAt, m.ageAt, m.wAt = tonumber(track.tau), tonumber(track.age), tonumber(track.w)
+						m.jointAt = if sr >= sw then "RightShoulder" else "Waist"
+						m.prevAt, m.waitNext = m.lastStep, true
+					end
+					m.lastStep = step
+					m.range = math.max(m.range, angleDeg(m.first, nowR))
+					local rest = angleDeg(CFrame.identity, nowR) < 0.5 and angleDeg(CFrame.identity, nowW) < 0.5
+						and (not ls or angleDeg(CFrame.identity, ls.Transform) < 0.5)
+					if rest and (tonumber(track.w) or 1) > 0.5 then
+						m.identity += 1
+					end
+					m.lastR, m.lastW = nowR, nowW
+				end
+			elseif m then
+				m.flush(m)
+				motion[p] = nil
+			end
+		end
+	end
+end)
+local function hookOwnHits(c: Model)
+	task.spawn(function()
+		local hum = c:WaitForChild("Humanoid", 10) :: Humanoid?
+		if not hum then
+			return
+		end
+		local last = hum.Health
+		hum.HealthChanged:Connect(function(h)
+			if h < last - 0.5 and ClipPlayerM then
+				for _, p in ipairs(Players:GetPlayers()) do
+					if p ~= lp and p.Character then
+						local ok, track = pcall(ClipPlayerM.playing, p.Character)
+						if ok and track then
+							local info = ClipPlayerM.info(track.__mpt or "")
+							L(string.format("SEE-HITAT %s clip=%s tau=%.3f hit=%s delta=%s", p.Name, tostring(track.__mpt), tonumber(track.tau) or -1, fmt(info and info.hit),
+								if info and type(info.hit) == "number" then string.format("%+.3f", (tonumber(track.tau) or 0) - info.hit) else "?"))
+						end
+					end
+				end
+			end
+			last = h
+		end)
+	end)
+end
+lp.CharacterAdded:Connect(hookOwnHits)
+if lp.Character then
+	hookOwnHits(lp.Character)
+end
+-- a reaction armed by the driver: on the next Swing that `target` starts (as told here), raise the guard (parry), or
+-- dodge, `lead` seconds before its strike; after a parry, tap Attack `counterDelay` later (the counter)
+local reactArm: any = nil
+do
+	local ca = Remotes:FindFirstChild("CombatAction")
+	if ca and ca:IsA("RemoteEvent") then
+		ca.OnClientEvent:Connect(function(payload)
+			local arm = reactArm
+			if not arm or type(payload) ~= "table" or payload.action ~= "Swing" then
+				return
+			end
+			local who = Players:FindFirstChild(arm.target)
+			if not (who and who:IsA("Player") and tonumber(payload.userId) == who.UserId) then
+				return
+			end
+			reactArm = nil
+			local wait = math.max(0, (tonumber(payload.lead) or 0.1) - (arm.lead or 0.12))
+			L(string.format("REACT swing seen from %s lead=%s move=%s -> %s in %.3f s", arm.target, fmt(payload.lead), tostring(payload.move), arm.mode, wait))
+			task.delay(wait, function()
+				if arm.mode == "parry" or arm.mode == "guard" then
+					L("REACT guard down=" .. tostring(touch("Aim", true)))
+					arm.guarding = true
+					task.delay(arm.release or 1.0, function()
+						touch("Aim", false)
+						L("REACT guard released")
+					end)
+				elseif arm.mode == "dodge" then
+					L("REACT dodge=" .. tostring(touch("Dodge", true)))
+					touch("Dodge", false)
+				end
+			end)
+			if arm.counter then
+				local conn
+				conn = Combat.action:Connect(function(name)
+					if name == "Parry" then
+						conn:Disconnect()
+						task.delay(arm.counterDelay or 0.05, function()
+							L("REACT counter press")
+							touch("Attack", true)
+							task.wait(0.05)
+							touch("Attack", false)
+						end)
+					end
+				end)
+				task.delay(3, function()
+					if conn.Connected then
+						conn:Disconnect()
+					end
+				end)
+			end
+		end)
+	end
+end
+
 local function shown(g: Instance): boolean
 	local cur: Instance? = g
 	while cur and not cur:IsA("PlayerGui") do
@@ -1641,6 +1864,43 @@ local function probe(arg: any): any
 		return { moveState = ClientState and ClientState.moveState, sit = hum and hum.Sit, seat = hum and hum.SeatPart and hum.SeatPart:GetFullName(),
 			attackBound = Input and Input.isBound and Input.isBound("Attack") }
 	end
+	-- mp-fight: every held item model on another body as this client draws it (Paired Blades: two)
+	if kind == "allheld" then
+		local p = Players:FindFirstChild(arg.target)
+		local c = p and p:IsA("Player") and p.Character
+		if not c then
+			return "no character"
+		end
+		local models, out = 0, {}
+		for _, m in ipairs(c:GetDescendants()) do
+			if m:IsA("Model") and (m.Name == "EquippedModel" or m.Name == "OffHand" or string.find(m.Name, "Held", 1, true) or m:GetAttribute("ItemId") ~= nil) then
+				models += 1
+				local weld = m.Parent and m.Parent.Name
+				local list = {}
+				for _, d in ipairs(m:GetDescendants()) do
+					if d:IsA("BasePart") then
+						table.insert(list, string.format("%s %s %s %d,%d,%d", d.Name, d.Material.Name, fmt(d.Size), math.floor(d.Color.R * 255), math.floor(d.Color.G * 255),
+							math.floor(d.Color.B * 255)))
+					end
+				end
+				-- the hand it is held in: the nearest hand part
+				local pp = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart", true)
+				local near, nd = "?", math.huge
+				for _, h in ipairs({ "RightHand", "LeftHand" }) do
+					local hp = c:FindFirstChild(h)
+					if hp and pp then
+						local d = (hp.Position - pp.Position).Magnitude
+						if d < nd then
+							near, nd = h, d
+						end
+					end
+				end
+				table.insert(out, string.format("[%s in %s near %s (%.1f) stars=%s: %s]", m.Name, tostring(weld), near, nd, tostring(m:GetAttribute("Stars")),
+					table.concat(list, "; ")))
+			end
+		end
+		return string.format("models=%d %s", models, table.concat(out, " "))
+	end
 	-- the weapons build (19 Nov, mp-weapons) ------------------------------------------------------------------------
 	if kind == "weap" then
 		-- stars as this client draws them: its own first-person item, and every other player's held model
@@ -1846,6 +2106,41 @@ callFn.OnClientInvoke = function(cmd: string, arg: any): any
 			return table.concat(out, " | ")
 		elseif cmd == "touch" then
 			return touch(arg.name, arg.down)
+		elseif cmd == "react" then
+			reactArm = arg
+			L("REACT armed " .. fmt(arg))
+			return true
+		elseif cmd == "rawswing" then
+			-- a modified client: a strike with a move id and a hold it claims, on `target` along the look
+			local ev = Remotes:FindFirstChild("MeleeSwing")
+			local p = arg.target and Players:FindFirstChild(arg.target)
+			local cf = CameraController.getBaseCFrame()
+			L("RAWSWING " .. fmt(arg))
+			ev:FireServer(cf.LookVector, true, 1, p and p.Character, workspace:GetServerTimeNow() - (arg.ago or 0.1), arg.move, arg.held)
+			return true
+		elseif cmd == "skill" then
+			local name = if arg.slot == "general" then "SkillGeneral" else "SkillWeapon"
+			local ok1 = touch(name, true)
+			task.wait(0.05)
+			touch(name, false)
+			L("SKILL " .. name .. " touch=" .. tostring(ok1))
+			return ok1
+		elseif cmd == "fps" then
+			-- this window's frame rates over the next second: the render step (CombatController times strikes there) and Heartbeat
+			local r, h, t0 = 0, 0, os.clock()
+			local c1 = RunService.RenderStepped:Connect(function()
+				r += 1
+			end)
+			local c2 = RunService.Heartbeat:Connect(function()
+				h += 1
+			end)
+			task.wait(1.0)
+			c1:Disconnect()
+			c2:Disconnect()
+			local e = os.clock() - t0
+			return string.format("render %.0f fps, heartbeat %.0f fps", r / e, h / e)
+		elseif cmd == "trails" then
+			return if TrailM then fmt(TrailM.stats()) else "no TrailController"
 		elseif cmd == "select" then
 			Inventory.select(arg)
 			return true
