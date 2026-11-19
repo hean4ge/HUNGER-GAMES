@@ -12,8 +12,10 @@
 	stop. The cabin lamps dim; MOVE s before the end a dark cover comes up, the server moves everyone into train B
 	(remote TrainRide "arrive"), the cover lifts. Reduced Motion: nothing slides; a short fade covers the station
 	leaving and the tunnel stands still around the train.
-	Arrival (TrainStage "Training"): the platform lamps come on bank by bank with a clunk, train B's doors (parts tagged
-	TrainDoorLeaf) slide open. The big screen counts to the launch doors, then to the call. The launch doors (a model
+	Arrival (TrainStage "Training"): you stand on the platform at train B's open doors (they slide open, parts tagged
+	TrainDoorLeaf, in the dark of the move), in first person, looking at the nearest arch into the hall; the platform
+	lamps come on bank by bank with a clunk. A quiet marker ("Training Centre", over the nearest arch) shows the way in
+	until you are inside; once the launch doors are open for you, "Launch" over them. The big screen counts to the launch doors, then to the call. The launch doors (a model
 	named LaunchDoors, attribute OpenAt) open for you only when you hold a place (player attribute TrainHeld): for the
 	others they stay shut (closed on this client, so they collide for this client only).
 	The red room: while you are in it (InRedRoom) the line "Stand on the disc", then "Ready" (RedRoomReady); every
@@ -76,7 +78,10 @@ local PROFILE_DT = 0.05
 
 local leaves: { [BasePart]: { base: CFrame, open: boolean, tween: Tween? } } = {}
 local lampsOn = false
-local pendingCarry: { transform: CFrame, deadline: number }? = nil
+local pendingCarry: { transform: CFrame, deadline: number, look: Vector3? }? = nil
+local arrivalLook: Vector3? = nil -- the arch to turn to after the move, at each of arrivalTurns (os.clock)
+local arrivalTurns: { number } = {}
+local marker: { gui: BillboardGui?, anchor: Part?, label: TextLabel? } = {}
 local skipHeldSince: number? = nil
 local skipSent = false
 local hidden: { [Model]: { [BasePart]: boolean } } = {}
@@ -464,7 +469,7 @@ local function updateDoors(t: number)
 	local station = workspace:FindFirstChild("TrainStationB")
 	local trainB = station and station:FindFirstChild("TrainB")
 	local openAt = trainB and tonumber(trainB:GetAttribute("DoorsOpenAt")) or 0
-	local openB = s == "Training" and openAt > 0 and t >= openAt
+	local openB = (s == "Training" or s == "Ride") and openAt > 0 and t >= openAt -- (they open in the dark of the move)
 	for _, leaf in ipairs(CollectionService:GetTagged("TrainDoorLeaf")) do
 		if leaf:IsA("BasePart") then
 			local late = openB and t - openAt > 1.5
@@ -747,6 +752,102 @@ local function skipFrame(t: number)
 	end
 end
 
+-- The quiet marker: on the platform it shows the way into the hall ("Training Centre"); once the launch doors are open
+-- for you, the way to them ("Launch"). Nothing shows inside the hall before that, in the red room or anywhere else.
+local function updateMarker()
+	local s = stage()
+	local here = player:GetAttribute("AtTrainingCentre") == true
+	local inHall = player:GetAttribute("InTraining") == true
+	local target: Vector3? = nil
+	local text = ""
+	if here and (s == "Training" or s == "Ride") and player:GetAttribute("InRedRoom") ~= true then
+		if not inHall then
+			local v = GameState:GetAttribute("TrainHallEntry")
+			local best = if typeof(v) == "Vector3" then v else nil
+			local me = rootPart()
+			for k = 1, 9 do
+				local a = GameState:GetAttribute("TrainHallArch" .. k)
+				if typeof(a) ~= "Vector3" then
+					break
+				end
+				if me and (not best or (a - me.Position).Magnitude < (best - me.Position).Magnitude) then
+					best = a
+				end
+			end
+			target = if best then best + Vector3.new(0, 7, 0) else nil -- (in the archway, just over head height)
+			text = "Training Centre"
+		elseif GameState:GetAttribute("TrainDoorsOpen") == true and player:GetAttribute("TrainHeld") == true then
+			local v = GameState:GetAttribute("TrainLaunchEntry")
+			target = if typeof(v) == "Vector3" then v + Vector3.new(0, 9, 0) else nil -- (in the open doorway)
+			text = "Launch"
+		end
+	end
+	local root = rootPart()
+	if target and root and (Vector3.new(target.X, root.Position.Y, target.Z) - root.Position).Magnitude < 3 then
+		target = nil -- you are there
+	end
+	if not target then
+		if marker.gui then
+			marker.gui.Enabled = false
+		end
+		return
+	end
+	if not marker.anchor then
+		local anchor = Instance.new("Part")
+		anchor.Name = "TrainWayMarker"
+		anchor.Anchored = true
+		anchor.CanCollide = false
+		anchor.CanQuery = false
+		anchor.CanTouch = false
+		anchor.Transparency = 1
+		anchor.Size = Vector3.new(0.2, 0.2, 0.2)
+		anchor.Parent = localFolder or workspace
+		local gui = Instance.new("BillboardGui")
+		gui.Name = "Way"
+		gui.AlwaysOnTop = false -- (it stands in the open archway or doorway: nothing hides it from the way there)
+		gui.LightInfluence = 0
+		gui.Size = UDim2.fromOffset(180, 46)
+		gui.Adornee = anchor
+		gui.Parent = anchor
+		local label = Instance.new("TextLabel")
+		label.Name = "Line"
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.new(1, 0, 0, 22)
+		label.FontFace = Theme.Fonts.Medium
+		label.TextSize = 15
+		label.TextColor3 = Theme.Colors.Ink
+		label.TextTransparency = 0.1
+		label.Parent = gui
+		local chevron = Instance.new("TextLabel")
+		chevron.Name = "Chevron"
+		chevron.BackgroundTransparency = 1
+		chevron.Position = UDim2.fromOffset(0, 20)
+		chevron.Size = UDim2.new(1, 0, 0, 22)
+		chevron.FontFace = Theme.Fonts.Medium
+		chevron.TextSize = 18
+		chevron.Text = "▼"
+		chevron.TextColor3 = Theme.Colors.Ink
+		chevron.TextTransparency = 0.25
+		chevron.Parent = gui
+		for _, l in ipairs({ label, chevron }) do
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Theme.Colors.Shade
+			stroke.Transparency = 0.55
+			stroke.Parent = l
+		end
+		marker.anchor, marker.gui, marker.label = anchor, gui, label
+	end
+	if marker.anchor and marker.anchor.Position ~= target then
+		marker.anchor.CFrame = CFrame.new(target)
+	end
+	if marker.label and marker.label.Text ~= text then
+		marker.label.Text = text
+	end
+	if marker.gui then
+		marker.gui.Enabled = true
+	end
+end
+
 local lastStage = ""
 local arrivedAt = 0
 
@@ -793,10 +894,26 @@ local function frame(dt: number)
 			if camera then
 				camera.CFrame = carry.transform * camera.CFrame
 				camera.Focus = carry.transform * camera.Focus
+				-- then turned to the arch into the hall (again as the dark lifts: the view switches to first person
+				-- around now, and that switch can undo a turn made a frame too early)
+				arrivalLook = carry.look
+				arrivalTurns = { os.clock(), os.clock() + 0.35, os.clock() + 0.8 }
 			end
 			pendingCarry = nil
 		elseif os.clock() > carry.deadline then
 			pendingCarry = nil
+		end
+	end
+	if arrivalLook and #arrivalTurns > 0 and os.clock() >= arrivalTurns[1] then
+		table.remove(arrivalTurns, 1)
+		local cameraController = Controllers and Controllers.CameraController
+		local root = rootPart()
+		if root and cameraController and type(cameraController.faceToward) == "function" then
+			-- eyes nearly level (CameraController owns the view's base turn)
+			cameraController.faceToward(Vector3.new(arrivalLook.X - root.Position.X, 0, arrivalLook.Z - root.Position.Z), -6)
+		end
+		if #arrivalTurns == 0 then
+			arrivalLook = nil
 		end
 	end
 	if t - lastSlow >= 0.25 then
@@ -804,6 +921,7 @@ local function frame(dt: number)
 		updateDoors(t)
 		updateRoom()
 		updateBoards(t)
+		updateMarker()
 		if s == "Training" and not lampsOn then
 			setPlatformLamps(true, false)
 		end
@@ -848,7 +966,8 @@ function TrainRideController.Start()
 				return
 			end
 			if payload.kind == "arrive" and typeof(payload.transform) == "CFrame" then
-				pendingCarry = { transform = payload.transform, deadline = os.clock() + 2 }
+				pendingCarry = { transform = payload.transform, deadline = os.clock() + 2,
+					look = if typeof(payload.look) == "Vector3" then payload.look else nil }
 				if not ride.covered then
 					ride.covered = true
 					cover(1, 0.1)

@@ -62,6 +62,7 @@ local state = { allies = {}, size = 1, cap = 0, context = "", offersIn = {}, off
 local allyIds: { [number]: string } = {} -- userId -> name
 local offersIn: { [number]: { name: string, expires: number } } = {}
 local offersOut: { [number]: number } = {}
+local dismissed: { [number]: number } = {} -- offers answered by a truce with someone else (userId -> until, os.clock)
 local marks: { [number]: { bb: BillboardGui, tick: Frame?, bars: { Frame }, seen: boolean, fading: boolean } } = {}
 local target: Player? = nil
 local holding: { t0: number, target: Player?, offerFrom: number? }? = nil
@@ -854,17 +855,33 @@ local function onUpdate(msg: any)
 	end
 	local kind = msg.kind
 	if kind == "state" then
+		local before = 0
+		for _ in pairs(allyIds) do
+			before += 1
+		end
 		state = msg
 		table.clear(allyIds)
+		local after = 0
 		for _, a in ipairs(msg.allies or {}) do
 			if type(a) == "table" and type(a.userId) == "number" then
 				allyIds[a.userId] = tostring(a.name)
+				after += 1
 			end
 		end
 		local t = os.clock()
+		-- a truce just agreed answers every other offer that was waiting: those lines go (they can offer again), and so
+		-- do offers from allies and offers a full group could not take
+		local full = (tonumber(msg.cap) or 0) > 0 and (tonumber(msg.size) or 1) >= (tonumber(msg.cap) or 0)
 		table.clear(offersIn)
 		for _, o in ipairs(msg.offersIn or {}) do
-			offersIn[o.userId] = { name = tostring(o.name), expires = t + (tonumber(o.left) or 0) }
+			local left = tonumber(o.left) or 0
+			if after > before then
+				dismissed[o.userId] = t + left
+			end
+			local gone = (dismissed[o.userId] or 0) > t
+			if not gone and not allyIds[o.userId] and not full then
+				offersIn[o.userId] = { name = tostring(o.name), expires = t + left }
+			end
 		end
 		table.clear(offersOut)
 		for _, o in ipairs(msg.offersOut or {}) do
@@ -873,6 +890,7 @@ local function onUpdate(msg: any)
 		syncMarks()
 		rebuildList()
 	elseif kind == "offer" then
+		dismissed[msg.userId] = nil -- a fresh offer from someone whose earlier one was answered by another truce
 		offersIn[msg.userId] = { name = tostring(msg.name), expires = os.clock() + (tonumber(msg.left) or 15) }
 		Sfx.play("Notify", { volume = 0.45 })
 		rebuildList()

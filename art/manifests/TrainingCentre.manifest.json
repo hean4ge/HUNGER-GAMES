@@ -16869,16 +16869,37 @@
   }
  ],
  "assetIds": {
-  "status": "NOT UPLOADED",
+  "status": "UPLOADED",
   "notes": [
-   "19 Nov 2026 (wave 14): the Open Cloud upload (POST /assets/v1/assets, creator user 5458010221, displayName LS_TrainingCentre_v1) was refused by this session's permission check, so nothing was uploaded. Upload TrainingCentre.glb once, then record the model here (displayName, operationId, assetId, moderationState, bytes, sha256) and re-run art/blender/training_centre_lua.py so TrainingCentreBuilder uses the meshes.",
-   "Until then TrainingCentreBuilder builds the same set from Parts (TrainingCentre.prims.json)."
+   "19 Nov 2026 (wave 15): uploaded once by the lead through Open Cloud POST /assets/v1/assets (creator user 5458010221), Blender uploads for this game approved by the owner on 19 Nov. Never re-upload this file; reuse its id. A re-export needs a new upload (new id) recorded here.",
+   "No textures, no vertex colours: one flat colour per part; the importer drops colours, so TrainingCentreBuilder sets Material/Color from this manifest and turns each mesh back 180 degrees about Y (like BlenderTemplates)."
   ],
   "creator": {
    "userId": 5458010221
   },
-  "file": "TrainingCentre.glb",
-  "bytes": 1339068,
-  "sha256": "f7ec7a69330a3d9b4ddd3520071b843150b0b4fea469bdb69efe7390946c4d31"
+  "model": {
+   "displayName": "LS_TrainingCentre_v1",
+   "operationId": "51ff5882-6512-4dfe-a78b-7edb87c7e678",
+   "uploadedUtc": "2026-11-19T12:57:41.978Z",
+   "assetId": 131956876680753,
+   "moderationState": "Approved",
+   "revisionId": "1",
+   "bytes": 1339068,
+   "sha256": "f7ec7a69330a3d9b4ddd3520071b843150b0b4fea469bdb69efe7390946c4d31",
+   "file": "TrainingCentre.glb"
+  },
+  "redRoom": {
+   "displayName": "LS_LaunchRedRoom_WalkIn_v1",
+   "operationId": "0d38ff36-2dd1-4f06-8bc7-23ae793148eb",
+   "uploadedUtc": "2026-11-19T13:08:57.516Z",
+   "assetId": 121866527438422,
+   "moderationState": "Approved",
+   "revisionId": "1",
+   "bytes": 710228,
+   "sha256": "38d944883a2e94359b17df0db2dd177b004e741001920e58a76034439d9331d4",
+   "file": "Launch/LaunchRedRoom_WalkIn.glb",
+   "source": "LaunchRedRoom.glb (art/blender/launch_rooms.py pass 2) with a doorway cut into the back wall over the walkway by art/blender/launch_redroom_walkin.py",
+   "note": "Uploaded once by hall-meshes (wave 15) with the owner's approval of Blender uploads for this game on 19 Nov. Never re-upload; reuse this id. The importer kept the palette textures as SurfaceAppearance."
+  }
  }
 }

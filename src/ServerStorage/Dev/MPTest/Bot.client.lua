@@ -1696,6 +1696,26 @@ local function probe(arg: any): any
 	local kind = type(arg) == "table" and arg.kind or arg
 	local hum, root = myParts()
 	local cam = workspace.CurrentCamera
+	if kind == "hall" then
+		-- the hall's light as this client has it (HallLightController's zone) and how much of the set is meshes here
+		local L2 = game:GetService("Lighting")
+		local set = workspace:FindFirstChild("TrainingCentre")
+		local meshes, parts = 0, 0
+		if set then
+			for _, d in ipairs(set:GetDescendants()) do
+				if d:IsA("MeshPart") then
+					meshes += 1
+				elseif d:IsA("BasePart") then
+					parts += 1
+				end
+			end
+		end
+		local function c3(c: Color3): string
+			return string.format("%d,%d,%d", math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5))
+		end
+		return string.format("cam=%s ambient=%s outdoor=%s envDiffuse=%.2f meshes=%d parts=%d", fmt(cam.CFrame.Position), c3(L2.Ambient),
+			c3(L2.OutdoorAmbient), L2.EnvironmentDiffuseScale, meshes, parts)
+	end
 	if kind == "lobby" then
 		-- where the camera and the character are against the train's cars; the scenery's motion over 0.5 s
 		local lobby = workspace:FindFirstChild("Lobby")
@@ -2286,14 +2306,42 @@ task.spawn(function()
 				L(string.upper(name) .. " " .. fmt({ t = m.t, kind = m.kind, text = m.text, sub = m.sub, id = m.id, state = m.state, score = m.score,
 					passed = m.passed, reason = m.reason }))
 				if name == "TrainRide" and m.kind == "arrive" then
-					task.delay(0.8, function()
+					local function arrivedLine(tag: string)
 						local c = lp.Character
 						local r = c and c:FindFirstChild("HumanoidRootPart")
+						local head = c and c:FindFirstChild("Head")
 						local cam = workspace.CurrentCamera
 						if r and cam then
-							L(string.format("ARRIVED root=%s cam=%s camOff=%.2f camType=%s", fmt(r.Position), fmt(cam.CFrame.Position),
-								(cam.CFrame.Position - r.Position).Magnitude, cam.CameraType.Name))
+							-- first person: the camera at the head; not in a wall: no solid part around the camera,
+							-- nothing between the head and the camera; the floor under the feet
+							local cp = cam.CFrame.Position
+							local hp = if head and head:IsA("BasePart") then head.Position else r.Position + Vector3.new(0, 1.5, 0)
+							local op = OverlapParams.new()
+							op.FilterType = Enum.RaycastFilterType.Exclude
+							op.FilterDescendantsInstances = { c }
+							local inside = {}
+							for _, p in ipairs(workspace:GetPartBoundsInRadius(cp, 0.25, op)) do
+								if p.CanCollide and p.Transparency < 0.9 then
+									table.insert(inside, p.Name)
+								end
+							end
+							local rp = RaycastParams.new()
+							rp.FilterType = Enum.RaycastFilterType.Exclude
+							rp.FilterDescendantsInstances = { c }
+							local between = if (cp - hp).Magnitude > 0.05 then workspace:Raycast(hp, cp - hp, rp) else nil
+							local floor = workspace:Raycast(r.Position, Vector3.new(0, -8, 0), rp)
+							local fwd = cam.CFrame.LookVector
+							L(string.format("%s root=%s cam=%s camOff=%.2f headOff=%.2f camType=%s mode=%s inside=[%s] between=%s floor=%s look=%s",
+								tag, fmt(r.Position), fmt(cp), (cp - r.Position).Magnitude, (cp - hp).Magnitude, cam.CameraType.Name,
+								lp.CameraMode.Name, table.concat(inside, ","), if between then between.Instance:GetFullName() else "none",
+								if floor then floor.Instance:GetFullName() else "none", fmt(Vector3.new(fwd.X, 0, fwd.Z).Unit)))
 						end
+					end
+					task.delay(0.8, function()
+						arrivedLine("ARRIVED")
+					end)
+					task.delay(3.5, function()
+						arrivedLine("ARRIVED2")
 					end)
 				end
 			end)

@@ -26,8 +26,19 @@
 	  Mats                 invisible CanTouch pads Mat_<Kit> (attributes Kit, Station)
 	  Markers              invisible 0.2 Parts at every station / drill / screen / target marker, attributes copied
 	  PlatformSpawns       Spawn_01..48 on platform B (plain Parts, NOT SpawnLocations)
-	  Lamps                PointLights (hall downlights marked light, platform banks, corridor)
-	Nothing here uploads, saves or publishes. It takes the shared-Studio lock (Workspace attribute QA_Lock).
+	  Lamps                PointLights: the hall's warm grid (HallLight_r_c, below), platform banks, corridor
+	  RedRoom              the walk-in red room behind the corridor (TrainingCentreData.redRoom, the uploaded
+	                       LaunchRedRoom_WalkIn.glb): meshes with their palette SurfaceAppearance, box colliders, an
+	                       invisible Disc (TrainRideService's red-room disc) and a few lights. Without it the corridor
+	                       keeps its end cap and TrainRideService builds its Part stand-in room.
+	In mesh mode the prep floor's Use and DarkSteel roles (the obstacle tops and posts: 9 shapes) are still Parts, so
+	TC.prepare can lift the slide bar with its collider (one merged mesh cannot move one bar).
+
+	The hall's light (19 Nov, wave 15): an even, soft, warm sports-hall light from 18 PointLights in a 6 x 3 grid under
+	the coffers (Range 60, no shadows except the two over the floor), not from the 26 scattered downlights: the blade
+	ring, the corners and the walls were dim. The 77 Neon downlight discs stay the visible source (warm white). Lights
+	without shadows are cheap on phones (voxel lighting at low quality levels).
+	Nothing here saves or publishes. It takes the shared-Studio lock (Workspace attribute QA_Lock).
 ]]
 local CollectionService = game:GetService("CollectionService")
 local InsertService = game:GetService("InsertService")
@@ -40,11 +51,29 @@ local TC = {}
 TC.HALL_AT = CFrame.new(DATA.hallOrigin[1], DATA.hallOrigin[2], DATA.hallOrigin[3])
 TC.MODEL_NAME = "TrainingCentre"
 TC.LOCK_LABEL = "training-centre"
+-- the set's build version: a live server rebuilds a saved set older than this (or one made of Parts when the meshes load)
+TC.VERSION = 2
 local ROT = CFrame.Angles(0, math.pi, 0)
-local HALL_LAMP = Color3.fromRGB(236, 240, 236)
 local PLAT_LAMP = Color3.fromRGB(255, 220, 180)
 local RED_LAMP = Color3.fromRGB(255, 70, 56)
-local SHADOW_LAMPS = { Lamp_05_03 = true, Lamp_07_05 = true }
+-- the hall's light: a warm grid under the coffers (hall coordinates), shadows only over the floor
+local HALL_LIGHT = {
+	colour = Color3.fromRGB(255, 228, 196),
+	xs = { -90, -54, -18, 18, 54, 90 },
+	zs = { -50, 0, 50 },
+	y = 30,
+	range = 60,
+	brightness = 0.95, -- 1.35 washed the chequer out to white (Studio, 19 Nov)
+	shadows = { ["3_2"] = true, ["4_2"] = true },
+}
+-- look overrides on top of the manifest's colours: the downlight discs read warm white, like the light they give
+local LOOK: { [string]: Color3 } = {
+	TC_HallShell_Downlight = Color3.fromRGB(255, 240, 220),
+}
+-- roles still built from Parts in mesh mode (asset -> role): TC.prepare moves the slide bar on its own
+local MESH_AS_PARTS: { [string]: { [string]: boolean } } = {
+	TC_PrepFloor = { Use = true, DarkSteel = true },
+}
 
 local function v3(t: { number }): Vector3
 	return Vector3.new(t[1], t[2], t[3])
@@ -100,7 +129,7 @@ local function plainPart(name: string, size: Vector3, cf: CFrame, parent: Instan
 end
 
 local function styleVisual(p: BasePart, spec: any)
-	p.Color = Color3.fromRGB(spec.c[1], spec.c[2], spec.c[3])
+	p.Color = LOOK[spec.n] or Color3.fromRGB(spec.c[1], spec.c[2], spec.c[3])
 	p.Material = material(spec.m)
 	p.Transparency = spec.t or 0
 	p.CastShadow = spec.sh ~= false
@@ -225,6 +254,162 @@ local function markerPart(name: string, frame: CFrame, mk: any, parent: Instance
 	return p
 end
 
+-- The hall's light: HALL_LIGHT's grid of warm PointLights under the coffers, into `parent` (the Lamps folder).
+local function hallLights(hall: CFrame, parent: Instance): number
+	local n = 0
+	for c, x in ipairs(HALL_LIGHT.xs) do
+		for r, z in ipairs(HALL_LIGHT.zs) do
+			local key = c .. "_" .. r
+			local holder = plainPart("HallLight_" .. key, Vector3.new(0.2, 0.2, 0.2), hall * CFrame.new(x, HALL_LIGHT.y, z), parent)
+			local light = Instance.new("PointLight")
+			light.Color = HALL_LIGHT.colour
+			light.Range = HALL_LIGHT.range
+			light.Brightness = HALL_LIGHT.brightness
+			light.Shadows = HALL_LIGHT.shadows[key] == true
+			light.Parent = holder
+			n += 1
+		end
+	end
+	return n
+end
+
+-- The walk-in red room (design page 5.2): the room stands 10 lower than the hall floor, turned to face the hall, so the
+-- launch corridor (floor 0, ending at hall z -87) runs through the doorway cut in its back wall onto its upper walkway
+-- (deck top 10 in the room). Room frame = Launch.manifest.json's (Roblox axes, floor centre 0, walkway on -z).
+TC.RED_ROOM_AT = CFrame.new(0, -10, -100) * CFrame.Angles(0, math.pi, 0) -- in hall space
+-- box colliders in the room frame: name, size, centre (the visual meshes never collide)
+local RED_COLLIDERS: { { any } } = {
+	{ "Floor", { 30, 1, 24 }, { 0, -0.5, 0 } },
+	{ "WallFront", { 32, 22.8, 1 }, { 0, 10.8, 12.5 } },
+	{ "WallW", { 1, 22.8, 26 }, { -15.5, 10.8, 0 } },
+	{ "WallE", { 1, 22.8, 26 }, { 15.5, 10.8, 0 } },
+	{ "WallBackW", { 13, 22.8, 1 }, { -9.5, 10.8, -12.5 } },
+	{ "WallBackE", { 13, 22.8, 1 }, { 9.5, 10.8, -12.5 } },
+	{ "WallBackLow", { 6, 10.6, 1 }, { 0, 4.7, -12.5 } }, -- its top is the doorway's sill (room y 10 = hall floor)
+	{ "WallBackTop", { 6, 3.6, 1 }, { 0, 20.4, -12.5 } },
+	{ "Roof", { 32, 1, 26 }, { 0, 22.7, 0 } },
+	{ "Walkway", { 26.9, 0.5, 3.6 }, { -1.55, 9.75, -10.2 } },
+	{ "Landing", { 3.1, 0.5, 3.6 }, { 13.45, 9.75, -10.2 } },
+	{ "WalkwayRail", { 26.9, 3.8, 0.4 }, { -1.55, 11.9, -8.55 } },
+	{ "LiftRailW", { 0.4, 3.8, 9 }, { -7.25, 1.9, -0.1 } },
+	{ "LiftRailE", { 0.4, 3.8, 9 }, { 7.25, 1.9, -0.1 } },
+	{ "LiftRailBack", { 14.5, 3.8, 0.4 }, { 0, 1.9, -4.6 } },
+	{ "RailBack", { 20, 3.8, 0.4 }, { 0, 1.9, -9.95 } },
+	{ "RailFront", { 20, 3.8, 0.4 }, { 0, 1.9, 9.95 } },
+}
+
+local function buildRedRoom(hall: CFrame, root: Instance, counts: { [string]: number }): string
+	local rr = DATA.redRoom
+	if not (rr and rr.assetId) then
+		return "no red room upload recorded"
+	end
+	local ok, loaded = pcall(function()
+		return InsertService:LoadAsset(rr.assetId)
+	end)
+	if not ok then
+		return "red room LoadAsset(" .. tostring(rr.assetId) .. ") failed: " .. tostring(loaded)
+	end
+	local container = loaded :: Instance
+	local imported: Model? = nil
+	for _, d in ipairs(container:GetDescendants()) do
+		if d:IsA("Model") and d.Name == rr.name then
+			imported = d
+		end
+	end
+	if not imported then
+		container:Destroy()
+		return "red room upload has no model " .. rr.name
+	end
+	local roomCF = hall * TC.RED_ROOM_AT
+	local room = Instance.new("Model")
+	room.Name = "RedRoom"
+	room:SetAttribute("AssetId", rr.assetId)
+	-- the importer turns the model 180 degrees about Y: undo it about the import's bounding-box centre
+	local importCentre = (imported :: Model):GetBoundingBox().Position
+	local back = CFrame.new(v3(rr.centre)) * ROT * CFrame.new(-importCentre)
+	local made, missing = 0, 0
+	for name, spec in pairs(rr.parts) do
+		local src = (imported :: Model):FindFirstChild(name, true)
+		if src and src:IsA("MeshPart") then
+			local p = src:Clone()
+			for _, c in ipairs(p:GetChildren()) do
+				if not c:IsA("SurfaceAppearance") then -- keep the palette textures
+					c:Destroy()
+				end
+			end
+			p.CFrame = roomCF * back * src.CFrame
+			p.Color = Color3.fromRGB(spec.c[1], spec.c[2], spec.c[3])
+			p.Material = material(spec.m)
+			p.CastShadow = spec.sh ~= false
+			p.Anchored = true
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.Parent = room
+			made += 1
+		else
+			missing += 1
+			warn("[TrainingCentreBuilder] the red room upload has no MeshPart " .. name)
+		end
+	end
+	container:Destroy()
+	for _, c in ipairs(RED_COLLIDERS) do
+		local p = plainPart("RedRoom_" .. c[1] .. "_Col", v3(c[2]), roomCF * CFrame.new(v3(c[3])), room)
+		p.CanCollide = true
+		p.CanQuery = true
+		counts.colliders += 1
+	end
+	-- the stair: one ramp under the 13 steps (room x 12..15, from z 7 at the floor up to z -8.4 at the walkway)
+	local rise, run = 10, 15.4
+	local tilt = math.atan2(rise, run)
+	local len = math.sqrt(rise * rise + run * run)
+	local rampCF = CFrame.new(13.5, rise / 2, (7 - 8.4) / 2) * CFrame.Angles(tilt, 0, 0)
+	local ramp = plainPart("RedRoom_Stair_Col", Vector3.new(3, 0.6, len), roomCF * rampCF * CFrame.new(0, -0.3, 0), room)
+	ramp.CanCollide, ramp.CanQuery = true, true
+	-- the open side's rail, stopped 2.5 short of the foot so you can step off the last stair and turn
+	local rail = plainPart("RedRoom_StairRail_Col", Vector3.new(0.4, 3.8, len - 2.5), roomCF * CFrame.new(11.85, 0, 0)
+		* CFrame.new(0, rise / 2 + 1.9, (7 - 8.4) / 2) * CFrame.Angles(tilt, 0, 0) * CFrame.new(0, 0, -1.25), room)
+	rail.CanCollide, rail.CanQuery = true, true
+	counts.colliders += 2
+	-- the disc TrainRideService looks for (stand on it: Ready); the rose lift mesh is its look
+	local disc = plainPart("Disc", Vector3.new(7, 0.3, 7), roomCF * CFrame.new(0, 0.15, 0), room)
+	disc:SetAttribute("RedRoomDisc", true)
+	-- a few real lights: the cool key down the hex onto the lift, the walkway's spot, the two lamps on the back wall
+	-- and the red glow in the two floor openings (Launch.manifest.json lighting, cut to six lights)
+	local at = rr.attachments
+	local function lightAt(name: string, kind: string, pos: Vector3, look: Vector3, colour: Color3, range: number,
+		brightness: number, angle: number?)
+		local up = if math.abs(look.Unit.Y) > 0.95 then Vector3.zAxis else Vector3.yAxis
+		local h = plainPart("RedRoom_" .. name, Vector3.new(0.2, 0.2, 0.2), roomCF * CFrame.lookAt(pos, pos + look, up), room)
+		local l = Instance.new(kind) :: any
+		l.Color, l.Range, l.Brightness, l.Shadows = colour, range, brightness, false
+		if angle then
+			l.Angle = angle
+			l.Face = Enum.NormalId.Front
+		end
+		l.Parent = h
+		counts.lights += 1
+	end
+	lightAt("KeyLight", "SpotLight", Vector3.new(0, 19, 0), Vector3.new(0, -1, 0),Color3.fromRGB(220, 234, 255), 28, 3.2, 44)
+	if at.WalkwaySpot then
+		lightAt("WalkwaySpot", "SpotLight", v3(at.WalkwaySpot.p), v3(at.WalkwaySpot.l), Color3.fromRGB(170, 200, 255), 16, 1.6, 70)
+	end
+	for _, k in ipairs({ "Lamp_7", "Lamp_8" }) do
+		if at[k] then
+			lightAt(k, "SpotLight", v3(at[k].p), v3(at[k].l) + Vector3.new(0, -0.18, 0), Color3.fromRGB(236, 240, 255), 20, 1.3, 70)
+		end
+	end
+	for _, k in ipairs({ "OpeningGlow_1", "OpeningGlow_2" }) do
+		if at[k] then
+			lightAt(k, "PointLight", v3(at[k].p) + Vector3.new(0, 1, 0), Vector3.new(0, 0, -1), Color3.fromRGB(255, 92, 86), 9, 1.6)
+		end
+	end
+	room.WorldPivot = roomCF
+	room.Parent = root
+	return string.format("red room %d meshes%s", made, if missing > 0 then string.format(", %d MISSING", missing) else "")
+end
+
 function TC.build(opts: { [string]: any }?): string
 	local o = opts or {}
 	local label = o.label or TC.LOCK_LABEL
@@ -317,7 +502,8 @@ function TC.build(opts: { [string]: any }?): string
 				-- visuals
 				for role, spec in pairs(a.roles) do
 					local parent = parentFor(role)
-					if source == "mesh" then
+					local asParts = MESH_AS_PARTS[assetName] ~= nil and MESH_AS_PARTS[assetName][role] == true
+					if source == "mesh" and not asParts then
 						local src = (meshes :: any)[spec.n]
 						if src then
 							local p = src:Clone()
@@ -389,18 +575,17 @@ function TC.build(opts: { [string]: any }?): string
 							local at = mk.at or {}
 							local isHall = string.match(mn, "^Lamp_%d+_%d+$") ~= nil
 							local isPlat = string.match(mn, "^PlatLamp_") ~= nil
-							if (not isHall) or at.light then
+							-- (the hall's downlight markers stay markers: the hall is lit by HALL_LIGHT's grid below)
+							if not isHall then
 								local holder = markerPart(mn, frame, mk, fLamps)
 								local light = Instance.new("PointLight")
 								if isPlat then
 									light.Color, light.Range, light.Brightness = PLAT_LAMP, 22, 1.2
 									holder:SetAttribute("Bank", at.bank)
-								elseif mn == "RedLamp" or at.red then
+								else -- RedLamp and the corridor's red lamps
 									light.Color, light.Range, light.Brightness = RED_LAMP, if mn == "RedLamp" then 16 else 12, 1
-								else
-									light.Color, light.Range, light.Brightness = HALL_LAMP, 40, 1.4
 								end
-								light.Shadows = SHADOW_LAMPS[mn] == true
+								light.Shadows = false
 								light.Parent = holder
 								counts.lights += 1
 							end
@@ -445,6 +630,7 @@ function TC.build(opts: { [string]: any }?): string
 				task.wait()
 			end
 		end
+		counts.lights += hallLights(hall, fLamps)
 		fMarkers.Parent = root
 		fSpawns.Parent = root
 		fLamps.Parent = root
@@ -452,6 +638,32 @@ function TC.build(opts: { [string]: any }?): string
 		if container then
 			container:Destroy()
 		end
+		-- the walk-in red room behind the corridor; with it the corridor's black end cap goes
+		local roomNote = "red room: none"
+		if o.redRoom ~= false then
+			roomNote = buildRedRoom(hall, root, counts)
+			local roomModel = root:FindFirstChild("RedRoom")
+			if roomModel then
+				-- the plan's disc marker (hall z -99 at floor 0) is not the disc: TrainRideService takes the first part
+				-- named RedRoomDisc / Disc outside Markers... and skipped this one, then built its stand-in room
+				local plan = fMarkers:FindFirstChild("RedRoomDisc")
+				local disc = roomModel:FindFirstChild("Disc")
+				if plan and plan:IsA("BasePart") then
+					plan.Name = "RedRoomDiscPlan"
+					if disc and disc:IsA("BasePart") then
+						plan.CFrame = disc.CFrame
+					end
+				end
+				local doors = root:FindFirstChild("LaunchDoors")
+				for _, d in ipairs(doors and doors:GetDescendants() or {}) do
+					if d.Name == "TC_LaunchDoors_EndCap" or d.Name == "TC_LaunchDoors_EndCap_Col" then
+						d:Destroy()
+					end
+				end
+			end
+		end
+		note ..= "; " .. roomNote
+		root:SetAttribute("BuildVersion", TC.VERSION)
 		root.WorldPivot = hall
 		root.Parent = workspace
 		return string.format(
@@ -597,18 +809,29 @@ end
 
 local ensuring = false
 -- The set in the workspace, built if missing (runtime: no lock) and prepared. Safe to call from several threads.
+-- A saved set older than TC.VERSION (or a Part set while an upload is recorded) is rebuilt at start, before anything
+-- has prepared or used it, so a live server always runs the meshes, the hall's light and the red room.
 function TC.ensure(): Instance?
+	if ensuring then -- another thread is building or preparing it: wait for the prepared set
+		local deadline = os.clock() + 30
+		local m: Instance? = nil
+		repeat
+			task.wait(0.1)
+			m = workspace:FindFirstChild(TC.MODEL_NAME)
+		until (m and m:GetAttribute("RuntimeReady") == true) or os.clock() > deadline
+		return m
+	end
+	ensuring = true
 	local m = workspace:FindFirstChild(TC.MODEL_NAME)
-	if not m then
-		if ensuring then
-			local deadline = os.clock() + 20
-			repeat
-				task.wait(0.1)
-				m = workspace:FindFirstChild(TC.MODEL_NAME)
-			until (m and m:GetAttribute("RuntimeReady") == true) or os.clock() > deadline
-			return m
+	if m and m:GetAttribute("BlenderSet") == true and m:GetAttribute("RuntimeReady") ~= true then
+		local stale = (tonumber(m:GetAttribute("BuildVersion")) or 0) < TC.VERSION
+			or (m:GetAttribute("Source") ~= "mesh" and DATA.assetId ~= nil)
+		if stale then
+			local result = TC.build({ noLock = true, source = "auto" })
+			print("[TrainingCentreBuilder] rebuilt the saved set: " .. result)
+			m = workspace:FindFirstChild(TC.MODEL_NAME)
 		end
-		ensuring = true
+	elseif not m then
 		local result = TC.build({ noLock = true, source = "auto" })
 		print("[TrainingCentreBuilder] " .. result)
 		m = workspace:FindFirstChild(TC.MODEL_NAME)

@@ -139,6 +139,8 @@ local function refreshMark(other: Player)
 	local show = other.Parent == Players
 		and other:GetAttribute("PlusMember") == true
 		and other:GetAttribute("InArena") ~= true
+		-- in the launch red room the others are hidden (TrainRideController): their marks go with them
+		and (other == player or other:GetAttribute("InRedRoom") ~= true)
 		and not ClientState.inArena
 		and ClientState.spectating == nil
 		and head ~= nil and head:IsA("BasePart")
@@ -204,6 +206,9 @@ local function watchPlayer(other: Player)
 		refreshMark(other)
 	end)
 	other:GetAttributeChangedSignal("InArena"):Connect(function()
+		refreshMark(other)
+	end)
+	other:GetAttributeChangedSignal("InRedRoom"):Connect(function()
 		refreshMark(other)
 	end)
 	other.CharacterAdded:Connect(function(character)

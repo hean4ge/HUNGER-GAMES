@@ -48,6 +48,7 @@ local switchToken = 0
 local emptyToken = 0
 local saved: { [string]: any }? = nil
 local lastAssert = 0
+local missingSince: number? = nil -- os.clock() since the target's root part has been missing on this client
 local cardToken = 0
 local stripUp = false -- NotificationController's defeat strip is on screen (its "Back to lobby" is the way out)
 local CARD_HEIGHT = 58 -- under the strip's hairline (Theme.Strip.Height 62)
@@ -164,7 +165,8 @@ local function updateCard()
 	R.eyebrow.Visible = false -- Quiet: the word sits in the name line ("Spectating Rowan")
 	R.name.Text = "Spectating <b>" .. Theme.escape(p.DisplayName) .. "</b>"
 	local kills = math.floor(tonumber(p:GetAttribute("Kills")) or 0)
-	local finding = if targetHumanoid(p) then "" else "  ·  finding them…"
+	local hum = targetHumanoid(p)
+	local finding = if hum and hum.RootPart then "" else "  ·  finding them…"
 	R.sub.Text = string.format("@%s  ·  %d %s%s", Theme.escape(p.Name), kills, if kills == 1 then "defeat" else "defeats", finding)
 end
 
@@ -328,6 +330,7 @@ setTarget = function(p: Player?)
 	disconnectTarget()
 	switchToken += 1
 	target = p
+	missingSince = nil
 	ClientState.spectating = p
 	pcall(function()
 		Net.event("SpectateTarget"):FireServer(p)
@@ -481,6 +484,24 @@ local function frame()
 		if camera and hum and camera.CameraSubject ~= hum then
 			applyCamera()
 			updateCard()
+		end
+		-- the watched body has not reached this client yet (far from the train lobby): ask the server again every 3 s
+		local character = target and target.Character
+		local hasRoot = character ~= nil and character:FindFirstChild("HumanoidRootPart") ~= nil
+		if hasRoot then
+			if missingSince then
+				missingSince = nil
+				updateCard()
+			end
+		elseif target then
+			missingSince = missingSince or t
+			if t - missingSince > 3 then
+				missingSince = t
+				pcall(function()
+					Net.event("SpectateTarget"):FireServer(target)
+				end)
+				updateCard()
+			end
 		end
 	end
 end

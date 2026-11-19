@@ -8,9 +8,10 @@
 	  Station   the Intermission. Train A (workspace.Lobby) stands parked; TrainSceneryController holds still.
 	  Ride      RideTime s (SoloRideTime alone). The doors seal, the station slides away, the country, the tunnel
 	            (TrainRideController draws all of it on each client). MoveLead s before its end, in the dark, every
-	            character in train A is moved to the same spot in train B, the copy parked at the Training Centre
-	            (per car: train B's gangway gaps are wider, they are its doors). Each client moves itself and its camera
-	            in the same frame (remote TrainRide "arrive"); the server checks and moves whoever did not.
+	            character in train A is moved onto the platform at the side door of train B (the copy parked at the
+	            Training Centre) nearest its place, turned toward the nearest arch into the hall; train B's doors open
+	            in the same dark (its gangway gaps are wider, they are its doors). The client carries its camera over
+	            and turns it to the arch (remote TrainRide "arrive", with `look`) and is in first person from then on.
 	  Training  TrainingTime s (SoloTrainingTime alone). The platform lamps come on, train B's doors open. Players
 	            have AtTrainingCentre = true. The launch doors open DoorsOpenBefore s before the call (at once when alone):
 	            the first `places` in the hall (least recently played first) are held (TrainHeld = true); others see
@@ -67,6 +68,9 @@ local frameB = CFrame.identity -- train B's pivot (same local frame)
 local gangwaysZ: { number } = {} -- train A's gangway centres, local z, ascending
 local carSpans: { { z0: number, z1: number, shift: number } } = {}
 local platformSpots: { CFrame } = {}
+local vestibulesZ: { number } = {} -- train B's vestibule (side door) centres, local z (frameB)
+local hallEntry: Vector3? = nil -- where the platform's way into the hall is (GameState.TrainHallEntry: the marker)
+local arches: { Vector3 } = {} -- the hall's ways in from the platform (the set's Arch_* markers, else the stand-in's)
 local regions: { { cf: CFrame, size: Vector3 } } = {} -- the station and the hall (late joiners, rescue, AtTrainingCentre)
 local hallFloorY = 200
 local redRoom: { cf: CFrame, size: Vector3 }? = nil
@@ -377,6 +381,7 @@ local function buildTrainB(lobby: Model, parent: Instance, at: CFrame)
 	doors.Parent = model
 	local dark = Color3.fromRGB(40, 30, 28)
 	table.clear(platformSpots)
+	table.clear(vestibulesZ)
 	for i, gz in ipairs(gangwaysZ) do
 		local shift = (carSpans[i] and carSpans[i].shift or 0) + GAP / 2
 		local zc = gz + shift
@@ -413,9 +418,10 @@ local function buildTrainB(lobby: Model, parent: Instance, at: CFrame)
 			end
 		end
 		v.Parent = doors
-		-- where a late joiner or a skipper stands: on the platform, facing the door
-		local out = frameB * CFrame.new(14, 0, zc)
-		table.insert(platformSpots, CFrame.lookAt(out.Position, out.Position + (out.Position - (frameB * CFrame.new(30, 0, zc)).Position)))
+		table.insert(vestibulesZ, zc)
+		-- where a late joiner or a skipper stands: on the platform just off the door, facing the hall (local +X)
+		local out = frameB * CFrame.new(16, 0, zc)
+		table.insert(platformSpots, CFrame.lookAt(out.Position, (frameB * CFrame.new(40, 0, zc)).Position))
 	end
 	model.WorldPivot = frameB
 	model.Parent = parent
@@ -780,6 +786,33 @@ local function build()
 	if not redRoom and disc then
 		redRoom = { cf = disc.CFrame, size = Vector3.new(30, 24, 24) }
 	end
+	-- the way into the hall from the platform (the set's middle arch, else the stand-in's) and the launch doors: the
+	-- client's quiet markers point at them (GameState TrainHallEntry, TrainLaunchEntry)
+	local markers = hall and hall:FindFirstChild("Markers")
+	table.clear(arches)
+	for k = 1, 9 do
+		local a = markers and markers:FindFirstChild("Arch_" .. k)
+		if a and a:IsA("BasePart") then
+			table.insert(arches, a.Position)
+		end
+	end
+	if #arches == 0 then
+		for _, ax in ipairs({ -40, 0, 40 }) do
+			table.insert(arches, centre + Vector3.new(ax, 0, 76))
+		end
+	end
+	local arch = markers and (markers:FindFirstChild("Arch_2") or markers:FindFirstChild("Arch_1"))
+	hallEntry = if arch and arch:IsA("BasePart") then arch.Position else centre + Vector3.new(0, 0, 76)
+	GameState:SetAttribute("TrainHallEntry", hallEntry)
+	for k, a in ipairs(arches) do
+		GameState:SetAttribute("TrainHallArch" .. k, a) -- (the client's marker points at the nearest one)
+	end
+	local lm = markers and markers:FindFirstChild("LaunchDoors")
+	local launchAt = if lm and lm:IsA("BasePart") then lm.Position
+		elseif launchDoors and launchDoors:IsA("Model") then launchDoors:GetPivot().Position
+		elseif launchDoors and launchDoors:IsA("BasePart") then launchDoors.Position
+		else centre + Vector3.new(0, 0, -75)
+	GameState:SetAttribute("TrainLaunchEntry", Vector3.new(launchAt.X, hallFloorY, launchAt.Z))
 	built = true
 	print(string.format("[TrainRideService] train B and %s ready at (%d, %d, %d)", if hall then "the TrainingCentre" else "the stand-in hall",
 		centre.X, centre.Y, centre.Z))
@@ -820,7 +853,8 @@ local function publish()
 	setAttr("TrainDoorsAt", st.doorsAt)
 	setAttr("TrainDoorsOpen", st.doorsOpen)
 	if trainB then
-		trainB:SetAttribute("DoorsOpenAt", if st.stage == "Training" then st.trainingStart + 1 else 0)
+		-- train B's doors open in the dark of the move: the riders stand at them, open behind them, when it lifts
+		trainB:SetAttribute("DoorsOpenAt", if st.stage == "Training" or (st.stage == "Ride" and st.moved) then st.moveAt else 0)
 	end
 	if launchDoors then
 		launchDoors:SetAttribute("OpenAt", if st.doorsOpen then st.doorsAt else 0)
@@ -830,6 +864,17 @@ end
 function TrainRideService.begin(t: number, solo: boolean, places: number, rank: ((Player, Player) -> boolean)?): boolean
 	if not TrainRideService.enabled() then
 		return false
+	end
+	-- one player on the whole server rides and trains alone (the solo timings), whatever the server's minimum is (a
+	-- Studio or private server can start a round with one); a second arrival makes it a full round (step)
+	local here = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player.Character and not inArenaRound(player) then
+			here += 1
+		end
+	end
+	if here <= 1 then
+		solo = true
 	end
 	local ride, training, doorsBefore = TrainRideService.timing(solo)
 	st.stage = "Ride"
@@ -857,24 +902,61 @@ function TrainRideService.begin(t: number, solo: boolean, places: number, rank: 
 	return true
 end
 
--- every character in train A goes to the same spot in train B (the client moves itself first; see the header)
+-- Arrival spots: each rider arrives standing on the platform just outside the side door of train B nearest their place
+-- in the car (the doors open in the dark, so they stand open behind them), turned toward the nearest arch into the
+-- hall. Twenty in front of each door (sixty in all). `look` is that arch, for the
+-- client's camera. (The game's MovementController drives every character each frame, so a scripted walk off the train
+-- is not possible from here: arriving at the open doors is the dependable way.)
+local function arrivalSpot(localZ: number, used: { [number]: number }): (CFrame, Vector3)
+	local best, bestD = 1, math.huge
+	for i, zc in ipairs(vestibulesZ) do
+		local d = math.abs(localZ - zc)
+		if d < bestD then
+			best, bestD = i, d
+		end
+	end
+	local zc = vestibulesZ[best] or (localZ + shiftAt(localZ))
+	local k = used[best] or 0
+	used[best] = k + 1
+	-- four abreast (2 studs apart, the door's width), five rows from the platform edge back toward the hall's wall
+	local row, col = (k // 4) % 5, (k % 4) - 1.5
+	local at = frameB * CFrame.new(13.5 + row * 1.9, 0, zc + col * 2.0 + (if k >= 20 then 1 else 0))
+	local look = (frameB * CFrame.new(40, 0, zc)).Position
+	local nearestD = math.huge
+	for _, a in ipairs(arches) do
+		local d = (Vector3.new(a.X, at.Y, a.Z) - at.Position).Magnitude
+		if d < nearestD then
+			look, nearestD = Vector3.new(a.X, at.Y, a.Z), d
+		end
+	end
+	return CFrame.lookAt(at.Position, look), look
+end
+
+-- every character in train A goes to the platform at the door of train B nearest their place, turned toward the hall
+-- (the dark covers it)
 local function doMove()
 	st.moved = true
 	local moved = 0
+	local used = {}
 	for _, player in ipairs(Players:GetPlayers()) do
-		local character, root = rootOf(player)
-		if character and root and not inArenaRound(player) and inTrainA(root.Position) then
-			local transform = transformFor(root.Position)
+		local character, root, humanoid = rootOf(player)
+		if character and root and humanoid and not inArenaRound(player) and inTrainA(root.Position) then
+			local l = frameA:PointToObjectSpace(root.Position)
+			local ground, look = arrivalSpot(l.Z, used)
+			local target = ground + Vector3.new(0, rootOffset(humanoid, root) + 0.05, 0)
+			local transform = target * root.CFrame:Inverse()
 			st.riders[player] = true
 			moved += 1
 			-- the server moves the character (one authority: no double move); the client, already dark, carries its
-			-- camera over by the same transform when it sees its character land
+			-- camera over when it sees its character land and turns it to `look` (the arch into the hall)
 			root.AssemblyLinearVelocity = Vector3.zero
 			character:PivotTo(transform * character:GetPivot())
-			fire(player, { kind = "arrive", transform = transform, at = st.rideEnd })
+			player:SetAttribute("AtTrainingCentre", true) -- (first person from the arrival: CameraController)
+			fire(player, { kind = "arrive", transform = transform, at = st.rideEnd, look = look })
 		end
 	end
-	print(string.format("[TrainRideService] the move: %d in train A -> train B", moved))
+	publish() -- (train B's doors open now, in the dark)
+	print(string.format("[TrainRideService] the move: %d in train A -> the platform at train B's doors", moved))
 end
 
 local function openDoors(t: number)

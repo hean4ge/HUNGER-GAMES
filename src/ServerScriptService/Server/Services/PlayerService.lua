@@ -81,6 +81,7 @@ local Services = nil
 local states = {} -- [Player] = per-player state (see onPlayerAdded)
 local spectateTargets = {} -- [requester] = target Player
 local spectateQueued = {} -- [requester] = { target = Player? }: the latest SpectateTarget that arrived over the rate limit
+local spectatePersist = {} -- [requester] = the watched character Model made PersistentPerPlayer for them
 local warned = {}
 local fallbackPad = nil
 local spawnCache = { list = {}, at = -math.huge }
@@ -459,8 +460,48 @@ end
 
 -- Spectating -------------------------------------------------------------------------------------------------------
 
+-- The watched body is sent whole to its watcher: with the train lobby thousands of studs from the arena, the focus alone
+-- streamed the ground around the contender but never their character (wave 14: 0 parts on the watcher's client, the
+-- camera left in train A). The target's character is PersistentPerPlayer for its watchers while they watch.
+local function releasePersist(requester: Player)
+	local model = spectatePersist[requester]
+	spectatePersist[requester] = nil
+	if not model then
+		return
+	end
+	pcall(model.RemovePersistentPlayer, model, requester)
+	for _, other in pairs(spectatePersist) do
+		if other == model then
+			return -- someone else still watches this body
+		end
+	end
+	if model.Parent then
+		pcall(function()
+			model.ModelStreamingMode = Enum.ModelStreamingMode.Default
+		end)
+	end
+end
+
+local function persistFor(requester: Player, model: Model?)
+	if spectatePersist[requester] == model then
+		return
+	end
+	releasePersist(requester)
+	if not model then
+		return
+	end
+	local ok = pcall(function()
+		model.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer
+		model:AddPersistentPlayer(requester)
+	end)
+	if ok then
+		spectatePersist[requester] = model
+	end
+end
+
 function PlayerService.clearSpectate(player: Player)
 	spectateTargets[player] = nil
+	releasePersist(player)
 	if player.Parent == Players then
 		player.ReplicationFocus = nil
 	end
@@ -470,6 +511,7 @@ local function releaseSpectatorsOf(target: Player)
 	for requester, current in pairs(spectateTargets) do
 		if current == target then
 			spectateTargets[requester] = nil
+			releasePersist(requester)
 			if requester.Parent == Players then
 				requester.ReplicationFocus = nil
 			end
@@ -1093,6 +1135,7 @@ local function onPlayerRemoving(player: Player)
 	end
 	spectateTargets[player] = nil
 	spectateQueued[player] = nil
+	releasePersist(player)
 	releaseSpectatorsOf(player)
 	for _, connection in ipairs(st.charConnections) do
 		connection:Disconnect()
@@ -1116,6 +1159,9 @@ local function applySpectateTarget(player: Player, target: any)
 		if root then
 			spectateTargets[player] = target
 			player.ReplicationFocus = root
+			persistFor(player, target.Character)
+			-- the ground around them arrives at once, not over the next streaming passes
+			task.spawn(pcall, player.RequestStreamAroundAsync, player, root.Position, 4)
 			return
 		end
 	end

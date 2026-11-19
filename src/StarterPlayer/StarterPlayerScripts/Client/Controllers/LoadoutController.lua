@@ -1165,7 +1165,8 @@ local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.
 		return Enum.ContextActionResult.Pass
 	end
 	if io and io.KeyCode == Enum.KeyCode.DPadRight then
-		if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or not lobbyShowing() then
+		if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or not lobbyShowing()
+			or player:GetAttribute("InTraining") == true then
 			return Enum.ContextActionResult.Pass
 		end
 		open()
@@ -1185,7 +1186,10 @@ end
 local function syncKeys()
 	local want = ""
 	if lobbyShowing() and gui then
-		want = if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil then "L" else "L+Pad"
+		-- in the Training Centre's hall D-pad right is the general skill (SkillController binds it there, skills are
+		-- tried in the hall): the Loadout keeps L, and a controller opens it at the rack or the kit board (ButtonX)
+		local inHall = player:GetAttribute("InTraining") == true
+		want = if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or inHall then "L" else "L+Pad"
 	end
 	if want == boundKeys then
 		return

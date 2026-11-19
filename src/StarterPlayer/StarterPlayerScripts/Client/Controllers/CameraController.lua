@@ -296,8 +296,9 @@ local function desiredMode(): string?
 		return "First"
 	end
 	-- the Training Centre's hall (TrainingService sets InTraining): first person, as in the arena, so the lent bows,
-	-- blades and throws are tried the way they are used
-	if alive and player:GetAttribute("InTraining") == true then
+	-- blades and throws are tried the way they are used. From the arrival in train B, on the platform and in the red
+	-- room too (TrainRideService sets AtTrainingCentre): a third-person camera in a 10-stud carriage sits in its walls.
+	if alive and (player:GetAttribute("InTraining") == true or player:GetAttribute("AtTrainingCentre") == true) then
 		return "First"
 	end
 	return "Third"

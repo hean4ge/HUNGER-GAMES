@@ -329,6 +329,29 @@ return function(ctx: { [string]: any })
 		-- (each keeps their spot in the four-car train: up to its length, about 300 studs, apart)
 		check("t.ride.together", ok and spreadT < 1 and spreadP < 320, string.format("all moved in one step: arrive lines %.2f s apart, standing within %.1f studs | %s",
 			spreadT, spreadP, table.concat(detail, " | ")))
+		-- the new arrival (wave 15): each stands on the platform, off the train, in first person, the camera in no wall,
+		-- no two riders in one spot
+		task.wait(3)
+		local okA, detA = true, {}
+		for _, p in ipairs(players()) do
+			local line = clientFind(p, "ARRIVED2", marks[p])
+			local headOff = line and tonumber(string.match(line, "headOff=([%d%.]+)"))
+			local inside = line and string.match(line, "inside=%[(.-)%]")
+			local between = line and string.match(line, "between=(%S+)")
+			local floor = line and string.match(line, "floor=(%S+)")
+			local mode = line and string.match(line, "mode=(%a+)")
+			local onPlatform = floor ~= nil and (string.find(floor, "Platform", 1, true) ~= nil)
+			local good = line ~= nil and headOff ~= nil and headOff < 1.5 and mode == "LockFirstPerson" and inside == "" and between == "none" and onPlatform
+			okA = okA and good
+			table.insert(detA, string.format("%s %s", p.Name, if line then string.sub(line, 1, 330) else "no ARRIVED2 line"))
+		end
+		local minGap = math.huge
+		for i = 1, #pos do
+			for j = i + 1, #pos do
+				minGap = math.min(minGap, (pos[i] - pos[j]).Magnitude)
+			end
+		end
+		check("t.arrival.platformFirstPerson", okA and minGap > 1.5, string.format("closest two riders %.2f studs apart | %s", minGap, table.concat(detA, " | ")))
 		shot("t_arrived", 0.6)
 		return true
 	end
@@ -386,6 +409,17 @@ return function(ctx: { [string]: any })
 		end
 		check("t.chest.perStation", ok, table.concat(detail, " | "))
 		shot("t_chests", 0.6)
+		-- the hall is the Blender set (meshes) and its warm light zone holds on each client inside it
+		local okL, detL = true, {}
+		for _, p in ipairs(players()) do
+			local s = tostring(call(p, "probe", { kind = "hall" }))
+			local r, g, b = string.match(s, "ambient=(%d+),(%d+),(%d+)")
+			local meshes = tonumber(string.match(s, "meshes=(%d+)")) or 0
+			local warm = r ~= nil and tonumber(r) >= 70 and tonumber(r) > tonumber(b)
+			okL = okL and warm and meshes >= 100
+			table.insert(detL, p.Name .. " " .. s)
+		end
+		check("t.hall.meshesLit", okL, table.concat(detL, " | "))
 		-- the drop key in the hall does nothing to borrowed items (G sends DropSlot; InventoryService keeps it closed there)
 		if C then
 			local before = invLine(C)
@@ -407,6 +441,14 @@ return function(ctx: { [string]: any })
 					task.wait(0.8)
 					call(C, "tprompt", { match = "borrow", radius = 10 }, 6)
 					task.wait(0.6)
+					if not slotOf(C, "short_bow") then
+						-- (runs T15, T16: real keys in C's window - a dodge - carried C off the spot during the hold) once more
+						L("BOW borrow missed; C at " .. (if root(C) then v3((root(C) :: BasePart).Position) else "?") .. ": again")
+						put(C, chestA.Position + inward.Unit * 3.5, chestA.Position)
+						task.wait(0.8)
+						call(C, "tprompt", { match = "borrow", radius = 10 }, 6)
+						task.wait(0.6)
+					end
 					local folder = workspace:FindFirstChild("TrainingStations")
 					local arch = folder and folder:FindFirstChild("archery")
 					local start = arch and arch:FindFirstChild("LaneStart1")
@@ -418,7 +460,20 @@ return function(ctx: { [string]: any })
 					end
 					local bowSlot = slotOf(C, "short_bow")
 					if not (start and bowSlot and #targets > 0) then
-						check("t.bow.outsideRound", false, string.format("no lane start (%s), bow slot (%s) or targets (%d); C's bag %s", tostring(start), tostring(bowSlot), #targets, invLine(C)))
+						local near = {}
+						local rc = root(C)
+						for _, pp in ipairs(workspace:GetDescendants()) do
+							if pp:IsA("ProximityPrompt") and rc then
+								local par = pp.Parent
+								local pos = if par and par:IsA("BasePart") then par.Position elseif par and par:IsA("Attachment") then par.WorldPosition elseif par and par:IsA("Model") then par:GetPivot().Position else nil
+								if pos and (pos - rc.Position).Magnitude < 16 then
+									table.insert(near, string.format("%s '%s' en=%s key=%s d=%.1f max=%s", pp:GetFullName(), pp.ActionText, tostring(pp.Enabled), pp.KeyboardKeyCode.Name,
+										(pos - rc.Position).Magnitude, tostring(pp.MaxActivationDistance)))
+								end
+							end
+						end
+						check("t.bow.outsideRound", false, string.format("no lane start (%s), bow slot (%s) or targets (%d); C's bag %s; C at %s Bay=%s; prompts near C: %s", tostring(start), tostring(bowSlot), #targets, invLine(C),
+							if rc then v3(rc.Position) else "?", tostring(C:GetAttribute("TrainingBay")), table.concat(near, " ; ")))
 						return
 					end
 					put(C, start.Position, targets[1]:GetPivot().Position)
@@ -656,6 +711,21 @@ return function(ctx: { [string]: any })
 			task.wait(0.8)
 		end
 		local lentBefore = lentIn(A)
+		-- first into the red room beside the disc (there they stop colliding with each other: TrainSolo), then onto the
+		-- disc: dropped together onto the raised Blender disc they shoved each other off its edge (run T15)
+		for k, p in ipairs(players()) do
+			local ang = k * 2.1
+			put(p, disc.Position + Vector3.new(math.cos(ang) * 7, 4, math.sin(ang) * 7), disc.Position)
+		end
+		waitFor(function()
+			for _, p in ipairs(players()) do
+				if p:GetAttribute("InRedRoom") ~= true then
+					return false
+				end
+			end
+			return true
+		end, 3)
+		task.wait(0.3)
 		for k, p in ipairs(players()) do
 			onDisc(p, disc, k)
 		end
@@ -727,6 +797,13 @@ return function(ctx: { [string]: any })
 		task.wait(0.4)
 		offer(B, C)
 		task.wait(0.6)
+		do
+			local rb, rc = root(B), root(C)
+			local sc = ast(C)
+			L(string.format("ALLY B->C offer: %.1f studs apart, B alive=%s InArena=%s, C alive=%s InArena=%s; C offer line '%s' rows %s lines %s",
+				if rb and rc then (rb.Position - rc.Position).Magnitude else -1, tostring(B:GetAttribute("Alive")), tostring(B:GetAttribute("InArena")),
+				tostring(C:GetAttribute("Alive")), tostring(C:GetAttribute("InArena")), tostring(sc.offer), fmt(sc.rows), fmt(sc.lines)))
+		end
 		call(C, "ally", { "hold", 0.5 })
 		local bc = waitFor(function()
 			return Ally.allied(B, C)

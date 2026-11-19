@@ -802,21 +802,30 @@ local function updateStatus()
 		-- the road to the arena (TrainRideService): the ride, the training, the launch doors; PhaseEndsAt is the call
 		local stage = GameState:GetAttribute("TrainStage")
 		local solo = GameState:GetAttribute("TrainSolo") == true
-		if stage == "Ride" then
+		local atCentre = player:GetAttribute("AtTrainingCentre") == true
+		if stage == "Ride" and not atCentre then
 			local left = math.max(0, (tonumber(GameState:GetAttribute("TrainRideEnd")) or now) - now)
-			setStatus(string.format("The Training Centre in %s", num(Util.formatTime(left), size)),
-				if solo then "Practice round · on the train" else "On the train", nil, false)
+			setStatus(string.format("The Training Centre in %s", num(Util.formatTime(left), size)), "On the train", nil, false)
 		elseif GameState:GetAttribute("TrainDoorsOpen") == true then
 			if player:GetAttribute("TrainHeld") == false then
 				setStatus("This round is full", "You are first on the next train", nil, false)
+			elseif solo and player:GetAttribute("InRedRoom") ~= true then
+				-- alone the launch doors stand open from the arrival: train as long as you like, up to the call
+				setStatus("Training Centre: try the stations", string.format("The doors to the launch are open · the call in %s",
+					num(Util.formatTime(remaining))), nil, false)
 			else
 				setStatus(string.format("The call in %s", num(Util.formatTime(remaining), size)),
-					"The doors are open · walk to the red room", nil, false)
+					if player:GetAttribute("InRedRoom") == true then "Stand on the disc" else "The doors are open · walk to the red room", nil, false)
 			end
 		else
+			-- one quiet line from the arrival: what this place is and when the way on opens (the marker shows the hall)
 			local doorsLeft = math.max(0, (tonumber(GameState:GetAttribute("TrainDoorsAt")) or now) - now)
-			setStatus(string.format("Doors open in %s", num(Util.formatTime(doorsLeft), size)),
-				if solo then "Practice round · train, then walk to the red room" else "Train, choose your kit and your allies", nil, false)
+			local line = string.format("Training Centre: try the stations · doors to the launch open in %s", num(Util.formatTime(doorsLeft), size))
+			if phone() then
+				setStatus("Training Centre: try the stations", string.format("Doors to the launch open in %s", num(Util.formatTime(doorsLeft))), nil, false)
+			else
+				setStatus(line, "", nil, false)
+			end
 		end
 	elseif phase == "Intermission" then
 		local total = math.max(1, tonumber(Config.Round.IntermissionTime) or 1)
