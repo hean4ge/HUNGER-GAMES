@@ -934,9 +934,19 @@ local function startThrow(now: number, spear: boolean)
 		return
 	end
 	local windup = if spear then 0.15 else 0.1
+	-- (wave 12: the wind-up is the throw clip's own Release marker, 0.2 s for the hatchet, 0.3 s for the Twin-Bit Axe,
+	-- 0.25 s for the Longsword's borrowed one, so the first-person clip plays at its own pace instead of squeezed into
+	-- a fixed 0.15 s; the others are told the same lead by the server)
+	local okFc, FightClips = pcall(require, Shared:FindFirstChild("FightClips") :: ModuleScript)
+	if okFc and type(FightClips) == "table" and type(FightClips.throwTiming) == "function" then
+		local okT, _, release = pcall(FightClips.throwTiming, def.id)
+		if okT and type(release) == "number" and release > 0 then
+			windup = math.clamp(release, 0.06, 0.45)
+		end
+	end
 	local total = math.max(def.cooldown or 0.5, windup + 0.3)
 	if spear then
-		total = math.max(total, 0.6)
+		total = math.max(total, windup + 0.45, 0.6)
 	end
 	local rec = {
 		kind = "Throw",
@@ -953,6 +963,12 @@ local function startThrow(now: number, spear: boolean)
 	nextActionAt = now + total
 	spendStamina((if spear then def.throwStaminaCost else nil) or def.staminaCost or 0.05)
 	stopSprint()
+	if RangedRelease then
+		-- the others are told the throw began, so its clip's wind-up plays on them before the release (CombatService
+		-- "ThrowStart": rate-limited, one per throw, lead = the same Release marker)
+		local cf = camera.CFrame
+		RangedRelease:FireServer(rec.shotId, cf.Position, cf.LookVector, 0, "ThrowStart")
+	end
 	CombatController.action:Fire("ThrowStart", rec)
 end
 

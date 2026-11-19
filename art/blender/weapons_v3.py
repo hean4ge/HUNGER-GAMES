@@ -1,4 +1,4 @@
-﻿"""
+"""
 weapons_v3.py - WeaponsV3: every starred weapon at five looks, 1 to 5 stars (docs/design/Combat_v3.md section 5),
 plus the two new weapons from the owner's 19 Nov pictures, as our own designs:
   paired_blades / paired_blades_L  two short single-edged blades, round guard, diamond cord wrap, clipped tip
@@ -17,8 +17,10 @@ Rule (Combat_v3 5.1): the silhouette stays the same at every star; detail grows 
   2 Sound       clean edge, tidy grip
   3 Fine        fuller / bevel line, diamond cross-wrap (raised lattice), steel ferrule ring, pale honed edge
   4 Superior    brass collar and pommel cap, two engraved bands, rivet row, stitched grip edge, dark hardwood
-  5 Masterwork  spine / haft inlay, layered-steel band by the edge, cord knot and tassel, maker's mark,
-                near-black steel against the pale honed edge (strongest value contrast)
+  5 Masterwork  spine / haft inlay, cord knot and tassel, maker's mark, near-black steel against the pale honed
+                edge (strongest value contrast). v2 (19 Nov, owner: the layered band read as saw teeth): blades get
+                one continuous temper zone with a slow smooth wave by the edge (Bl.temper) and an inlaid fuller line;
+                axes and the Ring Blade one smooth inlaid band. Nothing stepped or alternating.
 All matte (roughness >= 0.6, no emissive). Steel greys lean warm-neutral, never blue (blued steel read navy in the
 train's daylight, WeaponLooks note 18 Nov).
 Held-item convention (art/README.md section 3, WeaponsV2): grip at the origin, item along Blender +Z (Roblox +Y),
@@ -77,7 +79,7 @@ FIXED = {
     "LayerDark": ("Metal", (36, 34, 33)),
     "LayerLight": ("Metal", (124, 120, 112)),
     "Patch": ("Metal", (114, 100, 84)),
-    "Stitch": ("Fabric", (200, 190, 164)),
+    "Stitch": ("Fabric", (150, 136, 112)),          # v2: was (200, 190, 164); pale dashes read as a comb
     "Tassel": ("Fabric", (116, 48, 42)),         # oxblood cord (a cosmetic colour, not a hit effect)
     "Tassel2": ("Fabric", (178, 152, 98)),       # ochre cord: the left blade of the pair
     "Horn": ("Wood", (56, 48, 44)),
@@ -285,6 +287,29 @@ class Bl:
             for sd in (1, -1):
                 a.add("LayerLight", G.hull(pts[sd]))
 
+    def temper(self, a, z0, z1, f_lo=0.6, amp=0.07, wl=0.55, step=0.04, ramp=0.18, lift=0.0045,
+               role="LayerLight"):
+        """5 stars (v2, replaces layered): one continuous temper zone along the edge on both faces. Its lower boundary
+        is the body / edge-bevel line; its upper boundary is a slow, low wave (a hamon), sampled every `step` studs so
+        it reads as one smooth line, and it closes smoothly to the bevel at both ends. No facets, no steps."""
+        n = max(4, int(math.ceil((z1 - z0) / step)))
+        out = []
+        for sd in (1, -1):
+            secs = []
+            for i in range(n + 1):
+                z = z0 + (z1 - z0) * i / n
+                yb, yf, t = bl_at(self.st, z)
+                y0, y1 = body_span(yb, yf, self.band, self.double)
+                e = min(z - z0, z1 - z) / ramp
+                e = 1.0 if e >= 1 else (3 * e * e - 2 * e * e * e)            # smoothstep in / out
+                fw = f_lo + amp * math.sin(2 * PI * (z - z0) / wl)
+                fa = 0.995 - (0.995 - fw) * max(e, 0.04)
+                ya, yb_ = y0 + (y1 - y0) * fa, y0 + (y1 - y0) * 0.995
+                xo, xi = sd * (t + lift), sd * max(t - 0.003, 0.0005)
+                secs.append([(xo, ya, z), (xo, yb_, z), (xi, yb_, z), (xi, ya, z)])
+            out.append(G.loft(secs))
+        a.add(role, G.merge(*out))
+
     def patches(self, a, spots):
         for (z, dz, f0, f1, sd) in spots:
             a.add("Patch", self.face_strip(z, z + dz, f0, f1, lift=0.003, sides=(sd,)))
@@ -448,7 +473,8 @@ def knife(s, q):
             a.add("Stitch", stitches((0, -0.064, -0.27), (0, -0.064, 0.2), 8, (0, -1, 0)))
         if s >= 5:
             a.add("Inlay", B.spine_strip(0.3, 0.8))
-            B.layered(a, 0.36, 0.8, 8)
+            a.add("Inlay", B.face_strip(0.36, 0.78, 0.235, 0.255, lift=0.0065))        # inlaid fuller line
+            B.temper(a, 0.32, 0.86, f_lo=0.64, amp=0.045, wl=0.4, step=0.025, ramp=0.12)
             B.mark(a, 0.29, 0.25)
             tassel(a, (0, 0.0, -0.375), 0.3)
     grip_att(a)
@@ -492,7 +518,7 @@ def machete(s, q):
                                        T(sd * 0.052, 0, 0)))
             a.add("Stitch", stitches((0, 0.066, -0.4), (0, 0.066, 0.16), 9, (0, 1, 0)))
         if s >= 5:
-            B.layered(a, 0.5, 1.9, 12)
+            B.temper(a, 0.4, 1.92, f_lo=0.66, amp=0.06, wl=0.5)
             a.add("Inlay", B.spine_strip(0.3, 1.92))
             B.mark(a, 0.25, 0.3)
             tassel(a, (0, 0.0, -0.43), 0.3)
@@ -535,15 +561,19 @@ def hatchet(s, q):
         if s >= 5:
             a.add("Etch", G.cbox(0.137, 0.028, 0.302, 0, loc=(0, 0.06, zc)))           # engraved cheek band
             a.add("Etch", G.cbox(0.137, 0.012, 0.302, 0, loc=(0, 0.0, zc)))
-            for i in range(9):                                                           # layered edge
-                z0 = zc - 0.21 + i * 0.047
-                pts = []
-                for sd in (1, -1):
-                    pts = [(sd * 0.029, 0.37, z0), (sd * 0.022, 0.37, z0), (sd * 0.029, 0.37, z0 + 0.014),
-                           (sd * 0.022, 0.37, z0 + 0.014), (sd * 0.0255, 0.435, z0 + 0.03),
-                           (sd * 0.018, 0.435, z0 + 0.03), (sd * 0.0255, 0.435, z0 + 0.044),
-                           (sd * 0.018, 0.435, z0 + 0.044)]
-                    a.add("LayerLight", G.hull(pts))
+            # v2: one smooth inlaid band across each cheek, parallel to the bit (was 9 stepped facets: read as teeth)
+            def cheek(y, out):
+                f = (y - 0.30) / 0.14
+                x = 0.032 - 0.010 * f + out
+                return x, zc - 0.085 - 0.145 * f + 0.014, zc + 0.08 + 0.15 * f - 0.014
+            for sd in (1, -1):
+                for role, ya, yb_ in (("Inlay", 0.356, 0.374),):
+                    pts = []
+                    for y in (ya, yb_):
+                        for out in (0.0035, -0.004):
+                            x, zlo, zhi = cheek(y, out)
+                            pts += [(sd * x, y, zlo), (sd * x, y, zhi)]
+                    a.add(role, G.hull(pts))
             a.add("Grip", G.cyl(0.058, 1.12, 1.215, 8, ry=0.078, c=0.006))              # leather collar
             a.add("Stitch", stitches((0, -0.08, 1.125), (0, -0.08, 1.21), 3, (0, -1, 0), l=0.022))
             a.add("Stitch", stitches((0, 0.08, 1.125), (0, 0.08, 1.21), 3, (0, 1, 0), l=0.022))
@@ -638,7 +668,8 @@ def sword(s, q):
             a.add("Etch", B.face_strip(0.505, 0.52, 0.04, 0.96))
         if s >= 5:
             a.add("Inlay", G.cbox(0.02, 0.008, 2.3, 0, loc=(0, -0.0775, 1.6)))         # inlay on the raised spine
-            B.layered(a, 0.6, 2.7, 14)
+            a.add("Inlay", B.face_strip(0.56, 2.44, 0.28, 0.30, lift=0.0065))          # inlaid fuller line
+            B.temper(a, 0.55, 2.95)
             B.mark(a, 0.43, 0.5)
             tassel(a, (0, 0.0, -0.45), 0.32)
     grip_att(a)
@@ -678,18 +709,18 @@ def twin_axe(s, q):
                 poly = [(0.34, 0.02), (0.4, 0.09), (0.47, 0.07), (0.5, -0.02), (0.44, -0.07), (0.37, -0.05)]
                 a.add("Patch", G.hull([(xs * xx, sd * yy, zc + dz) for (yy, dz) in poly
                                        for xx in (0.024 + 0.04 * (0.62 - yy) / 0.3 * 0.55 + 0.004, 0.012)]))
-        if q and s >= 5:                                   # layered steel band along each bit's arc
-            for i in range(len(arc) - 1):
+        if q and s >= 5:                                   # v2: one smooth inlaid band along each bit's arc
+            for i in range(len(arc) - 1):                  # (was alternating dark / light facets: read as teeth)
                 for xs in (1, -1):
                     (y0, d0), (y1, d1) = arc[i], arc[i + 1]
                     pts = []
                     for (yy, dz) in ((y0, d0), (y1, d1)):
                         p = V((0, sd * yy, zc + dz))
                         dd = (p - cen).normalized()
-                        for k, xx in ((0.1, 0.032), (0.0, 0.03)):
-                            pp = p - dd * (0.04 + k * 0.6)
-                            pts += [(xs * xx, pp.y, pp.z), (xs * (xx - 0.008), pp.y, pp.z)]
-                    a.add("LayerDark" if i % 2 == 0 else "LayerLight", G.hull(pts))
+                        for inset, xx in ((0.075, 0.0305), (0.055, 0.0295)):
+                            pp = p - dd * inset
+                            pts += [(xs * xx, pp.y, pp.z), (xs * (xx - 0.009), pp.y, pp.z)]
+                    a.add("Inlay", G.hull(pts))
     if q:
         if s >= 3:
             a.add("Fitting", G.cyl(0.07, 2.08, 2.14, 8, ry=0.086, c=0.006))
@@ -760,16 +791,11 @@ def ring_blade(s, q):
             for z in (-half + 0.03, -half + 0.07, half - 0.07, half - 0.03):
                 a.add("Etch", G.cyl(0.0455, z - 0.007, z + 0.007, 8))
         if s >= 5:
-            for i in range(-5, 5):                            # layered band round the outer edge
-                for sd in (1, -1):
-                    a.add("LayerDark" if i % 2 == 0 else "LayerLight",
-                          G.hull([pt(r_mid - 0.045, ang(i), sd * (t + 0.004)), pt(r_mid - 0.045, ang(i), sd * (t - 0.002)),
-                                  pt(r_mid - 0.005, ang(i + 0.35), sd * (t + 0.004)),
-                                  pt(r_mid - 0.005, ang(i + 0.35), sd * (t - 0.002)),
-                                  pt(r_mid - 0.045, ang(i + 1), sd * (t + 0.004)),
-                                  pt(r_mid - 0.045, ang(i + 1), sd * (t - 0.002)),
-                                  pt(r_mid - 0.005, ang(i + 1.35), sd * (t + 0.004)),
-                                  pt(r_mid - 0.005, ang(i + 1.35), sd * (t - 0.002))]))
+            for sd in (1, -1):                                # v2: one smooth inlaid line round the front arc
+                a.add("Inlay", G.loft([[pt(r_mid - 0.034, ang(k / 4), sd * (t + 0.004)),
+                                        pt(r_mid - 0.018, ang(k / 4), sd * (t + 0.004)),
+                                        pt(r_mid - 0.018, ang(k / 4), sd * (t - 0.002)),
+                                        pt(r_mid - 0.034, ang(k / 4), sd * (t - 0.002))] for k in range(-20, 21)]))
     grip_att(a)
     a.attach("Tip", (0, cy + r_out, 0), look=(0, 1, 0), up=(0, 0, 1))
     a.attach("Spin", (0, cy, 0), look=(1, 0, 0), up=(0, 1, 0))
@@ -960,7 +986,7 @@ def blade_pair(wid, s, q, side="R", grip_len=0.6, blade_len=2.0, notes=""):
             a.add("Etch", B.face_strip(z_col1 + 0.095, z_col1 + 0.11, 0.04, 0.96))
         if s >= 5:
             a.add("Inlay", B.spine_strip(z_col1 + 0.05, z_col1 + blade_len - 0.3))
-            B.layered(a, z_col1 + 0.25, z_col1 + blade_len - 0.32, max(8, int(blade_len * 6)))
+            B.temper(a, z_col1 + 0.12, z_col1 + blade_len - 0.3, f_lo=0.62, amp=0.06, wl=0.5)
             B.mark(a, z_col1 + 0.02, 0.3)
             tassel(a, (0, 0.0, gz0 - 0.05), 0.3, role="Tassel" if side == "R" else "Tassel2")
     grip_att(a)

@@ -4,9 +4,10 @@
 	  Assets.Items.paired_blades_L_t1 .. _t5   the pair's left blade (InventoryService's OffHand build)
 	  Assets.Items.<id>                 the base template = that weapon's 2-star mesh, so every build path shows a mesh
 	  Assets.Items.throwing_knife / arrow / wire_snare   the unstarred WeaponsV3 meshes
-	Source: WeaponsV3.glb, uploaded once (19 Nov 2026, the owner's yes) as the Model asset LS_WeaponsV3_v1
-	(Manifest.SOURCE; ledger art/manifests/WeaponsV3.manifest.json "uploads"). The raw insert stays in
-	ServerStorage.MeshImports.LS_WeaponsV3_v1 (a package; never edit it; build() loads it when missing).
+	Source: WeaponsV3.glb, uploaded once per version (19 Nov 2026, the owner's yes): LS_WeaponsV3_v1, then
+	LS_WeaponsV3_v2 (smooth 5-star finish) (Manifest.SOURCE; ledger art/manifests/WeaponsV3.manifest.json "uploads").
+	The raw insert stays in ServerStorage.MeshImports.<SOURCE.name> (a package; never edit it; build() loads it when
+	missing).
 
 	The importer drops colours: every part is SmoothPlastic in the manifest's own rgb, Reflectance 0 (the owner, 19 Nov:
 	no Roblox tiled Wood or Metal on held items; matte, steel warm-neutral). Parts carry attribute Role (the
@@ -198,7 +199,10 @@ end
 local function install(items: Folder, archive: Folder, name: string, model: Model)
 	local old = items:FindFirstChild(name)
 	if old then
-		if old:GetAttribute("Source") ~= Manifest.SOURCE.name and not archive:FindFirstChild(name) then
+		-- an earlier WeaponsV3 upload (LS_WeaponsV3_v1 ...) is simply replaced; only pre-V3 templates are archived
+		local src = old:GetAttribute("Source")
+		local fromV3 = type(src) == "string" and string.sub(src, 1, 13) == "LS_WeaponsV3_"
+		if not fromV3 and not archive:FindFirstChild(name) then
 			old.Parent = archive
 		else
 			old:Destroy()

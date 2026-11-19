@@ -40,7 +40,8 @@ def main():
     w("\treturn { pos = pos, look = look, up = up }")
     w("end")
     w("return {")
-    w("\tSOURCE = { assetId = %s, name = \"LS_WeaponsV3_v1\", file = \"WeaponsV3.glb\" }," % (near.get("assetId") or "nil"))
+    w("\tSOURCE = { assetId = %s, name = \"%s\", file = \"WeaponsV3.glb\" }," % (
+        near.get("assetId") or "nil", near.get("displayName") or "LS_WeaponsV3_v1"))
     w("\tItems = {")
     for a in d["assets"]:
         if a["name"].endswith("_Far"):

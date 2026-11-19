@@ -235,6 +235,11 @@ local PARKED = CFrame.new(0, -10000, 0)
 
 -- Big soft items are held smaller in the view.
 local ITEM_SCALE: { [string]: number } = { leather_vest = 0.42, padded_armor = 0.4, medkit = 0.62 }
+-- The off-hand item's hold (replaces the mirrored main hold; Grip space as ITEM_HOLD). The Paired Blades' left blade
+-- leans forward 35 degrees and out 15, so the pair no longer stands upright on both sides of the view (wave 12).
+Rig.OFFHAND_HOLD = {
+	paired_blades = CFrame.Angles(0, math.rad(15), 0) * CFrame.Angles(math.rad(-35), 0, 0),
+} :: { [string]: CFrame }
 -- Where an item sits in the fist: its Grip frame relative to Rig.GRIP (Grip space: -Z toward the business end, -X
 -- toward the palm). Things wider than the fist (the apple, the bandage roll, the bottles, the ration tin) sit in it on
 -- the palm side, so the fingers close round them instead of the item perching on top; the bottles are gripped round

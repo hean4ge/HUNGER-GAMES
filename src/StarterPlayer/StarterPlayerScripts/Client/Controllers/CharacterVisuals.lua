@@ -327,6 +327,8 @@ local UPPER_JOINTS = { "Waist", "Neck", "LeftShoulder", "RightShoulder", "LeftEl
 
 local Controllers = nil
 local entries: { [Model]: any } = {}
+-- wave 12: the throws whose start was relayed ("ThrowStart"), so the release ("Throw") doesn't restart their clip
+local throwStarted: { [Model]: { itemId: string?, at: number, lead: number } } = setmetatable({}, { __mode = "k" }) :: any
 local localEntry = nil
 local errorAt = -math.huge
 local fpDown = 0 -- 0..1 how steeply the first-person view looks down (smoothed)
@@ -1139,7 +1141,7 @@ local function onCombatAction(payload: any)
 		return
 	end
 	if action ~= "Swing" and action ~= "Draw" and action ~= "Release" and action ~= "Guard" and action ~= "Charge"
-		and action ~= "Dodge" and action ~= "Skill" and action ~= "Throw" then
+		and action ~= "Dodge" and action ~= "Skill" and action ~= "Throw" and action ~= "ThrowStart" then
 		return
 	end
 	local userId = tonumber(payload.userId)
@@ -1194,11 +1196,21 @@ local function onCombatAction(payload: any)
 		elseif type(skill) == "string" and SKILL_BODY[skill] then
 			CharacterVisuals.playBody(character, SKILL_BODY[skill])
 		end
+	elseif action == "ThrowStart" then
+		-- wave 12: the throw began (the server relays it at once, lead = seconds to the release): the clip plays from
+		-- its first frame, wind-up included, fitted so it lets go when the release arrives
+		CharacterVisuals.setGuard(character, false, itemId)
+		CharacterVisuals.playThrow(character, itemId, tonumber(payload.lead))
 	elseif action == "Throw" then
 		-- the Throwing family's Blender clip (throw_knife, throw_dagger, throw_ring, throw_hatchet, throw_spear,
-		-- throw_twinaxe; Shared.FightClips): the throw was released on the server just now
+		-- throw_twinaxe; Shared.FightClips): the throw was released on the server just now. When its start was relayed
+		-- the clip is already playing through the release; only a throw with no start seen plays it from here.
 		CharacterVisuals.setGuard(character, false, itemId)
-		CharacterVisuals.playThrow(character, itemId)
+		local started = throwStarted[character]
+		if not (started and started.itemId == itemId and os.clock() - started.at < started.lead + 0.6) then
+			CharacterVisuals.playThrow(character, itemId)
+		end
+		throwStarted[character] = nil
 	else
 		bowEvent(entries[character], action, payload.cancelled == true) -- (item 8: another player's draw)
 		if action == "Release" and payload.cancelled ~= true then
@@ -1207,10 +1219,19 @@ local function onCombatAction(payload: any)
 	end
 end
 
--- A throw's body (Combat_v3 7.2 Throwing): the Blender clip for the thrown item, from its release.
-function CharacterVisuals.playThrow(character: Model, itemId: string?): boolean
+-- A throw's body (Combat_v3 7.2 Throwing): the Blender clip for the thrown item. lead (wave 12: from the relayed
+-- "ThrowStart") = seconds until the release: the clip plays from its first frame, wind-up and all, and lets go then.
+-- Without a lead the throw was seen only at its release: the clip starts late in its wind-up, as before.
+function CharacterVisuals.playThrow(character: Model, itemId: string?, lead: number?): boolean
 	local okFc, FightClips = pcall(require, ReplicatedStorage.Shared:FindFirstChild("FightClips") :: ModuleScript)
 	local name = if okFc and type(itemId) == "string" then FightClips.forMove(itemId, "Throw") else nil
+	if type(lead) == "number" and lead > 0.02 and name then
+		local played = clipPlay(character, name, { lead = math.min(lead, 0.6), blendIn = 0.06 }) ~= nil
+		if played then
+			throwStarted[character] = { itemId = itemId, at = os.clock(), lead = math.min(lead, 0.6) }
+		end
+		return played
+	end
 	-- (the release is the server's moment. Started two samples before the release, the throw read as a twitch with no
 	-- reach back: it now starts at the top of the wind-up's last half and comes through to the release in 0.09 s, so
 	-- the arm is seen cocked and whipping forward, then follows through)

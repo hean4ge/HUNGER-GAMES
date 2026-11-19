@@ -775,7 +775,9 @@ local function update(dt: number)
 			-- (right, left) in camera space, or nil), else the procedural swing
 			right, left = Poses.swing(anim.style, anim.variant, anim.t, anim.windup, anim.strike, anim.total, right, left, anim.jitter, chain)
 		elseif anim.kind == "Throw" then
-			right = Poses.throw(anim.spear, anim.t, anim.windup, anim.total, right)
+			-- (the javelin set only for the spear's own hold: CombatController marks every melee throw `spear`, so an
+			-- axe or sword under its clip was wound back like a javelin)
+			right = Poses.throw(anim.spear and heldKind == "Spear", anim.t, anim.windup, anim.total, right)
 		end
 	end
 	-- the Blender clips (ClipPlayer: the first-person wrists of the move, fitted to the strike), blended over the

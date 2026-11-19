@@ -20,6 +20,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local Net = require(Shared:WaitForChild("Net"))
+local Stars = require(Shared:WaitForChild("Stars"))
 local WorldItems = require(Shared:WaitForChild("WorldItems"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
@@ -144,7 +145,11 @@ local function setTarget(item: Item?, grab: Vector3?)
 		if target ~= item then
 			target = item
 			local def = ItemDefs.get(item.itemId)
-			p.ObjectText = if def then def.name else item.itemId
+			-- a thrown weapon keeps its stars (attribute Stars, ProjectileService): "Take Longsword ★★★★★", like the
+			-- ground loot's prompt (LootService); arrows and knives have none and read as before
+			local stars = item.model:GetAttribute("Stars")
+			local label = if type(stars) == "number" and Stars.of(item.itemId, stars) then Stars.label(item.itemId, stars) else nil
+			p.ObjectText = label or (if def then def.name else item.itemId)
 		end
 		local h = holder :: Attachment
 		if (h.WorldPosition - grab).Magnitude > 0.05 then

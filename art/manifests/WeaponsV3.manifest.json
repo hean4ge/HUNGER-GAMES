@@ -12,16 +12,19 @@
   "notes": [
    "One upload per file through Open Cloud POST /assets/v1/assets (owner approval 19 Nov 2026). Never re-upload a file listed here; reuse its id.",
    "Paths are relative to BlenderExports/WeaponsV3 (C:/Users/USER/OneDrive/Documents/LastStanding/BlenderExports/WeaponsV3).",
-   "Raw inserts: ServerStorage.MeshImports.<displayName> (packages; never edit them). Templates: ServerStorage.WorldGen.WeaponsV3Assets.build()."
+   "Raw inserts: ServerStorage.MeshImports.<displayName> (packages; never edit them). Templates: ServerStorage.WorldGen.WeaponsV3Assets.build().",
+   "v2 (19 Nov 2026, wave 12 tier-look): near set re-uploaded once as LS_WeaponsV3_v2; file at BlenderExports/WeaponsV3/v2/WeaponsV3.glb. WeaponsV3.glb@v1 is kept for history."
   ],
   "WeaponsV3.glb": {
-   "displayName": "LS_WeaponsV3_v1",
-   "operationId": "6ab7a12e-2b72-4f58-8c19-463a2efc627c",
-   "uploadedUtc": "2026-11-19T06:08:58.098Z",
-   "assetId": 78965894282116,
+   "displayName": "LS_WeaponsV3_v2",
+   "operationId": "7f321eed-3e25-46ff-8378-cb5a7dd03e35",
+   "uploadedUtc": "2026-11-19T08:05:43.202Z",
+   "assetId": 131657866476058,
    "moderationState": "Approved",
-   "bytes": 3547016,
-   "revisionId": "1"
+   "bytes": 3530248,
+   "revisionId": "1",
+   "file": "v2/WeaponsV3.glb",
+   "why": "5-star finish redone (owner: the layered band read as saw teeth): continuous temper line, inlaid fuller line, smooth inlaid bands on the axes and the Ring Blade; stitches toned down. Same names, bounds, origins and attachments as v1 except the 5-star layer parts (hatchet_t5_LayerLight, twin_axe_t5_LayerDark/LayerLight, ring_blade_t5_LayerDark/LayerLight removed; ring_blade_t5_Inlay added)."
   },
   "WeaponsV3_Far.glb": {
    "displayName": "LS_WeaponsV3_Far_v1",
@@ -30,7 +33,18 @@
    "assetId": 131421178360397,
    "moderationState": "Approved",
    "bytes": 811448,
-   "revisionId": "1"
+   "revisionId": "1",
+   "note": "v2 regenerated far set is byte-identical to v1 (all v2 changes are near-only details): not re-uploaded."
+  },
+  "WeaponsV3.glb@v1": {
+   "displayName": "LS_WeaponsV3_v1",
+   "operationId": "6ab7a12e-2b72-4f58-8c19-463a2efc627c",
+   "uploadedUtc": "2026-11-19T06:08:58.098Z",
+   "assetId": 78965894282116,
+   "moderationState": "Approved",
+   "bytes": 3547016,
+   "revisionId": "1",
+   "supersededBy": "LS_WeaponsV3_v2"
   }
  },
  "generator": "weapons_v3.py (+ wv3_geo.py)",
@@ -1377,9 +1391,9 @@
   "Stitch": {
    "robloxMaterial": "Fabric",
    "rgb": [
-    200,
-    190,
-    164
+    150,
+    136,
+    112
    ]
   },
   "Tassel": {
@@ -2143,9 +2157,9 @@
      "tris": 96,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -2229,7 +2243,7 @@
     1.392,
     0.25
    ],
-   "tris": 1606,
+   "tris": 1830,
    "parts": [
     {
      "name": "knife_t5_Blade",
@@ -2357,9 +2371,9 @@
      "tris": 96,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -2371,7 +2385,7 @@
      "name": "knife_t5_Inlay",
      "role": "Inlay",
      "finishRole": "Brass",
-     "tris": 28,
+     "tris": 84,
      "robloxMaterial": "Metal",
      "rgb": [
       164,
@@ -2388,7 +2402,7 @@
      "name": "knife_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 192,
+     "tris": 360,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -4406,7 +4420,7 @@
     1.78,
     1.764
    ],
-   "tris": 1448,
+   "tris": 1856,
    "parts": [
     {
      "name": "ring_blade_t5_Blade",
@@ -4545,32 +4559,15 @@
      "canTouch": false
     },
     {
-     "name": "ring_blade_t5_LayerLight",
-     "role": "LayerLight",
-     "finishRole": "Steel",
-     "tris": 120,
+     "name": "ring_blade_t5_Inlay",
+     "role": "Inlay",
+     "finishRole": "Brass",
+     "tris": 648,
      "robloxMaterial": "Metal",
      "rgb": [
-      124,
-      120,
-      112
-     ],
-     "collide": false,
-     "collision": "Box",
-     "castShadow": false,
-     "canQuery": false,
-     "canTouch": false
-    },
-    {
-     "name": "ring_blade_t5_LayerDark",
-     "role": "LayerDark",
-     "finishRole": "Steel",
-     "tris": 120,
-     "robloxMaterial": "Metal",
-     "rgb": [
-      36,
-      34,
-      33
+      164,
+      132,
+      74
      ],
      "collide": false,
      "collision": "Box",
@@ -5377,7 +5374,7 @@
     3.712,
     0.45
    ],
-   "tris": 1788,
+   "tris": 2036,
    "parts": [
     {
      "name": "sword_t5_Blade",
@@ -5502,7 +5499,7 @@
      "name": "sword_t5_Inlay",
      "role": "Inlay",
      "finishRole": "Brass",
-     "tris": 12,
+     "tris": 68,
      "robloxMaterial": "Metal",
      "rgb": [
       164,
@@ -5519,7 +5516,7 @@
      "name": "sword_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 792,
+     "tris": 984,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -6259,9 +6256,9 @@
      "tris": 108,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -6345,7 +6342,7 @@
     2.55,
     0.325
    ],
-   "tris": 1454,
+   "tris": 1542,
    "parts": [
     {
      "name": "machete_t5_Blade",
@@ -6473,9 +6470,9 @@
      "tris": 108,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -6487,7 +6484,7 @@
      "name": "machete_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 528,
+     "tris": 616,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -7398,7 +7395,7 @@
     2.755,
     0.421
    ],
-   "tris": 1714,
+   "tris": 1834,
    "parts": [
     {
      "name": "paired_blades_t5_Blade",
@@ -7557,7 +7554,7 @@
      "name": "paired_blades_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 528,
+     "tris": 648,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -8456,7 +8453,7 @@
     2.755,
     0.421
    ],
-   "tris": 1714,
+   "tris": 1834,
    "parts": [
     {
      "name": "paired_blades_L_t5_Blade",
@@ -8615,7 +8612,7 @@
      "name": "paired_blades_L_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 528,
+     "tris": 648,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -9509,7 +9506,7 @@
     3.455,
     0.421
    ],
-   "tris": 2058,
+   "tris": 2186,
    "parts": [
     {
      "name": "wrapped_sabre_t5_Blade",
@@ -9668,7 +9665,7 @@
      "name": "wrapped_sabre_t5_LayerLight",
      "role": "LayerLight",
      "finishRole": "Steel",
-     "tris": 744,
+     "tris": 872,
      "robloxMaterial": "Metal",
      "rgb": [
       124,
@@ -10450,9 +10447,9 @@
      "tris": 84,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -10538,7 +10535,7 @@
     2.1,
     0.675
    ],
-   "tris": 1498,
+   "tris": 1306,
    "parts": [
     {
      "name": "hatchet_t5_Wood",
@@ -10666,9 +10663,9 @@
      "tris": 156,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -10694,27 +10691,10 @@
      "canTouch": false
     },
     {
-     "name": "hatchet_t5_LayerLight",
-     "role": "LayerLight",
-     "finishRole": "Steel",
-     "tris": 216,
-     "robloxMaterial": "Metal",
-     "rgb": [
-      124,
-      120,
-      112
-     ],
-     "collide": false,
-     "collision": "Box",
-     "castShadow": false,
-     "canQuery": false,
-     "canTouch": false
-    },
-    {
      "name": "hatchet_t5_Inlay",
      "role": "Inlay",
      "finishRole": "Brass",
-     "tris": 24,
+     "tris": 48,
      "robloxMaterial": "Metal",
      "rgb": [
       164,
@@ -11647,7 +11627,7 @@
     3.656,
     1.56
    ],
-   "tris": 1648,
+   "tris": 1624,
    "parts": [
     {
      "name": "twin_axe_t5_Wood",
@@ -11769,32 +11749,15 @@
      "canTouch": false
     },
     {
-     "name": "twin_axe_t5_LayerDark",
-     "role": "LayerDark",
-     "finishRole": "Steel",
-     "tris": 96,
+     "name": "twin_axe_t5_Inlay",
+     "role": "Inlay",
+     "finishRole": "Brass",
+     "tris": 192,
      "robloxMaterial": "Metal",
      "rgb": [
-      36,
-      34,
-      33
-     ],
-     "collide": false,
-     "collision": "Box",
-     "castShadow": false,
-     "canQuery": false,
-     "canTouch": false
-    },
-    {
-     "name": "twin_axe_t5_LayerLight",
-     "role": "LayerLight",
-     "finishRole": "Steel",
-     "tris": 96,
-     "robloxMaterial": "Metal",
-     "rgb": [
-      124,
-      120,
-      112
+      164,
+      132,
+      74
      ],
      "collide": false,
      "collision": "Box",
@@ -11812,23 +11775,6 @@
       40,
       38,
       36
-     ],
-     "collide": false,
-     "collision": "Box",
-     "castShadow": false,
-     "canQuery": false,
-     "canTouch": false
-    },
-    {
-     "name": "twin_axe_t5_Inlay",
-     "role": "Inlay",
-     "finishRole": "Brass",
-     "tris": 24,
-     "robloxMaterial": "Metal",
-     "rgb": [
-      164,
-      132,
-      74
      ],
      "collide": false,
      "collision": "Box",
@@ -12457,9 +12403,9 @@
      "tris": 192,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -12672,9 +12618,9 @@
      "tris": 192,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",
@@ -12887,9 +12833,9 @@
      "tris": 192,
      "robloxMaterial": "Fabric",
      "rgb": [
-      200,
-      190,
-      164
+      150,
+      136,
+      112
      ],
      "collide": false,
      "collision": "Box",

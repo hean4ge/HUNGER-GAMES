@@ -133,7 +133,15 @@ local FAMILY_PREFIX = { Fists = "fists", ShortBlade = "shortblade", Sword = "swo
 local SKILL = { Fists = "fists_skill_head_kick", ShortBlade = "shortblade_skill_chained", Sword = "sword_skill_running_cut",
 	Axe = "axe_skill_whirl", Spear = "spear_skill_vault_kick" }
 local THROW = { throwing_knife = "throw_knife", leaf_dagger = "throw_dagger", ring_blade = "throw_ring",
-	hatchet = "throw_hatchet", spear = "throw_spear", twin_axe = "throw_twinaxe" }
+	hatchet = "throw_hatchet", spear = "throw_spear", twin_axe = "throw_twinaxe",
+	-- (wave 12: every melee weapon can be thrown; until each has its own Blender throw, it borrows the closest one,
+	-- re-timed by THROW_RETIME: the long blades the hatchet's overhand throw, a touch slower; the short blades the
+	-- dagger's flick)
+	sword = "throw_hatchet", wrapped_sabre = "throw_hatchet", machete = "throw_hatchet", climb_pick = "throw_hatchet",
+	knife = "throw_dagger", paired_blades = "throw_dagger" }
+-- how much later than the borrowed clip's own Release marker a weapon lets go (1 = the clip's timing)
+local THROW_RETIME = { sword = 1.25, wrapped_sabre = 1.15, machete = 1.05, climb_pick = 1.05, knife = 1.25,
+	paired_blades = 1.15 }
 local COMMON = { Kick = "kick", Parry = "parry", GuardIn = "guard_in", GuardHold = "guard_hold", GuardOut = "guard_out",
 	BlockHit = "block_hit", GuardBreak = "guard_break", DodgeBack = "dodge_back", DodgeLeft = "dodge_left",
 	DodgeRight = "dodge_right", DodgeRoll = "dodge_roll", Knockdown = "knockdown", Getup = "getup" }
@@ -184,6 +192,23 @@ function FightClips.forMove(itemId: string, move: string, n: number?): string?
 		return exists(fam and "equip_" .. string.lower(fam))
 	end
 	return exists(COMMON[move])
+end
+
+-- A throw's timing: (clip name?, seconds from the throw's start to the release?). The release is the clip's own
+-- Release marker (else its hit), stretched by THROW_RETIME for a weapon that borrows another's clip; the attacker's
+-- wind-up (CombatController.startThrow) and the others' fit of the clip (CombatService "ThrowStart" lead) both use it,
+-- so the hand lets go on the frame the clip lets go. (nil release: no clip; the caller keeps its own number.)
+function FightClips.throwTiming(itemId: string): (string?, number?)
+	local name = FightClips.forMove(itemId, "Throw")
+	if not name then
+		return nil, nil
+	end
+	local raw = FightClips.get(name)
+	local release = raw and ((type(raw.markers) == "table" and tonumber(raw.markers.Release)) or tonumber(raw.hit))
+	if not release or release <= 0 then
+		return name, nil
+	end
+	return name, release * (THROW_RETIME[itemId] or 1)
 end
 
 return FightClips

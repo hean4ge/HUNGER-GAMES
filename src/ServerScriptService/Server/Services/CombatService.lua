@@ -2125,6 +2125,46 @@ local function onMeleeSwing(player: Player, lookDirection: any, predictedHit: an
 	end
 end
 
+-- RangedRelease(shotId, origin, look, 0, "ThrowStart"), wave 12: a throw began on the attacker's client. Like a
+-- swing's "Start", the others near are told at once (CombatAction "ThrowStart", lead = seconds to the release, the
+-- throw clip's own Release marker: Shared.FightClips.throwTiming), so their clients play the clip's wind-up before
+-- the release instead of starting it at the release frame. Cheap and bounded: its own limiter (never eating the
+-- shots' budget), only with something throwable in hand, not while the throw cooldown is still closed, and at most
+-- one per THROW_START_GAP (a modified client cannot show wind-ups faster than a real throw can follow them).
+local THROW_START_GAP = 0.35
+local function onThrowStart(player: Player)
+	if not Net.rateLimit(player, "ThrowStart", 3, 2) then
+		return
+	end
+	local ctx = getContext(player)
+	if not ctx then
+		return
+	end
+	local itemId = equippedItemId(player)
+	local def = ItemDefs.get(itemId)
+	if not def or not (def.kind == "Throwable" or (def.kind == "Melee" and def.throwable)) then
+		return
+	end
+	local st = stateFor(player)
+	local now = os.clock()
+	if now < (st.nextThrow or 0) - (CombatConfig.CooldownJitter or 0.12) then
+		return
+	end
+	if st.throwStartAt and now - st.throwStartAt < THROW_START_GAP then
+		return
+	end
+	st.throwStartAt = now
+	local lead = if def.kind == "Melee" then 0.15 else 0.1
+	local okFc, FightClips = pcall(require, ReplicatedStorage.Shared:FindFirstChild("FightClips") :: ModuleScript)
+	if okFc and type(FightClips) == "table" and type(FightClips.throwTiming) == "function" then
+		local okT, _, release = pcall(FightClips.throwTiming, itemId :: string)
+		if okT and type(release) == "number" and release > 0 then
+			lead = math.clamp(release, 0.06, 0.45)
+		end
+	end
+	broadcastAction(player, "ThrowStart", itemId, nil, nil, lead)
+end
+
 local function validOrigin(ctx: Context, origin: any, targets: { Instance }): Vector3
 	local head = ctx.head.Position
 	if not Util.isFiniteVector(origin) then
@@ -2146,6 +2186,10 @@ local function validOrigin(ctx: Context, origin: any, targets: { Instance }): Ve
 end
 
 local function onRangedRelease(player: Player, shotId: any, origin: any, direction: any, charge: any, mode: any)
+	if mode == "ThrowStart" then
+		onThrowStart(player)
+		return
+	end
 	-- A "Draw" over the limit is still put on record (below), only not relayed: quick clicks send Draw and Cancel in
 	-- pairs, 10 to 12 messages a second, and when the limiter dropped the Draw of the click that was then held, the
 	-- full-draw shot after it was refused (BowNoDraw) while the archer saw their own arrow fly. Recording a draw is

@@ -56,7 +56,8 @@
 	         and you're within 80 m of its edge: "BORDER 42 m" under the compass and a tick toward the edge.
 	Public API (Controllers.HUDController):
 	  flashItemName(itemId: string?)               show the item-name toast above the hotbar
-	  getHotbarRect() -> (Vector2, Vector2)        absolute position and size of the hotbar
+	  getHotbarRect() -> (Vector2, Vector2)        absolute position and size of the hotbar, with the held item's
+	                                               name band above it (its top is the band's top; X and width the hotbar's)
 	  suppressTop(reason: string, on: boolean)     hide the compass block while something else uses the top band
 	                                               (NotificationController does this for headlines on phones)
 	  guidanceOn() -> boolean                      Q1: extra help for this player (Config.Guidance, or the player's
@@ -2388,7 +2389,22 @@ function HUDController.getHotbarRect(): (Vector2, Vector2)
 	if not R.hotbar then
 		return Vector2.zero, Vector2.zero
 	end
-	return R.hotbar.AbsolutePosition, R.hotbar.AbsoluteSize
+	local pos, size = R.hotbar.AbsolutePosition, R.hotbar.AbsoluteSize
+	-- wave 12: the band above the hotbar where the held item's name, kind and (for a new player) its description line
+	-- show (flashItemName) is part of the rect, always at its tallest (60), so what stacks over the hotbar (Feedback's
+	-- "+1 LONGSWORD" lines) starts above it: the pickup line drew on top of the description line. Its X and width
+	-- stay the hotbar's (NotificationController centres on them).
+	local group = R.itemName
+	if group and group.Size.Y.Offset > 0 and group.AbsoluteSize.Y > 0 then
+		local scale = group.AbsoluteSize.Y / group.Size.Y.Offset
+		local bottom = group.AbsolutePosition.Y + group.AbsoluteSize.Y
+		local top = math.floor(bottom - 60 * scale - 2 * scale)
+		if top < pos.Y then
+			size = Vector2.new(size.X, size.Y + (pos.Y - top))
+			pos = Vector2.new(pos.X, top)
+		end
+	end
+	return pos, size
 end
 
 --------------------------------------------------------------------------------------------------------------------

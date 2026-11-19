@@ -106,14 +106,17 @@ local SHAPE_NAMES = { "Relaxed", "Fist", "Grip", "Open" } -- (Rig.HAND_SHAPES)
 --               ends stay inside the block instead of showing as a stub on its near face
 -- (the Ring Blade's hoop is held smaller and turned about its grip so it is seen nearly edge-on at the lower right;
 -- at full size, face-on, it covered a quarter of the view)
-Blocky.ITEM_SCALE = { ration = 0.68, ring_blade = 0.72 } :: { [string]: number }
+-- (the Paired Blades, 2.75 studs each, filled both sides of the view at full size: both blades are held at 0.75)
+Blocky.ITEM_SCALE = { ration = 0.68, ring_blade = 0.72, paired_blades = 0.75 } :: { [string]: number }
 Blocky.PALM_HOLD = {
 	ration = CFrame.new(0, 0.05, -0.17) * CFrame.Angles(0, math.rad(90), 0),
 } :: { [string]: CFrame }
 Blocky.ITEM_HOLD = {
 	dried_meat = CFrame.new(0, 0, -0.07),
 	herbs = CFrame.new(0, 0, -0.09),
-	ring_blade = CFrame.Angles(0, 0, math.rad(32)),
+	-- (wave 12: the Blender hoop is on the edge side of the bar, so at the old 32 degrees it was edge-on behind the fist;
+	-- turned 60 more about the bar it leans forward and in, seen three-quarter as a hoop)
+	ring_blade = CFrame.Angles(0, 0, math.rad(92)),
 } :: { [string]: CFrame }
 
 local PARKED = CFrame.new(0, -10000, 0)
