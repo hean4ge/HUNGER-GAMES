@@ -1156,10 +1156,11 @@ end
 local close: () -> ()
 local open: () -> ()
 
--- The Loadout key (Input action "Loadout": L, D-pad right), bound only in the train lobby. L opens and closes the
--- screen; D-pad right only opens it, and is let go while the screen, a menu or any GUI selection is up (a controller
--- moves through those with the D-pad) and in the arena (where it is SkillGeneral).
-local boundKeys = "" -- what is bound now: "", "L" or "L+Pad"
+-- The Loadout key (Input action "Loadout": L, View, D-pad right), bound only in the train lobby. L opens and closes
+-- the screen wherever the lobby shows. In the train D-pad right only opens it, and is let go while the screen, a menu
+-- or any GUI selection is up (a controller moves through those with the D-pad). In the Training Centre's hall D-pad
+-- right is SkillGeneral, so there the controller's View (Create) button opens and closes it instead.
+local boundKeys = "" -- what is bound now: "", "L", "L+Pad" or "L+View"
 local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
 	if state ~= Enum.UserInputState.Begin then
 		return Enum.ContextActionResult.Pass
@@ -1183,29 +1184,48 @@ local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.
 	return Enum.ContextActionResult.Sink
 end
 
+local autoSelectBefore: boolean? = nil -- GuiService.AutoSelectGuiEnabled as it was before the hall took View
 local function syncKeys()
 	local want = ""
 	if lobbyShowing() and gui then
 		-- in the Training Centre's hall D-pad right is the general skill (SkillController binds it there, skills are
-		-- tried in the hall): the Loadout keeps L, and a controller opens it at the rack or the kit board (ButtonX)
+		-- tried in the hall): there the Loadout has L and View. Roblox's own use of View (it puts a controller's
+		-- selection on the screen's buttons, GuiService.AutoSelectGuiEnabled) is off while in the hall, or it takes
+		-- the press first (wave 16, in play); in the train it stays, and D-pad right opens the Loadout.
 		local inHall = player:GetAttribute("InTraining") == true
-		want = if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or inHall then "L" else "L+Pad"
+		want = if inHall then "L+View"
+			elseif isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil then "L" else "L+Pad"
 	end
 	if want == boundKeys then
 		return
 	end
 	boundKeys = want
+	if want == "L+View" then
+		if autoSelectBefore == nil then
+			autoSelectBefore = GuiService.AutoSelectGuiEnabled
+		end
+		GuiService.AutoSelectGuiEnabled = false
+	elseif autoSelectBefore ~= nil then
+		GuiService.AutoSelectGuiEnabled = autoSelectBefore
+		autoSelectBefore = nil
+	end
 	if want == "" then
 		Input.unbind("Loadout")
 		return
 	end
 	local spec = Input.ACTIONS and Input.ACTIONS.Loadout
-	local keys = if spec and spec.keys then table.clone(spec.keys) else { Enum.KeyCode.L, Enum.KeyCode.DPadRight }
-	if want == "L" then
-		local index = table.find(keys, Enum.KeyCode.DPadRight)
+	local keys = if spec and spec.keys then table.clone(spec.keys) else { Enum.KeyCode.L, Enum.KeyCode.ButtonSelect, Enum.KeyCode.DPadRight }
+	local function drop(key: Enum.KeyCode)
+		local index = table.find(keys, key)
 		if index then
 			table.remove(keys, index)
 		end
+	end
+	if want ~= "L+View" then
+		drop(Enum.KeyCode.ButtonSelect)
+	end
+	if want ~= "L+Pad" then
+		drop(Enum.KeyCode.DPadRight)
 	end
 	Input.bind("Loadout", onLoadoutKey, { keys = keys })
 end

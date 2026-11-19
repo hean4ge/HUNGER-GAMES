@@ -152,9 +152,21 @@ local function rootMetrics(): (number, number, number)
 	return s, root.AbsoluteSize.Y / s - padY, root.AbsoluteSize.X / s - padX
 end
 
--- QW6: HOW TO PLAY opens by itself only until the first round has been played
+-- On the road to the arena (the ride, platform B, the Training Centre and its red room) the camera is first person
+-- and the mouse is locked: HOW TO PLAY's x and HIDE HELP cannot be clicked there, and the open sheet covered the
+-- right fifth of the view (wave 15). There it is closed, whatever QW6 says, and H opens and closes it (the corner
+-- hint says so).
+local HOWTO_KEY = Enum.KeyCode.H
+local function travelling(): boolean
+	if player:GetAttribute("AtTrainingCentre") == true then
+		return true
+	end
+	return GameState:GetAttribute("Phase") == "Intermission" and (GameState:GetAttribute("TrainStage") or "") ~= ""
+end
+
+-- QW6: HOW TO PLAY opens by itself only until the first round has been played (never while travelling)
 local function howToByDefault(): boolean
-	return not phone() and math.floor(tonumber(player:GetAttribute("RoundsPlayed")) or 0) <= 0
+	return not phone() and not travelling() and math.floor(tonumber(player:GetAttribute("RoundsPlayed")) or 0) <= 0
 end
 
 -- QW4: the longest the next horn can be away while a round runs: what's left of it, then Ending (grown to fit the
@@ -1117,10 +1129,77 @@ function LobbyController.Start()
 	setHowTo(howToByDefault(), false)
 	-- RoundsPlayed arrives from the save a moment after joining, and goes up after a first round
 	player:GetAttributeChangedSignal("RoundsPlayed"):Connect(function()
-		if not howToTouched and howToOpen ~= howToByDefault() then
+		if not howToTouched and not travelling() and howToOpen ~= howToByDefault() then
 			setHowTo(howToByDefault(), visible == true)
 		end
 	end)
+
+	-- H opens and closes HOW TO PLAY wherever the lobby shows (the only way in first person); a quiet hint in the top
+	-- right corner says so while travelling, on a keyboard
+	local hint = QuietUI.label({
+		Name = "HowToHint",
+		Parent = lobby,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -24, 0, 14),
+		Size = UDim2.fromOffset(220, 20),
+		Text = "",
+		TextSize = Theme.TextSize.Small,
+		Font = "Medium",
+		TextXAlignment = Enum.TextXAlignment.Right,
+	})
+	hint.AnchorPoint = Vector2.new(1, 0)
+	hint.Position = UDim2.new(1, -24, 0, 14)
+	hint.Size = UDim2.fromOffset(220, 20)
+	hint.TextXAlignment = Enum.TextXAlignment.Right
+	hint.TextColor3 = C.Ink2
+	hint.RichText = true
+	if hint.Parent ~= lobby then
+		hint.Parent = lobby
+	end
+	hint.Visible = false
+	R.howToHint = hint
+	Input.bind("LobbyHowTo", function(state)
+		if state ~= Enum.UserInputState.Begin then
+			return Enum.ContextActionResult.Pass
+		end
+		if not visible or ClientState.menuOpen or next(covers) ~= nil or UserInputService:GetFocusedTextBox() then
+			return Enum.ContextActionResult.Pass
+		end
+		Sfx.play("UIClick")
+		howToTouched = true
+		setHowTo(not howToOpen, true)
+		return Enum.ContextActionResult.Sink
+	end, { keys = { HOWTO_KEY } })
+	local wasTravelling = false
+	local function watchTravel()
+		local now = travelling()
+		if now ~= wasTravelling then
+			wasTravelling = now
+			if now then
+				howToTouched = false -- what the player chose in the lobby does not follow them onto the train
+				if howToOpen then
+					setHowTo(false, visible == true)
+				end
+			elseif not howToTouched and howToOpen ~= howToByDefault() then
+				setHowTo(howToByDefault(), visible == true)
+			end
+		end
+		local keyboard = currentDevice() == "KeyboardMouse"
+		local want = now and keyboard and visible == true and not ClientState.menuOpen and next(covers) == nil
+		if hint.Visible ~= want then
+			hint.Visible = want
+		end
+		if want then
+			local text = string.format('<font family="%s">H</font>   %s', MONO_FAMILY, if howToOpen then "Hide help" else "How to play")
+			if hint.Text ~= text then
+				hint.Text = text
+			end
+		end
+	end
+	watchTravel()
+	GameState:GetAttributeChangedSignal("TrainStage"):Connect(watchTravel)
+	GameState:GetAttributeChangedSignal("Phase"):Connect(watchTravel)
+	player:GetAttributeChangedSignal("AtTrainingCentre"):Connect(watchTravel)
 	Players.PlayerAdded:Connect(function()
 		listDirty = true
 	end)
@@ -1150,6 +1229,7 @@ function LobbyController.Start()
 
 	while true do
 		updateVisibility() -- it also waits for the death and result cards
+		watchTravel() -- (and the corner hint's words)
 		updateChat(visible == true)
 		if visible then
 			updateStatus()

@@ -2,8 +2,10 @@
 	TrainingController - the Training Centre on this client (docs/design/TrainingAndLoadup.md section 3; the server half
 	is TrainingService, the numbers Shared.TrainingStations). UI style A, Quiet: no boxes, a few words and thin lines.
 
-	  The guidance: while the player attribute TrainingBay names a station, one line high in the middle of the screen
-	    says what it is and how its drill starts ("ARCHERY LANES" / "Step on a lane's orange line to start · ...").
+	  The guidance: while the player stands at one of the station's own things (its chest, an orange mat, the pad or
+	    line its drill starts from; within ANCHOR_REACH studs), small lines low in the middle of the screen say what it is
+	    and how its drill starts ("ARCHERY LANES" / "Step on a lane's orange line to start · ..."). Crossing a station's
+	    floor (the walk to the launch doors crosses the track's) shows nothing.
 	  The drill: while one runs, the same place shows its name, the score and the time left ("ARCHERY · 3 / 6 · 0:12");
 	    at its end one result line for 4 s ("ARCHERY · 5 / 6 · passed · +1 token").
 	  Lines: the server's short notes (kit mat, borrowed items back), under the guidance, for 3 s.
@@ -79,21 +81,22 @@ local function build()
 	screen.DisplayOrder = 4
 	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-	-- the guidance block: high in the middle
+	-- the guidance block: small and low in the middle (wave 16: high in the middle it sat over the view on every walk
+	-- across a station's floor), between the lobby's title (bottom left) and the list of who is here (bottom right)
 	local block = Instance.new("Frame")
 	block.Name = "Guide"
 	block.BackgroundTransparency = 1
-	-- under the top status lines (PRACTICE, the border, the kit), clear of the hotbar's item card and the action hints
-	block.AnchorPoint = Vector2.new(0.5, 0)
-	block.Position = UDim2.new(0.5, 0, 0, 228)
-	block.Size = UDim2.new(0, 640, 0, 96)
+	block.AnchorPoint = Vector2.new(0.5, 1)
+	block.Position = UDim2.new(0.5, 0, 1, -84) -- (over the Loadout summary line)
+	block.Size = UDim2.new(0, 560, 0, 88)
+	block.Visible = false -- (until the hall: its empty rule line showed alone on the train and the platform)
 	block.Parent = screen
 	ui.block = block
 	ui.title = label("Title", block, 0, Theme.TextSize.Label, "SemiBold")
-	ui.rule = QuietUI.line({ Name = "Rule", Parent = block, Size = UDim2.new(0, 220, 0, 1), Position = UDim2.new(0.5, -110, 0, 24) })
-	ui.how = label("How", block, 30, Theme.TextSize.Body, "Medium", Theme.Colors.Ink2)
-	ui.note = label("Note", block, 56, Theme.TextSize.Label, "Medium", Theme.Colors.Ink2)
-	ui.sub = label("Sub", block, 76, Theme.TextSize.Small, "Regular", Theme.Colors.Ink2)
+	ui.rule = QuietUI.line({ Name = "Rule", Parent = block, Size = UDim2.new(0, 160, 0, 1), Position = UDim2.new(0.5, -80, 0, 22) })
+	ui.how = label("How", block, 27, Theme.TextSize.Small, "Medium", Theme.Colors.Ink2)
+	ui.note = label("Note", block, 50, Theme.TextSize.Small, "Medium", Theme.Colors.Ink2)
+	ui.sub = label("Sub", block, 68, Theme.TextSize.Small, "Regular", Theme.Colors.Ink2)
 
 	-- the prompt line, under the crosshair
 	local promptLine = label("Prompt", screen, 0, Theme.TextSize.Body, "Medium")
@@ -254,6 +257,66 @@ local function stationLine(id: string?): (string?, string?)
 	return string.upper(station.name), nil
 end
 
+-- Is the player at one of this station's own things (TrainingService's parts in workspace.TrainingStations.<id>:
+-- the chest, the orange mats, the pads and lines a drill starts from)? Checked five times a second.
+local ANCHOR_REACH = 3 -- studs, across the floor, from the thing's edge (5 caught the arch beside archery lane 1)
+local ANCHOR_NAMES = { "^Chest$", "^Mat_", "^CentrePad$", "^LaneStart", "^ThrowLine$", "^RunStart$", "^LapLine$" }
+local anchorCache: { [string]: { BasePart } } = {}
+local nearAt, nearBay, nearWas = 0, nil :: string?, false
+
+local function anchorsFor(id: string): { BasePart }
+	local list = anchorCache[id]
+	if list and (#list == 0 or list[1].Parent) then
+		return list
+	end
+	list = {}
+	local folder = workspace:FindFirstChild("TrainingStations")
+	local model = folder and folder:FindFirstChild(id)
+	if model then
+		for _, d in ipairs(model:GetChildren()) do
+			if d:IsA("BasePart") then
+				for _, pattern in ipairs(ANCHOR_NAMES) do
+					if string.match(d.Name, pattern) then
+						table.insert(list, d)
+						break
+					end
+				end
+			end
+		end
+	end
+	anchorCache[id] = list
+	return list
+end
+
+local function atStation(id: string?): boolean
+	if not id then
+		return false
+	end
+	local now = os.clock()
+	if id == nearBay and now < nearAt then
+		return nearWas
+	end
+	nearBay, nearAt, nearWas = id, now + 0.2, false
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return false
+	end
+	for _, p in ipairs(anchorsFor(id)) do
+		local lp = p.CFrame:PointToObjectSpace((root :: BasePart).Position)
+		local dx = math.max(0, math.abs(lp.X) - p.Size.X / 2)
+		local dz = math.max(0, math.abs(lp.Z) - p.Size.Z / 2)
+		if dx * dx + dz * dz <= ANCHOR_REACH * ANCHOR_REACH and math.abs(lp.Y) < 8 then
+			nearWas = true
+			break
+		end
+	end
+	if not nearWas and #anchorsFor(id) == 0 then
+		anchorCache[id] = nil -- (the stations may still be building: look again next time)
+	end
+	return nearWas
+end
+
 local setRunning: (on: boolean) -> ()
 
 local function update(dt: number)
@@ -308,14 +371,15 @@ local function update(dt: number)
 		elseif weights then
 			title = string.format("WEIGHTS · %d / 10 clean · beat %d / 14", weights.clean, weights.beats)
 			how = "Press as the ring meets the circle"
-		else
+		elseif atStation(bay) then
 			title, how = stationLine(bay)
 		end
 	end
 	if now < lineUntil then
 		note, sub = ui.lineText, ui.lineSub
 	end
-	local show = inHall or (drill ~= nil and now < resultUntil + 0.5)
+	-- (a sheet, the Loadout or the menu, has the screen: ClientState.menuOpen)
+	local show = (inHall or (drill ~= nil and now < resultUntil + 0.5)) and not ClientState.menuOpen
 	ui.block.Visible = show and (title ~= nil or note ~= nil)
 	if ui.block.Visible then
 		setText(ui.title, title)
@@ -327,7 +391,7 @@ local function update(dt: number)
 
 	-- the prompt line (only while HUDController isn't drawing Custom prompts: outside the arena)
 	local p = shownPrompt
-	if p and p.Parent and p.Enabled and inHall and not ClientState.inArena then
+	if p and p.Parent and p.Enabled and inHall and not ClientState.inArena and not ClientState.menuOpen then
 		local key = if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then "TAP"
 			elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then "X" else "E"
 		setText(ui.prompt, string.format("[%s]  %s", key, p:GetAttribute("PromptLine") or p.ActionText))

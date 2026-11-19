@@ -1123,9 +1123,11 @@ function TrainRideService.step(t: number, waiting: number): string?
 			st.holdLast = st.holdLast or t
 			local dt = t - st.holdLast
 			st.holdLast = t
-			if dt > 0 and not st.doorsOpen then
-				st.doorsAt += dt
-				st.callAt += dt
+			if dt > 0 then
+				if not st.doorsOpen then
+					st.doorsAt += dt
+				end
+				st.callAt += dt -- (a lone round's doors are open from the start: its call waits too)
 				publish()
 			end
 		else

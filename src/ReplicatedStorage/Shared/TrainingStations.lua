@@ -55,6 +55,15 @@ local function v(x, y, z)
 	return Vector3.new(x, y, z)
 end
 
+-- The obstacle run's line (hall x). The set models it on the hall's centre line (x = 0), the straight walk from the
+-- middle arch to the launch doors, where its mantle wall stopped players on their way to the launch (wave 15).
+-- TrainingCentreBuilder.prepare moves the set's vault, mantle and slide bar (with their colliders) to this line, so
+-- the centre stays clear from the benches to the doors. At -6 it also stays clear of the straight walks from the side
+-- arches (Arch_1 / Arch_3 at x -+40) to the doors, which cross z -37..-15 at x -+10..14.4 (at -7 the west walk
+-- brushed the vault box's corner, wave 16): a stud or more of air either side of a walker.
+TrainingStations.RunX = -6
+local RX = TrainingStations.RunX
+
 TrainingStations.List = {
 	{
 		id = "archery",
@@ -217,14 +226,14 @@ TrainingStations.List = {
 		-- gate 1 on the east straight, running north; then the north bend, the west straight, the south bend.
 		gates = { v(20, 0, 0), v(0, 0, -63.5), v(-20, 0, 0), v(0, 0, 63.5) },
 		gateRadius = 9,
-		-- the obstacle run: along x = 0 from z -44 south to z -8 (spots turned 90: their local x runs along the run)
+		-- the obstacle run: along x = RunX from z -44 south to z -8 (spots turned 90: their local x runs along the run)
 		spots = {
 			lapStart = { pos = v(20, 0, 0), size = v(2, 0.2, 6), yaw = 90 },
-			runStart = { pos = v(0, 0, -44), size = v(4, 0.2, 6), yaw = 90 },
-			vault = { pos = v(0, 0, -36), size = v(3, 3, 6), yaw = 90 },
-			mantle = { pos = v(0, 0, -26), size = v(2, 5.5, 8), yaw = 90 },
-			slide = { pos = v(0, 0, -16), size = v(0.6, 1, 7.4), yaw = 90 }, -- a bar whose underside is 4.6 off the floor: slide or crouch under
-			runEnd = { pos = v(0, 0, -8), size = v(4, 0.2, 6), yaw = 90 },
+			runStart = { pos = v(RX, 0, -44), size = v(4, 0.2, 6), yaw = 90 },
+			vault = { pos = v(RX, 0, -36), size = v(3, 3, 6), yaw = 90 },
+			mantle = { pos = v(RX, 0, -26), size = v(2, 5.5, 8), yaw = 90 },
+			slide = { pos = v(RX, 0, -16), size = v(0.6, 1, 7.4), yaw = 90 }, -- a bar whose underside is 4.6 off the floor: slide or crouch under
+			runEnd = { pos = v(RX, 0, -8), size = v(4, 0.2, 6), yaw = 90 },
 		},
 		mats = {},
 		chest = nil,

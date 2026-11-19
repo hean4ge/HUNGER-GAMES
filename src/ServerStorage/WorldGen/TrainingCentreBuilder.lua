@@ -695,6 +695,8 @@ end
 --                 lamp is named DoorLamp
 --   EndCap        removed (the corridor opens onto the red room TrainRideService places behind it)
 --   SlideBar      lifted 1.6 (underside 4.6: a crouch or a slide passes, standing does not; tuned in play)
+--   Obstacle run  the vault, mantle and slide bar (and colliders) moved to x = TrainingStations.RunX, off the centre line
+--   RedRoom       RedRoom_WalkGlow_1..4: low red-orange PointLights along the walkway and at the stairs
 --   BigScreen     a SurfaceGui line, attribute TrainScreen (the call's countdown)
 --   PlatLamp_*    their lights start off; they come on bank by bank as train B stops
 -- Idempotent (attribute RuntimeReady).
@@ -763,6 +765,35 @@ function TC.prepare(root: Instance): string
 			end
 		end
 		table.insert(notes, "slide bar " .. n)
+		-- the obstacle run off the centre line (Shared.TrainingStations.RunX, where its drill's pads are): the vault and
+		-- mantle (one merged mesh), the slide bar and its posts, and their colliders. The centre line is the straight
+		-- walk from the middle arch to the launch doors (wave 16). The two white floor lines it leaves stay.
+		local runX = 0
+		pcall(function()
+			local shared = game:GetService("ReplicatedStorage"):FindFirstChild("Shared")
+			local ts = shared and shared:FindFirstChild("TrainingStations")
+			runX = tonumber(ts and (require(ts :: ModuleScript) :: any).RunX) or 0
+		end)
+		if runX ~= 0 then
+			local moved = 0
+			for _, d in ipairs(prep:GetDescendants()) do
+				if d:IsA("BasePart") then
+					local p = hall:PointToObjectSpace(d.Position)
+					if math.abs(p.X) <= 4.3 and p.Z >= -40 and p.Z <= -12 and math.max(d.Size.X, d.Size.Z) < 14 then
+						d.CFrame = hall * CFrame.new(runX, 0, 0) * hall:ToObjectSpace(d.CFrame)
+						moved += 1
+					end
+				end
+			end
+			for _, name in ipairs({ "Obstacle_Start", "Obstacle_End" }) do
+				local folder = root:FindFirstChild("Markers")
+				local m = folder and folder:FindFirstChild(name)
+				if m and m:IsA("BasePart") then
+					m.CFrame = hall * CFrame.new(runX, 0, 0) * hall:ToObjectSpace(m.CFrame)
+				end
+			end
+			table.insert(notes, string.format("obstacle run x %+d (%d)", runX, moved))
+		end
 	end
 	-- the big screen
 	local markers = root:FindFirstChild("Markers")
@@ -802,6 +833,41 @@ function TC.prepare(root: Instance): string
 				end
 			end
 		end
+	end
+	-- the red room's walkway: three low red-orange glows along it and one at the stairs' foot, so the way in reads (it
+	-- was near-black, wave 15) and the room stays red; no shadows (cheap on phones). HallLightController adds a dark-red
+	-- ambient while the camera is in the room.
+	local red = root:FindFirstChild("RedRoom")
+	local walkway = red and red:FindFirstChild("RedRoom_Walkway_Col", true)
+	if walkway and walkway:IsA("BasePart") and not red:FindFirstChild("RedRoom_WalkGlow_1") then
+		local stairs = red:FindFirstChild("RedRoom_Stair_Col", true)
+		local spots = {}
+		for _, f in ipairs({ -0.4, 0, 0.4 }) do
+			table.insert(spots, walkway.CFrame * CFrame.new(f * walkway.Size.X, 3.2, 0))
+		end
+		if stairs and stairs:IsA("BasePart") then
+			table.insert(spots, CFrame.new(stairs.Position + Vector3.new(0, 3.5, 0)))
+		end
+		for i, cf in ipairs(spots) do
+			local holder = Instance.new("Part")
+			holder.Name = "RedRoom_WalkGlow_" .. i
+			holder.Size = Vector3.new(0.2, 0.2, 0.2)
+			holder.CFrame = cf
+			holder.Anchored = true
+			holder.CanCollide = false
+			holder.CanQuery = false
+			holder.CanTouch = false
+			holder.CastShadow = false
+			holder.Transparency = 1
+			local light = Instance.new("PointLight")
+			light.Color = Color3.fromRGB(255, 118, 92)
+			light.Brightness = 0.9
+			light.Range = 12
+			light.Shadows = false
+			light.Parent = holder
+			holder.Parent = red
+		end
+		table.insert(notes, "walkway glows " .. #spots)
 	end
 	root:SetAttribute("RuntimeReady", true)
 	return "prepared: " .. table.concat(notes, ", ")

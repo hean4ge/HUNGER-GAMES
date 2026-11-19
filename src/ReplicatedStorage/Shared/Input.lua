@@ -75,11 +75,11 @@ Input.ACTIONS = {
 		touch = { label = "", position = UDim2.new(1, -262, 1, -228), size = 64 } },
 	SkillGeneral = { keys = { Enum.KeyCode.F, Enum.KeyCode.DPadRight },
 		touch = { label = "", position = UDim2.new(1, -170, 1, -262), size = 64 } },
-	-- The Loadout screen (LoadoutController), bound only in the train lobby: L opens and closes it, D-pad right opens
-	-- it (in the arena and in the Training Centre's hall D-pad right is SkillGeneral: LoadoutController binds only L
-	-- there, and a controller opens the Loadout at the rack or kit board). Touch has no button of its own: the Loadout summary line is tapped
+	-- The Loadout screen (LoadoutController), bound only in the train lobby: L opens and closes it, D-pad right opens it
+	-- in the train; in the Training Centre's hall D-pad right is SkillGeneral, so there View (ButtonSelect) opens and
+	-- closes it (Roblox's own View selection is off in the hall). Touch has no button of its own: the Loadout summary line is tapped
 	-- (InputCheck: gui:Loadout.Root.Summary).
-	Loadout = { keys = { Enum.KeyCode.L, Enum.KeyCode.DPadRight } },
+	Loadout = { keys = { Enum.KeyCode.L, Enum.KeyCode.ButtonSelect, Enum.KeyCode.DPadRight } },
 }
 
 local bound: { [string]: any } = {}

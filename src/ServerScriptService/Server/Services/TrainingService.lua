@@ -406,6 +406,7 @@ local function buildMat(model: Instance, station: any, spec: any)
 end
 
 local onChest: (player: Player, stationId: string) -> ()
+local chestParts: { [string]: BasePart } = {} -- station id -> its chest's box (the prompt's reach, onChest)
 
 local function buildChest(model: Instance, station: any)
 	if not station.chest or not station.spots.chest then
@@ -422,7 +423,16 @@ local function buildChest(model: Instance, station: any)
 		local n = if def then def.name else item.id
 		table.insert(names, if item.count > 1 then string.format("%s \u{00D7}%d", n, item.count) else n)
 	end
-	local pr = prompt(box, "Borrow", 0.6, station.chestLine or ("Borrow " .. table.concat(names, ", ")))
+	-- The prompt sits on an anchor 3.4 above the floor, not in the low box: Roblox shows a prompt only while its point
+	-- is on screen, and in first person a chest's centre (1.1 up) drops out of view 4 studs away, just where a player
+	-- stops to press E (wave 15: two real presses at 3.4 to 3.9 studs lent nothing, the prompt had hidden). One press,
+	-- no hold, from up to 9 studs (onChest also lends to a player just over the bay's edge, at the fitness chest).
+	chestParts[station.id] = box
+	local anchor = Instance.new("Attachment")
+	anchor.Name = "PromptAnchor"
+	anchor.Position = Vector3.new(0, 2.3, 0)
+	anchor.Parent = box
+	local pr = prompt(anchor, "Borrow", 0, station.chestLine or ("Borrow " .. table.concat(names, ", ")), 9)
 	pr.Triggered:Connect(function(player)
 		onChest(player, station.id)
 	end)
@@ -768,6 +778,7 @@ local function build()
 	table.clear(boards)
 	table.clear(dummies)
 	table.clear(mats)
+	table.clear(chestParts)
 	table.clear(pads)
 	table.clear(bikes)
 	survival = { plants = {} }
@@ -920,8 +931,17 @@ onChest = function(player: Player, stationId: string)
 		return
 	end
 	local st = stateFor(player)
-	if not st.inHall or st.bay ~= stationId then
+	if not st.inHall then
 		return
+	end
+	if st.bay ~= stationId then
+		-- at the chest but a step over its bay's edge (the fitness chest stands 6 studs from it): still the chest's
+		local box = chestParts[stationId]
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not (box and root and (root.Position - box.Position).Magnitude <= 12) then
+			return
+		end -- (the scan hands what it lends back once the player walks into a third bay)
 	end
 	if st.lentStation and st.lentStation ~= stationId then
 		TrainingService.reclaim(player, "Each station lends its own")
