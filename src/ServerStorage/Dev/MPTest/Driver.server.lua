@@ -3253,7 +3253,7 @@ local function starChecks()
 		L(duel(A, B, dist))
 		local nF = #fires
 		local r = attack(tag, { { "select", slot }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.3 }, { "aimset", true }, { "wait", 0.4 }, { "face", B.Name },
-			{ "wait", 0.1 }, { "click" }, { "wait", 0.25 }, { "aimset", false }, { "wait", 1.2 } }, 1.0)
+			{ "wait", 0.1 }, { "click", 0.6 }, { "wait", 0.25 }, { "aimset", false }, { "aim", false }, { "wait", 1.2 } }, 1.0) -- (Combat v3: guard + hold Attack throws)
 		local f = fires[nF + 1]
 		local okDmg = math.abs(r.dealt - expectBody) < 0.6 or math.abs(r.dealt - math.min(expectBody * headMult, 95)) < 0.6
 		check("w.throw." .. tag, f ~= nil and okDmg, string.format("%s at %d studs: fired=%s (%s stars=%s); B lost %.2f (body %.2f, head %.2f); A got HitConfirm=%s", tag, dist,
@@ -3281,7 +3281,7 @@ local function starChecks()
 	local gp = { x = ground.X, y = ground.Y, z = ground.Z }
 	local nF = #fires
 	call(A, "seq", { { "select", slotWith(A, "hatchet", 3) }, { "wait", 0.8 }, { "face", gp }, { "wait", 0.3 }, { "aimset", true },
-		{ "wait", 0.4 }, { "face", gp }, { "click" }, { "wait", 0.25 }, { "aimset", false } }, 10)
+		{ "wait", 0.4 }, { "face", gp }, { "click", 0.6 }, { "wait", 0.25 }, { "aimset", false }, { "aim", false } }, 10)
 	task.wait(2.5)
 	L("THROWN at the ground: " .. tostring(fires[nF + 1] and fires[nF + 1].item) .. " stars " .. tostring(fires[nF + 1] and fires[nF + 1].opts and fires[nF + 1].opts.recoverStars))
 	local loose, wid = nil, nil
@@ -3318,10 +3318,11 @@ local function starChecks()
 	L("ARMOUR B wears " .. tostring(B:GetAttribute("Armor")) .. " multiplier " .. tostring(mult))
 	setHealth(B)
 	L(duel(A, B, 5))
-	local rA = attack("twin axe vs padded@5", { { "aimset", false }, { "select", slotWith(A, "twin_axe", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" }, { "wait", 0.4 } }, 1.0)
+	local rA = attack("twin axe vs padded@5", { { "aimset", false }, { "aim", false }, { "select", slotWith(A, "twin_axe", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" }, { "wait", 0.4 } }, 1.0)
 	setHealth(B)
 	task.wait(1.0)
-	local rM = attack("machete vs padded@5", { { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" } })
+	L(duel(A, B, 5)) -- (Combat v3: the axe's blow knocks B back)
+	local rM = attack("machete vs padded@5", { { "aim", false }, { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 }, { "click" } })
 	local eAxe = dmgOf("twin_axe", 1) * (1 - (1 - mult) * 0.5)
 	local eMac = dmgOf("machete", 1) * mult
 	check("w.twinAxe.armour", B:GetAttribute("Armor") == "padded_armor" and math.abs(rA.dealt - eAxe) < 0.4 and math.abs(rM.dealt - eMac) < 0.4, string.format(
@@ -3504,7 +3505,7 @@ local function sweepChecks()
 	end
 	task.wait(0.8)
 	local h3 = health(P3)
-	local r = attack("machete with two in the arc", { { "aimset", false }, { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 },
+	local r = attack("machete with two in the arc", { { "aimset", false }, { "aim", false }, { "select", slotWith(A, "machete", 1) }, { "wait", 0.8 }, { "face", B.Name }, { "wait", 0.4 },
 		{ "click" }, { "wait", 0.5 } })
 	local d3 = h3 - health(P3)
 	local def = Stars.def("machete", 1)
@@ -3610,6 +3611,9 @@ if ARGS.batch == "F" then
 			health = health, duel = duel, setupDuel = setupDuel, slotOf = slotOf, Inv = Inv, invLine = invLine, refusals = refusals, flatDist = flatDist,
 			Stars = Stars, dmgOf = dmgOf, movingChecks = movingChecks, resolves = resolves, Shared = Shared, Services = Services, req = req, ARGS = ARGS,
 			A = A, B = B, killB = killB, backToLobby = backToLobby,
+			standAt = standAt, groundAt = groundAt, duelLine = function()
+				return duelBase, duelDir
+			end,
 		})
 		batchF = F.run
 		F.lobby()

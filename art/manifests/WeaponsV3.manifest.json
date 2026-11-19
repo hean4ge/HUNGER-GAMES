@@ -4,6 +4,35 @@
   "near": "WeaponsV3.glb",
   "far": "WeaponsV3_Far.glb"
  },
+ "uploads": {
+  "creator": {
+   "userId": 5458010221
+  },
+  "universeId": 10775788705,
+  "notes": [
+   "One upload per file through Open Cloud POST /assets/v1/assets (owner approval 19 Nov 2026). Never re-upload a file listed here; reuse its id.",
+   "Paths are relative to BlenderExports/WeaponsV3 (C:/Users/USER/OneDrive/Documents/LastStanding/BlenderExports/WeaponsV3).",
+   "Raw inserts: ServerStorage.MeshImports.<displayName> (packages; never edit them). Templates: ServerStorage.WorldGen.WeaponsV3Assets.build()."
+  ],
+  "WeaponsV3.glb": {
+   "displayName": "LS_WeaponsV3_v1",
+   "operationId": "6ab7a12e-2b72-4f58-8c19-463a2efc627c",
+   "uploadedUtc": "2026-11-19T06:08:58.098Z",
+   "assetId": 78965894282116,
+   "moderationState": "Approved",
+   "bytes": 3547016,
+   "revisionId": "1"
+  },
+  "WeaponsV3_Far.glb": {
+   "displayName": "LS_WeaponsV3_Far_v1",
+   "operationId": "b84d5209-67e6-4a61-ae56-7d81a12623fd",
+   "uploadedUtc": "2026-11-19T06:09:27.414Z",
+   "assetId": 131421178360397,
+   "moderationState": "Approved",
+   "bytes": 811448,
+   "revisionId": "1"
+  }
+ },
  "generator": "weapons_v3.py (+ wv3_geo.py)",
  "units": "studs (1 Blender unit = 1 stud)",
  "axes": "Roblox (x, y, z) = Blender (x, z, -y). Held items: Grip at the origin, look = item axis (Roblox +Y), up = edge / front (Roblox -Z), as WeaponsV2 / ItemsReal. Same grips and attachments as WeaponsV2.",

@@ -980,6 +980,51 @@ local function lobbyStop()
 	end
 end
 
+-- Back in the train after a death (or after spectating): the new character stands wherever the car's spawn put it,
+-- and Roblox's camera kept the old look direction, so it could sit pressed against a side wall with half the screen
+-- grey wall (wave10 final, picture 06). Turn the view so the camera behind the avatar has the most room: of 16
+-- directions, the one with the longest clear line from the head (up to the lobby zoom) and the most room to either
+-- side where the camera ends up, looking back over the avatar a little from above.
+local arrivalParams = RaycastParams.new()
+arrivalParams.FilterType = Enum.RaycastFilterType.Exclude
+arrivalParams.IgnoreWater = true
+local function placeLobbyView()
+	if ClientState.inArena or ClientState.spectating ~= nil or ClientState.launchShot then
+		return
+	end
+	local character = player.Character
+	local head = character and (character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart"))
+	local lobby = workspace:FindFirstChild("Lobby")
+	if not (head and head:IsA("BasePart") and lobby and lobby:IsA("Model")) then
+		return
+	end
+	if (head.Position - lobby:GetPivot().Position).Magnitude > LOBBY_NEAR then
+		return
+	end
+	arrivalParams.FilterDescendantsInstances = { character :: Instance }
+	local reach = K.LobbyZoom
+	local from = head.Position + Vector3.yAxis * 0.5
+	local best, bestScore = nil, -math.huge
+	for i = 0, 15 do
+		local a = i / 16 * math.pi * 2
+		local d = Vector3.new(math.sin(a), 0, math.cos(a))
+		local hit = workspace:Raycast(from, d * reach, arrivalParams)
+		local clear = if hit then hit.Distance else reach
+		local at = from + d * math.max(clear - LOBBY_GAP, 0)
+		local side = Vector3.new(-d.Z, 0, d.X)
+		local l = workspace:Raycast(at, side * 6, arrivalParams)
+		local r = workspace:Raycast(at, -side * 6, arrivalParams)
+		local room = math.min(if l then l.Distance else 6, if r then r.Distance else 6)
+		local score = clear + 1.5 * math.min(room, 4)
+		if score > bestScore + 0.05 then
+			best, bestScore = d, score
+		end
+	end
+	if best then
+		CameraController.faceToward(-best, -12)
+	end
+end
+
 -- Public API ------------------------------------------------------------------------------------------------------------
 
 function CameraController.getBaseCFrame(): CFrame
@@ -1078,11 +1123,22 @@ function CameraController.Start()
 			end
 			currentMode = nil
 			applyMode()
+			task.delay(0.35, placeLobbyView) -- back to the train from spectating: the same room-finding turn
 		end
 	end)
-	player.CharacterAdded:Connect(function()
+	local hadCharacter = player.Character ~= nil
+	player.CharacterAdded:Connect(function(character)
 		resetFeel()
 		prevYaw = nil
+		-- a later character (after a death): if it is in the train, turn the view to where the car has room
+		if hadCharacter then
+			task.delay(0.35, function()
+				if player.Character == character then
+					placeLobbyView()
+				end
+			end)
+		end
+		hadCharacter = true
 		-- the first character: Roblox's camera sets its own default zoom (10 here, the lobby's limit) when it takes up
 		-- the new character, after applyMode's lobby zoom at start-up: set the lobby zoom again once it has
 		task.delay(0.2, function()

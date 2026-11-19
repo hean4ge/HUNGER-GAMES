@@ -69,6 +69,7 @@ end
 
 local BLEND_IN = 0.06
 local BLEND_OUT = 0.15
+local CHAIN_BLEND = 0.1 -- a new clip over one still showing (ClipPlayer.play)
 local REACT_IN = 0.08 -- (the owner's numbers for reactions)
 local REACT_OUT = 0.25
 local RATE_MIN, RATE_MAX = 0.35, 3
@@ -127,6 +128,75 @@ local function decodeInto(s: string, at: number, count: number, lo: number, hi: 
 	end
 end
 
+-- De-pop (fight-fixes, 19 Nov): a scan of all 102 clips found 190 single-sample jumps (a joint turning 40 to 179
+-- degrees between two samples while its neighbours turn less than half that), most of them wrists flipping half a
+-- turn (sword_light_2's right wrist: 150 degrees in one 0.032 s sample). On screen each is a snap. A jump is spread
+-- over its neighbours (one sample each side, two for a flip over 100 degrees) along the shortest arc; the window
+-- never crosses the hit sample, so the pose at the hit stays exactly as authored. Quaternions at arr[s*stride+off].
+local depopCount = 0 -- (ClipPlayer.stats().depops)
+local DEPOP_MIN = 40 -- degrees in one sample
+local DEPOP_RATIO = 2 -- against the larger neighbour step
+local DEPOP_WIDE = 100 -- a flip: spread two samples each side
+local function qAngle(arr, a: number, b: number): number
+	local d = arr[a] * arr[b] + arr[a + 1] * arr[b + 1] + arr[a + 2] * arr[b + 2] + arr[a + 3] * arr[b + 3]
+	return math.deg(2 * math.acos(math.clamp(math.abs(d), 0, 1)))
+end
+local function depop(arr: { number }, n: number, stride: number, off: number, hitIndex: number?): number
+	local fixed = 0
+	-- a lone bad sample (axe_skill_whirl's hips and ankles at sample 15: 180 degrees from both neighbours, which agree
+	-- with each other): replaced by the midpoint of its neighbours
+	for i = 1, n - 2 do
+		local o0, o1, o2 = (i - 1) * stride + off, i * stride + off, (i + 1) * stride + off
+		local a, b, across = qAngle(arr, o0, o1), qAngle(arr, o1, o2), qAngle(arr, o0, o2)
+		if a > 60 and b > 60 and across < 0.5 * math.min(a, b) and i ~= hitIndex then
+			local q0 = CFrame.new(0, 0, 0, arr[o0], arr[o0 + 1], arr[o0 + 2], arr[o0 + 3])
+			local q2 = CFrame.new(0, 0, 0, arr[o2], arr[o2 + 1], arr[o2 + 2], arr[o2 + 3])
+			local axis, angle = q0:Lerp(q2, 0.5):ToAxisAngle()
+			local h = math.sin(angle / 2)
+			arr[o1], arr[o1 + 1], arr[o1 + 2], arr[o1 + 3] = axis.X * h, axis.Y * h, axis.Z * h, math.cos(angle / 2)
+			fixed += 1
+		end
+	end
+	for pass = 1, 2 do
+		local steps = table.create(n, 0)
+		for i = 1, n - 1 do
+			steps[i] = qAngle(arr, (i - 1) * stride + off, i * stride + off)
+		end
+		local i = 1
+		while i <= n - 1 do
+			local s = steps[i]
+			local nb = math.max(steps[i - 1] or 0, steps[i + 1] or 0)
+			local nextI = i + 1
+			if s > DEPOP_MIN and s > DEPOP_RATIO * nb then
+				local k = if s > DEPOP_WIDE then 2 else 1
+				local a, b = math.max(0, i - 1 - k), math.min(n - 1, i + k)
+				if hitIndex and a < hitIndex and hitIndex < b then
+					if hitIndex <= i - 1 then
+						a = hitIndex
+					else
+						b = hitIndex
+					end
+				end
+				if b - a >= 2 then
+					local oa, ob = a * stride + off, b * stride + off
+					local qa = CFrame.new(0, 0, 0, arr[oa], arr[oa + 1], arr[oa + 2], arr[oa + 3])
+					local qb = CFrame.new(0, 0, 0, arr[ob], arr[ob + 1], arr[ob + 2], arr[ob + 3])
+					for sIdx = a + 1, b - 1 do
+						local axis, angle = qa:Lerp(qb, (sIdx - a) / (b - a)):ToAxisAngle()
+						local h = math.sin(angle / 2)
+						local o = sIdx * stride + off
+						arr[o], arr[o + 1], arr[o + 2], arr[o + 3] = axis.X * h, axis.Y * h, axis.Z * h, math.cos(angle / 2)
+					end
+					fixed += 1
+					nextI = b + 1 -- (this window is done; the next pass rescans)
+				end
+			end
+			i = nextI
+		end
+	end
+	return fixed
+end
+
 local function decode(name: string): any
 	local d = decoded[name]
 	if d ~= nil then
@@ -182,6 +252,17 @@ local function decode(name: string): any
 			decodeInto(raw.fp, at + 34, 3, -1, 1, fp, i * 20 + 18)
 		end
 	end
+	-- de-pop (above): third-person joints and the first-person hands, never moving the hit sample
+	local hitIndex = if type(raw.hit) == "number" and raw.hit > 0 and raw.dt then math.floor(raw.hit / raw.dt + 0.5) else nil
+	local pops = 0
+	for j = 1, nj do
+		pops += depop(q[j], n, 4, 1, hitIndex)
+	end
+	if fp then
+		pops += depop(fp, n, 20, 4, hitIndex)
+		pops += depop(fp, n, 20, 11, hitIndex)
+	end
+	depopCount += pops
 	local markers = {}
 	for k, v in pairs(raw.markers or {}) do
 		table.insert(markers, { name = k, t = v })
@@ -321,7 +402,8 @@ local function fitTiming(d, opts): (number, number, number, number)
 	local lead = tonumber(opts.lead)
 	local total = tonumber(opts.total)
 	if hit and hit > 0 and lead then
-		local startTau = 0
+		-- (opts.startAt with a lead: from that clip time, reaching the hit in `lead` seconds)
+		local startTau = math.clamp(tonumber(opts.startAt) or 0, 0, hit)
 		if lead <= 1e-3 then
 			-- announced at the strike: start two samples before the hit, quickly
 			startTau = math.max(0, hit - 2 * d.dt)
@@ -472,7 +554,23 @@ function ClipPlayer.play(model: Model, name: string, opts: { [string]: any }?): 
 	if #e.tracks == 0 then
 		e.lastClock = os.clock() -- (idle until now: the first step must not count the idle time)
 	end
-	local track = newTrack(d, opts or {})
+	opts = opts or {}
+	if opts.blendIn == nil and not d.additive and d.family ~= "Spear" and string.sub(d.name, 1, 8) ~= "twinaxe_" then
+		-- a chain step cutting into the last one: crossfade over CHAIN_BLEND, not BLEND_IN. Measured on every chain
+		-- (fight-fixes frame sims, 60 fps): the 0.06 s crossfade turned the waist and neck 19 to 26 degrees in one
+		-- frame at each step's start (the step begins at the last one's follow-through, the body was in its recovery);
+		-- 0.1 s took the paired chain from 10 snaps to 3 and its worst frame from 62 to 46 degrees. (The spear's two
+		-- grips are half a turn apart, so a longer crossfade there flips the wrist: it keeps BLEND_IN, as does the
+		-- two-handed twin axe, 63 -> 78 with it.)
+		for _, t in ipairs(e.tracks) do
+			if not t.done and not t.clip.additive and t.w > 0.05 then
+				opts = table.clone(opts)
+				opts.blendIn = CHAIN_BLEND
+				break
+			end
+		end
+	end
+	local track = newTrack(d, opts)
 	table.insert(e.tracks, track)
 	return track
 end
@@ -642,7 +740,9 @@ local function standalone()
 							v = add * v
 						end
 						joint.Transform = v
-						e.written[joint] = v
+						-- (as read back: the property keeps a re-orthonormalised copy that never equals `v`, and the
+						-- check above then took our own pose as the next base and compounded it)
+						e.written[joint] = joint.Transform
 						e.bases[joint] = base
 					end
 				end
@@ -772,7 +872,7 @@ function ClipPlayer.stats(): { [string]: number }
 		m += 1
 		n += #e.tracks
 	end
-	return { tracks = n, models = m, decoded = decodedCount, ms = lastMs }
+	return { tracks = n, models = m, decoded = decodedCount, ms = lastMs, depops = depopCount }
 end
 
 function ClipPlayer._decode(name: string): any -- test hook: the decoded clip

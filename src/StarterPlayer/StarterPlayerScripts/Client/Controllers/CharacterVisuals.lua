@@ -1043,6 +1043,7 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 	elseif startU > 0 then
 		from = table.create(SWING_N, 0) -- (starting wound up: blend from the body as the Animator has it)
 	end
+	local clipTrack = nil
 	-- the Blender clip of this move, fitted to the server's strike (lead) and the move's length (total); the
 	-- procedural swing stays underneath it (and is the swing when the clip player has no clip for the move)
 	if moveId and not (kind == "Skill" and moveId ~= "S1") then
@@ -1054,9 +1055,10 @@ function CharacterVisuals.playSwing(character: Model, itemId: string?, variant: 
 			end
 			entry.chargeTrack = nil
 		end
-		clipPlay(character, clip, { lead = math.max(tonumber(lead) or 0, 0), total = duration })
+		clipTrack = clipPlay(character, clip, { lead = math.max(tonumber(lead) or 0, 0), total = duration })
 	end
 	entry.swing = {
+		clipTrack = clipTrack,
 		name = name,
 		style = style,
 		variant = v,
@@ -1209,7 +1211,15 @@ end
 function CharacterVisuals.playThrow(character: Model, itemId: string?): boolean
 	local okFc, FightClips = pcall(require, ReplicatedStorage.Shared:FindFirstChild("FightClips") :: ModuleScript)
 	local name = if okFc and type(itemId) == "string" then FightClips.forMove(itemId, "Throw") else nil
-	-- (the release is the server's moment: start the clip at its release frame so the arm is already going through)
+	-- (the release is the server's moment. Started two samples before the release, the throw read as a twitch with no
+	-- reach back: it now starts at the top of the wind-up's last half and comes through to the release in 0.09 s, so
+	-- the arm is seen cocked and whipping forward, then follows through)
+	local cp = clipPlayer()
+	local info = if cp and name and type(cp.info) == "function" then cp.info(name) else nil
+	local hit = if info and type(info.hit) == "number" then info.hit else nil
+	if hit and hit > 0.1 then
+		return clipPlay(character, name, { lead = 0.09, startAt = hit * 0.5, blendIn = 0.05 }) ~= nil
+	end
 	return clipPlay(character, name, { lead = 0 }) ~= nil
 end
 
@@ -1331,6 +1341,11 @@ local function swingPose(entry, now: number): { number }?
 	local u = (now - swing.t0) / swing.duration
 	if u >= 1 then
 		entry.swing = nil
+		return nil
+	end
+	if swing.clipTrack then
+		-- the Blender clip is the swing: the procedural cut is not laid under it (under the clip's blend in and out it
+		-- showed through as a second, different swing: the "rogue and choppy" look), only its timing is kept
 		return nil
 	end
 	u = math.max(u, 0)
@@ -1586,6 +1601,14 @@ local function combatLayer(entry, dt: number, now: number, swing: { number }?, u
 			entry.react = nil
 		end
 	end
+	-- (a guard or a heavy's hold that plays as a Blender clip is not laid in procedurally as well: the two differ, and
+	-- when the clip let go the procedural pose showed through at full and then faded, a bump)
+	if entry.guardTrack then
+		entry.guardW = 0
+	end
+	if entry.chargeTrack then
+		entry.chargeW = 0
+	end
 	local g, c = entry.guardW, entry.chargeW
 	if g < 0.002 and c < 0.002 and r < 0.002 and not swing and not upper then
 		return nil
@@ -1672,58 +1695,6 @@ CLIP_SKILL = {
 FAMILY_CHARGE = { Fists = "fists_heavy_charge", ShortBlade = "shortblade_heavy_charge", Sword = "sword_heavy_charge",
 	Axe = "axe_heavy_charge", Spear = "spear_heavy_charge" }
 
-local clipOut: { [string]: CFrame } = {}
-local clipW: { [string]: number } = {}
-local clipAdd: { [string]: CFrame } = {}
-local function applyClips(entry, now: number)
-	local cp = clipPlayer()
-	if not cp or not entry.clipClaimed or not (entry.clipUntil and now < entry.clipUntil) then
-		return
-	end
-	table.clear(clipOut)
-	table.clear(clipW)
-	table.clear(clipAdd)
-	local ok, any = pcall(cp.sample, entry.character, now, clipOut, clipW, clipAdd)
-	if not ok or not any then
-		return
-	end
-	local joints = entry.clipJoints
-	if not joints then
-		joints = {}
-		for _, d in ipairs(entry.character:GetDescendants()) do
-			if d:IsA("Motor6D") or d:IsA("AnimationConstraint") then
-				if joints[d.Name] == nil or d:IsA("AnimationConstraint") then
-					joints[d.Name] = d
-				end
-			end
-		end
-		entry.clipJoints = joints
-	end
-	local function put(joint: any, final: CFrame)
-		local cur = joint.Transform
-		-- the base for the bookkeeping: what the Animator gave this frame (ours if we wrote this joint just now)
-		local base = if entry.written[joint] ~= nil and entry.written[joint] == cur then (entry.bases[joint] or cur) else cur
-		joint.Transform = final -- (as writeJoint, below)
-		entry.written[joint] = final
-		entry.bases[joint] = base
-	end
-	for name, cf in pairs(clipOut) do
-		local joint = joints[name]
-		if joint and joint.Parent then
-			put(joint, joint.Transform:Lerp(cf, math.clamp(clipW[name] or 1, 0, 1)))
-		end
-	end
-	for name, add in pairs(clipAdd) do
-		local joint = joints[name]
-		if joint and joint.Parent then
-			put(joint, add * joint.Transform)
-		end
-	end
-	entry.posed = true
-end
-
--- Pose application ------------------------------------------------------------------------------------------------------
-
 -- This frame's animated Transform. If the Animator didn't write this joint this frame (throttled or not
 -- animated) the value is still what we wrote last frame, so we reuse the stored base and never stack poses.
 local function readBase(entry, joint: any): CFrame
@@ -1737,9 +1708,111 @@ end
 
 local function writeJoint(entry, joint: any, base: CFrame, new: CFrame)
 	joint.Transform = new
-	entry.written[joint] = new
+	-- (stored as read back: the property keeps a re-orthonormalised copy that never compares equal to `new`, so the
+	-- check in readBase failed every frame on a rig no Animator rewrites, and the poses compounded into a fold)
+	entry.written[joint] = joint.Transform
 	entry.bases[joint] = base
 end
+
+local POSE_SET: { [string]: boolean } = {}
+for _, name in ipairs(POSE_JOINTS) do
+	POSE_SET[name] = true
+end
+local clipTouched: { [string]: boolean } = {}
+local clipOut: { [string]: CFrame } = {}
+local clipW: { [string]: number } = {}
+local clipAdd: { [string]: CFrame } = {}
+local function applyClips(entry, now: number)
+	local cp = clipPlayer()
+	local extra = entry.clipExtra -- joints only the clips write (the wrists): given back their base when a clip lets go
+	if not cp or not entry.clipClaimed or not (entry.clipUntil and now < entry.clipUntil) then
+		if extra and next(extra) then
+			for joint in pairs(extra) do
+				if joint.Parent then
+					writeJoint(entry, joint, readBase(entry, joint), readBase(entry, joint))
+				end
+			end
+			table.clear(extra)
+		end
+		return
+	end
+	table.clear(clipOut)
+	table.clear(clipW)
+	table.clear(clipAdd)
+	local ok, any = pcall(cp.sample, entry.character, now, clipOut, clipW, clipAdd)
+	if not ok or not any then
+		if extra and next(extra) then
+			for joint in pairs(extra) do
+				if joint.Parent then
+					writeJoint(entry, joint, readBase(entry, joint), readBase(entry, joint))
+				end
+			end
+			table.clear(extra)
+		end
+		return
+	end
+	if not extra then
+		extra = {}
+		entry.clipExtra = extra
+	end
+	local joints = entry.clipJoints
+	if not joints then
+		joints = {}
+		for _, d in ipairs(entry.character:GetDescendants()) do
+			if d:IsA("Motor6D") or d:IsA("AnimationConstraint") then
+				if joints[d.Name] == nil or d:IsA("AnimationConstraint") then
+					joints[d.Name] = d
+				end
+			end
+		end
+		entry.clipJoints = joints
+	end
+	-- Each joint's start: the pose pass's result when it wrote this joint this frame (POSE_JOINTS), otherwise the
+	-- joint's base (never the clip's own pose from last frame, which compounded: the folded dummy, Waist 132 degrees).
+	-- The lerp and the additive delta are applied to that start once, and written once.
+	local touched = clipTouched
+	table.clear(touched)
+	for name in pairs(clipOut) do
+		touched[name] = true
+	end
+	for name in pairs(clipAdd) do
+		touched[name] = true
+	end
+	for name in pairs(touched) do
+		local joint = joints[name]
+		if joint and joint.Parent then
+			local base = readBase(entry, joint)
+			local start = if POSE_SET[name] then joint.Transform else base -- (the pose pass wrote every POSE_JOINTS joint just now)
+			local v = start
+			local cf = clipOut[name]
+			if cf then
+				v = v:Lerp(cf, math.clamp(clipW[name] or 1, 0, 1))
+			end
+			local add = clipAdd[name]
+			if add then
+				v = add * v
+			end
+			writeJoint(entry, joint, base, v)
+			if not POSE_SET[name] then
+				extra[joint] = true
+			end
+		end
+	end
+	-- a clip-only joint (the wrists) the clips stopped writing gets its base back
+	for joint in pairs(extra) do
+		if not touched[joint.Name] then
+			extra[joint] = nil
+			if joint.Parent then
+				local base = readBase(entry, joint)
+				writeJoint(entry, joint, base, base)
+			end
+		end
+	end
+	entry.posed = true
+end
+
+-- Pose application ------------------------------------------------------------------------------------------------------
+-- (readBase and writeJoint are above the clip pass, which uses them)
 
 local function clearPose(entry)
 	for joint, written in pairs(entry.written) do
@@ -1752,6 +1825,9 @@ local function clearPose(entry)
 	end
 	table.clear(entry.written)
 	table.clear(entry.bases)
+	if entry.clipExtra then
+		table.clear(entry.clipExtra)
+	end
 	entry.posed = false
 end
 

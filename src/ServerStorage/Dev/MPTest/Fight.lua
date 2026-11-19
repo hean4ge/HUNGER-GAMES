@@ -143,6 +143,31 @@ return function(ctx: { [string]: any })
 	end
 
 	local function fLobby()
+		if ARGS.nearPlates then
+			-- (test, this test server only: RoundService spreads a few contenders evenly round the ring, 260+ studs apart
+			-- for 3, beyond the load-in's 160-stud draw range; leave only as many neighbouring plinths as there are players,
+			-- so they start next to each other as in a full round)
+			local folder = workspace:FindFirstChild("Arena") and workspace.Arena:FindFirstChild("Plinths")
+			if folder then
+				local list = {}
+				for _, ch in ipairs(folder:GetChildren()) do
+					if string.sub(ch.Name, 1, 6) == "Plinth" or game:GetService("CollectionService"):HasTag(ch, "Plinth") then
+						table.insert(list, ch)
+					end
+				end
+				table.sort(list, function(a, b)
+					return a.Name < b.Name
+				end)
+				local keep = tonumber(ARGS.nearPlates) or #game:GetService("Players"):GetPlayers()
+				for i, ch in ipairs(list) do
+					if i > keep then
+						game:GetService("CollectionService"):RemoveTag(ch, "Plinth")
+						ch.Name = "MPTOff_" .. ch.Name
+					end
+				end
+				L(string.format("nearPlates: kept %d of %d plinths (%s)", math.min(keep, #list), #list, if list[1] then list[1].Name else "-"))
+			end
+		end
 		-- (test: skills open at once instead of 45 s into the round; set before the round, as SkillsOpenAt is published at the start)
 		if Moves and Moves.skills then
 			Moves.skills.LockedFirst = 0
@@ -240,6 +265,10 @@ return function(ctx: { [string]: any })
 			if okH and heavy then string.format("%.2f", heavy.damage) else "?"))
 		check("f.heavy.bSees", hasPrefix(vb.clips, "sword_heavy") and vb.rest == 0 and vb.frozen == 0, string.format("B's clips on A: %s | motion %s", listStr(vb.clips),
 			table.concat(vb.motion, " ; ")))
+		task.wait(2.6)
+		local j = tostring(call(A, "probe", { kind = "joints", target = B.Name }))
+		local deg = tonumber(string.match(j, "maxDeg=([%d%.]+)")) or 999
+		check("f.fold.afterHeavy", deg < 50, string.format("B about 3 s after taking A's heavy %s, as A's client draws B: %s", resStr(hits), j))
 	end
 
 	local function fParry(try: number, counterDelay: number)
@@ -343,6 +372,12 @@ return function(ctx: { [string]: any })
 		check("f.skill.whirl", #list >= 1 and list[1].move == "Whirl" and list[1].dealt > 0 and hasPrefix(vb.clips, "axe_skill_whirl"), string.format(
 			"A's Whirl (Hatchet 4*) on B 3 studs away: server %s; B's clips on A %s; motion %s; A's R ready again in %.1f s", resStr(list), listStr(vb.clips),
 			table.concat(vb.motion, " ; "), readyA - workspace:GetServerTimeNow()))
+		task.wait(2.0)
+		do
+			local j = tostring(call(A, "probe", { kind = "joints", target = B.Name }))
+			local deg = tonumber(string.match(j, "maxDeg=([%d%.]+)")) or 999
+			check("f.fold.afterWhirl", deg < 50, "B about 3.4 s after A's Whirl, as A's client draws B: " .. j)
+		end
 		-- per player: A's R again is refused (cooldown); B's R (Sword: Running Cut) works at once
 		local srA = skillRefusals()
 		call(A, "skill", { slot = "weapon" })
@@ -617,7 +652,22 @@ return function(ctx: { [string]: any })
 
 	local function fLoadIn(from: { [Player]: number })
 		local out, ok = {}, true
-		for _, viewer in ipairs({ A, B }) do
+		local everyone = {}
+		for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
+			if p:GetAttribute("InArena") == true or p:GetAttribute("Alive") == true then
+				table.insert(everyone, p)
+			end
+		end
+		-- where each contender stands: the plate gaps (the swirl of a player beyond 160 studs is not drawn, by design)
+		local gaps = {}
+		for i, p in ipairs(everyone) do
+			for j = i + 1, #everyone do
+				local _, r1 = parts(p)
+				local _, r2 = parts(everyone[j])
+				table.insert(gaps, string.format("%s-%s %.0f", p.Name, everyone[j].Name, if r1 and r2 then flatDist(r1.Position, r2.Position) else -1))
+			end
+		end
+		for _, viewer in ipairs(everyone) do
 			local lines = linesWith(viewer, from[viewer] or 0, "LOADIN ")
 			local who = {}
 			for _, line in ipairs(lines) do
@@ -626,13 +676,393 @@ return function(ctx: { [string]: any })
 					who[name] = true
 				end
 			end
-			ok = ok and who[A.Name] == true and who[B.Name] == true
+			for _, p in ipairs(everyone) do
+				ok = ok and who[p.Name] == true
+			end
 			table.insert(out, string.format("%s's client: %s", viewer.Name, table.concat(lines, " | ")))
 		end
-		check("f.loadIn.both", ok, "the load-in swirl at the arena on each client: " .. table.concat(out, " || "))
+		check("f.loadIn.both", ok and #everyone >= 2, string.format("the load-in swirl at the arena on each of %d clients (plate gaps %s): %s", #everyone,
+			table.concat(gaps, ", "), table.concat(out, " || ")))
+	end
+
+	-- mp-finish (19 Nov, wave 11) --------------------------------------------------------------------------------------
+	local CollectionService = game:GetService("CollectionService")
+	local ServerStorage = game:GetService("ServerStorage")
+	local standAt, groundAt = ctx.standAt, ctx.groundAt
+	local function pt(v: Vector3): { [string]: number }
+		return { x = v.X, y = v.Y, z = v.Z }
+	end
+	local function lowestY(m: Model): number
+		local lo = math.huge
+		for _, d in ipairs(m:GetDescendants()) do
+			if d:IsA("BasePart") and d.Transparency < 0.99 then
+				local h = d.Size / 2
+				for _, sx in ipairs({ -1, 1 }) do
+					for _, sy in ipairs({ -1, 1 }) do
+						for _, sz in ipairs({ -1, 1 }) do
+							lo = math.min(lo, (d.CFrame * Vector3.new(h.X * sx, h.Y * sy, h.Z * sz)).Y)
+						end
+					end
+				end
+			end
+		end
+		return lo
+	end
+	local function invStars(p: Player, itemId: string): string
+		local snap = Inv.getSnapshot(p)
+		local out = {}
+		for _, s in ipairs(snap.slots) do
+			if type(s) == "table" and s.id == itemId then
+				table.insert(out, tostring(s.stars))
+			end
+		end
+		return table.concat(out, ",")
+	end
+	local function goodLook(s: string, want: string): boolean
+		return string.find(s, "tierMesh=" .. want, 1, true) ~= nil and string.find(s, "tiled=%[[^%]]") == nil and string.find(s, "trims=[1-9]") == nil
+			and string.find(s, "mesh=[1-9]") ~= nil
+	end
+
+	-- B sees A's Blender weapons at their stars in hand; A's own first person; a weapon on the ground
+	local LOOK_SET = { { "sword", 1 }, { "sword", 5 }, { "hatchet", 4 }, { "twin_axe", 5 }, { "knife", 5 }, { "ring_blade", 3 }, { "paired_blades", 5 },
+		{ "leaf_dagger", 1 }, { "machete", 2 }, { "spear", 3 }, { "climb_pick", 4 } }
+	local function fLooks()
+		L(duel(A, B, 6))
+		fFace()
+		local bad = {}
+		for _, w in ipairs(LOOK_SET) do
+			Inv.clear(A)
+			Inv.give(A, w[1], 1, w[2])
+			task.wait(0.5)
+			call(A, "seq", { { "select", slotOf(A, w[1]) }, { "wait", 1.1 } }, 4)
+			local want = w[1] .. "_t" .. w[2]
+			local seen = tostring(call(B, "probe", { kind = "look", target = A.Name }))
+			local own = tostring(call(A, "probe", { kind = "look", target = "self" }))
+			L("SHOT f_look_" .. want)
+			task.wait(1.2)
+			local okW = goodLook(seen, want) and goodLook(own, want)
+			if w[1] == "paired_blades" then
+				local mB = tonumber(string.match(seen, "models=(%d+)")) or 0
+				local mA = tonumber(string.match(own, "models=(%d+)")) or 0
+				okW = okW and mB >= 2
+				L(string.format("f.look paired: B sees %d models on A, A's first person %d models", mB, mA))
+			end
+			if not okW then
+				table.insert(bad, want)
+			end
+			L("f.look " .. want .. " B sees: " .. string.sub(seen, 1, 900))
+			L("f.look " .. want .. " A's first person: " .. string.sub(own, 1, 900))
+		end
+		check("f.look.held", #bad == 0, string.format("%d weapons at their stars held by A: B's model and A's first-person model are the WeaponsV3 mesh of that star (TierMesh <id>_t<stars>), no tiled Wood/Metal, no part trims; failing: [%s] (lines f.look)",
+			#LOOK_SET, table.concat(bad, ",")))
+		-- on the ground: a 5* Longsword and a 1* Hatchet at B's feet, as LootService drops them
+		local loot = req(Services, "LootService")
+		local _, rb = parts(B)
+		local _, ra = parts(A)
+		if loot and rb and ra then
+			local mid = (ra.Position + rb.Position) / 2
+			pcall(loot.spawnGroundItem, "sword", 1, mid + Vector3.new(0, 1, 1.5), Vector3.zero, 5)
+			pcall(loot.spawnGroundItem, "hatchet", 1, mid + Vector3.new(0, 1, -1.5), Vector3.zero, 1)
+			task.wait(1.5)
+			call(B, "face", pt(mid - Vector3.new(0, 2.5, 0)))
+			task.wait(0.4)
+			L("SHOT f_look_ground")
+			local s = tostring(call(B, "probe", { kind = "worldlook", near = pt(mid), radius = 6 }))
+			check("f.look.ground", goodLook(string.match(s, "GroundItem sword.-%]") or "", "sword_t5") and goodLook(string.match(s, "GroundItem hatchet.-%]") or "", "hatchet_t1"),
+				"a 5* Longsword and a 1* Hatchet on the ground as B's client draws them: " .. string.sub(s, 1, 1500))
+			task.wait(1.0)
+			for _, m in ipairs(CollectionService:GetTagged("GroundItem")) do
+				if m:IsA("Model") and (m:GetPivot().Position - mid).Magnitude < 8 then
+					m:Destroy()
+				end
+			end
+		end
+	end
+
+	-- the newest world copy of a thrown itemId since `afterId`
+	local function thrownModel(itemId: string, afterId: number): Model?
+		local best, bestId = nil, afterId
+		for _, m in ipairs(CollectionService:GetTagged("WorldProjectile")) do
+			local id = tonumber(m:GetAttribute("WorldId")) or 0
+			if m:IsA("Model") and m:GetAttribute("ItemId") == itemId and id > bestId then
+				best, bestId = m, id
+			end
+		end
+		return best
+	end
+	local function maxWorldId(): number
+		local n = 0
+		for _, m in ipairs(CollectionService:GetTagged("WorldProjectile")) do
+			n = math.max(n, tonumber(m:GetAttribute("WorldId")) or 0)
+		end
+		return n
+	end
+	local function throwSeq(aim: { [string]: number }, slot: number?): { any }
+		return { { "select", slot }, { "wait", 0.9 }, { "face", aim }, { "aim", true }, { "wait", 0.35 }, { "face", aim }, { "down" }, { "wait", 0.7 }, { "up" }, { "wait", 0.2 },
+			{ "aim", false }, { "wait", 2.4 } }
+	end
+	-- A throws `itemId` at `stars` into the ground (or a tree trunk); B sees it fly at A's stars; it sticks; B takes it
+	-- with E and has it at A's stars
+	local function fThrowPick(itemId: string, stars: number, into: string)
+		Inv.clear(A)
+		Inv.give(A, itemId, 1, stars)
+		Inv.clear(B)
+		setHealth(A)
+		setHealth(B)
+		task.wait(0.5)
+		local label = itemId .. stars .. "_" .. into
+		local aim: Vector3? = nil
+		local trunkName = "-"
+		local trunkAt: Vector3? = nil
+		if into == "tree" then
+			-- the nearest climbable trunk to the duel base: A stands 9 studs from it
+			local base = ctx.duelLine()
+			local best, bestD = nil, 2500 -- (the nearest standing trunk anywhere on the map; A and B are stood beside it)
+			for _, t in ipairs(CollectionService:GetTagged("Climbable")) do
+				if t:IsA("BasePart") and base and t:IsDescendantOf(workspace) then
+					local d = flatDist(t.Position, base)
+					if d < bestD then
+						best, bestD = t, d
+					end
+				end
+			end
+			if not best then
+				check("f.throw." .. label, false, "no climbable trunk in the workspace")
+				return
+			end
+			trunkName = best:GetFullName() .. " " .. best.Material.Name
+			-- (the trunk's own foot: a ray from above would land on the canopy)
+			local _, ext = best.CFrame:ToObjectSpace(best.CFrame), best.Size
+			local foot = Vector3.new(best.Position.X, best.Position.Y - math.max(ext.X, ext.Y, ext.Z) / 2, best.Position.Z)
+			trunkName ..= string.format(" foot %s size %s", tostring(foot), tostring(best.Size))
+			trunkAt = foot
+			local away = Vector3.new(1, 0, 0)
+			standAt(A, foot.X + away.X * 9, foot.Z + away.Z * 9, foot)
+			standAt(B, foot.X + away.X * 6 + 6, foot.Z - 6, foot)
+			aim = foot + Vector3.new(0, 3.2, 0)
+		else
+			L(duel(A, B, 10))
+			local _, dir = ctx.duelLine()
+			local _, ra = parts(A)
+			if not ra then
+				return
+			end
+			local side = Vector3.new(-dir.Z, 0, dir.X)
+			local tp = ra.Position + side * 9
+			local g = groundAt(tp.X, ra.Position.Y, tp.Z)
+			aim = if g then g else tp - Vector3.new(0, 3, 0)
+		end
+		task.wait(0.6)
+		local w0, mA, mB = maxWorldId(), mark(A), mark(B)
+		local slot = slotOf(A, itemId)
+		task.delay(1.35, L, "SHOT f_throw_" .. label .. "_fly")
+		call(A, "seq", throwSeq(pt(aim :: Vector3), slot), 12)
+		local m: Model? = nil
+		local t0 = os.clock()
+		repeat
+			m = thrownModel(itemId, w0)
+			task.wait(0.1)
+		until (m and CollectionService:HasTag(m, "LooseProjectile")) or os.clock() - t0 > 4
+		local flyB = linesWith(B, mB, "FLY ")
+		local flyEndB = linesWith(B, mB, "FLY-END " .. itemId)
+		local flyLook = ""
+		for _, l in ipairs(flyB) do
+			if string.find(l, "item=" .. itemId, 1, true) then
+				flyLook = l
+				break
+			end
+		end
+		if not m then
+			check("f.throw." .. label, false, string.format("A threw %s %d* at %s: no world copy appeared; A's inventory %s; B's flight lines %s", itemId, stars, into,
+				invLine(A), table.concat(flyB, " | ")))
+			return
+		end
+		local pv = m:GetPivot()
+		local g = groundAt(pv.Position.X, pv.Position.Y + 2, pv.Position.Z)
+		local embed = if g then g.Y - lowestY(m) else 0
+		local loose = CollectionService:HasTag(m, "LooseProjectile")
+		call(B, "face", pt(pv.Position))
+		call(A, "face", pt(pv.Position))
+		task.wait(0.3)
+		L("SHOT f_throw_" .. label .. "_stuck")
+		task.wait(0.8)
+		-- what B's client draws of the landed copy
+		local bLook = tostring(call(B, "probe", { kind = "worldlook", near = pt(pv.Position), radius = 4, item = itemId }))
+		if trunkAt then
+			-- from the weapon's balance point toward the trunk's axis: the first surface, and the first one you can see
+			local params = RaycastParams.new()
+			params.FilterType = Enum.RaycastFilterType.Exclude
+			local skip = { m }
+			params.FilterDescendantsInstances = skip
+			local to = Vector3.new(trunkAt.X - pv.Position.X, 0, trunkAt.Z - pv.Position.Z)
+			local hits = {}
+			for _ = 1, 4 do
+				local r = workspace:Raycast(pv.Position, to.Unit * 8, params)
+				if not r then
+					break
+				end
+				table.insert(hits, string.format("%s %s transp=%.2f at %.2f", r.Instance.Name, r.Instance.ClassName, r.Instance.Transparency, (r.Position - pv.Position).Magnitude))
+				if r.Instance.Transparency < 0.99 then
+					break
+				end
+				table.insert(skip, r.Instance)
+				params.FilterDescendantsInstances = skip
+			end
+			L("f.throw " .. label .. " surfaces from the balance point toward the trunk: " .. table.concat(hits, " ; "))
+		end
+		check("f.throw." .. label .. ".flight", goodLook(flyLook, itemId .. "_t" .. stars) and #flyEndB >= 1, string.format(
+			"A threw its %s %d* (%s): B's client flew %s | %s (Studio windows draw at about 15 fps, so the per-frame turn aliases)", itemId, stars, trunkName,
+			flyLook, table.concat(flyEndB, " ")))
+		check("f.throw." .. label .. ".stuck", loose and tonumber(m:GetAttribute("Stars")) == stars and goodLook(bLook, itemId .. "_t" .. stars), string.format(
+			"server: the world copy at %s (%s), Stars=%s, loose=%s, look %s up %s, lowest point %.2f studs into the ground under it (an edge or point in: > 0; flat on top: about 0) | B draws %s",
+			tostring(pv.Position), if trunkAt then string.format("%.2f studs from the trunk's axis, %.2f above its foot", flatDist(pv.Position, trunkAt), pv.Position.Y - trunkAt.Y) else "ground", tostring(m:GetAttribute("Stars")), tostring(loose), tostring(pv.LookVector), tostring(pv.UpVector), embed, string.sub(bLook, 1, 700)))
+		-- B walks up to it and takes it with E
+		local _, ra = parts(A)
+		local from = if ra then ra.Position else pv.Position + Vector3.new(4, 0, 0)
+		local toward = Vector3.new(from.X - pv.Position.X, 0, from.Z - pv.Position.Z)
+		toward = if toward.Magnitude > 0.1 then toward.Unit else Vector3.new(1, 0, 0)
+		if trunkAt and ra then
+			-- (by a tree a ray from above lands on a branch: B takes A's spot, about 5 studs out, and A steps aside)
+			local spot = ra.Position
+			standAt(A, spot.X, spot.Z + 6, pv.Position, spot.Y)
+			standAt(B, spot.X, spot.Z, pv.Position, spot.Y - 3)
+		else
+			standAt(B, pv.Position.X + toward.X * 3, pv.Position.Z + toward.Z * 3, pv.Position, pv.Position.Y)
+		end
+		task.wait(0.6)
+		call(B, "face", pt(pv.Position))
+		task.wait(0.5)
+		local took = tostring(call(B, "probe", { kind = "take", wait = 3 }, 8))
+		task.wait(1.0)
+		local bStars = invStars(B, itemId)
+		local bSlot = slotOf(B, itemId)
+		local heldLook = "-"
+		if bSlot then
+			call(B, "seq", { { "select", bSlot }, { "wait", 1.0 } }, 4)
+			heldLook = tostring(call(A, "probe", { kind = "look", target = B.Name }))
+		end
+		check("f.throw." .. label .. ".takenByB", bStars == tostring(stars) and m.Parent == nil and goodLook(heldLook, itemId .. "_t" .. stars), string.format(
+			"B at 3 studs, facing it: %s; B's inventory %s (%s stars %s); the world copy %s; A's inventory %s; B's hand as A sees it %s", took, invLine(B), itemId,
+			bStars, if m.Parent then "still there" else "gone", invLine(A), string.sub(heldLook, 1, 600)))
+	end
+
+	-- a standing Longsword chain on a B that is not held in place: every hit connects, the last pushes about 4 studs
+	local function fChainFree()
+		Inv.clear(A)
+		Inv.give(A, "sword", 1, 1)
+		task.wait(0.5)
+		local sw = slotOf(A, "sword")
+		setHealth(A)
+		setHealth(B)
+		L(duel(A, B, 4))
+		fFace()
+		call(A, "seq", { { "select", sw }, { "wait", 0.8 } }, 4)
+		task.wait(1.0)
+		local n0 = #resolves
+		local rows, running, seen = {}, true, n0
+		task.spawn(function()
+			while running do
+				while #resolves > seen do
+					seen += 1
+					local r = resolves[seen]
+					local _, ra = parts(A)
+					local _, rb = parts(B)
+					local d0 = if ra and rb then flatDist(ra.Position, rb.Position) else -1
+					local row = { move = r.move, result = r.result, dealt = r.dealt, d0 = d0, d1 = -1 }
+					table.insert(rows, row)
+					task.delay(0.5, function()
+						local _, ra2 = parts(A)
+						local _, rb2 = parts(B)
+						row.d1 = if ra2 and rb2 then flatDist(ra2.Position, rb2.Position) else -1
+					end)
+				end
+				task.wait(0.02)
+			end
+		end)
+		call(A, "seq", { { "face", B.Name }, { "wait", 0.2 }, { "click" }, { "wait", 0.62 }, { "click" }, { "wait", 0.62 }, { "click" }, { "wait", 0.62 }, { "click" },
+			{ "wait", 1.4 } }, 15)
+		task.wait(0.6)
+		running = false
+		local moves, desc, pushes = {}, {}, {}
+		for _, r in ipairs(rows) do
+			table.insert(moves, r.move .. ":" .. r.result)
+			table.insert(pushes, r.d1 - r.d0)
+			table.insert(desc, string.format("%s %s %.1f gap %.2f -> %.2f (push %.2f)", r.move, r.result, r.dealt, r.d0, r.d1, r.d1 - r.d0))
+		end
+		local last = pushes[4] or 0
+		local earlyMax = math.max(pushes[1] or 9, pushes[2] or 9, pushes[3] or 9)
+		check("f.chainFree", table.concat(moves, ",") == "L1:Hit,L2:Hit,L3:Hit,L4:Hit" and earlyMax < 1.5 and last > 2.5 and last < 6.5, string.format(
+			"A's Longsword 1* chain of 4 taps 0.62 s apart at B 4 studs away, nobody moves forward, B not held: %s (early pushes under 1.5, last 2.5 to 6.5 studs)",
+			table.concat(desc, "; ")))
+	end
+
+	-- no folded body after a heavy or a Whirl: every joint of B on A's screen, and of a game training dummy
+	local function jointCheck(id: string, viewer: Player, target: string, what: string)
+		local j = tostring(call(viewer, "probe", { kind = "joints", target = target }))
+		local deg = tonumber(string.match(j, "maxDeg=([%d%.]+)")) or 999
+		check("f.fold." .. id, deg < 50, string.format("%s, as %s's client draws it: %s (folded reads 100+ degrees)", what, viewer.Name, j))
+	end
+	local function fDummyFold()
+		local template = ServerStorage:FindFirstChild("Dev") and ServerStorage.Dev:FindFirstChild("TrainingDummy")
+		if not template then
+			check("f.fold.dummy", false, "no ServerStorage.Dev.TrainingDummy")
+			return
+		end
+		Inv.clear(A)
+		Inv.give(A, "hatchet", 1, 4)
+		Inv.give(A, "paired_blades", 1, 5)
+		task.wait(0.5)
+		local base, dir = ctx.duelLine()
+		if not base then
+			return
+		end
+		L(duel(A, B, 25)) -- (B out of the way)
+		local _, ra = parts(A)
+		local at = (if ra then ra.Position else base) + dir * 4
+		local g = groundAt(at.X, at.Y, at.Z)
+		local dm = template:Clone()
+		dm.Name = "MPT_DummyF"
+		dm:PivotTo(CFrame.lookAt(Vector3.new(at.X, (if g then g.Y else at.Y - 3) + 3, at.Z), Vector3.new(base.X, (if g then g.Y else at.Y - 3) + 3, base.Z)))
+		local hum = dm:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.MaxHealth = 2000
+			hum.Health = 2000
+		end
+		CollectionService:AddTag(dm, "TrainingDummy")
+		dm.Parent = workspace
+		task.wait(1.0)
+		local n0 = #resolves
+		local dpt = pt(Vector3.new(at.X, (if g then g.Y else at.Y - 3) + 3, at.Z))
+		call(A, "seq", { { "select", slotOf(A, "hatchet") }, { "wait", 0.8 }, { "face", dpt } }, 4)
+		call(A, "skill", { slot = "weapon" })
+		task.wait(1.6)
+		call(A, "seq", { { "select", slotOf(A, "paired_blades") }, { "wait", 0.8 }, { "face", dpt }, { "click" }, { "wait", 0.45 }, { "click" }, { "wait", 0.45 },
+			{ "click" }, { "wait", 0.6 }, { "down" }, { "wait", 0.9 }, { "up" }, { "wait", 0.4 } }, 12)
+		local list = resolvesFrom(n0, A.Name)
+		task.wait(4.0)
+		L("SHOT f_fold_dummy")
+		jointCheck("dummy", A, "MPT_DummyF", string.format("a game training dummy 4.0 s after A's Whirl (Hatchet 4*), a Paired Blades 5* chain and a heavy %s", resStr(list)))
+		dm:Destroy()
+	end
+
+	-- a weapon thrown into B stays in B, and falls out when B dies (the round's end, run in the train step)
+	local function stuckInB(): Model?
+		Inv.clear(A)
+		Inv.give(A, "sword", 1, 3)
+		task.wait(0.5)
+		L(duel(A, B, 9))
+		fFace()
+		local w0 = maxWorldId()
+		local _, rb = parts(B)
+		call(A, "seq", throwSeq(pt(if rb then rb.Position + Vector3.new(0, 0.6, 0) else Vector3.zero), slotOf(A, "sword")), 12)
+		local m = thrownModel("sword", w0)
+		L(string.format("f.stuck: the thrown Longsword 3* %s host=%s hostPart=%s; B's health %.1f", if m then "is in the world" else "not found",
+			tostring(m and m:GetAttribute("Host")), tostring(m and m:GetAttribute("HostPart")), health(B)))
+		return m
 	end
 
 	local fRoundMarks: { [Player]: number } = {}
+
 	local function batchF()
 		if Moves and Moves.skills then
 			Moves.skills.LockedFirst = 0 -- (test: skills open at once instead of 45 s into the round)
@@ -672,6 +1102,21 @@ return function(ctx: { [string]: any })
 			{ "moving", movingChecks },
 			{ "ricochet", fRicochet }, -- (run with fspecA = "Throwing")
 			{ "pierce", fPierce }, -- (run with fspecB = "Bow")
+			{ "chainfree", fChainFree },
+			{ "fold", fDummyFold },
+			{ "looks", fLooks },
+			{ "throwaxe", function()
+				fThrowPick("hatchet", 4, "ground")
+			end },
+			{ "throwsword", function()
+				fThrowPick("sword", 5, "ground")
+			end },
+			{ "throwtree", function()
+				fThrowPick("twin_axe", 3, "tree")
+			end },
+			{ "throwtreesword", function()
+				fThrowPick("sword", 4, "tree")
+			end },
 			{ "train", function()
 				-- the round ends (A defeats B): B appears in the train first, then A at the round's end, a few studs from B
 				local mA, mB = mark(A), mark(B)
@@ -682,7 +1127,23 @@ return function(ctx: { [string]: any })
 						hum.Health = 100
 					end
 				end
+				-- a Longsword thrown into B first: it falls out when B dies
+				local okS, stuck = pcall(stuckInB)
+				local hostBefore = if okS and stuck then stuck:GetAttribute("Host") else nil
+				Inv.give(A, "sword", 1, 1)
+				task.wait(0.4)
 				ctx.killB("f")
+				if okS and stuck then
+					task.wait(1.5)
+					local pv = stuck:GetPivot()
+					local g = groundAt(pv.Position.X, pv.Position.Y + 2, pv.Position.Z)
+					check("f.throw.fallsOutOnDeath", hostBefore ~= nil and stuck:GetAttribute("Host") == nil and stuck.Parent ~= nil, string.format(
+						"A's Longsword 3* thrown into B (Host=%s before); 1.5 s after B's death: Host=%s, still in the world=%s, loose=%s, lowest point %.2f above the ground, Stars=%s",
+						tostring(hostBefore), tostring(stuck:GetAttribute("Host")), tostring(stuck.Parent ~= nil), tostring(CollectionService:HasTag(stuck, "LooseProjectile")),
+						if g then lowestY(stuck) - g.Y else -99, tostring(stuck:GetAttribute("Stars"))))
+				else
+					check("f.throw.fallsOutOnDeath", false, "the throw into B did not leave a world copy: " .. tostring(stuck))
+				end
 				ctx.backToLobby("f", { A, B })
 				task.wait(3.0)
 				local function played(lines: { string }): boolean
@@ -720,8 +1181,9 @@ return function(ctx: { [string]: any })
 	return {
 		lobby = function()
 			fLobby()
-			fRoundMarks[A] = mark(A)
-			fRoundMarks[B] = mark(B)
+			for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
+				fRoundMarks[p] = mark(p)
+			end
 		end,
 		run = batchF,
 	}

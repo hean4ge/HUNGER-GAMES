@@ -29,10 +29,15 @@
 	fails it becomes a plain ground item (LootService.spawnGroundItem).
 
 	Server -> all clients
-	  ProjectileFired  { id, shooter (UserId, 0 = none), itemId, origin, velocity, gravity, shotId, t (server time) }
+	  ProjectileFired  { id, shooter (UserId, 0 = none), itemId, origin, velocity, gravity, shotId, t (server time),
+	                     stars? (a thrown weapon's) }
 	  ProjectileImpact { id, position, normal, hitCharacter, part, material, recovered, itemId, headshot,
-	                     worldId?, pivot?, rel?, fallTo?, fallTime?, sink? }   (the item it left in the world, its pose,
-	                     relative to `part` when it is stuck to it, and the fall or sink that follows)
+	                     worldId?, pivot?, rel?, fallTo?, fallTime?, sink?, lost? }   (the item it left in the world, its
+	                     pose, relative to `part` when it is stuck to it, the fall or sink that follows, and lost = it sank
+	                     into deep water and goes once down)
+	Thrown melee weapons (19 Nov 2026: every one can be thrown) fly end over end and stick edge- or point-first by
+	Shared.ThrowLooks (./WorldProjectiles), keep their stars and their star look where they land, and anyone takes them
+	back with E.
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -180,6 +185,7 @@ local function impactPayload(p: Projectile, result: RaycastResult, hitCharacter:
 		fallTo = if entry then entry.fallTo else nil,
 		fallTime = if entry then entry.fallTime else nil,
 		sink = if entry and entry.sink then true else nil,
+		lost = if entry and entry.lost then true else nil, -- deep water: it goes once it has sunk
 	}
 end
 
@@ -481,6 +487,7 @@ function ProjectileService.fire(
 		gravity = p.gravity,
 		shotId = if type(o.shotId) == "string" then o.shotId else "",
 		t = workspace:GetServerTimeNow(),
+		stars = p.recoverStars, -- (a thrown weapon flies with its own star look)
 	})
 	return id
 end

@@ -85,7 +85,7 @@ Moves.reactions = merge({
 	Heavy = { Time = 0.7, HitStop = 0.08, Jolt = 9, ShakeAttacker = { 0.25, 0.2 }, ShakeVictim = { 0.4, 0.3 } },
 	Knockdown = { Time = 1.6, Down = 1.0, Getup = 0.6, RollOutAfter = 0.5, HitStop = 0.08, Jolt = 9 },
 	Poise = { AfterStagger = 0.8, AfterKnockdown = 1.5 },
-	Knockback = { Decay = 108, Cap = 36, HeavyMult = 1.5, Region = { Head = 1.4, Torso = 1.0, Limbs = 0.7 },
+	Knockback = { Decay = 108, Cap = 36, HeavyMult = 1.5, ChainStep = 0.3, ChainLast = 1.1, Region = { Head = 1.4, Torso = 1.0, Limbs = 0.7 },
 		Speed = { fists = 12, knife = 18, leaf_dagger = 16, ring_blade = 20, paired_blades = 16, machete = 34, sword = 28,
 			wrapped_sabre = 28, hatchet = 30, climb_pick = 24, spear = 26, twin_axe = 36, mace = 32, throwing_knife = 12,
 			kick = 30, counter = 36, arrow = 22, thrown = 26 } },
@@ -337,7 +337,10 @@ function Moves.step(stats: any, itemId: string?, index: number?): { [string]: an
 		sweep = s.sweep == true,
 		insideFull = s.insideFull == true,
 		stamina = if type(stats) == "table" then stats.staminaCost or 0.05 else 0.05,
-		knock = Moves.knockSpeed(itemId),
+		-- per chain step: the early steps only nudge (28 studs/s pushed the body about 3.6 studs, out of the next
+		-- step's reach, so a standing chain lost its third hit); the last step pushes in full
+		knock = Moves.knockSpeed(itemId) * (if i == #chain then (Moves.reactions.Knockback.ChainLast or 1)
+			else (Moves.reactions.Knockback.ChainStep or 0.3)),
 		label = s.label,
 	}
 end

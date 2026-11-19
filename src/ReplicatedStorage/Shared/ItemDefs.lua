@@ -3,6 +3,10 @@
 	kind: "Melee" | "Bow" | "Throwable" | "Ammo" | "Food" | "Drink" | "Heal" | "Armor" | "Utility"
 	Shared fields: id (filled in below), name, kind, rarity, stack (max per slot), desc
 	Melee: damage, cooldown, range, windup, staminaCost, [throwable, throwDamage, throwSpeed, throwGravity]
+	  Throws (19 Nov 2026: every melee weapon can be thrown; Guard + hold Attack): throwSpin = studs flown per full
+	  end-over-end turn (Shared.ThrowLooks turns it at throwSpeed / throwSpin a second), throwFlight "point" (the
+	  spear: point first, no spin) or "flat" (the Ring Blade's level spin), throwHold "Spear" (only the spear is held
+	  two-handed to throw). Short blades throw fast and far; swords and the heavy axes shorter, slower, harder.
 	Bow: ammo, damageMin, damageMax, drawTime, speedMin, speedMax, gravity, headshotMultiplier
 	Throwable: damage, speed, gravity, cooldown
 	Food / Drink / Heal: hunger, thirst, heal, useTime, [becomes]
@@ -27,53 +31,66 @@ ItemDefs.Items = {
 	knife = { name = "Hunting Knife", kind = "Melee", rarity = "Common", stack = 1, starred = true,
 		damage = 20, cooldown = 0.48, range = 4.5, windup = 0.10, staminaCost = 0.04,
 		unseenDamage = 40, -- first hit on someone facing away and not hurt in 5 s (CombatService)
+		throwable = true, throwDamage = 30, throwSpeed = 125, throwGravity = 35, throwHeadMultiplier = 1.6,
+		throwStaminaCost = 0.05, throwSpin = 12,
 		desc = "Quick, quiet, reliable.", equipSound = "Equip_Blade" },
 	machete = { name = "Machete", kind = "Melee", rarity = "Uncommon", stack = 1, starred = true,
 		damage = 26, cooldown = 0.55, range = 7, windup = 0.14, staminaCost = 0.06,
 		sweepShare = 0.6, sweepAngle = 55, -- a 2nd contender in the arc takes 60% (CombatService)
+		throwable = true, throwDamage = 34, throwSpeed = 95, throwGravity = 50, throwHeadMultiplier = 1.5,
+		throwStaminaCost = 0.08, throwSpin = 16,
 		desc = "Wide cuts. Best when two are close.", equipSound = "Equip_Blade" },
 	hatchet = { name = "Hatchet", kind = "Melee", rarity = "Uncommon", stack = 1, starred = true,
 		damage = 34, cooldown = 0.80, range = 5, windup = 0.18, staminaCost = 0.08,
 		throwable = true, throwDamage = 45, throwSpeed = 110, throwGravity = 45, throwHeadMultiplier = 1.6,
+		throwStaminaCost = 0.08, throwSpin = 15,
 		desc = "A short axe and a tool. One heavy throw.", equipSound = "Equip_Blade" },
 	spear = { name = "Spear", kind = "Melee", rarity = "Rare", stack = 1, starred = true,
 		damage = 34, cooldown = 0.70, range = 9.5, windup = 0.20, staminaCost = 0.07,
 		closeShare = 0.6, closeRange = 4, -- 60% inside 4 studs (CombatService)
-		throwable = true, throwDamage = 60, throwSpeed = 110, throwGravity = 45,
+		throwable = true, throwDamage = 60, throwSpeed = 110, throwGravity = 45, throwFlight = "point", throwHold = "Spear",
 		desc = "Long reach. Hold Aim and attack to throw.", equipSound = "Equip_Blade" },
 	mace = { name = "Mace", kind = "Melee", rarity = "Rare", stack = 1, starred = true, retired = true,
 		damage = 46, cooldown = 1.1, range = 7, windup = 0.25, staminaCost = 0.12,
 		desc = "Slow and crushing." }, -- retired from loot (Weapons_v2): the id and model stay so nothing breaks
 	sword = { name = "Longsword", kind = "Melee", rarity = "Epic", stack = 1, starred = true,
 		damage = 36, cooldown = 0.62, range = 8, windup = 0.16, staminaCost = 0.08,
+		throwable = true, throwDamage = 40, throwSpeed = 80, throwGravity = 55, throwHeadMultiplier = 1.4,
+		throwStaminaCost = 0.10, throwSpin = 18, -- a long blade: a short, slow, end-over-end throw
 		desc = "The duellist's blade. The Horn's prize.", equipSound = "Equip_Blade" },
 	twin_axe = { name = "Twin-Bit Axe", kind = "Melee", rarity = "Rare", stack = 1, starred = true,
 		damage = 42, cooldown = 0.95, range = 7, windup = 0.30, staminaCost = 0.12,
 		armorPierce = 0.5, -- armour stops half as much (CombatService)
-		throwable = true, throwDamage = 65, throwSpeed = 95, throwGravity = 50, throwStaminaCost = 0.10, throwSpin = true,
+		throwable = true, throwDamage = 65, throwSpeed = 95, throwGravity = 50, throwStaminaCost = 0.10, throwSpin = 20,
 		desc = "Slow, heavy, breaks armour. Throw it end over end.", equipSound = "Equip_Blade" },
 	ring_blade = { name = "Ring Blade", kind = "Melee", rarity = "Rare", stack = 1, starred = true,
 		damage = 24, cooldown = 0.55, range = 5.5, windup = 0.12, staminaCost = 0.05,
 		throwable = true, throwDamage = 38, throwSpeed = 140, throwGravity = 12, throwHeadMultiplier = 1.6,
-		throwOnTargetRange = 45, throwStaminaCost = 0.06,
+		throwOnTargetRange = 45, throwStaminaCost = 0.06, throwFlight = "flat", throwSpin = 10,
 		desc = "A steel hoop. Thrown, it flies flat and fast.", equipSound = "Equip_Blade" },
 	climb_pick = { name = "Climbing Pick", kind = "Melee", rarity = "Uncommon", stack = 1, starred = true,
 		damage = 26, cooldown = 0.65, range = 5, windup = 0.14, staminaCost = 0.06,
 		climbSpeedMultiplier = 1.2, climbDrainMultiplier = 0.7, -- in hand while climbing (MovementController)
+		throwable = true, throwDamage = 32, throwSpeed = 95, throwGravity = 48, throwHeadMultiplier = 1.5,
+		throwStaminaCost = 0.07, throwSpin = 14,
 		desc = "Climb faster and longer with it in hand.", equipSound = "Equip_Blade" },
 	-- Combat v3 (5.4, 5.5): our own pair after the owner's crossed-blades picture, and the leaf-shaped thrower
 	paired_blades = { name = "Paired Blades", kind = "Melee", rarity = "Epic", stack = 1, starred = true,
 		damage = 19, cooldown = 0.38, range = 5.5, windup = 0.07, staminaCost = 0.035, offHand = true,
+		throwable = true, throwDamage = 28, throwSpeed = 100, throwGravity = 45, throwHeadMultiplier = 1.5,
+		throwStaminaCost = 0.06, throwSpin = 15, -- (one blade flies; picking it up gives the pair back)
 		desc = "Two short blades. Fast chains that finish hard.", equipSound = "Equip_Blade" },
 	leaf_dagger = { name = "Leaf Dagger", kind = "Melee", rarity = "Uncommon", stack = 1, starred = true,
 		damage = 18, cooldown = 0.42, range = 4.2, windup = 0.08, staminaCost = 0.035,
 		throwable = true, throwDamage = 40, throwSpeed = 150, throwGravity = 20, throwHeadMultiplier = 1.6,
-		throwOnTargetRange = 30, throwStaminaCost = 0.05, throwUnseenDamage = 50, quietThrow = 10,
+		throwOnTargetRange = 30, throwStaminaCost = 0.05, throwUnseenDamage = 50, quietThrow = 10, throwSpin = 9,
 		desc = "A leaf blade with a ring. Throw it quietly, then fetch it.", equipSound = "Equip_Blade" },
 	-- the Paired Blades' fallback (Combat_v3 5.4): one single-edged sabre. Kept out of every roll (retired) until the
 	-- lead chooses it over the pair; the id, model, chain and clips stay ready.
 	wrapped_sabre = { name = "Wrapped Sabre", kind = "Melee", rarity = "Epic", stack = 1, starred = true, retired = true,
 		damage = 30, cooldown = 0.55, range = 7, windup = 0.13, staminaCost = 0.06,
+		throwable = true, throwDamage = 36, throwSpeed = 85, throwGravity = 52, throwHeadMultiplier = 1.4,
+		throwStaminaCost = 0.09, throwSpin = 17,
 		desc = "A single-edged sabre with a round guard.", equipSound = "Equip_Blade" },
 	-- Ranged
 	bow = { name = "Recurve Bow", kind = "Bow", rarity = "Rare", stack = 1, starred = true, ammo = "arrow",

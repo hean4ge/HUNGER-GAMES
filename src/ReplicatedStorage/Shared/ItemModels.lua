@@ -3,6 +3,10 @@
 	The models are the Blender meshes in ReplicatedStorage.Assets.Items / .Crates (Items.glb, built into templates by
 	ServerStorage.WorldGen.ItemAssets). Keep this API when the art changes; an item with no template gets a plain
 	pouch stand-in (and a warning) so nothing breaks.
+	Weapons (19 Nov 2026): every weapon template is a WeaponsV3 Blender mesh (ServerStorage.WorldGen.WeaponsV3Assets;
+	the base <id> is the 2-star look, Stars.applyFinish -> Shared.TierLooks swaps in <id>_t<stars>). All weapon parts
+	are matte SmoothPlastic in their own colours: build() turns any of Roblox's tiled materials (Wood, Metal ...) on a
+	weapon into SmoothPlastic, so a held item never shows the tiled wood or pixelated grey the owner disliked.
 
 	ItemModels.build(itemId, variant) -> Model?
 	  variant: "world" (default: held by other players, lying on the ground, hotbar icons)
@@ -76,6 +80,11 @@ end
 local STRING_COLOR = rgb(160, 132, 92) -- the bow string's rope colour (art manifest)
 local STRING_WIDTH = 0.012 -- a real string is ~3 mm; it is seen from very close in first person
 local STEEL_WARM = rgb(196, 182, 160) -- matte steel meshes are pulled toward this (see build)
+-- Roblox's tiled materials, never on a weapon (the owner, 19 Nov 2026: "copied and pasted wood"; see build)
+local TILED: { [Enum.Material]: boolean } = {
+	[M.Wood] = true, [M.WoodPlanks] = true, [M.Metal] = true, [M.DiamondPlate] = true, [M.CorrodedMetal] = true,
+	[M.Slate] = true, [M.Granite] = true, [M.Marble] = true, [M.Concrete] = true, [M.Brick] = true,
+}
 
 local warned: { [string]: boolean } = {}
 local function warnOnce(key: string, message: string)
@@ -223,9 +232,13 @@ function ItemModels.build(itemId: string, variant: string?): Model?
 		-- Steel meshes: their SurfaceAppearance is metallic and mirrored the sky, so the sword's and machete's blades read
 		-- glossy blue in daylight (Nov 2026). Weapons are matte (Weapons_v2 1.4): a steel part drops it and shows its own
 		-- grey, matte; Role keeps the star finish.
-		local weapon = def.kind == "Melee" or def.kind == "Throwable"
+		local weapon = def.kind == "Melee" or def.kind == "Throwable" or def.kind == "Bow" or def.kind == "Ammo"
 		for _, d in ipairs(if weapon then model:GetDescendants() else {}) do
-			if d:IsA("MeshPart") and d.Material == Enum.Material.Metal then
+			if d:IsA("BasePart") and TILED[d.Material] and not (d:IsA("MeshPart") and d.Material == Enum.Material.Metal) then
+				-- the owner (19 Nov): never Roblox's tiled Wood or Metal on a weapon; the part keeps its own colour, matte
+				d.Material = Enum.Material.SmoothPlastic
+				d.Reflectance = 0
+			elseif d:IsA("MeshPart") and d.Material == Enum.Material.Metal then
 				local look = d:FindFirstChildOfClass("SurfaceAppearance")
 				if look then
 					look:Destroy()

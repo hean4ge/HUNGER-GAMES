@@ -49,6 +49,8 @@ InputCheck.EXPECTED = {
 		Sprint = { touch = "auto" },
 		Crouch = {},
 		Zoom = NO_ZOOM, ZoomLevel = NO_ZOOM,
+		-- the Loadout screen (LoadoutController): L / D-pad right; touch: tap the Loadout summary line
+		Loadout = { touch = "gui:Loadout.Root.Summary" },
 	},
 	Plate = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },

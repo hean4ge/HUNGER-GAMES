@@ -95,6 +95,9 @@ local function buildMark(other: Player): BillboardGui
 	gui.ResetOnSpawn = false
 	gui.Enabled = false
 	gui.Active = false
+	-- your own mark sits beside your head, so a train wall close by cut it in half (wave10): placeOwnMark keeps it on
+	-- the side of the head with room (no wall there). (AlwaysOnTop is left off: with it on, the mark did not draw at all
+	-- in Studio's play view, 19 Nov.)
 	gui.AlwaysOnTop = false
 	gui.LightInfluence = 0
 	gui.MaxDistance = MARK_MAX_DISTANCE
@@ -139,6 +142,8 @@ local function refreshMark(other: Player)
 		and not ClientState.inArena
 		and ClientState.spectating == nil
 		and head ~= nil and head:IsA("BasePart")
+		-- your own mark steps aside while a screen of the game is open (the Loadout's preview, Settings, this sheet)
+		and not (other == player and ClientState.menuOpen)
 	if not show then
 		if gui then
 			gui.Enabled = false
@@ -162,6 +167,35 @@ end
 local function refreshMarks()
 	for _, other in ipairs(Players:GetPlayers()) do
 		refreshMark(other)
+	end
+end
+
+-- Your own mark: shown or hidden with the menus (ClientState.menuOpen has no signal), and on the side of the head
+-- with room: right of it, else left of it, else just over it, never inside a wall.
+local ownParams = RaycastParams.new()
+ownParams.FilterType = Enum.RaycastFilterType.Exclude
+ownParams.IgnoreWater = true
+local function placeOwnMark()
+	refreshMark(player)
+	local gui = marks[player]
+	local head = gui and gui.Enabled and gui.Adornee
+	local camera = workspace.CurrentCamera
+	if not (head and head:IsA("BasePart") and camera) then
+		return
+	end
+	ownParams.FilterDescendantsInstances = { player.Character :: Instance }
+	local right = camera.CFrame.RightVector
+	local reach = MARK_SIDE_OWN.X + 0.9 -- to the mark's far edge
+	local side = MARK_SIDE_OWN
+	if workspace:Raycast(head.Position, right * reach, ownParams) then
+		if not workspace:Raycast(head.Position, -right * reach, ownParams) then
+			side = Vector3.new(-MARK_SIDE_OWN.X, MARK_SIDE_OWN.Y, 0)
+		else
+			side = Vector3.new(0, 1.5, 0)
+		end
+	end
+	if gui.StudsOffset ~= side then
+		gui.StudsOffset = side
 	end
 end
 
@@ -601,6 +635,18 @@ function PlusController.Start()
 			task.wait(1)
 			if not ClientState.inArena and ClientState.spectating == nil then
 				refreshMarks()
+			end
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(0.1)
+			if marks[player] or player:GetAttribute("PlusMember") == true then
+				local ok, err = pcall(placeOwnMark)
+				if not ok then
+					warn("[PlusController] own mark: " .. tostring(err))
+					task.wait(5)
+				end
 			end
 		end
 	end)

@@ -143,6 +143,13 @@ local visible = false
 local initialized = false
 
 local heldId: string? = nil
+
+-- A camera-space hand frame mirrored across the view's centre line (x -> -x), still a proper rotation.
+local function mirrorX(cf: CFrame): CFrame
+	local p = cf.Position
+	return CFrame.fromMatrix(Vector3.new(-p.X, p.Y, p.Z), cf.XVector * Vector3.new(1, -1, -1),
+		cf.YVector * Vector3.new(-1, 1, 1), cf.ZVector * Vector3.new(-1, 1, 1))
+end
 local heldKey = ""
 local heldDef: any = nil
 local heldKind = "Fists"
@@ -241,7 +248,9 @@ local function holdKindFor(def: any): string
 	if not def then
 		return "Fists"
 	elseif def.kind == "Melee" then
-		return if def.throwable and not ONE_HAND_THROW[def.id] then "Spear" else "Blade"
+		-- (only the spear takes the spear's two-handed hold: the hatchet, twin axe, knife and dagger took it too, so in
+		-- first person an axe was held and thrown like a javelin, the owner's "throwing animation for the axe is so off")
+		return if def.throwable and not ONE_HAND_THROW[def.id] and def.id == "spear" then "Spear" else "Blade"
 	elseif def.kind == "Bow" then
 		return "Bow"
 	elseif def.kind == "Throwable" then
@@ -718,6 +727,13 @@ local function update(dt: number)
 			left = Poses.guardBlend(restLeft, left, alpha.guard, alpha.gdip)
 		end
 	end
+	-- an off-hand pair (the Paired Blades: Rig holds the second blade in the left hand): the left hand holds its blade
+	-- as the right does, mirrored across the view, so both are seen; the paired clips (fpLeft) move it from there
+	local pairDef = if heldId then ItemDefs.get(heldId) else nil
+	local paired = pairDef ~= nil and pairDef.offHand == true and heldKind ~= "Bow" and heldKind ~= "Spear"
+	if paired then
+		left = mirrorX(right)
+	end
 
 	-- Combat v3: the guard (the weapon raised across the body; the fists up) and the heavy's hold (wound back past
 	-- the cut's own wind-up, trembling a little at full charge), blended in over the guard's raise time
@@ -1067,6 +1083,8 @@ local function update(dt: number)
 				leftShape = if free < 0.5 and not rig.itemHidden then "Grip" else "Relaxed"
 			elseif heldKind == "Armor" and alpha.use > 0.05 and useT / math.max(useTime, 0.1) >= Poses.ARMOR.downAt then
 				leftShape = "Grip" -- (both hands take the hem)
+			elseif paired and not rig.itemHidden then
+				leftShape = rightShape -- (the second blade)
 			end
 		end
 		rig:setHands(rightShape, leftShape)

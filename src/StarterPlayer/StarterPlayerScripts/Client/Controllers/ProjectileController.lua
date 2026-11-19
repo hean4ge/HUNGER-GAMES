@@ -19,6 +19,11 @@
 	hidden from your first-person view (attributes Host / HostPart) until they come out. A shot the server left nothing
 	for sticks for Config.Combat.ArrowStickTime (into other players for a few seconds), as before.
 	ArrowWhiz plays when someone else's projectile passes close to the camera.
+	Thrown melee weapons (19 Nov 2026, Shared.ThrowLooks): the real WeaponsV3 model at the thrower's stars
+	(ProjectileFired.stars; our own from the inventory copy) leaves in the over-the-shoulder release pose, head or point
+	up and edge to the target, and turns end over end about its balance point at throwSpeed / throwSpin turns a second
+	(the Ring Blade: level, about its centre). It stops on the server's bite pose (edge- or point-first, the haft out
+	and down); off stone it falls flat; into deep water it sinks and goes (ProjectileImpact.lost).
 	Cosmetic trails (Combat_v3 section 4): each shot asks TrailController.attachProjectile for the shooter's arrow or
 	throw trail, moves it in render() and releases it when the shot sticks or goes (it fades where it is). With one, the
 	arrow's own faint trail is left off; without TrailController the arrow keeps it.
@@ -40,11 +45,16 @@ local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
+local Stars = require(Shared:WaitForChild("Stars"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local ThrowLooks = require(Shared:WaitForChild("ThrowLooks"))
 local WorldItems = require(Shared:WaitForChild("WorldItems"))
+
+local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 
 local player = Players.LocalPlayer
 local CombatConfig = Config.Combat
+local ownStars: (itemId: string) -> number?
 
 local ProjectileController = {}
 local Controllers: any = nil -- (TrailController draws the shooter's cosmetic trail)
@@ -122,6 +132,8 @@ type Shot = {
 	mayFall: boolean, -- landed in water or a blade on stone: wait for the server's fall before handing over
 	fall: { from: CFrame, to: CFrame, t0: number, duration: number, sink: boolean }?,
 	fx: any?, -- the cosmetic trail (TrailController handle), released when the shot lands or goes
+	throwCentre: Vector3?, -- a thrown melee weapon (Shared.ThrowLooks): its balance point; it turns about it
+	lost: boolean?, -- it sank into deep water (the server's goes once down)
 }
 
 type StuckEntry = { model: Model, expires: number, part: BasePart?, rel: CFrame?, shot: Shot? }
@@ -298,10 +310,14 @@ end
 
 -- Thrown weapons use the real item model. Returns the model, the offset that puts its anchor point (tip, or the
 -- centre for tumbling knives) on the simulated position with its business end forward, and its spin rate.
-itemVisual = function(itemId: string): (Model?, CFrame, number)
+itemVisual = function(itemId: string, stars: number?): (Model?, CFrame, number)
 	local ok, model = pcall(ItemModels.build, itemId, "world")
 	if not ok or typeof(model) ~= "Instance" or not model:IsA("Model") then
 		return nil, CFrame.identity, 0
+	end
+	local starred = Stars.of(itemId, stars)
+	if starred then
+		pcall(Stars.applyFinish, model, starred) -- it flies with its own star look (the WeaponsV3 mesh of that star)
 	end
 	for _, inst in ipairs(model:GetDescendants()) do
 		if inst:IsA("JointInstance") or inst:IsA("WeldConstraint") or inst:IsA("ProximityPrompt") then
@@ -597,6 +613,11 @@ local function render(shot: Shot, tau: number, position: Vector3)
 	if shot.fx then
 		shot.fx:follow(display, facing)
 	end
+	if shot.throwCentre then
+		-- end over end (or the hoop's level spin) about its balance point, from the over-the-shoulder release pose
+		model:PivotTo(ThrowLooks.flightPose(shot.itemId, shot.throwCentre, look, tau * shot.spin))
+		return
+	end
 	if shot.spin ~= 0 then
 		look *= CFrame.Angles(-tau * shot.spin, 0, 0)
 	end
@@ -669,6 +690,18 @@ local function hitPivot(shot: Shot, result: RaycastResult, hitCharacter: boolean
 	local velocity = velocityAt(shot, shotTime(shot, os.clock()))
 	local dir = if velocity.Magnitude > 0.01 then velocity.Unit else shot.direction
 	shot.direction = dir
+	if shot.throwCentre and shot.model and result.Material ~= Enum.Material.Water and not ThrowLooks.glances(shot.itemId, result.Material) then
+		-- a thrown blade or axe bites edge- or point-first, the server's pose for the same hit (Shared.ThrowLooks)
+		local handle = shot.model.PrimaryPart
+		local tip = handle and handle:FindFirstChild("Tip")
+		local tipLocal = if tip and tip:IsA("Attachment") then tip.Position else Vector3.new(0, 0, -WorldItems.tipDistance(shot.itemId))
+		local incidence = math.abs(dir:Dot(result.Normal))
+		local depth = ThrowLooks.depth(shot.itemId, result.Material, velocity.Magnitude, incidence, hitCharacter)
+		local stuck = ThrowLooks.stickPivot(shot.itemId, result.Position, result.Normal, dir, depth, tipLocal)
+		if stuck then
+			return stuck
+		end
+	end
 	local depth = if result.Material == Enum.Material.Water
 		then 0.25
 		else WorldItems.depth(shot.itemId, result.Material, velocity.Magnitude, math.abs(dir:Dot(result.Normal)), hitCharacter)
@@ -694,6 +727,7 @@ local function settle(shot: Shot, info: any)
 			pivot = shot.model:GetPivot()
 		end
 		stickAt(shot, pivot, part, WORLD_WAIT, if info.fallTo then nil else info.rel)
+		shot.lost = info.lost == true
 		if not shot.world and shot.id then
 			local model = worldByShot[shot.id]
 			if model and model.Parent then
@@ -731,6 +765,8 @@ local function localImpact(shot: Shot, result: RaycastResult, hitCharacter: bool
 	else
 		-- the pose the server gives the same hit; it waits there for the server's model
 		shot.mayFall = result.Material == Enum.Material.Water or WorldItems.glances(shot.itemId, result.Material)
+			or (shot.throwCentre ~= nil and (ThrowLooks.glances(shot.itemId, result.Material)
+				or (ThrowLooks.style(shot.itemId) == "flat" and result.Normal.Y > 0.6)))
 		stickAt(shot, hitPivot(shot, result, hitCharacter), part, WORLD_WAIT)
 	end
 	if shot.state == "Flying" then
@@ -815,12 +851,19 @@ local function targetModels(): { Instance }
 	return list
 end
 
-local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravity: number, isLocal: boolean, shooterId: number?): Shot
+local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravity: number, isLocal: boolean, shooterId: number?, stars: number?): Shot
 	local model: Model?, offset, spin = nil, CFrame.identity, 0
+	local throwCentre: Vector3? = nil
 	if itemId == "arrow" then
 		model, offset = arrowVisual()
 	else
-		model, offset, spin = itemVisual(itemId)
+		model, offset, spin = itemVisual(itemId, stars)
+		local style = ThrowLooks.style(itemId)
+		if model and (style == "tumble" or style == "flat") then
+			-- a thrown melee weapon turns about its balance point at a rate that follows the throw's speed
+			throwCentre = ThrowLooks.centre(model)
+			spin = ThrowLooks.spinRate(itemId, velocity.Magnitude)
+		end
 	end
 	-- the shooter's cosmetic trail (TrailController, Shared.Trails); it replaces the arrow's own faint trail
 	local fx = nil
@@ -872,6 +915,8 @@ local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravi
 		mayFall = false,
 		fall = nil,
 		fx = fx,
+		throwCentre = throwCentre,
+		lost = nil,
 	}
 	if model then
 		model:PivotTo(CFrame.new(0, -1000, 0)) -- out of sight until the first render
@@ -881,11 +926,33 @@ local function newShot(itemId: string, origin: Vector3, velocity: Vector3, gravi
 	return shot
 end
 
+-- The stars of our own weapon being thrown (the equipped slot; it is still in the inventory copy at the release).
+ownStars = function(itemId: string): number?
+	if not ItemDefs.isStarred(itemId) then
+		return nil
+	end
+	local inventory = ClientState.inventory
+	local slots = inventory and inventory.slots
+	if type(slots) ~= "table" then
+		return nil
+	end
+	local slot = slots[inventory.equipped]
+	if type(slot) == "table" and slot.id == itemId then
+		return tonumber(slot.stars)
+	end
+	for _, s in pairs(slots) do
+		if type(s) == "table" and s.id == itemId then
+			return tonumber(s.stars)
+		end
+	end
+	return nil
+end
+
 function ProjectileController.predict(shotId: string, itemId: string, origin: Vector3, velocity: Vector3, gravity: number, visualOrigin: Vector3?)
 	if type(shotId) ~= "string" or typeof(origin) ~= "Vector3" or typeof(velocity) ~= "Vector3" then
 		return
 	end
-	local shot = newShot(itemId, origin, velocity, gravity or 0, true, player.UserId)
+	local shot = newShot(itemId, origin, velocity, gravity or 0, true, player.UserId, ownStars(itemId))
 	shot.shotId = shotId
 	shot.shooterCharacter = player.Character
 	if typeof(visualOrigin) == "Vector3" and (visualOrigin - origin).Magnitude < 6 then
@@ -920,7 +987,7 @@ local function onFired(data: any)
 		return -- nowhere near us (e.g. waiting in the lobby)
 	end
 	local gravity = tonumber(data.gravity) or 0
-	local shot = newShot(data.itemId, data.origin, data.velocity, gravity, false, shooterId)
+	local shot = newShot(data.itemId, data.origin, data.velocity, gravity, false, shooterId, tonumber(data.stars))
 	shot.id = data.id
 	byId[data.id] = shot
 	byProjectile[data.id] = shot
@@ -951,6 +1018,7 @@ local function onImpact(data: any)
 		fallTo = if typeof(data.fallTo) == "CFrame" then data.fallTo else nil,
 		fallTime = if type(data.fallTime) == "number" then data.fallTime else nil,
 		sink = data.sink == true,
+		lost = data.lost == true,
 	}
 	local shot = if type(data.id) == "number" then byId[data.id] else nil
 	if shot then
@@ -1139,6 +1207,12 @@ local function update(_dt: number)
 				entry.model:PivotTo(WorldItems.fallPose(fall.from, fall.to, alpha, fall.sink))
 			else
 				entry.model:PivotTo(fall.to)
+				if shot.lost then
+					-- it sank into deep water: out of reach, and it goes (the server's goes too)
+					shot.fall = nil
+					entry.expires = 0
+					continue
+				end
 				-- landed: hand over once the server's model has landed too (it started a moment earlier)
 				local model = shot.world
 				local settled = model == nil or (model:GetPivot().Position - fall.to.Position).Magnitude < 0.05

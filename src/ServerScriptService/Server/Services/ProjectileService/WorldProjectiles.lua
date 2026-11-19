@@ -15,6 +15,11 @@
 	      A body that is already dead (the killing hit included) lets it fall straight out. A training dummy lets all its
 	      items out as it breaks, before its parts tumble away (CombatService calls World.releaseFrom).
 	  World.land(p, params) -> Entry?   a miss that outlived its lifetime: the rest of its arc is traced to the ground
+	  Thrown melee weapons (Shared.ThrowLooks, 19 Nov 2026): they bite edge-first (axes, the pick) or point-first
+	      (blades) in soil, wood, canvas and bodies, the haft or grip out and down; off stone, metal or ice they fall
+	      and lie flat; the Ring Blade sticks level in a wall and lies flat on the ground. Each keeps its stars and its
+	      star look (Stars.applyFinish). Water deeper than DEEP_WATER over the bed: it sinks out of reach and goes.
+	      Over the item cap, arrows and knives go before any starred weapon.
 	  "The ground below" (groundHit) is terrain or a part held in place: the ray looks past bodies (a broken dummy's
 	  tumbling parts too), loose parts, loot and items. An item whose part disappears (a crate replaced at the Feast, a
 	  dummy's stand) drops to the ground below, whether it was embedded in that part or lying on it.
@@ -47,6 +52,8 @@ local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
+local Stars = require(Shared:WaitForChild("Stars"))
+local ThrowLooks = require(Shared:WaitForChild("ThrowLooks"))
 local Util = require(Shared:WaitForChild("Util"))
 local WorldItems = require(Shared:WaitForChild("WorldItems"))
 
@@ -66,6 +73,7 @@ local LAND_STEPS = 450 -- 30 s of flight at most
 local FALL_GRAVITY = 70 -- studs/s^2, like tossed loot (Config.Loot.TossGravity)
 local GROUND_RAY = 250 -- how far down the ground below an item is looked for
 local GROUND_SKIPS = 8 -- bodies and loose parts looked past on the way down (groundHit)
+local DEEP_WATER = 6 -- studs of water over the bed: an item that sinks deeper than this is out of reach and goes
 
 local World = {}
 
@@ -93,6 +101,7 @@ export type Entry = {
 	fallTo: CFrame?,
 	fallTime: number?,
 	sink: boolean?,
+	lost: boolean?, -- sinking into deep water: it goes once it reaches the bed (out of reach)
 	dead: boolean,
 }
 
@@ -340,6 +349,7 @@ end
 --------------------------------------------------------------------------------------------------------------------
 
 local release: (entry: Entry) -> ()
+local removeEntry: (entry: Entry) -> ()
 
 local function hostGone(part: BasePart)
 	local watch = hostWatch[part]
@@ -417,7 +427,11 @@ local function stepFalls(dt: number)
 				entry.fall = nil
 				entry.fallTo, entry.fallTime, entry.sink = nil, nil, nil
 				table.remove(falling, i)
-				makeLoose(entry)
+				if entry.lost then
+					removeEntry(entry) -- it sank out of reach into deep water
+				else
+					makeLoose(entry)
+				end
 			else
 				entry.model:PivotTo(WorldItems.fallPose(fall.from, fall.to, fall.t / fall.duration, fall.sink))
 			end
@@ -457,7 +471,7 @@ local function dropFrom(entry: Entry, from: CFrame)
 	fallTo(entry, from, to, false)
 end
 
-local function removeEntry(entry: Entry)
+removeEntry = function(entry: Entry)
 	if entry.dead then
 		return
 	end
@@ -492,6 +506,20 @@ local function enforceCap()
 	local cap = math.max(1, math.floor(tonumber(CombatCfg.WorldItemCap) or 400))
 	local removed = 0
 	local oldestName = nil
+	-- arrows and throwing knives go first: a thrown starred weapon is someone's weapon (it goes only if nothing else is left)
+	if count > cap then
+		for i = orderHead, #order do
+			if count <= cap then
+				break
+			end
+			local entry = order[i]
+			if not entry.dead and not ItemDefs.isStarred(entry.itemId) then
+				oldestName = oldestName or entry.itemId
+				removeEntry(entry)
+				removed += 1
+			end
+		end
+	end
 	while count > cap and orderHead <= #order do
 		local entry = order[orderHead]
 		orderHead += 1
@@ -516,13 +544,18 @@ local function enforceCap()
 	end
 end
 
-type Options = { shot: number?, weldTo: BasePart?, hostUserId: number?, hostPart: string? }
+type Options = { shot: number?, weldTo: BasePart?, hostUserId: number?, hostPart: string?, stars: number? }
 
 local function register(itemId: string, pivot: CFrame, opts: Options): Entry?
 	local model = ItemModels.build(itemId, "world")
 	local handle = model and model.PrimaryPart
 	if not model or not handle then
 		return nil
+	end
+	local stars = Stars.of(itemId, opts.stars)
+	if stars then
+		-- a thrown weapon shows its own stars where it lands (the WeaponsV3 mesh of that star: Shared.TierLooks)
+		pcall(Stars.applyFinish, model, stars)
 	end
 	local welded = opts.weldTo ~= nil
 	for _, d in ipairs(model:GetDescendants()) do
@@ -639,6 +672,27 @@ end
 -- Placing (ProjectileService)
 --------------------------------------------------------------------------------------------------------------------
 
+-- A thrown melee weapon's Tip in its Handle space, at its stars (the WeaponsV3 variant's own Tip).
+local function tipLocal(itemId: string, stars: number?): Vector3
+	local assets = ReplicatedStorage:FindFirstChild("Assets")
+	local items = assets and assets:FindFirstChild("Items")
+	local model = items and (items:FindFirstChild(string.format("%s_t%d", itemId, stars or 2)) or items:FindFirstChild(itemId))
+	local handle = model and model:IsA("Model") and model.PrimaryPart
+	local tip = handle and handle:FindFirstChild("Tip")
+	if tip and tip:IsA("Attachment") then
+		return tip.Position
+	end
+	return Vector3.new(0, 0, -WorldItems.tipDistance(itemId))
+end
+
+-- Where a thrown melee weapon (Shared.ThrowLooks) sticks, or nil when it should lie flat instead.
+local function throwStick(p: any, result: RaycastResult, dir: Vector3, speed: number, body: boolean): CFrame?
+	local itemId = p.recoverItem :: string
+	local incidence = math.abs(dir:Dot(result.Normal))
+	local depth = ThrowLooks.depth(itemId, result.Material, speed, incidence, body)
+	return ThrowLooks.stickPivot(itemId, result.Position, result.Normal, dir, depth, tipLocal(itemId, p.recoverStars))
+end
+
 function World.embed(p: any, result: RaycastResult, velocity: Vector3): Entry?
 	local itemId = p.recoverItem
 	if type(itemId) ~= "string" then
@@ -647,10 +701,34 @@ function World.embed(p: any, result: RaycastResult, velocity: Vector3): Entry?
 	local dir = unit(velocity, p.velocity)
 	local part = result.Instance
 	local material = result.Material
+	local thrown = ThrowLooks.handles(itemId)
+	local stuck = if thrown and not ThrowLooks.glances(itemId, material) then throwStick(p, result, dir, velocity.Magnitude, false) else nil
+	if thrown and not stuck then
+		-- a thrown weapon off stone or metal (or a hoop on the ground): it drops and lies flat below
+		local from = WorldItems.embedPivot(itemId, result.Position - dir * 0.3, dir)
+		local entry = register(itemId, from, { shot = p.id, stars = p.recoverStars })
+		if entry then
+			local to, support = restBelow(itemId, result.Position + result.Normal * 0.4, dir)
+			entry.anchorPart = support
+			fallTo(entry, from, to, false)
+		end
+		return entry
+	end
+	if stuck then
+		local movable = isMovable(part)
+		local entry = register(itemId, stuck, { shot = p.id, weldTo = if movable then part :: BasePart else nil, stars = p.recoverStars })
+		if entry then
+			if not movable and part ~= workspace.Terrain and part:IsA("BasePart") then
+				entry.anchorPart = part
+			end
+			makeLoose(entry)
+		end
+		return entry
+	end
 	if WorldItems.glances(itemId, material) then
 		-- a blade off stone or metal: it falls to the ground below
 		local from = WorldItems.embedPivot(itemId, result.Position, dir)
-		local entry = register(itemId, from, { shot = p.id })
+		local entry = register(itemId, from, { shot = p.id, stars = p.recoverStars })
 		if entry then
 			local to, support = restBelow(itemId, result.Position + result.Normal * 0.4, dir)
 			entry.anchorPart = support
@@ -662,7 +740,7 @@ function World.embed(p: any, result: RaycastResult, velocity: Vector3): Entry?
 	local depth = WorldItems.depth(itemId, material, velocity.Magnitude, incidence, false)
 	local pivot = WorldItems.embedPivot(itemId, result.Position + dir * depth, dir)
 	local movable = isMovable(part)
-	local entry = register(itemId, pivot, { shot = p.id, weldTo = if movable then part :: BasePart else nil })
+	local entry = register(itemId, pivot, { shot = p.id, weldTo = if movable then part :: BasePart else nil, stars = p.recoverStars })
 	if entry then
 		if not movable and part ~= workspace.Terrain and part:IsA("BasePart") then
 			entry.anchorPart = part
@@ -679,7 +757,7 @@ function World.sink(p: any, result: RaycastResult, velocity: Vector3): Entry?
 	end
 	local dir = unit(velocity, p.velocity)
 	local from = WorldItems.embedPivot(itemId, result.Position + dir * 0.25, dir)
-	local entry = register(itemId, from, { shot = p.id })
+	local entry = register(itemId, from, { shot = p.id, stars = p.recoverStars })
 	if not entry then
 		return nil
 	end
@@ -688,6 +766,14 @@ function World.sink(p: any, result: RaycastResult, velocity: Vector3): Entry?
 	forward = if forward.Magnitude > 1e-3 then forward.Unit else Vector3.xAxis
 	local bed = groundHit(result.Position, Vector3.new(0, -GROUND_RAY, 0), params)
 	local to = from
+	if not bed or result.Position.Y - bed.Position.Y > DEEP_WATER then
+		-- deep water: it sinks out of sight and out of reach (it goes once it is down)
+		entry.lost = true
+		local down = if bed then math.min(result.Position.Y - bed.Position.Y, DEEP_WATER + 2) else DEEP_WATER + 2
+		to = WorldItems.restPivot(itemId, result.Position - Vector3.new(0, down, 0) + forward * 1.5, Vector3.yAxis, forward)
+		fallTo(entry, from, to, true)
+		return entry
+	end
 	if bed then
 		-- it carries on a little as it sinks, then settles on the bottom
 		local drift = math.min((result.Position.Y - bed.Position.Y) * 0.35, 3)
@@ -717,17 +803,22 @@ function World.stick(p: any, result: RaycastResult, bodyPart: BasePart?, humanoi
 	local incidence = math.abs(dir:Dot(result.Normal))
 	local depth = WorldItems.depth(itemId, nil, velocity.Magnitude, incidence, true)
 	local pivot = WorldItems.embedPivot(itemId, result.Position + dir * depth, dir)
+	if ThrowLooks.handles(itemId) then
+		-- a thrown blade or axe bites the body edge- or point-first (Shared.ThrowLooks), like it would a tree
+		pivot = throwStick(p, result, dir, velocity.Magnitude, true) or pivot
+	end
 	local victim = Players:GetPlayerFromCharacter(humanoid.Parent)
 	if humanoid.Health <= 0 then
 		-- a body that is already dead (this hit killed it, or it lay there): it falls straight out onto the ground
 		-- below, before the body comes apart and carries it off
-		local dropped = register(itemId, pivot, { shot = p.id })
+		local dropped = register(itemId, pivot, { shot = p.id, stars = p.recoverStars })
 		if dropped then
 			dropFrom(dropped, pivot)
 		end
 		return dropped
 	end
 	local entry = register(itemId, pivot, {
+		stars = p.recoverStars,
 		shot = p.id,
 		weldTo = host :: BasePart,
 		hostUserId = if victim then victim.UserId else 0,

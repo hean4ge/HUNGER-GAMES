@@ -744,6 +744,8 @@ local function nextStep(itemId: string, now: number): number
 	return 1
 end
 
+local scheduleMark: (any) -> () -- (set below, beside fireDue)
+
 -- Starts a move (a Shared.Moves move: a chain step, a heavy, a counter, a kick, a skill strike's swing).
 local function startMove(now: number, move: { [string]: any }, held: number?)
 	local def = meleeDef()
@@ -792,6 +794,7 @@ local function startMove(now: number, move: { [string]: any }, held: number?)
 		MeleeSwing:FireServer("Start", if variant <= 8 then variant else nil, move.id)
 	end
 	CombatController.action:Fire("Swing", rec)
+	scheduleMark(rec)
 	return rec
 end
 
@@ -811,6 +814,7 @@ end
 local function strike(rec: any, now: number)
 	rec.struck = true
 	lastStrikeAt = now
+	CombatController.lastStrikeLate = now - (rec.t0 + rec.windup) -- (seconds after the hit mark: the test reads it)
 	local cf = baseCFrame()
 	local hit = predictMelee(rec.def, cf, rec.move)
 	if MeleeSwing then
@@ -993,6 +997,33 @@ end
 
 local queuedIntent: string? = nil
 
+-- The strike (and a throw's release) leaves on its hit mark: checked at the mark itself (task.delay from the swing's
+-- start), on every Heartbeat and in the render step, whichever comes first. Checking only once per drawn frame sent it
+-- up to a frame late (0.057 s in the 15 fps test windows). The server times the swing from its start (trySwing), so
+-- sending on the mark is the honest time, never early.
+local function fireDue(now: number)
+	local rec = CombatController.current
+	if not rec or now < rec.t0 + (rec.windup or 0) then
+		return
+	end
+	-- (a throw still leaves in the render step: its aim puts the view's bob back on, which is only right there)
+	if rec.kind == "Melee" and not rec.struck then
+		if canAct() then
+			strike(rec, now)
+		else
+			rec.struck = true
+		end
+	end
+end
+
+scheduleMark = function(rec: any)
+	task.delay(math.max(0, rec.windup or 0), function()
+		if CombatController.current == rec then
+			fireDue(os.clock())
+		end
+	end)
+end
+
 -- intent: "Light" (a tap), "Kick" (a tap while guarding), "Counter" (a press after a parry), "Throw" (a throwable
 -- melee weapon released after guard + hold), nil (bows, throwing knives: as before).
 local function tryStartAttack(now: number, fromPress: boolean, intent: string?)
@@ -1008,8 +1039,9 @@ local function tryStartAttack(now: number, fromPress: boolean, intent: string?)
 		-- QW12: a press during the switch to a new item is kept for the whole switch (0.32 s, 0.44 s for the bow);
 		-- Combat v3: a tap during a swing's recovery is kept too, so the chain flows into its next step
 		local switching = now < CombatController.equipBlockedUntil
-		local recovering = rec ~= nil and rec.kind == "Melee" and rec.struck
-		if fromPress and (busyUntil - now < BUFFER_WINDOW or switching or recovering) then
+		-- (the whole swing, wind-up included: a fast tap early in a wind-up was dropped, so quick tapping lost steps)
+		local swinging = rec ~= nil and rec.kind == "Melee"
+		if fromPress and (busyUntil - now < BUFFER_WINDOW or switching or swinging) then
 			queuedAttack = true
 			queuedIntent = intent
 			queuedAt = math.max(now, busyUntil - BUFFER_WINDOW) -- it expires 0.4 s after this, so never mid-switch
@@ -1558,6 +1590,7 @@ local function update(dt: number)
 
 	local rec = CombatController.current
 	if rec then
+		fireDue(now) -- (also on every Heartbeat and at the mark itself: see fireDue)
 		if rec.kind == "Melee" then
 			if not rec.struck and now >= rec.t0 + rec.windup then
 				if active then
@@ -1870,6 +1903,11 @@ function CombatController.Start()
 		camera = workspace.CurrentCamera
 	end)
 	RunService:BindToRenderStep("CombatController", Enum.RenderPriority.Input.Value + 10, update)
+	RunService.Heartbeat:Connect(function()
+		if CombatController.current then
+			fireDue(os.clock())
+		end
+	end)
 	refreshBinding()
 end
 

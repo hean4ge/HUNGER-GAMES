@@ -1465,6 +1465,82 @@ local function worldItems(arg: any): { string }
 	return out
 end
 
+-- mp-finish (19 Nov, wave 11): what a weapon model is made of. tierMesh = the WeaponsV3 variant TierLooks put in
+-- (Assets.Items.<id>_t<stars>), mesh = visible MeshParts with a mesh, trims = old part-built TierTrim parts, tiled =
+-- visible parts in a tiled material (Wood, Metal ...: anything but SmoothPlastic, Plastic, Neon, Glass, ForceField)
+local UNTILED = { SmoothPlastic = true, Plastic = true, Neon = true, Glass = true, ForceField = true }
+local function finishLookOf(m: Instance): string
+	local tierMesh = m:GetAttribute("TierMesh")
+	if tierMesh == nil then
+		for _, d in ipairs(m:GetDescendants()) do
+			if d:GetAttribute("TierMesh") ~= nil then
+				tierMesh = d:GetAttribute("TierMesh")
+				break
+			end
+		end
+	end
+	local n, mesh, trims, tiled, mats = 0, 0, 0, {}, {}
+	for _, d in ipairs(m:GetDescendants()) do
+		if d:IsA("BasePart") and d.Transparency < 0.99 then
+			n += 1
+			if d:IsA("MeshPart") and d.MeshId ~= "" then
+				mesh += 1
+			end
+			if d:GetAttribute("TierTrim") then
+				trims += 1
+			end
+			mats[d.Material.Name] = (mats[d.Material.Name] or 0) + 1
+			if not UNTILED[d.Material.Name] then
+				table.insert(tiled, d.Name .. ":" .. d.Material.Name)
+			end
+		end
+	end
+	local ml = {}
+	for k, v in pairs(mats) do
+		table.insert(ml, k .. "x" .. v)
+	end
+	table.sort(ml)
+	return string.format("%s item=%s stars=%s tierMesh=%s parts=%d mesh=%d trims=%d mats=%s tiled=[%s]", m.Name, tostring(m:GetAttribute("ItemId")),
+		tostring(m:GetAttribute("Stars")), tostring(tierMesh), n, mesh, trims, table.concat(ml, ","), table.concat(tiled, ","))
+end
+-- every thrown model this client flies (ProjectileController's ClientProjectiles): its look when it leaves, then how
+-- far it turned per second (sampled every drawn frame) when it goes
+task.spawn(function()
+	local folder = workspace:WaitForChild("ClientProjectiles", 600)
+	if not folder then
+		return
+	end
+	local function watch(m: Instance)
+		if not m:IsA("Model") then
+			return
+		end
+		task.defer(function()
+			local item = tostring(m:GetAttribute("ItemId") or m.Name)
+			L("FLY " .. finishLookOf(m))
+			local t0, last, turned, frames = os.clock(), m:GetPivot(), 0, 0
+			local conn
+			conn = RunService.RenderStepped:Connect(function()
+				if not m.Parent then
+					conn:Disconnect()
+					local dt = os.clock() - t0
+					L(string.format("FLY-END %s secs=%.2f frames=%d turns=%.2f rate=%.2f/s", item, dt, frames, turned / 360, if dt > 0 then turned / 360 / dt else 0))
+					return
+				end
+				local now_ = m:GetPivot()
+				local _, a = (last.Rotation:Inverse() * now_.Rotation):ToAxisAngle()
+				turned += math.deg(math.abs(a))
+				last = now_
+				frames += 1
+			end)
+		end)
+	end
+	-- (the folder is made with the first projectile, which may already be in it)
+	for _, m in ipairs(folder:GetChildren()) do
+		watch(m)
+	end
+	folder.ChildAdded:Connect(watch)
+end)
+
 -- the evening build (18 Nov, mp-retest2): squirrels, campfires, trees, the swarm, the border, the train lobby, the
 -- results board ------------------------------------------------------------------------------------------------------
 local CollectionService = game:GetService("CollectionService")
@@ -1900,6 +1976,102 @@ local function probe(arg: any): any
 			end
 		end
 		return string.format("models=%d %s", models, table.concat(out, " "))
+	end
+	-- mp-finish (19 Nov, wave 11): the WeaponsV3 look of held / first-person / world models, the Take prompt, joints
+	if kind == "look" then
+		local found = {}
+		if arg.target == "self" then
+			for _, d in ipairs(cam:GetDescendants()) do
+				if d:IsA("Model") and (d:GetAttribute("Stars") ~= nil or d:GetAttribute("ItemId") ~= nil or d.Name == "OffHand") then
+					table.insert(found, d)
+				end
+			end
+		else
+			local p = Players:FindFirstChild(arg.target)
+			local c = p and p:IsA("Player") and p.Character
+			for _, d in ipairs(c and c:GetDescendants() or {}) do
+				if d:IsA("Model") and (d.Name == "EquippedModel" or d.Name == "OffHand") then
+					table.insert(found, d)
+				end
+			end
+		end
+		local out = {}
+		for _, m in ipairs(found) do
+			table.insert(out, "[" .. finishLookOf(m) .. "]")
+		end
+		return string.format("models=%d %s", #found, table.concat(out, " "))
+	elseif kind == "worldlook" then
+		local center = pointOf(arg.near)
+		local out = {}
+		for _, tag in ipairs({ "WorldProjectile", "GroundItem" }) do
+			for _, m in ipairs(CollectionService:GetTagged(tag)) do
+				if m:IsA("Model") and m:IsDescendantOf(workspace) and (not arg.item or m:GetAttribute("ItemId") == arg.item) then
+					local pv = m:GetPivot()
+					if not center or (pv.Position - center).Magnitude <= (arg.radius or 40) then
+						table.insert(out, string.format("[%s %s loose=%s host=%s at %s up=%s | %s]", tag, tostring(m:GetAttribute("ItemId")),
+							tostring(CollectionService:HasTag(m, "LooseProjectile")), tostring(m:GetAttribute("Host")), fmt(pv.Position), fmt(pv.UpVector), finishLookOf(m)))
+					end
+				end
+			end
+		end
+		return table.concat(out, " ")
+	elseif kind == "take" then
+		-- WorldItemController's own Take prompt (E), as the key would press it, once it targets something
+		local holderA = workspace.Terrain:FindFirstChild("WorldItemPrompt")
+		local prompt = holderA and holderA:FindFirstChild("TakePrompt")
+		local t0 = os.clock()
+		while os.clock() - t0 < (arg.wait or 2.5) and not (prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled) do
+			task.wait(0.1)
+			holderA = workspace.Terrain:FindFirstChild("WorldItemPrompt")
+			prompt = holderA and holderA:FindFirstChild("TakePrompt")
+		end
+		if not (prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled) then
+			return "no Take prompt shown"
+		end
+		local text = prompt.ActionText .. " " .. prompt.ObjectText
+		local fired = false
+		local conn = prompt.Triggered:Connect(function()
+			fired = true
+		end)
+		L("TAKE " .. text)
+		prompt:InputHoldBegin()
+		task.wait(0.1)
+		prompt:InputHoldEnd()
+		task.wait(0.3)
+		conn:Disconnect()
+		return string.format("prompt '%s' key=%s triggered=%s", text, prompt.KeyboardKeyCode.Name, tostring(fired))
+	elseif kind == "joints" then
+		-- every Motor6D's Transform turn on that body as this client has it (a folded body reads 100+ degrees)
+		local c: Instance? = nil
+		local p = Players:FindFirstChild(arg.target)
+		if p and p:IsA("Player") then
+			c = p.Character
+		else
+			c = workspace:FindFirstChild(arg.target, true)
+		end
+		if not c then
+			return "no body " .. tostring(arg.target)
+		end
+		local worst, list = 0, {}
+		for _, j in ipairs(c:GetDescendants()) do
+			if j:IsA("Motor6D") then
+				local _, ang = j.Transform:ToAxisAngle()
+				local deg = math.deg(math.abs(ang))
+				worst = math.max(worst, deg)
+				if deg > 20 then
+					table.insert(list, string.format("%s %.0f", j.Name, deg))
+				end
+			end
+		end
+		local hum = c:FindFirstChildOfClass("Humanoid")
+		local an = hum and hum:FindFirstChildOfClass("Animator")
+		local tracks = {}
+		if an then
+			for _, t in ipairs(an:GetPlayingAnimationTracks()) do
+				table.insert(tracks, t.Name)
+			end
+		end
+		return string.format("maxDeg=%.1f animator=%s tracks=%d over20=[%s]", worst, tostring(an ~= nil), #tracks, table.concat(list, ", "))
 	end
 	-- the weapons build (19 Nov, mp-weapons) ------------------------------------------------------------------------
 	if kind == "weap" then

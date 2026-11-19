@@ -10,14 +10,17 @@
 	  4 Superior    + a brass collar and pommel cap, two engraved bands, a row of rivets
 	  5 Masterwork  + a spine or haft inlay, a layered-steel band by the edge, a cord knot and short tassel, a maker's mark
 
-	THE MESH SWAP (one table): when the Blender variants are in the game as ReplicatedStorage.Assets.Items.<id>_t1 ..
-	<id>_t5 (WeaponsV3.glb, same Grip and attachments as the base model), set TierLooks.Meshes[id] = true. The held,
-	ground and view models then take that star's mesh parts in place of their own (aligned on Grip), the stand-in trims
-	below are skipped for that id, and Stars.applyFinish does not re-tint them (their colours are the finish).
-	Nothing else changes.
+	THE MESH SWAP (19 Nov 2026: live for every starred weapon). The Blender variants are in the game as
+	ReplicatedStorage.Assets.Items.<id>_t1 .. <id>_t5 (WeaponsV3.glb, built by ServerStorage.WorldGen.WeaponsV3Assets;
+	same Grip as the base model, which is itself the 2-star mesh). TierLooks.Meshes lists them. The held, first-person,
+	ground, crate, hotbar, Loadout and wheel models take that star's mesh parts in place of their own (aligned on Grip),
+	their attachments move to the variant's (the Ring Blade's Tip and Spin moved), the stand-in trims below are skipped
+	and Stars.applyFinish does not re-tint them (their colours are the finish: SmoothPlastic, matte). A model with
+	attribute OffHand (the pair's left blade) takes <id>_L_t<stars>. A "view" bow keeps its Beam string (the variant's
+	string mesh is left out). The trims below stay only as the fallback for an id with no variant meshes.
 
 	API
-	  TierLooks.Meshes                         { [itemId]: true } the ids whose _t1.._t5 meshes ship (empty today)
+	  TierLooks.Meshes                         { [itemId]: true } the ids whose _t1.._t5 meshes ship
 	  TierLooks.apply(model, stars) -> swapped the mesh swap when the id is in Meshes (returns true), else nil
 	  TierLooks.trim(model, stars)             the stand-in trims (Parts with attribute TierTrim); a second call replaces them
 	  TierLooks.clear(model)                   removes the trims
@@ -27,8 +30,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local TierLooks = {}
 
--- the one table to change when the WeaponsV3 meshes are uploaded (see the header)
-TierLooks.Meshes = {} :: { [string]: boolean }
+-- the ids whose WeaponsV3 meshes ship (uploaded 19 Nov 2026 as LS_WeaponsV3_v1; see the header)
+TierLooks.Meshes = {
+	knife = true, leaf_dagger = true, ring_blade = true, sword = true, machete = true, paired_blades = true,
+	wrapped_sabre = true, hatchet = true, twin_axe = true, climb_pick = true, spear = true, bow = true, short_bow = true,
+} :: { [string]: boolean }
 
 local V3 = Vector3.new
 local CF = CFrame.new
@@ -143,8 +149,8 @@ local function bladeTrims(ctx: Ctx, s: any, stars: number)
 	if stars == 1 then
 		-- Worn: a loose strap trailing off the grip end; two dull patches on the flats
 		add(ctx, V3(0.025, 0.05, 0.3), CF(0, -s.grip.r * 0.6, s.grip.z1 + 0.12) * CFrame.Angles(rad(-38), rad(8), 0), C.strap, M.Leather)
-		add(ctx, V3(0.008, height * 0.35, len * 0.14), CF(faceX, b.edge + height * 0.55, b.z0 - len * 0.3), C.patch, M.Slate)
-		add(ctx, V3(0.008, height * 0.25, len * 0.1), CF(-faceX, b.edge + height * 0.4, b.z0 - len * 0.62), C.patch, M.Slate)
+		add(ctx, V3(0.008, height * 0.35, len * 0.14), CF(faceX, b.edge + height * 0.55, b.z0 - len * 0.3), C.patch)
+		add(ctx, V3(0.008, height * 0.25, len * 0.1), CF(-faceX, b.edge + height * 0.4, b.z0 - len * 0.62), C.patch)
 		return
 	end
 	if stars < 3 then
@@ -206,7 +212,7 @@ local function axeTrims(ctx: Ctx, s: any, stars: number)
 	local haftLen = math.abs(hf.z1 - hf.z0)
 	if stars == 1 then
 		add(ctx, V3(0.025, 0.05, 0.32), CF(0, -hf.r * 0.7, hf.z1 + 0.1) * CFrame.Angles(rad(-40), rad(-6), 0), C.strap, M.Leather)
-		add(ctx, V3(0.008, 0.12, 0.14), CF(hd.half + 0.004, hd.y0 * 0.5, hd.z + 0.05), C.patch, M.Slate)
+		add(ctx, V3(0.008, 0.12, 0.14), CF(hd.half + 0.004, hd.y0 * 0.5, hd.z + 0.05), C.patch)
 		return
 	end
 	if stars < 3 then
@@ -379,7 +385,29 @@ local function itemIdOf(model: Instance): string?
 	return model.Name
 end
 
--- The stand-in trims of one model (not its OffHand child: that is trimmed on its own build).
+-- The star's variant template (Assets.Items.<id>_t<stars>, or <id>_L_t<stars> for the pair's left blade).
+local function variantOf(model: Instance, id: string, stars: number): Model?
+	if not TierLooks.Meshes[id] then
+		return nil
+	end
+	local assets = ReplicatedStorage:FindFirstChild("Assets")
+	local items = assets and assets:FindFirstChild("Items")
+	if not items then
+		return nil
+	end
+	local variant = nil
+	if model:GetAttribute("OffHand") then
+		variant = items:FindFirstChild(string.format("%s_L_t%d", id, stars))
+	end
+	variant = variant or items:FindFirstChild(string.format("%s_t%d", id, stars))
+	if variant and variant:IsA("Model") and variant.PrimaryPart then
+		return variant
+	end
+	return nil
+end
+
+-- The stand-in trims of one model (not its OffHand child: that is trimmed on its own build). Only for an id whose
+-- variant meshes are missing (the fallback).
 function TierLooks.trim(model: Instance, stars: number)
 	if not model:IsA("Model") then
 		return
@@ -387,7 +415,7 @@ function TierLooks.trim(model: Instance, stars: number)
 	TierLooks.clear(model)
 	local id = itemIdOf(model)
 	local spec = id and SPEC[id]
-	if not spec or TierLooks.Meshes[id :: string] or stars == 2 then
+	if not spec or stars == 2 or variantOf(model, id :: string, stars) then
 		return
 	end
 	local handle, frame = gripFrame(model)
@@ -426,22 +454,23 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 		return nil
 	end
 	local id = itemIdOf(model)
-	if not (id and TierLooks.Meshes[id]) then
+	if not id then
 		return nil
 	end
-	local assets = ReplicatedStorage:FindFirstChild("Assets")
-	local items = assets and assets:FindFirstChild("Items")
-	local variant = items and items:FindFirstChild(string.format("%s_t%d", id, stars))
-	if not (variant and variant:IsA("Model") and variant.PrimaryPart) then
+	local variant = variantOf(model, id, stars)
+	if not variant then
 		return nil
 	end
-	if model:GetAttribute("TierMesh") == stars then
+	if model:GetAttribute("TierMesh") == variant.Name then
 		return true
 	end
 	local handle, frame = gripFrame(model)
 	if not handle then
 		return nil
 	end
+	local view = model:GetAttribute("Variant") == "view"
+	local beamString = view and handle:FindFirstChild("String") ~= nil -- (ItemModels' first-person bow string)
+	local anchored = handle.Anchored
 	local vHandle = variant.PrimaryPart :: BasePart
 	local vGrip = vHandle:FindFirstChild("Grip")
 	local vFrame = vHandle.CFrame * (if vGrip and vGrip:IsA("Attachment") then vGrip.CFrame else CFrame.identity)
@@ -451,7 +480,7 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 		end
 	end
 	for _, d in ipairs(variant:GetChildren()) do
-		if d:IsA("BasePart") and d ~= vHandle then
+		if d:IsA("BasePart") and d ~= vHandle and not (beamString and d:GetAttribute("String")) then
 			local c = d:Clone()
 			for _, w in ipairs(c:GetChildren()) do
 				if w:IsA("JointInstance") or w:IsA("WeldConstraint") then
@@ -459,12 +488,16 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 				end
 			end
 			c.CFrame = frame * vFrame:ToObjectSpace(d.CFrame)
-			c.Anchored = false
+			c.Anchored = anchored
 			c.Massless = true
 			c.CanCollide = false
 			c.CanQuery = false
 			c.CanTouch = false
 			c.Reflectance = 0
+			c.Material = Enum.Material.SmoothPlastic -- (never Roblox's tiled Wood or Metal on a weapon: the owner, 19 Nov)
+			if view then
+				c.CastShadow = false
+			end
 			local w = Instance.new("Weld")
 			w.Part0 = handle
 			w.Part1 = c
@@ -473,7 +506,24 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 			c.Parent = model
 		end
 	end
-	model:SetAttribute("TierMesh", stars)
+	-- the variant's attachments (same names; the Ring Blade's Tip and Spin moved with its new size)
+	local toModel = handle.CFrame:Inverse() * frame
+	for _, a in ipairs(vHandle:GetChildren()) do
+		if a:IsA("Attachment") and a.Name ~= "Grip" then
+			local own = handle:FindFirstChild(a.Name)
+			if not (own and own:IsA("Attachment")) then
+				own = Instance.new("Attachment")
+				own.Name = a.Name
+				own.Parent = handle
+			end
+			local att = own :: Attachment
+			att.CFrame = toModel * vFrame:ToObjectSpace(vHandle.CFrame * a.CFrame)
+			for key, value in pairs(a:GetAttributes()) do
+				att:SetAttribute(key, value)
+			end
+		end
+	end
+	model:SetAttribute("TierMesh", variant.Name)
 	return true
 end
 

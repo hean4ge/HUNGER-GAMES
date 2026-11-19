@@ -1154,8 +1154,59 @@ local function sink()
 end
 
 local close: () -> ()
+local open: () -> ()
 
-local function open()
+-- The Loadout key (Input action "Loadout": L, D-pad right), bound only in the train lobby. L opens and closes the
+-- screen; D-pad right only opens it, and is let go while the screen, a menu or any GUI selection is up (a controller
+-- moves through those with the D-pad) and in the arena (where it is SkillGeneral).
+local boundKeys = "" -- what is bound now: "", "L" or "L+Pad"
+local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
+	if state ~= Enum.UserInputState.Begin then
+		return Enum.ContextActionResult.Pass
+	end
+	if io and io.KeyCode == Enum.KeyCode.DPadRight then
+		if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or not lobbyShowing() then
+			return Enum.ContextActionResult.Pass
+		end
+		open()
+		return Enum.ContextActionResult.Sink
+	end
+	if isOpen then
+		close()
+		return Enum.ContextActionResult.Sink
+	end
+	if ClientState.menuOpen or not lobbyShowing() then
+		return Enum.ContextActionResult.Pass
+	end
+	open()
+	return Enum.ContextActionResult.Sink
+end
+
+local function syncKeys()
+	local want = ""
+	if lobbyShowing() and gui then
+		want = if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil then "L" else "L+Pad"
+	end
+	if want == boundKeys then
+		return
+	end
+	boundKeys = want
+	if want == "" then
+		Input.unbind("Loadout")
+		return
+	end
+	local spec = Input.ACTIONS and Input.ACTIONS.Loadout
+	local keys = if spec and spec.keys then table.clone(spec.keys) else { Enum.KeyCode.L, Enum.KeyCode.DPadRight }
+	if want == "L" then
+		local index = table.find(keys, Enum.KeyCode.DPadRight)
+		if index then
+			table.remove(keys, index)
+		end
+	end
+	Input.bind("Loadout", onLoadoutKey, { keys = keys })
+end
+
+open = function()
 	if isOpen or not lobbyShowing() or ClientState.menuOpen or not gui then
 		return
 	end
@@ -1206,6 +1257,7 @@ local function open()
 		end
 	end
 	Sfx.play("UIClick", { pitch = 1.1 })
+	task.defer(syncKeys) -- (not inside the key's own callback)
 end
 
 close = function()
@@ -1260,6 +1312,7 @@ function LoadoutController.refresh()
 	if isOpen and not lobbyShowing() then
 		close()
 	end
+	task.defer(syncKeys)
 end
 
 -- Test hook (Studio playtests drive the screen with this; harmless in a live game)
@@ -1302,6 +1355,30 @@ local function buildSheet(root: Frame)
 	area.Position = UDim2.new(1, if compact then -16 else -40, 0.5, if compact then 0 else 40)
 	area.Size = if compact then UDim2.new(0.64, -16, 1, -16) else UDim2.new(0.5, -40, 0, 470)
 	area.Visible = false
+	-- the Quiet soft shade behind the rows (as behind the Plus sheet): the rows hold over the busy rules board, a
+	-- window or a lamp. No edge on screen: taller than the screen, run off its right side, its left side faded out.
+	local SHADE_FEATHER = 140
+	local shade = Instance.new("Frame")
+	shade.Name = "Shade"
+	shade.BorderSizePixel = 0
+	shade.BackgroundColor3 = C.Shade
+	shade.BackgroundTransparency = 0.42
+	shade.ZIndex = 0
+	shade.AnchorPoint = Vector2.new(0, 0.5)
+	shade.Position = UDim2.new(0, -SHADE_FEATHER, 0.5, 0)
+	shade.Size = UDim2.new(1, SHADE_FEATHER + 80, 0, 3000)
+	local fade = Instance.new("UIGradient")
+	fade.Name = "Fade"
+	fade.Parent = shade
+	local function paintFade()
+		local width = math.max(shade.AbsoluteSize.X, SHADE_FEATHER + 1)
+		local f = math.clamp(SHADE_FEATHER / width, 0.01, 0.6)
+		local k = NumberSequenceKeypoint.new
+		fade.Transparency = NumberSequence.new({ k(0, 1), k(f * 0.4, 0.7), k(f * 0.75, 0.2), k(f, 0), k(1, 0) })
+	end
+	shade:GetPropertyChangedSignal("AbsoluteSize"):Connect(paintFade)
+	paintFade()
+	shade.Parent = area
 	local holder = Instance.new("Frame")
 	holder.Name = "Body"
 	holder.BackgroundTransparency = 1
@@ -1594,20 +1671,14 @@ function LoadoutController.Start()
 			if R.summary and R.summary.Visible ~= want then
 				LoadoutController.refresh()
 			end
+			syncKeys()
 		end
 	end)
 
-	UserInputService.InputBegan:Connect(function(io, processed)
-		if io.KeyCode == Enum.KeyCode.L and not UserInputService:GetFocusedTextBox() then
-			if isOpen then
-				close()
-			elseif not processed then
-				open()
-			end
-		elseif io.KeyCode == Enum.KeyCode.DPadRight and not processed and not isOpen and lobbyShowing() then
-			open()
-		end
-	end)
+	-- the keys (Shared.Input action "Loadout", so InputCheck sees them): kept in step with the lobby, the screen and
+	-- the menus by syncKeys (the summary line refresh, open, close, the GUI selection and the twice-a-second check)
+	GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(syncKeys)
+	syncKeys()
 
 	RunService:BindToRenderStep("LoadoutBody", Enum.RenderPriority.Camera.Value + 2, function()
 		if isOpen then

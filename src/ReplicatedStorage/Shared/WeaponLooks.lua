@@ -1,6 +1,8 @@
 --[[
 	WeaponLooks - the one look table for the new weapons (docs/design/Weapons_v2.md 1.3, 1.4) until their Blender
-	meshes exist. Each look is built from plain Parts in ItemModels' conventions (see ItemModels' header): Grip at the
+	meshes exist. SUPERSEDED 19 Nov 2026: every id here now has its WeaponsV3 mesh template in Assets.Items
+	(ServerStorage.WorldGen.WeaponsV3Assets), so install() leaves them all alone; these part-built looks are only the
+	fallback for a place without the templates. Each look is built from plain Parts in ItemModels' conventions (see ItemModels' header): Grip at the
 	origin, LookVector (-Z) toward the business end, UpVector (+Y) the spine / back, cutting edges toward -Y, parts
 	carry attribute Role (Steel, Wood, Leather, Rope, Brass, Cord) so Stars.applyFinish can change their finish.
 	Bows keep Nock (RestPosition, MaxDraw), StringTop, StringBottom, ArrowRest and a string part with attribute String.
@@ -54,7 +56,8 @@ local function part(model: Model, handle: BasePart, spec: Spec): Part
 	p.Color = spec.color
 	-- Plain Parts have no SurfaceAppearance, so Roblox's Metal mirrors the sky (steel read glossy blue in the train,
 	-- 18 Nov): steel and brass stand-ins are matte SmoothPlastic in their own colours. Role keeps the star finish.
-	p.Material = if spec.material == M.Metal then M.SmoothPlastic else spec.material
+	-- (19 Nov: no tiled Wood either; the owner called the block-built wood "copied and pasted")
+	p.Material = if spec.material == M.Metal or spec.material == M.Wood then M.SmoothPlastic else spec.material
 	p.Reflectance = 0
 	p.Anchored = false
 	p.CanCollide = false

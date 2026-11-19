@@ -81,6 +81,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ItemModels = require(Shared:WaitForChild("ItemModels"))
 local Config = require(Shared:WaitForChild("Config"))
 local Stars = require(Shared:WaitForChild("Stars"))
+local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
 
 -- The "Blocky" arms' builder, colours and pose style: the sibling module ViewmodelController.Blocky (a Rig cloned on its
 -- own, without its parent, has none: it then builds the older arms)
@@ -1282,6 +1283,11 @@ function Rig:_rebuild()
 			table.insert(parts, p)
 		end
 	end
+	if self.offItem then
+		for _, p in ipairs(self.offItem.parts) do
+			table.insert(parts, p)
+		end
+	end
 	if self.arrow then
 		for _, p in ipairs(self.arrow.parts) do
 			table.insert(parts, p)
@@ -1313,6 +1319,10 @@ function Rig:setItem(itemId: string?, hand: string?, stars: number?)
 	if self.item then
 		self.item.model:Destroy()
 		self.item = nil
+	end
+	if self.offItem then
+		self.offItem.model:Destroy()
+		self.offItem = nil
 	end
 	if itemId then
 		local ok, model = pcall(Rig.ItemModels.build, itemId, "view")
@@ -1375,6 +1385,33 @@ function Rig:setItem(itemId: string?, hand: string?, stars: number?)
 			model.Parent = self.model
 			self.item = info
 			setHidden(info, self.itemHidden)
+			-- an off-hand item (the Paired Blades, ItemDefs offHand): the second blade in the left hand, the same build
+			-- at the same stars, marked OffHand before its finish (the 5-star pair's second tassel is charcoal), held as
+			-- the right one is, mirrored
+			local def = ItemDefs.get(itemId)
+			if def and def.offHand and info.hand == "Right" then
+				local okL, left = pcall(Rig.ItemModels.build, itemId, "view")
+				if okL and typeof(left) == "Instance" and left:IsA("Model") and left.PrimaryPart then
+					left:SetAttribute("OffHand", true)
+					if stars and Stars.of(itemId, stars) then
+						pcall(Stars.applyFinish, left, stars)
+					end
+					local offInfo = prepareItem(left, (own and own.ITEM_SCALE[itemId]) or ITEM_SCALE[itemId])
+					offInfo.itemId = itemId
+					offInfo.hand = "Left"
+					offInfo.handShape = info.handShape
+					local mirror = CFrame.new(-info.hold.X, info.hold.Y, info.hold.Z)
+						* CFrame.fromMatrix(Vector3.zero, info.hold.XVector * Vector3.new(1, -1, -1), info.hold.YVector * Vector3.new(-1, 1, 1),
+							info.hold.ZVector * Vector3.new(-1, 1, 1))
+					offInfo.hold = (Rig.OFFHAND_HOLD and Rig.OFFHAND_HOLD[itemId]) or mirror
+					left.Name = "OffHand"
+					left.Parent = self.model
+					self.offItem = offInfo
+					setHidden(offInfo, self.itemHidden)
+				elseif okL and typeof(left) == "Instance" then
+					left:Destroy()
+				end
+			end
 		elseif ok and typeof(model) == "Instance" then
 			model:Destroy()
 		end
@@ -1408,6 +1445,7 @@ function Rig:setItemHidden(hidden: boolean)
 	if self.itemHidden ~= hidden then
 		self.itemHidden = hidden
 		setHidden(self.item, hidden)
+		setHidden(self.offItem, hidden)
 	end
 end
 
@@ -1623,6 +1661,16 @@ function Rig:pose(frame: { [string]: any })
 		end
 	else
 		self.handleWorld = nil
+	end
+	local off = self.offItem
+	if off then
+		local leftHand = self.arms.Left and self.arms.Left.solved
+		local handle = if leftHand then leftHand * Rig.GRIP.Left * off.hold * off.gripInverse else PARKED
+		self.offHandleWorld = if leftHand then handle else nil
+		for _, offset in ipairs(off.offsets) do
+			i += 1
+			cframes[i] = handle * offset
+		end
 	end
 	local arrow = self.arrow
 	if arrow then

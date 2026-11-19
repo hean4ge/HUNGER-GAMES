@@ -397,9 +397,12 @@ end
 
 -- A positional sound, sent only to the players who can hear it: within its roll-off distance (Sounds: rollMax) plus
 -- SOUND_MARGIN of where they listen from. (Sfx.play sends to every client, the lobby 8,800 studs away included.)
-local function playSound(key: string, position: Vector3, exclude: Player?, volume: number?, pitch: number?)
+local function playSound(key: string, position: Vector3, exclude: Player?, volume: number?, pitch: number?, maxRange: number?)
 	local entry = (Sounds :: any)[key]
 	local range = ((if type(entry) == "table" then tonumber(entry.rollMax) else nil) or 160) + SOUND_MARGIN
+	if type(maxRange) == "number" and maxRange > 0 then
+		range = math.min(range, maxRange) -- (a quiet sound: the Leaf Dagger's throw, heard within 10 studs)
+	end
 	local data = { position = position, volume = volume, pitch = pitch }
 	for _, other in ipairs(Players:GetPlayers()) do
 		if other ~= exclude then
@@ -1007,6 +1010,22 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 	local hit = if type(info) == "table" then table.clone(info) else {}
 	hit.attacker = attacker
 	hit.cause = hit.cause or "Combat"
+	-- the Leaf Dagger's unseen throw (ItemDefs throwUnseenDamage): a thrown hit on a body facing away from where the
+	-- throw left, unhurt for CombatStats.UnseenWindow seconds, lands at throwUnseenDamage / throwDamage of its damage
+	-- (40 -> 50 at 1 star; the stars, falloff and headshot carry over). Not on a guard: blocked throws never get here.
+	if hit.cause == "Combat" and hit.melee ~= true and typeof(hit.position) == "Vector3" then
+		local tdef = ItemDefs.get(hit.weaponId)
+		local root = model:FindFirstChild("HumanoidRootPart")
+		if tdef and tdef.throwUnseenDamage and tdef.throwDamage and tdef.throwDamage > 0 and root and root:IsA("BasePart") then
+			local toThrower = Util.flat(hit.position - root.Position)
+			local look = Util.flat(root.CFrame.LookVector)
+			local unhurt = os.clock() - (lastHurtAt[humanoid] or -math.huge) >= CombatStats.UnseenWindow
+			if unhurt and toThrower.Magnitude > 0.01 and look.Magnitude > 0.01 and look.Unit:Dot(toThrower.Unit) < 0 then
+				baseDamage *= tdef.throwUnseenDamage / tdef.throwDamage
+				hit.unseen = true
+			end
+		end
+	end
 	if hit.cause == "Combat" then
 		baseDamage = math.min(baseDamage, CombatStats.hitCap()) -- no single weapon hit over 95, whatever the stars
 	end
@@ -2305,7 +2324,9 @@ local function onRangedRelease(player: Player, shotId: any, origin: any, directi
 		refund(player, itemId :: string)
 		return
 	end
-	playSound("Throw", start, player)
+	-- (a quiet throw, ItemDefs quietThrow: only those within that many studs hear it, and softly)
+	local quiet = tonumber(def.quietThrow)
+	playSound("Throw", start, player, if quiet then 0.45 else nil, nil, quiet)
 	broadcastAction(player, "Throw", itemId)
 end
 

@@ -347,11 +347,29 @@ local function compactToasts(): boolean
 	return UserInputService.TouchEnabled
 end
 
+-- The Loadout screen is open (its rows take the right half and the bottom of the screen; the avatar the left).
+local function loadoutOpen(): boolean
+	local lc = Controllers and Controllers.LoadoutController
+	if lc and type(lc.isOpen) == "function" then
+		local ok, open = pcall(lc.isOpen)
+		return ok and open == true
+	end
+	return false
+end
+
 local function layoutToasts()
 	local container = R.toasts
 	if not container then
 		return
 	end
+	-- while the Loadout is open the toasts move up to the top of the avatar's side, clear of the rows ("A contender
+	-- has arrived" lay over GENERAL SKILL and TRAIL, wave10); a phone's left side is too narrow: they wait, hidden
+	if loadoutOpen() then
+		container.Visible = not compactToasts()
+		container.Position = UDim2.new(0.25, 0, 0, 190)
+		return
+	end
+	container.Visible = true
 	-- clear of the HUD's item-name block above the hotbar (60 px tall while it shows an item's description)
 	if not compactToasts() then
 		container.Position = UDim2.new(0.5, 0, 1, -136)
@@ -1896,6 +1914,21 @@ function NotificationController.Start()
 			local ok, err = pcall(pumpCards)
 			if not ok then
 				warn("[NotificationController] card: " .. tostring(err))
+			end
+		end
+	end)
+	-- the Loadout opening or closing moves the toasts (layoutToasts) and hides the cards
+	task.spawn(function()
+		local wasOpen = false
+		while true do
+			task.wait(0.1)
+			local open = loadoutOpen()
+			if open ~= wasOpen then
+				wasOpen = open
+				layoutToasts()
+				if R.cards then
+					R.cards.Visible = not open
+				end
 			end
 		end
 	end)

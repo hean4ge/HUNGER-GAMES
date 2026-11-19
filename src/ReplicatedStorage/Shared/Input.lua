@@ -75,6 +75,10 @@ Input.ACTIONS = {
 		touch = { label = "", position = UDim2.new(1, -262, 1, -228), size = 64 } },
 	SkillGeneral = { keys = { Enum.KeyCode.F, Enum.KeyCode.DPadRight },
 		touch = { label = "", position = UDim2.new(1, -170, 1, -262), size = 64 } },
+	-- The Loadout screen (LoadoutController), bound only in the train lobby: L opens and closes it, D-pad right opens
+	-- it (in the arena D-pad right is SkillGeneral). Touch has no button of its own: the Loadout summary line is tapped
+	-- (InputCheck: gui:Loadout.Root.Summary).
+	Loadout = { keys = { Enum.KeyCode.L, Enum.KeyCode.DPadRight } },
 }
 
 local bound: { [string]: any } = {}
