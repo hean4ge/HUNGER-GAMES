@@ -104,13 +104,16 @@ local SHAPE_NAMES = { "Relaxed", "Fist", "Grip", "Open" } -- (Rig.HAND_SHAPES)
 --   ITEM_HOLD   where a gripped thing sits in the grip (Grip space, as Rig.ITEM_HOLD: -Z toward its business end). The
 --               dried meat's bone and the herbs' stems run through the block: they are pushed up through it, so their
 --               ends stay inside the block instead of showing as a stub on its near face
-Blocky.ITEM_SCALE = { ration = 0.68 } :: { [string]: number }
+-- (the Ring Blade's hoop is held smaller and turned about its grip so it is seen nearly edge-on at the lower right;
+-- at full size, face-on, it covered a quarter of the view)
+Blocky.ITEM_SCALE = { ration = 0.68, ring_blade = 0.72 } :: { [string]: number }
 Blocky.PALM_HOLD = {
 	ration = CFrame.new(0, 0.05, -0.17) * CFrame.Angles(0, math.rad(90), 0),
 } :: { [string]: CFrame }
 Blocky.ITEM_HOLD = {
 	dried_meat = CFrame.new(0, 0, -0.07),
 	herbs = CFrame.new(0, 0, -0.09),
+	ring_blade = CFrame.Angles(0, 0, math.rad(32)),
 } :: { [string]: CFrame }
 
 local PARKED = CFrame.new(0, -10000, 0)

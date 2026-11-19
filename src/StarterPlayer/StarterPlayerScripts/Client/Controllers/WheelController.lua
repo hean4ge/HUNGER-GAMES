@@ -91,11 +91,26 @@ local function stateLine(kind: string): (string, string)
 	return odds, p
 end
 
+-- Gold still needed for a paid draw (0: affordable, or free, or the Gold has not loaded)
+local promptShort: { [ProximityPrompt]: number } = {}
+local promptGold: number? = nil -- (held, like the Gold line, while your own reveal plays)
+local function shortOf(cost: number): number
+	if os.clock() >= WheelController.holdUntil or promptGold == nil then
+		promptGold = tonumber(player:GetAttribute("Gold")) or (if state.loaded then tonumber(state.gold) else nil)
+	end
+	local gold = promptGold
+	if not gold then
+		return 0
+	end
+	return math.max(0, cost - gold)
+end
+
 local function refreshPrompts()
 	local cfg = Rewards.config()
 	for prompt, kind in pairs(promptOwner) do
 		if kind == "spin" then
 			local text
+			local short = 0
 			if (state.freeLeft or 0) > 0 then
 				text = "Spin the wheel · free today"
 			elseif state.paidBlocked then
@@ -103,13 +118,23 @@ local function refreshPrompts()
 			elseif (state.paidLeft or 0) <= 0 then
 				text = "The wheel · no more spins today"
 			else
-				text = string.format("Spin the wheel · %s Gold", Rewards.comma(state.spinCost or cfg.Wheel.SpinCost))
+				local cost = state.spinCost or cfg.Wheel.SpinCost
+				short = shortOf(cost)
+				text = string.format("Spin the wheel · %s Gold", Rewards.comma(cost))
 			end
+			if short > 0 then
+				text ..= string.format("  ·  need %s more Gold", Rewards.comma(short))
+			end
+			promptShort[prompt] = short
 			prompt:SetAttribute("PromptLine", text)
 			prompt.Enabled = not spinning
 		else
 			-- Strongboxes are always paid: hidden for a player who may not buy paid random items
 			prompt.Enabled = not state.paidBlocked
+			local short = shortOf(if kind == "masterwork" then cfg.Strongbox.MasterworkCost else cfg.Strongbox.Cost)
+			promptShort[prompt] = short
+			prompt:SetAttribute("PromptLine", prompt.ActionText .. " " .. prompt.ObjectText
+				.. (if short > 0 then string.format("  ·  need %s more Gold", Rewards.comma(short)) else ""))
 		end
 	end
 	if shownPrompt and oddsLine and pityLine then
@@ -120,6 +145,12 @@ local function refreshPrompts()
 			local attr = shownPrompt:GetAttribute("PromptLine")
 			promptText.Text = if type(attr) == "string" and attr ~= "" then attr
 				else shownPrompt.ActionText .. " " .. shownPrompt.ObjectText
+			-- too little Gold: the line is dimmed and shows no key (a press still only gets the server's quiet refusal)
+			local short = (promptShort[shownPrompt] or 0) > 0
+			QuietUI.textTransparency(promptText, if short then 0.5 else 0)
+			if promptKey then
+				promptKey.Visible = not short
+			end
 		end
 	end
 end
@@ -663,6 +694,7 @@ local function onBox(data: { [string]: any })
 	if mine then
 		holdCamera(false)
 		WheelController.holdUntil = 0
+		refreshPrompts() -- the price line catches up with the Gold line
 	end
 end
 
@@ -880,6 +912,11 @@ local function attach(root: Model)
 			if type(kind) == "string" then
 				promptOwner[d] = kind
 				d.Triggered:Connect(function()
+					-- the server takes the Gold before its spin / box message arrives: hold the Gold line and the board
+					-- from the press, so both keep the old total and change together when the reveal ends
+					if (promptShort[d] or 0) <= 0 then
+						WheelController.holdUntil = math.max(WheelController.holdUntil, os.clock() + 3)
+					end
 					if action == "spin" then
 						sendAction("spin")
 					else
@@ -902,6 +939,7 @@ function WheelController.Start()
 		return
 	end
 	remote.OnClientEvent:Connect(onEvent)
+	player:GetAttributeChangedSignal("Gold"):Connect(refreshPrompts)
 	buildOddsGui()
 	ProximityPromptService.PromptShown:Connect(onPromptShown)
 	ProximityPromptService.PromptHidden:Connect(onPromptHidden)

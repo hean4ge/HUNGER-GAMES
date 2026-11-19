@@ -34,9 +34,9 @@ local HICKORY = rgb(150, 112, 74)
 local YEW = rgb(184, 150, 104)
 local LEATHER = rgb(92, 64, 44)
 local TAN = rgb(160, 124, 86)
-local FORGED = rgb(74, 76, 80)
-local HONED = rgb(150, 152, 154)
-local SATIN = rgb(132, 136, 140)
+local FORGED = rgb(118, 110, 100) -- (steel greys lean warm and light: the blue sky light turned neutral and dark greys navy in daylight)
+local HONED = rgb(196, 188, 174)
+local SATIN = rgb(176, 168, 154)
 local IRON = rgb(58, 58, 60)
 local CORD = rgb(52, 50, 48)
 local BRASS = rgb(150, 122, 72)
@@ -134,25 +134,26 @@ LOOKS.twin_axe = function(model, h)
 	attach(h, "Tip", CF(0, -0.88, -2.75) * TIP_DOWN)
 end
 
--- Ring Blade: a flat steel hoop 2.2 studs across (16 straight segments) with a bevelled outer strip, a cord-wrapped
--- grip bar across the inside with a brass ferrule at each end.
+-- Ring Blade: a flat steel hoop 1.7 studs across (the Blender sheet's 1.6 to 1.8; it was 2.2 and filled the first-person
+-- view) in 16 straight segments with a bevelled outer strip, a cord-wrapped grip bar across the inside with a brass
+-- ferrule at each end.
 LOOKS.ring_blade = function(model, h)
-	local r, cz, n = 1.05, -0.62, 16
+	local r, cz, n, bevel = 0.76, -0.45, 16, 0.09
 	local seg = 2 * r * math.tan(math.pi / n) + 0.02
 	for i = 0, n - 1 do
 		local a = (i + 0.5) / n * math.pi * 2
 		local pos = V3(0, r * math.sin(a), cz + r * math.cos(a))
 		local rot = CFrame.Angles(-(a + math.pi / 2), 0, 0)
-		part(model, h, { name = "Hoop", size = V3(0.06, 0.2, seg), cf = CF(pos) * rot, color = SATIN, material = M.Metal, role = "Steel" })
-		local edge = V3(0, (r + 0.13) * math.sin(a), cz + (r + 0.13) * math.cos(a))
-		part(model, h, { name = "Bevel", size = V3(0.03, 0.07, seg * (r + 0.13) / r), cf = CF(edge) * rot, color = HONED, material = M.Metal, role = "Steel" })
+		part(model, h, { name = "Hoop", size = V3(0.06, 0.17, seg), cf = CF(pos) * rot, color = SATIN, material = M.Metal, role = "Steel" })
+		local edge = V3(0, (r + bevel) * math.sin(a), cz + (r + bevel) * math.cos(a))
+		part(model, h, { name = "Bevel", size = V3(0.03, 0.06, seg * (r + bevel) / r), cf = CF(edge) * rot, color = HONED, material = M.Metal, role = "Steel" })
 	end
 	-- the grip bar runs along Z through the hand, from the back of the hoop toward its middle
-	part(model, h, { name = "Grip", size = V3(0.16, 0.16, 0.86), cf = CF(0, 0, 0.0), color = CORD, material = M.Fabric, role = "Cord" })
-	part(model, h, { name = "Ferrule", size = V3(0.19, 0.19, 0.08), cf = CF(0, 0, 0.42), color = BRASS, material = M.Metal, role = "Brass" })
-	part(model, h, { name = "Ferrule", size = V3(0.19, 0.19, 0.08), cf = CF(0, 0, -0.42), color = BRASS, material = M.Metal, role = "Brass" })
-	part(model, h, { name = "Spoke", size = V3(0.05, 0.05, 0.36), cf = CF(0, 0, -0.62), color = SATIN, material = M.Metal, role = "Steel" })
-	attach(h, "Tip", CF(0, 0, cz - r - 0.13) * TIP_FWD)
+	part(model, h, { name = "Grip", size = V3(0.16, 0.16, 0.62), cf = CF(0, 0, 0.0), color = CORD, material = M.Fabric, role = "Cord" })
+	part(model, h, { name = "Ferrule", size = V3(0.19, 0.19, 0.08), cf = CF(0, 0, 0.3), color = BRASS, material = M.Metal, role = "Brass" })
+	part(model, h, { name = "Ferrule", size = V3(0.19, 0.19, 0.08), cf = CF(0, 0, -0.3), color = BRASS, material = M.Metal, role = "Brass" })
+	part(model, h, { name = "Spoke", size = V3(0.05, 0.05, 0.28), cf = CF(0, 0, cz), color = SATIN, material = M.Metal, role = "Steel" })
+	attach(h, "Tip", CF(0, 0, cz - r - bevel) * TIP_FWD)
 end
 
 -- Climbing Pick: a short hickory haft, a curved pick of four bent segments, a square adze at the back, a rawhide

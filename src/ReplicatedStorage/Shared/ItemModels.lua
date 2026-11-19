@@ -75,6 +75,7 @@ end
 
 local STRING_COLOR = rgb(160, 132, 92) -- the bow string's rope colour (art manifest)
 local STRING_WIDTH = 0.012 -- a real string is ~3 mm; it is seen from very close in first person
+local STEEL_WARM = rgb(196, 182, 160) -- matte steel meshes are pulled toward this (see build)
 
 local warned: { [string]: boolean } = {}
 local function warnOnce(key: string, message: string)
@@ -219,6 +220,24 @@ function ItemModels.build(itemId: string, variant: string?): Model?
 	local model: Model
 	if source then
 		model = source:Clone()
+		-- Steel meshes: their SurfaceAppearance is metallic and mirrored the sky, so the sword's and machete's blades read
+		-- glossy blue in daylight (Nov 2026). Weapons are matte (Weapons_v2 1.4): a steel part drops it and shows its own
+		-- grey, matte; Role keeps the star finish.
+		local weapon = def.kind == "Melee" or def.kind == "Throwable"
+		for _, d in ipairs(if weapon then model:GetDescendants() else {}) do
+			if d:IsA("MeshPart") and d.Material == Enum.Material.Metal then
+				local look = d:FindFirstChildOfClass("SurfaceAppearance")
+				if look then
+					look:Destroy()
+				end
+				d.Material = Enum.Material.SmoothPlastic
+				d.Reflectance = 0
+				d.Color = d.Color:Lerp(STEEL_WARM, 0.35) -- (a neutral grey reads blue under the sky light)
+				if d:GetAttribute("Role") == nil then
+					d:SetAttribute("Role", "Steel")
+				end
+			end
+		end
 	else
 		warnOnce(itemId, string.format("no mesh template ReplicatedStorage.Assets.Items.%s; using a stand-in", itemId))
 		model = standInItem(itemId, def)

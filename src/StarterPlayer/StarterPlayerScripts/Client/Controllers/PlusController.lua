@@ -50,8 +50,12 @@ local REMOTE_NAME = "PlusSubscribe"
 local PRESS_COOLDOWN = 10 -- matches PlusService.PROMPT_COOLDOWN
 local MARK_PREFIX = "PlusMark_"
 -- Studs above the head's centre. Another player's head carries Roblox's own name tag at about 2 studs (lobby only:
--- PlayerService), so their mark rides above it; your own character has no name tag and wears the mark lower.
-local MARK_OFFSET_OWN = Vector3.new(0, 2.05, 0)
+-- PlayerService), so their mark rides above it; your own character has no name tag and wears the mark beside the head:
+-- over the head, your own mark stood in front of whatever the camera looked at past you, the Armoury board in the
+-- observation car included (19 Nov). MARK_SIDE_OWN is a camera-space offset (right, up): on screen it sits just right
+-- of your head, below the board's rows.
+local MARK_OFFSET_OWN = Vector3.zero
+local MARK_SIDE_OWN = Vector3.new(1.6, 0.35, 0)
 local MARK_OFFSET_OTHER = Vector3.new(0, 3.2, 0)
 local MARK_MAX_DISTANCE = 60 -- past this the name tag (a fixed size on screen) would reach the mark
 local CLOSE_ACTION = "PlusClose"
@@ -95,6 +99,7 @@ local function buildMark(other: Player): BillboardGui
 	gui.LightInfluence = 0
 	gui.MaxDistance = MARK_MAX_DISTANCE
 	gui.StudsOffsetWorldSpace = if other == player then MARK_OFFSET_OWN else MARK_OFFSET_OTHER
+	gui.StudsOffset = if other == player then MARK_SIDE_OWN else Vector3.zero
 	-- studs plus a few pixels: it shrinks with distance like the character, and stays readable a little longer
 	gui.Size = UDim2.new(1.5, 14, 0.42, 6)
 	-- Quiet: the word alone in amber with the dark stroke, no pill behind it ("Pill" stays as its clear holder)

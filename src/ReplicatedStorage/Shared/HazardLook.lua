@@ -331,6 +331,12 @@ function HazardLook.fogShell(radius: number, sides: number): (Part, { Beam })
 		beam.Segments = 1
 		beam.Width0 = width
 		beam.Width1 = width
+		-- a soft puff stretched over each veil, so it fades out at every edge and the overlapping veils merge into one soft
+		-- fog (untextured, each veil was a flat translucent rectangle with hard edges and brighter overlaps, 18 Nov)
+		beam.Texture = HazardLook.Textures.Smoke
+		beam.TextureMode = Enum.TextureMode.Stretch
+		beam.TextureLength = 1
+		beam.TextureSpeed = 0
 		beam.Color = ColorSequence.new(HazardLook.Colors.Fog)
 		beam.LightEmission = 0
 		beam.LightInfluence = 0.35
@@ -339,7 +345,7 @@ function HazardLook.fogShell(radius: number, sides: number): (Part, { Beam })
 		beam.Parent = anchor
 		table.insert(beams, beam)
 	end
-	local width = 2 * radius * math.tan(math.pi / sides) * 1.08
+	local width = 2 * radius * math.tan(math.pi / sides) * 1.8 -- (wide overlaps: the puffs' soft sides fill the gaps)
 	for i = 0, sides - 1 do
 		local angle = (i + 0.5) * math.pi * 2 / sides
 		local x, z = math.sin(angle) * radius, math.cos(angle) * radius
@@ -359,7 +365,7 @@ function HazardLook.setFogShell(beams: { Beam }, transparency: number)
 		beam.Transparency = if beam:GetAttribute("FadeTop") then walls else roof
 	end
 end
-HazardLook.FogShells = { { radius = 22, alpha = 0.3 }, { radius = 42, alpha = 0.5 }, { radius = 70, alpha = 0.72 } }
+HazardLook.FogShells = { { radius = 22, alpha = 0.4 }, { radius = 42, alpha = 0.68 }, { radius = 70, alpha = 0.95 } } -- (the soft puffs are thinner than the old flat veils)
 
 ----------------------------------------------------------------------------------------------------
 -- Storm

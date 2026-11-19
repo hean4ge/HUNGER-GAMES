@@ -222,11 +222,15 @@ local function narrowFit(cam: Camera): number
 	return math.clamp((NARROW_FROM - shape) / (NARROW_FROM - NARROW_FULL), 0, 1.3)
 end
 
+-- Throwable melee weapons held one-handed like a blade, not in the spear's two-handed guard: the Ring Blade's hoop in
+-- the guard filled the middle of the view (Poses.FACETED.HOLD_ITEM.ring_blade places it at the lower right).
+local ONE_HAND_THROW = { ring_blade = true }
+
 local function holdKindFor(def: any): string
 	if not def then
 		return "Fists"
 	elseif def.kind == "Melee" then
-		return if def.throwable then "Spear" else "Blade"
+		return if def.throwable and not ONE_HAND_THROW[def.id] then "Spear" else "Blade"
 	elseif def.kind == "Bow" then
 		return "Bow"
 	elseif def.kind == "Throwable" then

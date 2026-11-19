@@ -189,12 +189,12 @@ local function rgb(r: number, g: number, b: number): Color3
 	return Color3.fromRGB(r, g, b)
 end
 local FINISH_COLORS = {
-	[1] = { Steel = { rgb(150, 146, 138), 0.45 }, Wood = { rgb(150, 132, 108), 0.4 }, Leather = { rgb(118, 100, 84), 0.4 },
+	[1] = { Steel = { rgb(160, 150, 136), 0.45 }, Wood = { rgb(150, 132, 108), 0.4 }, Leather = { rgb(118, 100, 84), 0.4 },
 		Rope = { rgb(170, 158, 136), 0.3 }, Brass = { rgb(130, 116, 90), 0.5 }, Cord = { rgb(120, 112, 100), 0.3 } },
-	[3] = { Steel = { rgb(70, 78, 92), 0.35 }, Leather = { rgb(70, 46, 32), 0.35 }, Wood = { rgb(96, 66, 44), 0.2 } },
-	[4] = { Steel = { rgb(72, 78, 90), 0.4 }, Wood = { rgb(72, 46, 30), 0.45 }, Leather = { rgb(58, 38, 28), 0.4 },
+	[3] = { Steel = { rgb(124, 114, 102), 0.35 }, Leather = { rgb(70, 46, 32), 0.35 }, Wood = { rgb(96, 66, 44), 0.2 } },
+	[4] = { Steel = { rgb(108, 98, 86), 0.45 }, Wood = { rgb(72, 46, 30), 0.45 }, Leather = { rgb(58, 38, 28), 0.4 },
 		Brass = { rgb(168, 132, 70), 0.6 }, Rope = { rgb(120, 92, 60), 0.3 } },
-	[5] = { Steel = { rgb(60, 64, 74), 0.45 }, Wood = { rgb(58, 36, 24), 0.55 }, Leather = { rgb(46, 30, 22), 0.45 },
+	[5] = { Steel = { rgb(92, 82, 70), 0.55 }, Wood = { rgb(58, 36, 24), 0.55 }, Leather = { rgb(46, 30, 22), 0.45 },
 		Brass = { rgb(176, 138, 72), 0.7 }, Rope = { rgb(100, 76, 50), 0.35 }, Cord = { rgb(40, 36, 34), 0.4 } },
 }
 -- parts with no Role: guessed from their material

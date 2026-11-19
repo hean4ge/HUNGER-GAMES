@@ -88,18 +88,38 @@ function Kits.default()
 	return byId[settings.Default] or byId.forager
 end
 
-function Kits.summary(kit: any): string
+-- bringId / bringLabel (optional): an owned weapon chosen with BRING. The line then shows what the parcel holds,
+-- the same swap as KitService itemsFor: it takes the kit's first starred weapon's place (or leads), a bow adds Arrow ×6.
+function Kits.summary(kit: any, bringId: string?, bringLabel: string?): string
 	if not kit then
 		return ""
 	end
+	local bringDef = if type(bringId) == "string" and bringId ~= "" then ItemDefs.get(bringId) else nil
+	if bringDef and (not bringDef.starred or bringDef.neverOwned) then
+		bringDef = nil
+	end
+	local bringName = bringDef and (bringLabel or bringDef.name)
 	local parts = {}
+	local replaced, hasArrows = false, false
 	for _, item in ipairs(kit.items) do
 		local def = ItemDefs.get(item.id)
-		local name = if def then def.name else item.id
-		if item.count > 1 then
-			name = string.format("%s \u{00D7}%d", name, item.count)
+		if bringName and not replaced and def and def.starred then
+			replaced = true
+			table.insert(parts, bringName)
+		else
+			hasArrows = hasArrows or item.id == "arrow"
+			local name = if def then def.name else item.id
+			if item.count > 1 then
+				name = string.format("%s \u{00D7}%d", name, item.count)
+			end
+			table.insert(parts, name)
 		end
-		table.insert(parts, name)
+	end
+	if bringName and not replaced then
+		table.insert(parts, 1, bringName)
+	end
+	if bringDef and bringDef.kind == "Bow" and not hasArrows then
+		table.insert(parts, "Arrow \u{00D7}6")
 	end
 	return table.concat(parts, ", ")
 end

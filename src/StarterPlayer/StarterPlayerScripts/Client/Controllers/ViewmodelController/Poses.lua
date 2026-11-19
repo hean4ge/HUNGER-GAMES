@@ -1068,6 +1068,11 @@ Poses.FACETED = {
 		mace = { right = H(V(0.9, -0.7, -1.05), V(0.18, 0.8, -0.58), V(-0.15, 0.55, -0.82)) },
 		hatchet = { right = H(V(0.9, -0.66, -1.05), V(0.2, 0.95, -0.3), V(-0.12, 0.3, -0.95)) },
 		knife = { right = H(V(0.9, -0.66, -1.05), V(0.15, 0.85, -0.5), V(-0.12, 0.45, -0.88)) },
+		-- the Ring Blade one-handed at the lower right, the hoop leaning forward and out, seen nearly edge-on, clear
+		-- of the crosshair (ViewmodelController ONE_HAND_THROW)
+		-- (the hoop's plane holds the thumb and the knuckles: both lie in the plane through the eye's line to the hand
+		-- and the vertical, so the hoop is seen edge-on as a thin upright sliver)
+		ring_blade = { right = H(V(1.0, -0.8, -1.1), V(0.32, 0.8, -0.51), V(0.42, -0.6, -0.68)) },
 	},
 	PUNCH = { -- jab (left), cross (right), hook (left): odd sets punch with the left
 		{ -- 1 jab: the left fist straight out, left of the crosshair
