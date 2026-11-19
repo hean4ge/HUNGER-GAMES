@@ -798,6 +798,26 @@ local function updateStatus()
 		local need = math.max(1, math.floor(tonumber(GameState:GetAttribute("MinPlayers")) or Config.Round.MinPlayers))
 		setStatus(string.format("Waiting for players %s", num(string.format("%d / %d", count, need), size)),
 			if need > 1 then string.format("A round needs %s contenders", num(need)) else "", nil, false)
+	elseif phase == "Intermission" and (GameState:GetAttribute("TrainStage") or "") ~= "" then
+		-- the road to the arena (TrainRideService): the ride, the training, the launch doors; PhaseEndsAt is the call
+		local stage = GameState:GetAttribute("TrainStage")
+		local solo = GameState:GetAttribute("TrainSolo") == true
+		if stage == "Ride" then
+			local left = math.max(0, (tonumber(GameState:GetAttribute("TrainRideEnd")) or now) - now)
+			setStatus(string.format("The Training Centre in %s", num(Util.formatTime(left), size)),
+				if solo then "Practice round · on the train" else "On the train", nil, false)
+		elseif GameState:GetAttribute("TrainDoorsOpen") == true then
+			if player:GetAttribute("TrainHeld") == false then
+				setStatus("This round is full", "You are first on the next train", nil, false)
+			else
+				setStatus(string.format("The call in %s", num(Util.formatTime(remaining), size)),
+					"The doors are open · walk to the red room", nil, false)
+			end
+		else
+			local doorsLeft = math.max(0, (tonumber(GameState:GetAttribute("TrainDoorsAt")) or now) - now)
+			setStatus(string.format("Doors open in %s", num(Util.formatTime(doorsLeft), size)),
+				if solo then "Practice round · train, then walk to the red room" else "Train, choose your kit and your allies", nil, false)
+		end
 	elseif phase == "Intermission" then
 		local total = math.max(1, tonumber(Config.Round.IntermissionTime) or 1)
 		local count = math.floor(tonumber(GameState:GetAttribute("LobbyCount")) or 0)

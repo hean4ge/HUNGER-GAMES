@@ -994,7 +994,10 @@ local function trainChecks(tag: string, players: { Player })
 	for _, p in ipairs(players) do
 		if p.Parent == Players then
 			local t = call(p, "probe", { kind = "lobby" }) or {}
-			local good = t.rootCar ~= nil and t.camCar ~= nil and (tonumber(t.sceneryMovedIn05s) or 0) > 0.5
+			-- (the road to the arena, Config.TrainFlow: train A stands parked at the station until the ride, its scenery still)
+			local parked = type(Config.TrainFlow) == "table" and Config.TrainFlow.Enabled == true
+			local moved = tonumber(t.sceneryMovedIn05s) or 0
+			local good = t.rootCar ~= nil and t.camCar ~= nil and (if parked then moved < 0.5 else moved > 0.5)
 			ok = ok and good
 			table.insert(spawns, tostring(t.nearestSpawn))
 			table.insert(detail, string.format("%s: character in car %s at %s, camera in car %s at %s (%.1f studs from the root; ceiling above the camera: %s); scenery %s parts moved %.1f studs in 0.5 s; nearest spawn %s",
@@ -3620,10 +3623,42 @@ if ARGS.batch == "F" then
 	end
 end
 
+-- batch T: the ride, the Training Centre and allies (mp-training) live in the child module MPT_Training
+local batchT: (() -> ())? = nil
+if ARGS.batch == "T" then
+	lobbyExtra = function()
+		local mod = script:FindFirstChild("MPT_Training")
+		if not mod then
+			L("DRIVER ERROR no MPT_Training module")
+			return
+		end
+		local T = require(mod)({
+			L = L, check = check, call = call, mark = mark, linesWith = linesWith, clientFind = clientFind, parts = parts, setHealth = setHealth,
+			health = health, slotOf = slotOf, Inv = Inv, invLine = invLine, refusals = refusals, flatDist = flatDist, Shared = Shared,
+			Services = Services, req = req, ARGS = ARGS, A = A, B = B, P3 = P3, killB = killB, backToLobby = backToLobby, waitFor = waitFor,
+			waitPhase = waitPhase, phase = phase, shot = shot, contenderNames = contenderNames, Round = Round, Combat = Combat, PS = PS,
+			roundStartChecks = roundStartChecks, botReady = botReady, arenaCenter = arenaCenter, fmt = fmt, v3 = v3, now = now,
+			hpLog = hpLog, setExpect = function(n: number)
+				EXPECT = n
+			end,
+		})
+		batchT = T.run
+		T.lobby()
+	end
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
 	if not lobbyChecks() then
+		return
+	end
+	if batch == "T" then
+		if batchT then
+			batchT()
+		else
+			L("DRIVER ERROR batch T was not loaded in the lobby")
+		end
 		return
 	end
 	if batch == "E" then

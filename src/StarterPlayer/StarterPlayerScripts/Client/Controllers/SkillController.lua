@@ -248,7 +248,9 @@ local function unbind()
 end
 
 local function refreshBinding()
-	if ClientState.inArena and ClientState.alive and ClientState.spectating == nil then
+	-- (and in the Training Centre's hall, where skills are tried at four times the recharge: TrainingService)
+	if (ClientState.inArena and ClientState.alive and ClientState.spectating == nil)
+		or player:GetAttribute("InTraining") == true then
 		bind()
 	else
 		unbind()
@@ -339,6 +341,7 @@ function SkillController.Start()
 	pcall(buildGui)
 	ClientState.lifeChanged:Connect(refreshBinding)
 	ClientState.spectateChanged:Connect(refreshBinding)
+	player:GetAttributeChangedSignal("InTraining"):Connect(refreshBinding)
 	refreshBinding()
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)

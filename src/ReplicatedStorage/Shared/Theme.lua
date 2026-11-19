@@ -112,6 +112,7 @@ Theme.Colors = {
 	Accent = SUN,
 	AccentSoft = SUN,
 	Danger = RED,
+	Ally = Color3.fromRGB(157, 191, 174), -- the truce's sage (AllyController: marks over allies, compass ticks)
 	Warning = SUN,
 	Success = INK,
 	Gold = SUN,

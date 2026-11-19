@@ -205,14 +205,17 @@ local function phaseActive(): boolean
 	return GameState:GetAttribute("Phase") == "Active"
 end
 
+-- The Training Centre: TrainingService sets InTraining while the character stands in the hall; there the borrowed
+-- weapons swing, shoot and throw outside a round (the server lets them hit the training dummies only).
+local function inHall(): boolean
+	return player:GetAttribute("InTraining") == true
+end
+
 local function canAct(): boolean
 	return bound
-		and ClientState.inArena
-		and ClientState.alive
 		and not ClientState.frozen
 		and not ClientState.menuOpen
-		and ClientState.spectating == nil
-		and phaseActive()
+		and ((ClientState.inArena and ClientState.alive and ClientState.spectating == nil and phaseActive()) or inHall())
 end
 
 local function movementAllows(): boolean
@@ -1403,7 +1406,7 @@ local function unbindInputs()
 end
 
 local function refreshBinding()
-	local want = ClientState.inArena and ClientState.alive and ClientState.spectating == nil
+	local want = (ClientState.inArena and ClientState.alive and ClientState.spectating == nil) or inHall()
 	if want then
 		bindInputs()
 	else
@@ -1904,6 +1907,7 @@ function CombatController.Start()
 	end)
 	ClientState.lifeChanged:Connect(refreshBinding)
 	ClientState.spectateChanged:Connect(refreshBinding)
+	player:GetAttributeChangedSignal("InTraining"):Connect(refreshBinding)
 	ClientState.equippedChanged:Connect(function(itemId)
 		onEquipChanged(if type(itemId) == "string" then itemId else nil)
 	end)

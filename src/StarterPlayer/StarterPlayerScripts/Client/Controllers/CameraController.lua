@@ -295,6 +295,11 @@ local function desiredMode(): string?
 	if ClientState.inArena and ClientState.alive and alive then
 		return "First"
 	end
+	-- the Training Centre's hall (TrainingService sets InTraining): first person, as in the arena, so the lent bows,
+	-- blades and throws are tried the way they are used
+	if alive and player:GetAttribute("InTraining") == true then
+		return "First"
+	end
 	return "Third"
 end
 

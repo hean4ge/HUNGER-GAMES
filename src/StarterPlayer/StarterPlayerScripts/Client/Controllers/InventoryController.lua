@@ -192,7 +192,8 @@ local function cloneInventory(source: any)
 end
 
 local function canUseInventory(): boolean
-	return ClientState.alive == true and ClientState.spectating == nil
+	-- (the Training Centre's hall too: TrainingService sets InTraining; what its chests lend is switched and used there)
+	return (ClientState.alive == true or player:GetAttribute("InTraining") == true) and ClientState.spectating == nil
 end
 
 local function getHumanoid(): Humanoid?
@@ -1182,6 +1183,7 @@ function InventoryController.Start()
 	end)
 	ClientState.lifeChanged:Connect(refreshLife)
 	ClientState.spectateChanged:Connect(refreshLife)
+	player:GetAttributeChangedSignal("InTraining"):Connect(refreshLife)
 	ClientState.settingsChanged:Connect(function()
 		refreshActionHint()
 	end)

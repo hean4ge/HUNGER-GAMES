@@ -30,6 +30,11 @@
 	            cooldowns, Sprint Burst ending on an attack, Concentration), A's arrow and throw trails and clips, B's
 	            Others' trails setting, trails cosmetic, Paired Blades on B as A sees them, cheats, the moving checks.
 	            fsteps = "chain,parry,..." runs only those steps
+	            | "T" the road to the arena (19 Nov, mp-training; child module Training): three clients ride together,
+	            train side by side (chests per station, dummies, targets, the striker, skills, drops), agree a truce (and one
+	            not answered), the launch doors, the disc and the early call, the allies' plinths and marks, the truce's
+	            three ends; round two with places for two, a late joiner during the ride, and the one left out spectating.
+	            training / doors: Config.TrainFlow.TrainingTime and DoorsOpenBefore for round one (Studio defaults 85 / 30)
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
@@ -83,6 +88,12 @@ function MPTest.start(args: { [string]: any }?): string
 	elseif a.batch == "F" then
 		a.cut = a.cut or "Short"
 		a.failsafe = a.failsafe or 600
+	elseif a.batch == "T" then
+		-- the ride, the Training Centre and allies (mp-training, 19 Nov): three clients, a late joiner in round two
+		a.clients = math.max(a.clients, 3)
+		a.minPlayers = a.minPlayers or 2
+		a.cut = a.cut or "Short"
+		a.failsafe = a.failsafe or 600
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil
@@ -117,6 +128,12 @@ function MPTest.start(args: { [string]: any }?): string
 		local f = fight:Clone()
 		f.Name = "MPT_Fight"
 		f.Parent = driver
+	end
+	local training = script:FindFirstChild("Training") -- (batch T: the ride, the hall and allies, mp-training)
+	if training then
+		local t = training:Clone()
+		t.Name = "MPT_Training"
+		t.Parent = driver
 	end
 	driver.Parent = ServerScriptService
 	task.spawn(function()

@@ -434,7 +434,10 @@ local function useSkill(player: Player, slot: any, clientTime: any, direction: a
 			end
 		end
 	end
-	st.ready[slot] = started + (def.Cooldown or 30)
+	-- the Training Centre: skills recharge four times faster in the hall (TrainingService sets TrainingCooldownScale)
+	local scale = tonumber(player:GetAttribute("TrainingCooldownScale"))
+	local cooldown = (def.Cooldown or 30) * (if scale and scale > 0 and scale < 1 then scale else 1)
+	st.ready[slot] = started + cooldown
 	publish(player, st)
 	broadcastSkill(player, id, dir)
 end

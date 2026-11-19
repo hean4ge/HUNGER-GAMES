@@ -268,8 +268,32 @@ local function refuse(player: Player, reason: string)
 	end
 end
 
+-- The Training Centre (TrainingService sets InTraining while the character stands in the hall): a trainee may swing,
+-- shoot and throw outside a round, but only bodies tagged TrainingDummy take those hits, and nobody in the hall is ever
+-- hurt (applyHit).
+local function inHall(player: Player?): boolean
+	return player ~= nil and player:GetAttribute("InTraining") == true
+end
+
+local function isTrainingBody(model: Instance): boolean
+	local m: Instance? = model
+	for _ = 1, 3 do
+		if not m or m == workspace then
+			return false
+		end
+		if CollectionService:HasTag(m, DUMMY_TAG) then
+			return true
+		end
+		m = m.Parent
+	end
+	return false
+end
+
 local function getContext(player: Player): Context?
-	if not phaseActive() or player:GetAttribute("Frozen") == true or not isAliveContender(player) then
+	if player:GetAttribute("Frozen") == true then
+		return nil
+	end
+	if not inHall(player) and (not phaseActive() or not isAliveContender(player)) then
 		return nil
 	end
 	local character = player.Character
@@ -996,15 +1020,27 @@ function CombatService.applyHit(attacker: Player?, humanoid: Humanoid, baseDamag
 	if typeof(humanoid) ~= "Instance" or not humanoid:IsA("Humanoid") then
 		return 0, false
 	end
-	if not Util.isFiniteNumber(baseDamage) or baseDamage <= 0 or not phaseActive() then
+	if not Util.isFiniteNumber(baseDamage) or baseDamage <= 0 then
 		return 0, false
 	end
 	local model = humanoid.Parent
 	if not model or humanoid.Health <= 0 then
 		return 0, false
 	end
+	local hallVictim = Players:GetPlayerFromCharacter(model)
+	if hallVictim and inHall(hallVictim) then
+		return 0, false -- nobody in the Training Centre is ever hurt (the striker dummy's blow staggers only)
+	end
+	if not phaseActive() and not (inHall(attacker) and isTrainingBody(model)) then
+		return 0, false
+	end
 	if attacker ~= nil and (typeof(attacker) ~= "Instance" or not attacker:IsA("Player") or attacker.Parent == nil) then
 		attacker = nil -- left the game: no credit, no confirm
+	end
+	if attacker and inHall(attacker) and isTrainingBody(model) then
+		-- who struck this training body (TrainingService credits the drill to them, not to whoever stands nearest)
+		model:SetAttribute("TrainingHitBy", attacker.UserId)
+		model:SetAttribute("TrainingHitAt", os.clock())
 	end
 
 	local hit = if type(info) == "table" then table.clone(info) else {}

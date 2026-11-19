@@ -14,7 +14,9 @@ return require(game.ServerStorage.Dev.MPTest:Clone()).start({ batch = "B", clien
 
 Batches: `A` combat, `B` reach, poses, loot, eating, border, kill, result, Roll Call, round two, `B2` poses and items,
 `C` three clients (spectating, dusk Roll Call, a leaver), `D` a late joiner, `E` a leave during the Countdown,
-`G` the fill rule (a third client joins during a 45-second lobby countdown).
+`G` the fill rule (a third client joins during a 45-second lobby countdown), `T` the road to the arena with three
+clients (the ride, the Training Centre's stations, allies and the truce, the launch doors and the early call, then a
+round with places for two, a late joiner and a spectator; `src/ServerStorage/Dev/MPTest/Training.lua`).
 The header of `init.lua` lists the arguments. The session ends itself and frees the `QA_Lock` it took.
 
 ## Read the result

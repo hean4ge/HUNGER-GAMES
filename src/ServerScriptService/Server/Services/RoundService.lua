@@ -31,7 +31,16 @@
 	  * Two or more present but fewer than two ready when the Intermission ends (loading, respawning): the pick waits up to
 	    StartHoldTime seconds for the second, instead of a practice round for the first.
 	  * A real round whose contenders drop under two during the Countdown is cancelled (it would end on its first tick).
-	The arena (docs/design/Map1Build.md, decision 14): the plates are the instances in workspace.Arena.Plinths, in name
+	The road to the arena (docs/design/TrainingAndLoadup.md section 2; Config.TrainFlow, TrainRideService): when it is on,
+  the end of the Intermission does not call the contenders: the train departs (TrainRideService.begin), rides to the
+  Training Centre and players train until the call; Phase stays "Intermission" all the way (GameState.TrainStage says
+  which step: Ride, Training) and PhaseEndsAt is the call. Its own fill and solo rules are TrainRideService's (a
+  lone player's practice becomes a real round when a second arrives, the call at least LateJoinFloor s away; nobody
+  left = back to Lobby). The call is today's enterCountdown, with the places held at the launch doors picked first;
+  then TrainRideService.finish sends everyone else back to train A. Alone, the station wait is TrainFlow.SoloWaitTime
+  and the Intermission TrainFlow.SoloIntermissionTime. Config.TrainFlow.Enabled = false: none of this.
+  Allies (AllyService.assignPlinths): the call asks it for the plinths of the chosen, so allies never stand close.
+The arena (docs/design/Map1Build.md, decision 14): the plates are the instances in workspace.Arena.Plinths, in name
 	order (24 round the Spire on the forest arena; Plinth01..Plinth48 at radius 150 on Map 1). Head counts and the
 	border come from Config (Config.Maps[Config.Map] laid over it), the fallback ring from Shared.ArenaLayout (its Plates,
 	else PlinthCount / PlinthRingRadius / PlinthOffsetDeg): no arena's numbers are written here. The start signal's word
@@ -148,6 +157,32 @@ end
 
 local function playerService()
 	return Services and Services.PlayerService
+end
+
+-- The road to the arena (TrainRideService): the service when the flow is on and its train and hall exist, else nil
+local function trainFlow()
+	local service = Services and Services.TrainRideService
+	if service and type(service.enabled) == "function" and service.enabled() then
+		return service
+	end
+	return nil
+end
+
+-- the ride or the training is under way (Phase is still "Intermission")
+local function onTheRoad(): boolean
+	local service = Services and Services.TrainRideService
+	return service ~= nil and type(service.stage) == "function" and service.stage() ~= ""
+end
+
+-- alone at the station: the wait before the practice Intermission, and that Intermission (shorter with the ride)
+local function soloWaitTime(): number
+	local flow = if trainFlow() then (Config :: any).TrainFlow else nil
+	return math.max(0, tonumber(flow and flow.SoloWaitTime) or tonumber(RoundCfg.SoloWaitTime) or 30)
+end
+
+local function soloIntermissionTime(): number
+	local flow = if trainFlow() then (Config :: any).TrainFlow else nil
+	return tonumber(flow and flow.SoloIntermissionTime) or RoundCfg.IntermissionTime
 end
 
 -- The start signal as text says it: "the horn", or Shared.Lore.StartSignal (another word on a map whose centre is
@@ -658,7 +693,15 @@ local function enterCountdown()
 		for i, player in ipairs(candidates) do
 			order[player] = i
 		end
+		local road = trainFlow()
 		table.sort(candidates, function(a, b)
+			-- (the places held at the launch doors go first: TrainRideService)
+			if road then
+				local ha, hb = road.isHeld(a), road.isHeld(b)
+				if ha ~= hb then
+					return ha
+				end
+			end
 			local la, lb = lastPlayed[a] or 0, lastPlayed[b] or 0
 			if la ~= lb then
 				return la < lb
@@ -671,6 +714,14 @@ local function enterCountdown()
 	local offset = rng:NextInteger(0, #spots - 1)
 	local picked = 0
 	local leftOut = {}
+	-- allies (AllyService): the evenly spread plates handed out so that no two allies stand close; nil = today's order
+	local slots, chosen = {}, {}
+	for k = 0, count - 1 do
+		table.insert(slots, ((math.floor(k * #spots / count) + offset) % #spots) + 1)
+		chosen[k + 1] = candidates[k + 1]
+	end
+	local assigned = if Services and Services.AllyService then call("AllyService", "assignPlinths", chosen, slots, #spots, rng) else nil
+	local used = {}
 	for _, player in ipairs(candidates) do
 		if picked >= count then
 			table.insert(leftOut, player)
@@ -679,8 +730,22 @@ local function enterCountdown()
 		-- spread contenders evenly around the ring when there are fewer than plinths (a candidate who can't be placed
 		-- leaves their spot to the next one)
 		local index = ((math.floor(picked * #spots / count) + offset) % #spots) + 1
+		if type(assigned) == "table" then
+			local want = assigned[player]
+			if type(want) == "number" and spots[want] and not used[want] then
+				index = want
+			else
+				for _, slot in ipairs(slots) do -- (a stand-in for a chosen one who couldn't be placed: a free slot)
+					if not used[slot] then
+						index = slot
+						break
+					end
+				end
+			end
+		end
 		call("InventoryService", "clear", player)
 		if ps.prepareContender(player, spots[index]) then
+			used[index] = true
 			picked += 1
 			contenders[player] = { name = player.DisplayName, userId = player.UserId, placement = 0, kills = 0 }
 		end
@@ -742,7 +807,7 @@ end
 
 local function enterIntermission(solo: boolean?, quick: boolean?)
 	-- QW1: quick = the short Intermission before a lone player's next practice round (never longer than the normal one)
-	local duration = RoundCfg.IntermissionTime
+	local duration = if solo and not quick then soloIntermissionTime() else RoundCfg.IntermissionTime
 	if quick then
 		duration = math.min(duration, tonumber(RoundCfg.PracticeIntermissionTime) or duration)
 	end
@@ -771,6 +836,59 @@ local function enterIntermission(solo: boolean?, quick: boolean?)
 		sub = string.format("Contenders are chosen in %d seconds", seconds),
 		duration = 4,
 	})
+end
+
+-- The road to the arena: the Intermission is over, the train departs (TrainRideService). false = the flow is off (or
+-- the ring has no plates): the caller calls the contenders as today.
+local function startRide(t: number, solo: boolean): boolean
+	local road = trainFlow()
+	if not road then
+		return false
+	end
+	local places = math.min(tonumber(RoundCfg.MaxContenders) or math.huge, #getPlinthSpots())
+	if places <= 0 then
+		return false
+	end
+	-- the places at the launch doors go to whoever played least recently (as the pick does)
+	local function rank(a: Player, b: Player): boolean
+		local la, lb = lastPlayed[a] or 0, lastPlayed[b] or 0
+		if la ~= lb then
+			return la < lb
+		end
+		return a.UserId < b.UserId
+	end
+	if call("TrainRideService", "begin", t, solo, places, rank) ~= true then
+		return false
+	end
+	setPhase("Intermission", math.max(0, (tonumber(road.callAt()) or t) - t))
+	announce({
+		style = "Banner",
+		text = "THE TRAIN DEPARTS",
+		sub = if solo then "Practice round · next stop, the Training Centre" else "Next stop, the Training Centre",
+		duration = 3.5,
+	})
+	return true
+end
+
+-- The ride and the training (Phase "Intermission", TrainRideService.stage() ~= ""): the service runs its steps; here
+-- PhaseEndsAt follows the call, and the call is today's enterCountdown.
+local function roadTick(t: number, waiting: number)
+	local road = Services.TrainRideService
+	local result = call("TrainRideService", "step", t, waiting)
+	if result == "cancel" then
+		call("TrainRideService", "finish", nil)
+		setPhase("Lobby")
+		return
+	end
+	local callAt = tonumber(road.callAt()) or phaseEndsAt
+	if callAt > 0 and math.abs(callAt - phaseEndsAt) > 0.05 then
+		phaseEndsAt = callAt
+		GameState:SetAttribute("PhaseEndsAt", phaseEndsAt)
+	end
+	if result == "call" then
+		enterCountdown()
+		call("TrainRideService", "finish", contenders)
+	end
 end
 
 local function activeTick(t: number)
@@ -864,7 +982,7 @@ local function step()
 			enterIntermission(true, true)
 		elseif waiting == 1 and soloEnabled() then
 			-- QW1: never wait alone. One countdown covers the wait and the Intermission (LobbyController shows it).
-			local wait = math.max(0, tonumber(RoundCfg.SoloWaitTime) or 30)
+			local wait = soloWaitTime()
 			if not soloSince then
 				-- a newcomer's wait counts from joining, so loading is part of it (join to horn: Wait + Intermission +
 				-- Countdown, 65 s live); someone left alone later on waits the full SoloWaitTime from now
@@ -872,7 +990,7 @@ local function step()
 				local joined = if lone then joinedAt[lone] else nil
 				soloSince = if joined and t - joined < wait then joined else t
 			end
-			setAttr("SoloStartAt", math.floor((soloSince + wait + RoundCfg.IntermissionTime) * 10 + 0.5) / 10)
+			setAttr("SoloStartAt", math.floor((soloSince + wait + soloIntermissionTime()) * 10 + 0.5) / 10)
 			if t - soloSince >= wait then
 				soloRound = true
 				enterIntermission(true)
@@ -882,6 +1000,8 @@ local function step()
 			soloRound = false
 			setAttr("SoloStartAt", 0)
 		end
+	elseif phase == "Intermission" and onTheRoad() then
+		roadTick(t, waiting) -- the ride and the training (TrainRideService)
 	elseif phase == "Intermission" then
 		if soloRound and waiting >= minPlayers() then
 			soloRound = false -- someone arrived during the practice countdown: this is a full round now
@@ -920,10 +1040,13 @@ local function step()
 		elseif t >= phaseEndsAt and startHeld(t, waiting) then
 			-- (two or more are here and fewer than two are ready: the pick waits a little for the second)
 		elseif t >= phaseEndsAt then
+			local solo = soloRound
 			soloSince = nil
 			soloRound = false
 			setAttr("SoloStartAt", 0)
-			enterCountdown()
+			if not startRide(t, solo) then -- the train departs (TrainRideService), or today's call
+				enterCountdown()
+			end
 		end
 	elseif phase == "Countdown" then
 		setAttr("AliveCount", #ps.getAlivePlayers())

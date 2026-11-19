@@ -2276,9 +2276,90 @@ local function probe(arg: any): any
 	return "unknown probe " .. tostring(kind)
 end
 
+-- batch T (mp-training): the Training Centre's lines and the ride's moves as this client gets them; any prompt held
+task.spawn(function()
+	for _, name in ipairs({ "Training", "TrainRide" }) do
+		local ev = Remotes:WaitForChild(name, 30)
+		if ev and ev:IsA("RemoteEvent") then
+			ev.OnClientEvent:Connect(function(msg)
+				local m = if type(msg) == "table" then msg else { value = msg }
+				L(string.upper(name) .. " " .. fmt({ t = m.t, kind = m.kind, text = m.text, sub = m.sub, id = m.id, state = m.state, score = m.score,
+					passed = m.passed, reason = m.reason }))
+				if name == "TrainRide" and m.kind == "arrive" then
+					task.delay(0.8, function()
+						local c = lp.Character
+						local r = c and c:FindFirstChild("HumanoidRootPart")
+						local cam = workspace.CurrentCamera
+						if r and cam then
+							L(string.format("ARRIVED root=%s cam=%s camOff=%.2f camType=%s", fmt(r.Position), fmt(cam.CFrame.Position),
+								(cam.CFrame.Position - r.Position).Magnitude, cam.CameraType.Name))
+						end
+					end)
+				end
+			end)
+		end
+	end
+end)
+local function holdAnyPrompt(arg: any): string
+	local c = lp.Character
+	local root = c and c:FindFirstChild("HumanoidRootPart")
+	if not (root and root:IsA("BasePart")) then
+		return "no character"
+	end
+	local best, bestD = nil, (arg and arg.radius) or 12
+	for _, d in ipairs(workspace:GetDescendants()) do
+		if d:IsA("ProximityPrompt") and d.Enabled then
+			local holder = d.Parent
+			local pos = if holder and holder:IsA("BasePart") then holder.Position elseif holder and holder:IsA("Attachment") then holder.WorldPosition else nil
+			local label = d.ActionText .. "|" .. d.ObjectText
+			if pos and (pos - root.Position).Magnitude < bestD and (not (arg and arg.match) or string.find(string.lower(label), string.lower(arg.match), 1, true)) then
+				best, bestD = d, (pos - root.Position).Magnitude
+			end
+		end
+	end
+	if not best then
+		return "no prompt in range"
+	end
+	-- look at it first (a prompt behind the camera is not shown, and a hold on a prompt not shown does nothing)
+	local holder = best.Parent
+	local at = if holder and holder:IsA("BasePart") then holder.Position elseif holder and holder:IsA("Attachment") then holder.WorldPosition else nil
+	if at then
+		face(at)
+	end
+	task.wait(0.5)
+	local fired, began = false, false
+	local c1 = best.Triggered:Connect(function()
+		fired = true
+	end)
+	local c2 = best.PromptButtonHoldBegan:Connect(function()
+		began = true
+	end)
+	local shown = shownPrompts[best] == true
+	best:InputHoldBegin()
+	task.wait(best.HoldDuration + 0.2)
+	best:InputHoldEnd()
+	task.wait(0.2)
+	c1:Disconnect()
+	c2:Disconnect()
+	local label = string.format("%s|%s|%s dist=%.1f shown=%s began=%s triggered=%s", best.ActionText, best.ObjectText, best:GetFullName(), bestD,
+		tostring(shown), tostring(began), tostring(fired))
+	L("TPROMPT " .. label)
+	return label
+end
+
 callFn.OnClientInvoke = function(cmd: string, arg: any): any
 	local ok, res = pcall(function(): any
-		if cmd == "ping" then
+		if cmd == "ally" then
+			-- (batch T) AllyController's Studio hook; { "send", op, userId } fires AllyAsk as the quiet list would
+			if arg[1] == "send" then
+				Remotes.AllyAsk:FireServer({ op = arg[2], target = arg[3] })
+				return true
+			end
+			local AllyC = req(Controllers, "AllyController")
+			return AllyC and AllyC._test(arg[1], arg[2])
+		elseif cmd == "tprompt" then
+			return holdAnyPrompt(arg)
+		elseif cmd == "ping" then
 			return now()
 		elseif cmd == "state" then
 			return state()

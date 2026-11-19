@@ -351,7 +351,8 @@ end
 --------------------------------------------------------------------------------------------------------------------
 
 local function wantVisible(): boolean
-	if not (ClientState.inArena and ClientState.alive) or ClientState.spectating ~= nil or ClientState.launchShot then
+	local inHall = player:GetAttribute("InTraining") == true -- (the Training Centre: first person there too)
+	if not ((ClientState.inArena and ClientState.alive) or inHall) or ClientState.spectating ~= nil or ClientState.launchShot then
 		return false -- (and never during the launch intro: LaunchIntroController has the camera)
 	end
 	local cam = camera

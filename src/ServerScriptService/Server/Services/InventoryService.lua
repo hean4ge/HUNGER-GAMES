@@ -160,7 +160,10 @@ local function isAliveContender(player: Player): boolean
 		return false
 	end
 	local playerService = Services.PlayerService
-	if playerService and type(playerService.isAlive) == "function" then
+	if player:GetAttribute("InTraining") == true then
+		-- the Training Centre (TrainingService): its chests lend, and what they lend is held and used there (it is taken
+		-- back at the bay's edge, the hall's walls and the call). Drops stay closed: they need a round.
+	elseif playerService and type(playerService.isAlive) == "function" then
 		local ok, alive = pcall(playerService.isAlive, player)
 		if not ok or alive ~= true then
 			return false

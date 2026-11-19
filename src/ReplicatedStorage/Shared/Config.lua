@@ -79,6 +79,31 @@ Config.Round = {
 	EpilogueLeadIn = 2.5,
 }
 
+-- The road to the arena (docs/design/TrainingAndLoadup.md section 2; TrainRideService, TrainRideController): after the
+-- Intermission the train departs, rides RideTime s to the Training Centre, players train for TrainingTime s, the launch
+-- doors open DoorsOpenBefore s before the call and the call comes early once every held contender has stood on the red
+-- room's disc ReadyHold s (ReadyLead s later, never before MinTraining s of training). Alone: SoloWaitTime s at the
+-- station, a SoloIntermissionTime s Intermission, a SoloRideTime s ride and SoloTrainingTime s of training with the
+-- doors open from the start. A second player arriving then makes it a real round, the call at least LateJoinFloor s
+-- away. Enabled = false: today's flow exactly (Intermission -> the call; SoloWaitTime and IntermissionTime as above).
+-- The launch, the countdown and the round's clock are not changed by any of it.
+Config.TrainFlow = {
+	Enabled = true,
+	RideTime = 25,
+	SoloRideTime = 15,
+	TrainingTime = 90,
+	SoloTrainingTime = 60,
+	DoorsOpenBefore = 40,
+	ReadyHold = 3,
+	ReadyLead = 5,
+	MinTraining = 30,
+	LateJoinFloor = 30,
+	SoloWaitTime = 20,
+	SoloIntermissionTime = 10,
+	SkipHold = 0.6, -- hold Space (A, or the SKIP line on touch) this long to skip a ride you have ridden this session
+	HallCentre = Vector3.new(8800, 200, 3000), -- the stand-in hall's floor centre (when there is no workspace.TrainingCentre)
+}
+
 Config.Border = {
 	StartRadius = 640,
 	FinalRadius = 35,
@@ -704,6 +729,16 @@ if Config.IsStudio then
 		Config.Round.CountdownTime = 8 -- room for the launch plates to rise (about 4 s) before the numbers run out
 		Config.Round.EndingTime = 6
 		Config.Round.RespawnDelay = 2
+		-- the train flow, short (TrainingAndLoadup.md 2.3): a 6 s ride, 20 s of training, the doors open at 8 s.
+		-- (Live keeps the real numbers: GameState attribute TrainFlowLive = true uses them in a Studio test.)
+		Config.TrainFlow.Live = table.clone(Config.TrainFlow)
+		Config.TrainFlow.RideTime = 6
+		Config.TrainFlow.SoloRideTime = 6
+		Config.TrainFlow.TrainingTime = 20
+		Config.TrainFlow.SoloTrainingTime = 20
+		Config.TrainFlow.DoorsOpenBefore = 12
+		Config.TrainFlow.MinTraining = 8
+		Config.TrainFlow.LateJoinFloor = 12
 	end
 end
 

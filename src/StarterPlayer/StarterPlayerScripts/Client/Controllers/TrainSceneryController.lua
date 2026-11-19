@@ -5,6 +5,8 @@
 	Length (400). Every frame the layers slide toward the train's tail (world +Z of the lobby's pivot frame) and wrap,
 	so a window never sees an end. Only while the camera is near the train; one BulkMoveTo a frame (36 parts).
 	With reduced motion the scenery stands still.
+The ride (TrainRideController): while the folder has the attribute SpeedScale (set on this client only), the layers
+move at Speed * SpeedScale: 0 parked at the station, 1 at full speed. Without it they move on server time, as before.
 ]]
 local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
@@ -45,7 +47,9 @@ local function collect(folder: Instance)
 	end
 end
 
-local function step()
+local travelled: number? = nil -- under SpeedScale: the seconds of full-speed travel so far (starts at server time)
+
+local function step(dt: number)
 	local folder = scenery
 	if not folder or not folder.Parent then
 		local lobby = workspace:FindFirstChild("Lobby")
@@ -65,6 +69,13 @@ local function step()
 		return
 	end
 	local t = workspace:GetServerTimeNow()
+	local scale = folder:GetAttribute("SpeedScale")
+	if type(scale) == "number" then
+		travelled = (travelled or t) + math.clamp(dt, 0, 0.1) * scale
+		t = travelled :: number
+	else
+		travelled = nil
+	end
 	local span = length * 3
 	for i, l in ipairs(layers) do
 		local s = (l.s0 + t * l.speed + span * 0.5) % span - span * 0.5
@@ -76,8 +87,8 @@ end
 function TrainSceneryController.Init(_registry) end
 
 function TrainSceneryController.Start()
-	RunService.RenderStepped:Connect(function()
-		local ok, err = pcall(step)
+	RunService.RenderStepped:Connect(function(dt)
+		local ok, err = pcall(step, dt)
 		if not ok then
 			warn("[TrainSceneryController] " .. tostring(err))
 			scenery = nil
