@@ -593,6 +593,28 @@ local function ownerOf(inst: Instance?): string
 	end
 	return if inst then inst.Name else "nil"
 end
+-- wave 13 (mp-throw-look): THROWSEE <action> <owner>: when another player's ThrowStart / Throw reaches this client,
+-- where that owner's newest throw clip is (name, clip time now, its first clip time, its release/hit time, its age)
+local throwTracks: { [string]: any } = {}
+do
+	local ca = Remotes:FindFirstChild("CombatAction")
+	if ca and ca:IsA("RemoteEvent") then
+		ca.OnClientEvent:Connect(function(p)
+			if type(p) ~= "table" or (p.action ~= "ThrowStart" and p.action ~= "Throw") then
+				return
+			end
+			local who = Players:GetPlayerByUserId(tonumber(p.userId) or 0)
+			local owner = if who then who.Name else tostring(p.userId)
+			local recv = os.clock()
+			task.defer(function()
+				local tt = throwTracks[owner]
+				local tr = tt and tt.track
+				L(string.format("THROWSEE %s %s item=%s lead=%s clip=%s tau=%s startTau=%s hit=%s clipAge=%s", tostring(p.action), owner, tostring(p.itemId), fmt(p.lead),
+					tostring(tt and tt.name), fmt(tr and tr.tau), fmt(tr and tr.startTau), fmt(tr and tr.clip and tr.clip.hit), fmt(tt and (recv - tt.at))))
+			end)
+		end)
+	end
+end
 if ClipPlayerM and type(ClipPlayerM.play) == "function" then
 	local origPlay = ClipPlayerM.play
 	ClipPlayerM.play = function(model, name, opts, ...)
@@ -600,7 +622,12 @@ if ClipPlayerM and type(ClipPlayerM.play) == "function" then
 		if type(track) == "table" then
 			track.__mpt = name
 		end
-		L(string.format("CLIP %s %s lead=%s total=%s ok=%s", ownerOf(model), tostring(name), fmt(opts and opts.lead), fmt(opts and opts.total), tostring(track ~= nil)))
+		local owner = ownerOf(model)
+		L(string.format("CLIP %s %s lead=%s total=%s ok=%s startTau=%s hit=%s", owner, tostring(name), fmt(opts and opts.lead), fmt(opts and opts.total), tostring(track ~= nil),
+			fmt(type(track) == "table" and track.startTau), fmt(type(track) == "table" and track.clip and track.clip.hit)))
+		if type(track) == "table" and type(name) == "string" and string.sub(name, 1, 6) == "throw_" then
+			throwTracks[owner] = { track = track, name = name, at = os.clock() } -- (wave 13: THROWSEE reads it)
+		end
 		return track
 	end
 	if type(ClipPlayerM.playView) == "function" then
@@ -1500,8 +1527,31 @@ local function finishLookOf(m: Instance): string
 		table.insert(ml, k .. "x" .. v)
 	end
 	table.sort(ml)
-	return string.format("%s item=%s stars=%s tierMesh=%s parts=%d mesh=%d trims=%d mats=%s tiled=[%s]", m.Name, tostring(m:GetAttribute("ItemId")),
-		tostring(m:GetAttribute("Stars")), tostring(tierMesh), n, mesh, trims, table.concat(ml, ","), table.concat(tiled, ","))
+	-- wave 13: the template that variant came from (its Source), and how many of the drawn meshes are that template's
+	local assets = RS:FindFirstChild("Assets")
+	local items = assets and assets:FindFirstChild("Items")
+	local variant = if items and type(tierMesh) == "string" then items:FindFirstChild(tierMesh) else nil
+	local srcName = if variant then tostring(variant:GetAttribute("Source")) else "none"
+	local ids, matched, drawn, inlay = {}, 0, 0, 0
+	for _, d in ipairs(variant and variant:GetDescendants() or {}) do
+		if d:IsA("MeshPart") and d.MeshId ~= "" then
+			ids[d.MeshId] = true
+		end
+	end
+	for _, d in ipairs(m:GetDescendants()) do
+		local off = d:FindFirstAncestor("OffHand") -- (the pair's left blade inside the right one's model: its own line)
+		if d:IsA("MeshPart") and d.MeshId ~= "" and d.Transparency < 0.99 and not (off and off ~= m) then
+			drawn += 1
+			if ids[d.MeshId] then
+				matched += 1
+			end
+			if d:GetAttribute("PartRole") == "Inlay" then
+				inlay += 1
+			end
+		end
+	end
+	return string.format("%s item=%s stars=%s tierMesh=%s src=%s meshMatch=%d/%d inlay=%d parts=%d mesh=%d trims=%d mats=%s tiled=[%s]", m.Name, tostring(m:GetAttribute("ItemId")),
+		tostring(m:GetAttribute("Stars")), tostring(tierMesh), srcName, matched, drawn, inlay, n, mesh, trims, table.concat(ml, ","), table.concat(tiled, ","))
 end
 -- every thrown model this client flies (ProjectileController's ClientProjectiles): its look when it leaves, then how
 -- far it turned per second (sampled every drawn frame) when it goes

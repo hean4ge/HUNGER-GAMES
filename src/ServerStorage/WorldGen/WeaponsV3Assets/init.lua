@@ -5,7 +5,7 @@
 	  Assets.Items.<id>                 the base template = that weapon's 2-star mesh, so every build path shows a mesh
 	  Assets.Items.throwing_knife / arrow / wire_snare   the unstarred WeaponsV3 meshes
 	Source: WeaponsV3.glb, uploaded once per version (19 Nov 2026, the owner's yes): LS_WeaponsV3_v1, then
-	LS_WeaponsV3_v2 (smooth 5-star finish) (Manifest.SOURCE; ledger art/manifests/WeaponsV3.manifest.json "uploads").
+	LS_WeaponsV3_v2 (smooth 5-star finish), then LS_WeaponsV3_v3 (raised inlay bands, bow 5-star finish) (Manifest.SOURCE; ledger art/manifests/WeaponsV3.manifest.json "uploads").
 	The raw insert stays in ServerStorage.MeshImports.<SOURCE.name> (a package; never edit it; build() loads it when
 	missing).
 
@@ -153,7 +153,8 @@ local function buildOne(name: string, a: any, index: { [string]: MeshPart }, piv
 		part.Massless = true
 		pcall(function()
 			part.DoubleSided = false
-			part.RenderFidelity = Enum.RenderFidelity.Automatic
+			-- the brass inlay bands are thin: Precise keeps distance LOD from breaking them into dashes (wave 13)
+			part.RenderFidelity = if info.role == "Inlay" then Enum.RenderFidelity.Precise else Enum.RenderFidelity.Automatic
 		end)
 		part.CFrame = Hinv * (toItem * source.CFrame)
 		part:SetAttribute("Role", if info.finish ~= "" then info.finish else nil)

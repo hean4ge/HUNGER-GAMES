@@ -107,7 +107,9 @@ local SHAPE_NAMES = { "Relaxed", "Fist", "Grip", "Open" } -- (Rig.HAND_SHAPES)
 -- (the Ring Blade's hoop is held smaller and turned about its grip so it is seen nearly edge-on at the lower right;
 -- at full size, face-on, it covered a quarter of the view)
 -- (the Paired Blades, 2.75 studs each, filled both sides of the view at full size: both blades are held at 0.75)
-Blocky.ITEM_SCALE = { ration = 0.68, ring_blade = 0.72, paired_blades = 0.75 } :: { [string]: number }
+-- (the Twin-Bit Axe, 3.66 long with its head 2.5 up the haft, ran off the top of the view: held at 0.8 and choked up
+-- the haft, Blocky.ITEM_HOLD.twin_axe, so the whole head shows; wave 13)
+Blocky.ITEM_SCALE = { ration = 0.68, ring_blade = 0.72, paired_blades = 0.75, twin_axe = 0.8 } :: { [string]: number }
 Blocky.PALM_HOLD = {
 	ration = CFrame.new(0, 0.05, -0.17) * CFrame.Angles(0, math.rad(90), 0),
 } :: { [string]: CFrame }
@@ -117,6 +119,7 @@ Blocky.ITEM_HOLD = {
 	-- (wave 12: the Blender hoop is on the edge side of the bar, so at the old 32 degrees it was edge-on behind the fist;
 	-- turned 60 more about the bar it leans forward and in, seen three-quarter as a hoop)
 	ring_blade = CFrame.Angles(0, 0, math.rad(92)),
+	twin_axe = CFrame.new(0, 0, 0.75), -- choked up the haft 0.75 (the butt runs out of the bottom of the view)
 } :: { [string]: CFrame }
 
 local PARKED = CFrame.new(0, -10000, 0)

@@ -718,14 +718,17 @@ return function(ctx: { [string]: any })
 		end
 		return table.concat(out, ",")
 	end
+	-- (wave 13: and the variant is the current WeaponsV3 upload, every drawn mesh one of that template's)
 	local function goodLook(s: string, want: string): boolean
-		return string.find(s, "tierMesh=" .. want, 1, true) ~= nil and string.find(s, "tiled=%[[^%]]") == nil and string.find(s, "trims=[1-9]") == nil
-			and string.find(s, "mesh=[1-9]") ~= nil
+		local seg = string.match(s, "tierMesh=" .. want .. " .-tiled=%[[^%]]*%]") or ""
+		local k, n = string.match(seg, "meshMatch=(%d+)/(%d+)")
+		return seg ~= "" and string.find(seg, "tiled=%[[^%]]") == nil and string.find(seg, "trims=[1-9]") == nil
+			and string.find(seg, " mesh=[1-9]") ~= nil and string.find(seg, "src=LS_WeaponsV3_v3 ", 1, true) ~= nil and k ~= nil and k == n and tonumber(n) > 0
 	end
 
 	-- B sees A's Blender weapons at their stars in hand; A's own first person; a weapon on the ground
 	local LOOK_SET = { { "sword", 1 }, { "sword", 5 }, { "hatchet", 4 }, { "twin_axe", 5 }, { "knife", 5 }, { "ring_blade", 3 }, { "paired_blades", 5 },
-		{ "leaf_dagger", 1 }, { "machete", 2 }, { "spear", 3 }, { "climb_pick", 4 } }
+		{ "leaf_dagger", 1 }, { "machete", 2 }, { "spear", 3 }, { "climb_pick", 4 }, { "hatchet", 5 }, { "bow", 5 } }
 	local function fLooks()
 		L(duel(A, B, 6))
 		fFace()
@@ -865,6 +868,27 @@ return function(ctx: { [string]: any })
 		until (m and CollectionService:HasTag(m, "LooseProjectile")) or os.clock() - t0 > 4
 		local flyB = linesWith(B, mB, "FLY ")
 		local flyEndB = linesWith(B, mB, "FLY-END " .. itemId)
+		-- wave 13 (mp-throw-look): B gets A's ThrowStart before the release, and A's throw clip starts on B's screen at
+		-- its first frame (startTau 0), then reaches the release when the Throw arrives without being started again
+		do
+			local function tOf(line: string?): number?
+				return if line then tonumber(string.match(line, "^(%d+%.%d+) ")) else nil
+			end
+			local sS = linesWith(B, mB, "THROWSEE ThrowStart " .. A.Name)
+			local sR = linesWith(B, mB, "THROWSEE Throw " .. A.Name)
+			local clips = linesWith(B, mB, "CLIP " .. A.Name .. " throw_")
+			local tS, tR, tC = tOf(sS[1]), tOf(sR[1]), tOf(clips[1])
+			local startTau = tonumber(string.match(clips[1] or "", "startTau=([%-%d%.]+)"))
+			local relTau = tonumber(string.match(sR[1] or "", " tau=([%-%d%.]+)"))
+			local relHit = tonumber(string.match(sR[1] or "", " hit=([%-%d%.]+)"))
+			local relAge = tonumber(string.match(sR[1] or "", "clipAge=([%-%d%.]+)"))
+			local ok = tS ~= nil and tR ~= nil and tC ~= nil and tS < tR and math.abs(tC - tS) < 0.1 and startTau ~= nil and startTau <= 0.001
+				and #clips == 1 and relAge ~= nil and relAge > 0.04
+			check("f.throwStart." .. label, ok, string.format(
+				"B's client (server-time stamps): ThrowStart %s | clip %s | release %s; ThrowStart %.3f s before the release; clip started %.3f s after the ThrowStart at clip time %s (first frame = 0); throw clips started on A in B's view: %d (1 = not restarted at the release); at the release the clip was at %s of its release mark %s, %s s old",
+				sS[1] or "none", clips[1] or "none", sR[1] or "none", if tS and tR then tR - tS else -1, if tS and tC then tC - tS else -1, tostring(startTau), #clips,
+				tostring(relTau), tostring(relHit), tostring(relAge)))
+		end
 		local flyLook = ""
 		for _, l in ipairs(flyB) do
 			if string.find(l, "item=" .. itemId, 1, true) then
@@ -1110,6 +1134,12 @@ return function(ctx: { [string]: any })
 			end },
 			{ "throwsword", function()
 				fThrowPick("sword", 5, "ground")
+			end },
+			{ "throws5", function()
+				-- wave 13: the 5-star throws B watches from the wind-up (the Longsword 5 is "throwsword")
+				fThrowPick("hatchet", 5, "ground")
+				fThrowPick("twin_axe", 5, "ground")
+				fThrowPick("knife", 5, "ground")
 			end },
 			{ "throwtree", function()
 				fThrowPick("twin_axe", 3, "tree")

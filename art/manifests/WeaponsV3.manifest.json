@@ -13,18 +13,19 @@
    "One upload per file through Open Cloud POST /assets/v1/assets (owner approval 19 Nov 2026). Never re-upload a file listed here; reuse its id.",
    "Paths are relative to BlenderExports/WeaponsV3 (C:/Users/USER/OneDrive/Documents/LastStanding/BlenderExports/WeaponsV3).",
    "Raw inserts: ServerStorage.MeshImports.<displayName> (packages; never edit them). Templates: ServerStorage.WorldGen.WeaponsV3Assets.build().",
-   "v2 (19 Nov 2026, wave 12 tier-look): near set re-uploaded once as LS_WeaponsV3_v2; file at BlenderExports/WeaponsV3/v2/WeaponsV3.glb. WeaponsV3.glb@v1 is kept for history."
+   "v2 (19 Nov 2026, wave 12 tier-look): near set re-uploaded once as LS_WeaponsV3_v2; file at BlenderExports/WeaponsV3/v2/WeaponsV3.glb. WeaponsV3.glb@v1 is kept for history.",
+   "v3 (19 Nov 2026, wave 13 look-fix-2): near set re-uploaded once as LS_WeaponsV3_v3; file at BlenderExports/WeaponsV3/v3/WeaponsV3.glb. WeaponsV3.glb@v2 is kept for history."
   ],
   "WeaponsV3.glb": {
-   "displayName": "LS_WeaponsV3_v2",
-   "operationId": "7f321eed-3e25-46ff-8378-cb5a7dd03e35",
-   "uploadedUtc": "2026-11-19T08:05:43.202Z",
-   "assetId": 131657866476058,
+   "displayName": "LS_WeaponsV3_v3",
+   "operationId": "a946242a-9b11-4ac8-b9a7-8d2b02b8d14d",
+   "uploadedUtc": "2026-11-19T09:16:10.230Z",
+   "assetId": 117949641480016,
    "moderationState": "Approved",
-   "bytes": 3530248,
+   "bytes": 3558024,
    "revisionId": "1",
-   "file": "v2/WeaponsV3.glb",
-   "why": "5-star finish redone (owner: the layered band read as saw teeth): continuous temper line, inlaid fuller line, smooth inlaid bands on the axes and the Ring Blade; stitches toned down. Same names, bounds, origins and attachments as v1 except the 5-star layer parts (hatchet_t5_LayerLight, twin_axe_t5_LayerDark/LayerLight, ring_blade_t5_LayerDark/LayerLight removed; ring_blade_t5_Inlay added)."
+   "file": "v3/WeaponsV3.glb",
+   "why": "Wave 13 look-fix-2: every brass inlay a raised flat band 0.02-0.035 wide and 0.008-0.01 proud (thin lines broke into dashes at 10-40 studs); Climbing Pick haft band folded over the 6-sided haft's ridge; grip stitches moved onto the grip faces (they floated: pale dashes) on the Climbing Pick, Hatchet and knife; Bow and Short Bow 5 stars get lacquered tips, a brass belly line, a horn back strip, brass grip bands and a brass rest plate. Same names, origins and attachments as v2 plus bow_t5_Inlay and short_bow_t5_Inlay; bounds the same except bow_t5 0.0013 longer at each tip and short_bow_t5 0.0016 less deep."
   },
   "WeaponsV3_Far.glb": {
    "displayName": "LS_WeaponsV3_Far_v1",
@@ -34,7 +35,7 @@
    "moderationState": "Approved",
    "bytes": 811448,
    "revisionId": "1",
-   "note": "v2 regenerated far set is byte-identical to v1 (all v2 changes are near-only details): not re-uploaded."
+   "note": "v2 and v3 regenerated far sets are byte-identical to v1 (all changes are near-only details): not re-uploaded."
   },
   "WeaponsV3.glb@v1": {
    "displayName": "LS_WeaponsV3_v1",
@@ -45,6 +46,18 @@
    "bytes": 3547016,
    "revisionId": "1",
    "supersededBy": "LS_WeaponsV3_v2"
+  },
+  "WeaponsV3.glb@v2": {
+   "displayName": "LS_WeaponsV3_v2",
+   "operationId": "7f321eed-3e25-46ff-8378-cb5a7dd03e35",
+   "uploadedUtc": "2026-11-19T08:05:43.202Z",
+   "assetId": 131657866476058,
+   "moderationState": "Approved",
+   "bytes": 3530248,
+   "revisionId": "1",
+   "file": "v2/WeaponsV3.glb",
+   "why": "5-star finish redone (owner: the layered band read as saw teeth): continuous temper line, inlaid fuller line, smooth inlaid bands on the axes and the Ring Blade; stitches toned down. Same names, bounds, origins and attachments as v1 except the 5-star layer parts (hatchet_t5_LayerLight, twin_axe_t5_LayerDark/LayerLight, ring_blade_t5_LayerDark/LayerLight removed; ring_blade_t5_Inlay added).",
+   "supersededBy": "LS_WeaponsV3_v3"
   }
  },
  "generator": "weapons_v3.py (+ wv3_geo.py)",
@@ -765,10 +778,10 @@
    "5": {
     "coreSize": [
      0.192,
-     4.569,
+     4.572,
      0.563
     ],
-    "lengthDev": 0.0,
+    "lengthDev": 0.001,
     "widthDev": 0.043
    }
   },
@@ -813,10 +826,10 @@
     "coreSize": [
      0.158,
      3.67,
-     0.451
+     0.449
     ],
     "lengthDev": 0.0,
-    "widthDev": 0.013
+    "widthDev": 0.009
    }
   }
  },
@@ -12705,7 +12718,7 @@
     2.371,
     0.98
    ],
-   "tris": 810,
+   "tris": 818,
    "parts": [
     {
      "name": "climb_pick_t5_Wood",
@@ -12864,7 +12877,7 @@
      "name": "climb_pick_t5_Inlay",
      "role": "Inlay",
      "finishRole": "Brass",
-     "tris": 24,
+     "tris": 32,
      "robloxMaterial": "Metal",
      "rgb": [
       164,
@@ -14883,25 +14896,25 @@
    ],
    "size": [
     0.192,
-    4.569,
+    4.572,
     0.563
    ],
    "boundsMin": [
     -0.0961,
-    -2.0846,
+    -2.0859,
     -0.1265
    ],
    "boundsMax": [
     0.0961,
-    2.4846,
+    2.4859,
     0.4368
    ],
    "coreSize": [
     0.192,
-    4.569,
+    4.572,
     0.563
    ],
-   "tris": 844,
+   "tris": 1132,
    "parts": [
     {
      "name": "bow_t5_Wood",
@@ -14941,7 +14954,7 @@
      "name": "bow_t5_Brass",
      "role": "Brass",
      "finishRole": "Brass",
-     "tris": 140,
+     "tris": 228,
      "robloxMaterial": "Metal",
      "rgb": [
       152,
@@ -14992,12 +15005,29 @@
      "name": "bow_t5_Horn",
      "role": "Horn",
      "finishRole": "Wood",
-     "tris": 88,
+     "tris": 128,
      "robloxMaterial": "Wood",
      "rgb": [
       56,
       48,
       44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "bow_t5_Inlay",
+     "role": "Inlay",
+     "finishRole": "Brass",
+     "tris": 160,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      164,
+      132,
+      74
      ],
      "collide": false,
      "collision": "Box",
@@ -15993,7 +16023,7 @@
    "size": [
     0.158,
     3.67,
-    0.451
+    0.449
    ],
    "boundsMin": [
     -0.079,
@@ -16003,14 +16033,14 @@
    "boundsMax": [
     0.079,
     2.035,
-    0.3716
+    0.37
    ],
    "coreSize": [
     0.158,
     3.67,
-    0.451
+    0.449
    ],
-   "tris": 508,
+   "tris": 704,
    "parts": [
     {
      "name": "short_bow_t5_Wood",
@@ -16101,7 +16131,7 @@
      "name": "short_bow_t5_Brass",
      "role": "Brass",
      "finishRole": "Brass",
-     "tris": 44,
+     "tris": 88,
      "robloxMaterial": "Metal",
      "rgb": [
       152,
@@ -16118,12 +16148,29 @@
      "name": "short_bow_t5_Horn",
      "role": "Horn",
      "finishRole": "Wood",
-     "tris": 72,
+     "tris": 80,
      "robloxMaterial": "Wood",
      "rgb": [
       56,
       48,
       44
+     ],
+     "collide": false,
+     "collision": "Box",
+     "castShadow": false,
+     "canQuery": false,
+     "canTouch": false
+    },
+    {
+     "name": "short_bow_t5_Inlay",
+     "role": "Inlay",
+     "finishRole": "Brass",
+     "tris": 144,
+     "robloxMaterial": "Metal",
+     "rgb": [
+      164,
+      132,
+      74
      ],
      "collide": false,
      "collision": "Box",

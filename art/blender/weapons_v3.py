@@ -21,6 +21,9 @@ Rule (Combat_v3 5.1): the silhouette stays the same at every star; detail grows 
                 edge (strongest value contrast). v2 (19 Nov, owner: the layered band read as saw teeth): blades get
                 one continuous temper zone with a slow smooth wave by the edge (Bl.temper) and an inlaid fuller line;
                 axes and the Ring Blade one smooth inlaid band. Nothing stepped or alternating.
+                v3 (19 Nov, wave 13): every brass inlay is a raised flat band 0.02-0.035 wide and 0.008-0.01 proud of
+                its own surface (thin lines broke into dashes at 10-40 studs); the Climbing Pick's haft band folds
+                over its 6-sided haft's ridge; both bows get a real 5-star finish (bow_masterwork).
 All matte (roughness >= 0.6, no emissive). Steel greys lean warm-neutral, never blue (blued steel read navy in the
 train's daylight, WeaponLooks note 18 Nov).
 Held-item convention (art/README.md section 3, WeaponsV2): grip at the origin, item along Blender +Z (Roblox +Y),
@@ -422,9 +425,24 @@ def ring_bands(a, role, r, zs, h=0.012, ry=None, n=8):
         a.add(role, G.cyl(r, z - h / 2, z + h / 2, n, ry=ry))
 
 
-def haft_inlay(a, r, z0, z1, w=0.014, role="Inlay"):
+def haft_inlay(a, r, z0, z1, w=0.024, role="Inlay", lift=0.008, ry=None, ridge=False):
+    """5 stars: a raised flat brass band down each side of the haft. v3: 0.024 wide and 0.008 proud of the face (was
+    0.014 wide and 0.005 proud: it broke into dashes at middle distance). The default haft is an 8-sided cyl
+    (phase 0.5) with a flat face on +-X at r cos(pi/8). ridge=True: a 6-sided haft with phase 0 has a vertex on +-X
+    (the Climbing Pick), so the band folds over that ridge at a constant height instead of being cut by it."""
+    h = w / 2
     for sd in (1, -1):
-        a.add(role, G.cbox(0.006, w, z1 - z0, 0, loc=(sd * (r * math.cos(PI / 8) + 0.002), 0, (z0 + z1) / 2)))
+        if not ridge:
+            x = r * math.cos(PI / 8)
+            a.add(role, G.cbox(lift + 0.006, w, z1 - z0, 0, loc=(sd * (x + (lift - 0.006) / 2), 0, (z0 + z1) / 2)))
+        else:
+            ry_ = r if ry is None else ry
+            k = 0.5 * r / (ry_ * math.sin(PI / 3))           # x drop per unit y off the ridge
+            pts = []
+            for z in (z0, z1):
+                pts += [(sd * (r + lift), 0.0, z), (sd * (r - k * h + lift), h, z), (sd * (r - k * h + lift), -h, z),
+                        (sd * (r - k * h - 0.006), h, z), (sd * (r - k * h - 0.006), -h, z)]
+            a.add(role, G.hull(pts))
 
 
 def round_grip(a, s, q, r, z0, z1, ry=None, turns=2.0, n=8):
@@ -463,17 +481,17 @@ def knife(s, q):
             B.patches(a, [(0.36, 0.12, 0.15, 0.6, 1), (0.6, 0.1, 0.3, 0.8, -1)])
         if s >= 3:
             a.add("Fitting", G.cyl(0.054, 0.195, 0.222, 8, ry=0.068))                  # ferrule ring
-            a.add("Etch", B.face_strip(0.33, 0.82, 0.18, 0.3))                          # fuller line
+            a.add("Etch", B.face_strip(0.33, 0.82, *((0.16, 0.32) if s >= 5 else (0.18, 0.3))))   # fuller line
         if s >= 4:
             a.add("Etch", B.face_strip(0.3, 0.312, 0.05, 0.95))
             a.add("Etch", B.face_strip(0.326, 0.338, 0.05, 0.95))
             for z in (-0.2, -0.05, 0.1):
                 a.add("Brass", stud((0.05, 0, z), (1, 0, 0)))
                 a.add("Brass", stud((-0.05, 0, z), (-1, 0, 0)))
-            a.add("Stitch", stitches((0, -0.064, -0.27), (0, -0.064, 0.2), 8, (0, -1, 0)))
+            a.add("Stitch", stitches((0, -0.0565, -0.27), (0, -0.0565, 0.2), 8, (0, -1, 0)))   # v3: on the face
         if s >= 5:
             a.add("Inlay", B.spine_strip(0.3, 0.8))
-            a.add("Inlay", B.face_strip(0.36, 0.78, 0.235, 0.255, lift=0.0065))        # inlaid fuller line
+            a.add("Inlay", B.face_strip(0.36, 0.78, 0.19, 0.29, lift=0.010))           # v3: raised fuller band
             B.temper(a, 0.32, 0.86, f_lo=0.64, amp=0.045, wl=0.4, step=0.025, ramp=0.12)
             B.mark(a, 0.29, 0.25)
             tassel(a, (0, 0.0, -0.375), 0.3)
@@ -557,7 +575,7 @@ def hatchet(s, q):
             for z in (0.45, 0.7, 0.95):
                 a.add("Brass", stud((0.05 * math.cos(PI / 8), 0, z), (1, 0, 0), r=0.015))
                 a.add("Brass", stud((-0.05 * math.cos(PI / 8), 0, z), (-1, 0, 0), r=0.015))
-            a.add("Stitch", stitches((0, -0.079, -0.22), (0, -0.079, 0.22), 7, (0, -1, 0)))
+            a.add("Stitch", stitches((0, -0.07, -0.22), (0, -0.07, 0.22), 7, (0, -1, 0)))   # v3: on the face (0.0711)
         if s >= 5:
             a.add("Etch", G.cbox(0.137, 0.028, 0.302, 0, loc=(0, 0.06, zc)))           # engraved cheek band
             a.add("Etch", G.cbox(0.137, 0.012, 0.302, 0, loc=(0, 0.0, zc)))
@@ -567,17 +585,17 @@ def hatchet(s, q):
                 x = 0.032 - 0.010 * f + out
                 return x, zc - 0.085 - 0.145 * f + 0.014, zc + 0.08 + 0.15 * f - 0.014
             for sd in (1, -1):
-                for role, ya, yb_ in (("Inlay", 0.356, 0.374),):
+                for role, ya, yb_ in (("Inlay", 0.348, 0.382),):        # v3: 0.034 wide, 0.008 proud
                     pts = []
                     for y in (ya, yb_):
-                        for out in (0.0035, -0.004):
+                        for out in (0.008, -0.005):
                             x, zlo, zhi = cheek(y, out)
                             pts += [(sd * x, y, zlo), (sd * x, y, zhi)]
                     a.add(role, G.hull(pts))
             a.add("Grip", G.cyl(0.058, 1.12, 1.215, 8, ry=0.078, c=0.006))              # leather collar
-            a.add("Stitch", stitches((0, -0.08, 1.125), (0, -0.08, 1.21), 3, (0, -1, 0), l=0.022))
-            a.add("Stitch", stitches((0, 0.08, 1.125), (0, 0.08, 1.21), 3, (0, 1, 0), l=0.022))
-            haft_inlay(a, 0.05, 0.3, 1.1, w=0.012)
+            a.add("Stitch", stitches((0, -0.071, 1.125), (0, -0.071, 1.21), 3, (0, -1, 0), l=0.022))
+            a.add("Stitch", stitches((0, 0.071, 1.125), (0, 0.071, 1.21), 3, (0, 1, 0), l=0.022))
+            haft_inlay(a, 0.05, 0.3, 1.1, w=0.022)
     grip_att(a)
     a.attach("Tip", (0, 0.5, zc), look=(0, 1, 0), up=(0, 0, 1))
     return a
@@ -659,7 +677,7 @@ def sword(s, q):
             strap(a, 0.055, 0.0, -0.3)
             B.patches(a, [(0.7, 0.3, 0.1, 0.6, 1), (1.8, 0.25, 0.2, 0.7, -1), (2.5, 0.15, 0.1, 0.5, 1)])
         if s >= 3:
-            a.add("Etch", B.face_strip(0.5, 2.5, 0.22, 0.36))                           # fuller
+            a.add("Etch", B.face_strip(0.5, 2.5, *((0.2, 0.44) if s >= 5 else (0.22, 0.36))))   # fuller
             a.add("Fitting", G.cyl(0.066, 0.31, 0.335, 8, c=0.006))                     # ferrule
         if s >= 4:
             for sd in (1, -1):
@@ -668,7 +686,9 @@ def sword(s, q):
             a.add("Etch", B.face_strip(0.505, 0.52, 0.04, 0.96))
         if s >= 5:
             a.add("Inlay", G.cbox(0.02, 0.008, 2.3, 0, loc=(0, -0.0775, 1.6)))         # inlay on the raised spine
-            a.add("Inlay", B.face_strip(0.56, 2.44, 0.28, 0.30, lift=0.0065))          # inlaid fuller line
+            # v3: a raised flat brass band filling the fuller (0.02 wide, 0.01 proud; was a 0.0025 line that broke
+            # into dashes at middle distance), with a thin dark fuller rim either side
+            a.add("Inlay", B.face_strip(0.56, 2.44, 0.24, 0.40, lift=0.010))
             B.temper(a, 0.55, 2.95)
             B.mark(a, 0.43, 0.5)
             tassel(a, (0, 0.0, -0.45), 0.32)
@@ -717,9 +737,13 @@ def twin_axe(s, q):
                     for (yy, dz) in ((y0, d0), (y1, d1)):
                         p = V((0, sd * yy, zc + dz))
                         dd = (p - cen).normalized()
-                        for inset, xx in ((0.075, 0.0305), (0.055, 0.0295)):
+                        # v3: the cheek's surface x at each inset (it thickens from 0.026 at the arc to 0.045 at
+                        # the neck, about 0.38 in), the band 0.008 proud of it and 0.035 wide (was ~0.001 proud and
+                        # 0.02 wide: it fought the cheek for depth and broke into dashes at middle distance)
+                        for inset in (0.085, 0.05):
                             pp = p - dd * inset
-                            pts += [(xs * xx, pp.y, pp.z), (xs * (xx - 0.009), pp.y, pp.z)]
+                            xsurf = 0.026 + 0.019 * inset / 0.38
+                            pts += [(xs * (xsurf + 0.008), pp.y, pp.z), (xs * (xsurf - 0.006), pp.y, pp.z)]
                     a.add("Inlay", G.hull(pts))
     if q:
         if s >= 3:
@@ -828,8 +852,9 @@ def climb_pick(s, q):
             strap(a, 0.05, 0.0, -0.27)
             a.add("Patch", G.cbox(0.134, 0.09, 0.1, 0, loc=(0, 0.02, zc + 0.04)))
         if s >= 3:
-            a.add("Stitch", stitches((0, -0.079, -0.28), (0, -0.079, 0.24), 8, (0, -1, 0)))
-            a.add("Stitch", stitches((0, 0.079, -0.28), (0, 0.079, 0.24), 8, (0, 1, 0)))
+            # v3: on the 6-sided grip's +-Y face (0.077 sin 60 = 0.0667); at 0.079 they floated clear: pale dashes
+            a.add("Stitch", stitches((0, -0.066, -0.28), (0, -0.066, 0.24), 8, (0, -1, 0)))
+            a.add("Stitch", stitches((0, 0.066, -0.28), (0, 0.066, 0.24), 8, (0, 1, 0)))
             a.add("Fitting", G.cyl(0.064, 0.26, 0.29, 6, ry=0.08, phase=0))
         if s >= 4:
             a.add("Brass", G.cyl(0.04, -0.7, -0.64, 4, phase=0.5))
@@ -839,7 +864,7 @@ def climb_pick(s, q):
         if s >= 5:
             a.add("Etch", G.cbox(0.136, 0.166, 0.03, 0, loc=(0, 0, zc + 0.06)))
             a.add("Etch", G.cbox(0.136, 0.166, 0.015, 0, loc=(0, 0, zc - 0.05)))
-            haft_inlay(a, 0.055, 0.32, 1.22, w=0.012)
+            haft_inlay(a, 0.055, 0.32, 1.22, w=0.022, ry=0.07, ridge=True)     # v3: on the 6-sided haft's ridge
     grip_att(a)
     a.attach("Tip", (0, 0.63, zc - 0.22), look=(0, 0.55, -0.83), up=(0, 0.83, 0.55))
     return a
@@ -848,6 +873,50 @@ def climb_pick(s, q):
 def _limb(path, w0, w1, t0, t1, off=0.0):
     return G.sweep(path, lambda i, s: [(u, v + off) for (u, v) in G.rect(w0 + (w1 - w0) * s, t0 + (t1 - t0) * s)],
                    ref=(1, 0, 0))
+
+
+def _limb_strip(path, i0, i1, t0, t1, w, h=0.005, lift=0.006, side=1):
+    """A raised flat strip on one face of a _limb (side +1 = +Y, the back; -1 = -Y, the belly / string side) from path
+    index i0 to i1, riding `lift` proud of the limb's own tapering thickness (rect is half extents)."""
+    N = len(path) - 1
+
+    def sec(i, s_):
+        tl = t0 + (t1 - t0) * (i0 + i) / N
+        c = side * (tl + lift - h)
+        return [(u, v + c) for (u, v) in G.rect(w, h)]
+    return G.sweep(path[i0:i1 + 1], sec, ref=(1, 0, 0))
+
+
+def _limb_sleeve(path, i0, w0, w1, t0, t1, g=0.006, g_end=0.0015):
+    """A sleeve over a limb from path index i0 to its tip, g thicker all round (the dark lacquered tips); only g_end
+    at the very tip so the bow's bounds stay as they were."""
+    N = len(path) - 1
+
+    def sec(i, s_):
+        f = (i0 + i) / N
+        gg = g_end if i0 + i == N else g
+        return G.rect(w0 + (w1 - w0) * f + gg, t0 + (t1 - t0) * f + gg)
+    return G.sweep(path[i0:], sec, ref=(1, 0, 0))
+
+
+def bow_masterwork(a, up_path, lo_path, wl, tl, i_tip, grip_box, rest):
+    """5 stars on both bows (v3; owner: higher tiers more polished. 5 used to look like 4 because the old horn strips
+    sat flush inside the limb). Inside the 4-star silhouette:
+      dark lacquered limb tips (Horn sleeves from path index i_tip to the tip),
+      a fine raised brass line down the belly of each limb (the face the archer sees) and a dark horn strip on the back,
+      brass bands at both ends of the wrapped grip, and a brass arrow-rest plate with a small shelf under the arrow."""
+    (w0, w1), (t0, t1) = wl, tl
+    for p in (up_path, lo_path):
+        a.add("Horn", _limb_sleeve(p, i_tip, w0, w1, t0, t1))
+        a.add("Inlay", _limb_strip(p, 0, i_tip, t0, t1, w=0.009, side=-1))
+        a.add("Horn", _limb_strip(p, 0, i_tip, t0, t1, w=0.016, h=0.004, lift=0.004, side=1))
+    (gx, gy, gcy, zs) = grip_box                     # band size (inside the wrap's own bounds), centre y, heights
+    for z in zs:
+        a.add("Inlay", G.cbox(gx, gy, 0.022, 0.004, loc=(0, gcy, z)))
+    (px, py, pz, shelf) = rest
+    a.add("Brass", G.cbox(0.012, 0.07, 0.07, 0.003, loc=(px, py, pz)))                   # rest plate on the window
+    if shelf:
+        a.add("Brass", G.cbox(0.03, 0.05, 0.012, 0.003, loc=(px - 0.015, py, pz - 0.004)))   # shelf under the arrow
 
 
 def bow(s, q):
@@ -881,8 +950,8 @@ def bow(s, q):
             for dz in (0.045, -0.045):
                 a.add("Brass", G.cyl(0.02, zm + dz - 0.012, zm + dz + 0.012, 6, cy=sy))
         if s >= 5:
-            a.add("Horn", _limb(up_path[:6], 0.03, 0.014, 0.004, 0.004, off=0.03))
-            a.add("Horn", _limb(lo_path[:6], 0.03, 0.014, 0.004, 0.004, off=0.03))
+            bow_masterwork(a, up_path, lo_path, (0.075, 0.032), (0.034, 0.018), 4,
+                           (0.19, 0.21, 0.02, (-0.288, 0.048)), (-0.005, 0.035, 0.172, True))
             a.add("Etch", G.cbox(0.154, 0.174, 0.03, 0, loc=(0, 0.01, 0.66)))
             a.add("Etch", G.cbox(0.154, 0.174, 0.015, 0, loc=(0, 0.01, 0.71)))
     grip_att(a)
@@ -917,8 +986,8 @@ def short_bow(s, q):
         if s >= 4:
             a.add("Brass", G.cbox(0.075, 0.06, 0.018, 0.004, loc=(-0.035, 0.04, 0.13)))
         if s >= 5:
-            a.add("Horn", _limb(up_path, 0.022, 0.01, 0.004, 0.004, off=0.034))
-            a.add("Horn", _limb(lo_path, 0.022, 0.01, 0.004, 0.004, off=0.034))
+            bow_masterwork(a, up_path, lo_path, (0.07, 0.03), (0.036, 0.02), 3,
+                           (0.156, 0.156, 0.0, (-0.13, 0.01)), (-0.068, 0.035, 0.2, False))
     grip_att(a)
     a.attach("Nock", (0, sy, zm), look=(0, 1, 0), up=(0, 0, 1))
     a.attach("StringTop", (0, sy, zt))
