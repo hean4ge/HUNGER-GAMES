@@ -134,7 +134,7 @@ Config.Border = {
 	-- tools/border/make_hex_tile.py), "rbxassetid://<id>". nil: the client draws the same tile itself at start
 	-- (an EditableImage: needs Game Settings > Security > "Allow Mesh / Image APIs"), and keeps the old outline if
 	-- it cannot.
-	HexImage = nil,
+	HexImage = "rbxassetid://90072541202427",
 	-- Stages (optional). nil: the ring closes in one run, as described above. A list: the ring closes in stages and
 	-- rests between them. Each stage is { at = the round second it starts moving, over = seconds it moves,
 	-- radius = where it stops }, in order; the last one must end at FinalRadius, and ShrinkStartTime / ShrinkDuration
