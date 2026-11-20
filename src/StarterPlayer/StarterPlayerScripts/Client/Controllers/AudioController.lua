@@ -177,7 +177,12 @@ local SOFT_ROOF = { Grass = true, LeafyGrass = true }
 local DUCKS = {
 	Cannon = { music = 0.3, amb = 0.5, time = 3.8, reverb = { 4.5, -4 }, eq = { 3, -1, -7 } },
 	-- (3.0 s, was 4.5: the music is silent for the horn's first 2.4 s anyway, and the scramble should land near full)
-	StartHorn = { music = 0.35, amb = 0.6, time = 3.0, reverb = { 3.5, -7 } },
+	-- the start horn's body: an echo off the valley's far side (0.55 s there and back, two fading repeats) and a long
+	-- outdoor tail. Its layers (Shared.Sounds) take tails only: no second duck.
+	StartHorn = { music = 0.35, amb = 0.6, time = 3.0, reverb = { 4.5, -6 }, echo = { 0.55, 0.32, -8 } },
+	StartHorn_Braam = { reverb = { 4.0, -9 } },
+	-- the countdown's knock before it: a short slap off the valley, so the numbers sound outdoors, not in a room
+	CountdownTick = { reverb = { 2.0, -14 }, echo = { 0.42, 0.18, -15 } },
 	FeastBell = { music = 0.5, amb = 0.7, time = 3.5, reverb = { 4.0, -6 } },
 	BorderWarning = { music = 0.6, amb = 0.8, time = 3 },
 	Victory = { music = 0.12, amb = 0.6, time = 11 },
@@ -1321,6 +1326,17 @@ local function addReverbTail(sound: Sound, spec: any)
 		reverb.Diffusion = 0.9
 		reverb.Parent = sound
 	end
+	-- echo = { delay s, feedback 0..1, wet dB }: the call coming back off the valley's far side
+	if spec.echo and not sound:FindFirstChild("AudioEcho") then
+		local echo = Instance.new("EchoSoundEffect")
+		echo.Name = "AudioEcho"
+		echo.Delay = spec.echo[1]
+		echo.Feedback = spec.echo[2]
+		echo.WetLevel = spec.echo[3]
+		echo.DryLevel = 0
+		echo.Priority = 2 -- higher Priority runs first: echo, then the tail's reverb (0) smears each repeat
+		echo.Parent = sound
+	end
 	if spec.eq and not sound:FindFirstChild("AudioDistance") then
 		local eq = Instance.new("EqualizerSoundEffect")
 		eq.Name = "AudioDistance"
@@ -1339,7 +1355,9 @@ local function onSfxSound(sound: Instance)
 	if not spec then
 		return
 	end
-	AudioController.duck(spec.music, spec.amb, spec.time)
+	if spec.music then -- (a tail-only spec, e.g. the countdown knock, does not duck)
+		AudioController.duck(spec.music, spec.amb, spec.time)
+	end
 	addReverbTail(sound, spec)
 end
 

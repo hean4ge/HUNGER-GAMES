@@ -1530,7 +1530,8 @@ end
 --------------------------------------------------------------------------------------------------------------------
 local lastRollId: any = nil
 
-local BEARINGS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
+-- full words (hunt2_2: "IN THE SKY TO THE W" read as a cut-off line); the longest, "LOOK UP · TO THE NORTHWEST", fits the 250 px panel
+local BEARINGS = { "NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST" }
 
 local function bearingName(degrees: number?): string?
 	if type(degrees) ~= "number" then
@@ -1665,7 +1666,7 @@ local function showRollCall(payload: { [string]: any })
 			local bearing = recap and recap.getBearing and bearingName(recap.getBearing())
 			-- a Roll Call during the finale has no sky show (QW14): nothing to look up at
 			local hint = if payload.sky == false then ""
-				elseif bearing then "LOOK UP · IN THE SKY TO THE " .. bearing
+				elseif bearing then "LOOK UP · TO THE " .. bearing
 				else "LOOK UP"
 			if compact then
 				R.rollLine.Text = Theme.escape(hint)

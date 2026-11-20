@@ -38,6 +38,16 @@
 	the coffers (Range 60, no shadows except the two over the floor), not from the 26 scattered downlights: the blade
 	ring, the corners and the walls were dim. The 77 Neon downlight discs stay the visible source (warm white). Lights
 	without shadows are cheap on phones (voxel lighting at low quality levels).
+
+	The wave 27 look pass (the owner, 20 Nov: "recreate the training room to look more like the one in the movie"; spec
+	wave27/tc_design.md, our own room): TC_Dress, from art/blender/training_centre_v2.py -> WorldGen.TrainingCentreDressData
+	(GLB TrainingCentreV2.glb; until its upload is recorded the same shapes are built as Parts). It adds fluted wall
+	panels, white V struts on a ring beam with a warm cove, a 2.5-stud blue-slate chequer, teak station decks, our own
+	split-flap slat boards (two on the north wall, a 4-sided one hanging over the middle: SurfaceGui text, the countdown
+	slats carry TrainScreen), an observers' pod on the west wall, a hoop, cushions, clocks, a fountain, tall bay signs
+	(Shared.StationSign), 12 cove lights and the pod's glow. The v1 ribs and colour bars go; the floor, ceiling and panel
+	colours are darkened (LOOK). The blade circle, survival, fitness and the spear range stand on decks
+	TrainingStations.DeckHeight high: their v1 art, chests and dummies are lifted by it (TrainingStations' origins are too).
 	Nothing here saves or publishes. It takes the shared-Studio lock (Workspace attribute QA_Lock).
 ]]
 local CollectionService = game:GetService("CollectionService")
@@ -45,6 +55,27 @@ local InsertService = game:GetService("InsertService")
 local ServerStorage = game:GetService("ServerStorage")
 
 local DATA = require(ServerStorage:WaitForChild("WorldGen"):WaitForChild("TrainingCentreData"):Clone())
+-- the wave 27 dress (optional: without it the v1 set builds as before)
+local DRESS: any = nil
+do
+	local mod = ServerStorage.WorldGen:FindFirstChild("TrainingCentreDressData")
+	if mod then
+		local ok, d = pcall(require, mod:Clone())
+		DRESS = if ok then d else nil
+		if not ok then
+			warn("[TrainingCentreBuilder] TrainingCentreDressData failed: " .. tostring(d))
+		end
+	end
+end
+local function sharedModule(name: string): any
+	local shared = game:GetService("ReplicatedStorage"):FindFirstChild("Shared")
+	local m = shared and shared:FindFirstChild(name)
+	if not m then
+		return nil
+	end
+	local ok, r = pcall(require, m)
+	return if ok then r else nil
+end
 
 local TC = {}
 
@@ -52,24 +83,64 @@ TC.HALL_AT = CFrame.new(DATA.hallOrigin[1], DATA.hallOrigin[2], DATA.hallOrigin[
 TC.MODEL_NAME = "TrainingCentre"
 TC.LOCK_LABEL = "training-centre"
 -- the set's build version: a live server rebuilds a saved set older than this (or one made of Parts when the meshes load)
-TC.VERSION = 2
+TC.VERSION = 3 -- 3: the wave 27 look pass (TC_Dress, decks, darker shell)
 local ROT = CFrame.Angles(0, math.pi, 0)
 local PLAT_LAMP = Color3.fromRGB(255, 220, 180)
 local RED_LAMP = Color3.fromRGB(255, 70, 56)
 -- the hall's light: a warm grid under the coffers (hall coordinates), shadows only over the floor
 local HALL_LIGHT = {
-	colour = Color3.fromRGB(255, 228, 196),
+	colour = Color3.fromRGB(255, 226, 190),
 	xs = { -90, -54, -18, 18, 54, 90 },
 	zs = { -50, 0, 50 },
 	y = 30,
 	range = 60,
-	brightness = 0.95, -- 1.35 washed the chequer out to white (Studio, 19 Nov)
+	brightness = 0.8, -- 1.35 washed the chequer out to white (Studio, 19 Nov); 0.8 with the darker wave 27 floor
 	shadows = { ["3_2"] = true, ["4_2"] = true },
 }
--- look overrides on top of the manifest's colours: the downlight discs read warm white, like the light they give
+-- look overrides on top of the manifest's colours: the downlight discs read warm white, like the light they give.
+-- Wave 27 (tc_design 3.2): a blue-slate floor, a dark ceiling, the panels become the dark grooves behind the dress's
+-- flutes, white rims round the downlights, a butter-cream ring mat, navy cart trays, teak survival furniture.
 local LOOK: { [string]: Color3 } = {
 	TC_HallShell_Downlight = Color3.fromRGB(255, 240, 220),
 }
+local LOOK_V3: { [string]: Color3 } = {
+	TC_HallShell_Floor = Color3.fromRGB(62, 78, 94),
+	TC_HallShell_FloorTile = Color3.fromRGB(98, 116, 132),
+	TC_HallShell_Ceiling = Color3.fromRGB(34, 37, 41),
+	TC_HallShell_CeilBeam = Color3.fromRGB(46, 50, 54),
+	TC_HallShell_Panel = Color3.fromRGB(34, 56, 60),
+	TC_HallShell_DarkSteel = Color3.fromRGB(214, 212, 204),
+	TC_BladeRing_RingMat = Color3.fromRGB(226, 210, 160),
+	TC_BladeRing_WoodDark = Color3.fromRGB(44, 56, 84),
+	TC_Survival_Wood = Color3.fromRGB(150, 100, 60),
+}
+if DRESS then
+	for k, v in pairs(LOOK_V3) do
+		LOOK[k] = v
+	end
+end
+-- v1 shapes the dress replaces (removed after the build): the thin ribs (now the struts) and the colour-bar boards that
+-- hid behind the panels (now the slat stacks in front of them)
+local DRESS_REMOVES = {
+	TC_HallShell_Rib = true, TC_HallShell_BarTeal = true, TC_HallShell_BarOchre = true, TC_HallShell_BarSlate = true,
+	TC_HallShell_BarRose = true, TC_HallShell_BarSage = true, TC_HallShell_Line = true,
+}
+-- the decks: these v1 assets (and the chests and dummies of their stations) stand on them, lifted DeckHeight
+local DECK_ASSETS = { TC_Survival = true, TC_Fitness = true, TC_BladeRing = true, TC_SpearRange = true }
+local DECK_STATIONS = { Survival = true, Fitness = true, Blade = true, Spear = true }
+local DECK_ROLES = { Target = true, Blocker = true, Parrier = true, Striker = true, Bandage = true }
+local function deckHeight(): number
+	if not DRESS then
+		return 0
+	end
+	local TS = sharedModule("TrainingStations")
+	local h = TS and tonumber(TS.DeckHeight) or 0
+	if math.abs(h - (tonumber(DRESS.deckHeight) or 0)) > 1e-3 then
+		warn(string.format("[TrainingCentreBuilder] TrainingStations.DeckHeight %s differs from the dress's %s", tostring(h),
+			tostring(DRESS.deckHeight)))
+	end
+	return h
+end
 -- the floor's painted layers (one-face meshes) sat 0.01-0.015 apart, so the hall's chequer, the prep floor's track and
 -- its lines z-fought across the room (20 Nov flicker pass). Each layer is lifted to its own 0.03-stud step above the
 -- floor (top 0): tile 0.03, track and range line 0.06, prep lines 0.09; door and platform edge lines 0.04.
@@ -310,6 +381,147 @@ local RED_COLLIDERS: { { any } } = {
 	{ "RailFront", { 20, 3.8, 0.4 }, { 0, 1.9, 9.95 } },
 }
 
+-- The running track's bends (wave 27 bug hunt): art/blender/training_centre.py strip_up lays the track as one quad per
+-- polyline segment with no mitre, so on the outside of every bend the floor shows through as a grey wedge (a row of
+-- sawtooth notches round both curves). A flat disc of the track's own colour, as wide as the lane, under each bend
+-- vertex fills the wedge; it sits between the floor and the track, so the track still draws on top where it exists.
+-- Geometry mirrors build_floor() (r = 20, half = 43.5, 16 arc steps; the loop is point-symmetric, so the mesh's
+-- 180-degree yaw does not move a vertex). Idempotent; called by TC.prepare. Remove once the mesh has mitred joins.
+local TRACK_R, TRACK_HALF, TRACK_W, TRACK_STEPS = 20, 43.5, 4, 16
+function TC.patchTrackBends(root: Instance): string
+	local track = root:FindFirstChild("TC_PrepFloor_Track", true)
+	if not (track and track:IsA("MeshPart")) then
+		return "no track mesh"
+	end
+	local old = track.Parent and track.Parent:FindFirstChild("TC_PrepFloor_TrackJoins")
+	if old then
+		old:Destroy()
+	end
+	local holder = Instance.new("Model")
+	holder.Name = "TC_PrepFloor_TrackJoins"
+	local spots = {}
+	for k = 0, TRACK_STEPS do
+		local a = math.pi * k / TRACK_STEPS
+		local x, z = math.cos(a) * TRACK_R, TRACK_HALF + math.sin(a) * TRACK_R
+		table.insert(spots, Vector3.new(x, 0, z))
+		table.insert(spots, Vector3.new(-x, 0, -z))
+	end
+	local top = track.Position.Y - 0.008 -- just under the track (the chequer is 0.03 lower)
+	for i, p in ipairs(spots) do
+		local w = track.CFrame:PointToWorldSpace(p)
+		local disc = Instance.new("Part")
+		disc.Name = "Join" .. i
+		disc.Shape = Enum.PartType.Cylinder
+		disc.Size = Vector3.new(0.01, TRACK_W, TRACK_W)
+		disc.CFrame = CFrame.new(w.X, top - 0.005, w.Z) * CFrame.Angles(0, 0, math.pi / 2)
+		disc.Color = track.Color
+		disc.Material = track.Material
+		disc.Anchored = true
+		disc.CanCollide = false
+		disc.CanQuery = false
+		disc.CanTouch = false
+		disc.CastShadow = false
+		disc.Parent = holder
+	end
+	holder.Parent = track.Parent
+	return "track joins " .. #spots
+end
+
+-- The launch tube over the red room's lift (wave 27, owner's picture of the tube top: harsh red gradients on the walls,
+-- a flat square of skybox over the hex, glitchy). Idempotent; called by buildRedRoom and by TC.prepare (so a saved set
+-- gets it at server start without a rebuild).
+--   Matte: the upload's palette SurfaceAppearance carries a metalness map, and Metal reflects the sky through the open
+--   hex: the hood, roof, frame, rails and lamp housings showed banded red-to-black gradients. Every non-Neon mesh drops
+--   its SurfaceAppearance and paints flat in its palette colour (Data parts[].c); Metal becomes SmoothPlastic.
+--   The tube: six matte walls stand on the hex frame and run up TUBE_H studs to a bright daylight panel (the light at the
+--   top of the launch tube), with a soft warm SurfaceLight spilling down the walls onto the lift. No skybox square.
+local TUBE_H = 18
+local TUBE_WALL = Color3.fromRGB(104, 96, 98) -- matte warm grey, the light's colour carries the warmth (78 read black at low quality)
+local TUBE_BAND = Color3.fromRGB(150, 146, 142)
+local TUBE_SKY = Color3.fromRGB(255, 251, 242)
+function TC.finishRedRoom(room: Instance): string
+	local notes = {}
+	local matte = 0
+	local parts = (DATA.redRoom and DATA.redRoom.parts) or {}
+	for _, p in ipairs(room:GetChildren()) do
+		if p:IsA("MeshPart") and p.Material ~= Enum.Material.Neon then
+			local sa = p:FindFirstChildOfClass("SurfaceAppearance")
+			if sa then
+				sa:Destroy()
+				matte += 1
+			end
+			local spec = parts[p.Name]
+			if spec and spec.c then
+				p.Color = Color3.fromRGB(spec.c[1], spec.c[2], spec.c[3])
+			end
+			if p.Material == Enum.Material.Metal then
+				p.Material = Enum.Material.SmoothPlastic
+			end
+		end
+	end
+	table.insert(notes, "matte " .. matte)
+	local frame = room:FindFirstChild("LaunchRedRoom_HexFrame")
+	if room:FindFirstChild("RedRoom_Tube") or not (frame and frame:IsA("BasePart")) then
+		return table.concat(notes, ", ")
+	end
+	local tube = Instance.new("Model")
+	tube.Name = "RedRoom_Tube"
+	-- the frame's own axes, upright (the mesh is a flat hexagon: its flats face local +-X, the shorter extent)
+	local fcf = frame.CFrame
+	local look = Vector3.new(fcf.LookVector.X, 0, fcf.LookVector.Z)
+	local base = CFrame.lookAt(fcf.Position, fcf.Position + (if look.Magnitude > 0.1 then look else Vector3.zAxis))
+	local flatsX = frame.Size.X <= frame.Size.Z
+	if not flatsX then
+		base *= CFrame.Angles(0, math.pi / 2, 0)
+	end
+	local apothem = math.min(frame.Size.X, frame.Size.Z) / 2 - 0.45 -- on the frame's top, just inside its outer edge
+	local bottom = frame.Size.Y / 2 - 0.05
+	local T = 0.6
+	local width = 2 * (apothem + T) * math.tan(math.rad(30)) + 0.1
+	local function slab(name: string, size: Vector3, cf: CFrame, color: Color3, mat: Enum.Material)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Size = size
+		p.CFrame = cf
+		p.Color = color
+		p.Material = mat
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Parent = tube
+		return p
+	end
+	for i = 0, 5 do
+		local side = base * CFrame.Angles(0, math.rad(60 * i), 0)
+		slab("TubeWall", Vector3.new(T, TUBE_H, width), side * CFrame.new(apothem + T / 2, bottom + TUBE_H / 2, 0), TUBE_WALL,
+			Enum.Material.SmoothPlastic)
+		-- two thin pale seams, so the rise up the tube reads (paint, not light)
+		for _, y in ipairs({ 6, 12 }) do
+			slab("TubeSeam", Vector3.new(0.06, 0.25, width - 0.9), side * CFrame.new(apothem - 0.02, bottom + y, 0), TUBE_BAND,
+				Enum.Material.SmoothPlastic)
+		end
+	end
+	local span = 2 * (apothem + T) / math.cos(math.rad(30)) + 0.4
+	local sky = slab("TubeDaylight", Vector3.new(span, 0.3, span), base * CFrame.new(0, bottom + TUBE_H + 0.15, 0), TUBE_SKY,
+		Enum.Material.Neon)
+	local spill = Instance.new("SurfaceLight")
+	spill.Name = "Spill"
+	spill.Face = Enum.NormalId.Bottom
+	spill.Color = Color3.fromRGB(255, 244, 226)
+	spill.Brightness = 1.2 -- (2.2 washed the tube's top half white in Studio, 20 Nov)
+	spill.Range = 24
+	spill.Angle = 60
+	spill.Shadows = false
+	spill.Parent = sky
+	tube.Parent = room
+	table.insert(notes, "tube")
+	return table.concat(notes, ", ")
+end
+
 local function buildRedRoom(hall: CFrame, root: Instance, counts: { [string]: number }): string
 	local rr = DATA.redRoom
 	if not (rr and rr.assetId) then
@@ -418,8 +630,180 @@ local function buildRedRoom(hall: CFrame, root: Instance, counts: { [string]: nu
 		end
 	end
 	room.WorldPivot = roomCF
+	TC.finishRedRoom(room)
 	room.Parent = root
 	return string.format("red room %d meshes%s", made, if missing > 0 then string.format(", %d MISSING", missing) else "")
+end
+
+-- The wave 27 dress (TrainingCentreDressData): meshes when its upload is recorded (D.assetId), else Parts from its
+-- primitives. The chequer has no primitives: in Part mode the v1 tile mesh (5-stud squares over the whole floor) is
+-- split into four copies at half scale, a 2.5-stud chequer for no new parts. Signs, slat text, lights from its markers.
+local SLAT_INK = Color3.fromRGB(238, 233, 222)
+local SLAT_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
+local function buildDress(root: Instance, hall: CFrame, counts: { [string]: number }): string
+	local a = DRESS.assets.TC_Dress
+	local meshes: { [string]: MeshPart }? = nil
+	local container: Instance? = nil
+	local how = "parts"
+	if DRESS.assetId then
+		local ok, loaded = pcall(function()
+			return InsertService:LoadAsset(DRESS.assetId)
+		end)
+		if ok then
+			container = loaded
+			meshes = {}
+			for _, d in ipairs((loaded :: Instance):GetDescendants()) do
+				if d:IsA("MeshPart") then
+					(meshes :: any)[d.Name] = d
+				end
+			end
+			how = "mesh"
+		else
+			how = "parts (LoadAsset(" .. tostring(DRESS.assetId) .. ") failed)"
+		end
+	end
+	local m = Instance.new("Model")
+	m.Name = "TC_Dress"
+	m:SetAttribute("Source", how)
+	m:SetAttribute("Generator", "art/blender/training_centre_v2.py")
+	local frame = hall
+	local made = 0
+	for role, spec in pairs(a.roles) do
+		local src = meshes and (meshes :: any)[spec.n]
+		if src then
+			local p = src:Clone()
+			for _, c in ipairs(p:GetChildren()) do
+				c:Destroy()
+			end
+			p.CFrame = frame * CFrame.new(v3(spec.p)) * ROT
+			styleVisual(p, spec)
+			p.Parent = m
+			made += 1
+		elseif a.prims[role] then
+			made += primParts(a.prims[role], frame, spec, m)
+		end
+	end
+	-- the chequer
+	local shell = root:FindFirstChild("TC_HallShell")
+	local tile = shell and shell:FindFirstChild("TC_HallShell_FloorTile")
+	local chequerNote = "chequer v1"
+	if m:FindFirstChild("TC_Dress_Chequer") then
+		if tile then
+			tile:Destroy()
+		end
+		chequerNote = "chequer mesh"
+	elseif tile and tile:IsA("MeshPart") then
+		local spec = a.roles.Chequer
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				local c = tile:Clone()
+				c.Name = "TC_Dress_Chequer"
+				c.Size = Vector3.new(tile.Size.X / 2, tile.Size.Y, tile.Size.Z / 2)
+				c.CFrame = tile.CFrame + hall:VectorToWorldSpace(Vector3.new(sx * tile.Size.X / 4, 0, sz * tile.Size.Z / 4))
+				c.Color = Color3.fromRGB(spec.c[1], spec.c[2], spec.c[3])
+				c.Parent = m
+			end
+		end
+		tile:Destroy()
+		chequerNote = "chequer 2.5 (v1 tile x4)"
+	end
+	-- the v1 shapes the dress replaces
+	if shell then
+		for _, d in ipairs(shell:GetChildren()) do
+			if DRESS_REMOVES[d.Name] then
+				d:Destroy()
+			end
+		end
+	end
+	for _, c in ipairs(a.colliders) do
+		local p = plainPart(c.n, v3(c.s), frame * yawCF(c.p, c.yaw), m)
+		p.CanCollide = true
+		p.CanQuery = true
+		counts.colliders += 1
+	end
+	-- markers: slat faces (SurfaceGui text), bay signs, cove and gallery lights
+	local StationSign = sharedModule("StationSign")
+	local fSlats = Instance.new("Folder")
+	fSlats.Name = "Slats"
+	fSlats.Parent = m
+	local fSigns = Instance.new("Folder")
+	fSigns.Name = "BaySigns"
+	fSigns.Parent = m
+	local nText, nSigns, nLights = 0, 0, 0
+	for name, mk in pairs(a.attachments) do
+		local pos = frame * v3(mk.p)
+		local look = frame:VectorToWorldSpace(v3(mk.l))
+		local at = mk.at or {}
+		if string.match(name, "^SlatText_") then
+			local s = at.size or { 12, 1.5 }
+			local face = plainPart(name, Vector3.new(s[1], s[2], 0.05), CFrame.lookAt(pos + look * 0.03, pos + look * 2), fSlats)
+			local gui = Instance.new("SurfaceGui")
+			gui.Name = "Face"
+			gui.Face = Enum.NormalId.Front
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 50
+			gui.LightInfluence = 0.15
+			gui.Brightness = 1.2
+			gui.MaxDistance = 260
+			local label = Instance.new("TextLabel") -- the first TextLabel: TrainRideController writes the countdown into it
+			label.Name = "Line"
+			label.BackgroundTransparency = 1
+			label.Size = UDim2.fromScale(1, 1)
+			label.Text = at.text or ""
+			label.TextColor3 = SLAT_INK
+			label.FontFace = SLAT_FONT
+			label.TextScaled = true
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			local pad = Instance.new("UIPadding")
+			pad.PaddingLeft = UDim.new(0.02, 0)
+			pad.PaddingTop, pad.PaddingBottom = UDim.new(0.16, 0), UDim.new(0.16, 0)
+			pad.Parent = label
+			label.Parent = gui
+			gui.Parent = face
+			if at.screen then
+				face:SetAttribute("TrainScreen", true)
+			end
+			nText += 1
+		elseif string.match(name, "^BaySign_") and StationSign then
+			local okS, err = pcall(function()
+				StationSign.make({
+					Name = name,
+					CFrame = CFrame.lookAt(pos, pos + Vector3.new(look.X, 0, look.Z)),
+					Title = at.title,
+					Caption = at.caption,
+					Width = 4.2,
+					Height = 4.4,
+					BoardHeight = 1.6,
+					Tilt = 12,
+					Parent = fSigns,
+				})
+			end)
+			if okS then
+				nSigns += 1
+			else
+				warn("[TrainingCentreBuilder] bay sign " .. name .. ": " .. tostring(err))
+			end
+		elseif string.match(name, "^CoveLight_") or string.match(name, "^GalleryGlow_") then
+			local cove = string.match(name, "^CoveLight_") ~= nil
+			local holder = plainPart(name, Vector3.new(0.2, 0.2, 0.2), CFrame.new(pos), m)
+			local light = Instance.new("PointLight")
+			light.Color = if cove then Color3.fromRGB(255, 210, 165) else Color3.fromRGB(200, 220, 230)
+			light.Range = if cove then 18 else 12
+			light.Brightness = if cove then 0.6 else 0.4 -- (0.7 blew the pod's window out to white spots, 20 Nov)
+			light.Shadows = false
+			light.Parent = holder
+			nLights += 1
+		end
+	end
+	counts.lights += nLights
+	counts.visuals += made
+	if container then
+		container:Destroy()
+	end
+	m.WorldPivot = hall
+	m.Parent = root
+	return string.format("dress %s: %d visuals, %s, %d slat faces, %d bay signs, %d lights", how, made, chequerNote, nText,
+		nSigns, nLights)
 end
 
 function TC.build(opts: { [string]: any }?): string
@@ -463,6 +847,7 @@ function TC.build(opts: { [string]: any }?): string
 		root.ModelStreamingMode = Enum.ModelStreamingMode.Default
 		local hall = TC.HALL_AT
 		local counts = { visuals = 0, colliders = 0, markers = 0, lights = 0, missing = 0 }
+		local deckH = deckHeight()
 
 		local fMarkers = Instance.new("Folder")
 		fMarkers.Name = "Markers"
@@ -482,7 +867,10 @@ function TC.build(opts: { [string]: any }?): string
 				group = folder(root, "Dummies")
 			end
 			for _, pl in ipairs(a.placements) do
-				local frame = hall * yawCF(pl.p, pl.yaw)
+				local onDeck = DECK_ASSETS[assetName] == true
+					or (assetName == "TC_Chest" and DECK_STATIONS[pl.station or ""] == true)
+					or (assetName == "TC_Dummy" and DECK_ROLES[pl.role or ""] == true)
+				local frame = hall * yawCF(pl.p, pl.yaw) * CFrame.new(0, if onDeck then deckH else 0, 0)
 				local m = Instance.new("Model")
 				m.Name = if assetName == "TC_Chest" or assetName == "TC_Dummy" then pl.name else assetName
 				if pl.station then
@@ -643,6 +1031,15 @@ function TC.build(opts: { [string]: any }?): string
 			end
 		end
 		counts.lights += hallLights(hall, fLamps)
+		local dressNote = "dress: none"
+		if DRESS and o.dress ~= false then
+			local okD, dn = pcall(buildDress, root, hall, counts)
+			dressNote = if okD then dn else "dress FAILED: " .. tostring(dn)
+			if not okD then
+				warn("[TrainingCentreBuilder] " .. dressNote)
+			end
+		end
+		note ..= "; " .. dressNote
 		fMarkers.Parent = root
 		fSpawns.Parent = root
 		fLamps.Parent = root
@@ -850,6 +1247,12 @@ function TC.prepare(root: Instance): string
 	-- was near-black, wave 15) and the room stays red; no shadows (cheap on phones). HallLightController adds a dark-red
 	-- ambient while the camera is in the room.
 	local red = root:FindFirstChild("RedRoom")
+	if red then
+		local okT, tubeNote = pcall(TC.finishRedRoom, red)
+		table.insert(notes, if okT then "red room " .. tostring(tubeNote) else "red room tube failed: " .. tostring(tubeNote))
+	end
+	local okJ, joinNote = pcall(TC.patchTrackBends, root)
+	table.insert(notes, if okJ then tostring(joinNote) else "track joins failed: " .. tostring(joinNote))
 	local walkway = red and red:FindFirstChild("RedRoom_Walkway_Col", true)
 	if walkway and walkway:IsA("BasePart") and not red:FindFirstChild("RedRoom_WalkGlow_1") then
 		local stairs = red:FindFirstChild("RedRoom_Stair_Col", true)

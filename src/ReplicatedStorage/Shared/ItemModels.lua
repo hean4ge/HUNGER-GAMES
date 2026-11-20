@@ -507,6 +507,35 @@ local function addStraps(model: Model)
 	end
 end
 
+-- A plank floor just under the rim (hunt2_2): the crate meshes are open boxes on the ground, so once the lid swung up
+-- the terrain's grass blades stood up inside the empty crate. Crates spill their loot onto the ground, so a shallow
+-- inside costs nothing. Sized from Base, kept inside the walls; no collision, query, touch or shadow.
+local LINER_COLOR = rgb(62, 48, 37)
+local LINER_BELOW_RIM = 0.38
+local LINER_INSET = 0.2
+
+local function addLiner(model: Model)
+	local base = model.PrimaryPart
+	if not base or model:FindFirstChild("Liner") then
+		return
+	end
+	local p = Instance.new("Part")
+	p.Name = "Liner"
+	p.Size = Vector3.new(math.max(0.2, base.Size.X - 2 * LINER_INSET), 0.12, math.max(0.2, base.Size.Z - 2 * LINER_INSET))
+	p.CFrame = base.CFrame * CFrame.new(0, base.Size.Y / 2 - LINER_BELOW_RIM, 0)
+	p.Color = LINER_COLOR
+	p.Material = Enum.Material.Wood
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p.Massless = true
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Parent = model
+end
+
 function ItemModels.slackenCrate(model: Model)
 	local base = model.PrimaryPart
 	if not base then
@@ -551,6 +580,10 @@ function ItemModels.buildCrate(tier: number?): Model
 	local ok, err = pcall(addStraps, model)
 	if not ok then
 		warnOnce("straps", "crate straps failed: " .. tostring(err))
+	end
+	local okLiner, errLiner = pcall(addLiner, model)
+	if not okLiner then
+		warnOnce("liner", "crate liner failed: " .. tostring(errLiner))
 	end
 	return model
 end

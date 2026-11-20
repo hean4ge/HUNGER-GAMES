@@ -539,6 +539,21 @@ local function goodSpot(hit: RaycastResult?, skyParams: RaycastParams, center: V
 			return false
 		end
 	end
+	-- (wave 27 bug hunt) a practice dummy: the rays above see through it (excludeList) and its stand's platform is solid
+	-- ground to them, so a parcel landed on the stand, inside the dummy's legs. Keep a dummy's width away (and its
+	-- stand's: the stand stays in CombatService's TrainingDummies folder while a broken dummy respawns).
+	local standing = CollectionService:GetTagged("TrainingDummy")
+	local folder = workspace:FindFirstChild("TrainingDummies")
+	if folder then
+		for _, child in ipairs(folder:GetChildren()) do
+			table.insert(standing, child)
+		end
+	end
+	for _, dummy in ipairs(standing) do
+		if dummy:IsA("Model") and Util.flat(dummy:GetPivot().Position - p).Magnitude < 5 then
+			return false
+		end
+	end
 	return true
 end
 

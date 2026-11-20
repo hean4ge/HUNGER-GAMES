@@ -38,6 +38,8 @@ local Sfx = require(Shared:WaitForChild("Sfx"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local Util = require(Shared:WaitForChild("Util"))
 
+local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 local player = Players.LocalPlayer
 
@@ -795,6 +797,23 @@ local function updateMarker()
 	if target and root and (Vector3.new(target.X, root.Position.Y, target.Z) - root.Position).Magnitude < 3 then
 		target = nil -- you are there
 	end
+	-- (wave 27, owner's picture of the launch tube: "Launch" floated over the sky) never during the launch shot or the
+	-- arena, and never once you are through the launch doors: from the corridor, the stairs and the walkway (all
+	-- outside the server's red-room box) the word hung in the doorway behind you and in the opening over the lift
+	if ClientState.launchShot == true or player:GetAttribute("InArena") == true or player:GetAttribute("Alive") == true then
+		target = nil
+	end
+	if target and root then -- (either word: off the hall's box, InTraining is false here and "Training Centre" showed)
+		local door = GameState:GetAttribute("TrainLaunchEntry")
+		local hall = GameState:GetAttribute("TrainHallEntry")
+		if typeof(door) == "Vector3" and typeof(hall) == "Vector3" then
+			local out = Vector3.new(hall.X - door.X, 0, hall.Z - door.Z)
+			local me = Vector3.new(root.Position.X - door.X, 0, root.Position.Z - door.Z)
+			if out.Magnitude > 0.1 and me:Dot(out.Unit) < 1.5 then
+				target = nil -- in the doorway or beyond it
+			end
+		end
+	end
 	if not target then
 		if marker.gui then
 			marker.gui.Enabled = false
@@ -815,6 +834,7 @@ local function updateMarker()
 		gui.Name = "Way"
 		gui.AlwaysOnTop = false -- (it stands in the open archway or doorway: nothing hides it from the way there)
 		gui.LightInfluence = 0
+		gui.MaxDistance = 220 -- (the hall is 224 long: a way marker, never a word hanging in the sky from far away)
 		gui.Size = UDim2.fromOffset(180, 46)
 		gui.Adornee = anchor
 		gui.Parent = anchor

@@ -17,6 +17,8 @@
 	                                    --   opts.only = { M1_Horn = true } rebuild a part of them
 	  A.verify()                        -- reads every template back against the manifest; last line PASS or FAIL
 	  A.placeHeart(parent, offset?, opts?)      -- the platform, the horn, 48 plinths, the beds and teardrops
+	  A.dressBeds(parent?, opts?)       -- the rays' even colour and flower heads (placeHeart runs it; opts.dress = false)
+	  A.paintUnderBeds(parent?, opts?)  -- no terrain grass blades through the rays: re-run after any terrain write
 	  A.placeLandmarks(parent, offset?, opts?)  -- the peak, lone trees, hedges, berms, the spiral, the glade
 	  A.placeSkyline(parent, offset?, opts?)    -- the far range (Persistent)          } only when their sets are
 	  A.placeFarValley(parent, offset?, opts?)  -- the valley beyond streaming (Persistent) } uploaded
@@ -1063,6 +1065,12 @@ function Assets.placeHeart(parent: Instance, offset: Vector3?, opts: any): strin
 	for name in pairs(missing) do
 		note("PROBLEM: no template %s (run Assets.build())", name)
 	end
+	if not (opts and opts.dress == false) then
+		note("%s", Assets.dressBeds(parent, opts))
+		if parent:IsDescendantOf(workspace) and not (opts and opts.paint == false) then
+			note("%s", Assets.paintUnderBeds(parent, opts))
+		end
+	end
 	note("heart at offset %s under %s: platform and horn, %d beds, %d teardrops, %d plinths (Plinth01..%02d)%s", fmtV(off), parent:GetFullName(),
 		placed.beds, placed.teardrops, placed.plinths, placed.plinths, if placed.rims > 0 then string.format(", %d tube rims", placed.rims) else ", no tube rims")
 	if reach then
@@ -1250,6 +1258,326 @@ function Assets.applyLookColors(parent: Instance?): string
 	paint(wa and wa:FindFirstChild("Map1"))
 	paint(parent or workspace:FindFirstChild("Arena"))
 	return string.format("look colours: %d parts repainted, %d horn lights set", painted, lights)
+end
+
+--------------------------------------------------------------------------------------------------------- flower beds
+-- The coloured rays round the horn (Spoke_00..17), the owner's note of 20 Nov 2026: "grass through the blocks, patchy
+-- and bad shading". Three causes, three fixes, none of which needs a new mesh:
+--   1. The terrain under a bed is Grass, and terrain grass blades (1 to 3 studs) stand higher than the bed's mound
+--      (1.35): they poked up through it. Assets.paintUnderBeds() turns the Grass under each bed (and a stud or two round
+--      the cells the bed covers) into BEDS.soil, which grows no blades. A terrain write puts Grass back: run
+--      it again after one (Map1.Terrain.generate, a window rewrite).
+--   2. 22 % of the mound's faces carry the bed's "alt" colour, a much lighter tone: big pale plates on a dark field,
+--      the blotches. Their part is mixed BEDS.altMix of the way from the main colour: the same faces, a subtle shimmer.
+--      The mound is shaded BEDS.baseShade darker than its flowers, so the heads stand out from it.
+--   3. One flat colour per facet reads as painted plates, not flowers. Each bed gets a Blooms model of small flower
+--      heads (the FuseDaisy's petal disc and centre, recoloured to the bed) on its mound, every BEDS.spacing studs:
+--      many small tilted shapes break the flat facets up and read as a bed of flowers at eye level and from above.
+-- Assets.dressBeds() does 2 and 3 (placeHeart calls it); both are deterministic (seeded by the bed's name) and safe
+-- to re-run. The rays (Spoke_*) and the six teardrops by the platform, which had the same fault (the periwinkle's white
+-- fleck faces read as a pixel camouflage); opts.teardrops = false leaves the teardrops out.
+Assets.BEDS = {
+	altMix = 0.15, -- 0 = the main colour, 1 = the manifest's alt colour
+	baseShade = 0.84, -- the mound itself a shade darker than its flowers: the shaded ground between the heads
+	foliage = { 66, 88, 46 }, -- the green skirt's rgb: left as it is, no blooms on it
+	soil = Enum.Material.LeafyGrass, -- what the Grass under a bed becomes (no blades; the forest-floor variant)
+	soilCorner = 1.5, -- a 4-stud terrain column is painted only when the bed covers its centre and the four points
+	                  -- this far off it diagonally: so the soil never shows (in play a painted cell beside the bed
+	                  -- showed as a dark, stair-stepped fringe round every bed)
+	spacing = 1.5, -- studs between bloom spots, each jittered by up to half of it
+	scale = { 0.75, 1.2 }, -- petal disc scale (the daisy's disc is 1.3 across)
+	lift = 0.1, -- studs the disc floats over the mound surface
+	tilt = 18, -- degrees of random tilt
+	tone = 0.06, -- +- brightness jitter of a head
+	toAlt = { 0.25, 0.95 }, -- a head is mixed this far from the main colour toward the (lighter) alt one: it reads
+	                        -- as a flower over the darker bed, and many small ones are a texture, not blotches
+	centre = 0.35, -- chance a head gets a centre (the daisy's button, 0.6 of the disc's scale)
+	centreScale = 0.6,
+	centreLight = { 196, 160, 80 }, -- a pollen-yellow centre on the red, pink, lavender and magenta beds
+	centreDark = { 110, 72, 40 }, -- a brown one on the yellow and marigold beds
+	template = "M1_FuseDaisy",
+}
+
+local function rgbClose(c: Color3, t: { number }): boolean
+	return math.abs(c.R * 255 - t[1]) < 3 and math.abs(c.G * 255 - t[2]) < 3 and math.abs(c.B * 255 - t[3]) < 3
+end
+
+local function isBed(m: Instance, opts: any): boolean
+	if not m:IsA("Model") or m:GetAttribute("PlacedBy") ~= Assets.SOURCE then
+		return false
+	end
+	local asset = m:GetAttribute("Asset")
+	if type(asset) ~= "string" then
+		return false
+	end
+	return string.match(asset, "^M1_Spoke_%d+$") ~= nil or (not (opts and opts.teardrops == false) and string.match(asset, "^M1_Teardrop") ~= nil)
+end
+
+-- The bed's parts by kind, and its colours from the manifest (so a re-run starts from the same numbers).
+local function bedParts(m: Model): (MeshPart?, { MeshPart }, { MeshPart }, Color3?, Color3?)
+	local a = ASSET[m:GetAttribute("Asset")]
+	if not a then
+		return nil, {}, {}, nil, nil
+	end
+	local byName = {}
+	for _, info in ipairs(a.parts) do
+		byName[info.name] = info
+	end
+	local main: MeshPart? = nil
+	local alts, foliage = {}, {}
+	local mainColor, altColor
+	for _, p in ipairs(m:GetChildren()) do
+		local info = p:IsA("MeshPart") and byName[p.Name]
+		if not info then
+			continue
+		end
+		if rgbClose(rgb(info.rgb), Assets.BEDS.foliage) then
+			table.insert(foliage, p)
+		elseif info == a.parts[1] then
+			main = p
+			mainColor = rgb(info.rgb)
+		else
+			table.insert(alts, p)
+			altColor = altColor or rgb(info.rgb)
+		end
+	end
+	return main, alts, foliage, mainColor, altColor
+end
+
+local function seedOf(s: string): number
+	local h = 2166136261
+	for i = 1, #s do
+		h = bit32.bxor(h, string.byte(s, i))
+		h = (h * 16777619) % 4294967296
+	end
+	return h
+end
+
+local function scaleColor(c: Color3, k: number): Color3
+	return Color3.new(math.clamp(c.R * k, 0, 1), math.clamp(c.G * k, 0, 1), math.clamp(c.B * k, 0, 1))
+end
+
+-- Raycasts onto a bed's own shape. The bed parts' collision is Box (nothing collides with them), so a ray would meet
+-- the box's flat top, far past the lens outline; for the call each part gets an invisible stand-in with a Hull
+-- collision of the same mesh (the mound is convex, so its hull is its surface), destroyed afterwards.
+local hullCache: { [string]: MeshPart } = {}
+local function withBedQuery(parts: { BasePart }, fn: (RaycastParams) -> ())
+	local folder = Instance.new("Folder")
+	folder.Name = "BedQuery_TEMP"
+	local hulls = {}
+	for _, p in ipairs(parts) do
+		if not p:IsA("MeshPart") then
+			continue
+		end
+		local id = (p :: MeshPart).MeshId
+		local proto = hullCache[id]
+		if not proto then
+			local ok, made = pcall(function()
+				return AssetService:CreateMeshPartAsync(id, {
+					CollisionFidelity = Enum.CollisionFidelity.Hull,
+					RenderFidelity = Enum.RenderFidelity.Performance,
+				})
+			end)
+			if not ok or not made then
+				warn("Map1.Assets: no hull for " .. p:GetFullName() .. ": " .. tostring(made))
+				continue
+			end
+			proto = made
+			hullCache[id] = proto
+		end
+		local h = proto:Clone()
+		h.Size = p.Size
+		h.CFrame = p.CFrame
+		h.Anchored = true
+		h.Transparency = 1
+		h.CanCollide = false
+		h.CanTouch = false
+		h.CanQuery = true
+		h.CastShadow = false
+		h.Parent = folder
+		table.insert(hulls, h)
+	end
+	folder.Parent = workspace
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = hulls
+	local ok, err = pcall(fn, params)
+	folder:Destroy()
+	if not ok then
+		error(err)
+	end
+end
+
+-- Recolours the alt faces and puts a Blooms model of flower heads on every bed under parent.Landmarks.
+-- opts.blooms = false: colours only. opts.teardrops = false: the rays only.
+function Assets.dressBeds(parent: Instance?, opts: any): string
+	parent = parent or workspace:FindFirstChild("Arena")
+	local landmarks = parent and parent:FindFirstChild("Landmarks")
+	if not landmarks then
+		return "dressBeds: no Landmarks under " .. tostring(parent)
+	end
+	local B = Assets.BEDS
+	local daisy = Assets.template(B.template)
+	local petal = daisy and daisy:FindFirstChild(B.template .. "_Petals") :: MeshPart?
+	local button = daisy and daisy:FindFirstChild(B.template .. "_Copper") :: MeshPart?
+	local wantBlooms = not (opts and opts.blooms == false)
+	local lines = {}
+	local beds, recoloured, heads = 0, 0, 0
+	for _, m in ipairs(landmarks:GetChildren()) do
+		if not isBed(m, opts) then
+			continue
+		end
+		beds += 1
+		local main, alts, _, mainColor, altColor = bedParts(m :: Model)
+		if not (main and mainColor) then
+			table.insert(lines, "PROBLEM: " .. m.Name .. " has no main bed part")
+			continue
+		end
+		for _, p in ipairs(alts) do
+			p.Color = scaleColor(mainColor:Lerp(altColor or mainColor, B.altMix), B.baseShade)
+			recoloured += 1
+		end
+		main.Color = scaleColor(mainColor, B.baseShade)
+		local old = m:FindFirstChild("Blooms")
+		if old then
+			old:Destroy()
+		end
+		if not wantBlooms then
+			continue
+		end
+		if not (petal and button) then
+			table.insert(lines, "PROBLEM: no template " .. B.template .. " (its _Petals and _Copper parts): no blooms")
+			wantBlooms = false
+			continue
+		end
+		if not m:IsDescendantOf(workspace) then
+			table.insert(lines, "PROBLEM: " .. m:GetFullName() .. " is not in the Workspace: no blooms (they are seated by raycasts)")
+			continue
+		end
+		local surface = { main :: BasePart }
+		for _, p in ipairs(alts) do
+			table.insert(surface, p)
+		end
+		local rng = Random.new(seedOf(m.Name))
+		local blooms = Instance.new("Model")
+		blooms.Name = "Blooms"
+		local cf, size = m:GetBoundingBox()
+		local pivot = m:GetPivot()
+		-- the bed's own frame: its long axis is the pivot's Z, its width the pivot's X
+		local half = Vector3.new(size.X, 0, size.Z) / 2
+		local ext = math.max(half.X, half.Z)
+		local top = cf.Position.Y + size.Y / 2 + 2
+		local depth = size.Y + 6
+		local yellowBed = rgbClose(mainColor, { 204, 180, 72 }) or rgbClose(mainColor, { 212, 152, 60 })
+		withBedQuery(surface, function(params)
+			local s = B.spacing
+			for u = -ext, ext, s do
+				for v = -ext, ext, s do
+					local lp = Vector3.new(u + rng:NextNumber(-0.5, 0.5) * s, 0, v + rng:NextNumber(-0.5, 0.5) * s)
+					local wp = pivot:PointToWorldSpace(lp)
+					local hit = workspace:Raycast(Vector3.new(wp.X, top, wp.Z), Vector3.new(0, -depth, 0), params)
+					if not hit or hit.Normal.Y < 0.6 then
+						continue
+					end
+					local k = rng:NextNumber(B.scale[1], B.scale[2])
+					local col = scaleColor(mainColor:Lerp(altColor or mainColor, rng:NextNumber(B.toAlt[1], B.toAlt[2])), 1 + rng:NextNumber(-B.tone, B.tone))
+					local frame = CFrame.new(hit.Position + hit.Normal * B.lift)
+						* CFrame.Angles(math.rad(rng:NextNumber(-B.tilt, B.tilt)), rng:NextNumber(0, 2 * math.pi), math.rad(rng:NextNumber(-B.tilt, B.tilt)))
+					local d = petal:Clone()
+					d.Name = "Head"
+					d.Size = petal.Size * k
+					d.CFrame = frame
+					d.Color = col
+					d.Anchored = true
+					d.CanCollide = false
+					d.CanQuery = false
+					d.CanTouch = false
+					d.CastShadow = false
+					d:SetAttribute("Role", "Bloom")
+					d.Parent = blooms
+					heads += 1
+					if rng:NextNumber() < B.centre then
+						local c = button:Clone()
+						c.Name = "Centre"
+						c.Size = button.Size * k * B.centreScale
+						c.CFrame = frame * CFrame.new(0, 0.02 * k, 0)
+						c.Color = rgb(if yellowBed then B.centreDark else B.centreLight)
+						c.Anchored = true
+						c.CanCollide = false
+						c.CanQuery = false
+						c.CanTouch = false
+						c.CastShadow = false
+						c:SetAttribute("Role", "Bloom")
+						c.Parent = blooms
+					end
+				end
+			end
+		end)
+		blooms.Parent = m
+	end
+	table.insert(lines, 1, string.format("dressBeds: %d beds, %d alt parts mixed %.2f toward the main colour, %d flower heads",
+		beds, recoloured, B.altMix, heads))
+	return table.concat(lines, "\n")
+end
+
+-- Turns the terrain Grass under every bed (the cells it covers: BEDS.soilCorner) into BEDS.soil, so no terrain grass
+-- blades stand up through the beds. Only the top 12 studs of each 4-stud column under a bed; nothing else changes.
+function Assets.paintUnderBeds(parent: Instance?, opts: any): string
+	parent = parent or workspace:FindFirstChild("Arena")
+	local landmarks = parent and parent:FindFirstChild("Landmarks")
+	if not landmarks then
+		return "paintUnderBeds: no Landmarks under " .. tostring(parent)
+	end
+	local B = Assets.BEDS
+	local terrain = workspace.Terrain
+	local beds, columns = 0, 0
+	local r = B.soilCorner
+	local probe = { Vector3.zero, Vector3.new(r, 0, r), Vector3.new(-r, 0, r), Vector3.new(r, 0, -r), Vector3.new(-r, 0, -r) }
+	for _, m in ipairs(landmarks:GetChildren()) do
+		if not isBed(m, opts) or not m:IsDescendantOf(workspace) then
+			continue
+		end
+		beds += 1
+		local main, alts, foliage = bedParts(m :: Model)
+		local surface: { BasePart } = {}
+		for _, list in ipairs({ { main }, alts, foliage }) do
+			for _, p in ipairs(list) do
+				table.insert(surface, p)
+			end
+		end
+		local cf, size = m:GetBoundingBox()
+		local lo, hi = boxBounds(cf, size)
+		local top = hi.Y + 2
+		local done = {}
+		withBedQuery(surface, function(params)
+			for x = math.floor((lo.X - r) / 4) * 4, hi.X + r, 4 do
+				for z = math.floor((lo.Z - r) / 4) * 4, hi.Z + r, 4 do
+					local key = x .. "," .. z
+					if done[key] then
+						continue
+					end
+					local c = Vector3.new(x + 2, top, z + 2)
+					local under = true
+					for _, o in ipairs(probe) do
+						if not workspace:Raycast(c + o, Vector3.new(0, -(size.Y + 6), 0), params) then
+							under = false
+							break
+						end
+					end
+					if not under then
+						continue
+					end
+					done[key] = true
+					local ground = terrainY(x + 2, cf.Position.Y, z + 2, 12) or cf.Position.Y
+					local y0 = math.floor((ground - 10) / 4) * 4
+					local region = Region3.new(Vector3.new(x, y0, z), Vector3.new(x + 4, y0 + 16, z + 4))
+					terrain:ReplaceMaterial(region, 4, Enum.Material.Grass, B.soil)
+					columns += 1
+				end
+			end
+		end)
+	end
+	return string.format("paintUnderBeds: %d beds, %d terrain columns turned from Grass to %s", beds, columns, B.soil.Name)
 end
 
 -- Takes out what the place functions made under `parent` (group nil = all of them). Folders we made stay.

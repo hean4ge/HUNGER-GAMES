@@ -610,7 +610,7 @@ local function updateReason(combat: boolean)
 				local what = if hungry and thirsty then word("HUNGRY") .. " AND " .. word("THIRSTY")
 					elseif thirsty then word("THIRSTY")
 					else word("HUNGRY")
-				text = "NOT HEALING  ·  " .. what
+				text = "NOT  HEALING  ·  " .. what -- (two spaces: at 13 px the T and H ran together)
 			end
 		end
 	end

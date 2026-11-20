@@ -69,6 +69,7 @@ local Kits = require(Shared:WaitForChild("Kits"))
 local Net = require(Shared:WaitForChild("Net"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 local Signal = require(Shared:WaitForChild("Signal"))
+local StationSign = require(Shared:WaitForChild("StationSign"))
 local TS = require(Shared:WaitForChild("TrainingStations"))
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
@@ -339,7 +340,9 @@ end
 local function setTargetUp(model: Model, up: boolean)
 	for _, inst in ipairs(model:GetDescendants()) do
 		if inst:IsA("BasePart") and inst.Name ~= "HumanoidRootPart" then
-			inst.Transparency = if up then 0 else 0.82
+			-- (wave 27 bug hunt) with the Blender set its own targets always stand there: a "down" ghost at 0.82 hung
+			-- 1.4 studs in front of each one, 18 doubled, see-through targets down the lanes. With the set, down = gone.
+			inst.Transparency = if up then 0 elseif blender then 1 else 0.82
 			if inst.Name == "Board" or inst.Name == "Head" then
 				inst.CanQuery = up
 				inst.CanCollide = up
@@ -390,6 +393,11 @@ local function buildShell(root: Instance)
 	shell.Parent = root
 end
 
+-- which way a mat's sign faces, in the mat's frame (hall frame: x east, z north negative)
+local FACE_DIRS = {
+	n = Vector3.new(0, 0, -1), s = Vector3.new(0, 0, 1), e = Vector3.new(1, 0, 0), w = Vector3.new(-1, 0, 0),
+}
+
 local function buildMat(model: Instance, station: any, spec: any)
 	local spot = station.spots[spec.spot]
 	local size = spot.size or Vector3.new(6, 0.2, 6)
@@ -398,7 +406,33 @@ local function buildMat(model: Instance, station: any, spec: any)
 		Material = Enum.Material.Fabric })
 	local words = if spec.kit then string.upper((Kits.get(spec.kit) or { name = spec.kit }).name)
 		else string.upper(spec.specialty == "ShortBlade" and "Short blade" or spec.specialty)
-	floorLabel(p, words)
+	-- the name stands on a small sign beside the mat (20 Nov: the owner asked for standing signs, not words lying on
+	-- the floor). TrainingStations' mats carry where: sign = { at = mat-local floor offset, face = "n"|"s"|"e"|"w" }.
+	local okSign, err = pcall(function()
+		-- default: the board looks toward the hall's middle (the way people come from) and stands on the mat's far side,
+		-- so it is read across the mat and never stands in the way onto it
+		local s = spec.sign or {}
+		local toMid = cf:VectorToObjectSpace(hallCF.Position - cf.Position)
+		local faceKey = s.face or (if math.abs(toMid.X) >= math.abs(toMid.Z)
+			then (if toMid.X >= 0 then "e" else "w") else (if toMid.Z >= 0 then "s" else "n"))
+		local dir = FACE_DIRS[faceKey] or FACE_DIRS.e
+		local at = s.at or Vector3.new(-dir.X * (size.X / 2 + 0.9), 0, -dir.Z * (size.Z / 2 + 0.9))
+		local base = cf * CFrame.new(at.X, -size.Y / 2 - 0.02, at.Z)
+		local look = base:VectorToWorldSpace(dir)
+		StationSign.make({
+			Name = "Sign_" .. spec.spot,
+			CFrame = CFrame.lookAt(base.Position, base.Position + look),
+			Title = words,
+			Caption = if spec.kit then "Kit · stand on the mat" else "Specialty · stand on the mat",
+			Icon = spec.kit or s.icon,
+			Width = s.width,
+			Parent = model,
+		})
+	end)
+	if not okSign then
+		warn("[TrainingService] sign for " .. tostring(spec.spot) .. " failed: " .. tostring(err))
+		floorLabel(p, words)
+	end
 	if spec.kit then
 		artDraws(p) -- the set's orange kit mats (the blade circle's Specialty mats are ours alone)
 	end
@@ -487,6 +521,10 @@ local function spawnDummy(parent: Instance, cf: CFrame, stance: string, label: s
 	local bar = head and head:FindFirstChild("HealthBar")
 	if bar and bar:IsA("BillboardGui") then
 		bar.Size = UDim2.fromOffset(132, 26)
+		-- (wave 27 bug hunt) a fixed 132 px name at any distance up to DummyBuilder's 80: from across the hall the four
+		-- blade-circle names (dummies 11 studs apart) piled into one another ("Parrier Striker Blocker Target").
+		-- Within 34 studs 11 studs is wider than 132 px on a 750 px-tall screen, so they never touch.
+		bar.MaxDistance = 34
 		local nameLabel = bar:FindFirstChild("Name", true) or bar:FindFirstChildWhichIsA("TextLabel", true)
 		if nameLabel and nameLabel:IsA("TextLabel") then
 			nameLabel.Text = string.upper(label)

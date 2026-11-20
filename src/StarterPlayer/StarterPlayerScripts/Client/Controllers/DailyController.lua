@@ -40,6 +40,7 @@ local stampsHolder: Frame? = nil
 local autoDay = ""
 local lastArenaAt = -math.huge
 local trainSince = os.clock()
+local autoOpened = false -- the screen on show was opened by itself (not from the menu hub)
 
 local function daily(): { [string]: any }?
 	local s = ProgressUI.state
@@ -356,6 +357,14 @@ local function maybeAutoOpen()
 	if inHall() or ClientState.launchShot then
 		return
 	end
+	-- (hunt2_1) only while parked at the station: never over the loading screen, the ride (it covered the tunnel and
+	-- the arrival, then Prepare opened as it closed) or anywhere at the Training Centre (Prepare is its screen)
+	local me = Players.LocalPlayer
+	local gameState = ReplicatedStorage:FindFirstChild("GameState")
+	if me:GetAttribute("LoadingScreenUp") == true or me:GetAttribute("AtTrainingCentre") == true
+		or (gameState and gameState:GetAttribute("TrainStage") == "Ride") then
+		return
+	end
 	if os.clock() - lastArenaAt < 60 or os.clock() - trainSince < 4 then
 		return
 	end
@@ -363,7 +372,9 @@ local function maybeAutoOpen()
 		return
 	end
 	autoDay = today
-	DailyController.open()
+	if DailyController.open() then
+		autoOpened = true
+	end
 end
 
 function DailyController.Init(controllers)
@@ -373,6 +384,7 @@ end
 function DailyController.Start()
 	build()
 	ProgressUI.openers.daily = function(arg)
+		autoOpened = false
 		if arg == "phone" then
 			DailyController.rebuild()
 		end
@@ -406,6 +418,21 @@ function DailyController.Start()
 			trainSince = os.clock()
 		end
 		wasInArena = ClientState.inArena
+	end)
+	-- (hunt2_1) the doors seal: a screen that opened by itself at the station and is still up goes, so it never covers
+	-- the ride and the arrival; with the reward still waiting it may open by itself again at the next station stop
+	local gameState = ReplicatedStorage:WaitForChild("GameState")
+	gameState:GetAttributeChangedSignal("TrainStage"):Connect(function()
+		if gameState:GetAttribute("TrainStage") ~= "Ride" then
+			return
+		end
+		if autoOpened and screen and screen.isOpen() then
+			DailyController.close()
+			if DailyController.claimable() then
+				autoDay = ""
+			end
+		end
+		autoOpened = false
 	end)
 	-- (fixesUI) the launch shot and the hall, every frame (cheap: two attribute reads)
 	RunService.Heartbeat:Connect(syncGuards)

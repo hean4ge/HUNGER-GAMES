@@ -180,12 +180,21 @@ Sounds.Cannon = def("SFX", 2.5, { pitch = { 0.8, 0.82 }, maxLifetime = 15, ids =
 -- At 0.45 it sits about 8 dB under the crack (cannon -18.9 dB rms after volume). TO AUDITION.
 Sounds.Cannon_Sub = def("SFX", 0.45, { pitch = { 0.86, 0.88 }, maxLifetime = 8, ids = { rbx(9125484367) } })
 Sounds.CountdownTick = def("UI", 0.8, { pitch = { 0.98, 1.0 }, maxLifetime = 3, ids = { rbx(9120896809) } }) -- "Wood Impact 1": one hollow knock a number (PSE)
--- "Horn Blow 4": a ram's horn (PSE). Measured 20 Nov: rms -26.1 dB at 1.0, 7 dB under the cannon, though it is the
--- round's start signal; raised to 1.8 (-21 dB) with a deep swell under it (StartHorn_Low).
-Sounds.StartHorn = def("SFX", 1.8, { pitch = { 0.98, 1.0 }, maxLifetime = 15, ids = { rbx(9114820717) },
-	layers = { { key = "StartHorn_Low" } } })
--- "Energy Blast Big Deep Horn Swell Reverberant" (PSE), 7 s, blooms 1.6 s in, under the horn's held note. TO AUDITION.
-Sounds.StartHorn_Low = def("SFX", 0.45, { pitch = { 0.94, 0.95 }, maxLifetime = 9, ids = { rbx(9125544480) } })
+-- The start signal (wave 27, 20 Nov): the owner asked for a horn "more accurate to the movie": one huge, deep, flat
+-- blast that rolls across the valley, not the thin ram's horn ("Horn Blow 4" 9114820717, now unused). Our own mix of
+-- licensed library audio, nothing from any film. Three layers, levels by AudioAnalyzer (raw rms, then after volume):
+--   body   "Ship Horn Uss Constellation 2" (PSE, 4.7 s): an aircraft carrier's horn, one steady 4 s blast. Played at
+--          0.84 it is deeper and 5.6 s long. raw -14.6 dB, at 0.65 -18.3 dB.
+--   braam  "Juggernaut Braam" (APM, 11 s, centroid 750 Hz): a low brass swell held 4 s that decays for 6 more, the
+--          weight and the long tail under the blast. raw -10.1 dB, at 0.3 -20.5 dB.
+--   boom   "Doom Maker End Hit No Tonal" (APM, 7.6 s): one big cinematic low hit on the downbeat. raw -17.3, at 0.6 -21.7.
+-- Together about -15 dB rms: 1 dB over the cannon (-16.2), 10 dB over the music beds (-25), which the AudioController
+-- also ducks to 0.35 under it. The valley: AudioController DUCKS gives the body an echo off the far side plus a long
+-- reverb, and the braam a reverb. TO AUDITION by ear.
+Sounds.StartHorn = def("SFX", 0.65, { pitch = { 0.83, 0.85 }, maxLifetime = 15, ids = { rbx(9119077419) },
+	layers = { { key = "StartHorn_Braam" }, { key = "StartHorn_Boom" } } })
+Sounds.StartHorn_Braam = def("SFX", 0.3, { pitch = { 0.97, 0.98 }, maxLifetime = 12, ids = { rbx(131557850414701) } })
+Sounds.StartHorn_Boom = def("SFX", 0.6, { pitch = { 0.9, 0.92 }, maxLifetime = 9, ids = { rbx(9048829865) } })
 -- the winner: "Lost (sting a)" (APM, KPM Dark Drama), 13 s: small strings and a wordless soprano, more bittersweet than
 -- the old brass fanfare ("Conquering Heroes Link" 83315768373322). TO AUDITION. A custom id goes in CUSTOM_MUSIC.Victory.
 Sounds.Victory = def("Music", 1.0, { maxLifetime = 16, ids = { rbx(9043590268) } })

@@ -18,6 +18,9 @@
 
 	KITS (the orange mats)
 	  station.mats = { { spot, kit = kitId } } or { { spot, specialty = familyId } } (the blade circle sets a Specialty)
+	  Each mat's name stands on a small sign beside it (Shared.StationSign). Optional mat.sign = { at = mat-local floor
+	  offset, face = "n" | "s" | "e" | "w" (the way the board looks), width?, icon? }; without it the board looks toward
+	  the hall's middle from the mat's far side.
 
 	DRILLS
 	  station.drill = { id, name, time (s), need, total, line (how to), pass (words) , gives = attribute trained }
@@ -64,6 +67,13 @@ end
 TrainingStations.RunX = -6
 local RX = TrainingStations.RunX
 
+-- The station decks (wave 27 look pass, art/blender/training_centre_v2.py): the blade circle, survival, fitness and the
+-- spear range stand on low teak decks this high. Their origins sit on the deck top, so every spot, mat, chest, dummy and
+-- target of theirs stands on it; TrainingCentreBuilder lifts their art (and its markers) by the same height.
+-- The archery strip behind the line is a flush inlay (the line, the lane pads and the targets stay on the floor).
+TrainingStations.DeckHeight = 0.35
+local DH = TrainingStations.DeckHeight
+
 TrainingStations.List = {
 	{
 		id = "archery",
@@ -95,7 +105,7 @@ TrainingStations.List = {
 		name = "Spear and throwing range",
 		short = "THROWING",
 		bay = { min = v(40, -4, -75), max = v(110, 40, -35) },
-		origin = v(52, 0, -55), -- the throwing line
+		origin = v(52, DH, -55), -- the throwing line (on the spear deck)
 		boardDistances = { 10, 20, 30, 40, 50 }, -- studs east of the line (the set's boards)
 		boardOffsets = { -7, 9, -3, 11, 1 }, -- studs north/south: staggered, so a near board never shields a far one
 		boardFront = -0.7, -- the face stands this far in front of the set's board (west)
@@ -106,7 +116,7 @@ TrainingStations.List = {
 			chest = { pos = v(-6, 0, 9), yaw = 90 },
 			backstop = { pos = v(55, 0, -2) },
 		},
-		mats = { { spot = "mat", kit = "hunter" } },
+		mats = { { spot = "mat", kit = "hunter", sign = { at = v(-1, 0, -4.9), face = "w" } } }, -- north end: the walk to the line stays clear
 		chestLine = "Borrow a spear and 6 throwing knives",
 		chest = { { id = "spear", count = 1 }, { id = "throwing_knife", count = 6 } },
 		drill = {
@@ -120,7 +130,7 @@ TrainingStations.List = {
 		name = "Blade and axe circle",
 		short = "BLADES",
 		bay = { min = v(-110, -4, -20), max = v(-40, 40, 30) },
-		origin = v(-75, 0, 7.5), -- the ring's centre
+		origin = v(-75, DH, 7.5), -- the ring's centre (on the blade deck)
 		ringRadius = 14,
 		dummyRadius = 8,
 		spots = {
@@ -160,7 +170,7 @@ TrainingStations.List = {
 		name = "Survival corner",
 		short = "SURVIVAL",
 		bay = { min = v(-110, -4, -75), max = v(-40, 40, -20) },
-		origin = v(-75, 0, -47.5),
+		origin = v(-75, DH, -47.5), -- (on the survival deck)
 		spots = {
 			fire = { pos = v(-13, 0, -4.5) },
 			trough = { pos = v(11, 0, 3.5) },
@@ -170,7 +180,10 @@ TrainingStations.List = {
 			matForager = { pos = v(11, 0, -9.5), size = v(8, 0.2, 4) },
 			matMedic = { pos = v(1, 0, 13.5), size = v(4, 0.2, 6) },
 		},
-		mats = { { spot = "matForager", kit = "forager" }, { spot = "matMedic", kit = "medic" } },
+		mats = {
+			{ spot = "matForager", kit = "forager" },
+			{ spot = "matMedic", kit = "medic", sign = { at = v(1.2, 0, 3.9), face = "e" } }, -- south end: the patient is west
+		},
 		plants = { true, false, true, false, true, false }, -- sound (true) or spoiled: never poisonous (the Larder rule)
 		plantStep = 1.8, -- studs between pots on the table (the set's Plant_1..6)
 		chestLine = "Borrow firewood, a bottle, bandages and herbs",
@@ -189,7 +202,7 @@ TrainingStations.List = {
 		name = "Fitness corner",
 		short = "FITNESS",
 		bay = { min = v(-110, -4, 30), max = v(-40, 40, 75) },
-		origin = v(-75, 0, 52.5),
+		origin = v(-75, DH, 52.5), -- (on the fitness deck)
 		wallHeight = 24,
 		spots = {
 			wall = { pos = v(-31.8, 0, 0.5), size = v(1.6, 24.4, 30) }, -- its climbing face looks east (the set's wall)
@@ -203,7 +216,7 @@ TrainingStations.List = {
 			chest = { pos = v(29, 0, -2.5), yaw = 180 },
 		},
 		bikeSeatHeight = 3.75, -- the seat's centre (the set's bikes are 3.6 high)
-		mats = { { spot = "matClimber", kit = "climber" } },
+		mats = { { spot = "matClimber", kit = "climber", sign = { at = v(1.2, 0, 5.9), face = "e" } } }, -- south end: the wall is west
 		chestLine = "Borrow a climbing pick",
 		chest = { { id = "climb_pick", count = 1 } },
 		drills = {

@@ -424,7 +424,7 @@ local function computeTarget(): number
 		statusLabel.Text = "Loading the lobby"
 	else
 		p = 1
-		statusLabel.Text = "Ready"
+		statusLabel.Text = "Loading the lobby" -- "Ready" only once the bar itself is full (see the loop)
 	end
 	return p
 end
@@ -512,7 +512,6 @@ conn = RunService.RenderStepped:Connect(function(dt)
 		if t >= CAP and progress < 1 then
 			capped = true
 			progress = 1
-			statusLabel.Text = "Ready"
 		end
 	end
 	-- the shown value eases toward the target (never past it, never back); held back early on so a fast load still
@@ -526,6 +525,9 @@ conn = RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 	setBar(shown)
+	if shown >= 0.995 and statusLabel.Text ~= "Ready" then
+		statusLabel.Text = "Ready" -- the status says Ready only when the bar shows 100 %, never at 60 %
+	end
 	setDots(t)
 
 	-- done: hold, then fade

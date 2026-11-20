@@ -761,6 +761,29 @@ end
 
 local spawnDummy: (slot: DummySlot) -> ()
 
+-- On terrain Grass the blades grew up through the thin plank platform, and from a distance each practice dummy seemed
+-- to stand on a brown blotch (hunt1_2/hunt2_2). There the platform and its rim are hidden (they keep their collision);
+-- the post and its foot stand in the grass like a scarecrow's. On a floor (the Training Centre) nothing changes.
+local function hideStandBaseInGrass(stand: Model)
+	local platform = stand.PrimaryPart
+	if not platform then
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local hit = workspace:Raycast(platform.Position + Vector3.new(0, 2, 0), Vector3.new(0, -6, 0), params)
+	if not (hit and hit.Material == Enum.Material.Grass) then
+		return
+	end
+	for _, part in ipairs(stand:GetChildren()) do
+		if part:IsA("BasePart") and (part.Name == "Platform" or part.Name == "Rim") then
+			part.Transparency = 1
+			part.CastShadow = false
+		end
+	end
+end
+
 local function breakDummy(model: Model, slot: DummySlot)
 	local data = dummyData[model]
 	if not data then
@@ -845,6 +868,10 @@ spawnDummy = function(slot: DummySlot)
 		else
 			stand.Parent = getDummyFolder()
 			slot.stand = stand
+			local ok, err = pcall(hideStandBaseInGrass, stand)
+			if not ok then
+				warn("[CombatService] dummy stand check failed: " .. tostring(err))
+			end
 		end
 	end
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
