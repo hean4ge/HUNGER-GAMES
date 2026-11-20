@@ -472,7 +472,7 @@ local function rebuildList()
 		return
 	end
 	local ctx = myContext()
-	R.entry.Visible = ctx == "prep" and not ClientState.launchShot
+	R.entry.Visible = ctx == "prep" and not ClientState.launchShot and not ClientState.menuOpen -- (fixesUI) not through a menu
 	R.list.Visible = listOpen and ctx ~= ""
 	if not R.list.Visible then
 		return
@@ -937,6 +937,14 @@ function AllyController.Start()
 				target = t
 			end
 			updateOfferLine()
+			-- (fixesUI) the ALLIES word never shows through an open menu (the hub, Daily, Settings ...): it hides while
+			-- one is up (the quiet list itself counts: it takes the word's place) and comes back when the last one closes
+			if R.entry then
+				local entryWanted = myContext() == "prep" and not ClientState.launchShot and not ClientState.menuOpen
+				if R.entry.Visible ~= entryWanted then
+					R.entry.Visible = entryWanted
+				end
+			end
 			-- offers that ran out
 			local now = os.clock()
 			for id, o in pairs(offersIn) do

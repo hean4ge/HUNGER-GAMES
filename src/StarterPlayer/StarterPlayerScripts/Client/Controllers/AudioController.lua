@@ -544,7 +544,8 @@ local function playKey(key: string, opts: { [string]: any }?)
 	else
 		sound.PlaybackRegionsEnabled = false
 		sound.TimePosition = 0
-		duration = lengthOf[id] or 2.5
+		-- (a streamed sting, not preloaded, has no measured length yet: hold its voice for its maxLifetime)
+		duration = lengthOf[id] or (if sound.TimeLength > 0 then sound.TimeLength else nil) or entry.maxLifetime or 2.5
 	end
 	sound:Play()
 	local now = os.clock()
@@ -1677,14 +1678,19 @@ local function preload()
 			end
 		end
 	end
-	for _, entry in pairs(Sounds) do
-		if type(entry) == "table" and not entry.looped then
-			for _, id in ipairs(entry.ids or {}) do
-				add(id)
-			end
-			if type(entry.regions) == "table" then
-				for _, r in ipairs(entry.regions) do
-					add(r.id)
+	-- then the menus' clicks (the lobby uses them first), then the rest of the SFX. Nothing in the Music group: the
+	-- beds stream as they fade in, and the long stings (Victory, Sting_Defeat, 16 to 17 s each) stream too, so they
+	-- never sit in the queue ahead of a footstep (loadscreen, wave 20).
+	for _, wantGroup in ipairs({ "UI", "SFX", "Ambience" }) do
+		for _, entry in pairs(Sounds) do
+			if type(entry) == "table" and not entry.looped and entry.group == wantGroup then
+				for _, id in ipairs(entry.ids or {}) do
+					add(id)
+				end
+				if type(entry.regions) == "table" then
+					for _, r in ipairs(entry.regions) do
+						add(r.id)
+					end
 				end
 			end
 		end

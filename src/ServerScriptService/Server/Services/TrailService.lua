@@ -16,6 +16,13 @@
 	  server -> client  ("line", text)           one quiet line for the shop (not enough Gold, ...)
 	                    ("bought", id)           it is yours
 
+	Emotes and launch effects (the shop's "Emote" and "Launch effect" items, Econ.Shop.Equipped, ShopService): mirrored
+	here to the player attributes EquippedEmote / EquippedLaunchFx (Shared.EmoteFx; "" = none), checked every 2 s, so
+	every client can draw them (LaunchIntroController plays the launch effect on the rise). Studio only: workspace
+	attributes DevEmote / DevLaunchFx stand in for the shop's equipped ids. On the same remote:
+	  client -> server  ("emote")                play your equipped emote (rate limited; refused in the launch shot)
+	  server -> clients ("emote", userId, id)    everyone near draws it on that character (Shared.EmoteFx)
+
 	API (for the Loadout: LoadoutSet carries trails = { swing, arrow, throw })
 	  TrailService.owns(player, id) -> boolean
 	  TrailService.equip(player, slot, id) -> boolean     checks ownership and the slot; saves with the next write
@@ -29,6 +36,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
 local Trails = require(Shared:WaitForChild("Trails"))
+local EmoteFx = require(Shared:WaitForChild("EmoteFx"))
 
 local TrailService = {}
 
@@ -228,7 +236,53 @@ function TrailService.grant(player: Player, id: string): boolean
 	return true
 end
 
+-- the shop's equipped emote and launch effect, as attributes every client reads (Shared.EmoteFx)
+local function mirrorCosmetics(player: Player)
+	local shop = Services and Services.ShopService
+	local equipped = nil
+	if shop and type(shop.equipped) == "function" then
+		local ok, value = pcall(shop.equipped, player)
+		equipped = if ok and type(value) == "table" then value else nil
+	end
+	local emote = equipped and equipped["Emote"]
+	local launch = equipped and equipped["Launch effect"]
+	if game:GetService("RunService"):IsStudio() then
+		-- (Studio tests: workspace attributes DevEmote / DevLaunchFx stand in for the shop's equipped ids)
+		emote = workspace:GetAttribute("DevEmote") or emote
+		launch = workspace:GetAttribute("DevLaunchFx") or launch
+	end
+	emote = if type(emote) == "string" and EmoteFx.EMOTES[emote] then emote else ""
+	launch = if type(launch) == "string" and EmoteFx.LAUNCH[launch] then launch else ""
+	if player:GetAttribute(EmoteFx.EMOTE_ATTR) ~= emote then
+		player:SetAttribute(EmoteFx.EMOTE_ATTR, emote)
+	end
+	if player:GetAttribute(EmoteFx.LAUNCH_ATTR) ~= launch then
+		player:SetAttribute(EmoteFx.LAUNCH_ATTR, launch)
+	end
+end
+
+local function onEmote(player: Player)
+	if not Net.rateLimit(player, "Emote", 0.5, 2) then
+		return
+	end
+	mirrorCosmetics(player)
+	local id = player:GetAttribute(EmoteFx.EMOTE_ATTR)
+	if type(id) ~= "string" or id == "" or not remote then
+		return
+	end
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then
+		return
+	end
+	remote:FireAllClients("emote", player.UserId, id)
+end
+
 local function onRequest(player: Player, action: any, a: any, b: any)
+	if action == "emote" then
+		onEmote(player)
+		return
+	end
 	if not Net.rateLimit(player, "Trails", 4, 6) then
 		return
 	end
@@ -290,6 +344,14 @@ function TrailService.Start()
 	end
 	Players.PlayerRemoving:Connect(function(player)
 		busy[player] = nil
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(2)
+			for _, player in ipairs(Players:GetPlayers()) do
+				pcall(mirrorCosmetics, player)
+			end
+		end
 	end)
 end
 

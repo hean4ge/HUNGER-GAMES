@@ -9,16 +9,18 @@
 	    with a soft bloom, settles as the eyes adjust. The exposure (Lighting.ExposureCompensation) and the "Bloom"
 	    effect are raised on top of the day cycle's own values and taken off again; the cover's pale warm colour is the
 	    tint.
+	Owner, 20 Nov: "slightly blinded by the sun's rays like in the film" on arriving, wherever the camera faces. So by
+	day the arrival is a brief whiteout and bloom whichever way you look: the exposure, the bloom, a grade of its own
+	("LaunchGlareGrade": Brightness up, contrast and saturation down, a warm tint) and the sun rays (SunRays Intensity
+	and Spread) all ramp up under the cover and ease off together over about 1.5 s.
 	It follows the real sun (Lighting:GetSunDirection() at the arena's hour, read every frame):
 	  strength = how high the sun is  x  the cloud  x  how far you look toward it  x  shade
 	    sun height   0 below the horizon, full from about 13 degrees up (a round starts at 07:24 with the sun 19 up)
 	    cloud        1 up to the day cycle's usual cover (0.6), down to 0.4 under a closed sky
-	    toward it    1 looking at the sun, 0.3 with it beside or behind you (everyone gets a little)
-	    shade        0.55 when something solid stands between your eyes and the sun (one raycast, a moment in)
-	  A strong glare (daylight, facing the sun) lifts the exposure by EXPOSURE stops and takes 2 s to settle; a gentle
-	  one (dawn, cloud, the sun behind you) lifts it a little and takes 1.5 s; at night nothing is lifted and the
-	  cover, dark then, clears in under a second. Turning away during the fall lets it go faster; turning toward the
-	  sun never brings it back up (the level only ever falls).
+	    toward it    1 looking at the sun, 0.8 with it beside or behind you (the whiteout comes wherever you look)
+	    shade        0.85 when something solid stands between your eyes and the sun (one raycast, a moment in)
+	  By day it takes 1.4 s (gentle) to 1.7 s (strong) to settle; at night nothing is lifted and the cover, dark then,
+	  clears in under a second. Turning toward the sun never brings it back up (the level only ever falls).
 	"Shaders: Off" (opts.bloom = false; there is no bloom, and that player asked for a plain picture): nothing in
 	Lighting is touched. The same pale cover fades by itself over the same time, a plain fade.
 	The day cycle (ArenaController.Sky) writes its look on Heartbeat and remembers what it wrote; this module writes on
@@ -56,16 +58,24 @@ local IS_STUDIO = RunService:IsStudio()
 local PEAK = 0.95 -- the cover's alpha at the cut: near white, the picture still just there
 local DAY_COLOR = Color3.fromRGB(255, 247, 234) -- a pale warm white: the faint warm tint
 local NIGHT_COLOR = Color3.fromRGB(10, 13, 22) -- at night the cut passes through the dark, with no light at all
-local EXPOSURE = 1.3 -- stops added at full strength, at the cut (under the cover: what shows is its fall)
-local BLOOM_INTENSITY = 0.8 -- added to the bloom's Intensity at full strength
+local EXPOSURE = 1.7 -- stops added at full strength, at the cut (under the cover: what shows is its fall)
+local BLOOM_INTENSITY = 1.3 -- added to the bloom's Intensity at full strength
 local BLOOM_THRESHOLD = 0.9 -- taken off its Threshold at full strength (the day's 1.9 becomes 1.0: sky and lit ground glow)
 local BLOOM_THRESHOLD_MIN = 0.7
-local BLOOM_SIZE = 12 -- added to its Size at full strength (never over the shader tier's own cap)
+local BLOOM_SIZE = 22 -- added to its Size at full strength (never over the shader tier's own cap)
 local SUN_FULL = 0.25 -- the sun direction's Y from which the daylight counts as full (about 13 degrees up)
-local SHADE = 0.55 -- strength left when something solid hides the sun
+local SHADE = 0.85 -- strength left when something solid hides the sun
 local RAY = 3000 -- studs the shade test looks toward the sun
 local GRACE = 0.15 -- seconds in which the strength may still be set (the first frames after the cut, under the cover)
 local TRUST_FRAMES = 3 -- after a shot the sky's own look is taken from this frame on
+local TOWARD_MIN = 0.8 -- strength left with the sun behind you (owner: blinded wherever the camera faces)
+-- the glare's own grade on top of the arena's (a separate ColorCorrection, so the day cycle's ArenaGrade is never touched)
+local GRADE_NAME = "LaunchGlareGrade"
+local GRADE_BRIGHTNESS = 0.32
+local GRADE_CONTRAST = -0.28
+local GRADE_SATURATION = -0.3
+local GRADE_TINT = Color3.fromRGB(255, 240, 214) -- warm: sunlight in the eyes
+local RAYS_INTENSITY = 0.35 -- added to the SunRays' Intensity at full strength (they show where the sun is on screen)
 
 local Glare = {}
 
@@ -209,13 +219,34 @@ local function measure(g): number
 		local ok, hit = pcall(shaded, cam.CFrame.Position, sun)
 		g.shade = ok and hit == true
 	end
-	local toward = 0.3 + 0.7 * smooth((dot + 0.1) / 0.9)
+	local toward = TOWARD_MIN + (1 - TOWARD_MIN) * smooth((dot + 0.1) / 0.9)
 	return clamp01(day * g.cloud * toward * (if g.shade then SHADE else 1))
 end
 
--- seconds the fall takes: 1.5 (gentle) to 2 (strong) by day, under a second at night
+-- seconds the fall takes: 1.4 (gentle) to 1.7 (strong) by day, under a second at night
 local function duration(day: number, strength: number): number
-	return lerp(0.9, lerp(1.5, 2.0, strength), smooth(day / 0.3))
+	return lerp(0.9, lerp(1.4, 1.7, strength), smooth(day / 0.3))
+end
+
+local function sunRays(): SunRaysEffect?
+	local named = Lighting:FindFirstChild("SunRays")
+	if named and named:IsA("SunRaysEffect") then
+		return named
+	end
+	return Lighting:FindFirstChildOfClass("SunRaysEffect")
+end
+
+-- the glare's own grade (made on the first write, destroyed by Glare.finish)
+local function gradeOf(g): ColorCorrectionEffect
+	local cc = g.grade
+	if not cc or not cc.Parent then
+		cc = Instance.new("ColorCorrectionEffect")
+		cc.Name = GRADE_NAME
+		cc.Brightness = 0
+		cc.Parent = Lighting
+		g.grade = cc
+	end
+	return cc
 end
 
 local function write(g, boost: number)
@@ -234,6 +265,25 @@ local function write(g, boost: number)
 		fx.Size = math.min(cap, base.BloomSize + BLOOM_SIZE * boost)
 		fx.Threshold = math.max(math.min(base.BloomThreshold, BLOOM_THRESHOLD_MIN), base.BloomThreshold - BLOOM_THRESHOLD * boost)
 		g.wroteBloom = true
+	end
+	-- the whiteout itself: the picture lifts and washes out, warm, wherever you look
+	local cc = gradeOf(g)
+	cc.Brightness = GRADE_BRIGHTNESS * boost
+	cc.Contrast = GRADE_CONTRAST * boost
+	cc.Saturation = GRADE_SATURATION * boost
+	cc.TintColor = Color3.new(1, 1, 1):Lerp(GRADE_TINT, math.min(1, boost * 1.2))
+	-- the sun's rays: stronger and wider while the eyes adjust
+	local rays = sunRays()
+	if rays and type(base.RaysIntensity) == "number" then
+		if g.raysWasOn == nil then
+			g.raysWasOn = rays.Enabled
+		end
+		rays.Enabled = true
+		rays.Intensity = base.RaysIntensity + RAYS_INTENSITY * boost
+		if type(base.RaysSpread) == "number" then
+			rays.Spread = lerp(base.RaysSpread, 1, boost)
+		end
+		g.wroteRays = true
 	end
 end
 
@@ -296,12 +346,12 @@ function Glare.update(g, dt: number): (number, Color3, boolean)
 	-- whole effect and fades over the full time
 	local alpha
 	if g.bloom then
-		alpha = g.from * (1 - smooth(tau / lerp(0.5, 0.85, strength))) ^ 1.3
+		alpha = g.from * (1 - smooth(tau / lerp(0.55, 0.8, strength))) ^ 1.3
 	else
 		alpha = g.from * lerp(1 - smooth(tau / 0.55), (1 - x) ^ 2, 0.25 + 0.75 * strength)
 	end
-	-- the eyes adjusting: fast at first, then a long soft tail
-	local boost = strength * (1 - x) ^ 2.2
+	-- the eyes adjusting: held bright for a moment, then eased off (owner: "slightly blinded", about 1.5 s)
+	local boost = strength * (1 - smooth(x)) ^ 1.6
 	if not frozen and g.t >= GRACE then
 		-- one rise and one fall: from here the level only ever goes down
 		alpha = math.min(alpha, g.alpha)
@@ -330,6 +380,20 @@ function Glare.finish(g)
 					Lighting.ExposureCompensation = base.Exposure
 				end
 			end)
+			if g.wroteRays then
+				pcall(function()
+					local rays = sunRays()
+					if rays and type(base.RaysIntensity) == "number" then
+						rays.Intensity = base.RaysIntensity
+						if g.raysWasOn ~= nil then
+							rays.Enabled = g.raysWasOn
+						end
+						if type(base.RaysSpread) == "number" then
+							rays.Spread = base.RaysSpread
+						end
+					end
+				end)
+			end
 			if g.wroteBloom then
 				pcall(function()
 					local fx = bloomEffect()
@@ -341,6 +405,12 @@ function Glare.finish(g)
 				end)
 			end
 		end
+	end
+	if g.grade then
+		pcall(function()
+			g.grade:Destroy()
+		end)
+		g.grade = nil
 	end
 	if IS_STUDIO then
 		pcall(function()

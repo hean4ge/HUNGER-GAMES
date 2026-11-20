@@ -17,7 +17,15 @@
 	draws others' Bright trails as Draught). Default All on PC and console, Natural on phones and at the Low tier. Your
 	own trails always show to you.
 
+	Emotes (Shared.EmoteFx): J (gamepad: none yet) plays your equipped emote (player attribute EquippedEmote, mirrored
+	by TrailService from the shop's Equipped). It plays at once on your own character and goes to the server, which
+	relays it to everyone ("emote", userId, id on the Trails remote); a quiet line names it. The game is first person,
+	so while your own emote plays the camera eases out to a three-quarter view of you (your body shown, the first-person
+	arms hidden) and eases back when it ends or you move. Not during the launch shot. With none equipped the line
+	says so.
+
 	API
+	  TrailController.playEmote() -> boolean     (what J does)
 	  TrailController.attachProjectile(itemId, shooterUserId, isLocal, origin, forcedId?) -> handle?
 	      handle:follow(position: Vector3, direction: Vector3)   handle:release()
 	  TrailController.swing(itemId, character: Model?, isLocal: boolean, windup: number, forcedId: string?)
@@ -35,6 +43,14 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
 local Trails = require(Shared:WaitForChild("Trails"))
+local EmoteFx = require(Shared:WaitForChild("EmoteFx"))
+local Input = require(Shared:WaitForChild("Input"))
+local okClientState, ClientState = pcall(function()
+	return require(script.Parent.Parent:WaitForChild("ClientState", 5) :: ModuleScript)
+end)
+if not okClientState then
+	ClientState = nil
+end
 
 local player = Players.LocalPlayer
 
@@ -651,6 +667,131 @@ end
 
 --------------------------------------------------------------------------------------------------------------------
 
+-- Emotes ------------------------------------------------------------------------------------------------------------------
+
+local function quietLine(text: string)
+	local notes = Controllers and Controllers.NotificationController
+	if notes and type(notes.toast) == "function" then
+		pcall(notes.toast, text, nil, 1.6)
+	end
+end
+
+local lastEmoteAt = 0
+local EMOTE_CAM = "TrailEmoteCamera"
+
+local function smooth01(x: number): number
+	x = math.clamp(x, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+-- your own emote seen from outside: a three-quarter view of you while it plays (first person shows nothing of it)
+local function emoteCamera(character: Model)
+	local cam = workspace.CurrentCamera
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not cam or not (root and root:IsA("BasePart")) or not humanoid then
+		return
+	end
+	pcall(function()
+		RunService:UnbindFromRenderStep(EMOTE_CAM)
+	end)
+	local savedType = cam.CameraType
+	local fromCF = cam.CFrame
+	local t0 = os.clock()
+	local ending: number? = nil
+	local endFrom: CFrame? = nil
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { character }
+	local function goal(): CFrame
+		local flat = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+		local dir = CFrame.Angles(0, math.rad(-28), 0) * (if flat.Magnitude > 0.1 then flat.Unit else Vector3.zAxis)
+		local from = root.Position + Vector3.yAxis * 1.2
+		local dist = 9
+		local hit = workspace:Spherecast(from, 0.6, dir * dist, params)
+		if hit then
+			dist = math.max(3, hit.Distance - 0.4)
+		end
+		return CFrame.lookAt(from + dir * dist + Vector3.yAxis * 0.6, root.Position + Vector3.yAxis * 0.1)
+	end
+	local function setLocal(container: Instance?, value: number)
+		if container then
+			for _, d in ipairs(container:GetDescendants()) do
+				if d:IsA("BasePart") or d:IsA("Decal") then
+					d.LocalTransparencyModifier = value
+				end
+			end
+		end
+	end
+	cam.CameraType = Enum.CameraType.Scriptable
+	RunService:BindToRenderStep(EMOTE_CAM, Enum.RenderPriority.Camera.Value + 3, function()
+		local playing = EmoteFx.isPlaying(character) and character.Parent ~= nil and humanoid.Health > 0
+			and not (ClientState and ClientState.launchShot)
+		if not playing and not ending then
+			ending = os.clock()
+			endFrom = cam.CFrame
+		end
+		if ending then
+			local k = smooth01((os.clock() - ending) / 0.3)
+			local head = character:FindFirstChild("Head")
+			local back = if head and head:IsA("BasePart") then CFrame.new(head.Position) * (fromCF - fromCF.Position) else fromCF
+			cam.CFrame = (endFrom :: CFrame):Lerp(back, k)
+			if k >= 1 or not character.Parent then
+				RunService:UnbindFromRenderStep(EMOTE_CAM)
+				setLocal(cam:FindFirstChild("Viewmodel"), 0)
+				cam.CameraType = if savedType == Enum.CameraType.Scriptable then Enum.CameraType.Custom else savedType
+				cam.CameraSubject = humanoid
+			end
+			return
+		end
+		cam.CameraType = Enum.CameraType.Scriptable
+		cam.CFrame = fromCF:Lerp(goal(), smooth01((os.clock() - t0) / 0.35))
+		setLocal(character, 0)
+		setLocal(cam:FindFirstChild("Viewmodel"), 1)
+	end)
+end
+
+function TrailController.playEmote(): boolean
+	if ClientState and ClientState.launchShot then
+		return false
+	end
+	if UserInputService:GetFocusedTextBox() then
+		return false
+	end
+	local id = player:GetAttribute(EmoteFx.EMOTE_ATTR)
+	if type(id) ~= "string" or id == "" then
+		quietLine("No emote equipped")
+		return false
+	end
+	if os.clock() - lastEmoteAt < 2 then
+		return false
+	end
+	local seconds = EmoteFx.playEmote(player.Character, id)
+	if not seconds then
+		return false
+	end
+	lastEmoteAt = os.clock()
+	quietLine(EmoteFx.emoteName(id) or "Emote")
+	pcall(emoteCamera, player.Character)
+	if remote then
+		remote:FireServer("emote")
+	end
+	return true
+end
+
+local function onEmoteRelay(userId: any, id: any)
+	local other = Players:GetPlayerByUserId(tonumber(userId) or 0)
+	if not other or other == player or not other.Character then
+		return
+	end
+	local root = other.Character:FindFirstChild("HumanoidRootPart")
+	local cam = workspace.CurrentCamera
+	if root and cam and (root.Position - cam.CFrame.Position).Magnitude > 250 then
+		return
+	end
+	EmoteFx.playEmote(other.Character, id)
+end
+
 local function onCombatAction(payload: any)
 	if type(payload) ~= "table" or payload.action ~= "Swing" or payload.cancelled then
 		return
@@ -693,11 +834,27 @@ function TrailController.Start()
 		end)
 	end
 	RunService.Heartbeat:Connect(update)
+	Input.bind("Emote", function(state: Enum.UserInputState)
+		if state == Enum.UserInputState.Begin then
+			local ok, err = pcall(TrailController.playEmote)
+			if not ok then
+				warn("[TrailController] " .. tostring(err))
+			end
+		end
+		return Enum.ContextActionResult.Pass
+	end, { keys = { Enum.KeyCode.J }, priority = 1000 })
 	local folder = ReplicatedStorage:WaitForChild("Remotes")
 	local r = folder:WaitForChild("Trails", 30)
 	if r and r:IsA("RemoteEvent") then
 		remote = r
-		r.OnClientEvent:Connect(function(kind, value)
+		r.OnClientEvent:Connect(function(kind, value, extra)
+			if kind == "emote" then
+				local ok, err = pcall(onEmoteRelay, value, extra)
+				if not ok then
+					warn("[TrailController] " .. tostring(err))
+				end
+				return
+			end
 			if TrailController.lines then
 				TrailController.lines:Fire(kind, value)
 			end

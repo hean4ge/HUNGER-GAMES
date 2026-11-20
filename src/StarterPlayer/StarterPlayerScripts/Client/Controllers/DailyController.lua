@@ -7,9 +7,18 @@
 	It opens by itself once a UTC day, the first time the player is settled in the train with a reward waiting (never
 	in a round, never in the minute after one), otherwise from the menu hub: Controllers.DailyController.open().
 	Public: open(), close(), isOpen(), claimable() -> boolean
+
+	(fixesUI, 20 Nov) Never over the launch shot: while ClientState.launchShot is set the screen is hidden at once and
+	closed (and it never opens by itself then). Never in the way of a fight in the Training Centre's hall: it does not
+	open by itself there, and while it is open there an attack press (left mouse outside the panel, or R2) closes it
+	and passes the same press on to the attack, so nothing is swallowed.
 ]]
+local ContextActionService = game:GetService("ContextActionService")
 local GuiService = game:GetService("GuiService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Cards = require(Shared:WaitForChild("Cards"))
@@ -278,6 +287,61 @@ function DailyController.isOpen(): boolean
 	return screen ~= nil and screen.isOpen()
 end
 
+-- (fixesUI) The Training Centre's hall: TrainingService sets InTraining while the character stands there
+local function inHall(): boolean
+	return Players.LocalPlayer:GetAttribute("InTraining") == true
+end
+
+-- (fixesUI) an attack press while the screen is open in the hall: close it, then let the same press reach the attack
+-- (CombatController's "Attack" binding sits at priority 2000; this one is just above it and always passes)
+local HALL_ACTION = "DailyHallAttack"
+local hallBound = false
+
+local function overPanel(): boolean
+	local panel = screen and screen.panel
+	if not panel then
+		return false
+	end
+	local p = UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
+	local a, s = panel.AbsolutePosition, panel.AbsoluteSize
+	return p.X >= a.X and p.X <= a.X + s.X and p.Y >= a.Y and p.Y <= a.Y + s.Y
+end
+
+local function onHallAttack(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult
+	if state == Enum.UserInputState.Begin and DailyController.isOpen() and inHall() then
+		local mouse = io ~= nil and io.UserInputType == Enum.UserInputType.MouseButton1
+		if not (mouse and overPanel()) then
+			DailyController.close() -- ClientState.menuOpen clears now, before the attack binding sees this press
+		end
+	end
+	return Enum.ContextActionResult.Pass
+end
+
+local function syncGuards()
+	if not screen then
+		return
+	end
+	-- never over the launch shot: hidden at once (no fade), then closed
+	if ClientState.launchShot then
+		if screen.gui.Enabled then
+			screen.gui.Enabled = false
+		end
+		if screen.isOpen() then
+			DailyController.close()
+		end
+	end
+	local want = screen.isOpen() and inHall()
+	if want ~= hallBound then
+		hallBound = want
+		if want then
+			ContextActionService:BindActionAtPriority(HALL_ACTION, onHallAttack, false, 2050,
+				Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2)
+		else
+			ContextActionService:UnbindAction(HALL_ACTION)
+		end
+	end
+end
+
 -- once a UTC day, settled in the train with a reward waiting
 local function maybeAutoOpen()
 	local d = daily()
@@ -286,6 +350,10 @@ local function maybeAutoOpen()
 	end
 	local today = Progression.utcDay()
 	if autoDay == today or not ProgressUI.inTrain() or ClientState.menuOpen or ProgressUI.anyOpen() then
+		return
+	end
+	-- (fixesUI) not in the Training Centre's hall (it would cover the fight) and never over the launch shot
+	if inHall() or ClientState.launchShot then
 		return
 	end
 	if os.clock() - lastArenaAt < 60 or os.clock() - trainSince < 4 then
@@ -331,6 +399,8 @@ function DailyController.Start()
 		end
 		wasInArena = ClientState.inArena
 	end)
+	-- (fixesUI) the launch shot and the hall, every frame (cheap: two attribute reads)
+	RunService.Heartbeat:Connect(syncGuards)
 	while true do
 		task.wait(5)
 		pcall(maybeAutoOpen)

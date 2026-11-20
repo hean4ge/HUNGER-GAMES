@@ -221,6 +221,10 @@ local ATLAS_NAME: { [string]: string } = {
 	unseen = "tr_unseen", quiet_swish = "tr_quiet_swish", sweep = "tr_second_in_arc", heavy_throw = "tr_heavy_throw",
 	firewood = "tr_splits_firewood", reach = "tr_long_reach", big_throw = "tr_big_throw", armour_breaker = "tr_armour_breaker",
 	spin_throw = "tr_spinning_throw", flat_throw = "tr_flat_throw", climb = "tr_climb", draw_range = "tr_draw_range",
+	-- (fixesUI, 20 Nov) survival items with a fitting drawn cell: the Forager's cell is a sprig of berries, the Medic's a
+	-- white kit with a cross. close, plus, edit, apple, water, herbs, dried meat, arrow and throwing knife have no cell on
+	-- the sheets yet and keep their Frame glyphs.
+	berries = "kit_forager", bandage = "kit_medic",
 }
 -- weapon and general skills: "whirl" -> "sk_whirl"
 for _, n in ipairs({ "head_kick", "chained_strikes", "running_cut", "whirl", "vault_kick", "ricochet", "piercing_shot",

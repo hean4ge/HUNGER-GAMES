@@ -19,6 +19,8 @@ local Rewards = require(Shared:WaitForChild("Rewards"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local QuietUI = require(Shared:WaitForChild("QuietUI"))
 
+local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
+
 local player = Players.LocalPlayer
 
 local CurrencyController = {}
@@ -201,7 +203,11 @@ local function step()
 	if not l then
 		return
 	end
-	local show = inTrain() and player:GetAttribute("Gold") ~= nil
+	-- (fixesUI) not through an open menu (the hub, Daily, Season, Ranks, Settings, the Shop: the menus that deal in Gold
+	-- show it themselves)
+	local shop = Controllers and Controllers.ShopController
+	local menuUp = ClientState.menuOpen == true or (shop ~= nil and shop.isOpen == true)
+	local show = inTrain() and player:GetAttribute("Gold") ~= nil and not menuUp
 	l.Visible = show
 	if not show then
 		return

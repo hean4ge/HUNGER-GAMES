@@ -80,6 +80,7 @@ local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local Set = require(script:WaitForChild("Set"))
 local Figures = require(script:WaitForChild("Figures"))
 local Glare = require(script:WaitForChild("Glare"))
+local EmoteFx = require(Shared:WaitForChild("EmoteFx"))
 
 local GameState = ReplicatedStorage:WaitForChild("GameState")
 local localPlayer = Players.LocalPlayer
@@ -1329,6 +1330,133 @@ end
 
 local finish: (reason: string) -> ()
 
+-- The set goes into the workspace a few hundred instances a frame, red room first (wave 20: one Parent write of the
+-- whole 1,500 to 2,000 part set made the red room's first frame 202 ms). planAttach takes every instance under the
+-- set's rooms off its parent while the set is still outside the workspace (cheap there), then parents the near-empty
+-- set; stepAttach puts them back in order, parents before children, within ATTACH_BUDGET seconds a frame. The screen
+-- stays black until the red room is whole (s.readyT). flushAttach puts back whatever is left (a shot that ends early).
+local ATTACH_BUDGET = 0.004
+local WARM_FRAMES = 3 -- frames the camera looks over the hall under the opening black (stepShot)
+local function planAttach(s)
+	local queue = {}
+	local redCount = 0
+	local roots = set.model:GetChildren()
+	table.sort(roots, function(a, b)
+		return (a.Name == "RedRoom" and 0 or 1) < (b.Name == "RedRoom" and 0 or 1)
+	end)
+	for _, root in ipairs(roots) do
+		local list = { root }
+		local i = 1
+		while i <= #list do
+			for _, c in ipairs(list[i]:GetChildren()) do
+				table.insert(list, c)
+			end
+			i += 1
+		end
+		for j = 2, #list do
+			table.insert(queue, { list[j], list[j].Parent })
+		end
+		if root.Name == "RedRoom" then
+			redCount = #queue
+		end
+	end
+	for j = #queue, 1, -1 do
+		queue[j][1].Parent = nil
+	end
+	s.attach = { queue = queue, i = 1, red = redCount }
+end
+
+local function stepAttach(s, budget: number)
+	local a = s.attach
+	if not a then
+		return
+	end
+	local t0 = os.clock()
+	local q = a.queue
+	while a.i <= #q do
+		local e = q[a.i]
+		e[1].Parent = e[2]
+		a.i += 1
+		if a.i % 16 == 0 and os.clock() - t0 > budget then
+			break
+		end
+	end
+	if a.i > #q then
+		s.attach = nil
+		s.attachDoneT = os.clock() - s.startedAt
+	end
+end
+
+local function redReady(s): boolean
+	local a = s.attach
+	return a == nil or a.i > a.red
+end
+
+local function flushAttach(s)
+	if s.attach then
+		stepAttach(s, math.huge)
+	end
+end
+
+-- Launch effects (the shop's "Launch effect", player attribute EquippedLaunchFx via TrailService; Shared.EmoteFx):
+-- the rise ones (steam, leaves) play round each contender's disc as it climbs, yours and the others'; the arrival ones
+-- (dust ring, banner) on everyone's plinth at the hand-off. Studio: LocalPlayer attribute LS_LaunchFxTest = an id
+-- gives it to you and to every preview contender.
+local function launchFxOf(p: Player?): string?
+	if IS_STUDIO then
+		local test = localPlayer:GetAttribute("LS_LaunchFxTest")
+		if type(test) == "string" and EmoteFx.LAUNCH[test] and (p == nil or p == localPlayer) then
+			return test
+		end
+	end
+	local id = p and p:GetAttribute(EmoteFx.LAUNCH_ATTR)
+	return if type(id) == "string" and EmoteFx.LAUNCH[id] then id else nil
+end
+
+local function riseAnchor(slot: any): () -> CFrame
+	return function()
+		local lift = (slot.riser.Position - slot.riserCF.Position):Dot(slot.cf.UpVector)
+		return slot.cf * CFrame.new(0, slot.riserTop + lift, 0)
+	end
+end
+
+local function startRiseFx(s)
+	s.launchFx = s.launchFx or {}
+	local slots = set.hall.slots
+	local function play(id: string?, slotIndex: number?)
+		local slot = slotIndex and slots[slotIndex]
+		if not id or not slot then
+			return
+		end
+		local seconds = (s.plan.rise[2] - s.plan.rise[1]) * s.scale + 0.5
+		local ok, stop = pcall(EmoteFx.playLaunch, id, "rise", riseAnchor(slot), set.model, seconds)
+		if ok and stop then
+			table.insert(s.launchFx, stop)
+		end
+	end
+	play(launchFxOf(if s.preview then nil else localPlayer), s.mySlot)
+	for _, entry in ipairs(s.contenders) do
+		local id = if entry.player then launchFxOf(entry.player) elseif s.preview then launchFxOf(nil) else nil
+		play(id, entry.slot)
+	end
+end
+
+-- at the hand-off: the arrival effects on everyone's plinth in the arena
+local function arriveFx()
+	for _, p in ipairs(Players:GetPlayers()) do
+		local id = launchFxOf(p)
+		if id and EmoteFx.launchPhases(id).arrive and (p == localPlayer or p:GetAttribute("InArena") == true) then
+			local character = p.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if root and root:IsA("BasePart") and humanoid then
+				local feet = root.CFrame * CFrame.new(0, -(humanoid.HipHeight + root.Size.Y / 2), 0)
+				pcall(EmoteFx.playLaunch, id, "arrive", feet, workspace)
+			end
+		end
+	end
+end
+
 -- your plate is under you (the server has placed you) - the white holds a moment for a late placement
 local function placedOnPlate(): boolean
 	local character = localPlayer.Character
@@ -1383,7 +1511,45 @@ local function stepShot(dt: number)
 			end
 		end
 	end
+	-- the set, a few hundred instances a frame (planAttach)
+	if s.attach then
+		stepAttach(s, ATTACH_BUDGET)
+	end
+	if not s.readyT and redReady(s) then
+		s.readyT = t
+	end
+	-- Warm-up under the opening black (wave 20: the red room's slow frames were the hall's first render and the
+	-- contenders' cases being filled at the dip): once the whole set is in and the copies are made, the cases are
+	-- filled now, and for WARM_FRAMES frames the camera looks over the hall with all its lights on, so the engine's
+	-- first draw of it happens here, behind black, instead of mid-shot. The black lifts after (s.warmEndT).
+	-- (Measured 20 Nov: what is left of the red room's slow frames, 100 to 500 ms between 0.4 and 1.4 s, is the arena
+	-- streaming in round your plinth when the server places you: 45,000 to 50,000 instances, almost all Arena.Scatter's
+	-- plant models within the place's StreamingTargetRadius of 1,024, plus the round's loot. Nothing in the shot. A
+	-- client RequestStreamAroundAsync round the plinth ring in the Intermission did not bring them in: it covers the
+	-- minimum radius only. LS_LaunchStats' "slow" list gives t:ms:instances arrived for each frame over 90 ms.)
+	local warming = false
+	if not s.warmEndT and not s.attach and (not s.copyQueue or #s.copyQueue == 0 or t - s.joinT > 0.8) then
+		if not s.assigned then
+			assignSlots(s)
+		end
+		s.warm = (s.warm or 0) + 1
+		warming = true
+		if s.warm >= WARM_FRAMES then
+			s.warmEndT = t
+		end
+	end
 	local camCF, fov, stage = evaluate(s, t)
+	if warming then
+		local hall = set.hall
+		local lights = hall.lights
+		lights.hub.Enabled, lights.gantry.Enabled, lights.rider.Enabled, lights.riderFill.Enabled = true, true, true, true
+		s.lightStage = nil -- (setStageLights puts the stage's own lights back next frame)
+		local O = hall.origin
+		local yaw = (s.warm - 1) * (2 * math.pi / WARM_FRAMES)
+		local eye = O * CFrame.Angles(0, yaw, 0) * Vector3.new(0, 40, hall.slotRadius * 0.35)
+		camCF = CFrame.lookAt(eye, O * CFrame.Angles(0, yaw, 0) * Vector3.new(0, 0, -hall.slotRadius))
+		fov = 100
+	end
 	cam.CameraType = Enum.CameraType.Scriptable
 	cam.CFrame = camCF
 	cam.FieldOfView = fov
@@ -1419,8 +1585,12 @@ local function stepShot(dt: number)
 	-- the screen: fades, the letterbox, the skip prompt
 	local dip = plan.dip * k
 	local black = 0
-	if t - s.joinT < 0.6 then
-		black = 1 - smooth((t - s.joinT - 0.3) / 0.3) -- black a moment while the set settles in, then fade in
+	-- black while the red room goes in and a moment after (the set settles in), then fade in
+	local ready = s.warmEndT
+	if not ready or warming then
+		black = 1
+	elseif t - math.max(s.joinT, ready) < 0.6 then
+		black = 1 - smooth((t - math.max(s.joinT + 0.3, ready + 0.1)) / 0.3)
 	end
 	if t > dip - 0.1 and t < dip + 0.35 then
 		black = math.max(black, if t < dip then smooth((t - dip + 0.1) / 0.1) else 1 - smooth((t - dip - 0.06) / 0.28))
@@ -1446,6 +1616,13 @@ local function stepShot(dt: number)
 	holdGuis(s)
 	if not frozen then
 		updateSound(s, t)
+		if not s.fired.launchFx and stage == "Rise" and t >= plan.rise[1] * k then
+			s.fired.launchFx = true
+			local okFx, fxErr = pcall(startRiseFx, s)
+			if not okFx then
+				warn("[LaunchIntroController] launch effect failed: " .. tostring(fxErr))
+			end
+		end
 		local st = s.stats[stage]
 		if not st then
 			st = { n = 0, sum = 0, max = 0 }
@@ -1453,7 +1630,18 @@ local function stepShot(dt: number)
 		end
 		st.n += 1
 		st.sum += dt
-		st.max = math.max(st.max, dt)
+		if dt > st.max then
+			st.max = dt
+			st.maxAt = t
+		end
+		if dt > 0.09 and #s.slowFrames < 12 then
+			-- t : ms : instances that arrived in the game since the last frame (replication, other controllers)
+			table.insert(s.slowFrames, string.format("%.2f:%d:%d", t, math.floor(dt * 1000 + 0.5), s.arrived or 0))
+		end
+		s.arrived = 0
+		if #s.firstFrames < 8 then
+			table.insert(s.firstFrames, math.floor(dt * 10000 + 0.5) / 10)
+		end
 	end
 end
 
@@ -1510,6 +1698,9 @@ finish = function(reason: string)
 	try("render", function()
 		RunService:UnbindFromRenderStep(RENDER_NAME)
 	end)
+	if s.arrivedConn then
+		s.arrivedConn:Disconnect()
+	end
 	try("skip", function()
 		Input.unbind(SKIP_ACTION)
 	end)
@@ -1520,6 +1711,14 @@ finish = function(reason: string)
 	end)
 	try("arms", function()
 		armsStop(s)
+	end)
+	try("launchFx", function()
+		for _, stop in ipairs(s.launchFx or {}) do
+			stop()
+		end
+		if reason == "handoff" then
+			arriveFx()
+		end
 	end)
 	try("camera", function()
 		local cam = workspace.CurrentCamera
@@ -1565,6 +1764,7 @@ finish = function(reason: string)
 			setStageLights(s, "None")
 			set.hall.lights.hub.Enabled = false
 			set.model.Parent = nil
+			flushAttach(s)
 		end
 	end)
 	try("overlay", function()
@@ -1579,13 +1779,16 @@ finish = function(reason: string)
 		end
 	end)
 	try("stats", function()
-		local out = { cut = s.cut, reason = reason, preview = s.preview, parts = set and set.parts, detail = set and set.detail }
+		local out = { cut = s.cut, reason = reason, preview = s.preview, parts = set and set.parts, detail = set and set.detail,
+			begin = s.beginMs, firstFrames = s.firstFrames, slow = s.slowFrames, attachDone = s.attachDoneT,
+			readyT = s.readyT, warmEndT = s.warmEndT }
 		for stage, st in pairs(s.stats) do
 			if st.n > 0 then
 				out[stage] = {
 					frames = st.n,
 					fps = math.floor(st.n / math.max(st.sum, 1e-3) * 10 + 0.5) / 10,
 					worstMs = math.floor(st.max * 10000 + 0.5) / 10,
+					worstAt = st.maxAt and math.floor(st.maxAt * 100 + 0.5) / 100,
 				}
 			end
 		end
@@ -1616,10 +1819,26 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 		joinT = math.max(0, t0), startedAt = os.clock(), lastRender = os.clock(), reduced = reducedMotion(),
 		skipText = skipText(),
 		sky = { color = WHITE, peak = 0.95, cloud = 1, day = 1 }, flood = 1, cover = 0, -- (until Glare.sky is read below)
+		firstFrames = {}, slowFrames = {},
 		saved = { cameraType = cam.CameraType, subject = cam.CameraSubject, cframe = cam.CFrame, fov = cam.FieldOfView },
 	}
 	shot = s
 	ClientState.launchShot = true
+	-- (Studio: what the start costs, step by step, in ms; reported in LS_LaunchStats as "begin")
+	local mark0 = os.clock()
+	s.beginMs = {}
+	local function mark(label: string)
+		local t1 = os.clock()
+		s.beginMs[label] = math.floor((t1 - mark0) * 10000 + 0.5) / 10
+		mark0 = t1
+	end
+	if IS_STUDIO then
+		-- (Studio: instances arriving per frame during the shot, for the slow-frame list in LS_LaunchStats)
+		s.arrived = 0
+		s.arrivedConn = game.DescendantAdded:Connect(function()
+			s.arrived += 1
+		end)
+	end
 	local ok, err = pcall(function()
 		-- who else is in the round (their stand-ins are made while the red room plays)
 		if preview then
@@ -1642,6 +1861,7 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 		end
 		-- (a glare still falling from the last shot comes off first: the lighting kept below must be the day cycle's)
 		stopGlare()
+		mark("contenders")
 		takeLighting(s)
 		s.profiles = shotProfiles()
 		s.bloom = shaderTier() ~= "Off"
@@ -1655,14 +1875,21 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 		fadeToken += 1 -- (a fade still running from the last shot stops here)
 		setFade(BLACK, 1)
 		setLetterbox(1)
+		mark("lightingGui")
+		if not (IS_STUDIO and localPlayer:GetAttribute("LS_LaunchAttachOff") == true) then
+			planAttach(s) -- (Studio: LS_LaunchAttachOff = true parents the set in one write, as before, to compare)
+		end
 		set.model.Parent = workspace
+		mark("parentSet")
 		s.me = Figures.copy(localPlayer.Character) or Figures.plain(localPlayer.UserId)
 		s.me.place(set.red.origin * CFrame.new(0, set.red.liftTop, 0) * CFrame.Angles(0, math.pi, 0))
 		s.me.model.Parent = set.model
 		pcall(s.me.secure)
 		pcall(s.me.play, IDLE_ID)
 		s.me.fade(1) -- (first person: never drawn; it gives the height of your eyes)
+		mark("me")
 		armsStart(s)
+		mark("arms")
 		Input.bind(SKIP_ACTION, function(state: Enum.UserInputState)
 			if state == Enum.UserInputState.Begin then
 				skipHeldSince = os.clock()

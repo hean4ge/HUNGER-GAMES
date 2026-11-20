@@ -564,16 +564,53 @@ local function framing(): CFrame?
 	end
 	local cf = root.CFrame
 	local f = cf.LookVector
-	local around = CFrame.Angles(0, math.rad(-26), 0) * f -- three-quarter, from the avatar's right-front
-	local dist = 11.5
-	-- never past a wall: the eye stops short of the first thing between it and the avatar
+	-- Three-quarter, from the avatar's right-front (26 degrees round), 11.5 studs out, unless something visible stands
+	-- in the way: a thick probe (a 0.9-stud sphere, so a door frame's posts and lintel count, not only what the centre
+	-- line hits) from the feet, the chest and above the head toward each candidate eye. The first view with the whole
+	-- line clear wins; otherwise the one with the most room (wave 20: the eye had stopped beyond the Lounge's doorway,
+	-- with the frame across the avatar). Invisible walls and glass are looked through.
+	local WANT = 11.5
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character }
-	local hit = workspace:Raycast(root.Position + Vector3.yAxis * 1.9, around * dist, params)
-	if hit then
-		dist = math.max(hit.Distance - 0.6, 4)
+	local function clearance(from: Vector3, dir: Vector3): number
+		local ignore: { Instance } = { character }
+		if held then
+			table.insert(ignore, held)
+		end
+		local start, travelled = from, 0
+		for _ = 1, 6 do
+			params.FilterDescendantsInstances = ignore
+			local hit = workspace:Spherecast(start, 0.9, dir * (WANT + 1 - travelled), params)
+			if not hit then
+				return WANT + 1
+			end
+			local inst = hit.Instance
+			if inst:IsA("BasePart") and (inst.Transparency >= 0.6 or inst.LocalTransparencyModifier >= 0.6) then
+				table.insert(ignore, inst)
+			else
+				return travelled + hit.Distance
+			end
+		end
+		return travelled
 	end
+	local best, bestRoom, bestScore = -26, 0, -math.huge
+	for _, deg in ipairs({ -26, -18, -34, -10, -42, -2, -50, 6 }) do
+		local dir = CFrame.Angles(0, math.rad(deg), 0) * f
+		local room = math.huge
+		for _, h in ipairs({ 0.2, 1.9, 3.4 }) do
+			room = math.min(room, clearance(root.Position + Vector3.yAxis * h, dir))
+		end
+		local score = math.min(room, WANT) - math.abs(deg + 26) * 0.03
+		if room >= WANT then
+			best, bestRoom = deg, room
+			break
+		end
+		if score > bestScore then
+			best, bestRoom, bestScore = deg, room, score
+		end
+	end
+	local around = CFrame.Angles(0, math.rad(best), 0) * f
+	local dist = math.clamp(bestRoom - 0.4, 4, WANT)
 	local eye = root.Position + around * dist + Vector3.yAxis * 1.9
 	local look = CFrame.lookAt(eye, root.Position + Vector3.yAxis * 0.2)
 	-- the avatar sits in the middle of the left part of the picture (the rows take the right): aim to its left (the

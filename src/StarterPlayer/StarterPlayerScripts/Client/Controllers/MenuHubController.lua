@@ -430,6 +430,56 @@ end
 -- The hub
 --------------------------------------------------------------------------------------------------------------------
 
+-- (fixesUI, 20 Nov) the gamepad focus on a hub card: Style A "Quiet", a thin Sun (amber) line just outside the card
+-- and a faint Ink line a little further out, no fill. The engine's own SelectionImageObject did not show in the last
+-- check, so the ring is the card's own child, shown while the card holds GuiService.SelectedObject (SelectionGained /
+-- SelectionLost); the card's SelectionImageObject is an empty Frame so the engine adds no second outline.
+local function focusRing(): Frame
+	local root = Instance.new("Frame")
+	root.Name = "HubFocus"
+	root.BackgroundTransparency = 1
+	root.BorderSizePixel = 0
+	root.Size = UDim2.fromScale(1, 1)
+	local function line(name: string, out: number, color: Color3, transparency: number, thick: number, radius: number)
+		local f = Instance.new("Frame")
+		f.Name = name
+		f.BackgroundTransparency = 1
+		f.BorderSizePixel = 0
+		f.Position = UDim2.fromOffset(-out, -out)
+		f.Size = UDim2.new(1, out * 2, 1, out * 2)
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0, radius)
+		c.Parent = f
+		local st = Instance.new("UIStroke")
+		st.Color = color
+		st.Transparency = transparency
+		st.Thickness = thick
+		st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		st.Parent = f
+		f.Parent = root
+	end
+	line("Amber", 3, C.Sun, 0, 1.5, 10)
+	line("Ink", 6, C.Ink, 0.7, 1, 13)
+	return root
+end
+
+-- the focus goes on the first card when a gamepad is in use and nothing in the hub holds it yet
+local function focusHub(force: boolean?)
+	if not (hub and hub.isOpen()) then
+		return
+	end
+	local sel = GuiService.SelectedObject
+	if sel and sel:IsDescendantOf(hub.gui) then
+		return
+	end
+	if force or Input.isGamepad() then
+		local first = hubCards.loadout
+		if first and first.Parent then
+			GuiService.SelectedObject = first
+		end
+	end
+end
+
 local function fillHub()
 	if not hub then
 		return
@@ -512,6 +562,24 @@ local function fillHub()
 				factLabel.TextColor3 = C.Sun
 			end
 		end
+		local ring = focusRing()
+		ring.Name = "FocusRing"
+		ring.Visible = GuiService.SelectedObject == card
+		ring.ZIndex = 50
+		ring.Parent = card
+		card.SelectionGained:Connect(function()
+			ring.Visible = true
+		end)
+		card.SelectionLost:Connect(function()
+			ring.Visible = false
+		end)
+		local blank = Instance.new("Frame")
+		blank.Name = "NoEngineRing"
+		blank.BackgroundTransparency = 1
+		blank.BorderSizePixel = 0
+		blank.Size = UDim2.fromScale(0, 0)
+		card.SelectionImageObject = blank
+		card.Selectable = true
 		card.Parent = scroll
 		hubCards[key] = card
 	end
@@ -521,10 +589,10 @@ local function fillHub()
 		Cards.hints(hints, { Name = "Hints", AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Parent = body })
 	end
 	hub.sub.Text = if phone then "" else "Everything you choose, own, earn or buy."
-	if Input.isGamepad() or padOpened then
-		GuiService.SelectedObject = hubCards.loadout
-	end
+	-- (fixesUI) after a frame, so the cards have their place in the opened screen before the engine draws the ring
+	local force = padOpened
 	padOpened = false
+	task.defer(focusHub, force)
 end
 
 function MenuHubController.isOpen(): boolean
@@ -701,6 +769,7 @@ function MenuHubController.Start()
 	Input.deviceChanged:Connect(function()
 		buildBar()
 		paintBar()
+		focusHub() -- (fixesUI) a pad picked up with the hub open: the focus ring shows on its first card
 	end)
 	studioHook()
 
