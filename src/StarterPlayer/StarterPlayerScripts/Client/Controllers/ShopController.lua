@@ -1726,9 +1726,10 @@ layout = function()
 			r.well.Size = UDim2.fromOffset(44, 40)
 			r.name.Position = UDim2.fromOffset(58, 6)
 			r.name.Size = UDim2.fromOffset(sideW - 64, 22)
-			r.name.TextSize = 15
-			r.name.TextWrapped = false
 			r.name.Text = entryName(e)
+			-- (hunt2_1) "Masterwork Strongbox" was cut to "Masterwork..." at 15: a long name is set a little smaller
+			r.name.TextSize = if #r.name.Text > 17 then 13 else 15
+			r.name.TextWrapped = false
 			r.priceRow.Position = UDim2.fromOffset(58, 30)
 			r.priceRow.Size = UDim2.fromOffset(sideW - 64, 16)
 			r.count.Position = UDim2.new(1, -8, 0, 30)
@@ -1952,9 +1953,18 @@ local function build()
 	ui.badgeText = label(ui.badge, { Font = "SemiBold", TextSize = 13, TextColor3 = SHADE, TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.fromScale(1, 1), ZIndex = 4 })
 	ui.goldRow = make("Frame", { Name = "Gold", BackgroundTransparency = 1 }, panel)
-	icon("coin", ui.goldRow, { Size = UDim2.fromOffset(16, 16), AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -96, 0.5, 0) })
+	local goldCoin = icon("coin", ui.goldRow, { Size = UDim2.fromOffset(16, 16), AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -96, 0.5, 0) })
 	ui.gold = label(ui.goldRow, { Font = "Mono", TextSize = 22, TextXAlignment = Enum.TextXAlignment.Right, Size = UDim2.new(0, 90, 1, 0),
 		Position = UDim2.new(1, -90, 0, 0) })
+	-- (hunt1_1) the coin sits just left of the number, however short it is ("150" left an 80 px gap)
+	if goldCoin then
+		local function hug()
+			local w = (ui.gold :: TextLabel).TextBounds.X
+			goldCoin.Position = UDim2.new(1, -math.ceil(w) - 8, 0.5, 0)
+		end
+		(ui.gold :: TextLabel):GetPropertyChangedSignal("TextBounds"):Connect(hug)
+		hug()
+	end
 	ui.close = button(panel, "plain", "", { Name = "Close" })
 	icon("close", ui.close, { Size = UDim2.fromOffset(20, 20), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5) })
 	ui.shelfHeader = button(panel, "secondary", "SHELF", { Name = "ShelfHeader", TextSize = 13, Visible = false })

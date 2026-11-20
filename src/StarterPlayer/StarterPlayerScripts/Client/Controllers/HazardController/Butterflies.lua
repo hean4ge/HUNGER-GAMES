@@ -37,6 +37,7 @@ local lastStung = 0
 local stats = { roosts = 0, resting = 0, flying = 0, swarms = 0 }
 
 local TAU = math.pi * 2
+local EYE_BUBBLE = 2.2 -- no flying butterfly comes nearer the camera than this (studs)
 
 local function acquire(ctx): { [string]: any }
 	local b = table.remove(pool)
@@ -234,6 +235,7 @@ local function animateFlyers(ctx, view: { [string]: any }, dt: number, t: number
 	local F = ctx.Look.Butterfly
 	local centre = view.centre
 	local grow = math.clamp((t - (view.bornAt or t)) / 1.4, 0.15, 1) * loose
+	local eye = ctx.camera.Position
 	for _, b in ipairs(view.flyers) do
 		b.follow = b.follow:Lerp(centre, math.min(1, dt * b.rate))
 		local a = t * b.turn + b.phase
@@ -241,6 +243,14 @@ local function animateFlyers(ctx, view: { [string]: any }, dt: number, t: number
 		local c, s = math.cos(a), math.sin(a)
 		local y = b.height * grow + b.bob * math.sin(t * b.bobHz * TAU + b.phase) + s * r * b.tilt
 		local p = b.follow + Vector3.new(c * r, y, s * r)
+		-- the swarm sits on its target, so orbits pass through the target's own head: a wing a few tenths of a stud
+		-- from the eye filled a third of the screen as one flat blue slab (hunt 20 Nov). Kept outside a small bubble
+		-- round the camera, they still swirl close past the view.
+		local fromEye = p - eye
+		local eyeDistance = fromEye.Magnitude
+		if eyeDistance < EYE_BUBBLE then
+			p = eye + (if eyeDistance > 1e-3 then fromEye / eyeDistance else Vector3.yAxis) * EYE_BUBBLE
+		end
 		-- heading: along its orbit, pulled toward where the swarm is going
 		local ahead = Vector3.new(-s * b.turn, b.bob * math.cos(t * b.bobHz * TAU + b.phase) * 0.6, c * b.turn) + (centre - b.follow) * 0.4
 		if ahead.Magnitude < 1e-3 then

@@ -131,7 +131,7 @@ local function build()
 		Position = UDim2.new(0, if phone then 108 else 172, 0.5, if phone then 2 else 8),
 		Size = UDim2.new(0.5, -120, 0, 18), Parent = box })
 	if not phone then
-		local how = Cards.label("about 250 XP a round · placing, defeats and time alive · drills in the Training Centre",
+		local how = Cards.label("about 250 XP a round · placing, defeats, time alive, drills",
 			{ TextSize = 13, Color = Theme.Colors.Ink2, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -268, 0.5, 8),
 				Size = UDim2.new(0.5, -200, 0, 18), Parent = box })
 		how.TextXAlignment = Enum.TextXAlignment.Right

@@ -70,6 +70,18 @@ local HALL_LIGHT = {
 local LOOK: { [string]: Color3 } = {
 	TC_HallShell_Downlight = Color3.fromRGB(255, 240, 220),
 }
+-- the floor's painted layers (one-face meshes) sat 0.01-0.015 apart, so the hall's chequer, the prep floor's track and
+-- its lines z-fought across the room (20 Nov flicker pass). Each layer is lifted to its own 0.03-stud step above the
+-- floor (top 0): tile 0.03, track and range line 0.06, prep lines 0.09; door and platform edge lines 0.04.
+-- Visual only (the colliders are unchanged, feet stand on the floor collider).
+local FLOOR_LIFT: { [string]: number } = {
+	TC_HallShell_FloorTile = 0.0155, -- 0.0145 -> 0.030
+	TC_PrepFloor_Track = 0.0305, -- 0.0295 -> 0.060
+	TC_Archery_Line = 0.0305, -- 0.0295 -> 0.060
+	TC_PrepFloor_Line = 0.048, -- 0.042 (0.040 .. 0.045) -> 0.090
+	TC_LaunchDoors_Line = 0.02, -- 0.020 -> 0.040 (the corridor floor)
+	TC_Platform_PlatEdge = 0.02, -- 0.020 -> 0.040 (the platform's yellow edge)
+}
 -- roles still built from Parts in mesh mode (asset -> role): TC.prepare moves the slide bar on its own
 local MESH_AS_PARTS: { [string]: { [string]: boolean } } = {
 	TC_PrepFloor = { Use = true, DarkSteel = true },
@@ -510,7 +522,7 @@ function TC.build(opts: { [string]: any }?): string
 							for _, c in ipairs(p:GetChildren()) do
 								c:Destroy()
 							end
-							p.CFrame = frame * CFrame.new(v3(spec.p)) * ROT
+							p.CFrame = frame * CFrame.new(v3(spec.p)) * ROT + Vector3.new(0, FLOOR_LIFT[spec.n] or 0, 0)
 							styleVisual(p, spec)
 							if assetName == "TC_Dummy" and string.match(spec.n, "^TC_Dummy_(.+)$") then
 								p.Name = string.match(spec.n, "^TC_Dummy_(.+)$")

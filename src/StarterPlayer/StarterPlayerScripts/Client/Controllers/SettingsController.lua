@@ -162,7 +162,7 @@ local function allControlsFor(device: string): { { string } }
 			{ "While guarding: tap Attack to kick · hold to throw", g(K.ButtonL2) .. " + " .. g(K.ButtonR2) },
 			{ "Dodge (while guarding)", g(K.ButtonL2) .. " + " .. g(K.ButtonA) },
 			{ "Weapon skill · general skill", g(K.DPadLeft) .. " · " .. g(K.DPadRight) },
-			{ "Loadout (train · Training Centre)", g(K.DPadRight) .. " · " .. g(K.ButtonSelect) },
+			{ "Prepare: kit, skills, trail", g(K.DPadRight) .. " · " .. g(K.ButtonSelect) },
 			{ "Drink · fill · pick up · open", g(K.ButtonX) },
 			{ "Crouch (" .. modeWord("crouchModePad", MODE2) .. ") · quieter steps · slide while sprinting", g(K.ButtonB) },
 			{ "Let go of a climb", g(K.ButtonB) },
@@ -213,7 +213,7 @@ local function allControlsFor(device: string): { { string } }
 		{ "While guarding: tap Attack to kick · hold to throw", "Right + left click" },
 		{ "Dodge", "Q · Space while guarding" },
 		{ "Weapon skill · general skill", "R · F" },
-		{ "Loadout (train · hall)", "L" },
+		{ "Prepare: kit, skills, trail", "L" },
 		{ "How to play (show / hide)", "H" },
 		{ "Drink · fill a bottle (at water)", "E" },
 		{ "Pick up · open crates", "E" },
@@ -983,6 +983,25 @@ function SettingsController.Start()
 	local bg = panel:FindFirstChild("Bg")
 	if bg then
 		bg.Active = true
+		-- (hunt2_1) the menu's own card panel (as Daily, Season, Cases have): the rows were white text straight over
+		-- the world and only just readable over the bright train
+		if bg:IsA("Frame") then
+			local Cards = require(Shared:WaitForChild("Cards")) :: any
+			bg.BackgroundColor3 = Cards.Surface.Panel.color
+			bg.BackgroundTransparency = Cards.Surface.Panel.transparency
+			if not bg:FindFirstChildOfClass("UICorner") then
+				local c = Instance.new("UICorner")
+				c.CornerRadius = UDim.new(0, Cards.Corner.Panel)
+				c.Parent = bg
+			end
+			if not bg:FindFirstChildOfClass("UIStroke") then
+				local st = Instance.new("UIStroke")
+				st.Color = Cards.Surface.Edge.color
+				st.Transparency = Cards.Surface.Edge.transparency
+				st.Thickness = 1.5
+				st.Parent = bg
+			end
+		end
 	end
 	pcall(function()
 		playerGui.SelectionImageObject = refs.templates.Selection

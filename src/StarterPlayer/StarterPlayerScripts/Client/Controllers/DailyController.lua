@@ -387,6 +387,14 @@ function DailyController.Start()
 	ProgressUI.on("claimed", function(msg)
 		if msg.what == "daily" then
 			Sfx.play("UIClick", { pitch = 0.9 })
+			-- (hunt1_1) nothing is left to do here once today's reward is in: the screen shows CLAIMED for a moment,
+			-- then closes by itself, so the player is not left hunting for the small close button
+			task.delay(1.6, function()
+				local d = daily()
+				if screen and screen.isOpen() and not (d and d.claimable) then
+					DailyController.close()
+				end
+			end)
 		end
 	end)
 	local wasInArena = ClientState.inArena

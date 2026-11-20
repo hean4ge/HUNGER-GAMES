@@ -727,6 +727,16 @@ local function refreshPlayers()
 	if count and count:IsA("TextLabel") then
 		count.Text = tostring(#people)
 	end
+	-- (hunt2_1) the header says where the list is: it read IN THE LOBBY in the Training Centre too
+	local title = header and header:FindFirstChild("Title")
+	if title and title:IsA("TextLabel") then
+		local where = if player:GetAttribute("AtTrainingCentre") == true then "AT THE TRAINING CENTRE"
+			elseif GameState:GetAttribute("Phase") == "Intermission" and GameState:GetAttribute("TrainStage") == "Ride" then "ON THE TRAIN"
+			else "IN THE LOBBY"
+		if title.Text ~= where then
+			title.Text = where
+		end
+	end
 	listCount = #people
 end
 

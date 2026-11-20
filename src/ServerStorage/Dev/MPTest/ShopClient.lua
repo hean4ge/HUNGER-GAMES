@@ -46,7 +46,9 @@ return function(ctx: { [string]: any })
 			C("SeasonController"), C("DailyController"), C("RanksController"), C("SettingsController")
 		add("hub", hub and hub.isOpen())
 		add("cases", shop and shop.isOpen)
-		add("loadout", lo and lo.isOpen())
+		-- (20 Nov) the loadout key, tile and rack open the Prepare screen (kit, skills, trail); the old Loadout is behind it
+		local prep = C("PrepareController")
+		add("loadout", (lo and lo.isOpen()) or (prep and prep.isOpen()))
 		add("inspect", ins and ins.isOpen())
 		add("pass", se and se.isOpen())
 		add("daily", da and da.isOpen())
@@ -70,7 +72,7 @@ return function(ctx: { [string]: any })
 	end
 	local function closeAll()
 		for _, name in ipairs({ "MenuHubController", "ShopController", "LoadoutController", "InspectController", "SeasonController",
-			"DailyController", "RanksController", "SettingsController" }) do
+			"DailyController", "RanksController", "SettingsController", "PrepareController" }) do
 			local c = C(name)
 			if c and type(c.close) == "function" then
 				pcall(c.close)

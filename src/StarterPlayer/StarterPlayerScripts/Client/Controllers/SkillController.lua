@@ -47,6 +47,7 @@ local rows: { [string]: { key: Frame, seconds: TextLabel, name: TextLabel } } = 
 local pending: { [string]: number } = {} -- slot -> os.clock of a press not yet answered (shown as used at once)
 
 local GLYPH = { weapon = "R", general = "F" }
+local touchShown: { [string]: boolean } = {} -- what refreshDisplay last asked of each touch button (cleared on bind)
 
 local function serverNow(): number
 	return workspace:GetServerTimeNow()
@@ -220,6 +221,7 @@ local function bind()
 		return
 	end
 	bound = true
+	table.clear(touchShown) -- new buttons: refreshDisplay sets them again
 	local A = Input.ACTIONS or {}
 	Input.bind("SkillWeapon", onWeapon, {
 		keys = if A.SkillWeapon then A.SkillWeapon.keys else { Enum.KeyCode.R, Enum.KeyCode.DPadLeft },
@@ -292,6 +294,16 @@ local function buildGui()
 end
 
 local function refreshDisplay()
+	-- (hunt1_2, 20 Nov) on touch the two round buttons already show the glyph and the seconds: the R / F key squares
+	-- sat beside them at the screen's right edge as a second, untappable copy. Hidden there (the frame, not the
+	-- ScreenGui, whose Enabled the launch shot holds and gives back).
+	local root = gui and gui:FindFirstChild("Root")
+	if root and root:IsA("GuiObject") then
+		local want = not Input.isTouch()
+		if root.Visible ~= want then
+			root.Visible = want
+		end
+	end
 	local skills = {}
 	for _, slot in ipairs({ "weapon", "general" }) do
 		local info = slotInfo(slot)
@@ -313,6 +325,13 @@ local function refreshDisplay()
 		if bound and Input.isTouch() then
 			local name = if slot == "weapon" then "SkillWeapon" else "SkillGeneral"
 			Input.setTouchLabel(name, if info.id == nil then "" elseif info.seconds > 0.05 then tostring(math.ceil(info.seconds)) else GLYPH[slot])
+			-- (hunt1_2, 20 Nov) no skill for what is in hand (fists, food, a bottle): no button, rather than an empty
+			-- circle over the view that does nothing when tapped
+			local show = info.id ~= nil
+			if touchShown[name] ~= show then
+				touchShown[name] = show
+				Input.setTouchVisible(name, show)
+			end
 		end
 	end
 	ClientState.skills = skills

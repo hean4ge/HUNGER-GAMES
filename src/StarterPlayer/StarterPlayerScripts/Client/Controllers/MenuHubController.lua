@@ -52,7 +52,7 @@ local Controllers: { [string]: any } = {}
 
 -- key, word on the bar, name on the hub card, icon, number key
 local ENTRIES = {
-	{ key = "loadout", word = "Loadout", long = "Loadout", icon = "loadout", num = Enum.KeyCode.One },
+	{ key = "loadout", word = "Loadout", long = "Loadout", icon = "archer", num = Enum.KeyCode.One }, -- (hunt2_1) paintBar swaps in the kit's picture
 	{ key = "cases", word = "Cases", long = "Cases", icon = "crate", num = Enum.KeyCode.Two },
 	{ key = "pass", word = "Pass", long = "Season Track", icon = "season", num = Enum.KeyCode.Three },
 	{ key = "daily", word = "Daily", long = "Daily reward", icon = "daily", num = Enum.KeyCode.Four },
@@ -108,7 +108,7 @@ local function otherScreenOpen(): boolean
 	if shop and shop.isOpen == true then
 		return true
 	end
-	for _, name in ipairs({ "LoadoutController", "InspectController" }) do
+	for _, name in ipairs({ "LoadoutController", "InspectController", "PrepareController" }) do
 		local c = Controllers[name]
 		if c and type(c.isOpen) == "function" and c.isOpen() then
 			return true
@@ -253,6 +253,11 @@ local function openTarget(key: string): boolean
 		local l = c.LoadoutController
 		if l and l.open then
 			l.open()
+			-- (kitui) the Loadout entry opens the Prepare screen first
+			local p = c.PrepareController
+			if p and type(p.isOpen) == "function" and p.isOpen() then
+				return true
+			end
 			return l.isOpen and l.isOpen() or false
 		end
 	elseif key == "cases" then
@@ -396,9 +401,27 @@ local function buildBar()
 	bar = holder
 end
 
+-- (hunt2_1) the Loadout tile and card show the chosen kit's picture (as the PREPARE button does): the old satchel glyph
+-- read as a padlock at this size
+local function loadoutIcon(): string
+	local kit = Kits.get(player:GetAttribute("Kit")) or Kits.default()
+	return Icons.forKit(kit.id)
+end
+
 local function paintBar()
 	if not bar then
 		return
+	end
+	local lt = barTiles.loadout
+	if lt then
+		local want = loadoutIcon()
+		local old = lt:FindFirstChild("Icon")
+		if old and old:IsA("GuiObject") and lt:GetAttribute("IconKit") ~= want then
+			lt:SetAttribute("IconKit", want)
+			local size, pos, anchor = old.Size, old.Position, old.AnchorPoint
+			old:Destroy()
+			Icons.make(want, { Name = "Icon", Size = size, Position = pos, AnchorPoint = anchor, Parent = lt })
+		end
 	end
 	local keyboard = not Input.isGamepad() and not Input.isTouch()
 	local any = 0
@@ -548,7 +571,7 @@ local function fillHub()
 		local card = Cards.card({
 			Name = key,
 			Title = e.long,
-			Icon = e.icon,
+			Icon = if key == "loadout" then loadoutIcon() else e.icon,
 			Big = true,
 			Text = fact(key),
 			WellHeight = 0.58,

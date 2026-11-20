@@ -184,6 +184,8 @@ local function build()
 		Visible = false,
 		RichText = true,
 	})
+	-- (hunt2_1) over the train's light walls the thin shade left "GOLD 0" grey on grey: the fuller shade of the big lines
+	Theme.shadow(goldLabel :: TextLabel, true)
 	noteLabel = QuietUI.label({
 		Name = "Note",
 		Parent = gui,
@@ -212,12 +214,19 @@ local function step()
 	if not show then
 		return
 	end
+	-- (hunt2_1) on the ride the lobby's corner hint "H  How to play" stands in this same spot: the line steps under it
+	local lobby = l.Parent and l.Parent.Parent and l.Parent.Parent:FindFirstChild("Lobby")
+	local hint = lobby and lobby:FindFirstChild("HowToHint")
+	local y = if hint and hint:IsA("GuiObject") and hint.Visible and (lobby :: ScreenGui).Enabled then 40 else 14
+	if l.Position.Y.Offset ~= y then
+		l.Position = UDim2.new(1, -24, 0, y)
+	end
 	local hold = Controllers and Controllers.WheelController and Controllers.WheelController.holdUntil or 0
 	local gold = tonumber(player:GetAttribute("Gold")) or 0
 	if shownGold == nil or os.clock() >= hold then
 		shownGold = gold
 	end
-	l.Text = string.format("<font transparency=\"0.3\">GOLD</font>  %s", Rewards.comma(shownGold or 0))
+	l.Text = string.format("<font transparency=\"0.2\">GOLD</font>  <font color=\"#E8B65A\">%s</font>", Rewards.comma(shownGold or 0))
 end
 
 function CurrencyController.Init(controllers)

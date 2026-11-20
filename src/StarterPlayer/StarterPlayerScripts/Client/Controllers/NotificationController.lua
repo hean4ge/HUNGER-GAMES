@@ -192,6 +192,8 @@ end
 -- Headlines (Banner / Warning)
 --------------------------------------------------------------------------------------------------------------------
 local nextHeadline: () -> ()
+-- (hunt2_1) a menu panel is see-through by design: a headline is held hidden while a menu is open, not drawn through it
+local headlineHeldForMenu = false
 
 local function playHeadline(item: { [string]: any })
 	local token = {}
@@ -218,7 +220,8 @@ local function playHeadline(item: { [string]: any })
 	-- (ui-motion) fade and rise QuietUI.Motion.ToastRise px; with Reduce Motion on it only fades
 	local still = QuietUI.reducedMotion()
 	local rise = if still then 0 else QuietUI.Motion.ToastRise
-	h.Visible = true
+	h.Visible = not ClientState.menuOpen
+	headlineHeldForMenu = ClientState.menuOpen == true
 	h.GroupTransparency = 1
 	h.Position = UDim2.new(0.5, 0, y, rise)
 	TweenService:Create(h, Theme.Tween.Slow, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, y, 0) }):Play()
@@ -1964,6 +1967,22 @@ function NotificationController.Start()
 	end
 	table.clear(pending)
 	RunService.RenderStepped:Connect(updateCountdown)
+	-- (hunt2_1) headlines step out while a menu is open (Daily, Season, Cases, Prepare...) and come back after
+	RunService.Heartbeat:Connect(function()
+		local h = R.headline
+		if not h then
+			return
+		end
+		if ClientState.menuOpen then
+			if h.Visible then
+				h.Visible = false
+				headlineHeldForMenu = true
+			end
+		elseif headlineHeldForMenu then
+			headlineHeldForMenu = false
+			h.Visible = headlineCurrent ~= nil
+		end
+	end)
 	-- QW5 cards: the needs that trigger them, and a slow pump that holds them through Roll Calls and full screens
 	player:GetAttributeChangedSignal("Thirst"):Connect(checkNeeds)
 	player:GetAttributeChangedSignal("Hunger"):Connect(checkNeeds)

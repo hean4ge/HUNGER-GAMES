@@ -779,6 +779,15 @@ local function updateMarker()
 		elseif GameState:GetAttribute("TrainDoorsOpen") == true and player:GetAttribute("TrainHeld") == true then
 			local v = GameState:GetAttribute("TrainLaunchEntry")
 			target = if typeof(v) == "Vector3" then v + Vector3.new(0, 9, 0) else nil -- (in the open doorway)
+			-- (hunt2_1) the word is wider than the doorway: in its plane the jambs cut it ("aunch"); a few studs out into
+			-- the hall nothing stands in front of it
+			local hall = GameState:GetAttribute("TrainHallEntry")
+			if target and typeof(v) == "Vector3" and typeof(hall) == "Vector3" then
+				local out = Vector3.new(hall.X - v.X, 0, hall.Z - v.Z)
+				if out.Magnitude > 0.1 then
+					target += out.Unit * 4
+				end
+			end
 			text = "Launch"
 		end
 	end

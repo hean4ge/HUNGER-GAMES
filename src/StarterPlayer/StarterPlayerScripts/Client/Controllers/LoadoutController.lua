@@ -1950,16 +1950,39 @@ end
 -- or any GUI selection is up (a controller moves through those with the D-pad). In the Training Centre's hall D-pad
 -- right is SkillGeneral, so there the controller's View (Create) button opens and closes it instead.
 local boundKeys = "" -- what is bound now: "", "L", "L+Pad" or "L+View"
+-- (kitui, 20 Nov) every way in (L, View / D-pad right, the summary, the rack, the hub's Loadout card) opens the
+-- simpler Prepare screen (PrepareController: KIT · SKILLS · TRAIL, READY); its "Saved loadouts & more" opens this one
+local function prepare(): any
+	local p = Controllers and Controllers.PrepareController
+	return if p and type(p.open) == "function" then p else nil
+end
+
+local function openEntry()
+	local p = prepare()
+	if p then
+		if not p.isOpen() then
+			p.open(1)
+		end
+		return
+	end
+	open()
+end
+
 local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.ContextActionResult?
 	if state ~= Enum.UserInputState.Begin then
 		return Enum.ContextActionResult.Pass
+	end
+	local p = prepare()
+	if p and p.isOpen() then
+		p.close()
+		return Enum.ContextActionResult.Sink
 	end
 	if io and io.KeyCode == Enum.KeyCode.DPadRight then
 		if isOpen or ClientState.menuOpen or GuiService.SelectedObject ~= nil or not lobbyShowing()
 			or player:GetAttribute("InTraining") == true then
 			return Enum.ContextActionResult.Pass
 		end
-		open()
+		openEntry()
 		return Enum.ContextActionResult.Sink
 	end
 	if isOpen then
@@ -1969,7 +1992,7 @@ local function onLoadoutKey(state: Enum.UserInputState, io: InputObject?): Enum.
 	if ClientState.menuOpen or not lobbyShowing() then
 		return Enum.ContextActionResult.Pass
 	end
-	open()
+	openEntry()
 	return Enum.ContextActionResult.Sink
 end
 
@@ -2115,6 +2138,11 @@ function LoadoutController.isOpen(): boolean
 end
 
 function LoadoutController.open()
+	openEntry()
+end
+
+-- the full Loadout screen (saved cards, the weapon you bring, looks): Prepare's "Saved loadouts & more"
+function LoadoutController.openFull()
 	open()
 end
 
@@ -2131,7 +2159,8 @@ function LoadoutController.refresh()
 		saved = readSaved()
 	end
 	refreshSummary()
-	R.summary.Visible = lobbyShowing() and not isOpen and not ClientState.menuOpen
+	-- (kitui) the Prepare button takes the summary's place
+	R.summary.Visible = lobbyShowing() and not isOpen and not ClientState.menuOpen and prepare() == nil
 	if isOpen and not lobbyShowing() then
 		close()
 	end
@@ -2246,7 +2275,7 @@ local function buildSummary(root: Frame)
 		LayoutOrder = 1, Quiet = true })
 	text.TextTransparency = REST
 	QuietUI.bindButton(text, { quiet = true })
-	text.Activated:Connect(open)
+	text.Activated:Connect(openEntry)
 	text.Parent = holder
 	local gap = Instance.new("Frame")
 	gap.BackgroundTransparency = 1
@@ -2258,7 +2287,7 @@ local function buildSummary(root: Frame)
 	local word = QuietUI.button({ Name = "Open", Text = "Loadout", Font = "SemiBold", TextSize = Theme.TextSize.Label, Height = 30,
 		LayoutOrder = 4 })
 	QuietUI.bindButton(word)
-	word.Activated:Connect(open)
+	word.Activated:Connect(openEntry)
 	word.Parent = holder
 	local tick = QuietUI.label({ Name = "Saved", Text = "Saved", Font = "Medium", TextSize = Theme.TextSize.Caption, TextColor3 = C.Ink2,
 		Size = UDim2.fromOffset(48, 30), LayoutOrder = 5, Visible = false })
@@ -2293,7 +2322,7 @@ local function buildNear(root: Frame)
 	local word = QuietUI.button({ Name = "Word", Text = "Loadout", Font = "Medium", TextSize = Theme.TextSize.Body, Height = 34,
 		LayoutOrder = 2 })
 	QuietUI.bindButton(word)
-	word.Activated:Connect(open)
+	word.Activated:Connect(openEntry)
 	word.Parent = holder
 	holder.Parent = root
 	R.near = holder
@@ -2324,7 +2353,7 @@ local function hookStation(s: Instance)
 			prompt:SetAttribute("LoadoutHooked", true)
 			prompt.Triggered:Connect(function(who)
 				if who == player then
-					open()
+					openEntry()
 				end
 			end)
 		end
@@ -2446,7 +2475,7 @@ function LoadoutController.Start()
 	task.spawn(function()
 		while screen.Parent do
 			task.wait(0.5)
-			local want = lobbyShowing() and not isOpen and not ClientState.menuOpen
+			local want = lobbyShowing() and not isOpen and not ClientState.menuOpen and prepare() == nil
 			if R.summary and R.summary.Visible ~= want then
 				LoadoutController.refresh()
 			end

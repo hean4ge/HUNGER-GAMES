@@ -2085,13 +2085,25 @@ end
 
 -- Per-frame update (after the default controls) ------------------------------------------------------------------------
 
+-- (hunt1_2, 20 Nov) dead, or between a defeat and the next body: RUN and CROUCH go with the body (they stayed on a
+-- phone over the defeat strip); the next update with a living body shows them again (wantTouch below)
+local function hideTouchWhileDead()
+	if touchVisible then
+		touchVisible = false
+		Input.setTouchVisible("Sprint", false)
+		Input.setTouchVisible("Crouch", false)
+	end
+end
+
 local function update(dt: number)
 	local c = ctx
 	if not c or c.dead then
+		hideTouchWhileDead()
 		return
 	end
 	local humanoid, root = c.humanoid, c.root
 	if not root.Parent or not humanoid.Parent or humanoid.Health <= 0 then
+		hideTouchWhileDead()
 		return
 	end
 	dt = math.clamp(dt, 0, 0.1)

@@ -277,6 +277,13 @@ end
 ----------------------------------------------------------------------------------------------------
 BT.TRAIN_AT = CFrame.new(8800, 200, -30) -- the lounge car's floor centre; nose toward -Z; the Tor's island is 40 below
 BT.LAMP_COLOUR = Color3.fromRGB(255, 196, 140)
+-- visual layers lying on the cars' plank floor, lifted so no face shares the floor's plane (z-fighting)
+BT.FLOOR_LIFT = { Carpet = Vector3.new(0, 0.04, 0) }
+-- the passenger cars' shell (_Body) has an inner floor face at the plank floor's top too: it z-fought with the planks
+-- beside the carpet (pink strips flickering to dark planks, 20 Nov final check). Its shell is dropped clear instead.
+-- Not the Nose (no walkable floor inside).
+BT.BODY_DROP = { TrainLobby_Lounge = true, TrainLobby_Dining = true, TrainLobby_Observation = true }
+BT.BODY_DROP_BY = Vector3.new(0, -0.04, 0)
 
 local function yawCF(p: { number }, yawDeg: number?): CFrame
 	return CFrame.new(v3(p)) * CFrame.Angles(0, math.rad(yawDeg or 0), 0)
@@ -334,6 +341,12 @@ function BT.buildTrainLobby(): string
 				if string.find(spec.n, "_Ceiling", 1, true) then
 					p.CanCollide = true
 					p.CollisionFidelity = Enum.CollisionFidelity.Box
+				end
+				-- the carpet's border lies exactly on the plank floor's top (both at the car's floor level): the two
+				-- z-fought (the owner's 20 Nov capture: planks flickering through the carpet's edge). Lift it clear.
+				p.CFrame += BT.FLOOR_LIFT[string.match(spec.n, "_(%a+)$") or ""] or Vector3.zero
+				if BT.BODY_DROP[carName] and string.match(spec.n, "_Body$") then
+					p.CFrame += BT.BODY_DROP_BY
 				end
 				parts += 1
 			end

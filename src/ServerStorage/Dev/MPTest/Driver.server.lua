@@ -194,6 +194,9 @@ end
 if ARGS.batch ~= "S" then
 	workspace:SetAttribute("DailyAutoOpen", false)
 end
+-- The same for the Prepare screen (kit, skills, trail), which opens by itself 1.6 s after arriving in the hall (20 Nov):
+-- it held ClientState.menuOpen and blocked the bots' throws, shots, skills and ally offers there (final24_T, 12 FAIL)
+workspace:SetAttribute("PrepareAutoOpen", false)
 
 local fakeStore: any = nil
 if ARGS.batch == "W" or ARGS.fakeStore then

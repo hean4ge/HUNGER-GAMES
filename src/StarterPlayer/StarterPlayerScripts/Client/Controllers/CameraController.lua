@@ -480,10 +480,17 @@ local function refreshZoom()
 		end
 	end
 	if zoomBound then
-		-- ZOOM shows only while AIM is hidden: with a bow or a spear in hand AIM has the slot
+		-- ZOOM shows only while AIM is hidden: with a bow or a spear in hand AIM has the slot, and so does GUARD (the
+		-- same button, bound as GUARD with fists or any melee weapon since Combat_v3). (hunt1_2, 20 Nov: this used to
+		-- ask only "bow or spear?", so with fists or a sword ZOOM and GUARD were both drawn in the one slot on a phone.)
+		-- The AIM button's own ShowOnTouch (Input.setTouchVisible, CombatController.refreshTouchButtons) is the answer.
 		local combat = Controllers and Controllers.CombatController
 		local aimShown = false
-		if combat and type(combat.getEquipped) == "function" and type(combat.canAimWith) == "function" then
+		local aimButton = Input.getTouchButton("Aim")
+		local aimFlag = if aimButton then aimButton:GetAttribute("ShowOnTouch") else nil
+		if type(aimFlag) == "boolean" then
+			aimShown = aimFlag
+		elseif combat and type(combat.getEquipped) == "function" and type(combat.canAimWith) == "function" then
 			local _, def = combat.getEquipped()
 			aimShown = combat.canAimWith(def) == true
 		end

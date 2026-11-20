@@ -604,7 +604,10 @@ function Blocky.poses(Poses: any, info: { [string]: any }): { [string]: any }
 	end
 	out.EAT.hand = base.EAT.hand * back
 	if base.EAT.bite then
-		out.EAT.bite = base.EAT.bite * back
+		-- each bite goes 0.3 lower than the Faceted one, so the food leaves the view under its bottom edge: at the
+		-- Faceted height the ration tin (and an apple) came down over the middle of the hotbar 0.6 studs from the eye,
+		-- a big slab over slots 3 to 6 (hunt 20 Nov)
+		out.EAT.bite = (base.EAT.bite + V(0.05, -0.3, 0)) * back
 	end
 	-- food that is gripped, not laid on the palm, is put back where the Faceted frames hold it (Poses.EAT.lift: a
 	-- camera-space offset per item, added by Poses.applyUse)

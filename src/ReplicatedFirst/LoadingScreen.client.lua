@@ -1,18 +1,17 @@
 --[[
-	LoadingScreen (ReplicatedFirst, client) - the first thing a player sees after pressing Play (wave 20, "loadscreen").
+	LoadingScreen (ReplicatedFirst, client) - the first thing a player sees after pressing Play.
 
-	Owner's brief: a loading GUI on a dark screen with a glowing progress bar, a small bird that loads with the screen,
-	and the words ARENA 48 revealed as it loads, in a rusted, forest-weathered 3D-ish look.
-
-	What it draws (all plain GuiObjects; nothing is uploaded)
-	  * A near-black forest night: two rows of pine silhouettes (stacked rotated squares), a ground band, slow dust.
-	  * Our own bird mark: a small perched songbird on a twig, drawn from rounded frames and rotated bars (no ring, no
-	    arrow). A dim ink copy, and an amber copy that fills it from the feet up as the game loads (a CanvasGroup clip).
-	    It flaps now and then, and once more when loading is done.
-	  * ARENA 48, one letter at a time as progress passes each letter's mark: per letter a drop shadow, a five-step
-	    extrusion in dark rust, a warm rim highlight, a rust-to-moss gradient face with a dark stroke and a moss grime
-	    layer creeping up from the bottom. Oswald Bold (Roblox's own family).
-	  * A slim amber bar with a soft glow and a bright head, the percentage (RobotoMono) and a quiet status line.
+	Wave 24 remake (owner: the wave 20 screen was "so ugly"; their reference is a black screen with a glowing blue
+	segmented bar). What it draws, all plain GuiObjects (nothing is uploaded):
+	  * A fully opaque near-black screen. Nothing of the game shows through until the final fade.
+	  * A bar of CELLS separate rounded cells. Unlit cells are thin dim blue outlines; lit cells are a white-blue core
+	    with a bright blue edge. The cell being filled brightens in proportion, so the bar fills cell by cell, smoothly.
+	  * A soft blue glow under the lit part of the bar (stacked rounded bands, faintest widest), plus a faint glow along
+	    the whole bar.
+	  * "Loading" with four animated dots above the bar's left end, the percentage large above its right end, both
+	    white-blue with a blue glow. A small wide-tracked ARENA 48 wordmark above, a quiet status line below.
+	  * Every size is computed in whole pixels from the viewport (no UIScale), so the cells stay crisp and evenly
+	    spaced from a phone to 4K.
 
 	Progress (never goes backwards)
 	  0.00 - 0.40  before game:IsLoaded(): eases toward 0.40 with time, nudged by ContentProvider.RequestQueueSize
@@ -20,8 +19,8 @@
 	  0.55 - 0.95  the train lobby's content (Workspace.Lobby and the PlayerGui) preloaded first, measured by the
 	               request queue draining from its peak
 	  1.00         all of that done (or the cap reached)
-	  Hard cap: the screen fades out CAP seconds after it appeared, whatever is still loading. Minimum MIN_SHOW so the
-	  title has time to be read on a fast machine.
+	  Hard cap: the screen fades out CAP seconds after it appeared, whatever is still loading. Minimum MIN_SHOW so a
+	  fast load still reads as a smooth fill rather than a flash.
 
 	Load order (what this script asks for, in order)
 	  1. the lobby: Workspace.Lobby (Persistent) and the player's own GUI, during the screen
@@ -33,13 +32,12 @@
 	Measurements: LocalPlayer attribute LoadScreen (JSON: seconds since this script began for loaded, character,
 	lobby, done, the request queue's peak, whether the cap fired) and one [LoadingScreen] line in the output.
 	LocalPlayer attribute LoadingScreenUp is true while the screen is up.
+	Studio only: Workspace attribute LoadScreenPreview (a number 0..1) holds the screen at that progress, for captures.
 ]]
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local Players = game:GetService("Players")
 local ContentProvider = game:GetService("ContentProvider")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local TextService = game:GetService("TextService")
 local HttpService = game:GetService("HttpService")
 
 pcall(function()
@@ -48,9 +46,9 @@ end)
 
 local T0 = os.clock()
 local CAP = 25 -- seconds: never hold anyone longer than this
-local MIN_SHOW = 3.2 -- seconds: long enough to read the title on a fast machine
-local HOLD_AT_FULL = 0.7 -- seconds at 100 % before the fade
-local FADE = 0.9
+local MIN_SHOW = 3.2 -- seconds: the bar takes at least this long to fill
+local HOLD_AT_FULL = 0.35 -- seconds at 100 % before the fade
+local FADE = 0.6
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -59,44 +57,38 @@ player:SetAttribute("LoadingScreenUp", true)
 ---------------------------------------------------------------------------
 -- Palette and fonts
 ---------------------------------------------------------------------------
-local INK = Color3.fromRGB(244, 241, 234) -- #F4F1EA
-local SUN = Color3.fromRGB(232, 182, 90) -- #E8B65A
-local NIGHT = Color3.fromRGB(9, 12, 10)
-local PINE_FAR = Color3.fromRGB(20, 28, 22)
-local PINE_NEAR = Color3.fromRGB(13, 19, 15)
+local BLACK = Color3.fromRGB(3, 4, 7)
+local CORE = Color3.fromRGB(226, 242, 255) -- lit cell core, text
+local EDGE = Color3.fromRGB(70, 172, 255) -- lit cell edge, text glow
+local GLOW = Color3.fromRGB(38, 132, 255) -- the soft glow
+local DIM = Color3.fromRGB(44, 110, 190) -- unlit cell outline
+local QUIET = Color3.fromRGB(140, 172, 214) -- status line
 
-local RUST_LIGHT = Color3.fromRGB(219, 132, 74)
-local RUST = Color3.fromRGB(178, 84, 42)
-local RUST_DARK = Color3.fromRGB(132, 58, 28)
-local BARK = Color3.fromRGB(112, 74, 36)
-local MOSS = Color3.fromRGB(96, 112, 52)
-local MOSS_DEEP = Color3.fromRGB(62, 84, 40)
-local EXTRUDE_NEAR = Color3.fromRGB(78, 42, 22)
-local EXTRUDE_FAR = Color3.fromRGB(34, 20, 12)
-local STROKE = Color3.fromRGB(26, 17, 10)
-local RIM = Color3.fromRGB(244, 186, 124)
+local BOLD = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+local THIN = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Light, Enum.FontStyle.Normal)
+local SMALL = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 
-local TITLE_FONT = Font.new("rbxasset://fonts/families/Oswald.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-local SMALL_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-local MONO_FONT = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+local CELLS = 40
 
 ---------------------------------------------------------------------------
--- Fading: every drawn property is registered with its full-strength value and a group (0 = the whole screen, a
--- letter index = that letter). shown = base faded by the group's alpha and the screen's alpha.
+-- Fading: every static drawn property is registered with its full-strength value; shown = base faded by screenAlpha.
+-- The lit cells are set every frame instead (their strength depends on progress too).
 ---------------------------------------------------------------------------
-local registry: { { inst: Instance, prop: string, base: number, group: number } } = {}
-local groupAlpha: { [number]: number } = { [0] = 1 }
+local registry: { { inst: Instance, prop: string, base: number } } = {}
 local screenAlpha = 1
 local dirty = true
 
-local function reg(inst: Instance, prop: string, base: number, group: number?)
-	table.insert(registry, { inst = inst, prop = prop, base = base, group = group or 0 })
+local function reg(inst: Instance, prop: string, base: number)
+	table.insert(registry, { inst = inst, prop = prop, base = base })
+end
+
+local function fadeOf(base: number): number
+	return 1 - (1 - base) * screenAlpha
 end
 
 local function applyAlpha()
 	for _, r in ipairs(registry) do
-		local a = screenAlpha * (if r.group == 0 then 1 else (groupAlpha[r.group] or 0))
-		;(r.inst :: any)[r.prop] = 1 - (1 - r.base) * a
+		(r.inst :: any)[r.prop] = fadeOf(r.base)
 	end
 	dirty = false
 end
@@ -112,24 +104,49 @@ local function make(className: string, props: { [string]: any }, parent: Instanc
 	return inst
 end
 
-local function frame(props: { [string]: any }, parent: Instance, group: number?, round: number?): Frame
-	local alpha = props.BackgroundTransparency or 0
+local function frame(props: { [string]: any }, parent: Instance): Frame
 	props.BorderSizePixel = 0
 	local f = make("Frame", props, parent)
-	reg(f, "BackgroundTransparency", alpha, group)
-	if round then
-		make("UICorner", { CornerRadius = UDim.new(round, 0) }, f)
-	end
+	reg(f, "BackgroundTransparency", props.BackgroundTransparency or 0)
 	return f
 end
 
-local function label(props: { [string]: any }, parent: Instance, group: number?): TextLabel
-	local alpha = props.TextTransparency or 0
-	props.BackgroundTransparency = 1
-	props.BorderSizePixel = 0
-	local l = make("TextLabel", props, parent)
-	reg(l, "TextTransparency", alpha, group)
-	return l
+local function stroke(parent: Instance, color: Color3, transparency: number, mode: Enum.ApplyStrokeMode?): UIStroke
+	local s = make("UIStroke", {
+		Color = color,
+		Transparency = transparency,
+		Thickness = 1,
+		ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Contextual,
+		LineJoinMode = Enum.LineJoinMode.Round,
+	}, parent)
+	reg(s, "Transparency", transparency)
+	return s
+end
+
+-- a text with a blue glow: a soft wide halo label behind, and the crisp label with a thin blue edge on top
+local function glowText(name: string, font: Font, xAlign: Enum.TextXAlignment, anchor: Vector2, parent: Instance, edgeAlpha: number?)
+	local function one(z: number, textAlpha: number, strokeAlpha: number)
+		local l = make("TextLabel", {
+			Name = name,
+			AnchorPoint = anchor,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			FontFace = font,
+			RichText = true,
+			Text = "",
+			TextColor3 = CORE,
+			TextTransparency = textAlpha,
+			TextXAlignment = xAlign,
+			TextYAlignment = Enum.TextYAlignment.Bottom,
+			ZIndex = z,
+		}, parent)
+		reg(l, "TextTransparency", textAlpha)
+		return l, stroke(l, EDGE, strokeAlpha)
+	end
+	local halo, haloStroke = one(30, 0.6, 0.92)
+	local top, topStroke = one(31, 0, edgeAlpha or 0.45)
+	haloStroke.Color = GLOW
+	return { halo = halo, haloStroke = haloStroke, top = top, topStroke = topStroke }
 end
 
 ---------------------------------------------------------------------------
@@ -144,386 +161,191 @@ local gui = make("ScreenGui", {
 	ScreenInsets = Enum.ScreenInsets.None,
 })
 
-local bg = frame({ Name = "Night", Size = UDim2.fromScale(1, 1), BackgroundColor3 = NIGHT }, gui)
-make("UIGradient", {
-	Rotation = 90,
-	Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(6, 8, 8)),
-		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(14, 20, 17)),
-		ColorSequenceKeypoint.new(0.8, Color3.fromRGB(18, 24, 19)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 10, 9)),
-	}),
-}, bg)
-
--- Pines: a tree is three rotated squares stacked (diamonds), the lower half of each hidden by the next one down
-local rng = Random.new(48)
-local function pineRow(count: number, baseY: number, minH: number, maxH: number, color: Color3, z: number)
-	local row = make("Frame", { Name = "Pines", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = z }, bg)
-	for i = 1, count do
-		local x = (i - 0.5) / count + rng:NextNumber(-0.4, 0.4) / count
-		local h = rng:NextInteger(minH, maxH)
-		for k = 0, 2 do
-			local s = math.floor(h * (0.34 + k * 0.12))
-			local y = -h * (0.62 - k * 0.24)
-			frame({
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.new(x, 0, baseY, y),
-				Size = UDim2.fromOffset(s, s),
-				Rotation = 45,
-				BackgroundColor3 = color,
-				ZIndex = z,
-			}, row)
-		end
-		frame({
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(x, 0, baseY, 0),
-			Size = UDim2.fromOffset(math.max(3, math.floor(h * 0.06)), math.floor(h * 0.3)),
-			BackgroundColor3 = color,
-			ZIndex = z,
-		}, row)
-	end
-end
-pineRow(22, 0.9, 70, 140, PINE_FAR, 2)
--- a low band of fog between the rows
-local fog = frame({
-	Name = "Fog",
-	AnchorPoint = Vector2.new(0, 1),
-	Position = UDim2.fromScale(0, 0.92),
-	Size = UDim2.fromScale(1, 0.16),
-	BackgroundColor3 = Color3.fromRGB(46, 58, 50),
-	BackgroundTransparency = 0.82,
-	ZIndex = 3,
-}, bg)
-make("UIGradient", {
-	Rotation = 90,
-	Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.6, 0.2),
-		NumberSequenceKeypoint.new(1, 1),
-	}),
-}, fog)
-pineRow(14, 0.97, 110, 220, PINE_NEAR, 4)
+-- fully opaque: oversized a little so no edge of the game can show at any aspect or inset
 frame({
-	Name = "Ground",
-	AnchorPoint = Vector2.new(0, 1),
-	Position = UDim2.fromScale(0, 1),
-	Size = UDim2.new(1, 0, 0.05, 2),
-	BackgroundColor3 = Color3.fromRGB(7, 9, 8),
-	ZIndex = 5,
-}, bg)
-
--- Dust motes drifting up through the dark
-local motes = {}
-for i = 1, 22 do
-	local m = frame({
-		Size = UDim2.fromOffset(2, 2),
-		BackgroundColor3 = if i % 4 == 0 then SUN else INK,
-		BackgroundTransparency = rng:NextNumber(0.72, 0.9),
-		ZIndex = 6,
-	}, bg, nil, 1)
-	table.insert(motes, { f = m, x = rng:NextNumber(), y = rng:NextNumber(), v = rng:NextNumber(0.006, 0.02), p = rng:NextNumber(0, 6.28) })
-end
-
--- The centre stack, scaled to the screen
-local stack = make("Frame", {
-	Name = "Stack",
+	Name = "Black",
 	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromScale(0.5, 0.45),
-	Size = UDim2.fromOffset(640, 270),
+	Position = UDim2.fromScale(0.5, 0.5),
+	Size = UDim2.new(1, 80, 1, 80),
+	BackgroundColor3 = BLACK,
+	ZIndex = 1,
+}, gui)
+
+-- everything is placed in whole pixels around the bar's own box, which sits centred on the screen
+local bar = make("Frame", {
+	Name = "Bar",
+	AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.fromScale(0.5, 0.5),
 	BackgroundTransparency = 1,
 	ZIndex = 10,
 }, gui)
-local uiScale = make("UIScale", { Scale = 1 }, stack)
-local function rescale()
+
+-- the glow: many faint rounded bands stacked, so their overlap falls off smoothly. "Lit" bands follow the filled
+-- width; a few fainter ones span the whole bar so the unlit cells sit in a dim haze too
+local GLOW_LAYERS = 11
+local litBands: { { f: Frame, pad: number, corner: UICorner } } = {}
+for i = 1, GLOW_LAYERS do
+	local f = frame({
+		Name = "Glow" .. i,
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = GLOW,
+		BackgroundTransparency = 0.95,
+		ZIndex = 11,
+	}, bar)
+	local c = make("UICorner", {}, f)
+	table.insert(litBands, { f = f, pad = 1.2 * i ^ 1.3, corner = c })
+end
+local wholeBands: { { f: Frame, pad: number, corner: UICorner } } = {}
+for i = 1, 4 do
+	local f = frame({
+		Name = "GlowWhole" .. i,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		BackgroundColor3 = GLOW,
+		BackgroundTransparency = 0.985,
+		ZIndex = 11,
+	}, bar)
+	local c = make("UICorner", {}, f)
+	table.insert(wholeBands, { f = f, pad = 4 + i * 5, corner = c })
+end
+
+-- the cells: an outline that is always there, and a lit core over it whose strength is set every frame
+local cells: { { box: Frame, outline: UIStroke, oc: UICorner, ic: UICorner, core: Frame, coreStroke: UIStroke, cc: UICorner } } = {}
+for i = 1, CELLS do
+	local box = make("Frame", { Name = "Cell" .. i, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 12 }, bar)
+	local outline = make("UIStroke", {
+		Color = DIM,
+		Transparency = 0.35,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		LineJoinMode = Enum.LineJoinMode.Round,
+	}, box)
+	reg(outline, "Transparency", 0.35)
+	local inner = make("Frame", { -- the unlit cell's faint fill
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = DIM,
+		BackgroundTransparency = 0.9,
+		BorderSizePixel = 0,
+		ZIndex = 12,
+	}, box)
+	reg(inner, "BackgroundTransparency", 0.9)
+	local oc = make("UICorner", {}, box)
+	local ic = make("UICorner", {}, inner)
+	local core = make("Frame", {
+		Name = "Lit",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = CORE,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ZIndex = 13,
+	}, box)
+	local coreStroke = make("UIStroke", {
+		Color = EDGE,
+		Transparency = 1,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		LineJoinMode = Enum.LineJoinMode.Round,
+	}, core)
+	local cc = make("UICorner", {}, core)
+	table.insert(cells, { box = box, outline = outline, oc = oc, ic = ic, core = core, coreStroke = coreStroke, cc = cc })
+end
+
+local loadingText = glowText("Loading", BOLD, Enum.TextXAlignment.Left, Vector2.new(0, 1), bar)
+local pctText = glowText("Percent", BOLD, Enum.TextXAlignment.Right, Vector2.new(1, 1), bar)
+local wordmark = glowText("Wordmark", THIN, Enum.TextXAlignment.Center, Vector2.new(0.5, 1), bar, 0.75)
+local WORDMARK = "A R E N A   4 8"
+wordmark.halo.Text = WORDMARK
+wordmark.top.Text = WORDMARK
+wordmark.halo.TextColor3 = Color3.fromRGB(250, 252, 255)
+wordmark.top.TextColor3 = Color3.fromRGB(250, 252, 255)
+
+local statusLabel = make("TextLabel", {
+	Name = "Status",
+	AnchorPoint = Vector2.new(0.5, 0),
+	BackgroundTransparency = 1,
+	BorderSizePixel = 0,
+	FontFace = SMALL,
+	Text = "Connecting",
+	TextColor3 = QUIET,
+	TextTransparency = 0.45,
+	TextXAlignment = Enum.TextXAlignment.Center,
+	ZIndex = 30,
+}, bar)
+reg(statusLabel, "TextTransparency", 0.45)
+
+---------------------------------------------------------------------------
+-- Layout, in whole pixels from the viewport
+---------------------------------------------------------------------------
+local L = { pitch = 18, cw = 10, ch = 30, barW = 712, s = 1 }
+
+local function px(v: number, min: number?): number
+	return math.max(min or 1, math.floor(v + 0.5))
+end
+
+local function setTextGeometry(t, size: number, pos: UDim2, w: number, strokeTop: number, strokeHalo: number)
+	for _, l in ipairs({ t.halo, t.top }) do
+		l.TextSize = size
+		l.Position = pos
+		l.Size = UDim2.fromOffset(w, math.floor(size * 1.25 + 0.5))
+	end
+	t.topStroke.Thickness = strokeTop
+	t.haloStroke.Thickness = strokeHalo
+end
+
+local function layout()
 	local cam = workspace.CurrentCamera
 	local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
-	uiScale.Scale = math.clamp(math.min(vp.X / 760, vp.Y / 520), 0.45, 1.35)
-end
-rescale()
-
----------------------------------------------------------------------------
--- The bird: a perched songbird, facing right, in a 64 x 48 box
----------------------------------------------------------------------------
-local BIRD_W, BIRD_H = 64, 48
-local birdBox = make("Frame", {
-	Name = "Bird",
-	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.new(0.5, 0, 0, 0),
-	Size = UDim2.fromOffset(BIRD_W, BIRD_H),
-	BackgroundTransparency = 1,
-	ZIndex = 12,
-}, stack)
-local BIRD_SCALE = 1.3
-local birdScale = make("UIScale", { Scale = BIRD_SCALE }, birdBox)
-
-local wings: { Frame } = {}
-local heads: { Frame } = {}
-local function drawBird(parent: Instance, color: Color3, alpha: number, eyeColor: Color3, wingColor: Color3, z: number)
-	local function part(x, y, w, h, rot, round, c, a, zz)
-		return frame({
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromOffset(x, y),
-			Size = UDim2.fromOffset(w, h),
-			Rotation = rot,
-			BackgroundColor3 = c or color,
-			BackgroundTransparency = a or alpha,
-			ZIndex = zz or z,
-		}, parent, nil, round)
+	if vp.X < 2 or vp.Y < 2 then
+		vp = Vector2.new(1280, 720)
 	end
-	-- twig and a leaf on it
-	part(32, 42, 54, 2, -4, 0.5)
-	part(54, 38, 8, 3, -35, 0.5)
-	-- legs
-	part(29, 37, 1.5, 6, 10)
-	part(33, 37, 1.5, 6, -4)
-	-- tail: a long slim fan, down and back
-	part(9, 32, 20, 3, 30, 0.5)
-	part(10, 35, 17, 3, 42, 0.5)
-	-- body: slim and tilted, a rounder breast at the front
-	part(26, 26, 32, 13, -24, 0.5)
-	part(33, 25, 16, 15, -10, 0.5)
-	-- head, crown tuft, beak, eye
-	local head = part(42, 15, 12, 11, 0, 0.5)
-	part(39, 9.5, 5, 3, -30, 0.5)
-	part(49, 16, 4, 4, 45, nil)
-	part(44, 13.5, 2, 2, 0, 0.5, eyeColor, 0, z + 1)
-	table.insert(heads, head)
-	-- wing (flaps): pivots at its front edge, a shade darker than the body
-	local wing = part(25, 22, 20, 7, -22, 0.5, wingColor, alpha, z + 1)
-	wing.AnchorPoint = Vector2.new(0.85, 0.5)
-	wing.Position = UDim2.fromOffset(34, 22)
-	table.insert(wings, wing)
-end
+	-- the bar takes about 60 % of a wide screen, up to 88 % of a narrow one, and never too much of a short one
+	local want = math.max(vp.X * 0.6, math.min(vp.X * 0.88, 520))
+	local s = math.clamp(math.min(want / 712, vp.Y / 420), 0.3, 6)
+	local pitch = px(18 * s, 4)
+	local cw = math.clamp(px(pitch * 0.56, 2), 2, pitch - 1)
+	local ch = px(30 * s, 8)
+	local barW = pitch * CELLS - (pitch - cw)
+	L.pitch, L.cw, L.ch, L.barW, L.s = pitch, cw, ch, barW, s
 
--- the dim copy is drawn solid inside a CanvasGroup and faded as one, so overlapping parts leave no seams
-local dimGroup = make("CanvasGroup", {
-	Name = "Dim",
-	Size = UDim2.fromScale(1, 1),
-	BackgroundTransparency = 1,
-	GroupTransparency = 0.8,
-	ZIndex = 12,
-}, birdBox)
-reg(dimGroup, "GroupTransparency", 0.8)
-drawBird(dimGroup, INK, 0, NIGHT, Color3.fromRGB(150, 147, 140), 12)
-local fillClip = make("CanvasGroup", {
-	Name = "Fill",
-	AnchorPoint = Vector2.new(0, 1),
-	Position = UDim2.fromScale(0, 1),
-	Size = UDim2.new(1, 0, 0, 1),
-	BackgroundTransparency = 1,
-	ZIndex = 13,
-}, birdBox)
-reg(fillClip, "GroupTransparency", 0)
-local fillInner = make("Frame", {
-	AnchorPoint = Vector2.new(0, 1),
-	Position = UDim2.fromScale(0, 1),
-	Size = UDim2.fromOffset(BIRD_W, BIRD_H),
-	BackgroundTransparency = 1,
-	ZIndex = 13,
-}, fillClip)
-drawBird(fillInner, SUN, 0, Color3.fromRGB(40, 28, 14), Color3.fromRGB(176, 128, 52), 13)
+	bar.Size = UDim2.fromOffset(barW, ch)
+	bar.Position = UDim2.new(0.5, 0, 0.5, px(14 * s, 0))
 
----------------------------------------------------------------------------
--- ARENA 48
----------------------------------------------------------------------------
-local TITLE = "ARENA 48"
-local TITLE_SIZE = 118
-local title = make("Frame", {
-	Name = "Title",
-	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.new(0.5, 0, 0, 70),
-	Size = UDim2.fromOffset(640, 128),
-	BackgroundTransparency = 1,
-	ZIndex = 14,
-}, stack)
-
-local function glyphWidth(ch: string): number
-	if ch == " " then
-		return TITLE_SIZE * 0.22
+	local r = UDim.new(0, math.max(1, math.floor(cw * 0.3)))
+	local outlineT = math.max(1, math.floor(1.1 * s + 0.5))
+	local coreT = math.max(1, math.floor(1.6 * s + 0.5))
+	for i, c in ipairs(cells) do
+		c.box.Position = UDim2.fromOffset((i - 1) * pitch, 0)
+		c.box.Size = UDim2.fromOffset(cw, ch)
+		c.oc.CornerRadius = r
+		c.cc.CornerRadius = r
+		c.ic.CornerRadius = r
+		c.outline.Thickness = outlineT
+		c.coreStroke.Thickness = coreT
 	end
-	local ok, size = pcall(function()
-		local params = Instance.new("GetTextBoundsParams")
-		params.Text = ch
-		params.Font = TITLE_FONT
-		params.Size = TITLE_SIZE
-		params.Width = 1000
-		return TextService:GetTextBoundsAsync(params)
-	end)
-	if ok and size and size.X > 0 then
-		return size.X
+	for _, b in ipairs(litBands) do
+		local p = px(b.pad * s, 1)
+		b.f.Position = UDim2.new(0, -p, 0.5, 0)
+		b.f.Size = UDim2.fromOffset(2 * p, ch + 2 * p)
+		b.corner.CornerRadius = UDim.new(0, p + math.floor(cw * 0.3))
 	end
-	return TITLE_SIZE * 0.5
-end
-
-local letters: { { holder: Frame, scale: UIScale, group: number, at: number, shownAt: number?, face: TextLabel, grad: UIGradient } } = {}
-local widths, total = {}, 0
-local TRACK = 6 -- extra px between letters
-for i = 1, #TITLE do
-	local ch = string.sub(TITLE, i, i)
-	widths[i] = glyphWidth(ch)
-	total += widths[i] + (if i < #TITLE then TRACK else 0)
-end
-
-local visibleCount = 0
-for i = 1, #TITLE do
-	if string.sub(TITLE, i, i) ~= " " then
-		visibleCount += 1
+	for _, b in ipairs(wholeBands) do
+		local p = px(b.pad * s, 1)
+		b.f.Size = UDim2.fromOffset(barW + 2 * p, ch + 2 * p)
+		b.corner.CornerRadius = UDim.new(0, p + math.floor(cw * 0.3))
 	end
+
+	local gap = px(9 * s, 2)
+	local smallSize = px(24 * s, 10)
+	local bigSize = px(38 * s, 14)
+	local half = math.floor(barW / 2)
+	setTextGeometry(loadingText, smallSize, UDim2.fromOffset(0, -gap), half, math.max(1, math.floor(1.2 * s + 0.5)), px(5 * s, 2))
+	setTextGeometry(pctText, bigSize, UDim2.new(1, 0, 0, -gap + px(2 * s, 0)), half, math.max(1, math.floor(1.4 * s + 0.5)), px(6 * s, 2))
+	local markSize = px(17 * s, 9)
+	setTextGeometry(wordmark, markSize, UDim2.new(0.5, 0, 0, -px(120 * s, 30)), barW, 1, px(4 * s, 2))
+	statusLabel.TextSize = px(13 * s, 9)
+	statusLabel.Position = UDim2.new(0.5, 0, 1, px(20 * s, 6))
+	statusLabel.Size = UDim2.fromOffset(barW, px(18 * s, 12))
+	dirty = true
 end
-
-local x = (640 - total) / 2
-local n = 0
-for i = 1, #TITLE do
-	local ch = string.sub(TITLE, i, i)
-	local w = widths[i]
-	if ch ~= " " then
-		n += 1
-		local g = n
-		groupAlpha[g] = 0
-		local holder = make("Frame", {
-			Name = "L" .. i,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromOffset(x + w / 2, 64),
-			Size = UDim2.fromOffset(w + 16, 128),
-			BackgroundTransparency = 1,
-			ZIndex = 14,
-		}, title)
-		local sc = make("UIScale", { Scale = 1.25 }, holder)
-		local function layer(dx: number, dy: number, color: Color3, alpha: number, z: number): TextLabel
-			return label({
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.new(0.5, dx, 0.5, dy),
-				Size = UDim2.fromScale(1, 1),
-				Text = ch,
-				FontFace = TITLE_FONT,
-				TextSize = TITLE_SIZE,
-				TextColor3 = color,
-				TextTransparency = alpha,
-				ZIndex = z,
-			}, holder, g)
-		end
-		-- soft drop shadow
-		layer(7, 10, Color3.new(0, 0, 0), 0.45, 14)
-		-- extrusion, far to near
-		for k = 5, 1, -1 do
-			local c = EXTRUDE_FAR:Lerp(EXTRUDE_NEAR, (5 - k) / 4)
-			layer(k * 0.9, k * 1.2, c, 0, 15)
-		end
-		-- warm rim along the top edges (shows above the face)
-		layer(-0.6, -1.6, RIM, 0.35, 16)
-		-- the face: weathered rust running into moss
-		local face = layer(0, 0, Color3.new(1, 1, 1), 0, 17)
-		local rot = 90 + rng:NextNumber(-12, 12)
-		local grad = make("UIGradient", {
-			Rotation = rot,
-			Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, RUST_LIGHT),
-				ColorSequenceKeypoint.new(0.22, RUST),
-				ColorSequenceKeypoint.new(0.38, RUST_LIGHT:Lerp(RUST, 0.6)),
-				ColorSequenceKeypoint.new(0.55, RUST_DARK),
-				ColorSequenceKeypoint.new(0.72, BARK),
-				ColorSequenceKeypoint.new(0.88, MOSS),
-				ColorSequenceKeypoint.new(1, MOSS_DEEP),
-			}),
-			Offset = Vector2.new(0, rng:NextNumber(-0.06, 0.06)),
-		}, face)
-		local stroke = make("UIStroke", {
-			Color = STROKE,
-			Thickness = 1.4,
-			LineJoinMode = Enum.LineJoinMode.Miter,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-		}, face)
-		reg(stroke, "Transparency", 0, g)
-		-- moss grime creeping up from the bottom, patchy
-		local grime = layer(0, 0, MOSS_DEEP, 0, 18)
-		local a = rng:NextNumber(0.62, 0.78)
-		make("UIGradient", {
-			Rotation = 90 + rng:NextNumber(-25, 25),
-			Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 1),
-				NumberSequenceKeypoint.new(a - 0.12, 1),
-				NumberSequenceKeypoint.new(a, 0.55),
-				NumberSequenceKeypoint.new(a + 0.08, 0.8),
-				NumberSequenceKeypoint.new(math.min(0.97, a + 0.16), 0.35),
-				NumberSequenceKeypoint.new(1, 0.25),
-			}),
-		}, grime)
-		-- each letter's mark: spread over 0.06 .. 0.86 of the bar
-		local at = 0.06 + (g - 1) * (0.8 / math.max(1, visibleCount - 1))
-		table.insert(letters, { holder = holder, scale = sc, group = g, at = at, face = face, grad = grad })
-	end
-	x += w + TRACK
-end
-
----------------------------------------------------------------------------
--- The bar
----------------------------------------------------------------------------
-local BAR_W = 380
-local barBox = make("Frame", {
-	Name = "Bar",
-	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.new(0.5, 0, 0, 222),
-	Size = UDim2.fromOffset(BAR_W, 40),
-	BackgroundTransparency = 1,
-	ZIndex = 20,
-}, stack)
-frame({ Name = "Track", Size = UDim2.new(1, 0, 0, 2), BackgroundColor3 = INK, BackgroundTransparency = 0.86, ZIndex = 20 }, barBox, nil, 0.5)
-local glowWide = frame({
-	AnchorPoint = Vector2.new(0, 0.5),
-	Position = UDim2.fromOffset(0, 1),
-	Size = UDim2.fromOffset(0, 18),
-	BackgroundColor3 = SUN,
-	BackgroundTransparency = 0.93,
-	ZIndex = 21,
-}, barBox, nil, 0.5)
-local glow = frame({
-	AnchorPoint = Vector2.new(0, 0.5),
-	Position = UDim2.fromOffset(0, 1),
-	Size = UDim2.fromOffset(0, 7),
-	BackgroundColor3 = SUN,
-	BackgroundTransparency = 0.8,
-	ZIndex = 22,
-}, barBox, nil, 0.5)
-local fill = frame({ Size = UDim2.fromOffset(0, 2), BackgroundColor3 = SUN, ZIndex = 23 }, barBox, nil, 0.5)
-local headGlow = frame({
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromOffset(0, 1),
-	Size = UDim2.fromOffset(16, 16),
-	BackgroundColor3 = SUN,
-	BackgroundTransparency = 0.72,
-	ZIndex = 24,
-}, barBox, nil, 0.5)
-local head = frame({
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromOffset(0, 1),
-	Size = UDim2.fromOffset(5, 5),
-	BackgroundColor3 = Color3.fromRGB(255, 236, 196),
-	ZIndex = 25,
-}, barBox, nil, 0.5)
-
-local statusLabel = label({
-	Position = UDim2.fromOffset(0, 12),
-	Size = UDim2.new(1, -60, 0, 16),
-	Text = "CONNECTING",
-	FontFace = SMALL_FONT,
-	TextSize = 12,
-	TextColor3 = INK,
-	TextTransparency = 0.45,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	ZIndex = 20,
-}, barBox)
-local pctLabel = label({
-	AnchorPoint = Vector2.new(1, 0),
-	Position = UDim2.new(1, 0, 0, 11),
-	Size = UDim2.fromOffset(60, 18),
-	Text = "0%",
-	FontFace = MONO_FONT,
-	TextSize = 14,
-	TextColor3 = INK,
-	TextTransparency = 0.1,
-	TextXAlignment = Enum.TextXAlignment.Right,
-	ZIndex = 20,
-}, barBox)
+layout()
 
 applyAlpha()
 gui.Parent = playerGui
@@ -591,18 +413,18 @@ local function computeTarget(): number
 		local timeEase = 0.36 * (1 - math.exp(-t / 3.5))
 		local queueBit = if peakQueue > 0 then 0.04 * (1 - q / peakQueue) else 0
 		p = timeEase + queueBit
-		statusLabel.Text = if t < 1.2 then "CONNECTING" else "LOADING THE WORLD"
+		statusLabel.Text = if t < 1.2 then "Connecting" else "Loading the world"
 	elseif not hasCharacter() then
 		p = 0.4 + 0.1 * (1 - math.exp(-t / 4))
-		statusLabel.Text = "BOARDING THE TRAIN"
+		statusLabel.Text = "Boarding the train"
 	elseif not lobbyDone then
 		lobbyQueuePeak = math.max(lobbyQueuePeak, q)
 		local frac = if lobbyStarted then 1 - q / math.max(1, lobbyQueuePeak) else 0
 		p = 0.55 + 0.38 * math.clamp(frac, 0, 1)
-		statusLabel.Text = "LOADING THE LOBBY"
+		statusLabel.Text = "Loading the lobby"
 	else
 		p = 1
-		statusLabel.Text = "READY"
+		statusLabel.Text = "Ready"
 	end
 	return p
 end
@@ -614,23 +436,59 @@ local fullAt: number? = nil
 local fading = false
 local finished = false
 local capped = false
-local flapUntil = 0
-local nextFlap = 1.4
 local lastPct = -1
+local lastDots = -1
+local lastLitW = -1
 
 local function setBar(p: number)
-	local w = math.floor(BAR_W * p + 0.5)
-	fill.Size = UDim2.fromOffset(w, 2)
-	glow.Size = UDim2.fromOffset(w, 7)
-	glowWide.Size = UDim2.fromOffset(w, 18)
-	head.Position = UDim2.fromOffset(w, 1)
-	headGlow.Position = UDim2.fromOffset(w, 1)
-	fillClip.Size = UDim2.new(1, 0, 0, math.max(1, math.floor(BIRD_H * (0.08 + 0.92 * p))))
+	-- cells: each one lights over its own 1/CELLS of the progress, so the bar fills cell by cell without a jump
+	local f = p * CELLS
+	for i, c in ipairs(cells) do
+		local k = math.clamp(f - (i - 1), 0, 1)
+		k = k * k * (3 - 2 * k)
+		c.core.BackgroundTransparency = 1 - k * screenAlpha
+		c.coreStroke.Transparency = 1 - k * screenAlpha
+	end
+	-- the glow follows the filled width, ending at the edge of the cell being lit
+	local litW = 0
+	if f > 0 then
+		local whole = math.floor(f)
+		litW = whole * L.pitch - (if whole > 0 then L.pitch - L.cw else 0)
+		local part = f - whole
+		if part > 0 then
+			litW = (if whole > 0 then litW + (L.pitch - L.cw) else 0) + L.cw * part
+		end
+		litW = math.floor(litW + 0.5)
+	end
+	if litW ~= lastLitW then
+		lastLitW = litW
+		for _, b in ipairs(litBands) do
+			local h = b.f.Size.Y.Offset
+			local p2 = -b.f.Position.X.Offset * 2
+			b.f.Size = UDim2.fromOffset(if litW > 0 then litW + p2 else 0, h)
+		end
+	end
 	local pct = math.floor(p * 100 + 0.0001)
 	if pct ~= lastPct then
 		lastPct = pct
-		pctLabel.Text = tostring(pct) .. "%"
+		pctText.halo.Text = tostring(pct) .. "%"
+		pctText.top.Text = pctText.halo.Text
 	end
+end
+
+local function setDots(t: number)
+	-- four dots; the lit run grows 1..4 and starts over, the rest stay dim
+	local n = if lastPct >= 100 then 4 else 1 + math.floor(t * 2.6) % 4
+	if n == lastDots then
+		return
+	end
+	lastDots = n
+	local s = "Loading"
+	for i = 1, 4 do
+		s ..= if i <= n then "." else '<font transparency="0.72">.</font>'
+	end
+	loadingText.halo.Text = s
+	loadingText.top.Text = s
 end
 
 -- Studio only, for captures: Workspace attribute LoadScreenPreview (a number 0..1) holds the screen at that progress
@@ -647,74 +505,32 @@ conn = RunService.RenderStepped:Connect(function(dt)
 		shown = progress
 		T0 = math.min(T0, now - MIN_SHOW) -- (lets maxShown pass)
 		t = now - T0
-		statusLabel.Text = if progress < 0.4 then "LOADING THE WORLD" elseif progress < 0.55 then "BOARDING THE TRAIN" elseif progress < 1 then "LOADING THE LOBBY" else "READY"
+		statusLabel.Text = if progress < 0.4 then "Loading the world" elseif progress < 0.55 then "Boarding the train" elseif progress < 1 then "Loading the lobby" else "Ready"
 		fullAt = nil
 	elseif not fading then
 		progress = math.max(progress, computeTarget())
 		if t >= CAP and progress < 1 then
 			capped = true
 			progress = 1
-			statusLabel.Text = "READY"
+			statusLabel.Text = "Ready"
 		end
 	end
-	-- the shown value eases toward the target; held back a little early on so the letters keep pace on fast loads
+	-- the shown value eases toward the target (never past it, never back); held back early on so a fast load still
+	-- fills smoothly instead of jumping
 	local maxShown = math.clamp(t / MIN_SHOW, 0, 1)
 	local goal = math.min(progress, maxShown)
-	shown += (goal - shown) * math.min(1, dt * 5)
-	if goal - shown < 0.002 then
-		shown = goal
+	if goal > shown then
+		shown += (goal - shown) * math.min(1, dt * 5)
+		if goal - shown < 0.002 then
+			shown = goal
+		end
 	end
 	setBar(shown)
-
-	-- letters
-	for _, L in ipairs(letters) do
-		if not L.shownAt and shown >= L.at then
-			L.shownAt = now
-		end
-		if L.shownAt then
-			local k = math.clamp((now - L.shownAt) / 0.42, 0, 1)
-			local ease = 1 - (1 - k) ^ 3
-			if groupAlpha[L.group] ~= ease then
-				groupAlpha[L.group] = ease
-				dirty = true
-			end
-			-- settle from a little large, with a small overshoot
-			local over = math.sin(k * math.pi) * 0.04
-			L.scale.Scale = 1.25 - 0.25 * ease - over
-		end
-		-- slow rust shimmer
-		L.grad.Offset = Vector2.new(0, math.sin(t * 0.6 + L.group) * 0.03)
-	end
-
-	-- bird: idle bob, a flap now and then
-	if t >= nextFlap then
-		flapUntil = t + 0.45
-		nextFlap = t + 1.6 + rng:NextNumber(0, 1.4)
-	end
-	local flap = if t < flapUntil then math.sin((flapUntil - t) / 0.45 * math.pi * 3) * 28 else 0
-	for _, wng in ipairs(wings) do
-		wng.Rotation = -18 - math.abs(flap)
-	end
-	local bob = math.sin(t * 2.2) * 0.6
-	for _, h in ipairs(heads) do
-		h.Position = UDim2.fromOffset(42, 15 + bob)
-	end
-	headGlow.BackgroundTransparency = 1 - (1 - (0.72 + math.sin(t * 5) * 0.08)) * screenAlpha
-
-	-- motes
-	for _, m in ipairs(motes) do
-		m.y -= m.v * dt
-		if m.y < -0.02 then
-			m.y = 1.02
-			m.x = rng:NextNumber()
-		end
-		m.f.Position = UDim2.fromScale(m.x + math.sin(t * 0.5 + m.p) * 0.01, m.y)
-	end
+	setDots(t)
 
 	-- done: hold, then fade
 	if progress >= 1 and shown >= 0.999 and not fullAt then
 		fullAt = now
-		flapUntil = t + 0.6
 		mark("full")
 	end
 	if fullAt and not fading and now - fullAt >= HOLD_AT_FULL then
@@ -724,7 +540,6 @@ conn = RunService.RenderStepped:Connect(function(dt)
 			while true do
 				local k = math.clamp((os.clock() - start) / FADE, 0, 1)
 				screenAlpha = 1 - (k * k * (3 - 2 * k))
-				birdScale.Scale = BIRD_SCALE * (1 + k * 0.08)
 				dirty = true
 				if k >= 1 then
 					break
@@ -769,7 +584,10 @@ end)
 
 local cam = workspace.CurrentCamera
 if cam then
-	cam:GetPropertyChangedSignal("ViewportSize"):Connect(rescale)
+	cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		layout()
+		lastLitW = -1
+	end)
 end
 
 ---------------------------------------------------------------------------

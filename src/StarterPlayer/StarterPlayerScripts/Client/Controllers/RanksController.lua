@@ -141,6 +141,13 @@ local function build()
 	local ladder = Cards.grid({ Name = "Ladder", Position = UDim2.new(youW, 6, 0, 0), Size = UDim2.new(1 - youW, -6, 1, 0),
 		Cell = if phone then Vector2.new(200, 76) else Vector2.new(250, 104), Gap = if phone then 6 else 12, Parent = level })
 	R.ladder = ladder
+	if not phone then
+		-- (hunt1_1) three rank cards to a row: 250 px cells left a third of the ladder empty (two columns only)
+		local g = ladder:FindFirstChildWhichIsA("UIGridLayout")
+		if g then
+			g.CellSize = UDim2.new(1 / 3, -8, 0, 104)
+		end
+	end
 
 	-- Leaderboards: board list (left) + rows (right)
 	local listW = if phone then 150 else 250
@@ -322,7 +329,8 @@ function RanksController.renderLevel()
 	xp.TextWrapped = true
 	if not phone then
 		local nextRank = Progression.Ranks[band + 1]
-		local y = 380
+		-- (hunt1_1) a little higher, and the rule below in two lines, so it ends inside the card (it ran 30 px past it)
+		local y = 360
 		if nextRank then
 			Cards.section(string.format("Next rank: %s at level %d", nextRank.name, nextRank.level), { Position = UDim2.new(0, 22, 0, y),
 				Size = UDim2.new(1, -44, 0, 24), TextSize = 15, Parent = you })
@@ -342,10 +350,10 @@ function RanksController.renderLevel()
 			end
 			local goldTile = rewardTile({ k = "gold", n = 100 }, 80, tilesRow, 9)
 			goldTile.Name = "LevelGold"
-			y += 126
+			y += 118
 		end
-		local rule = Cards.label("Levels never go down. At level 100 you may Prestige: back to level 1 with a star by your name (up to 10), keeping everything.",
-			{ TextSize = 13, Color = Theme.Colors.Ink2, Position = UDim2.new(0, 22, 0, y), Size = UDim2.new(1, -44, 0, 40), Parent = you })
+		local rule = Cards.label("Levels never go down. At level 100 you may Prestige: a star by your name, back to level 1, keeping everything.",
+			{ TextSize = 13, Color = Theme.Colors.Ink2, Position = UDim2.new(0, 22, 0, y), Size = UDim2.new(1, -44, 0, 34), Parent = you })
 		rule.TextWrapped = true
 	end
 	if l.level >= 100 and (l.prestige or 0) < 10 then
@@ -466,16 +474,19 @@ local function row(parent: Instance, r: { [string]: any }, mine: boolean, order:
 			shade.Size = UDim2.fromScale(1, 1)
 			shade.ZIndex = 9
 			local g = Instance.new("UIGradient")
-			g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.7, 0.55),
-				NumberSequenceKeypoint.new(1, 0.85) })
+			-- (hunt2_1) a deeper shade: white names on the light Linen banner were grey on grey
+			g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.08), NumberSequenceKeypoint.new(0.7, 0.35),
+				NumberSequenceKeypoint.new(1, 0.7) })
 			g.Parent = shade
 			shade.Parent = strip
 		end
 	end
-	local who = Cards.label((if mine then "You · " else "") .. tostring(r.name or "?"), { Font = Theme.Fonts.SemiBold,
+	-- (hunt2_1) your own row uses the name you see everywhere else (the display name), not the username
+	local who = Cards.label(if mine then "You · " .. player.DisplayName else tostring(r.name or "?"), { Font = Theme.Fonts.SemiBold,
 		TextSize = if phone then 13 else 17, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -16, 1, 0), Parent = strip })
 	who.TextTruncate = Enum.TextTruncate.AtEnd
 	who.ZIndex = 10 -- over the banner backing
+	Theme.shadow(who)
 	who.TextTransparency = if top or mine then 0 else 0.15
 	-- the rank emblem (players on this server; others show none)
 	if r.rank and type(r.rank) == "table" and r.rank.rank then
