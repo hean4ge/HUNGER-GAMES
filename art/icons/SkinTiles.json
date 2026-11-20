@@ -7,7 +7,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://131611255369381"
   },
   "SkinTiles_2": {
    "file": "SkinTiles_2.png",
@@ -15,7 +15,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://76748043194497"
   },
   "SkinTiles_3": {
    "file": "SkinTiles_3.png",
@@ -23,7 +23,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://130520481397754"
   },
   "SkinTiles_4": {
    "file": "SkinTiles_4.png",
@@ -31,7 +31,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://101908714342865"
   }
  },
  "tiles": {
@@ -238,5 +238,6 @@
    "w": 512,
    "h": 205
   }
- }
+ },
+ "upload": "Uploaded 20 Nov 2026 by the lead through Studio's Asset Manager import, as Images, owner approved. Never upload again."
 }

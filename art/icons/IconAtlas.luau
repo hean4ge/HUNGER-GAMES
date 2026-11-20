@@ -2,17 +2,17 @@
 -- Rect = ImageRectOffset (x, y) + ImageRectSize (w, h) on the sheet image. Fill the asset ids after upload.
 return {
 	Sheets = {
-		Icons_1 = "", -- rbxassetid:// of Icons_1.png
-		Icons_2 = "", -- rbxassetid:// of Icons_2.png
-		Icons_3 = "", -- rbxassetid:// of Icons_3.png
-		Icons_4 = "", -- rbxassetid:// of Icons_4.png
-		Icons_5 = "", -- rbxassetid:// of Icons_5.png
-		Ranks_1 = "", -- rbxassetid:// of Ranks_1.png
-		Ranks_2 = "", -- rbxassetid:// of Ranks_2.png
-		Ranks_3 = "", -- rbxassetid:// of Ranks_3.png
-		Banners_1 = "", -- rbxassetid:// of Banners_1.png
-		Banners_2 = "", -- rbxassetid:// of Banners_2.png
-		Banners_3 = "", -- rbxassetid:// of Banners_3.png
+		Icons_1 = "rbxassetid://133742219456290", -- rbxassetid:// of Icons_1.png
+		Icons_2 = "rbxassetid://73817072101513", -- rbxassetid:// of Icons_2.png
+		Icons_3 = "rbxassetid://107563385876280", -- rbxassetid:// of Icons_3.png
+		Icons_4 = "rbxassetid://79299929083210", -- rbxassetid:// of Icons_4.png
+		Icons_5 = "rbxassetid://113195078877029", -- rbxassetid:// of Icons_5.png
+		Ranks_1 = "rbxassetid://115884944434956", -- rbxassetid:// of Ranks_1.png
+		Ranks_2 = "rbxassetid://133221234701662", -- rbxassetid:// of Ranks_2.png
+		Ranks_3 = "rbxassetid://120813241484567", -- rbxassetid:// of Ranks_3.png
+		Banners_1 = "rbxassetid://80811269966894", -- rbxassetid:// of Banners_1.png
+		Banners_2 = "rbxassetid://131872621677610", -- rbxassetid:// of Banners_2.png
+		Banners_3 = "rbxassetid://90056849450954", -- rbxassetid:// of Banners_3.png
 	},
 	Icons = {
 		sk_head_kick = { sheet = "Icons_1", x = 0, y = 0, w = 256, h = 256, group = "WeaponSkills", name = "Head Kick" },

@@ -3,7 +3,7 @@
  "design": "docs/design/CardMenusAndShop.md section 4.2",
  "style": "matte flat facets, one shade step on lower-right facets, soft Shade shadow at 60%, transparent; icons 256 (silhouette in the centre 200), rank emblems 512, banners 768x256",
  "font": "Montserrat-Bold.ttf",
- "upload": "Not uploaded. Upload each sheet as an Image (Decal) after the owner's yes and fill assetId.",
+ "upload": "Uploaded 20 Nov 2026 by the lead through Studio's Asset Manager import, as Images, owner approved. Never upload again.",
  "sheets": {
   "Icons_1": {
    "file": "Icons_1.png",
@@ -11,7 +11,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://133742219456290"
   },
   "Icons_2": {
    "file": "Icons_2.png",
@@ -19,7 +19,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://73817072101513"
   },
   "Icons_3": {
    "file": "Icons_3.png",
@@ -27,7 +27,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://107563385876280"
   },
   "Icons_4": {
    "file": "Icons_4.png",
@@ -35,7 +35,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://79299929083210"
   },
   "Icons_5": {
    "file": "Icons_5.png",
@@ -43,7 +43,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://113195078877029"
   },
   "Ranks_1": {
    "file": "Ranks_1.png",
@@ -51,7 +51,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://115884944434956"
   },
   "Ranks_2": {
    "file": "Ranks_2.png",
@@ -59,7 +59,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://133221234701662"
   },
   "Ranks_3": {
    "file": "Ranks_3.png",
@@ -67,7 +67,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://120813241484567"
   },
   "Banners_1": {
    "file": "Banners_1.png",
@@ -75,7 +75,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://80811269966894"
   },
   "Banners_2": {
    "file": "Banners_2.png",
@@ -83,7 +83,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://131872621677610"
   },
   "Banners_3": {
    "file": "Banners_3.png",
@@ -91,7 +91,7 @@
     1024,
     1024
    ],
-   "assetId": ""
+   "assetId": "rbxassetid://90056849450954"
   }
  },
  "counts": {
