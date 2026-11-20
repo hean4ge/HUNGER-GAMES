@@ -3647,6 +3647,33 @@ if ARGS.batch == "T" then
 	end
 end
 
+-- batch S: the card menus, CASES, Season Track, daily, ranks, boards, cosmetics (mp-shop) in MPT_Shop; its client half
+-- MPT_ShopClient goes into ReplicatedStorage for the bots' "mod" order
+local batchS: (() -> ())? = nil
+if ARGS.batch == "S" then
+	local sc = script:FindFirstChild("MPT_ShopClient")
+	if sc then
+		sc:Clone().Parent = RS
+	end
+	lobbyExtra = function()
+		local mod = script:FindFirstChild("MPT_Shop")
+		if not mod then
+			L("DRIVER ERROR no MPT_Shop module")
+			return
+		end
+		local S = require(mod)({
+			L = L, check = check, call = call, mark = mark, clientFind = clientFind, linesWith = linesWith, waitFor = waitFor, phase = phase, shot = shot,
+			fmt = fmt, v3 = v3, now = now, parts = parts, Shared = Shared, Services = Services, req = req, ARGS = ARGS, A = A, B = B, P3 = P3, GS = GS,
+			Data = Data, fakeData = fakeData, fakeWrites = function()
+				return fakeWrites
+			end, Inv = Inv, setupDuel = setupDuel, killB = killB, deathChecks = deathChecks, resultChecks = resultChecks, backToLobby = backToLobby,
+			snapshotAll = snapshotAll,
+		})
+		batchS = S.run
+		S.lobby()
+	end
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
@@ -3694,6 +3721,12 @@ local function run()
 			batchF()
 		else
 			L("DRIVER ERROR batch F was not loaded in the lobby")
+		end
+	elseif batch == "S" then
+		if batchS then
+			batchS()
+		else
+			L("DRIVER ERROR batch S was not loaded in the lobby")
 		end
 	end
 end

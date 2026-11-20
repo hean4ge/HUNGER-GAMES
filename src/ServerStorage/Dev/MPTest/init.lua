@@ -94,6 +94,12 @@ function MPTest.start(args: { [string]: any }?): string
 		a.minPlayers = a.minPlayers or 2
 		a.cut = a.cut or "Short"
 		a.failsafe = a.failsafe or 600
+	elseif a.batch == "S" then
+		-- the card menus, CASES, the Season Track, daily, ranks, boards and cosmetics (mp-shop, 20 Nov; child modules Shop
+		-- and ShopClient): a fake store for every save, a short launch cut
+		a.fakeStore = true
+		a.cut = a.cut or "Short"
+		a.failsafe = a.failsafe or 420
 	end
 	local label = tostring(a.lock or "mp-test")
 	a.lock = nil
@@ -134,6 +140,14 @@ function MPTest.start(args: { [string]: any }?): string
 		local t = training:Clone()
 		t.Name = "MPT_Training"
 		t.Parent = driver
+	end
+	for _, name in ipairs({ "Shop", "ShopClient" }) do -- (batch S: the menus and the shop, mp-shop)
+		local m = script:FindFirstChild(name)
+		if m then
+			local c = m:Clone()
+			c.Name = "MPT_" .. name
+			c.Parent = driver
+		end
 	end
 	driver.Parent = ServerScriptService
 	task.spawn(function()

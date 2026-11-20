@@ -1,0 +1,242 @@
+{
+ "note": "Fallback pictures (512 x 205, 2.5:1) for skin tiles past the 24 live ViewportFrames. Not uploaded.",
+ "sheets": {
+  "SkinTiles_1": {
+   "file": "SkinTiles_1.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "SkinTiles_2": {
+   "file": "SkinTiles_2.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "SkinTiles_3": {
+   "file": "SkinTiles_3.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "SkinTiles_4": {
+   "file": "SkinTiles_4.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  }
+ },
+ "tiles": {
+  "skin_sword_blued_steel": {
+   "sheet": "SkinTiles_1",
+   "x": 0,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_sword_riverstone": {
+   "sheet": "SkinTiles_1",
+   "x": 512,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_sword_temper_line": {
+   "sheet": "SkinTiles_1",
+   "x": 0,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_sword_oakcrown": {
+   "sheet": "SkinTiles_1",
+   "x": 512,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_sword_starfall": {
+   "sheet": "SkinTiles_1",
+   "x": 0,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_hatchet_camp_orange": {
+   "sheet": "SkinTiles_1",
+   "x": 512,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_hatchet_northwood": {
+   "sheet": "SkinTiles_1",
+   "x": 0,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_hatchet_rime": {
+   "sheet": "SkinTiles_1",
+   "x": 512,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_hatchet_copperhead": {
+   "sheet": "SkinTiles_2",
+   "x": 0,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_twin_axe_ironbark": {
+   "sheet": "SkinTiles_2",
+   "x": 512,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_twin_axe_sunforge": {
+   "sheet": "SkinTiles_2",
+   "x": 0,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_twin_axe_glacier": {
+   "sheet": "SkinTiles_2",
+   "x": 512,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_paired_twin_moons": {
+   "sheet": "SkinTiles_2",
+   "x": 0,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_paired_jade_lacquer": {
+   "sheet": "SkinTiles_2",
+   "x": 512,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_knife_field_green": {
+   "sheet": "SkinTiles_2",
+   "x": 0,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_knife_antler": {
+   "sheet": "SkinTiles_2",
+   "x": 512,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_spear_driftwood": {
+   "sheet": "SkinTiles_3",
+   "x": 0,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_spear_stormcaller": {
+   "sheet": "SkinTiles_3",
+   "x": 512,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_bow_hornbow": {
+   "sheet": "SkinTiles_3",
+   "x": 0,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_bow_autumn_leaf": {
+   "sheet": "SkinTiles_3",
+   "x": 512,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "skin_short_bow_birchbark": {
+   "sheet": "SkinTiles_3",
+   "x": 0,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_machete_brass_spine": {
+   "sheet": "SkinTiles_3",
+   "x": 512,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  },
+  "skin_ring_blade_moonring": {
+   "sheet": "SkinTiles_3",
+   "x": 0,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_climb_pick_glacier_guide": {
+   "sheet": "SkinTiles_3",
+   "x": 512,
+   "y": 793,
+   "w": 512,
+   "h": 205
+  },
+  "skin_leaf_dagger_verdigris": {
+   "sheet": "SkinTiles_4",
+   "x": 0,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "skin_throwing_knife_bone_grip": {
+   "sheet": "SkinTiles_4",
+   "x": 512,
+   "y": 25,
+   "w": 512,
+   "h": 205
+  },
+  "wrap_checker_plate": {
+   "sheet": "SkinTiles_4",
+   "x": 0,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "wrap_cobalt_enamel": {
+   "sheet": "SkinTiles_4",
+   "x": 512,
+   "y": 281,
+   "w": 512,
+   "h": 205
+  },
+  "wrap_sandstone": {
+   "sheet": "SkinTiles_4",
+   "x": 0,
+   "y": 537,
+   "w": 512,
+   "h": 205
+  }
+ }
+}

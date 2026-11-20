@@ -10,8 +10,13 @@
 	                   FallDamage.LethalHeight (curve exponent FallDamage.Exponent), through
 	                   Services.PlayerService.damage(player, amount, { cause = "Fall" }). Skipped when landing in
 	                   water, when the player is not InArena, while frozen, or when GameState.Phase ~= "Active".
-	Sanity             warns (no punishment yet) when a player's horizontal speed stays above Slide.MaxSpeed + 10 for
-	                   more than a second.
+	Speed checks       the envelope is SlidePhysics.serverSpeedLimit(SprintSpeed) + 6 (a physical slide tops out at
+	                   SlidePhysics.C.HardCap = 36; a Sprint Burst downhill at ~31.5), so 42 studs/s.
+	                   Warns when the root's horizontal velocity stays above it for more than a second. In a live round
+	                   (Phase Active, InArena, not Frozen) the ground actually covered is measured from server positions
+	                   over 1 s windows (catches CFrame teleport cheats too); two windows in a row over the limit put
+	                   the contender back where that run began (at most once per 3 s). One server teleport only
+	                   inflates one window, so it never trips this.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,6 +25,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Net = require(Shared:WaitForChild("Net"))
+local SlidePhysics = require(Shared:WaitForChild("SlidePhysics"))
 
 local MovementService = {}
 
@@ -42,9 +48,18 @@ local EXPONENT = math.clamp(num(FALL, "Exponent", 1.15), 0.5, 3)
 local MAX_HEALTH = num(SURVIVAL, "MaxHealth", 100)
 -- the slowest a real fall reaches the damage threshold (falls start with full gravity for a moment)
 local MIN_IMPACT = math.sqrt(2 * FALL_GRAVITY * MIN_HEIGHT)
-local SANITY_SPEED = num(MOVE.Slide, "MaxSpeed", 28) + 10
+-- Speed envelope: the fastest a legitimate contender holds (a physical slide's hard cap, or a Sprint Burst down a
+-- hill; Shared.SlidePhysics) plus a margin for lag and knockbacks.
+local SPEED_LIMIT = SlidePhysics.serverSpeedLimit(num(MOVE, "SprintSpeed", 21)) + 6
+local SANITY_SPEED = SPEED_LIMIT
 local SANITY_TIME = 1
 local WARN_INTERVAL = 10
+-- Enforcement (in a live round only): ground covered is measured over WINDOW-second windows from server-side
+-- positions (so CFrame teleport cheats count too). OVER_WINDOWS windows in a row above SPEED_LIMIT put the contender
+-- back where the run began. One server teleport inflates only one window, so it never trips this.
+local WINDOW = 1
+local OVER_WINDOWS = 2
+local CORRECT_COOLDOWN = 3
 
 local ALLOWED_STANCES = { Stand = true, Crouch = true, Slide = true, Climb = true }
 
@@ -137,6 +152,11 @@ local function track(player: Player, character: Model)
 		fallStartAt = 0,
 		fastFor = 0,
 		lastWarnAt = -math.huge,
+		winAt = os.clock(),
+		winPos = root.Position,
+		goodPos = root.Position,
+		overWindows = 0,
+		correctedAt = -math.huge,
 	}
 	-- these connections belong to the character's own instances and die with it
 	humanoid.Died:Connect(function()
@@ -147,6 +167,43 @@ local function track(player: Player, character: Model)
 			untrack(character)
 		end
 	end)
+end
+
+-- Ground covered per window (server positions). Enforced only for a contender in a live round.
+local function checkWindow(st, now: number)
+	local elapsed = now - st.winAt
+	if elapsed < WINDOW then
+		return
+	end
+	local pos = st.root.Position
+	local d = pos - st.winPos
+	local rate = Vector3.new(d.X, 0, d.Z).Magnitude / elapsed
+	st.winAt, st.winPos = now, pos
+	local player = st.player
+	local enforced = phase() == "Active" and player:GetAttribute("InArena") == true
+		and player:GetAttribute("Frozen") ~= true
+	if not enforced or rate <= SPEED_LIMIT then
+		st.overWindows = 0
+		st.goodPos = pos
+		return
+	end
+	st.overWindows += 1
+	if st.overWindows < OVER_WINDOWS or now - st.correctedAt < CORRECT_COOLDOWN then
+		return
+	end
+	-- held over the envelope for OVER_WINDOWS windows: back to where that run began
+	st.correctedAt = now
+	st.overWindows = 0
+	local root = st.root
+	local back = st.goodPos
+	local rot = root.CFrame - root.CFrame.Position
+	pcall(function()
+		st.character:PivotTo(CFrame.new(back) * rot)
+		root.AssemblyLinearVelocity = Vector3.zero
+	end)
+	st.winPos = back
+	warn(string.format("[MovementService] %s covered %.0f studs/s for %d s (limit %.0f): moved back %.0f studs",
+		player.Name, rate, OVER_WINDOWS, SPEED_LIMIT, (pos - back).Magnitude))
 end
 
 local function onHeartbeat(dt: number)
@@ -196,6 +253,7 @@ local function onHeartbeat(dt: number)
 		else
 			st.fastFor = 0
 		end
+		checkWindow(st, now)
 	end
 end
 

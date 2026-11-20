@@ -92,6 +92,7 @@ local RULES = {
 	CoverProbe = 200, -- studs above a marker on the open ground from where the seating ray starts: a mesh over the spot blocks it
 	SiteFirstRing = 6, -- studs from the anchor to the first marker (a tree or a hedge may stand on the anchor)
 	SiteSpacing = 6, -- studs between a site's markers (LootService keeps crates CrateSpacing = 5 apart)
+	CrateGap = 5.25, -- seating: a crate marker never comes to rest closer than this to another (CrateSpacing 5 + margin)
 	ScatterFrom = 190, -- scattered markers start outside the Heart's turf
 	ScatterSpacing = 45, -- studs between scattered markers
 	ScatterClear = 22, -- studs between a scattered marker and any other marker
@@ -912,6 +913,14 @@ local function seatAll(markers: { any }, stats: { [string]: any }, opts: { [stri
 			return false, fy
 		end
 		if m.kind == "Crate" then
+			-- never within LootService's CrateSpacing of another crate marker (a moved crate of site C8 came to rest
+			-- 4.97 studs from its neighbour on the hilled ground, 20 Nov)
+			for _, o in ipairs(markers) do
+				if o ~= m and o.kind == "Crate" and not o.dropped and (o.x - x) ^ 2 + (o.z - z) ^ 2 < RULES.CrateGap * RULES.CrateGap
+					and abs((o.y or fy) - fy) < 4 then
+					return false, fy
+				end
+			end
 			local look: Vector3 = m.look
 			local cf = CFrame.lookAt(Vector3.new(x, fy, z) + offset, Vector3.new(x, fy, z) + offset + look)
 			if not crateSpotClear(cf, exclude) then

@@ -52,6 +52,7 @@ local promptText: TextLabel? = nil
 local promptKey: Frame? = nil
 local promptTap: TextButton? = nil
 local board: { [string]: any } = {}
+local controllers: any = nil -- (ShopController: the case counter opens CASES)
 
 local function now(): number
 	return workspace:GetServerTimeNow()
@@ -759,7 +760,7 @@ local function refreshBoard()
 	board.pity.Text = string.format("Strongboxes: ★★★★ or better within %d  ·  ★★★★★ within %d      The wheel: ★★★★ weapon within %d spins",
 		pity.box4 or cfg.Strongbox.Pity4, pity.box5 or cfg.Strongbox.Pity5, pity.wheel4 or cfg.Wheel.Pity4)
 	board.bringNote.Text = if state.bring and state.bring ~= "" then string.format("You bring your %s %s next round · it comes with your kit",
-		Rewards.weaponName(state.bring), Rewards.starText(armoury[state.bring] or 0)) else "Click a weapon you own to bring it next round"
+		Rewards.weaponName(state.bring), Rewards.starText(armoury[state.bring] or 0)) else "Click a weapon to inspect it · choose what you bring in the Loadout"
 end
 
 local function buildBoard()
@@ -857,6 +858,14 @@ local function buildBoard()
 		line.Parent = paper
 		nameButton.Activated:Connect(function()
 			local owned = (state.armoury or {})[id] or 0
+			-- (integrate, 20 Nov) a weapon's name opens its card screen: the weapon in 3D at your stars, its Kill effect /
+			-- Kill icon / Skin slots, its traits, and Buy / Raise (hold) while you stand here (InspectController)
+			local inspector = controllers and controllers.InspectController
+			if inspector and type(inspector.open) == "function" then
+				play("UIClick", face.Position, 0.5)
+				inspector.open(id, math.max(owned, 3), { from = "armoury" })
+				return
+			end
 			if owned > 0 then
 				play("UIClick", face.Position, 0.5)
 				sendAction("bring", if state.bring == id then "" else id)
@@ -912,6 +921,13 @@ local function attach(root: Model)
 			if type(kind) == "string" then
 				promptOwner[d] = kind
 				d.Triggered:Connect(function()
+					-- the steel case counter opens CASES on that Strongbox (its odds card, BUY = hold to confirm); the
+					-- box still opens here at the case. Without CASES the prompt draws directly, as before.
+					local shopUi = controllers and controllers.ShopController
+					if action ~= "spin" and shopUi and type(shopUi.open) == "function" then
+						shopUi.open(kind)
+						return
+					end
 					-- the server takes the Gold before its spin / box message arrives: hold the Gold line and the board
 					-- from the press, so both keep the old total and change together when the reveal ends
 					if (promptShort[d] or 0) <= 0 then
@@ -930,7 +946,9 @@ local function attach(root: Model)
 	refreshPrompts()
 end
 
-function WheelController.Init(_controllers) end
+function WheelController.Init(c)
+	controllers = c
+end
 
 function WheelController.Start()
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")

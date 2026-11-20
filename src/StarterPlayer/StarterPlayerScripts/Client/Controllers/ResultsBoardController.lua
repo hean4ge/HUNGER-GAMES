@@ -79,6 +79,14 @@ local function paintRow(frame: any, row: { [string]: any }?, mine: boolean)
 	if mine then
 		name ..= string.format("<font color=\"#%s\" size=\"30\">   YOU</font>", (Theme.Colors.PaperTag or Color3.fromRGB(138, 92, 16)):ToHex())
 	end
+	-- the Level (RankService): a short "LV 30" in the board's dim ink (★n after a Prestige); the rank's name is in
+	-- the Ranks menu and over heads in the train (the column is too narrow for both)
+	local rank = row.rank
+	if type(rank) == "table" and tonumber(rank.level) then
+		local prestige = math.floor(tonumber(rank.prestige) or 0)
+		name ..= string.format("<font color=\"#%s\" size=\"22\" transparency=\"0.4\">  LV %d%s</font>", (Theme.Colors.PaperInk or Color3.new()):ToHex(),
+			math.floor(tonumber(rank.level) or 1), if prestige > 0 then " ★" .. prestige else "")
+	end
 	frame.Who.Text = name
 	frame.Defeats.Text = tostring(math.floor(tonumber(row.kills) or 0))
 	frame.Survived.Text = Util.formatTime(tonumber(row.survived) or 0)

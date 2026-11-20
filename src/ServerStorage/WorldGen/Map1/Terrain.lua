@@ -60,6 +60,11 @@
 	  force    generate: start even when Map1Status says a run is in progress
 	  pack     the data pack's name (default "map1_data")
 	  look, streaming, boundary   generate / run: also call applyLook / applyStreaming / buildBoundary (default false)
+  only     generate / run / plan: { [cj * NC + ci] = true } (NC = 86 chunks a side): write only these 64-stud chunks.
+           For a pack whose heights changed in places (the hills of tools/map1/hills.py): the chunks that changed,
+           with no window, so no rim is banked and the rest of the place (the Peak's fill) is not touched.
+  trim     generate / run: studs of air written just over each chunk's new box before it is written (default 0),
+           so ground that stood higher before does not stay over the new surface. 24 covers the hills' 18.
 	generate() and run() refuse to write over the lobby (a SpawnLocation of workspace.Lobby inside the written
 	disc): move the lobby first (decision 3), or pass allowLobby = true.
 ]]
@@ -333,6 +338,9 @@ local function context(st: any, o: any): any
 		slotTop = slotTop,
 		slotSub = slotSub,
 		dry = o.dry == true,
+		only = o.only, -- { [cj * NC + ci] = true }: write only these chunks (see the header: "only", "trim")
+		trim = tonumber(o.trim) or 0,
+		trimmed = 0,
 		tpl = {},
 		channels = {},
 		chunks = 0,
@@ -384,8 +392,12 @@ end
 local function chunkList(ctx: any): { { number } }
 	local st = ctx.st
 	local list = {}
+	local only = ctx.only
 	for cj = ctx.wr0 // CH, ctx.wr1 // CH do
 		for ci = ctx.wc0 // CH, ctx.wc1 // CH do
+			if only and not only[cj * st.NC + ci] then
+				continue
+			end
 			local x0 = st.OX + VOX * max(ci * CH, ctx.wc0)
 			local x1 = st.OX + VOX * (min(ci * CH + CH - 1, ctx.wc1) + 1)
 			local z0 = st.OZ + VOX * max(cj * CH, ctx.wr0)
@@ -729,6 +741,18 @@ local function writeChunk(ctx: any, ci: number, cj: number): boolean
 	channels.SolidMaterial, channels.SolidOccupancy, channels.LiquidOccupancy = mats, occs, liqs
 	local t1 = os.clock()
 	if not ctx.dry then
+		if ctx.trim > 0 then
+			-- ground that was higher before (a hill lowered): empty the layers just over the new box first
+			ctx.terrain:FillRegion(
+				Region3.new(
+					Vector3.new(st.OX + VOX * ia + ctx.ox, maxY + ctx.oy, st.OZ + VOX * ja + ctx.oz),
+					Vector3.new(st.OX + VOX * (ib + 1) + ctx.ox, maxY + ceil(ctx.trim / VOX) * VOX + ctx.oy, st.OZ + VOX * (jb + 1) + ctx.oz)
+				),
+				VOX,
+				AIR
+			)
+			ctx.trimmed += 1
+		end
 		ctx.terrain:WriteVoxelChannels(region, VOX, channels)
 	end
 	local t2 = os.clock()

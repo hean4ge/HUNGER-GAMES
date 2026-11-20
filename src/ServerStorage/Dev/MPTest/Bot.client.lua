@@ -2395,6 +2395,7 @@ local function holdAnyPrompt(arg: any): string
 	return label
 end
 
+local shopMod: ((string, any) -> any)? = nil -- (batch S: MPT_ShopClient, loaded on the first "mod" order)
 callFn.OnClientInvoke = function(cmd: string, arg: any): any
 	local ok, res = pcall(function(): any
 		if cmd == "ally" then
@@ -2544,6 +2545,16 @@ callFn.OnClientInvoke = function(cmd: string, arg: any): any
 			return bowInfo(arg)
 		elseif cmd == "probe" then
 			return probe(arg)
+		elseif cmd == "mod" then
+			-- (batch S, mp-shop) the client half the driver put in ReplicatedStorage: { op = name, arg = ... }
+			if not shopMod then
+				local m = RS:FindFirstChild("MPT_ShopClient")
+				if not m then
+					return "no MPT_ShopClient"
+				end
+				shopMod = require(m)({ L = L, fmt = fmt, Controllers = Controllers, ClientState = ClientState, Input = Input })
+			end
+			return shopMod(arg.op, arg.arg)
 		elseif cmd == "leave" then
 			local sts = game:GetService("StudioTestService")
 			L("LEAVE CanLeaveTest=" .. tostring(sts:CanLeaveTest()))

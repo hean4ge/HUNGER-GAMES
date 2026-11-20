@@ -87,6 +87,10 @@ local Stars = require(Shared:WaitForChild("Stars"))
 local ArenaLayout = require(Shared:WaitForChild("ArenaLayout"))
 local Lore = require(Shared:WaitForChild("Lore"))
 local ThreatLine = require(Shared:WaitForChild("ThreatLine"))
+local okCosmetics, CosmeticLooks = pcall(require, Shared:WaitForChild("CosmeticLooks", 5) :: ModuleScript) -- kill icons
+if not okCosmetics then
+	CosmeticLooks = nil
+end
 local WaterPoints: any = nil
 do
 	local module = Shared:FindFirstChild("WaterPoints")
@@ -1052,6 +1056,9 @@ local function paintEntry(entry: any, fade: number, rest: number)
 			QuietUI.tint(entry.icon, C.Ink:Lerp(C.TextFaint, rest)) -- (an icon dims by colour: its parts overlap)
 		end
 	end
+	if entry.badge then -- the killer's kill icon (its own colours: it fades as a group, and dims a little at rest)
+		entry.badge.GroupTransparency = 1 - (1 - fade) * (1 - 0.35 * rest)
+	end
 	entry.mark.BackgroundTransparency = t
 	entry.fadeShown, entry.restShown = fade, rest
 end
@@ -1142,10 +1149,24 @@ local function addKill(data: any)
 	textLabel.Text = first
 	mark.Visible = involved
 	local icon: Frame? = nil
+	local badge: CanvasGroup? = nil
 	local secondLabel: TextLabel? = nil
 	if second then
-		icon = QuietUI.icon("blade", { Name = "Blade", Px = 13, LayoutOrder = 3 })
-		icon.Parent = frame
+		-- the killer's kill icon for that weapon (CardMenusAndShop 1.1: 16 design px), else the small blade
+		local killerPlayer = tonumber(data.killerUserId) and Players:GetPlayerByUserId(tonumber(data.killerUserId) :: number)
+		if CosmeticLooks and killerPlayer then
+			local okIcon, made = pcall(function()
+				local id = CosmeticLooks.iconFor(CosmeticLooks.of(killerPlayer), if type(data.weapon) == "string" then data.weapon else nil)
+				return id and CosmeticLooks.killIcon(id, 16, { Name = "KillIcon", LayoutOrder = 3 })
+			end)
+			badge = if okIcon then made else nil
+		end
+		if badge then
+			badge.Parent = frame
+		else
+			icon = QuietUI.icon("blade", { Name = "Blade", Px = 13, LayoutOrder = 3 })
+			icon.Parent = frame
+		end
 		local clone = textLabel:Clone()
 		clone.Name = "Victim"
 		clone.LayoutOrder = 4
@@ -1158,6 +1179,7 @@ local function addKill(data: any)
 		text = textLabel,
 		second = secondLabel,
 		icon = icon,
+		badge = badge,
 		mark = mark,
 		born = os.clock(),
 		life = if involved then 9 else 6.5,

@@ -44,6 +44,10 @@
 	  Climbing down onto a limb of the tree goes round it instead of landing on it (from a limb: face the trunk, push
 	  into it, hold S).
 	  ("Slide" also covers sliding involuntarily down ground that is too steep to stand on.)
+  A voluntary slide (crouch while running at SlidePhysics.C.MinEntrySpeed or more) is physical (Shared.SlidePhysics):
+  it starts at your run speed, gravity along the slope speeds it up or brakes it, friction depends on the ground
+  material, and it ends when it runs out of speed or you stand: the steeper the hill and the faster you ran, the
+  further you slide.
 	Writes ClientState: moveState, speed, velocity, grounded, stamina, exhausted, crouchAlpha, strideAlpha
 	Fires ClientState: moveStateChanged(new, old), jumped(), landed(impactSpeed),
 	                   footstep(material: Enum.Material, intensity 0..1, foot "L" | "R")
@@ -70,7 +74,8 @@ press while out of breath answers with Feedback.deny ("OUT OF BREATH").
 	  MovementController.tryClimb(trunk) -> boolean    start climbing that Climbable part if it is in reach (Climb prompt)
 	  MovementController.getMotion() -> { accel: Vector3, exertion: 0..1, surface: string, slope: number,
 	      stumble: 0..1, wade: number, land: number }   live locomotion readings for the camera and body (shared table)
-	  MovementController.getDebug() -> table           internal readings for tuning; set the local player's
+	  MovementController.getSlide() -> live slide readings (SlideFx); getLastSlide() -> the last slide's time and distance
+  MovementController.getDebug() -> table          internal readings for tuning; set the local player's
 	      attribute LS_MoveDebug = true to mirror them onto dbg_* attributes (10 Hz) for probes
 ]]
 local Players = game:GetService("Players")
@@ -87,6 +92,7 @@ local Util = require(Shared:WaitForChild("Util"))
 local Input = require(Shared:WaitForChild("Input"))
 local Feedback = require(Shared:WaitForChild("Feedback"))
 local TreeClimb = require(Shared:WaitForChild("TreeClimb"))
+local SlidePhysics = require(Shared:WaitForChild("SlidePhysics"))
 
 local ClientState = require(script.Parent.Parent:WaitForChild("ClientState"))
 local ItemDefs = require(Shared:WaitForChild("ItemDefs"))
@@ -114,7 +120,6 @@ local function num(tbl: any, key: string, default: number): number
 end
 
 local STAM_CFG = MOVE.Stamina or {}
-local SLIDE_CFG = MOVE.Slide or {}
 local MANTLE_CFG = MOVE.Mantle or {}
 local CLIMB_CFG = MOVE.Climb or {}
 local STANCE_CFG = MOVE.Stance or {}
@@ -227,20 +232,16 @@ local ST = {
 	CrouchHeadTop = num(STANCE_CFG, "CrouchHeadTop", 4.3),
 	Blend = math.max(0.02, num(STANCE_CFG, "BlendTime", 0.16)),
 }
--- Slide
+-- Slide: a physical slide (Shared.SlidePhysics: entry from the run speed, gravity along the slope, friction by
+-- material, soft and hard speed caps, steering). Config.Movement.Slide's old timer keys (MaxTime, Boost, Friction,
+-- DownhillTimeScale, HardMaxTime, SteerRate) are no longer read.
+local SP = SlidePhysics.C
 local SL = {
-	MinEntry = num(SLIDE_CFG, "MinEntrySpeed", 15),
-	Boost = num(SLIDE_CFG, "Boost", 1.15),
-	Max = num(SLIDE_CFG, "MaxSpeed", 28),
-	Friction = num(SLIDE_CFG, "Friction", 15),
-	SlopeAccel = num(SLIDE_CFG, "SlopeAcceleration", 40),
-	MaxTime = num(SLIDE_CFG, "MaxTime", 1.2),
-	MinTime = num(SLIDE_CFG, "MinTime", 0.35),
-	DownhillTime = num(SLIDE_CFG, "DownhillTimeScale", 0.35),
-	HardCap = num(SLIDE_CFG, "HardMaxTime", 3.5),
-	Steer = num(SLIDE_CFG, "SteerRate", 1.2),
-	Cooldown = num(SLIDE_CFG, "Cooldown", 0.7),
-	EndSpeed = num(SLIDE_CFG, "EndSpeed", 8),
+	MinEntry = SP.MinEntrySpeed,
+	MinTime = SP.MinTime,
+	MaxTime = SP.MaxTime,
+	Cooldown = SP.Cooldown,
+	EndSpeed = SP.EndSpeed,
 }
 -- Mantle and vault
 local MT = {
@@ -1235,8 +1236,18 @@ local function mantlePosition(m, u: number): Vector3
 	return Vector3.new(m.p0.X, y, m.p0.Z) + m.dirH * (m.distance * h)
 end
 
+local lastSlide = nil -- the last finished voluntary slide's numbers (getLastSlide, for tuning and probes)
+-- live slide readings for SlideFx (getSlide): speed, ground material, slope, + when going downhill
+local SLIDE_INFO = { active = false, kind = "none", speed = 0, material = Enum.Material.Air, slopeSin = 0,
+	downhill = 0, age = 0, entry = 0, distance = 0, grounded = false }
 local function endSlide(c, t: number)
 	local wasSlope = slide and slide.kind == "Slope"
+	SLIDE_INFO.active, SLIDE_INFO.kind, SLIDE_INFO.speed = false, "none", 0
+	if slide and slide.kind == "Slide" then
+		local p = c and c.root and c.root.Position
+		local flat = if p and slide.startPos then Vector3.new(p.X - slide.startPos.X, 0, p.Z - slide.startPos.Z).Magnitude else 0
+		lastSlide = { time = slide.age, distance = flat, path = slide.distance, entry = slide.entry, endedAt = t }
+	end
 	slide = nil
 	slideCooldownUntil = t + (if wasSlope then 0.2 else SL.Cooldown)
 	if c and c.humanoid and not mantle and not climb and not c.dead then
@@ -1646,12 +1657,16 @@ local function airStep(v: Vector3, w: Vector3, S: number, dt: number): Vector3
 	return w * along + perp
 end
 
+-- Voluntary slide (Shared.SlidePhysics): entry from the run speed, then gravity along the slope against friction
+-- by material, so the steeper the hill and the faster you were running, the further you slide.
+
 local function startSlide(c, t: number, fwd: Vector3, actualSpeed: number)
 	local s = math.max(velocity.Magnitude, actualSpeed)
 	local dir = if velocity.Magnitude > 0.5 then velocity.Unit else fwd
-	local speed = math.min(SL.Max, math.max(s, SL.MinEntry) * SL.Boost)
+	local speed = SlidePhysics.entrySpeed(s, SPD.Sprint)
 	velocity = dir * speed
-	slide = { kind = "Slide", time = 0, age = 0, dir = dir, blockedTime = 0, airTime = 0, recover = 0 }
+	slide = { kind = "Slide", time = 0, age = 0, dir = dir, blockedTime = 0, airTime = 0, recover = 0,
+		normal = if G.hit then G.normal else Vector3.yAxis, entry = speed, distance = 0, startPos = c.root.Position }
 	if sprintToggled then
 		setSprintToggle(false)
 	end
@@ -1660,34 +1675,27 @@ end
 
 local function slideStep(c, dt: number, t: number, wishDir: Vector3, actualSpeed: number, grounded: boolean): Vector3
 	local sl = slide
-	local s = velocity.Magnitude
-	local dir = if s > 0.01 then velocity / s else sl.dir
-	if wishDir.Magnitude > 0.01 then
-		local angle = math.acos(math.clamp(dir:Dot(wishDir), -1, 1))
-		if angle > 1e-3 and angle < 2.2 then
-			local sign = if dir:Cross(wishDir).Y >= 0 then 1 else -1
-			dir = CFrame.fromAxisAngle(Vector3.yAxis, sign * math.min(angle, SL.Steer * dt)):VectorToWorldSpace(dir)
+	-- the slope under us, smoothed (faceted terrain normals jump from facet to facet)
+	if grounded and G.hit and G.normal.Y > 0.3 then
+		sl.normal = sl.normal:Lerp(G.normal, expAlpha(SP.NormalSmoothing, dt))
+		if sl.normal.Magnitude > 1e-3 then
+			sl.normal = sl.normal.Unit
 		end
 	end
-	-- friction depends on the surface: you slide further on mud, snow and ice
-	s = math.max(0, s - SL.Friction * math.clamp(SURF.grip, 0.35, 1.2) * dt)
-	local nv = dir * s
-	local downhill = 0
-	local n = G.normal
-	if grounded and n.Y < 0.999 and n.Y > 0.3 then
-		-- the horizontal part of gravity along the slope: downhill speeds you up, uphill slows you
-		local g = Vector3.new(n.X * n.Y, 0, n.Z * n.Y)
-		nv += g * SL.SlopeAccel * dt
-		downhill = g:Dot(dir)
+	local material = if G.hit then G.material else c.humanoid.FloorMaterial
+	local mu = SlidePhysics.friction(material)
+	if W.depth > 0.15 then
+		mu *= 1.4 -- shallow water drags at you
 	end
-	local ns = nv.Magnitude
-	if ns > SL.Max then
-		nv = nv * (SL.Max / ns)
+	local nv = SlidePhysics.step(velocity, sl.dir, sl.normal, mu, SURF.grip, wishDir, dt, grounded)
+	if nv.Magnitude > 0.01 then
+		sl.dir = nv.Unit
 	end
-	sl.time += dt * (if downhill > 0.12 then SL.DownhillTime else 1)
 	sl.age += dt
+	sl.time = sl.age
+	sl.distance += actualSpeed * dt
 	if actualSpeed < SL.EndSpeed * 0.6 and sl.age > 0.15 then
-		sl.blockedTime += dt
+		sl.blockedTime += dt -- hit something
 	else
 		sl.blockedTime = 0
 	end
@@ -1696,9 +1704,16 @@ local function slideStep(c, dt: number, t: number, wishDir: Vector3, actualSpeed
 	else
 		sl.airTime += dt
 	end
+	local n = sl.normal
+	local downhill = Vector3.new(n.X, 0, n.Z)
+	SLIDE_INFO.active, SLIDE_INFO.kind = true, "Slide"
+	SLIDE_INFO.speed, SLIDE_INFO.material, SLIDE_INFO.grounded = nv.Magnitude, material, grounded
+	SLIDE_INFO.slopeSin = downhill.Magnitude
+	SLIDE_INFO.downhill = if nv.Magnitude > 0.01 then downhill:Dot(nv.Unit) else 0 -- + going downhill
+	SLIDE_INFO.age, SLIDE_INFO.entry, SLIDE_INFO.distance = sl.age, sl.entry, sl.distance
 	local crouchInput = crouchHeld or crouchToggled
-	if nv.Magnitude < SL.EndSpeed or sl.time >= SL.MaxTime or sl.age >= SL.HardCap or sl.blockedTime > 0.12
-		or (not crouchInput and sl.age >= SL.MinTime) or sl.airTime > 0.15 then
+	if nv.Magnitude < SL.EndSpeed or sl.age >= SL.MaxTime or sl.blockedTime > 0.12
+		or (not crouchInput and sl.age >= SL.MinTime) or sl.airTime > SP.AirGrace then
 		endSlide(c, t)
 	end
 	return nv
@@ -2438,15 +2453,19 @@ local function update(dt: number)
 
 	-- Crouch, slide, sprint
 	local crouchInput = crouchHeld or crouchToggled
-	if not slide and t - crouchPressedAt < 0.15 and t >= slideCooldownUntil and grounded and not swimming and not useBusy
-		and W.depth < SWM.WadeStart
-		and (moveState == "Sprint" or ((sprintHeld or sprintToggled) and actualSpeed >= SL.MinEntry)) and actualSpeed >= SL.MinEntry * 0.9 then
+	-- (a press counts for 0.25 s, and a foot just off the ground counts as grounded: running down a bumpy hill the
+	-- Humanoid leaves the ground for a frame or two between strides)
+	local footDown = grounded or (G.hit and G.dist < 0.6 and not swimming and not nativeClimb)
+	if not slide and t - crouchPressedAt < 0.25 and t >= slideCooldownUntil and footDown and not swimming and not useBusy
+		and W.depth < SWM.WadeStart and math.max(actualSpeed, velocity.Magnitude * 0.95) >= SL.MinEntry
+		and actualSpeed >= SL.MinEntry * 0.85 then
+		-- any run fast enough slides (a jog short, a sprint long); slower, the press crouches
 		crouchPressedAt = -math.huge
 		startSlide(c, t, fwd, actualSpeed)
 	end
 	if AIR.landSlide then
 		AIR.landSlide = false
-		if not slide and crouchInput and t >= slideCooldownUntil and grounded and not useBusy and actualSpeed >= SL.MinEntry then
+		if not slide and crouchInput and t >= slideCooldownUntil and footDown and not useBusy and actualSpeed >= SL.MinEntry then
 			startSlide(c, t, fwd, actualSpeed)
 		end
 	end
@@ -3116,6 +3135,20 @@ function MovementController.getMotion()
 	return motion
 end
 
+-- Live slide readings (shared table): { active, kind, speed, material, slopeSin, downhill (+ = going downhill), age,
+-- entry, distance, grounded }. active is true only during a voluntary slide.
+function MovementController.getSlide()
+	if SLIDE_INFO.active and (slide == nil or slide.kind ~= "Slide") then
+		SLIDE_INFO.active, SLIDE_INFO.kind, SLIDE_INFO.speed = false, "none", 0
+	end
+	return SLIDE_INFO
+end
+
+-- The last finished voluntary slide: { time, distance (flat, start to end), path, entry, endedAt } or nil.
+function MovementController.getLastSlide()
+	return lastSlide
+end
+
 -- Start climbing the given trunk (a Climbable part) if it is in reach: the Climb prompt (TreeSeatController) on
 -- touch and gamepad. Returns whether the climb began. Holding forward into the trunk does the same.
 function MovementController.tryClimb(trunk: Instance?): boolean
@@ -3149,6 +3182,13 @@ function MovementController.getDebug()
 	debugOut.instability = AIR.instability
 	debugOut.exertion = motion.exertion
 	debugOut.slide = if slide then slide.kind else "none"
+	debugOut.slideSpeed = if slide then velocity.Magnitude else 0
+	if lastSlide then
+		debugOut.lastSlideTime = lastSlide.time
+		debugOut.lastSlideDist = lastSlide.distance
+		debugOut.lastSlideEntry = lastSlide.entry
+		debugOut.lastSlideAt = lastSlide.endedAt
+	end
 	debugOut.mantle = if mantle then mantle.kind else "none"
 	debugOut.climb = climb ~= nil
 	return debugOut

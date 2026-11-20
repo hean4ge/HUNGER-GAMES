@@ -226,6 +226,26 @@ Trails.list = {
 			{ type = "particles", texture = TEX.sparks, color = { rgb(255, 220, 140) }, size = { 0.16, 0.04 }, alpha = { 0, 1 },
 				rate = 20, life = { 0.5, 0.9 }, speed = { 2, 5 }, drag = 1, accel = Vector3.new(0, -6, 0), spread = 180, light = 1 },
 		} },
+	-- Season one's two trails (CardMenusAndShop.md 3.1): earned on the Season Track, never sold (`earned` names where;
+	-- TrailService.buy refuses them, SeasonService grants them through TrailService.grant)
+	{ id = "resin", name = "Resin", kind = "Natural", rarity = "Common", slots = ALL, earned = "Season Track · free tier 10",
+		desc = "A warm amber ribbon with a light core.",
+		look = {
+			{ type = "trail", color = { rgb(250, 226, 170) }, width = 0.06, life = 0.22, alpha = { 0.1, 1 }, light = 0.4,
+				swingSpan = 0.15 },
+			{ type = "trail", color = { rgb(214, 150, 64), rgb(150, 96, 40) }, width = 0.24, life = 0.26, alpha = { 0.45, 1 },
+				light = 0.3, swingSpan = 0.6 },
+		} },
+	{ id = "gold_dust", name = "Gold Dust", kind = "Natural", rarity = "Legendary", slots = ALL,
+		earned = "Season Track · premium tier 45",
+		desc = "A soft gold ribbon with a slow drift of motes.",
+		look = {
+			{ type = "trail", color = { rgb(236, 206, 132), rgb(190, 150, 80) }, width = 0.2, life = 0.3, alpha = { 0.35, 1 },
+				light = 0.5, swingSpan = 0.6 },
+			{ type = "particles", texture = TEX.sparkle, color = { rgb(240, 214, 140) }, size = { 0.16, 0.04 }, alpha = { 0.2, 1 },
+				rate = 16, life = { 0.8, 1.3 }, speed = { 0.1, 0.4 }, drag = 2, accel = Vector3.new(0, -0.4, 0), spread = 180,
+				light = 0.4 },
+		} },
 }
 
 Trails.ById = {}
@@ -255,6 +275,12 @@ end
 
 function Trails.isFree(id: any): boolean
 	return type(id) == "string" and FREE[id] == true
+end
+
+-- Where an earned-only trail comes from ("Season Track · free tier 10"), or nil for the trails the shop sells
+function Trails.earnedFrom(id: any): string?
+	local def = Trails.get(id)
+	return if def and type(def.earned) == "string" then def.earned else nil
 end
 
 function Trails.price(id: any): number

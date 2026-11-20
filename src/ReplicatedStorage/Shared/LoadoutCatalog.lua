@@ -213,6 +213,7 @@ do
 					t.colors = { c[1], c[2] or c[1] }
 				end
 				t.line = lineOf(src) or t.line
+				t.earned = if type(src.earned) == "string" then src.earned else nil -- (earned-only: never a price button)
 				if type(trails.price) == "function" then
 					local ok, price = pcall(trails.price, src.id)
 					if ok and type(price) == "number" then

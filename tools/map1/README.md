@@ -143,6 +143,20 @@ To make the margin the default, set `STREAM_MARGIN = True` at the top of `pack.p
 `Map1Regions.lua` changes a little too and must be pushed again. A pack under another name keeps its files in
 `build/<name>/` and does not touch the log, the manifest or the module of the real pack.
 
+## The hills (on by default; `--no-hills` leaves them out)
+
+The owner asked for a slightly hilly map (20 November 2026). `hills.py` lays gentle rolling ground over the valley
+floor after the water repairs, so the Height blob, `Map1Regions.lua` and every builder read the same ground: a
+seeded cubic B-spline value noise (wavelengths 320, 160 and 80 studs, seed 4820), about 10 studs up or down on the
+open meadow and up to 17 near the valley sides, times a mask that keeps everything else as Blender made it: the
+heart inside r 205 (the knoll, deck, plinth ring and turf), every cell within 28 studs of water (the lake, the stream,
+their banks and levels), the trails and paths, every landmark's footprint, the Edge, Crest and Outside regions and
+everything past r 1,560, and steep ground. The packer then checks the water's faults are unchanged, that no repaired
+cell moved and that the heart is untouched, and stops otherwise. Build 5: 459,878 cells moved, +15.6 / -16.4 studs at
+most. A B-spline, not a quintic blend: the quintic is flat round every lattice node, and the plateaus it left drew as
+pale bare grass. After a new pack, write the changed chunks only (`Map1.Terrain` opts `only` and `trim`), then
+`fillUnder`, Scatter, Loot, Water and the Audit.
+
 ## What else makes the packer stop
 
 A missing file; a PNG of the wrong size or bit depth; a grid, cell size or origin that is not the contract's; a

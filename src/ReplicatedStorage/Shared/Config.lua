@@ -128,6 +128,13 @@ Config.Border = {
 	WallColor = Color3.fromRGB(44, 112, 255), -- (Neon draws a colour brighter and nearer cyan than it is written)
 	WallLineColor = Color3.fromRGB(56, 124, 255),
 	OutsideTint = Color3.fromRGB(176, 204, 255),
+	-- The honeycomb on the wall (owner, 20 Nov 2026: "opaque slightly transparent blue hexagonal shape"; ArenaController
+	-- .Wall / .Hex): blue-white cell outlines in WallLineColor lifted toward white, a WallColor glow and a light
+	-- WallColor tint in the cells. HexImage: the uploaded tile (tools/border/hex_tile.png, 111 x 192, made by
+	-- tools/border/make_hex_tile.py), "rbxassetid://<id>". nil: the client draws the same tile itself at start
+	-- (an EditableImage: needs Game Settings > Security > "Allow Mesh / Image APIs"), and keeps the old outline if
+	-- it cannot.
+	HexImage = nil,
 	-- Stages (optional). nil: the ring closes in one run, as described above. A list: the ring closes in stages and
 	-- rests between them. Each stage is { at = the round second it starts moving, over = seconds it moves,
 	-- radius = where it stops }, in order; the last one must end at FinalRadius, and ShrinkStartTime / ShrinkDuration
@@ -544,6 +551,33 @@ Config.Kits = {
 Config.Economy = {
 	RobuxGold = false,
 }
+
+-- CASES and every Robux path in the shop (docs/design/CardMenusAndShop.md 3.10; ShopService, ShopController).
+-- Every switch is OFF and every product id empty until the owner says yes and the lead creates the products.
+-- A switch with an empty id stays off (the server checks both). Prices are read from Roblox, never written here.
+-- RobuxGold (the Gold packs) is Config.Economy.RobuxGold above (either key is read). With RobuxGold, RobuxCrates or
+-- RobuxLuck on, crates become paid random items: PolicyService ArePaidRandomItemsRestricted players cannot buy them.
+Config.Shop = {
+	RobuxGold = false, -- mirrors Config.Economy.RobuxGold; the pack ids are Shared.Rewards' Economy.Packs
+	RobuxCrates = false, CrateProductIds = {}, -- { timber = id, ironbound = id, ... }: one crate for Robux each
+	RobuxLuck = false, LuckPassId = nil, -- "Lucky Charm" game pass: every 3rd crate rolls twice
+	DirectBuy = false, DirectBuyProductIds = {}, -- by grade: { Prized = id, Storied = id, Fabled = id } (Shelf items)
+	SeasonPremium = false, SeasonPremiumProductId = nil,
+	SeasonDeluxe = false, SeasonDeluxeProductId = nil,
+	StarterKit = false, StarterKitProductId = nil,
+	WardrobePass = false, WardrobePassId = nil,
+	ShelfPerDay = 6, CrateMaxQuantity = 10, AcornMax = 10,
+	LuckEvery = 3, -- the Lucky Charm: this many crates per lucky one (a counter, not a chance)
+}
+
+-- The Season Track, the daily reward, Level ranks and the leaderboards (CardMenusAndShop.md 3.6 to 3.9; Shared.Progression
+-- holds the tiers and rewards; SeasonService, DailyService, RankService, LeaderboardService). The premium row shows
+-- only with Config.Shop.SeasonPremium on AND a SeasonPremiumProductId (both off today: the row is hidden, not teased).
+Config.Season = { Id = "S1", Name = "The First Ride", StartUnix = 1794787200, Days = 42, Tiers = 50, TierXP = 1000, EncoreXP = 2500 }
+Config.Daily = { Enabled = true, StampsForTrim = 4 }
+Config.Ranks = { LevelBase = 400, LevelStep = 40, GoldPerLevel = 100, MaxLevel = 100, MaxPrestige = 10, Arena = false,
+	TrainingXP = 25, TrainingPerDay = 8 }
+Config.Boards = { Enabled = true, ReadEvery = 120, ReadStagger = 20, ReadTop = 50, FullFrom = 8, WritesSpread = 10 }
 
 -- Help for new players (PlayabilityPlan Q1). Mode: "Auto" = players with fewer than NewPlayerRounds real rounds
 -- (the RoundsPlayed attribute, read at the Countdown) get the extra help, which fades as they learn; "Always"; "Off".

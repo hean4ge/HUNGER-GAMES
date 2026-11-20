@@ -31,7 +31,9 @@
 	    Daily = { day = "YYYY-MM-DD" (UTC), free, paid (spins used), roundGold, firstRound, firstWin },
 	    LastKit = string, Bring = string,        the kit and the owned weapon picked for the next round ("" = none)
 	    Draws = number,                          wheel spins and boxes opened, ever
+	    BonusSpins = number,                     free wheel spins from the daily reward (RewardsService.grantSpins)
 	    Trails = { Owned = { [id] = true }, Swing, Arrow, Throw }  bought and equipped trails (TrailService; "" = default)
+	    Shop = { Owned, Held, Acorns, Pity, Opened, Lucky, Equipped, Receipts }  cosmetics and crates (ShopService)
 	  }
 	  Econ is written like Settings: only once the profile has loaded, and whole except the Armoury, which is merged
 	  by the higher star with what is stored. A save from before Gold existed (no Gold, no Econ, Version 1) loads as
@@ -55,6 +57,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Net = require(Shared:WaitForChild("Net"))
 local Util = require(Shared:WaitForChild("Util"))
+local Progression = require(Shared:WaitForChild("Progression"))
 
 local STORE_NAME = "PlayerStats_v1"
 local AUTOSAVE_INTERVAL = 120
@@ -179,6 +182,8 @@ local function sanitizeEcon(raw: any)
 		out.Bring = src.Bring
 	end
 	out.Draws = count(src.Draws, 1e9)
+	-- free wheel spins given by the daily reward (day 4: RewardsService.grantSpins); used before the daily free one
+	out.BonusSpins = count(src.BonusSpins, 20)
 	-- Trails (TrailService, Combat_v3 section 4): { Owned = { [id] = true }, Swing, Arrow, Throw } ("" = the default)
 	local trails = { Owned = {}, Swing = "", Arrow = "", Throw = "" }
 	if type(src.Trails) == "table" then
@@ -206,6 +211,85 @@ local function sanitizeEcon(raw: any)
 			specialty = if type(l.specialty) == "string" and #l.specialty <= 16 then l.specialty else nil,
 			general = if type(l.general) == "string" and #l.general <= 24 then l.general else nil,
 		}
+		-- the saved loadout cards (CardMenusAndShop 2.1: up to 4; KitService checks each value against the catalogue)
+		local function str(v: any, max: number): string?
+			return if type(v) == "string" and #v <= max then v else nil
+		end
+		if type(l.saved) == "table" then
+			local saved = {}
+			for i = 1, 4 do
+				local s = l.saved[i]
+				if type(s) ~= "table" then
+					break
+				end
+				local tr = if type(s.trails) == "table" then s.trails else {}
+				saved[i] = { name = str(s.name, 20), kit = str(s.kit, 16), bring = str(s.bring, 32) or "",
+					specialty = str(s.specialty, 16), general = str(s.general, 24),
+					trails = { swing = str(tr.swing, 24), arrow = str(tr.arrow, 24), throw = str(tr.throw, 24) } }
+			end
+			out.Loadout.saved = saved
+		end
+		out.Loadout.slot = if Util.isFiniteNumber(l.slot) then math.clamp(math.floor(l.slot), 1, 4) else nil
+	end
+	-- CASES (ShopService, CardMenusAndShop 3.2 to 3.5): { Owned = { [cosmeticId] = serial (0 plain, n = Numbered #n) },
+	-- Held = { [crateId] = count }, Acorns, Pity = { [crateId] = { s, f } }, Opened, Lucky (Lucky Charm counter),
+	-- Equipped = { [slot] = cosmeticId }, Receipts = { purchaseId } (the last 40 Robux receipts granted) }
+	local shop = { Owned = {}, Held = {}, Acorns = 0, Pity = {}, Opened = 0, Lucky = 0, Equipped = {}, Receipts = {} }
+	if type(src.Shop) == "table" then
+		local s = src.Shop
+		local function str(v: any, max: number): boolean
+			return type(v) == "string" and #v > 0 and #v <= max
+		end
+		if type(s.Owned) == "table" then
+			local n = 0
+			for id, serial in pairs(s.Owned) do
+				if str(id, 32) and Util.isFiniteNumber(serial) and n < 400 then
+					shop.Owned[id] = math.clamp(math.floor(serial), 0, 1e6)
+					n += 1
+				end
+			end
+		end
+		if type(s.Held) == "table" then
+			for id, count in pairs(s.Held) do
+				if str(id, 24) and Util.isFiniteNumber(count) and count >= 1 then
+					shop.Held[id] = math.clamp(math.floor(count), 0, 999)
+				end
+			end
+		end
+		shop.Acorns = count(s.Acorns, 10)
+		if type(s.Pity) == "table" then
+			for id, p in pairs(s.Pity) do
+				if str(id, 24) and type(p) == "table" then
+					shop.Pity[id] = { s = count(p.s, 1000), f = count(p.f, 1000) }
+				end
+			end
+		end
+		shop.Opened = count(s.Opened, 1e9)
+		shop.Lucky = count(s.Lucky, 100)
+		if type(s.Equipped) == "table" then
+			for slot, id in pairs(s.Equipped) do
+				if str(slot, 40) and str(id, 32) then
+					shop.Equipped[slot] = id
+				end
+			end
+		end
+		if type(s.Receipts) == "table" then
+			for i, id in ipairs(s.Receipts) do
+				if i <= 40 and str(id, 64) then
+					table.insert(shop.Receipts, id)
+				end
+			end
+		end
+	end
+	out.Shop = shop
+	-- Progress (Season Track, daily reward, Level ranks, weekly board values): Shared.Progression owns the shape.
+	-- A save without it loads as a new player's Progress.
+	out.Progress = Progression.sanitize(src.Progress)
+	-- Looks (CosmeticService): the cosmetics worn, per weapon and account-wide: { s = skins, e = kill effects,
+	-- i = kill icons, b = banner, t = trim }. Shared.CosmeticLooks owns the shape and drops any unknown id.
+	local okLooks, CosmeticLooks = pcall(require, Shared:FindFirstChild("CosmeticLooks") :: ModuleScript)
+	if okLooks and type(CosmeticLooks) == "table" then
+		out.Looks = CosmeticLooks.clean(src.Looks)
 	end
 	return out
 end

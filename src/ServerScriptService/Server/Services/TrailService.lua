@@ -171,6 +171,10 @@ function TrailService.buy(player: Player, id: string, slot: string?): (boolean, 
 		end
 		return true, nil
 	end
+	local earned = Trails.earnedFrom(id)
+	if earned then
+		return false, string.format("%s is earned, not sold · %s", def.name, earned)
+	end
 	if not call("DataService", "isLoaded", player) then
 		return false, "Your Gold is still loading"
 	end
@@ -198,6 +202,30 @@ function TrailService.buy(player: Player, id: string, slot: string?): (boolean, 
 	busy[player] = nil
 	publish(player)
 	return true, nil
+end
+
+-- A trail given, not bought (the Season Track's Resin and Gold Dust; SeasonService). True once it is owned and saved.
+function TrailService.grant(player: Player, id: string): boolean
+	if type(id) ~= "string" or not Trails.get(id) then
+		return false
+	end
+	if TrailService.owns(player, id) then
+		return true
+	end
+	if not call("DataService", "isLoaded", player) then
+		return false
+	end
+	local ok = call("DataService", "updateEcon", player, function(econ)
+		econ.Trails = econ.Trails or { Owned = {} }
+		econ.Trails.Owned = econ.Trails.Owned or {}
+		econ.Trails.Owned[id] = true
+	end)
+	if not ok then
+		return false
+	end
+	call("DataService", "saveSoon", player)
+	publish(player)
+	return true
 end
 
 local function onRequest(player: Player, action: any, a: any, b: any)

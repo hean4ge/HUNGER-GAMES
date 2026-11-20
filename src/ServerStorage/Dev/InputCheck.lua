@@ -51,6 +51,9 @@ InputCheck.EXPECTED = {
 		Zoom = NO_ZOOM, ZoomLevel = NO_ZOOM,
 		-- the Loadout screen (LoadoutController): L / D-pad right; touch: tap the Loadout summary line
 		Loadout = { touch = "gui:Loadout.Root.Summary" },
+		-- the train menu (MenuHubController): 1 to 7 open its screens, D-pad down opens the hub; touch: the bar's cards
+		-- (a phone: one MENU card). Bound while the bar shows (no menu up).
+		Hub = { touch = "gui:MenuHub.Root.Bar" },
 	},
 	Plate = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },
@@ -89,6 +92,7 @@ InputCheck.EXPECTED = {
 		Dodge = {},
 		SkillWeapon = {},
 		SkillGeneral = {},
+		Hub = { absent = true }, -- no menu opens in a round
 	},
 	Spectating = {
 		Menu = { touch = "gui:Menu.Root.Launcher" },

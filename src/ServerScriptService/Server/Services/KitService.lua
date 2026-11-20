@@ -56,6 +56,7 @@
 	  KitService.delivered: Signal(player, kitId, parcel?)   a parcel was dropped (or, "Start", the kit given)
 ]]
 local CollectionService = game:GetService("CollectionService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -307,10 +308,52 @@ function KitService.setLoadout(player: Player, payload: any)
 	end
 	loadouts[player] = clean
 	publishLoadout(player)
+	-- (integrate, 20 Nov) the saved loadout cards: up to 4, each value checked against the catalogue, kept in
+	-- Econ.Loadout.saved / slot and published as LoadoutSaved (JSON) and LoadoutSlot for the Loadout screen
+	local savedList, slot = nil, nil
+	if type(p.saved) == "table" then
+		savedList = {}
+		for i = 1, 4 do
+			local s = p.saved[i]
+			if type(s) ~= "table" then
+				break
+			end
+			local kit = if Kits.get(s.kit) then s.kit else KitService.getKit(player)
+			local c = LoadoutCatalog.sanitize(s, function(id)
+				return ownsTrail(player, id)
+			end, kit)
+			savedList[i] = { name = if type(s.name) == "string" then string.sub(s.name, 1, 20) else nil, kit = kit,
+				bring = if type(s.bring) == "string" and #s.bring <= 32 then s.bring else "",
+				specialty = c.specialty, general = c.general,
+				trails = { swing = c.trails.swing, arrow = c.trails.arrow, throw = c.trails.throw } }
+		end
+	end
+	if type(p.slot) == "number" and p.slot == p.slot then
+		slot = math.clamp(math.floor(p.slot), 1, 4)
+	end
 	call("DataService", "updateEcon", player, function(econ)
-		econ.Loadout = { specialty = clean.specialty, general = clean.general }
+		local before = if type(econ.Loadout) == "table" then econ.Loadout else {}
+		econ.Loadout = { specialty = clean.specialty, general = clean.general, saved = savedList or before.saved,
+			slot = slot or before.slot }
 	end)
+	if savedList then
+		KitService.publishSaved(player, savedList, slot)
+	end
 	return clean
+end
+
+-- LoadoutSaved (JSON list of the saved cards) and LoadoutSlot (the selected one) for the Loadout screen
+function KitService.publishSaved(player: Player, list: any, slot: number?)
+	if player.Parent ~= Players or type(list) ~= "table" or #list == 0 then
+		return
+	end
+	local ok, json = pcall(HttpService.JSONEncode, HttpService, list)
+	if ok and #json < 4000 then
+		player:SetAttribute("LoadoutSaved", json)
+	end
+	if slot then
+		player:SetAttribute("LoadoutSlot", slot)
+	end
 end
 
 local function onLoadoutSet(player: Player, payload: any)
@@ -340,6 +383,9 @@ local function loadPick(player: Player)
 			end
 			if type(econ) == "table" and type(econ.Loadout) == "table" and loadouts[player] == nil then
 				loadouts[player] = LoadoutCatalog.sanitize(econ.Loadout, nil, KitService.getKit(player))
+			end
+			if type(econ) == "table" and type(econ.Loadout) == "table" and type(econ.Loadout.saved) == "table" then
+				KitService.publishSaved(player, econ.Loadout.saved, econ.Loadout.slot)
 			end
 			break
 		end

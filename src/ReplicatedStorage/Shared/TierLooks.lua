@@ -385,10 +385,57 @@ local function itemIdOf(model: Instance): string?
 	return model.Name
 end
 
--- The star's variant template (Assets.Items.<id>_t<stars>, or <id>_L_t<stars> for the pair's left blade).
+--[[ SKINS (CardMenusAndShop 3.1; Shared.CosmeticLooks). A skin goes ON TOP of the star look and never changes stats:
+	after every star swap or trim pass, the model's skin (attribute Skin, set by Server CosmeticService on a held model
+	or by a menu's preview) recolours the parts by PartRole. A first-person ("view") model with no Skin attribute takes
+	the local player's own skin for that weapon. A skin with its own SeasonOne meshes (CosmeticLooks.Models) is swapped
+	in here in place of the star's mesh. ]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local cosmeticsModule: any = false
+local function Cosmetics(): any
+	if cosmeticsModule == false then
+		local mod = script.Parent:FindFirstChild("CosmeticLooks")
+		local ok, result = pcall(function()
+			return if mod then require(mod :: ModuleScript) else nil
+		end)
+		cosmeticsModule = if ok and type(result) == "table" then result else nil
+	end
+	return cosmeticsModule
+end
+
+local function skinHook(model: Instance, fresh: boolean)
+	local cosmetics = Cosmetics()
+	if not cosmetics then
+		return
+	end
+	local skin = model:GetAttribute("Skin")
+	if skin == nil and RunService:IsClient() and model:GetAttribute("Variant") == "view" and Players.LocalPlayer then
+		local id = model:GetAttribute("ItemId")
+		local own = cosmetics.skinFor(cosmetics.of(Players.LocalPlayer), if type(id) == "string" then id else model.Name)
+		skin = own
+	end
+	if type(skin) == "string" then
+		local ok, err = pcall(cosmetics.applySkin, model, skin, fresh)
+		if not ok then
+			warn("[TierLooks] skin: " .. tostring(err))
+		end
+	end
+end
+TierLooks.skinHook = skinHook
+
+-- The star's variant template (Assets.Items.<id>_t<stars>, or <id>_L_t<stars> for the pair's left blade); a skin's
+-- own SeasonOne meshes first, when they ship.
 local function variantOf(model: Instance, id: string, stars: number): Model?
 	if not TierLooks.Meshes[id] then
 		return nil
+	end
+	local cosmetics = Cosmetics()
+	if cosmetics and cosmetics.skinMesh then
+		local ok, skinned = pcall(cosmetics.skinMesh, model, stars)
+		if ok and skinned then
+			return skinned
+		end
 	end
 	local assets = ReplicatedStorage:FindFirstChild("Assets")
 	local items = assets and assets:FindFirstChild("Items")
@@ -415,7 +462,11 @@ function TierLooks.trim(model: Instance, stars: number)
 	TierLooks.clear(model)
 	local id = itemIdOf(model)
 	local spec = id and SPEC[id]
-	if not spec or stars == 2 or variantOf(model, id :: string, stars) then
+	if id and variantOf(model, id :: string, stars) then
+		return
+	end
+	skinHook(model, true) -- (the star tint has just been set: the skin goes on it; the trims keep their own colours)
+	if not spec or stars == 2 then
 		return
 	end
 	local handle, frame = gripFrame(model)
@@ -462,6 +513,7 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 		return nil
 	end
 	if model:GetAttribute("TierMesh") == variant.Name then
+		skinHook(model, false)
 		return true
 	end
 	local handle, frame = gripFrame(model)
@@ -524,6 +576,7 @@ function TierLooks.apply(model: Instance, stars: number): boolean?
 		end
 	end
 	model:SetAttribute("TierMesh", variant.Name)
+	skinHook(model, false)
 	return true
 end
 

@@ -18,6 +18,7 @@ Options
   --force-pack       write the Studio pack even if the one in Studio's content folder is already this build
   --margin           give narrow pools (the stream) a wet margin one cell wide, so that the designed water shows
                      (README, "The margin"); --no-margin turns it off. The default is STREAM_MARGIN below.
+  --no-hills         leave out the rolling hills of hills.py (the Height blob is then Blender's, repaired)
   --pack-name NAME   another name for the Studio pack, for experiments: the log and the manifest then stay in the
                      build folder and the module is not written (the contract's name is map1_data)
   --height-cell N    spacing of Map1Regions' height nodes in studs: 32 (default) or 64
@@ -40,6 +41,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
+import hills  # noqa: E402
 import pngread  # noqa: E402
 
 BS = chr(92)
@@ -1347,7 +1349,7 @@ def run_sync_blob(pack_name, blob_files):
 
 def main(argv):
     opts = {"exports": default_exports(), "build": None, "pack": "map1_data", "cell": 32, "margin": STREAM_MARGIN,
-            "dry": False, "no_pack": False, "no_module": False, "ready": None, "force_pack": False}
+            "dry": False, "no_pack": False, "no_module": False, "ready": None, "force_pack": False, "hills": True}
     args = list(argv)
     while args:
         a = args.pop(0)
@@ -1355,6 +1357,8 @@ def main(argv):
             opts["force_pack"] = True
         elif a == "--margin":
             opts["margin"] = True
+        elif a == "--no-hills":
+            opts["hills"] = False
         elif a == "--no-margin":
             opts["margin"] = False
         elif a == "--exports":
@@ -1419,6 +1423,26 @@ def main(argv):
               "z %.0f..%.0f: left as it is (see the repair log)" % (
                   hw["cells"], hw["deepest"], hw["level"], hw["xFrom"], hw["xTo"], hw["zFrom"], hw["zTo"]))
 
+    # the hills (hills.py): gentle rolling ground over the open floor, nothing within reach of the water, the heart,
+    # the trails, the landmarks or the Edge. The water rules are checked again on the hilled ground.
+    hill_info = None
+    if opts["hills"]:
+        H_hilled, hill_info, _mask = hills.add_hills(H2, W2, ex["material"], ex["region"], ex["layout"])
+        hilled = {4: count_faults(H_hilled, W2, NB4), 8: count_faults(H_hilled, W2, NB8)}
+        if hilled != after:
+            raise PackError("the hills changed the water's faults: %r, not %r" % (hilled, after))
+        moved_repairs = [rp for rp in repairs if H_hilled[rp["row"], rp["col"]] != H2[rp["row"], rp["col"]]]
+        if moved_repairs:
+            raise PackError("the hills moved %d cells the water repairs made" % len(moved_repairs))
+        c = ORIGIN + CELL * (np.arange(N) + 0.5)
+        rr = np.hypot(c[None, :], c[:, None])
+        if (H_hilled[rr < hills.HEART_KEEP] != H2[rr < hills.HEART_KEEP]).any():
+            raise PackError("the hills reached into the heart")
+        print("  the hills: %d cells moved (seed %d), up to +%.2f / -%.2f studs, %.2f on average where moved" % (
+            hill_info["cellsChanged"], hill_info["seed"], hill_info["raisedMax"], hill_info["loweredMax"],
+            hill_info["meanAbsWhereChanged"]))
+        H2 = H_hilled
+
     blobs = make_blobs(ex, H2, W2)
     print("  fingerprinting %d blobs (%.1f MB) ..." % (len(blobs), sum(len(b[2]) for b in blobs) / 1e6))
     blob_rows = [{"name": name, "file": fname, "bytes": len(data), "fnv": fnv(data), "content": desc}
@@ -1454,6 +1478,7 @@ def main(argv):
         "module": dict(module_info, file="src/ReplicatedStorage/Shared/Map1Regions.lua",
                        packHeight=by_name["Height"]["fnv"], packRegion=by_name["Region"]["fnv"]),
         "notes": ex["notes"],
+        "hills": hill_info,
     }
 
     if opts["dry"]:

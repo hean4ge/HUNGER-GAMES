@@ -13,7 +13,7 @@
   {
    "name": "Height",
    "bytes": 3786752,
-   "fnv": "a79c8714",
+   "fnv": "cf360598",
    "content": "1376 x 1376 uint16 LE, y = value / 32 (water repairs applied)"
   },
   {
@@ -108,15 +108,15 @@
   },
   {
    "name": "Manifest_Skyline",
-   "bytes": 155589,
-   "fnv": "37ff6cf0",
-   "content": "Map1_SkylineCut.manifest.json as text"
+   "bytes": 156573,
+   "fnv": "ec4fdb03",
+   "content": "Map1_SkylineCut.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)"
   },
   {
    "name": "Manifest_FarValley",
-   "bytes": 57639,
-   "fnv": "4bc69bfa",
-   "content": "Map1_FarValley.manifest.json as text"
+   "bytes": 58622,
+   "fnv": "1b9c8d83",
+   "content": "Map1_FarValley.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)"
   }
  ],
  "missing": [],
@@ -201,9 +201,17 @@
    "bytes": 163902,
    "sha256": "e37c43c7a0c206c2fc0be69d560f1fa04c3e0101b1deefb71f2010f1b9b6e493"
   },
+  "art/manifests/Map1_SkylineCut.manifest.json": {
+   "bytes": 164908,
+   "sha256": "18adb21d9ac438c660f2aef6b101ebb14b383ef250586f90975b9dea4af84744"
+  },
   "Map1_FarValley.manifest.json": {
    "bytes": 60829,
    "sha256": "bd560a4a89b05849a522f8f113284cb1e4c78326a4f8089a915cc5057150822a"
+  },
+  "art/manifests/Map1_FarValley.manifest.json": {
+   "bytes": 61834,
+   "sha256": "0a678dac38ae172d9101438766a248663951173a86b530ab0cf5088f531fcddc"
   },
   "Map1_BiomeGrid16.json": {
    "bytes": 129214,
@@ -278,7 +286,7 @@
  },
  "module": {
   "bytes": 123655,
-  "fnv": "0d3bd44e",
+  "fnv": "8d32738b",
   "regionGrid": [
    240,
    240
@@ -293,19 +301,45 @@
   "heightStep": 0.35,
   "accuracyInsideR1800": {
    "points": 200000,
-   "mean": 0.5386637569814242,
-   "p50": 0.31812338452810707,
-   "p95": 1.4077547956937377,
-   "p99": 3.044519873517735,
+   "mean": 0.5481211066708065,
+   "p50": 0.32816837219690953,
+   "p95": 1.4239697877409652,
+   "p99": 3.0471345743676435,
    "max": 85.62582777754972,
-   "within6": 0.995865
+   "within6": 0.99588
   },
   "file": "src/ReplicatedStorage/Shared/Map1Regions.lua",
-  "packHeight": "a79c8714",
+  "packHeight": "cf360598",
   "packRegion": "b6404fbd"
  },
  "notes": [],
- "build": 3,
+ "hills": {
+  "seed": 4820,
+  "octaves": [
+   [
+    320.0,
+    1.0
+   ],
+   [
+    160.0,
+    0.45
+   ],
+   [
+    80.0,
+    0.15
+   ]
+  ],
+  "amplitude": [
+   10.0,
+   17.0
+  ],
+  "cellsChanged": 459878,
+  "raisedMax": 15.5625,
+  "loweredMax": 16.375,
+  "meanAbsWhereChanged": 3.716800094264131,
+  "inPlay": 459878
+ },
+ "build": 5,
  "history": [
   {
    "build": 1,
@@ -329,11 +363,27 @@
     "changed Height (bb2439aa -> a79c8714): 287 cells differ, by up to 2.9375",
     "changed WaterLevel (9df27642 -> 42c28127): 281 cells differ, by up to 60.65625",
     "changed Manifest_FarValley (ee956eed -> 4bc69bfa): now Map1_FarValley.manifest.json as text"
+   ]
+  },
+  {
+   "build": 4,
+   "date": "2026-11-20 02:42",
+   "changes": [
+    "changed Height (a79c8714 -> aea4030e): 460425 cells differ, by up to 18",
+    "changed Manifest_Skyline (37ff6cf0 -> ec4fdb03): now Map1_SkylineCut.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)",
+    "changed Manifest_FarValley (4bc69bfa -> 1b9c8d83): now Map1_FarValley.manifest.json as text, from art/manifests: the export's manifest plus its upload record (assetIds)"
+   ]
+  },
+  {
+   "build": 5,
+   "date": "2026-11-20 03:03",
+   "changes": [
+    "changed Height (aea4030e -> cf360598): 453786 cells differ, by up to 11.125"
    ],
    "blobs": {
     "Height": [
      3786752,
-     "a79c8714"
+     "cf360598"
     ],
     "Material": [
      1893376,
@@ -396,12 +446,12 @@
      "dbe55fed"
     ],
     "Manifest_Skyline": [
-     155589,
-     "37ff6cf0"
+     156573,
+     "ec4fdb03"
     ],
     "Manifest_FarValley": [
-     57639,
-     "4bc69bfa"
+     58622,
+     "1b9c8d83"
     ]
    }
   }

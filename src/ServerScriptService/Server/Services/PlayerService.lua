@@ -638,7 +638,7 @@ local function handleDeath(victim: Player, info, position: Vector3?, leaving: bo
 			call("InventoryService", "dropAll", victim, position)
 		end
 		releaseSpectatorsOf(victim)
-		PlayerService.died:Fire(victim, killer, cause)
+		PlayerService.died:Fire(victim, killer, cause, weaponId, position) -- (weaponId, position: CosmeticService's kill effect)
 	else
 		-- Lobby death (reset, fell off the island) or after the round was decided: just respawn.
 		victim:SetAttribute("Alive", false)

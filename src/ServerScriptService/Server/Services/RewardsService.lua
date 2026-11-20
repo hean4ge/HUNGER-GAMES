@@ -137,6 +137,31 @@ local function near(player: Player, name: string): boolean
 	return (root.Position - spot.Position).Magnitude <= USE_DISTANCE
 end
 
+-- CASES (ShopController) sends the same actions with a "menu" flag: allowed anywhere in the train, never by an alive
+-- contender in a round. The draw still plays its reveal at the steel case, where others in the car watch.
+local function inTrain(player: Player): boolean
+	if player:GetAttribute("Alive") == true and GameState:GetAttribute("Phase") == "Active" then
+		local contender = call("RoundService", "isContender", player)
+		if contender ~= false then
+			return false
+		end
+	end
+	return true
+end
+
+local function reachable(player: Player, name: string, menu: boolean?): boolean
+	if menu == true then
+		return inTrain(player)
+	end
+	return near(player, name)
+end
+
+-- Paid random draws refused: CurrencyService's answer (Gold for Robux) or ShopService's (any Robux switch of the shop)
+local function blocked(player: Player): boolean
+	return call("CurrencyService", "paidRandomBlocked", player) == true
+		or call("ShopService", "paidRandomRestricted", player) == true
+end
+
 local function today(): string
 	return Rewards.utcDay()
 end
@@ -150,6 +175,24 @@ end
 function RewardsService.getArmoury(player: Player): { [string]: number }
 	local econ = call("DataService", "getEcon", player)
 	return if econ then econ.Armoury else {}
+end
+
+-- Free wheel spins given (the daily reward's day 4: SeasonService / DailyService). They wait in Econ.BonusSpins and
+-- are used after the day's own free spin, before any paid one. True once saved.
+function RewardsService.grantSpins(player: Player, n: number): boolean
+	n = math.floor(tonumber(n) or 0)
+	if n <= 0 or not call("DataService", "isLoaded", player) then
+		return false
+	end
+	local ok = call("DataService", "updateEcon", player, function(e)
+		e.BonusSpins = math.min(20, (tonumber(e.BonusSpins) or 0) + n)
+	end)
+	if not ok then
+		return false
+	end
+	call("DataService", "saveSoon", player)
+	RewardsService.pushState(player)
+	return true
 end
 
 function RewardsService.getBring(player: Player): (string?, number?)
@@ -173,7 +216,7 @@ local function stateFor(player: Player): { [string]: any }
 	return {
 		loaded = call("DataService", "isLoaded", player) == true,
 		gold = call("CurrencyService", "balance", player) or 0,
-		freeLeft = math.max(0, cfg.Wheel.FreePerDay - (if sameDay then daily.free or 0 else 0)),
+		freeLeft = math.max(0, cfg.Wheel.FreePerDay - (if sameDay then daily.free or 0 else 0)) + (tonumber(econ.BonusSpins) or 0),
 		paidLeft = math.max(0, cfg.Wheel.PaidPerDay - (if sameDay then daily.paid or 0 else 0)),
 		spinCost = cfg.Wheel.SpinCost,
 		armoury = econ.Armoury or {},
@@ -183,7 +226,7 @@ local function stateFor(player: Player): { [string]: any }
 			box4 = math.max(1, cfg.Strongbox.Pity4 - (pity.box4 or 0)),
 			box5 = math.max(1, cfg.Strongbox.Pity5 - (pity.box5 or 0)),
 		},
-		paidBlocked = call("CurrencyService", "paidRandomBlocked", player) == true,
+		paidBlocked = blocked(player),
 		robuxGold = cfg.Economy.RobuxGold == true,
 		wheelBusyUntil = wheelBusyUntil,
 	}
@@ -246,9 +289,10 @@ local function spin(player: Player)
 	end
 	local sameDay = econ.Daily.day == today()
 	local free = (if sameDay then econ.Daily.free else 0) < cfg.Wheel.FreePerDay
-	local paid = not free
+	local bonus = not free and (tonumber(econ.BonusSpins) or 0) > 0 -- the daily reward's spins (grantSpins)
+	local paid = not free and not bonus
 	if paid then
-		if call("CurrencyService", "paidRandomBlocked", player) then
+		if blocked(player) then
 			line(player, "Paid spins are not available on this account · your free spin comes back tomorrow")
 			return
 		end
@@ -286,6 +330,8 @@ local function spin(player: Player)
 		freshDaily(e)
 		if free then
 			e.Daily.free += 1
+		elseif bonus then
+			e.BonusSpins = math.max(0, (e.BonusSpins or 0) - 1)
 		else
 			e.Daily.paid += 1
 		end
@@ -348,19 +394,19 @@ end
 
 -- Strongboxes -----------------------------------------------------------------------------------------------------------
 
-local function openBox(player: Player, kind: any)
+local function openBox(player: Player, kind: any, menu: boolean?)
 	local cfg = Rewards.config()
 	if kind ~= "strongbox" and kind ~= "masterwork" then
 		return
 	end
-	if not near(player, if kind == "masterwork" then "Masterwork" else "Case") then
+	if not reachable(player, if kind == "masterwork" then "Masterwork" else "Case", menu) then
 		return
 	end
 	if not call("DataService", "isLoaded", player) then
 		line(player, "Your Gold is still loading")
 		return
 	end
-	if call("CurrencyService", "paidRandomBlocked", player) then
+	if blocked(player) then
 		line(player, "Strongboxes are not available on this account · the Armoury sells every weapon")
 		return
 	end
@@ -437,12 +483,12 @@ end
 
 -- The Armoury (no chance: open to everyone) ----------------------------------------------------------------------------
 
-local function armoury(player: Player, action: string, id: any)
+local function armoury(player: Player, action: string, id: any, menu: boolean?)
 	local cfg = Rewards.config()
 	if type(id) ~= "string" or (not Rewards.InPool[id] and not (action == "bring" and id == "")) then
 		return
 	end
-	if not near(player, "Armoury") then
+	if not reachable(player, "Armoury", menu) then
 		return
 	end
 	if not call("DataService", "isLoaded", player) then
@@ -584,7 +630,8 @@ end
 
 -- Lifecycle -------------------------------------------------------------------------------------------------------------
 
-local function onEvent(player: Player, action: any, arg: any)
+local function onEvent(player: Player, action: any, arg: any, flag: any)
+	local menu = flag == "menu"
 	if type(action) ~= "string" then
 		return
 	end
@@ -600,9 +647,9 @@ local function onEvent(player: Player, action: any, arg: any)
 	if action == "spin" then
 		spin(player)
 	elseif action == "box" then
-		openBox(player, arg)
+		openBox(player, arg, menu)
 	elseif action == "buy" or action == "raise" or action == "bring" then
-		armoury(player, action, arg)
+		armoury(player, action, arg, menu)
 	end
 end
 

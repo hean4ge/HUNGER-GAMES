@@ -1,19 +1,21 @@
 --[[
 	LaunchIntroController - the launch intro of the beta (TwoArenas.md section 2, Tier 1): one shot at the call, played
 	on this client from the round's shared clock, before today's plate rise.
-	  1. The red room: down through the teal hex frame at your own stand-in on the dusty-rose lift disc, under the fine
-	     diamond net (a slow push in; you look up; the lift starts and carries you up toward the lens).
+	First person from the first frame to the hand-off (owner, 20 Nov: "first person all the way up to the arena"): the
+	camera is your own eyes the whole time, at your own field of view, with your block arms at rest at the bottom of the
+	picture (ViewmodelController's Rig, read only), the head's slow sway and, on a moving disc, its vibration (all pure
+	in t). Your own stand-in is never drawn.
+	  1. The red room: on the dusty-rose lift disc under the fine diamond net; you look up through the teal hex frame
+	     into the lift shaft and its light, and the lift starts and carries you up into it.
 	  2. "It loads up": a quick dip to black into your glass case among the other contenders in theirs (Full only):
-	     the camera at face height outside your glass looks past you along the row, then pulls back round the hall.
-	  3. The rise: your disc carries you up your pole through the round hall while the camera circles you (two thirds
-	     of a turn in the full shot, a quarter in the short cut), dropping low behind you to look up the pole, and then,
-	     for the last part of the climb, spiralling in over your right shoulder and into your own eyes (your stand-in
-	     fades as the lens reaches it; the field of view eases to your own setting). You ride the rest in first person,
-	     looking up the pole at the lit roof and the white opening it runs into. The others rise on their own poles a
-	     little ahead or behind. With Roblox's Reduce Motion the camera does not circle or travel: it holds its first
-	     bearing and a short dip to black cuts to your eyes.
-	  4. The arrival: the light from above floods the picture (the set's exposure and bloom, then a pale cover up to
-	     0.95, never a hard white frame) while your eyes come down level, and under it the shot hands off: first person
+	     you look out through the glass along the row to your left, then to your right, then up a little.
+	  3. The rise: your disc carries you up your pole through the round hall. You look across at the others lifting off
+	     on their own poles, then up: your case's posts run on up as rails with small lamps and square collars that
+	     stream past, toward the shaft in the roof and its light, which grows as you near it (Set: the ride). With
+	     Roblox's Reduce Motion: no sway, a quarter of the vibration, smaller glances, a lower gaze, no field-of-view kick.
+	  4. The arrival: your head comes up into the shaft's light as it floods the picture (the set's exposure and bloom,
+	     then a pale cover up to 0.95, never a hard white frame) while your eyes come down level, and under it the shot
+	     hands off: first person
 	     on your own plate, facing the Spire, at the very bearing, pitch and field of view the shot ended on (no jump;
 	     LaunchController's wave-1 turn, which waits for the shot, asks for the same view). Then the sun's glare falls
 	     away over 1.5 to 2 seconds as your eyes adjust (Glare, a child module: stronger facing the real sun in
@@ -96,42 +98,39 @@ local HIDE_CORE = { Enum.CoreGuiType.Chat, Enum.CoreGuiType.PlayerList }
 local MAX_CASES = 24
 local WHITE = Color3.fromRGB(246, 248, 252) -- the cover's colour when the sky can't be read (Glare.sky gives the real one)
 local FACE_PITCH = -6 -- degrees: the view the shot ends on and hands over (LaunchController's FACE_PITCH)
-local EYE_AHEAD = 12 -- studs ahead of the eyes the first-person view aims at
 local BLACK = Color3.new(0, 0, 0)
 local LIT = Set.Colors.light
 local UNLIT = Color3.fromRGB(40, 44, 50)
 
 -- Stage times in seconds from the call for the nominal cinematic length (the plan ends at LaunchAt), scaled to the
 -- server's LaunchAt - LaunchCallAt.
---   look      the stand-in looks up the shaft     lift    the lift starts      dip   the dip to black out of the red room
---   cases     { from, to } at your case (Full)    rise    { from, to } up the pole, the disc climbing riseHeight studs
+--   look      you look up the lift shaft          lift    the lift starts      dip   the dip to black out of the red room
+--   cases     { from, to } in your case (Full)    rise    { from, to } up the pole, the disc climbing riseHeight studs
+--             (to the shaft in the roof: your head comes up into its light as the cover comes up)
 --   white     the flood of light starts           handoff first person on your plate (the glare falls from there)
---   phi       the camera's bearing round you { start, end } in degrees (0 = in front, + = your right). It ends
---             behind your right shoulder (155 = -205): the pole stands behind your left one, at 220.
---   eyes      { from, to } in rise progress (0..1): the camera leaves its circle and spirals into your own eyes;
---             from `to` on the rise is first person
---   low       the camera's lowest height against your feet, reached as the spiral starts (the full shot looks up at
---             you and the pole from under the disc; the short cut has no time to go down there and back)
---   gaze      degrees you look up the pole in first person      level  { from, to } seconds: your eyes come down to
---             the view the hand-off gives (FACE_PITCH), mostly under the flood of light
+--   gaze      degrees you look up the shaft        level  { from, to } seconds: your eyes come down to the view the
+--             hand-off gives (FACE_PITCH), under the flood of light
 -- The server's clock depends on length alone (LaunchAt - LaunchCallAt); length, rise, white and handoff are as they
--- were before the first-person ending.
+-- were before the first-person shot (20 Nov). riseHeight is this client's picture only.
 local PLANS = {
 	Full = {
 		length = 15.4, look = 1.0, lift = 3.3, dip = 4.45, cases = { 4.5, 8.6 }, rise = { 8.6, 14.95 },
-		white = 14.15, handoff = 14.95, riseHeight = 70, phi = { 34.4, -205 }, start = nil,
-		eyes = { 0.46, 0.70 }, low = -1.9, gaze = 60, level = { 14.15, 14.9 },
+		white = 14.15, handoff = 14.95, riseHeight = 113, gaze = 76, level = { 14.6, 14.93 },
 	},
 	Short = {
 		length = 6.2, look = 0.3, lift = 0.8, dip = 1.6, cases = nil, rise = { 1.66, 5.75 },
-		white = 5.05, handoff = 5.75, riseHeight = 44, phi = { 60, 155 },
-		start = { r = 9.6, h = 4.3, fov = 54 },
-		eyes = { 0.40, 0.66 }, low = 1.8, gaze = 60, level = { 5.05, 5.7 },
+		white = 5.05, handoff = 5.75, riseHeight = 113, gaze = 76, level = { 5.4, 5.73 },
 	},
 }
--- the case stage's last pose (slot space) = the full rise's first: continuous position, target and field of view
-local CASE_END_EYE = Vector3.new(6.5, 6.4, -9.5)
-local CASE_END_FOV = 52
+-- First person (owner, 20 Nov: "first person all the way up to the arena"): the head's sway and the disc's vibration,
+-- pure in t like everything else. Reduce Motion keeps a quarter of the vibration and none of the sway or the glances.
+local SWAY_ROLL = math.rad(0.5)
+local SWAY_YAW = math.rad(0.4)
+local SHAKE_STUDS = 0.03
+local SHAKE_PITCH = math.rad(0.14)
+local FOV_KICK = 5 -- degrees wider at the disc's full speed (none with Reduce Motion; back to your own by the hand-off)
+local LETTERBOX = 2.1 -- the shot's frame (thinner bars than 2.39: your hands rest at the bottom of the picture)
+local PRE_GLOW = 0.18 -- the flood's share the light grows to on the way up, before the flood itself (white)
 
 -- Lighting per room (TwoArenas 2.8: navy halls, the red room's warm dark; the light carries the hue)
 local PROFILES = {
@@ -484,13 +483,13 @@ local function buildUi()
 		promptFill = fill, skip = skip, skipFill = skipFill }
 end
 
--- letterbox k: 1 = 2.39:1, 0 = full frame
+-- letterbox k: 1 = LETTERBOX:1, 0 = full frame
 local function setLetterbox(k: number)
 	local cam = workspace.CurrentCamera
 	local v = if cam then cam.ViewportSize else Vector2.new(1280, 720)
 	local bar = 0
 	if v.X > 1 and v.Y > 1 then
-		bar = math.max(0, (1 - (v.X / v.Y) / 2.39) / 2) * clamp01(k)
+		bar = math.max(0, (1 - (v.X / v.Y) / LETTERBOX) / 2) * clamp01(k)
 	end
 	ui.top.Size = UDim2.fromScale(1, bar)
 	ui.bottom.Size = UDim2.fromScale(1, bar)
@@ -916,6 +915,108 @@ local function cue(s, name: string, t: number, at: number, fn: () -> ())
 	end
 end
 
+-- Your arms -----------------------------------------------------------------------------------------------------------------
+
+-- Your own block arms at rest in the view, the arms the game shows in first person (ViewmodelController's Rig and Poses,
+-- read only: a second Rig of the same "Blocky" style, built for the shot and destroyed with it). Only when the game's
+-- arms are the block arms (Rig.STYLE and Poses.STYLE "Blocky"): building another style would swap Rig's shared
+-- constants under ViewmodelController. Any failure means no arms, never a broken shot.
+local armModules: any = nil
+local function armKit(): any
+	if armModules == nil then
+		armModules = false
+		local ok, kit = pcall(function()
+			local vm = script.Parent:FindFirstChild("ViewmodelController")
+			local rigModule = vm and vm:FindFirstChild("Rig")
+			local posesModule = vm and vm:FindFirstChild("Poses")
+			if not (rigModule and posesModule) then
+				return nil
+			end
+			return { Rig = require(rigModule) :: any, Poses = require(posesModule) :: any }
+		end)
+		if ok and kit then
+			armModules = kit
+		end
+	end
+	return armModules or nil
+end
+
+local function armColors(): (Color3?, Color3?)
+	local character = localPlayer.Character
+	if not character then
+		return nil, nil
+	end
+	local colors = character:FindFirstChildOfClass("BodyColors")
+	local function side(name: string, r6: string, fallback: Color3?): Color3?
+		local hand = character:FindFirstChild(name .. "Hand") or character:FindFirstChild(r6)
+		if hand and hand:IsA("BasePart") then
+			return hand.Color
+		end
+		return fallback
+	end
+	local right = side("Right", "Right Arm", if colors then colors.RightArmColor3 else nil)
+	local left = side("Left", "Left Arm", if colors then colors.LeftArmColor3 else nil)
+	return right, left or right
+end
+
+local function armsStart(s)
+	local kit = armKit()
+	if not kit or kit.Rig.STYLE ~= "Blocky" or kit.Poses.STYLE ~= "Blocky" then
+		return
+	end
+	local ok, rig = pcall(function()
+		local right, left = armColors()
+		local r = kit.Rig.new(right, "Blocky")
+		if right then
+			r:setSkin(right, left)
+		end
+		r:setHands("Relaxed", "Relaxed")
+		return r
+	end)
+	if ok and rig then
+		s.arms = rig
+	else
+		warn("[LaunchIntroController] no arms in the shot: " .. tostring(rig))
+	end
+end
+
+-- The arms at rest under your eyes this frame: the hands a little higher than the game's rest (above the letterbox),
+-- going down out of the way as you look up (`pitch` in radians).
+local function armsPose(s, camCF: CFrame, pitch: number)
+	local rig = s.arms
+	if not rig then
+		return
+	end
+	local kit = armModules
+	local Rig, Poses = kit.Rig, kit.Poses
+	if not rig.model.Parent then
+		rig.model.Parent = workspace.CurrentCamera
+	end
+	local right, left = Poses.hold("Relaxed")
+	local drop = lerp(-0.1, 0.45, smooth((math.deg(pitch) - 12) / 40))
+	local M = CFrame.new(0, -drop, 0)
+	rig:pose({
+		right = camCF * (M * right),
+		left = camCF * (M * left),
+		shoulderRight = camCF * (M * Rig.SHOULDER.Right),
+		shoulderLeft = camCF * (M * Rig.SHOULDER.Left),
+		poleRight = camCF:VectorToWorldSpace(Rig.POLE.Right),
+		poleLeft = camCF:VectorToWorldSpace(Rig.POLE.Left),
+		up = camCF.UpVector,
+		eye = camCF.Position,
+	})
+end
+
+local function armsStop(s)
+	local rig = s.arms
+	s.arms = nil
+	if rig then
+		pcall(function()
+			rig:destroy()
+		end)
+	end
+end
+
 -- The contenders ----------------------------------------------------------------------------------------------------------
 
 -- the other contenders' cases (their plates' bearings where known) and their stand-ins: copies of the nearest
@@ -1005,6 +1106,10 @@ local function assignSlots(s)
 		p.LocalTransparencyModifier = 1
 	end
 	set.hall.gantryAnchor.CFrame = slots[mine].cf * CFrame.new(0, 12.9, -10.4)
+	-- your ride: the rails, their lamps and the shaft in the roof stand over your own case
+	if set.hall.ride then
+		set.hall.ride:PivotTo(slots[mine].cf)
+	end
 end
 
 local function updateOthers(s, t: number)
@@ -1056,8 +1161,30 @@ local function setStageLights(s, stage: string)
 	hall.riderFill.Enabled = stage == "Rise"
 end
 
+-- Your eyes in `frame` (its -Z is the way your body faces): at `eye` (frame space), turned `yaw` (+ left) and `pitch`
+-- (+ up), with the head's sway and the disc's vibration (`shake` 0..1) on top. Pure in t.
+local function eyes(s, frame: CFrame, eye: Vector3, t: number, yaw: number, pitch: number, shake: number,
+	still: number?): CFrame
+	-- (`still` 0..1 settles the sway, for the hand-off's exact view)
+	local calm = (if s.reduced then 0 else 1) * (1 - (still or 0))
+	local v = shake * (if s.reduced then 0.25 else 1)
+	-- breathing and the head's own slow drift
+	local roll = SWAY_ROLL * calm * math.sin(t * 0.83)
+	yaw += SWAY_YAW * calm * math.sin(t * 0.61 + 1.0)
+	local breathe = 0.03 * calm * math.sin(t * 1.6)
+	-- the disc under your feet: a fine buzz and a slower judder, never a shake of the whole picture
+	local jx = SHAKE_STUDS * v * (0.7 * math.sin(t * 47.3) + 0.4 * math.sin(t * 83.1 + 0.4))
+	local jy = SHAKE_STUDS * v * (0.8 * math.sin(t * 61.7 + 0.7) + 0.3 * math.sin(t * 29.3))
+	pitch += SHAKE_PITCH * v * math.sin(t * 39.1 + 2.1)
+	roll += SHAKE_PITCH * 0.6 * v * math.sin(t * 33.7)
+	return frame * CFrame.new(eye + Vector3.new(0, breathe, 0)) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(pitch, 0, 0)
+		* CFrame.new(jx, jy, 0) * CFrame.Angles(0, 0, roll)
+end
+
 -- The picture at time t (seconds from the call): camera, stand-ins, discs and lights. Pure in t, so a late join or a
--- frozen preview shows exactly what everyone else sees at that moment.
+-- frozen preview shows exactly what everyone else sees at that moment. First person from the first frame to the
+-- hand-off (owner, 20 Nov): your own stand-in is never drawn (s.me only gives the height of your eyes); the arms in
+-- view are your block arms (stepShot, armsPose).
 local function evaluate(s, t: number): (CFrame, number, string)
 	local plan, k = s.plan, s.scale
 	local red, hall = set.red, set.hall
@@ -1068,91 +1195,74 @@ local function evaluate(s, t: number): (CFrame, number, string)
 		assignSlots(s)
 	end
 	setStageLights(s, stage)
+	s.me.fade(1)
+	local glance = if s.reduced then 0.5 else 1
 	if stage == "Red" then
+		-- on the lift disc in the red room, facing its front lane; you look up through the hex frame into the lift
+		-- shaft, and the lift starts and carries you up toward its light
 		local O = red.origin
-		local e = smooth(t / dip)
-		-- the lift: still, then it takes you up the shaft toward the lens
 		local liftA = plan.lift * k
 		local lu = clamp01((t - liftA) / math.max(0.1, dip - liftA))
 		local liftY = 7.2 * lu ^ 2.2
 		red.lift.CFrame = red.liftHome + up * liftY
 		s.me.place(O * CFrame.new(0, red.liftTop + liftY, 0) * CFrame.Angles(0, math.pi, 0))
-		s.me.look(0.85 * smooth((t - plan.look * k) / 1.0), 0)
-		s.me.fade(0)
-		-- the camera: over the shaft's mouth, down through the far half of the hex (its top vertex at the top of the
-		-- frame, its sides at the edges) at you on the disc; a slow push in and a slight drift round the shaft
-		local drift = if s.reduced then 0 else math.rad(lerp(-4, 3, e))
-		local eye = CFrame.Angles(0, drift, 0) * Vector3.new(0, lerp(19.4, 18.2, e), lerp(4.3, 3.7, e))
-		local target = Vector3.new(0, lerp(2.4, 2.8, e) + liftY * 0.6, lerp(-4.2, -3.4, e) + liftY * 0.35)
-		return CFrame.lookAt(O * eye, O * target), lerp(56, 50, e), stage
+		local lookA = plan.look * k
+		local lookSpan = math.max(0.3, math.min(1.2, (dip - lookA) * 0.6))
+		local e = smooth((t - lookA) / lookSpan)
+		local pitch = math.rad(lerp(-4, if s.reduced then 30 else 50, e))
+		local yaw = math.rad(lerp(5, -2, smooth(t / dip))) * glance
+		local frame = O * CFrame.Angles(0, math.pi, 0) -- (its -Z is the room's +Z: the way you face)
+		local shake = if lu > 0 and lu < 1 then 0.6 else 0
+		local eye = Vector3.new(0, red.liftTop + liftY + s.me.eye, 0)
+		return eyes(s, frame, eye, t, yaw, pitch, shake), ownFov(), stage
 	end
 	local slot = hall.slots[s.mySlot]
 	local S = slot.cf
 	if stage == "Cases" then
+		-- in your glass case, facing the hall's centre: you look along the row to your left at the others in theirs,
+		-- then to your right, then up a little at the pole running up out of the case
 		local ca, cb = plan.cases[1] * k, plan.cases[2] * k
-		local e = smooth((t - ca) / (cb - ca))
+		local f = clamp01((t - ca) / math.max(0.1, cb - ca))
 		slot.riser.CFrame = slot.riserCF
 		s.me.place(S * CFrame.new(0, slot.riserTop, 0))
-		s.me.look(0.04, 0.65 * smooth((t - ca - 0.5) / 1.0))
-		s.me.fade(0)
 		updateOthers(s, t)
-		-- at face height just outside your glass, looking past you along the row; then it pulls back round the hall
-		local eye = Vector3.new(3.6, 5.4, -4.6):Lerp(CASE_END_EYE, e)
-		local target = Vector3.new(-12, 4.8, -0.5):Lerp(Vector3.new(0, slot.riserTop + 3.4, 0), e)
-		return CFrame.lookAt(S * eye, S * target), lerp(46, CASE_END_FOV, e), stage
+		local e1, e2, e3 = smooth((f - 0.1) / 0.27), smooth((f - 0.52) / 0.3), smooth((f - 0.84) / 0.16)
+		local yaw = (0.5 * e1 - 0.9 * e2 + 0.4 * e3) * glance
+		local pitch = math.rad(-2 + 8 * e3)
+		local eye = Vector3.new(0, slot.riserTop + s.me.eye, 0)
+		return eyes(s, S, eye, t, yaw, pitch, 0), ownFov(), stage
 	end
-	-- the rise: your disc climbs the pole while the camera circles you and drops low behind you; for the last part of
-	-- the climb it spirals in over your right shoulder and into your own eyes, and the rest is first person
+	-- the rise: your disc climbs the pole up the rails; you look across at the others lifting off, then up the rails
+	-- to the light of the shaft in the roof; the lamps and collars stream past, the disc buzzes under you; your eyes
+	-- come level under the flood of light (the view the hand-off gives)
 	local riseA, riseB = plan.rise[1] * k, plan.rise[2] * k
 	local riseSpan = math.max(0.1, riseB - riseA)
 	local u = clamp01((t - riseA) / riseSpan)
-	local y = plan.riseHeight * riseEase((t - riseA) / riseSpan)
+	local ur = (t - riseA) / riseSpan
+	local y = plan.riseHeight * riseEase(ur)
 	slot.riser.CFrame = slot.riserCF + up * y
 	local feetY = slot.riserTop + y
 	s.me.place(S * CFrame.new(0, feetY, 0))
-	s.me.look(lerp(0.04, 0.3, smooth(u * 2)), lerp(if plan.cases then 0.65 else 0, 0, smooth(u * 3)))
 	updateOthers(s, t)
-	local r0, h0, fov0
-	if plan.start then
-		r0, h0, fov0 = plan.start.r, plan.start.h, plan.start.fov
-	else
-		local flat = Vector2.new(CASE_END_EYE.X, CASE_END_EYE.Z)
-		r0, h0, fov0 = flat.Magnitude, CASE_END_EYE.Y - slot.riserTop, CASE_END_FOV
-	end
-	-- into your eyes: 0 on the circle, 1 in first person. The circle's turn ends as the camera arrives.
-	local eyesA, eyesB = plan.eyes[1], plan.eyes[2]
-	local e = smooth((u - eyesA) / (eyesB - eyesA))
-	local phi = math.rad(lerp(plan.phi[1], plan.phi[2], smooth(u / eyesB)))
-	if s.reduced then
-		-- Reduce Motion: no circling and no travel into the head. The camera keeps its first bearing (going low, to look
-		-- up at your whole body), and a short dip to black (stepShot) cuts to your eyes.
-		phi = math.rad(plan.phi[1])
-		e = if u >= (eyesA + eyesB) / 2 then 1 else 0
-	end
-	local lowBy = eyesA + 0.02 - 0.3 -- (the camera is down as the spiral starts)
-	local r = lerp(r0, 8.0, smooth(u / 0.3))
-	r = lerp(r, 7.4, smooth((u - 0.3) / lowBy))
-	local h = lerp(h0, 3.0, smooth(u / 0.3))
-	h = lerp(h, plan.low, smooth((u - 0.3) / lowBy))
-	local circleEye = Vector3.new(math.sin(phi) * r, feetY + h, -math.cos(phi) * r)
-	local circleTarget = Vector3.new(0, feetY + lerp(3.4, 2.9, smooth((u - 0.3) / lowBy)), 0)
-	-- first person: at your eyes, facing the hall's centre as your plinth faces the Spire. You look up the pole at the
-	-- roof's lights and the opening, and your eyes come level (the view the hand-off gives) under the flood of light.
+	-- the disc's speed (0..1 of its top speed): the buzz and the field of view follow it; the lift taking your weight
+	-- is a short dip at the start
+	local speed = if ur <= 0 then 0 elseif ur >= 1 then 1 else (4 * ur - 3 * ur * ur) / 1.34
+	local takeUp = if s.reduced then 0 else 0.14 * math.sin(math.pi * clamp01((t - riseA) / (0.35 * k)))
 	local levelA, levelB = plan.level[1] * k, plan.level[2] * k
+	local lv = smooth((t - levelA) / math.max(0.05, levelB - levelA))
 	local gaze = if s.reduced then math.min(plan.gaze, 30) else plan.gaze
-	local pitch = math.rad(lerp(gaze, FACE_PITCH, smooth((t - levelA) / math.max(0.05, levelB - levelA))))
-	local ownEye = Vector3.new(0, feetY + s.me.eye, 0)
-	local ownTarget = ownEye + Vector3.new(0, math.sin(pitch), -math.cos(pitch)) * EYE_AHEAD
-	local eye = circleEye:Lerp(ownEye, e)
-	local target = circleTarget:Lerp(ownTarget, e)
-	-- your stand-in is not drawn once the lens comes near it (gone 2 studs behind its head)
-	s.me.fade(smooth((e - 0.4) / 0.3))
+	local p0 = if plan.cases then 6 else -2
+	local a = smooth(u / 0.14)
+	local c = smooth((u - 0.32) / 0.3)
+	local pitch = math.rad(lerp(lerp(lerp(p0, 16, a), gaze, c), FACE_PITCH, lv))
+	local yaw = 0.3 * smooth((u - 0.04) / 0.2) * (1 - c) * glance
+	local eye = Vector3.new(0, feetY + s.me.eye - takeUp, 0)
 	local keyAt = S * Vector3.new(0, feetY + 9, -2.2)
 	hall.riderAnchor.CFrame = CFrame.lookAt(keyAt, S * Vector3.new(0, feetY + 3, 0))
 	-- your case light goes out behind you once you've left it
 	slot.light.Enabled = u < 0.25
-	-- the field of view ends on your own setting: nothing changes at the hand-off
-	return CFrame.lookAt(S * eye, S * target), lerp(lerp(fov0, 61, smooth(u)), ownFov(), e), stage
+	local kick = if s.reduced then 0 else FOV_KICK * math.min(speed, 1) * (1 - lv)
+	return eyes(s, S, eye, t, yaw, pitch, (0.35 + 0.65 * math.min(speed, 1)) * (1 - lv), lv), ownFov() + kick, stage
 end
 
 local function shotTime(s): (number, boolean)
@@ -1261,6 +1371,13 @@ local function stepShot(dt: number)
 	cam.CameraType = Enum.CameraType.Scriptable
 	cam.CFrame = camCF
 	cam.FieldOfView = fov
+	if s.arms then
+		local okArms, armErr = pcall(armsPose, s, camCF, math.asin(math.clamp(camCF.LookVector.Y, -1, 1)))
+		if not okArms then
+			warn("[LaunchIntroController] the arms failed: " .. tostring(armErr))
+			armsStop(s)
+		end
+	end
 	-- light: snap at the cuts (behind black), blend otherwise; the arrival floods the exposure
 	local whiteA = plan.white * k
 	-- the arrival, one smooth rise: the light from above floods first (exposure and bloom, as far as the hour's sky
@@ -1268,6 +1385,12 @@ local function stepShot(dt: number)
 	-- at the hand-off. The cut onto your plinth hides under it, and Glare takes the same cover down from there.
 	local span = math.max(0.1, handoffT - 0.1 - whiteA)
 	local white = smooth((t - whiteA) / span)
+	if stage == "Rise" then
+		-- the light growing as you near the shaft in the roof: a little of the flood before the flood
+		local rA = plan.rise[1] * k
+		local rSpan = math.max(0.1, handoffT - rA)
+		white = math.max(white, PRE_GLOW * smooth((t - rA - 0.5 * rSpan) / (0.35 * rSpan)))
+	end
 	local cover = s.sky.peak * smooth((t - whiteA - 0.35 * span) / (0.65 * span))
 	if t > handoffT then
 		-- a late placement (or a preview's last moment): the cover closes while the shot waits
@@ -1287,14 +1410,6 @@ local function stepShot(dt: number)
 		black = math.max(black, if t < dip then smooth((t - dip + 0.1) / 0.1) else 1 - smooth((t - dip - 0.06) / 0.28))
 	end
 	local riseA = plan.rise[1] * k
-	if s.reduced and stage == "Rise" then
-		-- Reduce Motion: the cut into your own eyes (evaluate) passes through a short dip to black
-		local riseSpan = math.max(0.1, plan.rise[2] * k - riseA)
-		local d = t - (riseA + riseSpan * (plan.eyes[1] + plan.eyes[2]) / 2)
-		if d > -0.2 and d < 0.4 then
-			black = math.max(black, if d < 0 then smooth((d + 0.2) / 0.2) else 1 - smooth((d - 0.05) / 0.3))
-		end
-	end
 	if cover > 0 then
 		setFade(s.sky.color, cover)
 	else
@@ -1386,6 +1501,9 @@ finish = function(reason: string)
 		for _, e in ipairs(s.sounds) do
 			e.sound:Destroy()
 		end
+	end)
+	try("arms", function()
+		armsStop(s)
 	end)
 	try("camera", function()
 		local cam = workspace.CurrentCamera
@@ -1527,6 +1645,8 @@ local function begin(cut: string, callAt: number, launchAt: number, preview: boo
 		s.me.model.Parent = set.model
 		pcall(s.me.secure)
 		pcall(s.me.play, IDLE_ID)
+		s.me.fade(1) -- (first person: never drawn; it gives the height of your eyes)
+		armsStart(s)
 		Input.bind(SKIP_ACTION, function(state: Enum.UserInputState)
 			if state == Enum.UserInputState.Begin then
 				skipHeldSince = os.clock()

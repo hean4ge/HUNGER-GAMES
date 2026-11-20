@@ -1,0 +1,952 @@
+{
+ "generator": "art/blender/ui_icons.py (+ ui_icons_defs.py, ui_icons_lib.py)",
+ "design": "docs/design/CardMenusAndShop.md section 4.2",
+ "style": "matte flat facets, one shade step on lower-right facets, soft Shade shadow at 60%, transparent; icons 256 (silhouette in the centre 200), rank emblems 512, banners 768x256",
+ "font": "Montserrat-Bold.ttf",
+ "upload": "Not uploaded. Upload each sheet as an Image (Decal) after the owner's yes and fill assetId.",
+ "sheets": {
+  "Icons_1": {
+   "file": "Icons_1.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Icons_2": {
+   "file": "Icons_2.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Icons_3": {
+   "file": "Icons_3.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Icons_4": {
+   "file": "Icons_4.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Icons_5": {
+   "file": "Icons_5.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Ranks_1": {
+   "file": "Ranks_1.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Ranks_2": {
+   "file": "Ranks_2.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Ranks_3": {
+   "file": "Ranks_3.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Banners_1": {
+   "file": "Banners_1.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Banners_2": {
+   "file": "Banners_2.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  },
+  "Banners_3": {
+   "file": "Banners_3.png",
+   "size": [
+    1024,
+    1024
+   ],
+   "assetId": ""
+  }
+ },
+ "counts": {
+  "WeaponSkills": 7,
+  "GeneralSkills": 6,
+  "Kits": 5,
+  "Traits": 12,
+  "Currencies": 5,
+  "Cases": 9,
+  "KillIcons": 5,
+  "KillEffects": 9,
+  "Emotes": 5,
+  "LaunchEffects": 4,
+  "UI": 6,
+  "Ranks": 11,
+  "Banners": 5,
+  "Trims": 4
+ },
+ "icons": {
+  "sk_head_kick": {
+   "sheet": "Icons_1",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Head Kick"
+  },
+  "sk_chained_strikes": {
+   "sheet": "Icons_1",
+   "x": 256,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Chained Strikes"
+  },
+  "sk_running_cut": {
+   "sheet": "Icons_1",
+   "x": 512,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Running Cut"
+  },
+  "sk_whirl": {
+   "sheet": "Icons_1",
+   "x": 768,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Whirl"
+  },
+  "sk_vault_kick": {
+   "sheet": "Icons_1",
+   "x": 0,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Vault Kick"
+  },
+  "sk_ricochet": {
+   "sheet": "Icons_1",
+   "x": 256,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Ricochet"
+  },
+  "sk_piercing_shot": {
+   "sheet": "Icons_1",
+   "x": 512,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "WeaponSkills",
+   "name": "Piercing Shot"
+  },
+  "sk_concentration": {
+   "sheet": "Icons_1",
+   "x": 768,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Concentration"
+  },
+  "sk_second_wind": {
+   "sheet": "Icons_1",
+   "x": 0,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Second Wind"
+  },
+  "sk_sprint_burst": {
+   "sheet": "Icons_1",
+   "x": 256,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Sprint Burst"
+  },
+  "sk_quiet_step": {
+   "sheet": "Icons_1",
+   "x": 512,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Quiet Step"
+  },
+  "sk_steady_hands": {
+   "sheet": "Icons_1",
+   "x": 768,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Steady Hands"
+  },
+  "sk_brace": {
+   "sheet": "Icons_1",
+   "x": 0,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "GeneralSkills",
+   "name": "Brace"
+  },
+  "kit_archer": {
+   "sheet": "Icons_1",
+   "x": 256,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Kits",
+   "name": "Archer"
+  },
+  "kit_forager": {
+   "sheet": "Icons_1",
+   "x": 512,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Kits",
+   "name": "Forager"
+  },
+  "kit_trapper": {
+   "sheet": "Icons_1",
+   "x": 768,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Kits",
+   "name": "Trapper"
+  },
+  "kit_medic": {
+   "sheet": "Icons_2",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Kits",
+   "name": "Medic"
+  },
+  "kit_climber": {
+   "sheet": "Icons_2",
+   "x": 256,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Kits",
+   "name": "Climber"
+  },
+  "tr_unseen": {
+   "sheet": "Icons_2",
+   "x": 512,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Unseen"
+  },
+  "tr_quiet_swish": {
+   "sheet": "Icons_2",
+   "x": 768,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Quiet Swish"
+  },
+  "tr_second_in_arc": {
+   "sheet": "Icons_2",
+   "x": 0,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Second in the Arc"
+  },
+  "tr_heavy_throw": {
+   "sheet": "Icons_2",
+   "x": 256,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Heavy Throw"
+  },
+  "tr_splits_firewood": {
+   "sheet": "Icons_2",
+   "x": 512,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Splits Firewood"
+  },
+  "tr_long_reach": {
+   "sheet": "Icons_2",
+   "x": 768,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Long Reach"
+  },
+  "tr_big_throw": {
+   "sheet": "Icons_2",
+   "x": 0,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Big Throw"
+  },
+  "tr_armour_breaker": {
+   "sheet": "Icons_2",
+   "x": 256,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Armour-breaker"
+  },
+  "tr_spinning_throw": {
+   "sheet": "Icons_2",
+   "x": 512,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Spinning Throw"
+  },
+  "tr_flat_throw": {
+   "sheet": "Icons_2",
+   "x": 768,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Flat Throw"
+  },
+  "tr_climb": {
+   "sheet": "Icons_2",
+   "x": 0,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Climb"
+  },
+  "tr_draw_range": {
+   "sheet": "Icons_2",
+   "x": 256,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Traits",
+   "name": "Draw Range"
+  },
+  "cur_gold": {
+   "sheet": "Icons_2",
+   "x": 512,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Currencies",
+   "name": "Gold"
+  },
+  "cur_acorn": {
+   "sheet": "Icons_2",
+   "x": 768,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Currencies",
+   "name": "Lucky Acorn"
+  },
+  "cur_spin_token": {
+   "sheet": "Icons_3",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Currencies",
+   "name": "Wheel Spin"
+  },
+  "cur_xp": {
+   "sheet": "Icons_3",
+   "x": 256,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Currencies",
+   "name": "XP"
+  },
+  "cur_daily_stamp": {
+   "sheet": "Icons_3",
+   "x": 512,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Currencies",
+   "name": "Daily Stamp"
+  },
+  "case_timber": {
+   "sheet": "Icons_3",
+   "x": 768,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Timber Crate"
+  },
+  "case_ironbound": {
+   "sheet": "Icons_3",
+   "x": 0,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Ironbound Crate"
+  },
+  "case_steel": {
+   "sheet": "Icons_3",
+   "x": 256,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Steel Crate"
+  },
+  "case_silverleaf": {
+   "sheet": "Icons_3",
+   "x": 512,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Silverleaf Crate"
+  },
+  "case_crown": {
+   "sheet": "Icons_3",
+   "x": 768,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Crown Crate"
+  },
+  "case_strongbox": {
+   "sheet": "Icons_3",
+   "x": 0,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Strongbox"
+  },
+  "case_masterwork": {
+   "sheet": "Icons_3",
+   "x": 256,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Masterwork Strongbox"
+  },
+  "case_wheel": {
+   "sheet": "Icons_3",
+   "x": 512,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Prize Wheel"
+  },
+  "case_armoury": {
+   "sheet": "Icons_3",
+   "x": 768,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Cases",
+   "name": "Armoury"
+  },
+  "ki_crossed_axes": {
+   "sheet": "Icons_3",
+   "x": 0,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "KillIcons",
+   "name": "Crossed Axes"
+  },
+  "ki_compass_star": {
+   "sheet": "Icons_3",
+   "x": 256,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "KillIcons",
+   "name": "Compass Star"
+  },
+  "ki_wolf_head": {
+   "sheet": "Icons_3",
+   "x": 512,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "KillIcons",
+   "name": "Wolf Head"
+  },
+  "ki_laurel": {
+   "sheet": "Icons_3",
+   "x": 768,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "KillIcons",
+   "name": "Laurel"
+  },
+  "ki_horned_helm": {
+   "sheet": "Icons_4",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "KillIcons",
+   "name": "Horned Helm"
+  },
+  "ke_ash_scatter": {
+   "sheet": "Icons_4",
+   "x": 256,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Ash Scatter"
+  },
+  "ke_petal_fall": {
+   "sheet": "Icons_4",
+   "x": 512,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Petal Fall"
+  },
+  "ke_leaf_swirl": {
+   "sheet": "Icons_4",
+   "x": 768,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Leaf Swirl"
+  },
+  "ke_paper_confetti": {
+   "sheet": "Icons_4",
+   "x": 0,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Paper Confetti"
+  },
+  "ke_feather_burst": {
+   "sheet": "Icons_4",
+   "x": 256,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Feather Burst"
+  },
+  "ke_bell_toll": {
+   "sheet": "Icons_4",
+   "x": 512,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Bell Toll"
+  },
+  "ke_flag_drop": {
+   "sheet": "Icons_4",
+   "x": 768,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Flag Drop"
+  },
+  "ke_frost_over": {
+   "sheet": "Icons_4",
+   "x": 0,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Frost Over"
+  },
+  "ke_recall_beam": {
+   "sheet": "Icons_4",
+   "x": 256,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "KillEffects",
+   "name": "Recall Beam"
+  },
+  "em_whetstone": {
+   "sheet": "Icons_4",
+   "x": 512,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Emotes",
+   "name": "Whetstone"
+  },
+  "em_blade_twirl": {
+   "sheet": "Icons_4",
+   "x": 768,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "Emotes",
+   "name": "Blade Twirl"
+  },
+  "em_map_check": {
+   "sheet": "Icons_4",
+   "x": 0,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Emotes",
+   "name": "Map Check"
+  },
+  "em_campfire_hands": {
+   "sheet": "Icons_4",
+   "x": 256,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Emotes",
+   "name": "Campfire Hands"
+  },
+  "em_last_one_standing": {
+   "sheet": "Icons_4",
+   "x": 512,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "Emotes",
+   "name": "Last One Standing"
+  },
+  "le_steam_vent": {
+   "sheet": "Icons_4",
+   "x": 768,
+   "y": 768,
+   "w": 256,
+   "h": 256,
+   "group": "LaunchEffects",
+   "name": "Steam Vent"
+  },
+  "le_dust_ring": {
+   "sheet": "Icons_5",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "LaunchEffects",
+   "name": "Dust Ring"
+  },
+  "le_leaf_ring": {
+   "sheet": "Icons_5",
+   "x": 256,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "LaunchEffects",
+   "name": "Leaf Ring"
+  },
+  "le_banner_unfurl": {
+   "sheet": "Icons_5",
+   "x": 512,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "LaunchEffects",
+   "name": "Banner Unfurl"
+  },
+  "ui_title_tag": {
+   "sheet": "Icons_5",
+   "x": 768,
+   "y": 0,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "Season Title"
+  },
+  "ui_banner_trim": {
+   "sheet": "Icons_5",
+   "x": 0,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "Banner Trim"
+  },
+  "ui_numbered_seal": {
+   "sheet": "Icons_5",
+   "x": 256,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "Numbered"
+  },
+  "ui_padlock": {
+   "sheet": "Icons_5",
+   "x": 512,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "Locked"
+  },
+  "ui_tick": {
+   "sheet": "Icons_5",
+   "x": 768,
+   "y": 256,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "Owned"
+  },
+  "ui_none": {
+   "sheet": "Icons_5",
+   "x": 0,
+   "y": 512,
+   "w": 256,
+   "h": 256,
+   "group": "UI",
+   "name": "None"
+  },
+  "rank_recruit": {
+   "sheet": "Ranks_1",
+   "x": 0,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Recruit"
+  },
+  "rank_runner": {
+   "sheet": "Ranks_1",
+   "x": 512,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Runner"
+  },
+  "rank_scout": {
+   "sheet": "Ranks_1",
+   "x": 0,
+   "y": 512,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Scout"
+  },
+  "rank_tracker": {
+   "sheet": "Ranks_1",
+   "x": 512,
+   "y": 512,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Tracker"
+  },
+  "rank_pathfinder": {
+   "sheet": "Ranks_2",
+   "x": 0,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Pathfinder"
+  },
+  "rank_ranger": {
+   "sheet": "Ranks_2",
+   "x": 512,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Ranger"
+  },
+  "rank_warden": {
+   "sheet": "Ranks_2",
+   "x": 0,
+   "y": 512,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Warden"
+  },
+  "rank_vanguard": {
+   "sheet": "Ranks_2",
+   "x": 512,
+   "y": 512,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Vanguard"
+  },
+  "rank_sentinel": {
+   "sheet": "Ranks_3",
+   "x": 0,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Sentinel"
+  },
+  "rank_paragon": {
+   "sheet": "Ranks_3",
+   "x": 512,
+   "y": 0,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Paragon"
+  },
+  "rank_prestige": {
+   "sheet": "Ranks_3",
+   "x": 0,
+   "y": 512,
+   "w": 512,
+   "h": 512,
+   "group": "Ranks",
+   "name": "Prestige"
+  },
+  "bn_linen": {
+   "sheet": "Banners_1",
+   "x": 0,
+   "y": 0,
+   "w": 768,
+   "h": 256,
+   "group": "Banners",
+   "name": "Linen"
+  },
+  "bn_oak_iron": {
+   "sheet": "Banners_1",
+   "x": 0,
+   "y": 256,
+   "w": 768,
+   "h": 256,
+   "group": "Banners",
+   "name": "Oak and Iron"
+  },
+  "bn_mountain_dawn": {
+   "sheet": "Banners_1",
+   "x": 0,
+   "y": 512,
+   "w": 768,
+   "h": 256,
+   "group": "Banners",
+   "name": "Mountain Dawn"
+  },
+  "bn_first_ride": {
+   "sheet": "Banners_1",
+   "x": 0,
+   "y": 768,
+   "w": 768,
+   "h": 256,
+   "group": "Banners",
+   "name": "The First Ride"
+  },
+  "bn_top48": {
+   "sheet": "Banners_2",
+   "x": 0,
+   "y": 0,
+   "w": 768,
+   "h": 256,
+   "group": "Banners",
+   "name": "Top 48"
+  },
+  "trim_regular": {
+   "sheet": "Banners_2",
+   "x": 0,
+   "y": 256,
+   "w": 768,
+   "h": 256,
+   "group": "Trims",
+   "name": "Regular (trim)"
+  },
+  "trim_warden": {
+   "sheet": "Banners_2",
+   "x": 0,
+   "y": 512,
+   "w": 768,
+   "h": 256,
+   "group": "Trims",
+   "name": "Warden (trim)"
+  },
+  "trim_sentinel": {
+   "sheet": "Banners_2",
+   "x": 0,
+   "y": 768,
+   "w": 768,
+   "h": 256,
+   "group": "Trims",
+   "name": "Sentinel (trim)"
+  },
+  "trim_paragon": {
+   "sheet": "Banners_3",
+   "x": 0,
+   "y": 0,
+   "w": 768,
+   "h": 256,
+   "group": "Trims",
+   "name": "Paragon (frame)"
+  }
+ }
+}

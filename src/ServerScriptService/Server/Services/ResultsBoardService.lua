@@ -147,6 +147,7 @@ local function build(winner: Player?): { [string]: any }?
 			kills = e.kills,
 			survived = math.floor(survived + 0.5),
 			cause = e.cause,
+			rank = call("RankService", "tagFor", e.userId), -- { level, prestige, rank } (RankService; nil without it)
 		})
 	end
 	table.sort(rows, function(a, b)

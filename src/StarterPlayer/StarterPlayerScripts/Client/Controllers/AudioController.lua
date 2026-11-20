@@ -9,9 +9,13 @@
 	- Ambience beds by biome (Shared.ArenaLayout.getBiome around the camera, spatially blended) and time of
 	  day (Lighting.ClockTime; night beds take over around 19:30), crossfaded. AmbientEmitter-tagged parts
 	  get looped 3D emitters (SoundKey attribute, optional Volume attribute), streaming-aware, nearest N only.
-	- Music by game state: Music_Lobby in the lobby; Music_Tension during the countdown, the opening rush,
-	  the Feast, while the border shrinks or at AliveCount <= 5; Music_Final at AliveCount <= 2.
-	  Music and ambience duck under the cannon, start horn, feast bell, border warning, victory and roll call.
+	- Music is the MusicController's (20 Nov 2026): it picks and cross-fades the cues. This controller still owns the
+	  mix: the Music group's volume (Music setting x master), and the duck the music and ambience take under the
+	  cannon, start horn, feast bell, border warning, victory and roll call (musicDuckLevel(), read by MusicController).
+	- Layers: a Shared.Sounds entry may name `layers = { { key, delay?, volume? } }`, played with it (Sfx.play on this
+	  client and AudioController.play), e.g. the cannon's sub boom under the crack. Layers do not layer again.
+	- Sliding: a one-shot for the start of the slide and a looped scrape (SlideLoop) held for as long as the slide lasts,
+	  its level and pitch following the slide speed (a long slide down a steep hill is heard all the way).
 	- Low-stamina breathing and low-health heartbeat (looped, faded; below Config.Feedback.LowHealth, the HUD's LOW line).
 	- Other contenders' bow draws (PlayabilityPlan QW9): the CombatAction remote's "Draw" plays the bow's creak at the
 	  archer for anyone within 45 studs, following them, and "Release" (loosed or let down) stops it.
@@ -33,7 +37,9 @@
 	  AudioController.footstepAt(position: Vector3, material: Enum.Material, intensity: number?, crouched: boolean?)
 	  AudioController.duck(musicFactor: number, ambienceFactor: number, seconds: number)
 	  AudioController.materialKey(material: Enum.Material) -> string?   ("Footstep_*")
-	  AudioController.setMusicSuppressed(suppressed: boolean)
+	  AudioController.setMusicSuppressed(suppressed: boolean)    (MusicController reads it: isMusicSuppressed())
+	  AudioController.isMusicSuppressed() -> boolean
+	  AudioController.musicDuckLevel() -> number   (0..1, the current duck for music beds)
 	  AudioController.debugState() -> { [string]: any }   (stockMuted = stock character sounds silenced so far)
 ]]
 local Players = game:GetService("Players")
@@ -75,12 +81,8 @@ local TUNE = {
 	DawnFrom = 5.0,
 	DawnTo = 6.5,
 	BedFade = 0.5, -- crossfade rate (1/s) for ambience beds
-	MusicFadeIn = 0.45,
-	MusicFadeOut = 0.32,
-	FinalFadeIn = 0.9,
-	OpeningMusicTime = 40, -- seconds of tension music after the start horn
-	TensionAlive = 5,
-	FinalAlive = 2,
+	-- (music timing lives in MusicController.TUNE)
+	SlideLoopSpeed = 26, -- studs/s at which the slide scrape is at full level
 	MaxEmitters = 14,
 	EmitterMargin = 30, -- emitters start this many studs before their RollOffMaxDistance
 	RemoteDrawRange = 45, -- studs: other contenders' bow creak is heard this close (QW9)
@@ -174,7 +176,8 @@ local SOFT_ROOF = { Grass = true, LeafyGrass = true }
 -- 2D stings and signals that duck the mix (and get a big outdoor reverb tail)
 local DUCKS = {
 	Cannon = { music = 0.3, amb = 0.5, time = 3.8, reverb = { 4.5, -4 }, eq = { 3, -1, -7 } },
-	StartHorn = { music = 0.35, amb = 0.6, time = 4.5, reverb = { 3.5, -7 } },
+	-- (3.0 s, was 4.5: the music is silent for the horn's first 2.4 s anyway, and the scramble should land near full)
+	StartHorn = { music = 0.35, amb = 0.6, time = 3.0, reverb = { 3.5, -7 } },
 	FeastBell = { music = 0.5, amb = 0.7, time = 3.5, reverb = { 4.0, -6 } },
 	BorderWarning = { music = 0.6, amb = 0.8, time = 3 },
 	Victory = { music = 0.12, amb = 0.6, time = 11 },
@@ -341,6 +344,11 @@ end
 ---------------------------------------------------------------------------
 local function applySfxRegion(key: any, sound: Sound)
 	local entry = if type(key) == "string" then entryOf(key) else nil
+	-- per-take gain (Shared.Sounds `gains = { [id] = gain }`): evens out takes of one key recorded at different levels
+	local gains = entry and entry.gains
+	if type(gains) == "table" and type(gains[sound.SoundId]) == "number" then
+		sound.Volume = math.clamp(sound.Volume * gains[sound.SoundId], 0, 10)
+	end
 	local regions = entry and entry.regions
 	if type(regions) ~= "table" or #regions == 0 or sound.Looped then
 		return
@@ -378,6 +386,23 @@ local function wrapSfx()
 			local ok, err = pcall(applySfxRegion, key, sound)
 			if not ok then
 				warn("[AudioController] Sfx region for " .. tostring(key) .. ": " .. tostring(err))
+			end
+		end
+		-- layers: played beside the sound through the raw Sfx.play (a layer never layers again)
+		local entry = if type(key) == "string" then entryOf(key) else nil
+		if entry and type(entry.layers) == "table" then
+			for _, layer in ipairs(entry.layers) do
+				if type(layer) == "table" and type(layer.key) == "string" then
+					local layerOpts = if type(opts) == "table" then table.clone(opts) else {}
+					layerOpts.volume = (tonumber(layerOpts.volume) or 1) * (tonumber(layer.volume) or 1)
+					layerOpts.pitch = nil
+					local delay = tonumber(layer.delay) or 0
+					if delay > 0 then
+						task.delay(delay, rawPlay, layer.key, layerOpts)
+					else
+						rawPlay(layer.key, layerOpts)
+					end
+				end
 			end
 		end
 		return sound
@@ -467,7 +492,9 @@ local function pickVariant(entry: any, key: string, foot: string?)
 			index = (index % #ids) + 1
 		end
 		lastPick[key] = index
-		return ids[index], nil, nil, 1
+		local gains = entry.gains
+		local gain = if type(gains) == "table" and type(gains[ids[index]]) == "number" then gains[ids[index]] else 1
+		return ids[index], nil, nil, gain
 	end
 	return nil, nil, nil, 1
 end
@@ -526,6 +553,20 @@ local function playKey(key: string, opts: { [string]: any }?)
 	voice.priority = priority
 	voice.base = volume
 	voice.fade = nil
+	if type(entry.layers) == "table" and not o.noLayers then
+		for _, layer in ipairs(entry.layers) do
+			if type(layer) == "table" and type(layer.key) == "string" then
+				local layerOpts = { position = position, priority = math.max(priority - 1, 1), noLayers = true,
+					volume = (o.volume or 1) * (tonumber(layer.volume) or 1), rollScale = o.rollScale }
+				local delay = tonumber(layer.delay) or 0
+				if delay > 0 then
+					task.delay(delay, playKey, layer.key, layerOpts)
+				else
+					playKey(layer.key, layerOpts)
+				end
+			end
+		end
+	end
 	return sound, voice
 end
 
@@ -622,6 +663,12 @@ local function updateLoop(loop, dt: number, mult: number?)
 		created.Looped = true
 		created.Volume = 0
 		created.SoundGroup = getGroup(entry.group)
+		if type(entry.loopRegion) == "table" and #entry.loopRegion == 2 then
+			-- loop only the steady middle of a one-take recording (its attack and tail are left out)
+			created.PlaybackRegionsEnabled = true
+			created.PlaybackRegion = NumberRange.new(entry.loopRegion[1], entry.loopRegion[2])
+			created.LoopRegion = NumberRange.new(entry.loopRegion[1], entry.loopRegion[2])
+		end
 		if loop.spatial then
 			created.RollOffMode = Enum.RollOffMode.InverseTapered
 			created.RollOffMinDistance = entry.rollMin or 10
@@ -668,10 +715,12 @@ local rootPart: BasePart? = nil
 
 local bedLoops: { [string]: any } = {}
 local musicLoops: { [string]: any } = {}
-local breathLoop, heartLoop, swimLoop, underwaterLoop
+local breathLoop, heartLoop, swimLoop, underwaterLoop, slideLoop
 local emitters: { [Instance]: any } = {}
+local registry: any = nil
 
-local settings = { sfx = 1, music = 0.6, ambience = 0.8 }
+-- master: settings.masterVolume when the settings have it (default 1); it scales every group
+local settings = { sfx = 1, music = 0.6, ambience = 0.8, master = 1 }
 local ducks = {}
 local musicDuck, ambDuck = 1, 1
 local muffle, deathMuffle, hitMuffle = 0, 0, 0
@@ -681,8 +730,7 @@ local currentBiome = "Woodland"
 local currentEnv = "Forest"
 local reverbDecay, reverbWet = 1.4, -20
 local indoorFactor = 1
-local desiredMusic: string? = nil
-local desiredMusicLevel = 1
+local desiredMusic: string? = nil -- the MusicController's cue (debug line only)
 local musicSuppressed = false
 
 local lastLocalStep = 0
@@ -1065,7 +1113,14 @@ local function simulateRemote(st, dt: number, now: number)
 	if stance ~= st.stance then
 		if stance == "Slide" and st.grounded then
 			local _, slide = playKey("Slide", { position = feetOf(root, hum), volume = 0.9, priority = 2 })
-			fadeVoiceAfter(slide, TUNE.RemoteSlideFade, 0.3)
+			st.slideVoice = slide
+			st.slideStarted = if slide then slide.started else 0
+		elseif st.stance == "Slide" and st.slideVoice then
+			-- their slide ended: the scrape stops with it (a long slide keeps the whole recording)
+			if st.slideVoice.started == st.slideStarted then
+				fadeVoice(st.slideVoice, 0.3)
+			end
+			st.slideVoice = nil
 		end
 		st.stance = stance
 	end
@@ -1249,49 +1304,7 @@ local function detectEnvironment(camPos: Vector3): string
 	return BIOME_ENV[currentBiome] or "Forest"
 end
 
-local function attr(name: string): any
-	return if GameState then GameState:GetAttribute(name) else nil
-end
-
-local function decideMusic(): (string?, number)
-	if musicSuppressed then
-		return nil, 1
-	end
-	local phase = attr("Phase")
-	if phase == "Ending" then
-		return nil, 1 -- the victory sting carries it
-	end
-	local watchingArena = ClientState.inArena or ClientState.spectating ~= nil
-	if not watchingArena then
-		return "Music_Lobby", 1
-	end
-	if phase == "Countdown" then
-		return "Music_Tension", 0.6
-	end
-	if phase == "Active" then
-		local practice = attr("Practice") == true
-		local alive = tonumber(attr("AliveCount")) or 0
-		local started = tonumber(attr("StartedCount")) or 0
-		if not practice and started >= 3 and alive >= 1 and alive <= TUNE.FinalAlive then
-			return "Music_Final", 1
-		end
-		if attr("BorderShrinking") == true then
-			return "Music_Tension", 1
-		end
-		if not practice and started > TUNE.TensionAlive and alive <= TUNE.TensionAlive then
-			return "Music_Tension", 1
-		end
-		if attr("ArenaEvent") == "Feast" then
-			return "Music_Tension", 0.75
-		end
-		local startedAt = tonumber(attr("RoundStartedAt")) or 0
-		if startedAt > 0 and workspace:GetServerTimeNow() - startedAt < TUNE.OpeningMusicTime then
-			return "Music_Tension", 0.8
-		end
-		return nil, 1 -- exploration: ambience only, the arena breathes
-	end
-	return "Music_Lobby", 1
-end
+-- (the music cue decision moved to MusicController.decide, 20 Nov 2026)
 
 ---------------------------------------------------------------------------
 -- Ducking of stings (2D Sfx sounds are parented to SoundService by Shared.Sfx)
@@ -1357,11 +1370,13 @@ local function updateMix(dt: number, now: number)
 	end
 	musicDuck += (musicTarget - musicDuck) * damp(if musicTarget < musicDuck then 6 else 0.6, dt)
 	ambDuck += (ambTarget - ambDuck) * damp(if ambTarget < ambDuck then 6 else 0.8, dt)
-	setGroupVolume("SFX", settings.sfx)
-	setGroupVolume("UI", settings.sfx * 0.8)
-	-- music ducking is applied to our music loops only, so stings in the Music group (Victory, RollCall) stay full
-	setGroupVolume("Music", settings.music)
-	setGroupVolume("Ambience", settings.ambience * ambDuck)
+	local master = settings.master
+	setGroupVolume("SFX", settings.sfx * master)
+	setGroupVolume("UI", settings.sfx * 0.8 * master)
+	-- music ducking is applied to the music beds only (MusicController reads musicDuckLevel), so stings in the Music
+	-- group (Victory, RollCall) stay full
+	setGroupVolume("Music", settings.music * master)
+	setGroupVolume("Ambience", settings.ambience * ambDuck * master)
 	-- muffle (underwater, death, heavy hits)
 	deathMuffle = math.max(0, deathMuffle - dt / 3)
 	hitMuffle = math.max(0, hitMuffle - dt * 2.5)
@@ -1439,6 +1454,16 @@ local function updateLocalLoops(dt: number)
 	end
 	swimLoop.target = swim
 	updateLoop(swimLoop, dt)
+	-- sliding: the scrape lasts as long as the slide (the one-shot "Slide" gives its start), louder and a little
+	-- brighter the faster the slide goes, so a long slide down a steep hill is heard all the way down
+	local slide = 0
+	if alive and ClientState.moveState == "Slide" then
+		local speed = tonumber(ClientState.speed) or 0
+		slide = math.clamp(speed / TUNE.SlideLoopSpeed, 0.2, 1)
+	end
+	slideLoop.target = slide
+	slideLoop.speed = 0.92 + 0.16 * slide
+	updateLoop(slideLoop, dt)
 	-- the bed under the surface (with the muffle in updateMix), whoever the camera is with
 	underwaterLoop.target = if underwater then 1 else 0
 	updateLoop(underwaterLoop, dt)
@@ -1596,11 +1621,9 @@ local function update(dt: number)
 	timers.music += dt
 	if timers.music >= 0.5 then
 		timers.music = 0
-		desiredMusic, desiredMusicLevel = decideMusic()
-		for key, loop in pairs(musicLoops) do
-			loop.target = if key == desiredMusic then desiredMusicLevel else 0
-			loop.rateIn = if key == "Music_Final" then TUNE.FinalFadeIn else TUNE.MusicFadeIn
-		end
+		-- (for the debug line only: the MusicController decides and plays the cues)
+		local mc = registry and registry.MusicController
+		desiredMusic = if mc and type(mc.currentCue) == "function" then mc.currentCue() else nil
 	end
 
 	timers.sim += dt
@@ -1742,6 +1765,14 @@ function AudioController.setMusicSuppressed(suppressed: boolean)
 	musicSuppressed = suppressed == true
 end
 
+function AudioController.isMusicSuppressed(): boolean
+	return musicSuppressed
+end
+
+function AudioController.musicDuckLevel(): number
+	return musicDuck
+end
+
 function AudioController.debugState()
 	return debugInfo
 end
@@ -1754,9 +1785,11 @@ local function applySettings(s: any)
 	settings.sfx = math.clamp(tonumber(source.sfxVolume) or 1, 0, 1)
 	settings.music = math.clamp(tonumber(source.musicVolume) or 0.6, 0, 1)
 	settings.ambience = math.clamp(tonumber(source.ambienceVolume) or 0.8, 0, 1)
+	settings.master = math.clamp(tonumber(source.masterVolume) or 1, 0, 1)
 end
 
 function AudioController.Init(_registry)
+	registry = _registry
 	-- client-local infrastructure (no yields)
 	local existing = SoundService:FindFirstChild("AudioController")
 	if existing then
@@ -1774,10 +1807,9 @@ function AudioController.Init(_registry)
 	for _, key in ipairs(BED_KEYS) do
 		bedLoops[key] = newLoop(key, rootFolder, TUNE.BedFade, TUNE.BedFade, true)
 	end
-	for _, key in ipairs({ "Music_Lobby", "Music_Tension", "Music_Final" }) do
-		musicLoops[key] = newLoop(key, rootFolder, TUNE.MusicFadeIn, TUNE.MusicFadeOut, false)
-	end
+	-- (the music beds are the MusicController's: musicLoops stays empty)
 	breathLoop = newLoop("BreathHeavy", rootFolder, 1.6, 0.9, true)
+	slideLoop = newLoop("SlideLoop", rootFolder, 9, 5, true)
 	heartLoop = newLoop("Heartbeat", rootFolder, 0.9, 0.7, false)
 	swimLoop = newLoop("Swim", rootFolder, 3, 2.5, true)
 	underwaterLoop = newLoop("Underwater", rootFolder, 4, 2.5, true)

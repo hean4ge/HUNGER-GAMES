@@ -32,6 +32,8 @@
 	             strip: BasePart (the case's top light), light: SpotLight, units: { BasePart } (wall units beside it) } },
 	             poleOffset: Vector3 (a pole's foot from its case centre, case space), poleTop: number,
 	             riderAnchor: BasePart (SpotLight "Key"), gantryAnchor: BasePart (SurfaceLight "Fill"),
+	             ride: Model (your ride, in case space: rails with lamps, collars, the roof shaft and its bright top;
+	             PivotTo a slot's cf), shaftY: number (the shaft's mouth above the case floor),
 	             lights = { hub, rider, riderFill, gantry } }
 	set.parts: number   parts built          set.detail: the tier it was built for
 ]]
@@ -500,6 +502,27 @@ local function buildRed(model: Model, detail: string)
 		beam(room, "HoodLip", pt(la.X, hoodBottom + 0.1, la.Y), pt(lb.X, hoodBottom + 0.1, lb.Y), 0.16, 0.16, C.rail, PAINT)
 	end
 
+	-- the lift shaft above the hex (first person, 20 Nov: you look up through the frame as the lift starts): six dark
+	-- walls from the frame up, two pale bands inside and a bright cap at the top, the light the lift carries you toward
+	local SHAFT_TOP = FRAME_Y + 11
+	local shaftWall = hexPoly(A_OUT + 0.25)
+	local shaftBand = hexPoly(A_OUT + 0.08)
+	for i = 1, 6 do
+		local a, b = shaftWall[i], shaftWall[i % 6 + 1]
+		local dir = (b - a).Unit
+		local pa, pb = a - dir * 0.15, b + dir * 0.15
+		local mid = (pa + pb) / 2
+		local midY = (FRAME_Y + 0.4 + SHAFT_TOP) / 2
+		part(room, "LiftShaft", Vector3.new(0.3, SHAFT_TOP - FRAME_Y - 0.4, (pb - pa).Magnitude),
+			CFrame.lookAt(pt(mid.X, midY, mid.Y), pt(pb.X, midY, pb.Y)), C.oxbloodDk, PANEL, { shadow = false })
+		local la, lb = shaftBand[i], shaftBand[i % 6 + 1]
+		for _, y in ipairs(if low then { SHAFT_TOP - 3 } else { FRAME_Y + 4, SHAFT_TOP - 3 }) do
+			beam(room, "LiftShaftBand", pt(la.X, y, la.Y), pt(lb.X, y, lb.Y), 0.1, 0.22, C.light, M.Neon, { shadow = false })
+		end
+	end
+	part(room, "LiftShaftCap", Vector3.new(2 * A_OUT + 1, 0.3, 2 * (A_OUT + 0.5) / math.cos(math.rad(30))), at(0, SHAFT_TOP, 0),
+		C.lens, M.Neon, { shadow = false })
+
 	-- lights: a cool white key down the shaft, a cool fill under the roof, the lamp, red light in the openings
 	local keyAnchor = anchor(room, "KeyLight", CFrame.lookAt(pt(0, ROOF_BOTTOM - 0.5, 1.2), pt(0, 0, -0.3)))
 	local key = Instance.new("SpotLight")
@@ -720,6 +743,55 @@ local function buildHall(model: Model, detail: string, slotCount: number)
 	end
 	task.wait()
 
+	-- Your ride (first person, 20 Nov): built once at the hall's origin in case space and moved onto your own case
+	-- (set.hall.ride:PivotTo(slot.cf)). The case's four posts run on up as guide rails to the roof, with small lamps on
+	-- their inner faces that stream past as you climb, square collars every 24 studs that you pass through, and a
+	-- square shaft in the roof (the tube) whose top is a bright panel: the light you rise into.
+	local ride = folder(hall, "Ride")
+	local rideCF = O * CFrame.new(0, 0, 0)
+	local RAIL_R = 2.45 -- the case posts' corners
+	local SHAFT_A = 3.7 -- the shaft's half width (the rails run up inside it)
+	local SHAFT_Y = 108
+	local lampStep = if low then 12 elseif high then 6 else 8
+	for _, p in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+		local x, z = p[1] * RAIL_R, p[2] * RAIL_R
+		part(ride, "Rail", Vector3.new(0.2, ROOF_Y - 9.7, 0.2), rideCF * CFrame.new(x, (9.7 + ROOF_Y) / 2, z), C.pole, PAINT,
+			{ shadow = false })
+		-- lamps on the inner corner, toward you
+		local y = 12
+		while y < SHAFT_Y + 12 do
+			part(ride, "RailLamp", Vector3.new(0.1, 0.45, 0.1), rideCF * CFrame.new(x - p[1] * 0.15, y, z - p[2] * 0.15), C.light,
+				M.Neon, { shadow = false })
+			y += lampStep
+		end
+	end
+	for _, y in ipairs({ 34, 58, 82 }) do
+		for _, s in ipairs({ { -1, -1, 1, -1 }, { -1, 1, 1, 1 }, { -1, -1, -1, 1 }, { 1, -1, 1, 1 } }) do
+			beam(ride, "Collar", (rideCF * CFrame.new(s[1] * RAIL_R, y, s[2] * RAIL_R)).Position,
+				(rideCF * CFrame.new(s[3] * RAIL_R, y, s[4] * RAIL_R)).Position, 0.3, 0.3, C.truss, PAINT, { shadow = false })
+		end
+		-- a thin light strip under each collar's front bar (the one you face), so each one flashes past
+		beam(ride, "CollarLight", (rideCF * CFrame.new(-RAIL_R + 0.4, y - 0.2, -RAIL_R + 0.05)).Position,
+			(rideCF * CFrame.new(RAIL_R - 0.4, y - 0.2, -RAIL_R + 0.05)).Position, 0.12, 0.08, C.light, M.Neon, { shadow = false })
+	end
+	-- the shaft: four dark walls from SHAFT_Y up into the roof deck, a lit band at its mouth, the bright top
+	local shaftH = ROOF_Y + 0.8 - SHAFT_Y
+	for _, w in ipairs({ { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } }) do
+		local size = if w[1] == 0 then Vector3.new(2 * SHAFT_A + 0.6, shaftH, 0.3) else Vector3.new(0.3, shaftH, 2 * SHAFT_A + 0.6)
+		part(ride, "ShaftWall", size, rideCF * CFrame.new(w[1] * (SHAFT_A + 0.15), SHAFT_Y + shaftH / 2, w[2] * (SHAFT_A + 0.15)),
+			C.shell, PANEL, { shadow = false })
+		local band = if w[1] == 0 then Vector3.new(2 * SHAFT_A, 0.25, 0.08) else Vector3.new(0.08, 0.25, 2 * SHAFT_A)
+		part(ride, "ShaftBand", band, rideCF * CFrame.new(w[1] * (SHAFT_A - 0.02), SHAFT_Y + 0.3, w[2] * (SHAFT_A - 0.02)),
+			C.light, M.Neon, { shadow = false })
+		if not low then
+			part(ride, "ShaftBand", band, rideCF * CFrame.new(w[1] * (SHAFT_A - 0.02), SHAFT_Y + 8, w[2] * (SHAFT_A - 0.02)),
+				C.light, M.Neon, { shadow = false })
+		end
+	end
+	part(ride, "ShaftTop", Vector3.new(2 * SHAFT_A, 0.2, 2 * SHAFT_A), rideCF * CFrame.new(0, ROOF_Y - 0.4, 0), C.lens, M.Neon,
+		{ shadow = false })
+	ride.WorldPivot = rideCF
+
 	-- lights: the hub, a key that rides up with your disc, a fill from the gantry over your case
 	local hubAnchor = anchor(hall, "HubLight", O * CFrame.new(0, CROWN_Y - 6, 0))
 	local hub = Instance.new("PointLight")
@@ -773,6 +845,8 @@ local function buildHall(model: Model, detail: string, slotCount: number)
 		crownY = CROWN_Y,
 		riderAnchor = riderAnchor,
 		gantryAnchor = gantryAnchor,
+		ride = ride,
+		shaftY = SHAFT_Y,
 		lights = { hub = hub, rider = rider, riderFill = riderFill, gantry = gantry },
 	}
 end
