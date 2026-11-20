@@ -149,3 +149,11 @@ These are your calls. The defaults are in use meanwhile.
 - **Motion:** weighty, smooth and varied, never like a stock Roblox avatar.
 - **The films:** film-faithful places, launch, trains and challenges. No film frames, logos or text anywhere in the game or the repo.
 - **Working style:** ask about aesthetics and the player's experience ("ask me if you have any questions regarding user aesthetic and user experience design"). Otherwise act ("cant you switch it yourself", "you do what you think is necessary", "do it yourself"). Use multi-agent workflows, keep every running agent updated, and understand all your messages before acting ("read through all my prompts first and understand what you are doing").
+
+## 20 Nov 2026: after the pre-publish pass
+
+Owner: "and then after you should add we still need to link the discord server and change the icon and do ads"
+
+- **Discord:** add the server as a social link on the experience (Creator Dashboard > Social links). Needs the invite link from the owner.
+- **Icon:** replace the current icon (a golden bird in a ring, too close to the films' pin) with our own design in the game's look. Show the owner options before uploading.
+- **Ads:** Roblox Ads Manager campaigns cost money, so no campaign and no spending without the owner's yes, budget and dates. The video ad is being made in the separate ad session.
