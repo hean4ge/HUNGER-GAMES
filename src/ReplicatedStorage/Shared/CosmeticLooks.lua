@@ -421,7 +421,42 @@ function CosmeticLooks.skinMesh(model: Instance, stars: number): Model?
 	return if m and m:IsA("Model") and m.PrimaryPart then m else nil
 end
 
--- GUI stand-ins: kill icons and banners (Frames only, no images until CosmeticLooks.Images is filled) ---------------
+-- GUI: kill icons and banners. The uploaded icon sheets first (Shared.Icons / Shared.IconAtlas: ki_*, bn_*, trim_*),
+-- then CosmeticLooks.Images, then the Frame stand-ins below ----------------------------------------------------------
+
+local iconsMod: any = nil
+-- An ImageLabel cut from the atlas cell for this catalogue item, or nil (no cell: the stand-in draws)
+local function atlasImage(id: string, props: { [string]: any }): ImageLabel?
+	if iconsMod == nil then
+		local m = script.Parent:FindFirstChild("Icons")
+		local ok, mod = false, nil
+		if m then
+			ok, mod = pcall(require, m)
+		end
+		iconsMod = if ok then mod else false
+	end
+	if not iconsMod then
+		return nil
+	end
+	local _, cell = iconsMod.cell(id)
+	local sheet = cell and iconsMod.Atlas.Sheets[cell.Sheet]
+	if not sheet then
+		return nil
+	end
+	local img = Instance.new("ImageLabel")
+	img.Name = "Picture"
+	img.BackgroundTransparency = 1
+	img.BorderSizePixel = 0
+	img.Size = UDim2.fromScale(1, 1)
+	img.Image = sheet.Image
+	img.ImageRectOffset = Vector2.new(cell.X, cell.Y)
+	img.ImageRectSize = Vector2.new(cell.W, cell.H)
+	img.ScaleType = Enum.ScaleType.Fit
+	for k, v in pairs(props) do
+		(img :: any)[k] = v
+	end
+	return img
+end
 
 local function new(className: string, props: { [string]: any }, children: { Instance }?): any
 	local inst = Instance.new(className)
@@ -539,7 +574,10 @@ function CosmeticLooks.killIcon(id: any, px: number, props: { [string]: any }?):
 		BorderSizePixel = 0,
 	})
 	local image = CosmeticLooks.Images[item.id]
-	if image then
+	local cut = atlasImage(item.id, {})
+	if cut then
+		cut.Parent = g
+	elseif image then
 		new("ImageLabel", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Image = image, Parent = g })
 	else
 		local draw = GLYPHS[item.glyph]
@@ -651,7 +689,10 @@ function CosmeticLooks.banner(id: any, props: { [string]: any }?, trimId: any): 
 	})
 	corner(6).Parent = f
 	local image = CosmeticLooks.Images[item.id]
-	if image then
+	local cut = atlasImage(item.id, { ScaleType = Enum.ScaleType.Crop })
+	if cut then
+		cut.Parent = f
+	elseif image then
 		new("ImageLabel", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Image = image, ScaleType = Enum.ScaleType.Crop, Parent = f })
 	else
 		local paint = PAINT[item.paint]
@@ -662,7 +703,10 @@ function CosmeticLooks.banner(id: any, props: { [string]: any }?, trimId: any): 
 	local trim = CosmeticLooks.get(trimId)
 	if trim and trim.kind == "trim" then
 		local img = CosmeticLooks.Images[trim.id]
-		if img then
+		local cutTrim = atlasImage(trim.id, { Name = "Trim", ScaleType = Enum.ScaleType.Crop, ZIndex = 8 })
+		if cutTrim then
+			cutTrim.Parent = f
+		elseif img then
 			new("ImageLabel", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Image = img, ZIndex = 8, Parent = f })
 		elseif trim.frame then
 			-- (a stroke draws outside its frame and the banner clips: an inset frame of four rails instead)
