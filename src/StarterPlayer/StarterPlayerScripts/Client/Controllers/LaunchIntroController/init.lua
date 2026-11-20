@@ -90,7 +90,8 @@ local IDLE_ID = "rbxassetid://17172918855" -- the game's own idle clip (StarterC
 local SKIP_ACTION = "LaunchSkip"
 local RENDER_NAME = "LS_LaunchShot"
 local SKIP_HOLD = tonumber(LaunchCfg.SkipHold) or 0.6
-local HIDE_GUIS = { "HUD", "HUDFX", "Overlay", "FeedbackLines", "TouchControls", "Menu" }
+-- (SkillRings: SkillController's R / F key squares, bound once you are on your plate; they sat over the whole shot)
+local HIDE_GUIS = { "HUD", "HUDFX", "Overlay", "FeedbackLines", "TouchControls", "Menu", "SkillRings" }
 -- Roblox's own windows that would sit over the letterboxed shot (the pointer is already hidden: HUDController hides it
 -- for a living contender in the arena)
 local HIDE_CORE = { Enum.CoreGuiType.Chat, Enum.CoreGuiType.PlayerList }
@@ -1032,6 +1033,13 @@ local function assignSlots(s)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local mine = if s.preview then 1 else ((root and root:IsA("BasePart") and slotOf(root.Position)) or 1)
 	s.mySlot = mine
+	-- the way your plate faces (toward the Horn): the hand-off's view. With more plates than cases (Map 1: 48 and 24)
+	-- your case's bearing is up to 11.25 degrees off your plate's, so the shot's last look turns onto it (evaluate)
+	if not s.preview and root and root:IsA("BasePart") and slotOf(root.Position) then
+		local centre = arenaCentre()
+		local flat = Vector3.new(centre.X - root.Position.X, 0, centre.Z - root.Position.Z)
+		s.plateDir = if flat.Magnitude > 0.1 then flat.Unit else nil
+	end
 	local taken = { [mine] = true }
 	local pending = {}
 	for _, entry in ipairs(s.contenders) do
@@ -1256,6 +1264,14 @@ local function evaluate(s, t: number): (CFrame, number, string)
 	local c = smooth((u - 0.32) / 0.3)
 	local pitch = math.rad(lerp(lerp(lerp(p0, 16, a), gaze, c), FACE_PITCH, lv))
 	local yaw = 0.3 * smooth((u - 0.04) / 0.2) * (1 - c) * glance
+	if s.plateDir then
+		-- as your eyes come level, turn onto the bearing your plate faces, so the hand-off view matches it exactly
+		-- (runP1, 20 Nov: an 11.2 degree turn at the cut on Map 1, where two plates share a case)
+		local look = S.LookVector
+		local off = math.atan2(-s.plateDir.X, -s.plateDir.Z) - math.atan2(-look.X, -look.Z)
+		off = (off + math.pi) % (2 * math.pi) - math.pi
+		yaw += off * lv
+	end
 	local eye = Vector3.new(0, feetY + s.me.eye - takeUp, 0)
 	local keyAt = S * Vector3.new(0, feetY + 9, -2.2)
 	hall.riderAnchor.CFrame = CFrame.lookAt(keyAt, S * Vector3.new(0, feetY + 3, 0))

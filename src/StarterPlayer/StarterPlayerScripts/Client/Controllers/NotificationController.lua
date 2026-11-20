@@ -46,6 +46,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local GuiService = game:GetService("GuiService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -214,11 +215,18 @@ local function playHeadline(item: { [string]: any })
 	R.hRule.Visible = not compact and not quiet
 	R.hRule.BackgroundColor3 = item.ruleColor or C.Accent
 	R.hRule.Size = UDim2.fromOffset(0, 2)
+	-- (ui-motion) fade and rise QuietUI.Motion.ToastRise px; with Reduce Motion on it only fades
+	local still = QuietUI.reducedMotion()
+	local rise = if still then 0 else QuietUI.Motion.ToastRise
 	h.Visible = true
 	h.GroupTransparency = 1
-	h.Position = UDim2.new(0.5, 0, y, 10)
-	Theme.tween(h, Theme.Tween.Slow, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, y, 0) })
-	Theme.tween(R.hRule, TweenInfo.new(0.8, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(56, 2) })
+	h.Position = UDim2.new(0.5, 0, y, rise)
+	TweenService:Create(h, Theme.Tween.Slow, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, y, 0) }):Play()
+	if still then
+		R.hRule.Size = UDim2.fromOffset(56, 2)
+	else
+		TweenService:Create(R.hRule, TweenInfo.new(0.8, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(56, 2) }):Play()
+	end
 	if item.sound then
 		Sfx.play(item.sound)
 	end
@@ -238,7 +246,9 @@ local function playHeadline(item: { [string]: any })
 		if not headlineCurrent or headlineCurrent.token ~= token then
 			return
 		end
-		local t = Theme.tween(h, Theme.Tween.FadeOut, { GroupTransparency = 1, Position = UDim2.new(0.5, 0, y, -6) })
+		local t = TweenService:Create(h, QuietUI.Ease.ToastOut, { GroupTransparency = 1,
+			Position = UDim2.new(0.5, 0, y, if QuietUI.reducedMotion() then 0 else -QuietUI.Motion.ToastRise / 2) })
+		t:Play()
 		t.Completed:Wait()
 		if headlineCurrent and headlineCurrent.token == token then
 			headlineCurrent = nil
@@ -262,8 +272,16 @@ local function clearHeadlines()
 	table.clear(headlineQueue)
 	headlineCurrent = nil
 	suppressTop("Headline", false)
-	if R.headline then
-		R.headline.Visible = false
+	if R.headline and R.headline.Visible then
+		-- (ui-motion) a quick fade, not a cut; a new headline meanwhile keeps it
+		local h = R.headline
+		local t = TweenService:Create(h, QuietUI.Ease.Out, { GroupTransparency = 1 })
+		t:Play()
+		t.Completed:Once(function()
+			if headlineCurrent == nil and h.GroupTransparency > 0.99 then
+				h.Visible = false
+			end
+		end)
 	end
 end
 
@@ -310,7 +328,7 @@ local function removeToast(entry: any, fast: boolean?)
 	if index then
 		table.remove(toasts, index)
 	end
-	local info = if fast then Theme.Tween.Fast else Theme.Tween.FadeOut
+	local info = if fast then Theme.Tween.Fast else QuietUI.Ease.ToastOut
 	local f = entry.frame
 	-- no box: the dot and the words (with their dark strokes) fade; then the line goes
 	QuietUI.tween(entry.mark, info, { BackgroundTransparency = 1 })
@@ -318,11 +336,34 @@ local function removeToast(entry: any, fast: boolean?)
 	local t = QuietUI.fadeText(entry.text, false, info)
 	if t then
 		t.Completed:Once(function()
-			f:Destroy()
+			-- (ui-motion) fold the empty line, so the toasts left close up instead of jumping
+			if f.Parent and f.AutomaticSize ~= Enum.AutomaticSize.Y and f.AutomaticSize ~= Enum.AutomaticSize.XY then
+				local fold = TweenService:Create(f, QuietUI.Ease.Out, { Size = UDim2.new(f.Size.X.Scale, f.Size.X.Offset, 0, 0) })
+				fold:Play()
+				fold.Completed:Once(function()
+					f:Destroy()
+				end)
+			else
+				f:Destroy()
+			end
 		end)
 	else
 		f:Destroy() -- reduced motion: set at once
 	end
+end
+
+-- (ui-motion) a new toast or card opens its line from nothing (Motion.Toast, Quint Out): the others move up smoothly
+-- and its words rise into place as the line grows from the bottom. Reduce Motion: it is simply there.
+local function growIn(frame: GuiObject)
+	if QuietUI.reducedMotion() or frame.AutomaticSize == Enum.AutomaticSize.Y or frame.AutomaticSize == Enum.AutomaticSize.XY then
+		return
+	end
+	local full = frame.Size
+	if full.Y.Scale ~= 0 or full.Y.Offset <= 0 then
+		return
+	end
+	frame.Size = UDim2.new(full.X.Scale, full.X.Offset, 0, 0)
+	TweenService:Create(frame, QuietUI.Ease.Toast, { Size = full }):Play()
 end
 
 -- a toast's or card's words start clear, with their strokes, and fade in
@@ -334,10 +375,10 @@ local function fadeInLabels(labels: { any }, mark: GuiObject?)
 		mark.BackgroundTransparency = 1
 	end
 	for _, label in ipairs(labels) do
-		QuietUI.fadeText(label, true, Theme.Tween.Normal)
+		QuietUI.fadeText(label, true, QuietUI.Ease.Toast)
 	end
 	if mark then
-		QuietUI.tween(mark, Theme.Tween.Normal, { BackgroundTransparency = 0 })
+		QuietUI.tween(mark, QuietUI.Ease.Toast, { BackgroundTransparency = 0 })
 	end
 end
 
@@ -416,6 +457,7 @@ function NotificationController.toast(text: string, sub: string?, duration: numb
 	end
 	frame.BackgroundTransparency = 1 -- Quiet: no box behind a toast
 	frame.Visible = true
+	growIn(frame)
 	frame.Parent = R.toasts
 	fadeInLabels({ textLabel, subLabel }, mark)
 	local entry = { frame = frame, text = textLabel, sub = subLabel, mark = mark }
@@ -492,6 +534,7 @@ local function showCard(item: { [string]: any })
 	layoutToasts()
 	frame.Visible = true
 	-- cards have their own place at the left (Overlay Cards), so they never cover the item toast or the held item
+	growIn(frame)
 	frame.Parent = R.cards or R.toasts
 	fadeInLabels({ title, textLabel }, mark)
 	local entry = { frame = frame, text = title, sub = textLabel, mark = mark, card = true }
@@ -649,17 +692,32 @@ local function captionFor(n: number?): string
 end
 
 -- the caption pill under the number, and the cache line under it
+local captionBase: string? = nil
 local function setCaption(n: number?)
 	local text = captionFor(n)
+	local base = goalCaption()
 	if R.cdCaption.Text ~= text then
-		R.cdCaption.Text = text
+		-- (ui-motion) new words fade through (Motion.Text); only the seconds changing are set at once
+		if base ~= captionBase and R.cdCaption.Text ~= "" then
+			QuietUI.setText(R.cdCaption, text)
+		else
+			R.cdCaption.Text = text
+		end
 	end
+	captionBase = base
 	R.cdCaption.Visible = text ~= ""
 	if R.cdSub then
 		local sub = cacheLine()
-		R.cdSub.Visible = sub ~= nil
-		if sub and R.cdSub.Text ~= sub then
+		if sub and not R.cdSub.Visible then
 			R.cdSub.Text = sub
+			R.cdSub.Visible = true
+			QuietUI.textTransparency(R.cdSub, 1)
+			QuietUI.fadeText(R.cdSub, true, QuietUI.Ease.Toast)
+		elseif sub and R.cdSub.Text ~= sub then
+			QuietUI.setText(R.cdSub, sub)
+		end
+		if not sub then
+			R.cdSub.Visible = false
 		end
 	end
 end
@@ -669,9 +727,10 @@ local function showCountdownNumber(n: number)
 	R.cdNumber.Text = tostring(n)
 	R.cdNumber.TextColor3 = C.Text
 	QuietUI.textTransparency(R.cdNumber, 0.4)
-	R.cdPop.Scale = 1.3
-	QuietUI.tween(R.cdPop, Theme.Tween.Pop, { Scale = 1 })
-	QuietUI.fadeText(R.cdNumber, true, Theme.Tween.Pop)
+	-- (ui-motion) no pop: the number settles from 1.08 as it fades in (Quint Out); Reduce Motion: no scale
+	R.cdPop.Scale = if QuietUI.reducedMotion() then 1 else 1.08
+	QuietUI.tween(R.cdPop, QuietUI.Ease.Toast, { Scale = 1 })
+	QuietUI.fadeText(R.cdNumber, true, QuietUI.Ease.Toast)
 	setCaption(n)
 	QuietUI.textTransparency(R.cdCaption, 0)
 	Sfx.play("CountdownTick")
@@ -694,8 +753,8 @@ local function beginFlash()
 	if R.cdSub then
 		R.cdSub.Visible = false
 	end
-	R.cdPop.Scale = 0.86
-	QuietUI.tween(R.cdPop, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.06 })
+	R.cdPop.Scale = if QuietUI.reducedMotion() then 1 else 0.96
+	QuietUI.tween(R.cdPop, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.03 })
 	task.delay(0.8, function()
 		-- the word and its dark outline fade together (a stroke left behind would read as a ghost "BEGIN")
 		local t = QuietUI.fadeText(R.cdNumber, false, Theme.Tween.FadeOut)
@@ -1135,7 +1194,7 @@ local function hideStrip()
 		GuiService.SelectedObject = nil
 	end
 	if R.strip then
-		QuietUI.fadeOut(R.strip, Theme.Time.Out)
+		QuietUI.conceal(R.strip, { seconds = Theme.Time.Out, rise = QuietUI.Motion.ToastRise }) -- (ui-motion)
 	end
 	if R.stripTip then
 		QuietUI.fadeText(R.stripTip, false)
@@ -1151,7 +1210,7 @@ local function showStrip()
 	stripToken += 1
 	setStripBinding(true)
 	refreshStrip()
-	QuietUI.fadeIn(R.strip, 0.5)
+	QuietUI.reveal(R.strip, { seconds = 0.5, rise = QuietUI.Motion.ToastRise }) -- (ui-motion) fade and rise, no jump
 	if R.stripTip then
 		R.stripTip.Visible = true
 		QuietUI.fadeText(R.stripTip, true, 0.6)
@@ -1731,8 +1790,8 @@ function NotificationController.pulseCountdown()
 	R.cdCaption.TextColor3 = C.Accent
 	R.cdCaption.TextTransparency = 0
 	Theme.tween(R.cdCaption, TweenInfo.new(1.0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextColor3 = captionColor })
-	R.cdPop.Scale = 1.08
-	Theme.tween(R.cdPop, Theme.Tween.Pop, { Scale = 1 })
+	R.cdPop.Scale = if QuietUI.reducedMotion() then 1 else 1.04
+	QuietUI.tween(R.cdPop, QuietUI.Ease.Toast, { Scale = 1 })
 end
 
 --------------------------------------------------------------------------------------------------------------------

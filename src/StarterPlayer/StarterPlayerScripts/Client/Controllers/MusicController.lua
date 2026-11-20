@@ -150,6 +150,12 @@ end
 local function arenaCue(now: number): string?
 	local phase = attr("Phase")
 	if phase == "Countdown" then
+		-- the launch shot starts a frame or two after the phase turns: in its first moment keep what plays, so the
+		-- Countdown bed doesn't start for a quarter second before Rise takes over (mp-polish runP1, 20 Nov)
+		local callAt = tonumber(attr("LaunchCallAt"))
+		if attr("LaunchCut") ~= nil and callAt and math.abs(workspace:GetServerTimeNow() - callAt) < 0.75 then
+			return desiredCue
+		end
 		return "Countdown"
 	end
 	if phase ~= "Active" then

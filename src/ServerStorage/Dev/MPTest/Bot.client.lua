@@ -2396,6 +2396,7 @@ local function holdAnyPrompt(arg: any): string
 end
 
 local shopMod: ((string, any) -> any)? = nil -- (batch S: MPT_ShopClient, loaded on the first "mod" order)
+local polishMod: ((string, any) -> any)? = nil -- (batch P: MPT_PolishClient, loaded on the first "pmod" order)
 callFn.OnClientInvoke = function(cmd: string, arg: any): any
 	local ok, res = pcall(function(): any
 		if cmd == "ally" then
@@ -2555,6 +2556,24 @@ callFn.OnClientInvoke = function(cmd: string, arg: any): any
 				shopMod = require(m)({ L = L, fmt = fmt, Controllers = Controllers, ClientState = ClientState, Input = Input })
 			end
 			return shopMod(arg.op, arg.arg)
+		elseif cmd == "pmod" then
+			-- (batch P, mp-polish) the client half the driver put in ReplicatedStorage: { op = name, arg = ... }
+			if not polishMod then
+				local m = RS:FindFirstChild("MPT_PolishClient")
+				if not m then
+					return "no MPT_PolishClient"
+				end
+				polishMod = require(m)({ L = L, fmt = fmt, Controllers = Controllers, ClientState = ClientState, Input = Input, touch = touch,
+					move = function(a: any)
+						if a and a.seconds then
+							mover = { v = Vector2.new(a.x or 0, a.y or 1), face = a.face, untilT = os.clock() + a.seconds }
+						else
+							stopMover()
+						end
+						return true
+					end })
+			end
+			return polishMod(arg.op, arg.arg)
 		elseif cmd == "leave" then
 			local sts = game:GetService("StudioTestService")
 			L("LEAVE CanLeaveTest=" .. tostring(sts:CanLeaveTest()))

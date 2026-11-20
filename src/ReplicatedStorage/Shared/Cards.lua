@@ -74,8 +74,31 @@ local ContextActionService = game:GetService("ContextActionService")
 local Shared = script.Parent
 local Theme = require(Shared:WaitForChild("Theme"))
 local Icons = require(Shared:WaitForChild("Icons"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 
 local Cards = {}
+
+-- (ui-motion) hover, focus and press ease (QuietUI.Motion.Hover / Press) instead of stepping; a later plain set cancels
+-- a running ease, so a state set at once is never overwritten by an old hover tween. Reduce Motion: set at once.
+local easing: { [Instance]: { [string]: Tween } } = setmetatable({}, { __mode = "k" }) :: any
+local function ease(inst: Instance, prop: string, value: any, info: TweenInfo?)
+	local running = easing[inst]
+	if running and running[prop] then
+		running[prop]:Cancel()
+		running[prop] = nil
+	end
+	if info and not QuietUI.reducedMotion() and (inst :: any)[prop] ~= value then
+		local t = TweenService:Create(inst, info, { [prop] = value })
+		if not running then
+			running = {}
+			easing[inst] = running
+		end
+		(running :: any)[prop] = t
+		t:Play()
+	else
+		(inst :: any)[prop] = value
+	end
+end
 
 local C = Theme.Colors
 local F = Theme.Fonts
@@ -371,7 +394,8 @@ local function gradeColor(g: any): Color3?
 end
 
 -- Repaint the edge, bar and states from the attributes (Grade, State_*)
-local function paint(root: GuiObject)
+local function paint(root: GuiObject, animate: boolean?)
+	local hoverInfo = if animate then QuietUI.Ease.Hover else nil
 	local edge = root:FindFirstChild("Edge") :: UIStroke?
 	local bar = root:FindFirstChild("GradeBar") :: Frame?
 	local well = root:FindFirstChild("Well") :: Frame?
@@ -383,14 +407,15 @@ local function paint(root: GuiObject)
 	local disabled = root:GetAttribute("State_Disabled") == true
 	if edge then
 		if claim then
-			edge.Color, edge.Transparency, edge.Thickness = SUN, 0, 2
+			ease(edge, "Transparency", 0)
+			edge.Color, edge.Thickness = SUN, 2
 		elseif def then
 			edge.Color = def.color
-			edge.Transparency = math.max(0, def.edge - (if hover then 0.15 else 0))
+			ease(edge, "Transparency", math.max(0, def.edge - (if hover then 0.15 else 0)), hoverInfo)
 			edge.Thickness = 1.5
 		else
 			edge.Color = INK
-			edge.Transparency = if hover then 0.62 else Cards.Surface.Edge.transparency
+			ease(edge, "Transparency", if hover then 0.62 else Cards.Surface.Edge.transparency, hoverInfo)
 			edge.Thickness = 1.5
 		end
 	end
@@ -410,7 +435,7 @@ local function paint(root: GuiObject)
 	-- the surface lifts a little on hover (matte: a step in transparency, no glow)
 	local base = root:GetAttribute("BaseTransparency")
 	if type(base) == "number" then
-		root.BackgroundTransparency = if hover and not disabled then math.max(0, base - 0.08) else base
+		ease(root, "BackgroundTransparency", if hover and not disabled then math.max(0, base - 0.08) else base, hoverInfo)
 	end
 	-- states
 	local selected = root:FindFirstChild("Sel") :: Frame?
@@ -565,28 +590,28 @@ local function bindHover(root: GuiButton, hoverFn: ((boolean) -> ())?)
 		if root:GetAttribute("State_New") then
 			root:SetAttribute("State_New", nil)
 		end
-		paint(root)
+		paint(root, true)
 		if hoverFn then
 			task.spawn(hoverFn, true)
 		end
 	end)
 	root.MouseLeave:Connect(function()
 		root:SetAttribute("Hover", false)
-		paint(root)
+		paint(root, true)
 		if hoverFn then
 			task.spawn(hoverFn, false)
 		end
 	end)
 	root.SelectionGained:Connect(function()
 		root:SetAttribute("Hover", true)
-		paint(root)
+		paint(root, true)
 		if hoverFn then
 			task.spawn(hoverFn, true)
 		end
 	end)
 	root.SelectionLost:Connect(function()
 		root:SetAttribute("Hover", false)
-		paint(root)
+		paint(root, true)
 		if hoverFn then
 			task.spawn(hoverFn, false)
 		end
@@ -945,7 +970,7 @@ function Cards.setButtonKind(b: TextButton, kind: string)
 	local look = BUTTON_LOOK[kind] or BUTTON_LOOK.Primary
 	b:SetAttribute("Kind", kind)
 	b.BackgroundColor3 = look.bg
-	b.BackgroundTransparency = look.bgT
+	ease(b, "BackgroundTransparency", look.bgT)
 	b:SetAttribute("BaseTransparency", look.bgT)
 	b.TextColor3 = look.fg
 	b.TextTransparency = look.fgT or 0
@@ -1018,11 +1043,33 @@ function Cards.button(kind: string, value: string, props: { [string]: any }?): T
 		end
 		local base = b:GetAttribute("BaseTransparency") or 0
 		if k == "Secondary" or k == "Ghost" then
-			b.BackgroundTransparency = if on then 0.88 else 1
+			ease(b, "BackgroundTransparency", if on then 0.88 else 1, QuietUI.Ease.Hover)
 		else
-			b.BackgroundTransparency = if on then math.min(1, base + 0.1) else base
+			ease(b, "BackgroundTransparency", if on then math.min(1, base + 0.1) else base, QuietUI.Ease.Hover)
 		end
 	end
+	-- press: a quick matte dip over Motion.Press, back on release (no scale, nothing bounces)
+	local over = false
+	b.InputBegan:Connect(function(io: InputObject)
+		local t = io.UserInputType
+		if t == Enum.UserInputType.MouseMovement then
+			over = true
+		elseif (t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch or io.KeyCode == Enum.KeyCode.ButtonA)
+			and b:GetAttribute("Kind") ~= "Off" then
+			local k = b:GetAttribute("Kind")
+			local base = b:GetAttribute("BaseTransparency") or 0
+			ease(b, "BackgroundTransparency", if k == "Secondary" or k == "Ghost" then 0.8 else math.min(1, base + 0.22),
+				QuietUI.Ease.Press)
+		end
+	end)
+	b.InputEnded:Connect(function(io: InputObject)
+		local t = io.UserInputType
+		if t == Enum.UserInputType.MouseMovement then
+			over = false
+		elseif t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch or io.KeyCode == Enum.KeyCode.ButtonA then
+			lit((over and t ~= Enum.UserInputType.Touch) or GuiService.SelectedObject == b)
+		end
+	end)
 	b.MouseEnter:Connect(function()
 		lit(true)
 	end)
@@ -1132,8 +1179,8 @@ function Cards.tabs(list: { { [string]: any } }, props: { [string]: any }?)
 		for key, b in pairs(api.buttons) do
 			local on = key == current
 			local line = b:FindFirstChild("Line") :: UIStroke
-			line.Transparency = if on then 0.1 else 1
-			b.TextTransparency = if on then 0 else 0.3
+			ease(line, "Transparency", if on then 0.1 else 1, QuietUI.Ease.Tab)
+			ease(b, "TextTransparency", if on then 0 else 0.3, QuietUI.Ease.Hover)
 		end
 	end
 	for i, item in ipairs(list) do
@@ -1166,7 +1213,7 @@ function Cards.tabs(list: { { [string]: any } }, props: { [string]: any }?)
 		corner(badge, 9)
 		b.MouseEnter:Connect(function()
 			if b.Name ~= "Tab_" .. tostring(current) then
-				b.TextTransparency = 0.1
+				ease(b, "TextTransparency", 0.1, QuietUI.Ease.Hover)
 			end
 		end)
 		b.MouseLeave:Connect(paintTabs)

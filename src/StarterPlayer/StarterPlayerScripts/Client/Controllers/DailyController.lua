@@ -210,8 +210,17 @@ local function render()
 		else
 			Cards.setState(card, "Locked", "")
 		end
-		local kind = if claimed then "Off" elseif today and d.claimable then "Sun" else "Off"
-		local word = if claimed then "Claimed" else "Claim"
+		if not (today and d.claimable) then
+			local nextDay = (current % 7) + 1
+			local word = if claimed then "CLAIMED" elseif i == nextDay or (today and not d.claimable) then "TOMORROW" else "LOCKED"
+			local status = Cards.label(word, { Name = "Status", Font = Theme.Fonts.SemiBold, TextSize = if phone then 12 else 14,
+				Color = Theme.Colors.Ink2, Position = UDim2.new(0, 0, cardH, if phone then 8 else 14),
+				Size = UDim2.new(1, 0, 0, if phone then 44 else 48), Parent = col })
+			status.TextXAlignment = Enum.TextXAlignment.Center
+			continue
+		end
+		local kind = "Sun"
+		local word = "Claim"
 		local button = Cards.button(kind, word, { Name = "Claim", AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1),
 			Size = UDim2.new(1, 0, 0, if phone then 44 else 48), AutomaticSize = Enum.AutomaticSize.None, TextSize = if phone then 13 else 16,
 			Parent = col })

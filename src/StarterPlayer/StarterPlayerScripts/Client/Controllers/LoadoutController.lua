@@ -1662,6 +1662,9 @@ local function buildEdit(screen: Frame, index: number)
 		tab = key
 		Sfx.play("UIClick")
 		buildTab()
+		if R.body then
+			QuietUI.swap(R.body) -- (ui-motion) tabs cross-fade (Motion.Tab)
+		end
 	end)
 	goldRow(panel, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.fromScale(1, 0), Size = UDim2.fromOffset(140, headH) })
 
@@ -1756,6 +1759,9 @@ openEdit = function(i: number)
 		R.main.Visible = false
 	end
 	buildEdit(R.screen, i)
+	if R.edit then
+		QuietUI.swap(R.edit) -- (ui-motion) the Edit panel cross-fades in
+	end
 	if unbindShoulders then
 		unbindShoulders()
 	end
@@ -1802,6 +1808,9 @@ closeEdit = function(save: boolean)
 	end
 	R.body, R.note, R.tabsApi, R.inspectButton = nil, nil, nil, nil
 	buildMain(R.screen)
+	if R.main then
+		QuietUI.swap(R.main) -- (ui-motion) back to the cards: a cross-fade
+	end
 	refreshSummary()
 	refreshPreview()
 	focusCard(i)
@@ -1991,6 +2000,10 @@ open = function()
 		R.near.Visible = false
 	end
 	buildMain(R.screen)
+	if R.main then
+		-- (ui-motion) the cards fade and rise in (Motion.In, 12 px)
+		QuietUI.reveal(R.main, { rise = QuietUI.Motion.Rise })
+	end
 	takeBody(true)
 	takeCamera(true)
 	task.delay(0.15, refreshPreview)
@@ -2035,10 +2048,19 @@ close = function()
 	clearPreview()
 	takeCamera(false)
 	takeBody(false)
-	R.screen.Visible = false
-	if R.main then
-		R.main:Destroy()
-		R.main = nil
+	-- (ui-motion) the cards fade and sink out (Motion.Out); the screen hides when they are gone, unless it opened again
+	local leaving = R.main
+	R.main = nil
+	if leaving then
+		leaving.Name = "MainLeaving"
+		QuietUI.conceal(leaving, { rise = QuietUI.Motion.Rise }, function()
+			leaving:Destroy()
+			if not isOpen and R.screen then
+				R.screen.Visible = false
+			end
+		end)
+	else
+		R.screen.Visible = false
 	end
 	ClientState.menuOpen = false
 	draft = nil

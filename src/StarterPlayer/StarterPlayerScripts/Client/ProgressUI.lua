@@ -282,7 +282,8 @@ local CRATE_TINT = {
 	silverleaf = Color3.fromRGB(196, 202, 208), crown = Color3.fromRGB(96, 110, 136),
 }
 
--- A rank emblem: a shield in the band's metal with 1 to 3 chevrons; a Prestige star under it
+-- A rank emblem: the band's emblem from the Ranks sheets (else a Frame shield in its metal with 1 to 3 chevrons);
+-- a Prestige star under it
 function ProgressUI.emblem(parent: GuiObject, band: number, size: number?, prestige: number?): Frame
 	local rank = Progression.Ranks[math.clamp(band or 1, 1, #Progression.Ranks)]
 	local metal = Progression.Metals[rank.metal] or Theme.Colors.Ink2
@@ -294,61 +295,67 @@ function ProgressUI.emblem(parent: GuiObject, band: number, size: number?, prest
 	holder.Size = if size then UDim2.fromOffset(size, size) else UDim2.fromScale(0.62, 0.62)
 	local aspect = Instance.new("UIAspectRatioConstraint")
 	aspect.Parent = holder
-	-- the shield: a rounded top block and a rotated square for the point
-	local top = Instance.new("Frame")
-	top.Name = "Top"
-	top.BorderSizePixel = 0
-	top.BackgroundColor3 = metal
-	top.Position = UDim2.fromScale(0.16, 0.06)
-	top.Size = UDim2.fromScale(0.68, 0.5)
-	local c1 = Instance.new("UICorner")
-	c1.CornerRadius = UDim.new(0.12, 0)
-	c1.Parent = top
-	top.Parent = holder
-	local point = Instance.new("Frame")
-	point.Name = "Point"
-	point.BorderSizePixel = 0
-	point.BackgroundColor3 = metal
-	point.AnchorPoint = Vector2.new(0.5, 0.5)
-	point.Position = UDim2.fromScale(0.5, 0.56)
-	point.Size = UDim2.fromScale(0.48, 0.48)
-	point.Rotation = 45
-	local c2 = Instance.new("UICorner")
-	c2.CornerRadius = UDim.new(0.1, 0)
-	c2.Parent = point
-	point.Parent = holder
-	-- a darker right half (one shade step, matte)
-	local shade = Instance.new("Frame")
-	shade.Name = "Half"
-	shade.BorderSizePixel = 0
-	shade.BackgroundColor3 = Color3.new(0, 0, 0)
-	shade.BackgroundTransparency = 0.82
-	shade.Position = UDim2.fromScale(0.5, 0.06)
-	shade.Size = UDim2.fromScale(0.34, 0.82)
-	shade.ZIndex = 2
-	shade.Parent = holder
-	local grad = Instance.new("UIGradient")
-	grad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.4) })
-	grad.Rotation = 90
-	grad.Parent = shade
-	-- chevrons
-	for i = 1, rank.chevrons do
-		local y = 0.36 + (i - 1) * 0.13 - (rank.chevrons - 1) * 0.065
-		for side = -1, 1, 2 do
-			local bar = Instance.new("Frame")
-			bar.Name = "Chevron" .. i
-			bar.BorderSizePixel = 0
-			bar.BackgroundColor3 = Theme.Colors.Shade
-			bar.BackgroundTransparency = 0.15
-			bar.AnchorPoint = Vector2.new(0.5, 0.5)
-			bar.Position = UDim2.fromScale(0.5 + side * 0.105, y)
-			bar.Size = UDim2.fromScale(0.27, 0.075)
-			bar.Rotation = side * 32
-			bar.ZIndex = 3
-			local cc = Instance.new("UICorner")
-			cc.CornerRadius = UDim.new(0.5, 0)
-			cc.Parent = bar
-			bar.Parent = holder
+	-- the emblem drawn on the Ranks sheets (Shared.IconAtlas); the Frame shield only if a band has no cell
+	local sheetName = Icons.rank(band or 1)
+	if Icons.cell(sheetName) then
+		Icons.make(sheetName, { Name = "Sheet", Size = UDim2.fromScale(1, 1), Parent = holder })
+	else
+		-- the shield: a rounded top block and a rotated square for the point
+		local top = Instance.new("Frame")
+		top.Name = "Top"
+		top.BorderSizePixel = 0
+		top.BackgroundColor3 = metal
+		top.Position = UDim2.fromScale(0.16, 0.06)
+		top.Size = UDim2.fromScale(0.68, 0.5)
+		local c1 = Instance.new("UICorner")
+		c1.CornerRadius = UDim.new(0.12, 0)
+		c1.Parent = top
+		top.Parent = holder
+		local point = Instance.new("Frame")
+		point.Name = "Point"
+		point.BorderSizePixel = 0
+		point.BackgroundColor3 = metal
+		point.AnchorPoint = Vector2.new(0.5, 0.5)
+		point.Position = UDim2.fromScale(0.5, 0.56)
+		point.Size = UDim2.fromScale(0.48, 0.48)
+		point.Rotation = 45
+		local c2 = Instance.new("UICorner")
+		c2.CornerRadius = UDim.new(0.1, 0)
+		c2.Parent = point
+		point.Parent = holder
+		-- a darker right half (one shade step, matte)
+		local shade = Instance.new("Frame")
+		shade.Name = "Half"
+		shade.BorderSizePixel = 0
+		shade.BackgroundColor3 = Color3.new(0, 0, 0)
+		shade.BackgroundTransparency = 0.82
+		shade.Position = UDim2.fromScale(0.5, 0.06)
+		shade.Size = UDim2.fromScale(0.34, 0.82)
+		shade.ZIndex = 2
+		shade.Parent = holder
+		local grad = Instance.new("UIGradient")
+		grad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.4) })
+		grad.Rotation = 90
+		grad.Parent = shade
+		-- chevrons
+		for i = 1, rank.chevrons do
+			local y = 0.36 + (i - 1) * 0.13 - (rank.chevrons - 1) * 0.065
+			for side = -1, 1, 2 do
+				local bar = Instance.new("Frame")
+				bar.Name = "Chevron" .. i
+				bar.BorderSizePixel = 0
+				bar.BackgroundColor3 = Theme.Colors.Shade
+				bar.BackgroundTransparency = 0.15
+				bar.AnchorPoint = Vector2.new(0.5, 0.5)
+				bar.Position = UDim2.fromScale(0.5 + side * 0.105, y)
+				bar.Size = UDim2.fromScale(0.27, 0.075)
+				bar.Rotation = side * 32
+				bar.ZIndex = 3
+				local cc = Instance.new("UICorner")
+				cc.CornerRadius = UDim.new(0.5, 0)
+				cc.Parent = bar
+				bar.Parent = holder
+			end
 		end
 	end
 	if prestige and prestige > 0 then
@@ -373,24 +380,45 @@ end
 function ProgressUI.rewardPicture(r: { [string]: any }): (GuiObject) -> ()
 	return function(well: GuiObject)
 		local k = r.k
+		-- a drawn cell on the icon sheets (Shared.Icons) when there is one; a wide cell (banner, trim) fills the width
+		local function sheet(name: string, s: number): boolean
+			local _, cell = Icons.cell(name)
+			if not cell then
+				return false
+			end
+			glyph(well, name, if cell.W > cell.H * 1.5 then 0.9 else s)
+			return true
+		end
 		if k == "gold" then
 			glyph(well, "coin", 0.5)
 		elseif k == "crate" then
-			glyph(well, "crate", 0.56, CRATE_TINT[r.id or ""])
+			if not sheet("case_" .. tostring(r.id or "timber"), 0.62) then
+				glyph(well, "crate", 0.56, CRATE_TINT[r.id or ""])
+			end
 		elseif k == "acorn" then
 			glyph(well, "acorn", 0.5)
 		elseif k == "spins" then
-			glyph(well, "wheel", 0.56)
+			if not sheet("spins", 0.56) then
+				glyph(well, "wheel", 0.56)
+			end
 		elseif k == "stamp" then
-			glyph(well, "star", 0.46, Theme.Colors.Sun)
+			if not sheet("stamp", 0.52) then
+				glyph(well, "star", 0.46, Theme.Colors.Sun)
+			end
 		elseif k == "slot" then
 			glyph(well, "plus", 0.4)
 		elseif k == "title" then
-			glyph(well, "banner", 0.5, Theme.Colors.Ink2)
+			if not sheet("ui_title_tag", 0.6) then
+				glyph(well, "banner", 0.5, Theme.Colors.Ink2)
+			end
 		elseif k == "trim" then
-			glyph(well, "banner", 0.5, Progression.Metals.brass)
+			if not sheet(tostring(r.id or ""), 0.5) then
+				glyph(well, "banner", 0.5, Progression.Metals.brass)
+			end
 		elseif k == "trail" then
 			glyph(well, "trail", 0.56)
+		elseif sheet(tostring(r.id or ""), 0.6) then
+			-- a cosmetic with its own drawn cell (kill icon, kill effect, banner, emote, launch effect, skin tile)
 		else
 			local id = tostring(r.id or "")
 			local prefix = string.sub(id, 1, 3)

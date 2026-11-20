@@ -372,7 +372,7 @@ local function buildPage()
 			local m = tile:FindFirstChild("Well") and tile.Well:FindFirstChildWhichIsA("ViewportFrame")
 			local _ = m
 		else
-			tile = Cards.slot({ Name = "Slot_" .. s.kind, Size = UDim2.fromOffset(slotPx, slotPx), Empty = item == nil, Icon = if item then s.icon else "none",
+			tile = Cards.slot({ Name = "Slot_" .. s.kind, Size = UDim2.fromOffset(slotPx, slotPx), Empty = item == nil, Icon = if item then (if Icons.cell(item.id) then item.id else s.icon) else "none",
 				Picture = pictureFor(s.kind, item), NoName = true, Grade = item and item.grade, Label = "" })
 		end
 		tile.AnchorPoint = Vector2.new(1, 0)
@@ -433,7 +433,7 @@ local function buildPage()
 		local have = isOwned(item)
 		local tile = Cards.tile({ Name = "Choice_" .. item.id, LayoutOrder = i, Size = UDim2.fromOffset(tileW, rowPx), Grade = item.grade,
 			Item = if slotKind == "skin" then id else nil, ItemStars = st, Turn = "none",
-			Icon = if slotKind == "skin" then nil else (if slotKind == "icon" and pictureFor("icon", item) then nil else (if slotKind == "effect" then "kill_effect" else "kill_icon")),
+			Icon = if slotKind == "skin" then nil else (if slotKind == "icon" and pictureFor("icon", item) then nil else (if Icons.cell(item.id) then item.id elseif slotKind == "effect" then "kill_effect" else "kill_icon")),
 			Picture = pictureFor(slotKind, item),
 			Title = item.name, NameSize = 13, Label = if compact then "" else nil,
 			OnActivate = function()
@@ -583,6 +583,7 @@ function InspectController.open(id: string, stars: number?, opts: { [string]: an
 	local camera = workspace.CurrentCamera
 	local v = if camera then camera.ViewportSize else Vector2.new(1280, 720)
 	compact = Theme.isSmallScreen(v) or v.Y < 560 or player:GetAttribute("LoadoutTouchLayout") == true
+	local opening = not isOpen
 	if not isOpen then
 		isOpen = true
 		hadMenu = ClientState.menuOpen
@@ -629,6 +630,9 @@ function InspectController.open(id: string, stars: number?, opts: { [string]: an
 	end
 	screen.Enabled = true
 	buildPage()
+	if opening and page then
+		QuietUI.reveal(page, { rise = QuietUI.Motion.Rise }) -- (ui-motion) fade and rise in
+	end
 	local _ = opts
 end
 
@@ -642,12 +646,18 @@ function InspectController.close()
 		unbindShoulders()
 		unbindShoulders = nil
 	end
-	if page then
-		page:Destroy()
-		page = nil
-	end
+	-- (ui-motion) the page fades and sinks out, then goes; the screen turns off unless it opened again meanwhile
+	local leaving = page
+	page = nil
 	view = nil
-	if screen then
+	if leaving then
+		QuietUI.conceal(leaving, { rise = QuietUI.Motion.Rise }, function()
+			leaving:Destroy()
+			if not isOpen and screen then
+				screen.Enabled = false
+			end
+		end)
+	elseif screen then
 		screen.Enabled = false
 	end
 	if dimmedHere then

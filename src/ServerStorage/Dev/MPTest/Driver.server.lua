@@ -3692,6 +3692,30 @@ if ARGS.batch == "S" then
 	end
 end
 
+-- batch P: the owner's list of 20 Nov (mp-polish) in MPT_Polish; its client half MPT_PolishClient goes into
+-- ReplicatedStorage for the bots' "pmod" order
+local batchP: (() -> ())? = nil
+if ARGS.batch == "P" then
+	local pc = script:FindFirstChild("MPT_PolishClient")
+	if pc then
+		pc:Clone().Parent = RS
+	end
+	lobbyExtra = function()
+		local mod = script:FindFirstChild("MPT_Polish")
+		if not mod then
+			L("DRIVER ERROR no MPT_Polish module")
+			return
+		end
+		local P = require(mod)({
+			L = L, check = check, call = call, waitFor = waitFor, phase = phase, shot = shot, fmt = fmt, v3 = v3, now = now, parts = parts,
+			flatDist = flatDist, arenaCenter = arenaCenter, Shared = Shared, Services = Services, req = req, ARGS = ARGS, A = A, B = B, P3 = P3,
+			GS = GS, PS = PS,
+		})
+		batchP = P.run
+		P.lobby()
+	end
+end
+
 local function run()
 	local batch = tostring(ARGS.batch or "A")
 	L("BATCH " .. batch)
@@ -3739,6 +3763,12 @@ local function run()
 			batchF()
 		else
 			L("DRIVER ERROR batch F was not loaded in the lobby")
+		end
+	elseif batch == "P" then
+		if batchP then
+			batchP()
+		else
+			L("DRIVER ERROR batch P was not loaded in the lobby")
 		end
 	elseif batch == "S" then
 		if batchS then

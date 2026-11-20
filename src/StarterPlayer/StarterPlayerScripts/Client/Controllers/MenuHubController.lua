@@ -445,7 +445,9 @@ local function fillHub()
 	scroll.Name = "Cards"
 	scroll.BackgroundTransparency = 1
 	scroll.BorderSizePixel = 0
-	scroll.Size = UDim2.fromScale(1, 1)
+	-- (ui-motion, Figma 01) room for the hints row along the bottom
+	local hintsH = if Input.isTouch() then 0 else 30
+	scroll.Size = UDim2.new(1, 0, 1, -hintsH)
 	scroll.ScrollBarThickness = 4 -- (final-shop) shown only when the cards overflow
 	scroll.ScrollBarImageColor3 = C.Ink
 	scroll.ScrollBarImageTransparency = 0.6
@@ -471,7 +473,7 @@ local function fillHub()
 		local s = if scaleObj and scaleObj:IsA("UIScale") and scaleObj.Scale > 0 then scaleObj.Scale else 1
 		local avail = body.AbsoluteSize.Y / s
 		if avail > 0 then
-			h = math.clamp(math.floor((avail - 16 - 18) / 2), 210, 252)
+			h = math.clamp(math.floor((avail - hintsH - 16 - 18) / 2), 190, 232)
 		end
 		grid.CellSize = UDim2.fromOffset(w, h)
 		grid.CellPadding = UDim2.fromOffset(18, 18)
@@ -491,29 +493,34 @@ local function fillHub()
 		local function go()
 			MenuHubController.go(key)
 		end
-		local keyWord = if e.num and not Input.isGamepad() and not Input.isTouch() then string.format("KEY %d", e.order)
-			elseif key == "settings" and not Input.isTouch() then (if Input.isGamepad() then "D-PAD UP" else "KEY M")
-			elseif key == "loadout" and Input.isGamepad() then "D-PAD RIGHT" else nil
+		-- (ui-motion, Figma 01) the whole card is the button: its name, one fact (Sun when something waits there) and a
+		-- Sun dot; the keys are listed once in the hints along the bottom
 		local card = Cards.card({
 			Name = key,
 			Title = e.long,
-			Sub = keyWord,
 			Icon = e.icon,
 			Big = true,
 			Text = fact(key),
-			WellHeight = 0.46,
+			WellHeight = 0.58,
 			LayoutOrder = i,
-			Button = { kind = if n > 0 and (key == "daily" or key == "pass") then "Sun" else "Primary",
-				text = if n > 0 and (key == "daily" or key == "pass") then "CLAIM" elseif key == "cases" and n > 0 then "OPEN" else "OPEN",
-				onActivate = go },
 			OnActivate = go,
 		})
 		if n > 0 then
-			Cards.setState(card, "Claimable", true)
+			Cards.setState(card, "New", true)
+			local factLabel = card:FindFirstChild("Text", true)
+			if factLabel and factLabel:IsA("TextLabel") then
+				factLabel.TextColor3 = C.Sun
+			end
 		end
 		card.Parent = scroll
 		hubCards[key] = card
 	end
+	if hintsH > 0 then
+		local hints = if Input.isGamepad() then { { key = "B", text = "close" }, { key = "A", text = "open" } }
+			else { { key = "Esc", text = "close" }, { key = "1-7", text = "open" }, { key = "M", text = "settings" } }
+		Cards.hints(hints, { Name = "Hints", AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Parent = body })
+	end
+	hub.sub.Text = if phone then "" else "Everything you choose, own, earn or buy."
 	if Input.isGamepad() or padOpened then
 		GuiService.SelectedObject = hubCards.loadout
 	end

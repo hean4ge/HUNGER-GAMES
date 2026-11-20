@@ -35,6 +35,10 @@
 	            not answered), the launch doors, the disc and the early call, the allies' plinths and marks, the truce's
 	            three ends; round two with places for two, a late joiner during the ride, and the one left out spectating.
 	            training / doors: Config.TrainFlow.TrainingTime and DoorsOpenBefore for round one (Studio defaults 85 / 30)
+	            | "P" the owner's list of 20 Nov (mp-polish; child modules Polish, PolishClient): the Full launch in first
+	            person and the glare on every screen, the music cues on every client, sprint slides flat / down / up the
+	            19 degree hill as both see them, the border wall at the start and moving, walks over the hills, the loot
+	            on the ground, a crate and the stream walked to
 	  clients   2 (3 for batch "C"); minPlayers = clients for "C"
 	  cut       "Short" | "Full": forces the launch cut (GameState.LaunchCutTest)
 	  border    a small start radius for the ring (batch "B" uses 170, so "outside" is a few steps from the plates)
@@ -94,6 +98,12 @@ function MPTest.start(args: { [string]: any }?): string
 		a.minPlayers = a.minPlayers or 2
 		a.cut = a.cut or "Short"
 		a.failsafe = a.failsafe or 600
+	elseif a.batch == "P" then
+		-- the owner's list of 20 Nov (mp-polish; child modules Polish and PolishClient): the Full launch cut, the round's
+		-- clock 4x (night about 113 s after the horn; the border's first stage is moved to 140 s by the module)
+		a.cut = a.cut or "Full"
+		a.timeScale = a.timeScale or 4
+		a.failsafe = a.failsafe or 520
 	elseif a.batch == "S" then
 		-- the card menus, CASES, the Season Track, daily, ranks, boards and cosmetics (mp-shop, 20 Nov; child modules Shop
 		-- and ShopClient): a fake store for every save, a short launch cut
@@ -141,7 +151,7 @@ function MPTest.start(args: { [string]: any }?): string
 		t.Name = "MPT_Training"
 		t.Parent = driver
 	end
-	for _, name in ipairs({ "Shop", "ShopClient" }) do -- (batch S: the menus and the shop, mp-shop)
+	for _, name in ipairs({ "Shop", "ShopClient", "Polish", "PolishClient" }) do -- (batch S: the menus and the shop, mp-shop; P: mp-polish)
 		local m = script:FindFirstChild(name)
 		if m then
 			local c = m:Clone()

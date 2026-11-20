@@ -349,9 +349,11 @@ local function itemPicture(parent: Instance, item: any): GuiObject?
 			return g
 		end
 	end
-	local g = icon(TYPE_ICON[item.type] or "spark", parent, { Size = UDim2.fromScale(0.62, 0.62), AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5) })
-	if g and item.tint and Icons and Icons.tint then
+	-- the item's own drawn cell (kill effect, emote, launch effect, a skin's tile ...), else its kind's glyph
+	local own = Icons and Icons.cell and Icons.cell(tostring(item.id))
+	local g = icon(own or TYPE_ICON[item.type] or "spark", parent, { Size = UDim2.fromScale(if own then 0.86 else 0.62, if own then 0.86 else 0.62),
+		AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5) })
+	if g and not own and item.tint and Icons and Icons.tint then
 		pcall(Icons.tint, g, item.tint)
 	end
 	return g
@@ -554,8 +556,19 @@ local function entryPrice(e: any): (string, boolean)
 	return "choose", false
 end
 
+-- a case's drawn icon from the sheets (Shared.Icons "case_<id>"); false if it has none
+local function caseIcon(parent: Instance, id: string, scale: number): boolean
+	if not (Icons and Icons.cell and Icons.cell("case_" .. id)) then
+		return false
+	end
+	return icon("case_" .. id, parent, { Size = UDim2.fromScale(scale, scale), AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5) }) ~= nil
+end
+
 local function entryPicture(e: any, parent: Instance)
-	if e.kind == "crate" or e.kind == "box" then
+	if caseIcon(parent, tostring(e.id), 0.8) then
+		return
+	elseif e.kind == "crate" or e.kind == "box" then
 		crateView(parent, e.id)
 	elseif e.id == "wheel" then
 		icon("wheel", parent, { Size = UDim2.fromScale(0.7, 0.7), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5) })
@@ -870,7 +883,9 @@ local function buildOpenView(parent: Instance)
 		local c = panelFrame("Held_" .. crate.id, o.grid)
 		c.LayoutOrder = i
 		local w = well(c, { Position = UDim2.fromOffset(14, 14), Size = UDim2.new(1, -28, 0, 118) })
-		crateView(w, crate.id)
+		if not caseIcon(w, crate.id, 0.86) then
+			crateView(w, crate.id)
+		end
 		local name = label(c, { Text = crate.name, Font = "SemiBold", TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.fromOffset(0, 138), Size = UDim2.new(1, 0, 0, 24) })
 		local count = label(c, { Font = "Mono", TextSize = 14, TextColor3 = INK2, TextXAlignment = Enum.TextXAlignment.Center,
@@ -2038,6 +2053,11 @@ function ShopController.setTab(t: string)
 		ui.buyReveal.Visible = false
 	end
 	refresh()
+	-- (ui-motion) the new tab's page cross-fades in (Motion.Tab, 0.15 s)
+	local page = if tab == "buy" then ui.buyView else (ui.open and ui.open.view)
+	if page then
+		QuietUI.swap(page)
+	end
 end
 
 local function onAction(name: string, inputState: Enum.UserInputState, input: InputObject): Enum.ContextActionResult

@@ -45,6 +45,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -576,8 +577,12 @@ end
 
 local function showPage(name: string)
 	currentPage = name
+	local changed = currentPage ~= nil and refs.settingsPage.Visible ~= (name == "Settings")
 	refs.settingsPage.Visible = name == "Settings"
 	refs.controlsPage.Visible = name == "Controls"
+	if changed then
+		QuietUI.swap(if name == "Settings" then refs.settingsPage else refs.controlsPage) -- (ui-motion) tabs cross-fade
+	end
 	styleTab(refs.settingsTab, name == "Settings")
 	styleTab(refs.controlsTab, name == "Controls")
 	refs.reset.Visible = name == "Settings"
@@ -648,10 +653,13 @@ local function setOpen(on: boolean, page: string?)
 		dim.Visible = true
 		panel.Visible = true
 		panel.GroupTransparency = 1
-		panel.Position = UDim2.new(0.5, 0, 0.5, 14)
-		-- (QuietUI.tween: set at once when the player has Reduce Motion on)
-		QuietUI.tween(panel, Theme.Tween.Normal, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 0.5) })
-		QuietUI.tween(dim, Theme.Tween.Normal, { BackgroundTransparency = Theme.Transparency.Dim })
+		-- (ui-motion) the shared panel motion: fade and rise QuietUI.Motion.Rise px over Motion.In (Quint Out); with
+		-- Reduce Motion on it only fades
+		local reduced = QuietUI.reducedMotion()
+		panel.Position = UDim2.new(0.5, 0, 0.5, if reduced then 0 else QuietUI.Motion.Rise)
+		local fadeIn = if reduced then TweenInfo.new(0.15) else QuietUI.Ease.In
+		TweenService:Create(panel, fadeIn, { GroupTransparency = 0, Position = UDim2.fromScale(0.5, 0.5) }):Play()
+		TweenService:Create(dim, fadeIn, { BackgroundTransparency = Theme.Transparency.Dim }):Play()
 		if Input.isGamepad() then
 			GuiService.SelectedObject = firstSelectable()
 		end
@@ -660,8 +668,12 @@ local function setOpen(on: boolean, page: string?)
 		dragging = nil
 		repeatToken += 1
 		local token = closeToken
-		local t = QuietUI.tween(panel, Theme.Tween.Fast, { GroupTransparency = 1, Position = UDim2.new(0.5, 0, 0.5, 10) })
-		QuietUI.tween(dim, Theme.Tween.Fast, { BackgroundTransparency = 1 })
+		local reduced = QuietUI.reducedMotion()
+		local fadeOut = if reduced then TweenInfo.new(0.12) else QuietUI.Ease.Out
+		local t = TweenService:Create(panel, fadeOut, { GroupTransparency = 1,
+			Position = UDim2.new(0.5, 0, 0.5, if reduced then 0 else QuietUI.Motion.Rise / 2) })
+		t:Play()
+		TweenService:Create(dim, fadeOut, { BackgroundTransparency = 1 }):Play()
 		local function hide()
 			if token == closeToken and not isOpen then
 				panel.Visible = false

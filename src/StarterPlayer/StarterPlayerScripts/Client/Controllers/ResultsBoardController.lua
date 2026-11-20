@@ -22,6 +22,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Lore = require(Shared:WaitForChild("Lore"))
 local Util = require(Shared:WaitForChild("Util"))
 
@@ -233,8 +234,25 @@ function ResultsBoardController.Start()
 		if action ~= "result" then
 			return
 		end
+		local fresh = result ~= nil
 		result = if type(data) == "table" then data else nil
 		renderAll()
+		if fresh and result then
+			-- (ui-motion) a new result writes itself in: the winner, then the lines one after another (Motion.Line, 30 ms
+			-- apart), then the facts; no line jumps in. The first fill on joining is simply there.
+			for _, gui in ipairs(boards()) do
+				local paper = gui:FindFirstChild("Paper")
+				if paper then
+					for _, name in ipairs({ "Winner", "Table", "Facts" }) do
+						local part = paper:FindFirstChild(name)
+						if part and part:IsA("GuiObject") and part.Visible then
+							QuietUI.reveal(part, { seconds = QuietUI.Motion.Line * 2, rise = 0,
+								stagger = if name ~= "Winner" then part else nil })
+						end
+					end
+				end
+			end
+		end
 	end)
 	remote:FireServer("get")
 end

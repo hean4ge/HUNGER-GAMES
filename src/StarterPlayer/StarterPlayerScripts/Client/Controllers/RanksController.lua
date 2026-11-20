@@ -27,6 +27,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Cards = require(Shared:WaitForChild("Cards"))
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Progression = require(Shared:WaitForChild("Progression"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
 
@@ -216,6 +217,9 @@ local function build()
 	sApi.onChanged(function(key)
 		currentScope = key
 		RanksController.renderBoards()
+		if R.rows then
+			QuietUI.swap(R.rows) -- (ui-motion) the rows cross-fade
+		end
 		ProgressUI.send({ t = "boards", board = currentBoard, scope = currentScope })
 	end)
 	R.scope = scope
@@ -266,6 +270,7 @@ local function build()
 		level.Visible = key == "level"
 		boards.Visible = key == "boards"
 		later.Visible = false
+		QuietUI.swap(if key == "boards" then boards else level) -- (ui-motion) tabs cross-fade
 		if key == "boards" then
 			RanksController.renderBoards()
 			ProgressUI.send({ t = "boards", board = currentBoard, scope = currentScope })
@@ -443,9 +448,34 @@ local function row(parent: Instance, r: { [string]: any }, mine: boolean, order:
 	sc.CornerRadius = UDim.new(0, 4)
 	sc.Parent = strip
 	strip.Parent = f
+	-- the banner backing (Banners sheets via CosmeticLooks.banner): a player here shows their own banner and trim,
+	-- anyone else the free Linen; a shade from the left keeps the name readable on a light banner
+	local okLooks, Looks = pcall(require, Shared:WaitForChild("CosmeticLooks"))
+	if okLooks and Looks and Looks.banner then
+		local other = if mine then player elseif type(r.userId) == "number" then Players:GetPlayerByUserId(r.userId) else nil
+		local looks = if other and Looks.of then Looks.of(other) else {}
+		local okB, banner = pcall(Looks.banner, looks.b or "linen", { Name = "Banner", Size = UDim2.fromScale(1, 1) }, looks.t)
+		if okB and banner then
+			banner.Parent = strip
+			strip.ClipsDescendants = true
+			strip.BackgroundTransparency = 1
+			local shade = Instance.new("Frame")
+			shade.Name = "Shade"
+			shade.BorderSizePixel = 0
+			shade.BackgroundColor3 = Theme.Colors.Shade
+			shade.Size = UDim2.fromScale(1, 1)
+			shade.ZIndex = 9
+			local g = Instance.new("UIGradient")
+			g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.7, 0.55),
+				NumberSequenceKeypoint.new(1, 0.85) })
+			g.Parent = shade
+			shade.Parent = strip
+		end
+	end
 	local who = Cards.label((if mine then "You · " else "") .. tostring(r.name or "?"), { Font = Theme.Fonts.SemiBold,
 		TextSize = if phone then 13 else 17, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -16, 1, 0), Parent = strip })
 	who.TextTruncate = Enum.TextTruncate.AtEnd
+	who.ZIndex = 10 -- over the banner backing
 	who.TextTransparency = if top or mine then 0 else 0.15
 	-- the rank emblem (players on this server; others show none)
 	if r.rank and type(r.rank) == "table" and r.rank.rank then
@@ -706,7 +736,7 @@ function RanksController.showRankUp(msg: { [string]: any })
 		TweenService:Create(l, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0.35),
 			{ TextTransparency = 0 }):Play()
 	end
-	TweenService:Create(emblem, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+	TweenService:Create(emblem, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), -- (ui-motion) nothing bounces
 		{ Size = UDim2.fromScale(1, 1), Rotation = 0 }):Play()
 	Sfx.play("FeastBell", { volume = 0.35, pitch = 0.78 })
 	local done = false
@@ -900,7 +930,7 @@ local function flash(other: Player)
 	local e = ProgressUI.emblem(holder, tonumber(other:GetAttribute("RankBand")) or 1)
 	e.Size = UDim2.fromScale(0.4, 0.4)
 	bb.Parent = head
-	TweenService:Create(e, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Size = UDim2.fromScale(1, 1) }):Play()
+	TweenService:Create(e, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromScale(1, 1) }):Play()
 	task.delay(1.6, function()
 		for _, d in ipairs(e:GetDescendants()) do
 			if d:IsA("Frame") then

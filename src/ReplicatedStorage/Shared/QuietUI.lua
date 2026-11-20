@@ -1084,6 +1084,13 @@ local function start(root: GuiObject, shown: boolean, opts: { [string]: any }?):
 	if reduced then
 		full = math.min(full, 0.15)
 	end
+	-- Studio only: workspace attribute UIMotionSlow (e.g. 10) slows every reveal for frame strips
+	if RunService:IsStudio() then
+		local slow = workspace:GetAttribute("UIMotionSlow")
+		if type(slow) == "number" and slow > 0 then
+			full *= slow
+		end
+	end
 	-- turning back halfway takes only the time the rest of the way needs
 	r.dur = full * math.abs(r.to - r.from)
 	r.style = if shown then (o.style or Motion.InStyle) else (o.style or Motion.OutStyle)
