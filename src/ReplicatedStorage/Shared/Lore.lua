@@ -25,7 +25,7 @@
 local Lore = {}
 
 -- The show and its people
-Lore.Game = "LAST STANDING"
+Lore.Game = "ARENA 48"
 Lore.Contender = "contender" -- a player in a round
 Lore.Contenders = "contenders"
 Lore.Wardens = "the Wardens" -- the arena's directors

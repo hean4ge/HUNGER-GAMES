@@ -76,7 +76,12 @@ return function(ctx: { [string]: any })
 				pcall(c.close)
 			end
 		end
-		task.wait(0.35)
+		-- (20 Nov) HOW TO PLAY opens by itself before a player's first round and the bar steps aside while it shows
+		local lobby = C("LobbyController")
+		if lobby and type(lobby.setHowToVisible) == "function" then
+			pcall(lobby.setHowToVisible, false)
+		end
+		task.wait(0.7)
 	end
 
 	-- a real key through Roblox's input (VirtualInputManager): only when the test client allows it
@@ -105,7 +110,11 @@ return function(ctx: { [string]: any })
 		for _, d in ipairs(root:GetDescendants()) do
 			if d:IsA("GuiObject") and not d:IsA("TextLabel") then -- (the winner's name label on a banner is not its picture)
 				local c = d.BackgroundColor3
-				table.insert(parts, d.ClassName .. ":" .. c:ToHex())
+				local s = d.ClassName .. ":" .. c:ToHex()
+				if d:IsA("ImageLabel") or d:IsA("ImageButton") then -- (20 Nov) banners and icons are atlas cuts now
+					s ..= ":" .. (tostring(d.Image):match("%d+$") or tostring(d.Image)) .. "@" .. tostring(d.ImageRectOffset)
+				end
+				table.insert(parts, s)
 			end
 		end
 		return #parts .. "|" .. table.concat(parts, ","):sub(1, 400)

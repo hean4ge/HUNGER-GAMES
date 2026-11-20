@@ -7,7 +7,7 @@ local RunService = game:GetService("RunService")
 
 local Config = {}
 
-Config.GameTitle = "LAST STANDING" -- working title (rename freely)
+Config.GameTitle = "ARENA 48" -- the experience is "#ARENA 48" (renamed 18 Nov 2026)
 Config.IsStudio = RunService:IsStudio()
 
 Config.Round = {
