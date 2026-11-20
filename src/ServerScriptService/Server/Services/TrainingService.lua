@@ -98,7 +98,7 @@ local boards: { { model: Model, distance: number } } = {}
 local dummies: { { model: Model, stance: string, data: { [string]: any } } } = {}
 local mats: { { part: BasePart, station: string, kit: string?, specialty: string? } } = {}
 local pads: { [string]: BasePart } = {}
-local survival: { fire: BasePart?, flame: Fire?, plants: { { part: BasePart, sound: boolean } } } = { plants = {} }
+local survival: { fire: BasePart?, flame: ParticleEmitter?, plants: { { part: BasePart, sound: boolean } } } = { plants = {} }
 local bikes: { Seat } = {}
 
 local function serverNow(): number
@@ -627,10 +627,36 @@ local function buildStation(root: Instance, station: any)
 		local logs = artDraws(part(model, "Logs", Vector3.new(3.2, 0.7, 0.7), fcf * CFrame.new(0, 1.3, 0), C.Wood, { Material = Enum.Material.Wood }))
 		artDraws(part(model, "Logs2", Vector3.new(3.2, 0.7, 0.7), fcf * CFrame.new(0, 1.5, 0) * CFrame.Angles(0, math.rad(90), 0), C.Wood,
 			{ Material = Enum.Material.Wood }))
-		local flame = Instance.new("Fire")
+		-- the same soft flame as the arena's cook fire (Shared.CreatureLooks), not Roblox's cartoon Fire object
+		local flame = Instance.new("ParticleEmitter")
+		flame.Name = "Flame"
+		flame.Texture = "rbxasset://textures/particles/fire_main.dds"
+		flame.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 214, 120)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 140, 50)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 60, 24)),
+		})
+		flame.LightEmission = 0.85
+		flame.LightInfluence = 0
+		flame.Size = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1.1),
+			NumberSequenceKeypoint.new(0.4, 1.6),
+			NumberSequenceKeypoint.new(1, 0.3),
+		})
+		flame.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.35),
+			NumberSequenceKeypoint.new(0.7, 0.3),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		flame.Lifetime = NumberRange.new(0.5, 0.9)
+		flame.Speed = NumberRange.new(2.4, 3.6)
+		flame.SpreadAngle = Vector2.new(9, 9)
+		flame.Rotation = NumberRange.new(-20, 20)
+		flame.RotSpeed = NumberRange.new(-40, 40)
+		flame.Acceleration = Vector3.new(0, 1.5, 0)
+		flame.EmissionDirection = Enum.NormalId.Top
+		flame.Rate = 22
 		flame.Enabled = false
-		flame.Heat = 6
-		flame.Size = 4
 		flame.Parent = logs
 		local light = Instance.new("PointLight")
 		light.Name = "FireLight"

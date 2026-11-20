@@ -188,6 +188,13 @@ local function deep(t: any): any
 	end
 	return c
 end
+-- The daily reward opens by itself for a new player settled in the train (DailyController, 20 Nov), and the bots never
+-- close it, so it held ClientState.menuOpen through the ride and blocked every swing, throw, shot, skill and ally
+-- offer in the hall (runT9). Only batch S tests that screen; the others switch the auto-open off on the test server.
+if ARGS.batch ~= "S" then
+	workspace:SetAttribute("DailyAutoOpen", false)
+end
+
 local fakeStore: any = nil
 if ARGS.batch == "W" or ARGS.fakeStore then
 	local fake = {}
@@ -208,6 +215,17 @@ if ARGS.batch == "W" or ARGS.fakeStore then
 		fakeWrites += 1
 	end
 	L("FAKESTORE installed=" .. tostring(Data and Data.useTestStore(fake)))
+	-- DataService.Init sets the real store; when this driver starts before Server/Main has run the Inits, install the
+	-- stand-in again once Main prints "[Server] N services started" (runS3, 20 Nov: Init came 7 s later and won)
+	local again: RBXScriptConnection? = nil
+	again = LogService.MessageOut:Connect(function(message)
+		if string.match(message, "^%[Server%] %d+ services started") then
+			L("FAKESTORE installed again after the services started=" .. tostring(Data and Data.useTestStore(fake)))
+			if again then
+				again:Disconnect()
+			end
+		end
+	end)
 end
 -- every projectile the server fires: where from, how fast, what gravity (the bow checks rebuild its arc from this)
 local fires: { { t: number, shooter: string, item: string, origin: Vector3, velocity: Vector3, gravity: number, damage: number, opts: any } } = {}

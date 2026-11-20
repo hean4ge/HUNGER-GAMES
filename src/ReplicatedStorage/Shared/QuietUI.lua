@@ -804,6 +804,465 @@ function QuietUI.fadeOut(gui: GuiObject, seconds: number?, keepVisible: boolean?
 end
 
 ----------------------------------------------------------------------------------------------------------------------
+-- Transitions (ui-motion, 20 Nov 2026; the Figma "Quiet cards" motion spec): one set of timings for every screen,
+-- card, tab, toast, caption and line. Panels fade and rise 12 px over 0.25 s (Quint Out) and leave faster than they
+-- come; tabs cross-fade in 0.15 s; cards stagger 30 ms; hover and press ease over 0.12 / 0.08 s. Nothing bounces,
+-- nothing pops. Reduce Motion (Roblox's setting): fades only, nothing moves or scales.
+----------------------------------------------------------------------------------------------------------------------
+local RunService = game:GetService("RunService")
+
+local Motion = {
+	In = 0.25, -- a panel, a card, a screen coming in
+	Out = 0.16, -- leaving is quicker than coming
+	Rise = 12, -- px a panel rises as it comes in (and sinks by half as it goes)
+	Tab = 0.15, -- a tab's content cross-fades
+	Hover = 0.12,
+	Press = 0.08,
+	Stagger = 0.03, -- per card, the first STAGGER_MAX cards only
+	StaggerMax = 10,
+	Toast = 0.28, -- a toast or an announcement line: fade and rise
+	ToastOut = 0.35,
+	ToastRise = 8,
+	Text = 0.18, -- a caption's words changing: out and in
+	Line = 0.22, -- one line of a list (the results board, a stat row) appearing
+	InStyle = Enum.EasingStyle.Quint,
+	OutStyle = Enum.EasingStyle.Quad,
+}
+QuietUI.Motion = Motion
+
+QuietUI.Ease = {
+	In = TweenInfo.new(Motion.In, Motion.InStyle, Enum.EasingDirection.Out),
+	Out = TweenInfo.new(Motion.Out, Motion.OutStyle, Enum.EasingDirection.In),
+	Tab = TweenInfo.new(Motion.Tab, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	Hover = TweenInfo.new(Motion.Hover, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	Press = TweenInfo.new(Motion.Press, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	Toast = TweenInfo.new(Motion.Toast, Motion.InStyle, Enum.EasingDirection.Out),
+	ToastOut = TweenInfo.new(Motion.ToastOut, Motion.OutStyle, Enum.EasingDirection.In),
+	Text = TweenInfo.new(Motion.Text, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	Line = TweenInfo.new(Motion.Line, Motion.InStyle, Enum.EasingDirection.Out),
+}
+
+-- A reveal: every part of a gui fades from clear to its own transparency, read fresh each time (menus rebuild and
+-- restate their parts, so nothing is cached between openings). One RenderStepped drives every reveal on screen.
+type Item = { inst: Instance, prop: string, rest: number, last: number, delay: number }
+type Reveal = {
+	root: GuiObject,
+	items: { Item },
+	index: { [Instance]: boolean },
+	a: number, -- 0 clear .. 1 shown, where the fade stands now
+	from: number,
+	to: number,
+	t0: number,
+	dur: number,
+	style: Enum.EasingStyle,
+	dir: Enum.EasingDirection,
+	rise: number, -- px below the rest position at a = 0
+	base: UDim2?,
+	lastPos: UDim2?,
+	stagger: { [Instance]: number }?,
+	maxDelay: number,
+	added: RBXScriptConnection?,
+	done: { () -> () },
+}
+
+local reveals: { [GuiObject]: Reveal } = {}
+local stepper: RBXScriptConnection? = nil
+local MAX_ITEMS = 4000 -- past this a reveal fades the panel itself and lets its contents arrive with it
+
+local function addItem(r: Reveal, inst: Instance, alpha: number)
+	local props = fadeProps(inst)
+	if not props then
+		return
+	end
+	local delay = 0
+	if r.stagger then
+		local node: Instance? = inst
+		while node and node ~= r.root do
+			local d = r.stagger[node]
+			if d then
+				delay = d
+				break
+			end
+			node = node.Parent
+		end
+	end
+	for _, prop in ipairs(props) do
+		local value = (inst :: any)[prop]
+		if type(value) == "number" and value < 0.999 then
+			local shown = 1 - (1 - value) * alpha;
+			(inst :: any)[prop] = shown
+			table.insert(r.items, { inst = inst, prop = prop, rest = value, last = (inst :: any)[prop], delay = delay })
+		end
+	end
+end
+
+local function collect(r: Reveal, alpha: number)
+	r.index[r.root] = true
+	addItem(r, r.root, alpha)
+	local all = r.root:GetDescendants()
+	if #all > MAX_ITEMS then
+		return
+	end
+	for _, d in ipairs(all) do
+		-- a CanvasGroup inside fades as one: its own parts are left alone
+		local inner = d:FindFirstAncestorWhichIsA("CanvasGroup")
+		if not (inner and inner ~= r.root and inner:IsDescendantOf(r.root)) then
+			addItem(r, d, alpha)
+		end
+	end
+end
+
+local function stepReveal(r: Reveal, now: number): boolean
+	local span = r.dur + (if r.to > r.from then r.maxDelay else 0)
+	local t = if span > 0 then math.clamp((now - r.t0) / span, 0, 1) else 1
+	local finished = t >= 1
+	-- the panel's own alpha (no stagger) drives the rise
+	local function alphaAt(delay: number): number
+		local local01 = if r.dur > 0 then math.clamp((now - r.t0 - delay) / r.dur, 0, 1) else 1
+		if finished then
+			local01 = 1
+		end
+		local e = TweenService:GetValue(local01, r.style, r.dir)
+		return r.from + (r.to - r.from) * e
+	end
+	local a = alphaAt(0)
+	r.a = a
+	for i = #r.items, 1, -1 do
+		local item = r.items[i]
+		local inst = item.inst
+		if inst.Parent == nil then
+			table.remove(r.items, i)
+		else
+			local current = (inst :: any)[item.prop]
+			if math.abs(current - item.last) > 0.002 then
+				-- someone else set it meanwhile (a hover, a state): theirs is the new resting value
+				item.rest = current
+				table.remove(r.items, i)
+			else
+				local ia = if item.delay > 0 and r.to > r.from then alphaAt(item.delay) else a
+				local v = 1 - (1 - item.rest) * ia
+				if math.abs(v - current) > 0.0005 then
+					local target: any = inst
+					target[item.prop] = v
+					item.last = (inst :: any)[item.prop]
+				end
+			end
+		end
+	end
+	if r.base and r.rise ~= 0 then
+		local pos = r.root.Position
+		if r.lastPos and pos ~= r.lastPos then
+			r.base = pos -- the screen laid itself out again meanwhile
+		end
+		local off = if r.to >= r.from then r.rise * (1 - a) else r.rise * 0.5 * (1 - a)
+		local base = r.base :: UDim2
+		local p = UDim2.new(base.X.Scale, base.X.Offset, base.Y.Scale, base.Y.Offset + math.floor(off + 0.5))
+		if p ~= pos then
+			r.root.Position = p
+		end
+		r.lastPos = p
+	end
+	return finished
+end
+
+local function finish(r: Reveal)
+	if r.added then
+		r.added:Disconnect()
+		r.added = nil
+	end
+	if r.base and r.root.Position == r.lastPos then
+		r.root.Position = r.base
+	end
+	reveals[r.root] = nil
+	local done = r.done
+	r.done = {}
+	for _, fn in ipairs(done) do
+		task.spawn(fn)
+	end
+end
+
+local function ensureStepper()
+	if stepper then
+		return
+	end
+	stepper = RunService.RenderStepped:Connect(function()
+		local now = os.clock()
+		local any = false
+		for _, r in pairs(reveals) do
+			any = true
+			if stepReveal(r, now) then
+				finish(r)
+			end
+		end
+		if not any and stepper then
+			stepper:Disconnect()
+			stepper = nil
+		end
+	end)
+end
+
+-- Puts every part back to its resting transparency at once (after a conceal has hidden the gui).
+local function restore(r: Reveal)
+	for _, item in ipairs(r.items) do
+		local inst = item.inst
+		if inst.Parent then
+			local current = (inst :: any)[item.prop]
+			if math.abs(current - item.last) <= 0.002 then
+				(inst :: any)[item.prop] = item.rest
+			end
+		end
+	end
+	if r.base and r.root.Position == r.lastPos then
+		r.root.Position = r.base
+	end
+end
+
+local function start(root: GuiObject, shown: boolean, opts: { [string]: any }?): Reveal
+	local o = opts or {}
+	local reduced = QuietUI.reducedMotion()
+	local r = reveals[root]
+	if not r then
+		-- a fresh reveal starts clear; a fresh conceal starts from fully shown
+		local alpha = if shown then 0 else 1
+		r = {
+			root = root,
+			items = {},
+			index = {},
+			a = alpha,
+			from = alpha,
+			to = alpha,
+			t0 = os.clock(),
+			dur = 0,
+			style = Motion.InStyle,
+			dir = Enum.EasingDirection.Out,
+			rise = 0,
+			base = nil,
+			lastPos = nil,
+			stagger = nil,
+			maxDelay = 0,
+			added = nil,
+			done = {},
+		}
+		reveals[root] = r
+		local rr = r :: Reveal
+		if shown and o.stagger and not reduced then
+			local list = {}
+			for _, child in ipairs((o.stagger :: Instance):GetChildren()) do
+				if child:IsA("GuiObject") and child.Visible then
+					table.insert(list, child)
+				end
+			end
+			table.sort(list, function(x, y)
+				if x.LayoutOrder ~= y.LayoutOrder then
+					return x.LayoutOrder < y.LayoutOrder
+				end
+				return x.Name < y.Name
+			end)
+			rr.stagger = {}
+			for i, child in ipairs(list) do
+				local d = math.min(i - 1, Motion.StaggerMax) * Motion.Stagger;
+				(rr.stagger :: any)[child] = d
+				rr.maxDelay = math.max(rr.maxDelay, d)
+			end
+		end
+		collect(rr, alpha)
+		-- parts built while it fades in (a refresh after the server answers) join the fade instead of popping
+		rr.added = root.DescendantAdded:Connect(function(d)
+			if rr.to > rr.from or rr.a < 1 then
+				addItem(rr, d, rr.a)
+			end
+		end)
+	end
+	local rise = tonumber(o.rise) or 0
+	if reduced then
+		rise = 0
+	end
+	r.from = r.a
+	r.to = if shown then 1 else 0
+	r.t0 = os.clock()
+	local full = tonumber(o.seconds) or (if shown then Motion.In else Motion.Out)
+	if reduced then
+		full = math.min(full, 0.15)
+	end
+	-- turning back halfway takes only the time the rest of the way needs
+	r.dur = full * math.abs(r.to - r.from)
+	r.style = if shown then (o.style or Motion.InStyle) else (o.style or Motion.OutStyle)
+	r.dir = if shown then Enum.EasingDirection.Out else Enum.EasingDirection.In
+	if rise ~= 0 and root:IsA("GuiObject") then
+		if not r.base then
+			r.base = root.Position
+		end
+		r.rise = rise
+	else
+		r.rise = 0
+	end
+	if not shown then
+		r.maxDelay = 0
+	end
+	ensureStepper()
+	stepReveal(r, r.t0) -- the first frame now, so nothing shows at full strength for a frame
+	return r
+end
+
+--[[
+  QuietUI.reveal(gui, opts?) -> ()
+      Fades gui and everything in it from clear to its own look (and rises opts.rise px, e.g. Motion.Rise), over
+      opts.seconds (default Motion.In, Quint Out). opts.stagger = a container whose children (cards) come in 30 ms
+      apart. Makes gui Visible. Calling it while a conceal runs turns that one back from where it is.
+  QuietUI.conceal(gui, opts?, onDone?) -> ()
+      The reverse (default Motion.Out, Quad In; it sinks by half of opts.rise). onDone runs when it is clear; then
+      hide it (Visible = false or ScreenGui.Enabled = false). Every part gets its own transparency back right after
+      onDone, so the next reveal (or a plain Visible = true) shows it as built. opts.keepVisible: do not hide it.
+  QuietUI.openScreen(screenGui, panel?, opts?)    Enabled = true, then reveal(panel) with the rise.
+  QuietUI.closeScreen(screenGui, panel?, opts?, onDone?)    conceal(panel), then Enabled = false (unless it was
+      opened again meanwhile), then onDone.
+  QuietUI.swap(container, opts?)    a tab's or a page's new content: it fades in over Motion.Tab, no rise.
+  QuietUI.rise(gui, info?, px?)     a line coming in: fades its parts and rises px (Motion.ToastRise) over Motion.Toast.
+  QuietUI.setText(label, text, info?)    changes a label's words with a quick fade through (no jump); same words: nothing.
+  QuietUI.isMoving(gui) -> boolean
+]]
+function QuietUI.reveal(gui: GuiObject, opts: { [string]: any }?)
+	gui.Visible = true
+	start(gui, true, opts)
+end
+
+function QuietUI.conceal(gui: GuiObject, opts: { [string]: any }?, onDone: (() -> ())?)
+	local o = opts or {}
+	if not gui.Visible then
+		local r = reveals[gui]
+		if r then
+			r.to, r.from, r.a = 0, 0, 0
+			finish(r)
+			restore(r)
+		end
+		if onDone then
+			task.spawn(onDone)
+		end
+		return
+	end
+	local r = start(gui, false, o)
+	table.insert(r.done, function()
+		if r.to ~= 0 then
+			return -- revealed again before it finished
+		end
+		if not o.keepVisible then
+			gui.Visible = false
+		end
+		if onDone then
+			onDone()
+		end
+		restore(r)
+	end)
+end
+
+function QuietUI.isMoving(gui: GuiObject): boolean
+	return reveals[gui] ~= nil
+end
+
+local screenTokens: { [Instance]: number } = setmetatable({}, { __mode = "k" }) :: any
+
+function QuietUI.openScreen(screenGui: ScreenGui, panel: GuiObject?, opts: { [string]: any }?)
+	screenTokens[screenGui] = (screenTokens[screenGui] or 0) + 1
+	local o = table.clone(opts or {})
+	if o.rise == nil then
+		o.rise = Motion.Rise
+	end
+	local wasOn = screenGui.Enabled and not (panel and reveals[panel] and reveals[panel].to == 0)
+	screenGui.Enabled = true
+	if panel and not wasOn then
+		QuietUI.reveal(panel, o)
+	elseif panel and reveals[panel] then
+		QuietUI.reveal(panel, o) -- it was leaving: turn it back
+	end
+end
+
+function QuietUI.closeScreen(screenGui: ScreenGui, panel: GuiObject?, opts: { [string]: any }?, onDone: (() -> ())?)
+	local token = (screenTokens[screenGui] or 0) + 1
+	screenTokens[screenGui] = token
+	if not panel or not screenGui.Enabled then
+		screenGui.Enabled = false
+		if onDone then
+			task.spawn(onDone)
+		end
+		return
+	end
+	local o = table.clone(opts or {})
+	if o.rise == nil then
+		o.rise = Motion.Rise
+	end
+	o.keepVisible = true
+	QuietUI.conceal(panel, o, function()
+		if screenTokens[screenGui] == token then
+			screenGui.Enabled = false
+		end
+		if onDone then
+			onDone()
+		end
+	end)
+end
+
+function QuietUI.swap(container: GuiObject, opts: { [string]: any }?)
+	local o = table.clone(opts or {})
+	o.seconds = o.seconds or Motion.Tab
+	local r = reveals[container]
+	if r then
+		-- start the new content from clear again
+		r.a = 0
+	end
+	if container.Visible then
+		start(container, true, o)
+	end
+end
+
+function QuietUI.rise(gui: GuiObject, info: TweenInfo?, px: number?)
+	local i = info or QuietUI.Ease.Toast
+	QuietUI.reveal(gui, { seconds = i.Time, style = i.EasingStyle, rise = px or Motion.ToastRise })
+end
+
+function QuietUI.setText(label: TextLabel, text: string, info: TweenInfo?)
+	if label.Text == text then
+		return
+	end
+	if QuietUI.reducedMotion() or not label.Visible or label.TextTransparency >= 0.99 then
+		label.Text = text
+		return
+	end
+	local i = info or QuietUI.Ease.Text
+	local half = i.Time * 0.4
+	local tokenName = "SetTextToken"
+	local token = (label:GetAttribute(tokenName) or 0) + 1
+	label:SetAttribute(tokenName, token)
+	local restT = label:GetAttribute("RestTransparency")
+	local rest = if type(restT) == "number" then restT else label.TextTransparency
+	if label:GetAttribute("SetTextRest") == nil then
+		label:SetAttribute("SetTextRest", rest)
+	end
+	rest = label:GetAttribute("SetTextRest")
+	local stroke = label:FindFirstChild("Shadow")
+	local strokeBase = if stroke and stroke:IsA("UIStroke") then strokeRest(stroke) else nil
+	local function to(t: number, seconds: number, dir: Enum.EasingDirection): Tween
+		local ti = TweenInfo.new(seconds, Enum.EasingStyle.Quad, dir)
+		if stroke and stroke:IsA("UIStroke") and strokeBase then
+			TweenService:Create(stroke, ti, { Transparency = strokeBase + (1 - strokeBase) * t }):Play()
+		end
+		local tw = TweenService:Create(label, ti, { TextTransparency = t })
+		tw:Play()
+		return tw
+	end
+	to(math.max(rest, 0.85), half, Enum.EasingDirection.In).Completed:Once(function()
+		if label:GetAttribute(tokenName) ~= token then
+			return
+		end
+		label.Text = text
+		to(rest, i.Time - half, Enum.EasingDirection.Out).Completed:Once(function()
+			if label:GetAttribute(tokenName) == token then
+				label:SetAttribute("SetTextRest", nil)
+			end
+		end)
+	end)
+end
+
+----------------------------------------------------------------------------------------------------------------------
 -- Button behaviour
 ----------------------------------------------------------------------------------------------------------------------
 local TOUCH_MIN = 44

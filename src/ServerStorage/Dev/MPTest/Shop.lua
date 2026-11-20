@@ -325,7 +325,7 @@ return function(ctx: { [string]: any })
 			tostring(hold and hold:GetAttribute("Skin")), tostring(seen.item), tostring(seen.skin), tostring(seen.colors), tostring(own.viewItem), tostring(own.viewSkin)))
 		shot("s_skin_seen", 1.0)
 		local mA, mB = ctx.killB("round1")
-		task.wait(0.6)
+		task.wait(1.3) -- the clients sample the drawn effect 0.5 s after it appears
 		local _, rootB = ctx.parts(B)
 		local fxA = clientFind(A, "SHOPEV killfx remote", mA)
 		local fxB = clientFind(B, "SHOPEV killfx remote", mB)
@@ -333,7 +333,9 @@ return function(ctx: { [string]: any })
 		local drawnB = clientFind(B, "SHOPEV killfx drawn", mB)
 		check("s.round.killEffect", fxA ~= nil and fxB ~= nil and string.find(fxB, "id=" .. LOOKS[A].effect, 1, true) ~= nil
 			and string.find(fxB, "killer=" .. A.UserId, 1, true) ~= nil and drawnA ~= nil and drawnB ~= nil
-			and string.find(drawnB, "KillFx_" .. LOOKS[A].effect, 1, true) ~= nil,
+			and string.find(drawnB, "KillFx_" .. LOOKS[A].effect, 1, true) ~= nil
+			-- where the victim fell: the drawn bits' middle within 12 studs (flat) of the message's position, on both screens
+			and (tonumber(string.match(drawnB, "flatOff=([%d%.]+)")) or 999) <= 12 and (tonumber(string.match(drawnA, "flatOff=([%d%.]+)")) or 999) <= 12,
 			string.format("A's client: %s ; %s | B's client: %s ; %s | B's body now at %s", tostring(fxA), tostring(drawnA), tostring(fxB), tostring(drawnB),
 				if rootB then ctx.v3(rootB.Position) else "gone"))
 		local iconA = clientFind(A, "SHOPEV feedicon", mA)

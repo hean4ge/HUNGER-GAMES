@@ -1300,9 +1300,17 @@ end
 
 function FallenRecapController.Start()
 	poolTarget = desiredPoolSize()
-	-- build the pool gradually in the background (parked out of sight)
+	-- build the pool gradually in the background (parked out of sight). Performance pass (20 Nov): not at join any more
+	-- (it was 3,600 parts made 3 s after joining, carried through the lobby, the train and the launch): it waits until
+	-- this client is in a running round for POOL_AFTER_ACTIVE s (the first Roll Call is at dusk, minutes later), clear
+	-- of the start horn's scramble, or until a show is about to run.
 	task.spawn(function()
-		task.wait(3)
+		local POOL_AFTER_ACTIVE = 40
+		local activeFor = 0
+		while activeFor < POOL_AFTER_ACTIVE and not show do
+			task.wait(1)
+			activeFor = if GameState:GetAttribute("Phase") == "Active" then activeFor + 1 else 0
+		end
 		while not growPool(120) do
 			RunService.Heartbeat:Wait()
 		end

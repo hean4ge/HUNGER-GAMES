@@ -34,6 +34,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Theme = require(Shared:WaitForChild("Theme"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 local Crates = require(Shared:WaitForChild("Crates"))
 local Rewards = require(Shared:WaitForChild("Rewards"))
 local Sfx = require(Shared:WaitForChild("Sfx"))
@@ -2097,7 +2098,7 @@ function ShopController.open(entry: string?, startTab: string?)
 		blurOn(true)
 	end
 	ShopController.isOpen = true
-	ui.gui.Enabled = true
+	QuietUI.openScreen(ui.gui, ui.panel) -- (ui-motion) fade and rise, no pop
 	setModal(true)
 	sound("UIOpen", 0.5)
 	if shopRemote then
@@ -2123,7 +2124,7 @@ function ShopController.close()
 	ShopController.isOpen = false
 	revealToken += 1
 	if ui.gui then
-		ui.gui.Enabled = false
+		QuietUI.closeScreen(ui.gui, ui.panel) -- (ui-motion) fade and sink out, then disabled
 	end
 	if ui.overlay then
 		ui.overlay:Destroy()

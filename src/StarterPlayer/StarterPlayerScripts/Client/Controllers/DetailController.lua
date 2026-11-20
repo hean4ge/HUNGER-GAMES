@@ -64,6 +64,10 @@
 	API (for tests): DetailController.stats() -> { tier, why, models, cells, hidden, farCanopy, farCanopyHidden },
 	DetailController.refresh(). The stats are also published as LocalPlayer attributes DetailHidden (parts hidden now)
 	and DetailFarHidden ("hidden/all" far canopy parts).
+
+	The crowd (performance pass, 20 Nov): other players' rigid accessories (hats, hair, back items; never layered
+	clothing, bodies or weapons) are hidden past 260 / 150 / 90 studs (High / Medium / Low) and shown again inside
+	85 % of that. stats().crowdHidden and the LocalPlayer attribute DetailCrowdHidden count the parts hidden now.
 ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -340,6 +344,121 @@ local function refreshSkyline(arena: Instance, again: boolean)
 	end
 end
 
+-- The crowd ---------------------------------------------------------------------------------------------------------
+-- Other players' rigid accessories (hats, hair, back and waist items: an Accessory whose Handle has no WrapLayer) are
+-- hidden on this client past CROWD[tier] studs from the camera and shown again inside CROWD_BACK of it. Measured
+-- 20 Nov with 47 copies of one avatar at the horn: its accessories were 330k of 911k triangles and 155 of 451 draws.
+-- Layered clothing is never touched (hiding it would show the bare body), nor bodies, faces, weapons or anything of
+-- your own. Only parts at modifier 0 are hidden and only parts this controller hid are shown again, so the other
+-- writers (LoadIn's fade-in, the red room, the defeat fade) keep working; a body at zero health is let go untouched.
+local CROWD = { High = 260, Medium = 150, Low = 90 }
+local CROWD_BACK = 0.85
+local crowd = setmetatable({}, { __mode = "k" }) -- character -> { parts = { BasePart }, hidden = boolean, mine = { [BasePart]: true } }
+local crowdHidden = 0
+
+local function rigidAccessoryPart(d: Instance): boolean
+	if not d:IsA("BasePart") then
+		return false
+	end
+	local acc = d:FindFirstAncestorWhichIsA("Accessory")
+	if not acc then
+		return false
+	end
+	local handle = acc:FindFirstChild("Handle")
+	return not (handle and handle:FindFirstChildWhichIsA("WrapLayer"))
+end
+
+local function trackCharacter(character: Model)
+	if crowd[character] then
+		return
+	end
+	local entry = { parts = {}, hidden = false, mine = {} }
+	crowd[character] = entry
+	for _, d in ipairs(character:GetDescendants()) do
+		if rigidAccessoryPart(d) then
+			table.insert(entry.parts, d)
+		end
+	end
+	character.DescendantAdded:Connect(function(d)
+		if crowd[character] == entry and rigidAccessoryPart(d) then
+			table.insert(entry.parts, d)
+		end
+	end)
+	-- kept while it is out of the workspace (streamed out: what it hid is still its own when it comes back);
+	-- `crowd` has weak keys, so a destroyed character is let go with its entry
+end
+
+local function watchPlayer(player: Player)
+	if player == Players.LocalPlayer then
+		return
+	end
+	if player.Character then
+		trackCharacter(player.Character)
+	end
+	player.CharacterAdded:Connect(trackCharacter)
+end
+
+local function crowdPass()
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return
+	end
+	local eye = camera.CFrame.Position
+	local far = CROWD[tierName] or CROWD.High
+	local n = 0
+	-- a character that streamed out and back in (or arrived without CharacterAdded on this client) is picked up here
+	local me = Players.LocalPlayer
+	for _, player in ipairs(Players:GetPlayers()) do
+		local character = player.Character
+		if player ~= me and character and not crowd[character] and character:IsDescendantOf(workspace) then
+			trackCharacter(character)
+		end
+	end
+	for character, entry in pairs(crowd) do
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		local root = character.PrimaryPart or character:FindFirstChild("HumanoidRootPart")
+		if humanoid and humanoid.Health <= 0 then
+			-- defeated: the defeat fade owns every part now
+			entry.hidden = false
+			table.clear(entry.mine)
+		elseif not humanoid or not root or not character:IsDescendantOf(workspace) then
+			-- streaming in or out: left as it is until it can be measured
+			for _ in pairs(entry.mine) do
+				n += 1
+			end
+		else
+			local d = (root.Position - eye).Magnitude
+			local hide = if entry.hidden then d > far * CROWD_BACK else d > far
+			if hide then
+				for _, p in ipairs(entry.parts) do
+					if p:FindFirstChildWhichIsA("WrapLayer") then
+						-- layered clothing whose WrapLayer streamed in after its handle: never hidden
+						if entry.mine[p] then
+							entry.mine[p] = nil
+							p.LocalTransparencyModifier = 0
+						end
+					elseif p.LocalTransparencyModifier == 0 and p.Parent then
+						p.LocalTransparencyModifier = 1
+						entry.mine[p] = true
+					end
+				end
+				for _ in pairs(entry.mine) do
+					n += 1
+				end
+			elseif entry.hidden then
+				for p in pairs(entry.mine) do
+					if p.Parent and p.LocalTransparencyModifier == 1 then
+						p.LocalTransparencyModifier = 0
+					end
+				end
+				table.clear(entry.mine)
+			end
+			entry.hidden = hide
+		end
+	end
+	crowdHidden = n
+end
+
 -- the player's graphics level 1-10, or nil on Automatic
 local function savedLevel(): number?
 	local ok, q = pcall(function()
@@ -462,7 +581,7 @@ function DetailController.stats()
 		end
 	end
 	return { tier = tierName, why = tierWhy, models = nModels, cells = nCells, hidden = hidden, shaders = shaderName, shaderDevice = shaderDevice,
-		farCanopy = #farParts, farCanopyHidden = farHidden }
+		farCanopy = #farParts, farCanopyHidden = farHidden, crowdHidden = crowdHidden }
 end
 
 -- The shader tier and the tier this device has on Auto (see the header).
@@ -592,6 +711,25 @@ function DetailController.Start()
 	applyTier()
 	DetailController.refresh()
 	refreshSkyline(arena, true)
+	-- the crowd: other players' rigid accessories by distance (see "The crowd")
+	for _, player in ipairs(Players:GetPlayers()) do
+		watchPlayer(player)
+	end
+	Players.PlayerAdded:Connect(watchPlayer)
+	if IS_STUDIO then
+		-- tests: stand-in contenders (R15 models with no Player) tagged LS_CrowdTest are treated like other players
+		local CollectionService = game:GetService("CollectionService")
+		for _, m in ipairs(CollectionService:GetTagged("LS_CrowdTest")) do
+			if m:IsA("Model") then
+				trackCharacter(m)
+			end
+		end
+		CollectionService:GetInstanceAddedSignal("LS_CrowdTest"):Connect(function(m)
+			if m:IsA("Model") then
+				trackCharacter(m)
+			end
+		end)
+	end
 	-- every frame (a distance test; parts are written only when the answer changes): a camera cut between the lobby
 	-- and the arena never shows a frame with the wrong skyline
 	RunService.RenderStepped:Connect(function()
@@ -630,8 +768,10 @@ function DetailController.Start()
 				local st = DetailController.stats()
 				lp:SetAttribute("DetailHidden", st.hidden)
 				lp:SetAttribute("DetailFarHidden", string.format("%d/%d", st.farCanopyHidden, st.farCanopy))
+				lp:SetAttribute("DetailCrowdHidden", st.crowdHidden)
 			end
 		end
+		crowdPass()
 		DetailController.refresh()
 		if tick % 4 == 0 then
 			refreshSkyline(arena, true)

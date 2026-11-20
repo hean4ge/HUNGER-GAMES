@@ -458,11 +458,13 @@ function CreatureLooks.newCampfire(): Fire
 	flame.Parent = fireAt
 	local sparks = Instance.new("ParticleEmitter")
 	sparks.Name = "Sparks"
-	sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparks.Texture = "rbxasset://textures/particles/SquareParticle.png" -- tiny ember flakes, not twinkle stars
+	sparks.Rotation = NumberRange.new(0, 360)
+	sparks.RotSpeed = NumberRange.new(-120, 120)
 	sparks.Color = ColorSequence.new(rgb(255, 190, 110))
 	sparks.LightEmission = 1
 	sparks.LightInfluence = 0
-	sparks.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.12), NumberSequenceKeypoint.new(1, 0.03) })
+	sparks.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.07), NumberSequenceKeypoint.new(1, 0.02) })
 	sparks.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) })
 	sparks.Lifetime = NumberRange.new(0.8, 1.6)
 	sparks.Speed = NumberRange.new(2.5, 5)

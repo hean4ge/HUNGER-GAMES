@@ -24,6 +24,7 @@ local Icons = require(Shared:WaitForChild("Icons"))
 local Theme = require(Shared:WaitForChild("Theme"))
 local Signal = require(Shared:WaitForChild("Signal"))
 local Progression = require(Shared:WaitForChild("Progression"))
+local QuietUI = require(Shared:WaitForChild("QuietUI"))
 
 local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
@@ -206,7 +207,8 @@ function ProgressUI.screen(name: string, title: string, opts: { [string]: any }?
 		if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(gui) then
 			GuiService.SelectedObject = nil
 		end
-		gui.Enabled = false
+		-- (ui-motion) fades and sinks out over QuietUI.Motion.Out, then the gui is disabled
+		QuietUI.closeScreen(gui, panel)
 		Cards.dimWorld(false)
 		setModal("Progress_" .. name, false)
 		for _, fn in ipairs(closeFns) do
@@ -230,7 +232,8 @@ function ProgressUI.screen(name: string, title: string, opts: { [string]: any }?
 			return false
 		end
 		isOpen = true
-		gui.Enabled = true
+		-- (ui-motion) the panel fades in and rises 12 px over 0.25 s (the Figma motion spec); Reduce Motion: a fade
+		QuietUI.openScreen(gui, panel)
 		Cards.dimWorld(true)
 		setModal("Progress_" .. name, true)
 		ContextActionService:BindActionAtPriority(actionName, function(_, state)
@@ -249,6 +252,13 @@ function ProgressUI.screen(name: string, title: string, opts: { [string]: any }?
 	-- a round starting under an open menu: it closes
 	ClientState.lifeChanged:Connect(function()
 		if isOpen and not ProgressUI.inTrain() then
+			screen.close()
+		end
+	end)
+	-- (final-shop, 20 Nov) arriving in the Training Centre hall: a screen left open from the train (the daily reward
+	-- opens by itself there) closes, or it would hold ClientState.menuOpen and block swings, throws and ally offers
+	player:GetAttributeChangedSignal("InTraining"):Connect(function()
+		if isOpen and player:GetAttribute("InTraining") == true then
 			screen.close()
 		end
 	end)

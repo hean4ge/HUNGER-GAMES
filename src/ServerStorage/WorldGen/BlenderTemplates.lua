@@ -29,6 +29,14 @@ local BT = {}
 
 local ROT = CFrame.Angles(0, math.pi, 0)
 
+-- Terrain materials draw Roblox's tiled ground textures on a mesh (a leaf-litter pattern on pine needles), so painted
+-- foliage and stone become matte Plaster, as in Map1.Assets.MATERIALS (low-poly consistency, 20 Nov 2026).
+local TERRAIN_TO_MATTE: { [string]: Enum.Material } = {
+	LeafyGrass = Enum.Material.Plaster,
+	Grass = Enum.Material.Plaster,
+	Limestone = Enum.Material.Plaster,
+}
+
 local function v3(t: { number }): Vector3
 	return Vector3.new(t[1], t[2], t[3])
 end
@@ -61,7 +69,7 @@ local function meshPart(meshes: { [string]: MeshPart }, spec: any, frame: CFrame
 	local ok, mat = pcall(function()
 		return (Enum.Material :: any)[spec.m]
 	end)
-	p.Material = if ok and mat then mat else Enum.Material.SmoothPlastic
+	p.Material = TERRAIN_TO_MATTE[spec.m] or (if ok and mat then mat else Enum.Material.SmoothPlastic)
 	p.Transparency = spec.t or 0
 	p.Anchored = true
 	local collide = spec.col and not visualOnly

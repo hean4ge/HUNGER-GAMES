@@ -121,6 +121,16 @@ function MenuHubController.barVisible(): boolean
 	return bar ~= nil and bar.Visible
 end
 
+-- (final-shop, 20 Nov) HOW TO PLAY (LobbyController) has the same right edge: while that sheet shows, the bar steps
+-- aside instead of drawing under it (H closes the sheet and the bar comes back)
+local function howToShown(): boolean
+	local lobby = player:FindFirstChildOfClass("PlayerGui") and player.PlayerGui:FindFirstChild("Lobby")
+	local root = lobby and lobby:FindFirstChild("Root")
+	local howTo = root and root:FindFirstChild("HowTo")
+	return lobby ~= nil and lobby:IsA("ScreenGui") and lobby.Enabled and howTo ~= nil and howTo:IsA("GuiObject")
+		and howTo.Visible
+end
+
 local function barWanted(): boolean
 	return inTrain() and not ClientState.menuOpen and not otherScreenOpen()
 end
@@ -436,7 +446,7 @@ local function fillHub()
 	scroll.BackgroundTransparency = 1
 	scroll.BorderSizePixel = 0
 	scroll.Size = UDim2.fromScale(1, 1)
-	scroll.ScrollBarThickness = if phone then 4 else 0
+	scroll.ScrollBarThickness = 4 -- (final-shop) shown only when the cards overflow
 	scroll.ScrollBarImageColor3 = C.Ink
 	scroll.ScrollBarImageTransparency = 0.6
 	scroll.Selectable = false
@@ -454,7 +464,16 @@ local function fillHub()
 		grid.VerticalAlignment = Enum.VerticalAlignment.Center
 	else
 		local w = if m.class == "TV" then 250 else 236
-		grid.CellSize = UDim2.fromOffset(w, 252)
+		-- (final-shop, 20 Nov) both rows fit a short window (about 750 px): the cards give up picture height, down to
+		-- 210 px, before the second row's OPEN buttons would hide below the panel
+		local h = 252
+		local scaleObj = hub.gui:FindFirstChild("Root") and hub.gui.Root:FindFirstChild("Scale")
+		local s = if scaleObj and scaleObj:IsA("UIScale") and scaleObj.Scale > 0 then scaleObj.Scale else 1
+		local avail = body.AbsoluteSize.Y / s
+		if avail > 0 then
+			h = math.clamp(math.floor((avail - 16 - 18) / 2), 210, 252)
+		end
+		grid.CellSize = UDim2.fromOffset(w, h)
 		grid.CellPadding = UDim2.fromOffset(18, 18)
 		grid.FillDirectionMaxCells = 4
 		grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -686,14 +705,15 @@ function MenuHubController.Start()
 			return
 		end
 		last = t
-		local show = barWanted()
+		local wanted = barWanted()
+		local show = wanted and not howToShown() -- the keys stay bound while HOW TO PLAY covers the bar
 		if bar and bar.Visible ~= show then
 			bar.Visible = show
 		end
 		if show then
 			paintBar()
 		end
-		syncKeys(show)
+		syncKeys(wanted)
 	end)
 end
 

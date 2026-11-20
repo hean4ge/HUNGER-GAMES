@@ -425,8 +425,11 @@ local function ensureFx(): Attachment
 		RotSpeed = NumberRange.new(-60, 60),
 		LightInfluence = 1,
 	})
+	-- chips are flat faceted flakes (a square), not twinkle stars (low-poly consistency, 20 Nov 2026)
 	emitters.Chips = makeEmitter("Chips", {
-		Texture = "rbxasset://textures/particles/sparkles_main.dds",
+		Texture = "rbxasset://textures/particles/SquareParticle.png",
+		Rotation = NumberRange.new(0, 360),
+		RotSpeed = NumberRange.new(-300, 300),
 		Lifetime = NumberRange.new(0.3, 0.55),
 		Speed = NumberRange.new(7, 13),
 		SpreadAngle = Vector2.new(45, 45),
@@ -436,8 +439,11 @@ local function ensureFx(): Attachment
 		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.6) }),
 		LightInfluence = 1,
 	})
+	-- sparks are short hot streaks along their flight, not twinkle stars
 	emitters.Sparks = makeEmitter("Sparks", {
-		Texture = "rbxasset://textures/particles/sparkles_main.dds",
+		Texture = "rbxasset://textures/particles/SquareParticle.png",
+		Orientation = Enum.ParticleOrientation.VelocityParallel,
+		Squash = NumberSequence.new(-2.2),
 		Lifetime = NumberRange.new(0.12, 0.28),
 		Speed = NumberRange.new(14, 26),
 		SpreadAngle = Vector2.new(50, 50),

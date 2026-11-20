@@ -181,24 +181,34 @@ return function(ctx: { [string]: any })
 		on("Looks", function(kind, data)
 			L("SHOPEV looks " .. tostring(kind) .. " ok=" .. tostring(type(data) == "table" and data.ok) .. " why=" .. tostring(type(data) == "table" and data.why))
 		end)
+		local lastFxPos: Vector3? = nil
 		on("KillFx", function(data)
 			if type(data) == "table" then
+				if typeof(data.pos) == "Vector3" then
+					lastFxPos = data.pos
+				end
 				L(string.format("SHOPEV killfx remote id=%s pos=%s killer=%s victim=%s weapon=%s", tostring(data.id), fmt(data.pos), tostring(data.killer),
 					tostring(data.victim), tostring(data.weapon)))
 			end
 		end)
 		workspace.ChildAdded:Connect(function(child)
 			if child:IsA("Folder") and string.sub(child.Name, 1, 7) == "KillFx_" then
-				task.wait(0.1)
-				local at: Vector3? = nil
-				local n = 0
+				-- the bits are placed by the effect's Heartbeat step, so sample a little later and take the middle of the
+				-- placed parts (ones still at the world origin are not placed yet), and how far it is from the message's pos
+				task.wait(0.5)
+				local sum, placed, n = Vector3.zero, 0, 0
 				for _, d in ipairs(child:GetDescendants()) do
 					if d:IsA("BasePart") then
 						n += 1
-						at = at or d.Position
+						if d.Position.Magnitude > 1 then
+							sum += d.Position
+							placed += 1
+						end
 					end
 				end
-				L(string.format("SHOPEV killfx drawn %s parts=%d at=%s", child.Name, n, fmt(at)))
+				local at: Vector3? = if placed > 0 then sum / placed else nil
+				local off = if at and lastFxPos then string.format("%.1f", (Vector3.new(at.X, 0, at.Z) - Vector3.new(lastFxPos.X, 0, lastFxPos.Z)).Magnitude) else "?"
+				L(string.format("SHOPEV killfx drawn %s parts=%d placed=%d at=%s flatOff=%s", child.Name, n, placed, fmt(at), off))
 			end
 		end)
 		gui.DescendantAdded:Connect(function(d)

@@ -1886,6 +1886,17 @@ function AudioController.Start()
 		end
 	end)
 
+	-- Performance pass (20 Nov): the ~140 short sounds are fetched after the first screen, not beside it, so a slow
+	-- phone downloads the train lobby's meshes and textures first (the lobby has no fight to be late for).
+	if not game:IsLoaded() then
+		game.Loaded:Wait()
+	end
+	local lp = game:GetService("Players").LocalPlayer
+	local waited = 0
+	while lp and not lp.Character and waited < 15 do
+		waited += task.wait(0.25)
+	end
+	task.wait(2)
 	preload()
 end
 
